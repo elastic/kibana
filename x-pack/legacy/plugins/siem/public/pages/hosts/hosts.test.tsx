@@ -38,9 +38,12 @@ jest.mock('ui/documentation_links', () => ({
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
+// For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../components/search_bar', () => ({
   SiemSearchBar: () => null,
+}));
+jest.mock('../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -78,10 +81,6 @@ const mockHistory = {
   listen: jest.fn(),
 };
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-
 const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
 const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
 
@@ -101,13 +100,6 @@ describe('Hosts - rendering', () => {
     hostsPagePath: '',
   };
 
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-
-  afterAll(() => {
-    console.error = originalError;
-  });
   beforeEach(() => {
     localSource = cloneDeep(mocksSource);
   });

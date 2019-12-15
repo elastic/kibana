@@ -1,0 +1,186 @@
+[role="xpack"]
+[[lens]]
+== Lens
+
+beta[]
+
+*Lens* provides you with a simple and fast way to create visualizations from your Elasticsearch data. With Lens, you can:
+
+* Quickly build visualizations by dragging and dropping data fields.
+
+* Understand your data with a summary view on each field.
+
+* Easily change the visualization type by selecting the automatically generated visualization suggestions.
+
+* Save your visualization for use in a dashboard.
+
+[float]
+[[drag-drop]]
+=== Drag and drop
+
+The data panel in the left column shows the data fields for the selected time period. When
+you drag a field from the data panel, Lens highlights where you can drop that field. The first time you drag a data field,
+you'll see two places highlighted in green:
+
+* The visualization builder pane
+
+* The *X-axis* or *Y-axis* fields in the right column
+
+You can incorporate many fields into your visualization, and Lens uses heuristics to decide how
+to apply each one to the visualization.
+
+[role="screenshot"]
+image::images/lens_drag_drop.gif[]
+
+TIP: Drag-and-drop capabilities are available only when Lens knows how to use the data. You can still customize
+your visualization if Lens is unable to make a suggestion.
+
+[float]
+[[apply-lens-filters]]
+==== Find the right data
+
+Lens shows you fields based on the <<index-patterns, index patterns>> you have defined in
+{kib}, and the current time range. When you change the index pattern or time filter,
+the list of fields are updated.
+
+To narrow the list of fields you see in the left panel, you can:
+
+* Enter the field name in *Search field names*.
+
+* Click *Filter by type*, then select the filter. You can also select *Only show fields with data*
+to show the full list of fields from the index pattern.
+
+[float]
+[[view-data-summaries]]
+==== Data summaries
+
+To help you decide exactly the data you want to display, get a quick summary of each data field.
+The summary shows the distribution of values in the time range.
+
+To view the data information, navigate to a data field, then click *i*.
+
+[role="screenshot"]
+image::images/lens_data_info.gif[]
+
+[float]
+[[change-the-visualization-type]]
+==== Change the visualization type
+
+With Lens, you are no longer required to build each visualization from scratch. Lens allows
+you to switch between any supported chart type at any time. Lens also provides
+suggestions, which are shortcuts to alternate visualizations based on the data you have.
+
+You can switch between suggestions without losing your previous state:
+
+[role="screenshot"]
+image::images/lens_suggestions.gif[]
+
+If you want to switch to a chart type that is not suggested, click the chart type in the
+top right, then select a chart type. When there is an exclamation point (!)
+next to a chart type, Lens is unable to transfer your current data, but
+still allows you to make the change.
+
+[float]
+[[customize-operation]]
+==== Customize the data for your visualization
+
+Lens allows some customizations of the data for each visualization.
+
+. Change the index pattern.
+
+.. In the left column, click the index pattern name.
+
+.. Select the new index pattern.
++
+If there is a match, Lens displays the new data. All fields that do not match the index pattern are removed.
+
+. Change the data field options, such as the aggregation or label.
+
+.. Click *Drop a field here* or the field name in the right column.
+
+.. Change the options that appear depending on the type of field.
+
+[float]
+[[layers]]
+==== Layers in bar, line, and area charts
+
+The bar, line, and area charts allow you to layer two different series. To add a layer, click *+*.
+
+To remove a layer, click the chart icon next to the index name:
+
+[role="screenshot"]
+image::images/lens_remove_layer.png[]
+
+[float]
+[[lens-tutorial]]
+=== Lens tutorial
+
+Ready to create your own visualization with Lens? Use the following tutorial to create a visualization that
+lets you compare sales over time.
+
+[float]
+[[lens-before-begin]]
+==== Before you begin
+
+To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
+
+[float]
+==== Build the visualization
+
+Drag and drop your data onto the visualization builder pane.
+
+. Open *Visualize*, then click *Create visualization*.
+
+. On the *New Visualization* window, click *Lens*.
+
+. In the left column, select the *kibana_sample_data_ecommerce* index.
+
+. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. The list of data fields are updated.
+
+. Drag and drop the *taxful_total_price* data field to the visualization builder pane.
++
+[role="screenshot"]
+image::images/lens_tutorial_1.png[Lens tutorial]
+
+Lens has taken your intent to see *taxful_total_price* and added in the *order_date* field to show
+average order prices over time.
+
+To break down your data, drag the *category.keyword* field to the visualization builder pane. Lens
+understands that you want to show the top categories and compare them across the dates,
+and creates a chart that compares the sales for each of the top 3 categories:
+
+[role="screenshot"]
+image::images/lens_tutorial_2.png[Lens tutorial]
+
+[float]
+[[customize-lens-visualization]]
+==== Further customization
+
+Customize your visualization to look exactly how you want.
+
+. In the right column, click *Average of taxful_total_price*.
+
+.. Change the *Label* to `Sales`, or a name that you prefer for the data.
+
+. Click *Top values of category.keyword*.
+
+.. Increase *Number of values* to `10`. The visualization updates in the background to show there are only
+six available categories.
+
+. Look at the suggestions. None of them show an area chart, but for sales data, a stacked area chart
+might make sense. To switch the chart type:
+
+.. Click *Stacked bar chart* in the right column.
+
+.. Click *Stacked area*.
++
+[role="screenshot"]
+image::images/lens_tutorial_3.png[Lens tutorial]
+
+[float]
+[[lens-tutorial-next-steps]]
+==== Next steps
+
+Now that you've created your visualization in Lens, you can add it to a Dashboard.
+
+For more information, see <<dashboard,Dashboard>>.

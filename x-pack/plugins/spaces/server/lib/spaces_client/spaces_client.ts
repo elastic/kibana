@@ -5,22 +5,19 @@
  */
 import Boom from 'boom';
 import { omit } from 'lodash';
-import { Legacy } from 'kibana';
 import { KibanaRequest } from 'src/core/server';
-import { AuthorizationService } from '../../../../../legacy/plugins/security/server/lib/authorization/service';
+import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../security/server';
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
 import { ConfigType } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
 
-type SpacesClientRequestFacade = Legacy.Request | KibanaRequest;
-
 const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObjectsIntoSpace'];
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
-  (authorization: AuthorizationService) => string
+  (authorization: SecurityPluginSetupContract['authz']) => string
 > = {
   any: authorization => authorization.actions.login,
   copySavedObjectsIntoSpace: authorization =>
@@ -31,11 +28,11 @@ export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
     private readonly debugLogger: (message: string) => void,
-    private readonly authorization: AuthorizationService | null,
+    private readonly authorization: SecurityPluginSetupContract['authz'] | null,
     private readonly callWithRequestSavedObjectRepository: any,
     private readonly config: ConfigType,
     private readonly internalSavedObjectRepository: any,
-    private readonly request: SpacesClientRequestFacade
+    private readonly request: KibanaRequest
   ) {}
 
   public async canEnumerateSpaces(): Promise<boolean> {
@@ -220,10 +217,7 @@ export class SpacesClient {
   }
 
   private useRbac(): boolean {
-    // TODO: remove "as any" once Security is updated to NP conventions
-    return (
-      this.authorization != null && this.authorization.mode.useRbacForRequest(this.request as any)
-    );
+    return this.authorization != null && this.authorization.mode.useRbacForRequest(this.request);
   }
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {

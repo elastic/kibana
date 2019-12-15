@@ -1,5 +1,5 @@
 {
-  "apm-telemetry": {
+  "apm-services-telemetry": {
     "properties": {
       "has_any_services": {
         "type": "boolean"
@@ -60,9 +60,6 @@
         "type": "keyword"
       },
       "apm_oss.metricsIndices": {
-        "type": "keyword"
-      },
-      "apm_oss.apmAgentConfigurationIndex": {
         "type": "keyword"
       }
     }

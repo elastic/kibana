@@ -6,12 +6,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/types';
 import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
+  ExpressionFunction,
   IInterpreterRenderFunction,
   IInterpreterRenderHandlers,
-} from '../../../../../../src/legacy/core_plugins/expressions/public/expressions';
+} from '../../../../../../src/plugins/expressions/public';
 import { MetricConfig } from './types';
 import { LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';

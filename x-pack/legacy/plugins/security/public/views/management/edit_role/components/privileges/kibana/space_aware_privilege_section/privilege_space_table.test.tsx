@@ -61,26 +61,23 @@ const getTableFromComponent = (
   const table = component.find(EuiInMemoryTable);
   const rows = table.find('tr');
   const dataRows = rows.slice(1);
-  return dataRows.reduce(
-    (acc, row) => {
-      const cells = row.find('td');
-      const spacesCell = cells.at(0);
-      const spacesBadge = spacesCell.find(EuiBadge);
-      const privilegesCell = cells.at(1);
-      const privilegesDisplay = privilegesCell.find(PrivilegeDisplay);
-      return [
-        ...acc,
-        {
-          spaces: spacesBadge.map(badge => badge.text().trim()),
-          privileges: {
-            summary: privilegesDisplay.text().trim(),
-            overridden: privilegesDisplay.find(EuiIconTip).exists('[type="lock"]'),
-          },
+  return dataRows.reduce((acc, row) => {
+    const cells = row.find('td');
+    const spacesCell = cells.at(0);
+    const spacesBadge = spacesCell.find(EuiBadge);
+    const privilegesCell = cells.at(1);
+    const privilegesDisplay = privilegesCell.find(PrivilegeDisplay);
+    return [
+      ...acc,
+      {
+        spaces: spacesBadge.map(badge => badge.text().trim()),
+        privileges: {
+          summary: privilegesDisplay.text().trim(),
+          overridden: privilegesDisplay.find(EuiIconTip).exists('[type="lock"]'),
         },
-      ];
-    },
-    [] as TableRow[]
-  );
+      },
+    ];
+  }, [] as TableRow[]);
 };
 
 describe('only global', () => {

@@ -43,8 +43,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
   class VisualBuilderPage {
     public async resetPage(
-      fromTime = '2015-09-19 06:31:44.000',
-      toTime = '2015-09-22 18:31:44.000'
+      fromTime = 'Sep 19, 2015 @ 06:31:44.000',
+      toTime = 'Sep 22, 2015 @ 18:31:44.000'
     ) {
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
@@ -305,9 +305,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(
-        `.echLegendItem .echLegendItem__displayValue`
-      ))[nth];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__displayValue`)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }

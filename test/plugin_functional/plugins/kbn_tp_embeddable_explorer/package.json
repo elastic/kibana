@@ -8,8 +8,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@elastic/eui": "14.8.0",
-    "react": "^16.8.0"
+    "@elastic/eui": "17.0.0",
+    "react": "^16.12.0"
   },
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "@kbn/plugin-helpers": "9.0.2",
-    "typescript": "3.5.3"
+    "typescript": "3.7.2"
   }
 }

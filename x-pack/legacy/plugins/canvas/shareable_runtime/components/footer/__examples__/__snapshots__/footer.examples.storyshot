@@ -41,9 +41,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -79,9 +79,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -118,9 +118,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -158,9 +158,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -202,9 +202,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -243,9 +243,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -285,9 +285,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -321,9 +321,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -371,9 +371,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -424,9 +424,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -462,9 +462,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -498,9 +498,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -535,9 +535,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -573,9 +573,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -611,9 +611,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -651,9 +651,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -688,9 +688,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -725,9 +725,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -764,9 +764,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -815,9 +815,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -858,9 +858,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -949,9 +949,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1018,9 +1018,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1058,9 +1058,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1099,9 +1099,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1141,9 +1141,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1181,9 +1181,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1221,9 +1221,9 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 177.77777777777777,
+                "width": 1280,
               }
             }
           >
@@ -1265,6 +1265,11 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
           >
             <div
               className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
             >
               <a
                 className="euiLink euiLink--primary"
@@ -1487,9 +1492,9 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
             className="preview"
             style={
               Object {
-                "height": 100,
+                "height": 720,
                 "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                "width": 150,
+                "width": 1080,
               }
             }
           >
@@ -1529,6 +1534,11 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
           >
             <div
               className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
             >
               <a
                 className="euiLink euiLink--primary"

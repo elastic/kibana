@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarsListTable renders the table with all calendars 1`] = `
+<Fragment>
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "calendar_id",
+          "name": "ID",
+          "render": [Function],
+          "sortable": true,
+          "truncateText": true,
+        },
+        Object {
+          "field": "job_ids_string",
+          "name": "Jobs",
+          "sortable": true,
+          "truncateText": true,
+        },
+        Object {
+          "field": "events_length",
+          "name": "Events",
+          "render": [Function],
+          "sortable": true,
+        },
+      ]
+    }
+    data-test-subj="mlCalendarTable"
+    executeQueryOptions={Object {}}
+    isSelectable={true}
+    itemId="calendar_id"
+    items={
+      Array [
+        Object {
+          "calendar_id": "farequote-calendar",
+          "description": "test ",
+          "events": Array [],
+          "job_ids": Array [
+            "farequote",
+          ],
+        },
+        Object {
+          "calendar_id": "this-is-a-new-calendar",
+          "description": "new calendar",
+          "events": Array [],
+          "job_ids": Array [
+            "test",
+          ],
+        },
+      ]
+    }
+    loading={false}
+    pagination={
+      Object {
+        "initialPageSize": 20,
+        "pageSizeOptions": Array [
+          10,
+          20,
+        ],
+      }
+    }
+    responsive={true}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+        },
+        "filters": Array [],
+        "toolsRight": Array [
+          <EuiButton
+            data-test-subj="mlCalendarButtonCreate"
+            href="#/settings/calendars_list/new_calendar"
+            isDisabled={false}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="New"
+              id="xpack.ml.calendarsList.table.newButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>,
+          <EuiButton
+            color="danger"
+            iconType="trash"
+            isDisabled={true}
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Delete"
+              id="xpack.ml.calendarsList.table.deleteButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>,
+        ],
+      }
+    }
+    selection={
+      Object {
+        "onSelectionChange": [Function],
+      }
+    }
+    sorting={
+      Object {
+        "sort": Object {
+          "direction": "asc",
+          "field": "calendar_id",
+        },
+      }
+    }
+  />
+</Fragment>
+`;

@@ -59,15 +59,15 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
             onChange={ev => setInputValue(ev.target.value)}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
           <EuiButton type="submit" size="s" onClick={handleAddGroup}>
-            Set
+            {strings.getButtonSet()}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiButtonEmpty color="danger" size="xs" onClick={() => setAddMode(!addMode)} flush="left">
-        Cancel
+        {strings.getButtonCancel()}
       </EuiButtonEmpty>
     </form>
   );

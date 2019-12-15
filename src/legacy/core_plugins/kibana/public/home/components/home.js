@@ -51,6 +51,9 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
+    const showTelemetryDisclaimer = getServices().getInjected(
+      'telemetryNotifyUserAboutOptInDefault'
+    );
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -60,6 +63,7 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
+      showTelemetryDisclaimer,
     };
   }
 
@@ -136,15 +140,11 @@ export class Home extends Component {
     const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage restrictWidth={1200}>
+      <EuiPage restrictWidth={1200} data-test-subj="homeApp">
         <EuiPageBody className="eui-displayBlock">
-
           <EuiScreenReaderOnly>
             <h1>
-              <FormattedMessage
-                id="kbn.home.welcomeHomePageHeader"
-                defaultMessage="Kibana home"
-              />
+              <FormattedMessage id="kbn.home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
 
@@ -228,10 +228,8 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        shouldShowTelemetryOptIn={this.props.shouldShowTelemetryOptIn}
-        fetchTelemetry={this.props.fetchTelemetry}
-        setOptIn={this.props.setOptIn}
-        getTelemetryBannerId={this.props.getTelemetryBannerId}
+        showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
+        onOptInSeen={this.props.onOptInSeen}
       />
     );
   }
@@ -254,10 +252,6 @@ export class Home extends Component {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  fetchTelemetry: PropTypes.func.isRequired,
-  getTelemetryBannerId: PropTypes.func.isRequired,
-  setOptIn: PropTypes.func.isRequired,
-  shouldShowTelemetryOptIn: PropTypes.bool,
   directories: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -274,4 +268,5 @@ Home.propTypes = {
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
+  onOptInSeen: PropTypes.func.isRequired,
 };

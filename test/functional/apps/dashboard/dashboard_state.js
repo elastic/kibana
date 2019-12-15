@@ -24,9 +24,9 @@ import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dash
 // eslint-disable-next-line
 import {
   DEFAULT_PANEL_WIDTH
-} from '../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public/lib/embeddable/dashboard_constants';
+} from '../../../../src/plugins/dashboard_embeddable_container/public/embeddable/dashboard_constants';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -38,12 +38,12 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard state', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function () {
+    after(async function() {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
@@ -65,7 +65,9 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
-      const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist('#EA6460');
+      const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist(
+        '#EA6460'
+      );
 
       expect(colorChoiceRetained).to.be(true);
     });
@@ -167,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
+      it('for query parameter', async function() {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
 
@@ -182,11 +184,14 @@ export default function ({ getService, getPageObjects }) {
         expect(newQuery).to.equal('hi');
       });
 
-      it('for panel size parameters', async function () {
+      it('for panel size parameters', async function() {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await browser.getCurrentUrl();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-        const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
+        const newUrl = currentUrl.replace(
+          `w:${DEFAULT_PANEL_WIDTH}`,
+          `w:${DEFAULT_PANEL_WIDTH * 2}`
+        );
         await browser.get(newUrl.toString(), false);
         await retry.try(async () => {
           const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
@@ -197,12 +202,16 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.waitForRenderComplete();
           // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
           const marginOfError = 10;
-          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
-          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
+          expect(newPanelDimensions[0].width).to.be.lessThan(
+            currentPanelDimensions[0].width * 2 + marginOfError
+          );
+          expect(newPanelDimensions[0].width).to.be.greaterThan(
+            currentPanelDimensions[0].width * 2 - marginOfError
+          );
         });
       });
 
-      it('when removing a panel', async function () {
+      it('when removing a panel', async function() {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
         await browser.get(newUrl.toString(), false);
@@ -214,7 +223,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('for embeddable config color parameters on a visualization', () => {
-        it('updates a pie slice color on a soft refresh', async function () {
+        it('updates a pie slice color on a soft refresh', async function() {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visualize.openLegendOptionColors('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
@@ -237,14 +246,14 @@ export default function ({ getService, getPageObjects }) {
         });
 
         // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
-        it.skip('and updates the pie slice legend color', async function () {
+        it.skip('and updates the pie slice legend color', async function() {
           await retry.try(async () => {
             const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
             expect(colorExists).to.be(true);
           });
         });
 
-        it('resets a pie slice color to the original when removed', async function () {
+        it('resets a pie slice color to the original when removed', async function() {
           const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
           await browser.get(newUrl.toString(), false);
@@ -258,7 +267,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
-        it.skip('resets the legend color as well', async function () {
+        it.skip('resets the legend color as well', async function() {
           await retry.try(async () => {
             const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#57c17b');
             expect(colorExists).to.be(true);

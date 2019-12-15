@@ -18,43 +18,37 @@
  */
 
 import './np_core.test.mocks';
-
 import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
-import { AppStateClass } from 'ui/state_management/app_state';
+import { AppStateClass } from './legacy_imports';
 import { DashboardAppState } from './types';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, TimefilterContract, InputTimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { InputTimeRange } from 'ui/timefilter';
 
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn(),
-  },
+jest.mock('ui/state_management/state', () => ({
+  State: {},
 }));
-
-import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
-const dataSetupMock = dataPluginMock.createSetup();
 
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
 
   let mockTime: TimeRange = { to: 'now', from: 'now-15m' };
-  const mockTimefilter = dataSetupMock.timefilter!.timefilter;
-
-  mockTimefilter.setTime.mockImplementation((time: InputTimeRange) => {
-    mockTime = time as TimeRange;
-  });
-  mockTimefilter.getTime.mockImplementation(() => {
-    return mockTime;
-  });
+  const mockTimefilter = {
+    getTime: () => {
+      return mockTime;
+    },
+    setTime: (time: InputTimeRange) => {
+      mockTime = time as TimeRange;
+    },
+  } as TimefilterContract;
 
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
       hideWriteControls: false,
+      kibanaVersion: '7.0.0',
     });
   }
 

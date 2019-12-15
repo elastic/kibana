@@ -44,10 +44,7 @@ const TimelineRefetchComponent = memo<OwnProps>(
 );
 
 export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
-  connect(
-    null,
-    {
-      setTimelineQuery: inputsActions.setQuery,
-    }
-  )
+  connect(null, {
+    setTimelineQuery: inputsActions.setQuery,
+  })
 )(TimelineRefetchComponent);

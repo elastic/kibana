@@ -25,141 +25,126 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { uiModules } from 'ui/modules';
-import { updateOldState } from 'ui/vis/vis_update_state';
+import { updateOldState } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
-import {
-  extractReferences,
-  injectReferences,
-} from './saved_visualization_references';
+import { extractReferences, injectReferences } from './saved_visualization_references';
 
-uiModules
-  .get('app/visualize')
-  .factory('SavedVis', function (Promise, savedSearches, Private) {
-    const Vis = Private(VisProvider);
-    const SavedObject = Private(SavedObjectProvider);
-    createLegacyClass(SavedVis).inherits(SavedObject);
-    function SavedVis(opts) {
-      const self = this;
-      opts = opts || {};
-      if (typeof opts !== 'object') opts = { id: opts };
+uiModules.get('app/visualize').factory('SavedVis', function(savedSearches, Private) {
+  const SavedObject = Private(SavedObjectProvider);
+  createLegacyClass(SavedVis).inherits(SavedObject);
+  function SavedVis(opts) {
+    const self = this;
+    opts = opts || {};
+    if (typeof opts !== 'object') opts = { id: opts };
 
-      SavedVis.Super.call(self, {
-        type: SavedVis.type,
-        mapping: SavedVis.mapping,
-        searchSource: SavedVis.searchSource,
-        extractReferences: extractReferences,
-        injectReferences: injectReferences,
+    SavedVis.Super.call(self, {
+      type: SavedVis.type,
+      mapping: SavedVis.mapping,
+      searchSource: SavedVis.searchSource,
+      extractReferences: extractReferences,
+      injectReferences: injectReferences,
 
-        id: opts.id,
-        indexPattern: opts.indexPattern,
-        defaults: {
-          title: '',
-          visState: (function () {
-            if (!opts.type) return null;
-            const def = {};
-            def.type = opts.type;
-            return def;
-          }()),
-          uiStateJSON: '{}',
-          description: '',
-          savedSearchId: opts.savedSearchId,
-          version: 1
-        },
+      id: opts.id,
+      indexPattern: opts.indexPattern,
+      defaults: {
+        title: '',
+        visState: (function() {
+          if (!opts.type) return null;
+          const def = {};
+          def.type = opts.type;
+          return def;
+        })(),
+        uiStateJSON: '{}',
+        description: '',
+        savedSearchId: opts.savedSearchId,
+        version: 1,
+      },
 
-        afterESResp: this._afterEsResp
-      });
-
-      this.showInRecentlyAccessed = true;
-    }
-
-    SavedVis.type = 'visualization';
-
-    SavedVis.mapping = {
-      title: 'text',
-      visState: 'json',
-      uiStateJSON: 'text',
-      description: 'text',
-      savedSearchId: 'keyword',
-      version: 'integer'
-    };
-
-    // Order these fields to the top, the rest are alphabetical
-    SavedVis.fieldOrder = ['title', 'description'];
-
-    SavedVis.searchSource = true;
-
-    SavedVis.prototype.getFullPath = function () {
-      return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;
-    };
-
-    SavedVis.prototype._afterEsResp = function () {
-      const self = this;
-
-      return self._getLinkedSavedSearch()
-        .then(function () {
-          self.searchSource.setField('size', 0);
-
-          return self.vis ? self._updateVis() : self._createVis();
-        });
-    };
-
-    SavedVis.prototype._getLinkedSavedSearch = Promise.method(function () {
-      const self = this;
-      const linkedSearch = !!self.savedSearchId;
-      const current = self.savedSearch;
-
-      if (linkedSearch && current && current.id === self.savedSearchId) {
-        return;
-      }
-
-      if (self.savedSearch) {
-        self.searchSource.setParent(self.savedSearch.searchSource.getParent());
-        self.savedSearch.destroy();
-        self.savedSearch = null;
-      }
-
-      if (linkedSearch) {
-        return savedSearches.get(self.savedSearchId)
-          .then(function (savedSearch) {
-            self.savedSearch = savedSearch;
-            self.searchSource.setParent(self.savedSearch.searchSource);
-          });
-      }
+      afterESResp: this._afterEsResp,
     });
 
-    SavedVis.prototype._createVis = function () {
-      const self = this;
+    this.showInRecentlyAccessed = true;
+  }
 
-      self.visState = updateOldState(self.visState);
+  SavedVis.type = 'visualization';
 
-      // visState doesn't yet exist when importing a visualization, so we can't
-      // assume that exists at this point. If it does exist, then we're not
-      // importing a visualization, so we want to sync the title.
-      if (self.visState) {
-        self.visState.title = self.title;
-      }
-      self.vis = new Vis(
-        self.searchSource.getField('index'),
-        self.visState
-      );
+  SavedVis.mapping = {
+    title: 'text',
+    visState: 'json',
+    uiStateJSON: 'text',
+    description: 'text',
+    savedSearchId: 'keyword',
+    version: 'integer',
+  };
 
-      self.vis.savedSearchId = self.savedSearchId;
+  // Order these fields to the top, the rest are alphabetical
+  SavedVis.fieldOrder = ['title', 'description'];
 
-      return self.vis;
-    };
+  SavedVis.searchSource = true;
 
-    SavedVis.prototype._updateVis = function () {
-      const self = this;
+  SavedVis.prototype.getFullPath = function() {
+    return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;
+  };
 
-      self.vis.indexPattern = self.searchSource.getField('index');
+  SavedVis.prototype._afterEsResp = async function() {
+    const self = this;
+
+    await self._getLinkedSavedSearch();
+    self.searchSource.setField('size', 0);
+    return self.vis ? self._updateVis() : self._createVis();
+  };
+
+  SavedVis.prototype._getLinkedSavedSearch = async function() {
+    const self = this;
+    const linkedSearch = !!self.savedSearchId;
+    const current = self.savedSearch;
+
+    if (linkedSearch && current && current.id === self.savedSearchId) {
+      return;
+    }
+
+    if (self.savedSearch) {
+      self.searchSource.setParent(self.savedSearch.searchSource.getParent());
+      self.savedSearch.destroy();
+      self.savedSearch = null;
+    }
+
+    if (linkedSearch) {
+      self.savedSearch = await savedSearches.get(self.savedSearchId);
+      self.searchSource.setParent(self.savedSearch.searchSource);
+    }
+  };
+
+  SavedVis.prototype._createVis = function() {
+    const self = this;
+
+    self.visState = updateOldState(self.visState);
+
+    // visState doesn't yet exist when importing a visualization, so we can't
+    // assume that exists at this point. If it does exist, then we're not
+    // importing a visualization, so we want to sync the title.
+    if (self.visState) {
       self.visState.title = self.title;
-      self.vis.setState(self.visState);
-      self.vis.savedSearchId = self.savedSearchId;
-    };
+    }
+    self.vis = new Vis(self.searchSource.getField('index'), self.visState);
 
-    return SavedVis;
-  });
+    self.vis.savedSearchId = self.savedSearchId;
+
+    return self.vis;
+  };
+
+  SavedVis.prototype._updateVis = function() {
+    const self = this;
+
+    self.vis.indexPattern = self.searchSource.getField('index');
+    self.visState.title = self.title;
+    self.vis.setState(self.visState);
+    self.vis.savedSearchId = self.savedSearchId;
+  };
+
+  return SavedVis;
+});

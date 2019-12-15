@@ -27,9 +27,9 @@ import {
   Plugin,
   PluginInitializerContext,
   PluginManifest,
-  PluginConfigSchema,
   PluginInitializer,
   PluginOpaqueId,
+  PluginConfigDescriptor,
 } from './types';
 import { CoreSetup, CoreStart } from '..';
 
@@ -128,7 +128,7 @@ export class PluginWrapper<
     this.instance = undefined;
   }
 
-  public getConfigSchema(): PluginConfigSchema {
+  public getConfigDescriptor(): PluginConfigDescriptor | null {
     if (!this.manifest.server) {
       return null;
     }
@@ -141,10 +141,11 @@ export class PluginWrapper<
       return null;
     }
 
-    if (!(pluginDefinition.config.schema instanceof Type)) {
+    const configDescriptor = pluginDefinition.config;
+    if (!(configDescriptor.schema instanceof Type)) {
       throw new Error('Configuration schema expected to be an instance of Type');
     }
-    return pluginDefinition.config.schema;
+    return configDescriptor;
   }
 
   private createPluginInstance() {

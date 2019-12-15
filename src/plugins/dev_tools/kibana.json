@@ -1,0 +1,7 @@
+{
+  "id": "dev_tools",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["kibana_legacy"]
+}

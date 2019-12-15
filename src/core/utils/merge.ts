@@ -66,20 +66,17 @@ const mergeObjects = <T extends Record<string, any>, U extends Record<string, an
   baseObj: T,
   overrideObj: U
 ): T & U =>
-  [...new Set([...Object.keys(baseObj), ...Object.keys(overrideObj)])].reduce(
-    (merged, key) => {
-      const baseVal = baseObj[key];
-      const overrideVal = overrideObj[key];
+  [...new Set([...Object.keys(baseObj), ...Object.keys(overrideObj)])].reduce((merged, key) => {
+    const baseVal = baseObj[key];
+    const overrideVal = overrideObj[key];
 
-      if (isMergable(baseVal) && isMergable(overrideVal)) {
-        merged[key] = mergeObjects(baseVal, overrideVal);
-      } else if (overrideVal !== undefined) {
-        merged[key] = overrideVal;
-      } else if (baseVal !== undefined) {
-        merged[key] = baseVal;
-      }
+    if (isMergable(baseVal) && isMergable(overrideVal)) {
+      merged[key] = mergeObjects(baseVal, overrideVal);
+    } else if (overrideVal !== undefined) {
+      merged[key] = overrideVal;
+    } else if (baseVal !== undefined) {
+      merged[key] = baseVal;
+    }
 
-      return merged;
-    },
-    {} as any
-  );
+    return merged;
+  }, {} as any);

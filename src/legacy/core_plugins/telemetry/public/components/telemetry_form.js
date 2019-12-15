@@ -29,10 +29,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from 'ui/management';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
@@ -49,34 +50,34 @@ export class TelemetryForm extends Component {
     processing: false,
     showExample: false,
     queryMatches: null,
-  }
+  };
 
-  componentWillReceiveProps(nextProps) {
-    const {
-      query
-    } = nextProps;
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    const { query } = nextProps;
 
     const searchTerm = (query.text || '').toLowerCase();
     const searchTermMatches = SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
 
     if (searchTermMatches !== this.state.queryMatches) {
-      this.setState({
-        queryMatches: searchTermMatches
-      }, () => {
-        this.props.onQueryMatchChange(searchTermMatches);
-      });
+      this.setState(
+        {
+          queryMatches: searchTermMatches,
+        },
+        () => {
+          this.props.onQueryMatchChange(searchTermMatches);
+        }
+      );
     }
   }
 
   render() {
-    const {
-      telemetryOptInProvider,
-    } = this.props;
+    const { telemetryOptInProvider } = this.props;
 
-    const {
-      showExample,
-      queryMatches,
-    } = this.state;
+    const { showExample, queryMatches } = this.state;
+
+    if (!telemetryOptInProvider.canChangeOptInStatus()) {
+      return null;
+    }
 
     if (queryMatches !== null && !queryMatches) {
       return null;
@@ -84,22 +85,19 @@ export class TelemetryForm extends Component {
 
     return (
       <Fragment>
-        {showExample &&
+        {showExample && (
           <OptInExampleFlyout
             fetchTelemetry={() => telemetryOptInProvider.fetchExample()}
             onClose={this.toggleExample}
           />
-        }
+        )}
         <EuiPanel paddingSize="l">
           <EuiForm>
             <EuiText>
               <EuiFlexGroup alignItems="baseline">
                 <EuiFlexItem grow={false}>
                   <h2>
-                    <FormattedMessage
-                      id="telemetry.usageDataTitle"
-                      defaultMessage="Usage Data"
-                    />
+                    <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
                   </h2>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -112,7 +110,10 @@ export class TelemetryForm extends Component {
                 type: 'boolean',
                 value: telemetryOptInProvider.getOptIn() || false,
                 description: this.renderDescription(),
-                defVal: false,
+                defVal: true,
+                ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
+                  defaultMessage: 'Provide usage statistics',
+                }),
               }}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
@@ -145,18 +146,34 @@ export class TelemetryForm extends Component {
                       defaultMessage="all of Kibana."
                     />
                   </strong>
-                )
+                ),
               }}
             />
           </p>
         }
       />
     );
-  }
+  };
 
   renderDescription = () => (
     <Fragment>
-      <p>{getConfigTelemetryDesc()}</p>
+      <p>
+        <FormattedMessage
+          id="telemetry.telemetryConfigAndLinkDescription"
+          defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
+          See our {privacyStatementLink} for more details."
+          values={{
+            privacyStatementLink: (
+              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                <FormattedMessage
+                  id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                  defaultMessage="Privacy Statement"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
       <p>
         <EuiLink onClick={this.toggleExample}>
           <FormattedMessage
@@ -165,41 +182,38 @@ export class TelemetryForm extends Component {
           />
         </EuiLink>
       </p>
-      <p>
-        <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-          <FormattedMessage
-            id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-            defaultMessage="Read our usage data privacy statement"
-          />
-        </EuiLink>
-      </p>
     </Fragment>
-  )
+  );
 
   toggleOptIn = async () => {
     const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
 
     return new Promise((resolve, reject) => {
-      this.setState({
-        enabled: newOptInValue,
-        processing: true
-      }, () => {
-        this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(() => {
-          this.setState({ processing: false });
-          resolve();
-        }, (e) => {
-          // something went wrong
-          this.setState({ processing: false });
-          reject(e);
-        });
-      });
+      this.setState(
+        {
+          enabled: newOptInValue,
+          processing: true,
+        },
+        () => {
+          this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(
+            () => {
+              this.setState({ processing: false });
+              resolve();
+            },
+            e => {
+              // something went wrong
+              this.setState({ processing: false });
+              reject(e);
+            }
+          );
+        }
+      );
     });
-
-  }
+  };
 
   toggleExample = () => {
     this.setState({
-      showExample: !this.state.showExample
+      showExample: !this.state.showExample,
     });
-  }
+  };
 }

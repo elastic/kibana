@@ -16,6 +16,7 @@ import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
+import { SecurityLicense } from '../licensing';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -30,35 +31,32 @@ export {
 } from './api_keys';
 
 interface SetupAuthenticationParams {
-  core: CoreSetup;
+  http: CoreSetup['http'];
   clusterClient: IClusterClient;
   config: ConfigType;
+  license: SecurityLicense;
   loggers: LoggerFactory;
-  getLegacyAPI(): LegacyAPI;
+  getLegacyAPI(): Pick<LegacyAPI, 'isSystemAPIRequest'>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
 
 export async function setupAuthentication({
-  core,
+  http,
   clusterClient,
   config,
+  license,
   loggers,
   getLegacyAPI,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
-
-  const isSecurityFeatureDisabled = () => {
-    const xpackInfo = getLegacyAPI().xpackInfo;
-    return xpackInfo.isAvailable() && !xpackInfo.feature('security').isEnabled();
-  };
 
   /**
    * Retrieves currently authenticated user associated with the specified request.
    * @param request
    */
   const getCurrentUser = async (request: KibanaRequest) => {
-    if (isSecurityFeatureDisabled()) {
+    if (!license.isEnabled()) {
       return null;
     }
 
@@ -67,26 +65,49 @@ export async function setupAuthentication({
       .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
   };
 
+  const isValid = (sessionValue: ProviderSession) => {
+    // ensure that this cookie was created with the current Kibana configuration
+    const { path, idleTimeoutExpiration, lifespanExpiration } = sessionValue;
+    if (path !== undefined && path !== (http.basePath.serverBasePath || '/')) {
+      authLogger.debug(`Outdated session value with path "${sessionValue.path}"`);
+      return false;
+    }
+    // ensure that this cookie is not expired
+    if (idleTimeoutExpiration && idleTimeoutExpiration < Date.now()) {
+      return false;
+    } else if (lifespanExpiration && lifespanExpiration < Date.now()) {
+      return false;
+    }
+    return true;
+  };
+
   const authenticator = new Authenticator({
     clusterClient,
-    basePath: core.http.basePath,
-    config: { sessionTimeout: config.sessionTimeout, authc: config.authc },
+    basePath: http.basePath,
+    config: { session: config.session, authc: config.authc },
     isSystemAPIRequest: (request: KibanaRequest) => getLegacyAPI().isSystemAPIRequest(request),
     loggers,
-    sessionStorageFactory: await core.http.createCookieSessionStorageFactory({
+    sessionStorageFactory: await http.createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
-      validate: (sessionValue: ProviderSession) =>
-        !(sessionValue.expires && sessionValue.expires < Date.now()),
+      validate: (session: ProviderSession | ProviderSession[]) => {
+        const array: ProviderSession[] = Array.isArray(session) ? session : [session];
+        for (const sess of array) {
+          if (!isValid(sess)) {
+            return { isValid: false, path: sess.path };
+          }
+        }
+        return { isValid: true };
+      },
     }),
   });
 
   authLogger.debug('Successfully initialized authenticator.');
 
-  core.http.registerAuth(async (request, response, t) => {
+  http.registerAuth(async (request, response, t) => {
     // If security is disabled continue with no user credentials and delete the client cookie as well.
-    if (isSecurityFeatureDisabled()) {
+    if (!license.isEnabled()) {
       return t.authenticated();
     }
 
@@ -148,11 +169,12 @@ export async function setupAuthentication({
   const apiKeys = new APIKeys({
     clusterClient,
     logger: loggers.get('api-key'),
-    isSecurityFeatureDisabled,
+    license,
   });
   return {
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
+    getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),

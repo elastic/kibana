@@ -9,7 +9,10 @@ Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->.
 <b>Signature:</b>
 
 ```typescript
-export declare type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export declare type ToastInputFields = Pick<EuiToast, Exclude<keyof EuiToast, 'id' | 'text' | 'title'>> & {
+    title?: string | MountPoint;
+    text?: string | MountPoint;
+};
 ```
 
 ## Remarks

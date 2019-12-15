@@ -26,11 +26,11 @@ function clearIndexPatternsCache() {
 }
 
 export async function listSampleDataSets() {
-  return await getServices().kfetch({ method: 'GET', pathname: sampleDataUrl });
+  return await getServices().http.get(sampleDataUrl);
 }
 
 export async function installSampleDataSet(id, sampleDataDefaultIndex) {
-  await getServices().kfetch({ method: 'POST', pathname: `${sampleDataUrl}/${id}` });
+  await getServices().http.post(`${sampleDataUrl}/${id}`);
 
   if (getServices().uiSettings.isDefault('defaultIndex')) {
     getServices().uiSettings.set('defaultIndex', sampleDataDefaultIndex);
@@ -40,12 +40,14 @@ export async function installSampleDataSet(id, sampleDataDefaultIndex) {
 }
 
 export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
-  await getServices().kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
+  await getServices().http.delete(`${sampleDataUrl}/${id}`);
 
   const uiSettings = getServices().uiSettings;
 
-  if (!uiSettings.isDefault('defaultIndex')
-    && uiSettings.get('defaultIndex') === sampleDataDefaultIndex) {
+  if (
+    !uiSettings.isDefault('defaultIndex') &&
+    uiSettings.get('defaultIndex') === sampleDataDefaultIndex
+  ) {
     uiSettings.set('defaultIndex', null);
   }
 

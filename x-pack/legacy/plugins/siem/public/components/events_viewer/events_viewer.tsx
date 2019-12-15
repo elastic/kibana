@@ -5,12 +5,9 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { Filter, getEsQueryConfig } from '@kbn/es-query';
 import { getOr, isEmpty, isEqual } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
@@ -18,7 +15,7 @@ import { Direction } from '../../graphql/types';
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
-import { HeaderPanel } from '../header_panel';
+import { HeaderSection } from '../header_section';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Sort } from '../timeline/body/sort';
@@ -29,8 +26,14 @@ import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
 import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { isCompactFooter } from '../timeline/timeline';
-import { ManageTimelineContext } from '../timeline/timeline_context';
+import { ManageTimelineContext, TimelineTypeContextProps } from '../timeline/timeline_context';
 import * as i18n from './translations';
+import {
+  esFilters,
+  esQuery,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;
 
@@ -44,10 +47,11 @@ interface Props {
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
   end: number;
-  filters: Filter[];
+  filters: esFilters.Filter[];
+  headerFilterGroup?: React.ReactNode;
   height?: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -57,7 +61,9 @@ interface Props {
   showInspect: boolean;
   start: number;
   sort: Sort;
+  timelineTypeContext: TimelineTypeContextProps;
   toggleColumn: (column: ColumnHeader) => void;
+  utilityBar?: (totalCount: number) => React.ReactNode;
 }
 
 export const EventsViewer = React.memo<Props>(
@@ -67,6 +73,7 @@ export const EventsViewer = React.memo<Props>(
     dataProviders,
     end,
     filters,
+    headerFilterGroup,
     height = DEFAULT_EVENTS_VIEWER_HEIGHT,
     id,
     indexPattern,
@@ -79,12 +86,14 @@ export const EventsViewer = React.memo<Props>(
     showInspect,
     start,
     sort,
+    timelineTypeContext,
     toggleColumn,
+    utilityBar,
   }) => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     const core = useKibanaCore();
     const combinedQueries = combineQueries({
-      config: getEsQueryConfig(core.uiSettings),
+      config: esQuery.getEsQueryConfig(core.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,
@@ -101,7 +110,7 @@ export const EventsViewer = React.memo<Props>(
         <AutoSizer detectAnyWindowResize={true} content>
           {({ measureRef, content: { width = 0 } }) => (
             <>
-              <WrappedByAutoSizer innerRef={measureRef}>
+              <WrappedByAutoSizer ref={measureRef}>
                 <div
                   data-test-subj="events-viewer-measured"
                   style={{ height: '0px', width: '100%' }}
@@ -113,6 +122,7 @@ export const EventsViewer = React.memo<Props>(
                   fields={columnsHeader.map(c => c.id)}
                   filterQuery={combinedQueries.filterQuery}
                   id={id}
+                  indexPattern={indexPattern}
                   limit={itemsPerPage}
                   sortField={{
                     sortFieldId: sort.columnId,
@@ -131,20 +141,32 @@ export const EventsViewer = React.memo<Props>(
                     totalCount = 0,
                   }) => (
                     <>
-                      <HeaderPanel
+                      <HeaderSection
                         id={id}
                         showInspect={showInspect}
-                        subtitle={`${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(
-                          totalCount
-                        )}`}
-                        title={i18n.EVENTS}
-                      />
+                        subtitle={
+                          utilityBar
+                            ? undefined
+                            : `${i18n.SHOWING}: ${totalCount.toLocaleString()} ${i18n.UNIT(
+                                totalCount
+                              )}`
+                        }
+                        title={timelineTypeContext?.title ?? i18n.EVENTS}
+                      >
+                        {headerFilterGroup}
+                      </HeaderSection>
+
+                      {utilityBar?.(totalCount)}
 
                       <div
                         data-test-subj={`events-container-loading-${loading}`}
                         style={{ width: `${width}px` }}
                       >
-                        <ManageTimelineContext loading={loading} width={width}>
+                        <ManageTimelineContext
+                          loading={loading}
+                          width={width}
+                          type={timelineTypeContext}
+                        >
                           <TimelineRefetch
                             id={id}
                             inputId="global"

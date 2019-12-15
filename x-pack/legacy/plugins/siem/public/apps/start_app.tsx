@@ -9,6 +9,8 @@ import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
+import { LegacyCoreStart } from 'kibana/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -16,6 +18,9 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
+
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
@@ -30,8 +35,6 @@ import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
 import { ApolloClientContext } from '../utils/apollo_context';
-
-import { StartObject } from './plugin';
 
 const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const history = createHashHistory();
@@ -74,10 +77,21 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-export const SiemApp = memo<StartObject>(({ core, plugins }) => (
-  <KibanaCoreContextProvider core={core}>
-    <KibanaPluginsContextProvider plugins={plugins}>
-      <StartApp {...compose()} />
-    </KibanaPluginsContextProvider>
-  </KibanaCoreContextProvider>
-));
+export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
+  ({ core, plugins }) => (
+    <KibanaContextProvider
+      services={{
+        appName: 'siem',
+        data: plugins.data,
+        storage: new Storage(localStorage),
+        ...core,
+      }}
+    >
+      <KibanaCoreContextProvider core={core}>
+        <KibanaPluginsContextProvider plugins={plugins}>
+          <StartApp {...compose()} />
+        </KibanaPluginsContextProvider>
+      </KibanaCoreContextProvider>
+    </KibanaContextProvider>
+  )
+);

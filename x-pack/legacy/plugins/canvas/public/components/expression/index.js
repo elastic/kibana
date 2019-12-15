@@ -70,11 +70,7 @@ const expressionLifecycle = lifecycle({
 });
 
 export const Expression = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('functionDefinitions', 'setFunctionDefinitions', []),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,

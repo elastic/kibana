@@ -5,12 +5,11 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEqual, uniqWith } from 'lodash/fp';
+import { isEmpty, isEqual, uniqWith } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME, Port } from '../port';
 import * as i18n from '../timeline/body/renderers/translations';
 
 import { GeoFields } from './geo_fields';
@@ -26,7 +25,8 @@ export interface IpPortPair {
 /**
  * Returns `true` if the ip field (i.e. `sourceIp`, `destinationIp`) that
  * corresponds with the specified `type` (i.e. `source`, `destination`) is
- * populated
+ * populated. This function will return `false` when the array only contains
+ * empty values.
  */
 export const isIpFieldPopulated = ({
   destinationIp,
@@ -37,15 +37,57 @@ export const isIpFieldPopulated = ({
   sourceIp?: string[] | null;
   type: SourceDestinationType;
 }): boolean =>
-  (type === 'source' && sourceIp != null) || (type === 'destination' && destinationIp != null);
+  (type === 'source' && sourceIp != null && sourceIp.some(ip => !isEmpty(ip))) ||
+  (type === 'destination' && destinationIp != null && destinationIp.some(ip => !isEmpty(ip)));
 
-const IpAdressesWithPorts = pure<{
+/**
+ * Returns an array of ports, filtered such that `null` entries are removed. If
+ * the provided `destinationPort` and `sourcePort` do not contain valid ports,
+ * an empty array will be returned.
+ */
+export const getPorts = ({
+  destinationPort,
+  sourcePort,
+  type,
+}: {
+  destinationPort?: Array<number | string | null> | null;
+  sourcePort?: Array<number | string | null> | null;
+  type: SourceDestinationType;
+}): string[] => {
+  const ports =
+    type === 'source' && sourcePort != null
+      ? sourcePort
+      : type === 'destination' && destinationPort != null
+      ? destinationPort
+      : [];
+
+  return ports
+    .filter(p => p != null)
+    .map(p => `${p}`)
+    .filter(p => !isEmpty(p));
+};
+
+/**
+ * Returns `true` if the array of ports, filtered to remove invalid entries,
+ * has at least one port.
+ */
+export const hasPorts = ({
+  destinationPort,
+  sourcePort,
+  type,
+}: {
+  destinationPort?: Array<number | string | null> | null;
+  sourcePort?: Array<number | string | null> | null;
+  type: SourceDestinationType;
+}): boolean => getPorts({ destinationPort, sourcePort, type }).length > 0;
+
+const IpAdressesWithPorts = React.memo<{
   contextId: string;
   destinationIp?: string[] | null;
-  destinationPort?: string[] | null;
+  destinationPort?: Array<number | string | null> | null;
   eventId: string;
   sourceIp?: string[] | null;
-  sourcePort?: string[] | null;
+  sourcePort?: Array<number | string | null> | null;
   type: SourceDestinationType;
 }>(({ contextId, destinationIp, destinationPort, eventId, sourceIp, sourcePort, type }) => {
   const ip = type === 'source' ? sourceIp : destinationIp;
@@ -64,14 +106,14 @@ const IpAdressesWithPorts = pure<{
     port != null && ip.length === port.length
       ? ip.map((address, i) => ({
           ip: address,
-          port: port[i], // use the corresponding port in the parallel array
+          port: port[i] != null ? `${port[i]}` : null, // use the corresponding port in the parallel array
         }))
       : ip.map(address => ({
           ip: address,
-          port: null, // drop the port, because the length of the ip and port arrays is different
+          port: null, // drop the port, because the length of the parallel ip and port arrays is different
         }));
 
-  return ip != null ? (
+  return (
     <EuiFlexGroup gutterSize="none">
       {uniqWith(isEqual, ipPortPairs).map(
         ipPortPair =>
@@ -90,7 +132,7 @@ const IpAdressesWithPorts = pure<{
           )
       )}
     </EuiFlexGroup>
-  ) : null;
+  );
 });
 
 IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
@@ -104,7 +146,7 @@ IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
  * - a port, hyperlinked to a port lookup service, when it's populated
  * - a summary of geolocation details, when they are populated
  */
-export const SourceDestinationIp = pure<SourceDestinationIpProps>(
+export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
   ({
     contextId,
     destinationGeoContinentName,
@@ -125,7 +167,9 @@ export const SourceDestinationIp = pure<SourceDestinationIpProps>(
     type,
   }) => {
     const label = type === 'source' ? i18n.SOURCE : i18n.DESTINATION;
-    return isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (
+
+    return isIpFieldPopulated({ destinationIp, sourceIp, type }) ||
+      hasPorts({ destinationPort, sourcePort, type }) ? (
       <EuiBadge data-test-subj={`${type}-ip-badge`} color="hollow">
         <EuiFlexGroup
           alignItems="center"
@@ -137,15 +181,31 @@ export const SourceDestinationIp = pure<SourceDestinationIpProps>(
             <Label data-test-subj={`${type}-label`}>{label}</Label>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <IpAdressesWithPorts
-              contextId={contextId}
-              destinationIp={destinationIp}
-              destinationPort={destinationPort}
-              eventId={eventId}
-              sourceIp={sourceIp}
-              sourcePort={sourcePort}
-              type={type}
-            />
+            {isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (
+              <IpAdressesWithPorts
+                contextId={contextId}
+                destinationIp={destinationIp}
+                destinationPort={destinationPort}
+                eventId={eventId}
+                sourceIp={sourceIp}
+                sourcePort={sourcePort}
+                type={type}
+              />
+            ) : (
+              <EuiFlexGroup gutterSize="none">
+                {getPorts({ destinationPort, sourcePort, type }).map((port, i) => (
+                  <EuiFlexItem key={`port-${port}-${i}`} grow={false}>
+                    <Port
+                      contextId={contextId}
+                      data-test-subj="port"
+                      eventId={eventId}
+                      fieldName={`${type}.port`}
+                      value={port}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
           <EuiFlexItem>
             <GeoFields

@@ -5,7 +5,7 @@
  */
 
 import { useState, useCallback, useContext } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -27,7 +27,7 @@ export interface MetricExplorerViewState {
 
 export const useMetricsExplorerState = (
   source: SourceQuery.Query['source']['configuration'],
-  derivedIndexPattern: StaticIndexPattern
+  derivedIndexPattern: IIndexPattern
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [afterKey, setAfterKey] = useState<string | null>(null);
@@ -59,7 +59,7 @@ export const useMetricsExplorerState = (
       setAfterKey(null);
       setTimeRange({ ...currentTimerange, from: start, to: end });
     },
-    [currentTimerange]
+    [currentTimerange, setTimeRange]
   );
 
   const handleGroupByChange = useCallback(
@@ -70,7 +70,7 @@ export const useMetricsExplorerState = (
         groupBy: groupBy || void 0,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleFilterQuerySubmit = useCallback(
@@ -81,7 +81,7 @@ export const useMetricsExplorerState = (
         filterQuery: query,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleMetricsChange = useCallback(
@@ -92,7 +92,7 @@ export const useMetricsExplorerState = (
         metrics,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleAggregationChange = useCallback(
@@ -109,7 +109,7 @@ export const useMetricsExplorerState = (
               }));
       setOptions({ ...options, aggregation, metrics });
     },
-    [options]
+    [options, setOptions]
   );
 
   const onViewStateChange = useCallback(
@@ -124,7 +124,7 @@ export const useMetricsExplorerState = (
         setOptions(vs.options);
       }
     },
-    [setChartOptions, setTimeRange, setTimeRange]
+    [setChartOptions, setOptions, setTimeRange]
   );
 
   return {

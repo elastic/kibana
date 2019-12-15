@@ -7,7 +7,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { hostsActions } from '../../../../store/actions';
 import {
   Direction,
@@ -37,7 +37,7 @@ interface OwnProps {
   data: HostsEdges[];
   fakeTotalCount: number;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
@@ -209,11 +209,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(
-  makeMapStateToProps,
-  {
-    updateHostsSort: hostsActions.updateHostsSort,
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(HostsTableComponent);
+export const HostsTable = connect(makeMapStateToProps, {
+  updateHostsSort: hostsActions.updateHostsSort,
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';

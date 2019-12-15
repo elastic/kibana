@@ -22,7 +22,7 @@ interface RouterProps {
   uiCapabilities: UICapabilities;
 }
 
-const PageRouterComponent: React.SFC<RouterProps> = ({ history, uiCapabilities }) => {
+const PageRouterComponent: React.FC<RouterProps> = ({ history, uiCapabilities }) => {
   return (
     <Router history={history}>
       <Switch>

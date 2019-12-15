@@ -26,9 +26,24 @@ setting to preserve the same key across multiple restarts and multiple instances
 [[reporting-kibana-server-settings]]
 ==== Kibana server settings
 
-Reporting uses the Kibana interface to generate reports. In most cases, you don't need
-to configure Reporting to communicate with Kibana. However, if you use a reverse-proxy
-to access Kibana, you must set the proxy port, protocol, and hostname.
+Reporting opens the {kib} web interface in a server process to generate 
+screenshots of {kib} visualizations. In most cases, the default settings 
+will work and you don't need to configure Reporting to communicate with {kib}. 
+However, if your client connections must go through a reverse-proxy
+to access {kib}, Reporting configuration must have the proxy port, protocol, 
+and hostname set in the `xpack.reporting.kibanaServer.*` settings.
+
+[NOTE] 
+====
+If a reverse-proxy carries encrypted traffic from end-user 
+clients back to a {kib} server, the proxy port, protocol, and hostname 
+in Reporting settings must be valid for the encryption that the Reporting 
+browser will receive. Encrypted communications will fail if there are 
+mismatches in the host information between the request and the certificate on the server.
+
+Configuring the `xpack.reporting.kibanaServer` settings to point to a
+proxy host requires that the Kibana server has network access to the proxy.
+====
 
 `xpack.reporting.kibanaServer.port`::
 The port for accessing Kibana, if different from the `server.port` value.
@@ -39,8 +54,6 @@ The protocol for accessing Kibana, typically `http` or `https`.
 `xpack.reporting.kibanaServer.hostname`::
 The hostname for accessing {kib}, if different from the `server.host` value.
 
-NOTE: Configuring the `xpack.reporting.kibanaServer` settings to point to a
-proxy host requires that the Kibana server has network access to the proxy.
 
 [float]
 [[reporting-job-queue-settings]]

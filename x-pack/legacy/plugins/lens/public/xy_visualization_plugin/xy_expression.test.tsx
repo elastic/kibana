@@ -28,7 +28,10 @@ function sampleArgs() {
           { id: 'c', name: 'c', formatHint: { id: 'string' } },
           { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
         ],
-        rows: [{ a: 1, b: 2, c: 'I', d: 'Foo' }, { a: 1, b: 5, c: 'J', d: 'Bar' }],
+        rows: [
+          { a: 1, b: 2, c: 'I', d: 'Foo' },
+          { a: 1, b: 5, c: 'J', d: 'Bar' },
+        ],
       },
     },
   };

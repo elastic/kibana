@@ -24,7 +24,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
       await esArchiver.load('historic');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       await browser.setWindowSize(1600, 850);
@@ -79,29 +79,32 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       let data = []; // List of Buffer objects
       const auth = config.get('servers.elasticsearch.auth');
       const headers = {
-        Authorization: `Basic ${Buffer.from(auth).toString('base64')}`
+        Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
       };
       const parsedUrl = parse(url);
       return new Promise((resolve, reject) => {
-        http.get(
-          {
-            hostname: parsedUrl.hostname,
-            path: parsedUrl.path,
-            port: parsedUrl.port,
-            responseType: 'arraybuffer',
-            headers
-          },
-          res => {
-            res.on('data', function (chunk) {
-              data.push(chunk);
-            });
-            res.on('end', function () {
-              data = Buffer.concat(data);
-              resolve(data);
-            });
-          }).on('error', (e) => {
-          reject(e);
-        });
+        http
+          .get(
+            {
+              hostname: parsedUrl.hostname,
+              path: parsedUrl.path,
+              port: parsedUrl.port,
+              responseType: 'arraybuffer',
+              headers,
+            },
+            res => {
+              res.on('data', function(chunk) {
+                data.push(chunk);
+              });
+              res.on('end', function() {
+                data = Buffer.concat(data);
+                resolve(data);
+              });
+            }
+          )
+          .on('error', e => {
+            reject(e);
+          });
       });
     }
 
@@ -153,7 +156,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       log.debug('Reporting:checkForReportingToasts');
       const isToastPresent = await testSubjects.exists('completeReportSuccess', {
         allowHidden: true,
-        timeout: 90000
+        timeout: 90000,
       });
       // Close toast so it doesn't obscure the UI.
       if (isToastPresent) {
@@ -165,15 +168,13 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async setTimepickerInDataRange() {
       log.debug('Reporting:setTimepickerInDataRange');
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
-      const fromTime = '1999-09-19 06:31:44.000';
-      const toTime = '1999-09-23 18:31:44.000';
+      const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
+      const toTime = 'Sep 23, 1999 @ 18:31:44.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }

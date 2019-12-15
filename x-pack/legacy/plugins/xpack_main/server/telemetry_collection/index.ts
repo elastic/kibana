@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getStatsWithXpack } from './get_stats_with_xpack';
+export { registerMonitoringCollection } from './register_xpack_collection';

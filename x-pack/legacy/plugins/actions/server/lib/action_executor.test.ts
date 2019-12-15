@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {
   savedObjectsClientMock,
   loggingServiceMock,
@@ -24,7 +24,7 @@ function getServices() {
     callCluster: jest.fn(),
   };
 }
-const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 const executeParams = {
@@ -157,6 +157,7 @@ test('throws an error when config is invalid', async () => {
 
   const result = await actionExecutor.execute(executeParams);
   expect(result).toEqual({
+    actionId: '1',
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
@@ -188,6 +189,7 @@ test('throws an error when params is invalid', async () => {
 
   const result = await actionExecutor.execute(executeParams);
   expect(result).toEqual({
+    actionId: '1',
     status: 'error',
     retry: false,
     message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,

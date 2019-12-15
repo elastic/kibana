@@ -44,8 +44,9 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '../../../../core/server';
+import { SavedObjectAttributes } from '../../../../core/public';
 import { SimpleSavedObject, CoreStart } from '../../../../core/public';
+import { useKibana } from '../context';
 
 // TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
 const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
@@ -104,12 +105,18 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
   initialPageSize?: 5 | 10 | 15 | 25;
   fixedPageSize?: undefined;
 }
-type SavedObjectFinderProps = {
+
+export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
+
+export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
-} & (SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize);
+} & SavedObjectFinderProps;
 
-class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObjectFinderState> {
+class SavedObjectFinderUi extends React.Component<
+  SavedObjectFinderUiProps,
+  SavedObjectFinderState
+> {
   public static propTypes = {
     onChoose: PropTypes.func,
     noItemsMessage: PropTypes.node,
@@ -174,7 +181,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
     }
   }, 300);
 
-  constructor(props: SavedObjectFinderProps) {
+  constructor(props: SavedObjectFinderUiProps) {
     super(props);
 
     this.state = {
@@ -523,4 +530,15 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
   }
 }
 
-export { SavedObjectFinder };
+const SavedObjectFinder = (props: SavedObjectFinderProps) => {
+  const { services } = useKibana();
+  return (
+    <SavedObjectFinderUi
+      {...props}
+      savedObjects={services.savedObject}
+      uiSettings={services.uiSettings}
+    />
+  );
+};
+
+export { SavedObjectFinder, SavedObjectFinderUi };

@@ -9,8 +9,11 @@ import sinon from 'sinon';
 import uuid from 'uuid';
 import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
-import { mockLogger } from './test_utils';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
 
 const taskDefinitions: TaskDictionary<TaskDefinition> = {
@@ -77,6 +80,7 @@ describe('TaskStore', () => {
 
     test('serializes the params and state', async () => {
       const task = {
+        id: 'id',
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
@@ -99,7 +103,10 @@ describe('TaskStore', () => {
           taskType: 'report',
           user: undefined,
         },
-        {}
+        {
+          id: 'id',
+          refresh: false,
+        }
       );
 
       expect(result).toEqual({
@@ -323,233 +330,6 @@ describe('TaskStore', () => {
         ],
         searchAfter: ['b', 2],
       });
-    });
-  });
-
-  describe('fetchAvailableTasks', () => {
-    async function testFetchAvailableTasks({ opts = {}, hits = [] }: any = {}) {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
-      const store = new TaskStore({
-        callCluster,
-        logger: mockLogger(),
-        definitions: taskDefinitions,
-        maxAttempts: 2,
-        serializer,
-        ...opts,
-      });
-
-      const result = await store.fetchAvailableTasks();
-
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWith(callCluster, 'search');
-
-      return {
-        result,
-        args: callCluster.args[0][1],
-      };
-    }
-
-    test('it returns normally with no tasks when the index does not exist.', async () => {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits: [] } }));
-      const store = new TaskStore({
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        callCluster,
-        definitions: taskDefinitions,
-        maxAttempts: 2,
-        savedObjectsRepository: savedObjectsClient,
-      });
-
-      const result = await store.fetchAvailableTasks();
-
-      sinon.assert.calledOnce(callCluster);
-      sinon.assert.calledWithMatch(callCluster, 'search', { ignoreUnavailable: true });
-
-      expect(result.length).toBe(0);
-    });
-
-    test('it filters tasks by supported types, maxAttempts, and runAt', async () => {
-      const maxAttempts = _.random(2, 43);
-      const customMaxAttempts = _.random(44, 100);
-      const { args } = await testFetchAvailableTasks({
-        opts: {
-          maxAttempts,
-          definitions: {
-            foo: {
-              type: 'foo',
-              title: '',
-              createTaskRunner: jest.fn(),
-            },
-            bar: {
-              type: 'bar',
-              title: '',
-              maxAttempts: customMaxAttempts,
-              createTaskRunner: jest.fn(),
-            },
-          },
-        },
-      });
-      expect(args).toMatchObject({
-        body: {
-          query: {
-            bool: {
-              must: [
-                { term: { type: 'task' } },
-                {
-                  bool: {
-                    must: [
-                      {
-                        bool: {
-                          should: [
-                            {
-                              bool: {
-                                must: [
-                                  { term: { 'task.status': 'idle' } },
-                                  { range: { 'task.runAt': { lte: 'now' } } },
-                                ],
-                              },
-                            },
-                            {
-                              bool: {
-                                must: [
-                                  { term: { 'task.status': 'running' } },
-                                  { range: { 'task.retryAt': { lte: 'now' } } },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            { exists: { field: 'task.interval' } },
-                            {
-                              bool: {
-                                must: [
-                                  { term: { 'task.taskType': 'foo' } },
-                                  {
-                                    range: {
-                                      'task.attempts': {
-                                        lt: maxAttempts,
-                                      },
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                            {
-                              bool: {
-                                must: [
-                                  { term: { 'task.taskType': 'bar' } },
-                                  {
-                                    range: {
-                                      'task.attempts': {
-                                        lt: customMaxAttempts,
-                                      },
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          size: 10,
-          sort: {
-            _script: {
-              type: 'number',
-              order: 'asc',
-              script: {
-                lang: 'expression',
-                source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-              },
-            },
-          },
-          seq_no_primary_term: true,
-        },
-      });
-    });
-
-    test('it returns task objects', async () => {
-      const runAt = new Date();
-      const { result } = await testFetchAvailableTasks({
-        hits: [
-          {
-            _id: 'aaa',
-            _source: {
-              type: 'task',
-              task: {
-                runAt,
-                taskType: 'foo',
-                interval: undefined,
-                attempts: 0,
-                status: 'idle',
-                params: '{ "hello": "world" }',
-                state: '{ "baby": "Henhen" }',
-                user: 'jimbo',
-                scope: ['reporting'],
-              },
-            },
-            _seq_no: 1,
-            _primary_term: 2,
-            sort: ['a', 1],
-          },
-          {
-            _id: 'bbb',
-            _source: {
-              type: 'task',
-              task: {
-                runAt,
-                taskType: 'bar',
-                interval: '5m',
-                attempts: 2,
-                status: 'running',
-                params: '{ "shazm": 1 }',
-                state: '{ "henry": "The 8th" }',
-                user: 'dabo',
-                scope: ['reporting', 'ceo'],
-              },
-            },
-            _seq_no: 3,
-            _primary_term: 4,
-            sort: ['b', 2],
-          },
-        ],
-      });
-      expect(result).toMatchObject([
-        {
-          attempts: 0,
-          id: 'aaa',
-          interval: undefined,
-          params: { hello: 'world' },
-          runAt,
-          scope: ['reporting'],
-          state: { baby: 'Henhen' },
-          status: 'idle',
-          taskType: 'foo',
-          user: 'jimbo',
-        },
-        {
-          attempts: 2,
-          id: 'bbb',
-          interval: '5m',
-          params: { shazm: 1 },
-          runAt,
-          scope: ['reporting', 'ceo'],
-          state: { henry: 'The 8th' },
-          status: 'running',
-          taskType: 'bar',
-          user: 'dabo',
-        },
-      ]);
     });
   });
 
@@ -927,7 +707,7 @@ describe('TaskStore', () => {
           user: undefined,
           ownerId: null,
         },
-        { version: '123' }
+        { version: '123', refresh: false }
       );
 
       expect(result).toEqual({

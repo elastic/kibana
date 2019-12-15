@@ -14,7 +14,38 @@ export default function(kibana: any) {
     require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'alerting',
+        name: 'Alerting',
+        app: ['alerting', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['alert'],
+              read: [],
+            },
+            ui: [],
+            api: ['alerting-read', 'alerting-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['alert'],
+            },
+            ui: [],
+            api: ['alerting-read'],
+          },
+        },
+      });
+
       // Action types
+      const noopActionType: ActionType = {
+        id: 'test.noop',
+        name: 'Test: Noop',
+        async executor() {
+          return { status: 'ok', actionId: '' };
+        },
+      };
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
@@ -94,6 +125,7 @@ export default function(kibana: any) {
           return {
             status: 'error',
             retry: new Date(params.retryAt),
+            actionId: '',
           };
         },
       };
@@ -155,9 +187,11 @@ export default function(kibana: any) {
           });
           return {
             status: 'ok',
+            actionId: '',
           };
         },
       };
+      server.plugins.actions.setup.registerType(noopActionType);
       server.plugins.actions.setup.registerType(indexRecordActionType);
       server.plugins.actions.setup.registerType(failingActionType);
       server.plugins.actions.setup.registerType(rateLimitedActionType);
@@ -311,7 +345,7 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: [],
+        actionGroups: ['default'],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.setup.registerType(alwaysFiringAlertType);

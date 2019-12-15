@@ -41,14 +41,20 @@ export interface ActionTypeExecutorOptions {
 export interface ActionResult {
   id: string;
   actionTypeId: string;
-  description: string;
+  name: string;
   config: Record<string, any>;
+}
+
+export interface FindActionResult extends ActionResult {
+  referencedByCount: number;
 }
 
 // the result returned from an action type executor function
 export interface ActionTypeExecutorResult {
+  actionId: string;
   status: 'ok' | 'error';
   message?: string;
+  serviceMessage?: string;
   data?: any;
   retry?: null | boolean | Date;
 }
@@ -77,7 +83,7 @@ export interface ActionType {
 
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
-  description: string;
+  name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }

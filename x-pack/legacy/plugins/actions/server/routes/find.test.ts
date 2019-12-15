@@ -23,9 +23,9 @@ it('sends proper arguments to action find function', async () => {
       'page=1&' +
       'search=text*&' +
       'default_search_operator=AND&' +
-      'search_fields=description&' +
-      'sort_field=description&' +
-      'fields=description',
+      'search_fields=name&' +
+      'sort_field=name&' +
+      'fields=name',
   };
   const expectedResult = {
     total: 0,
@@ -46,7 +46,7 @@ it('sends proper arguments to action find function', async () => {
         "options": Object {
           "defaultSearchOperator": "AND",
           "fields": Array [
-            "description",
+            "name",
           ],
           "filter": undefined,
           "hasReference": undefined,
@@ -54,9 +54,9 @@ it('sends proper arguments to action find function', async () => {
           "perPage": 1,
           "search": "text*",
           "searchFields": Array [
-            "description",
+            "name",
           ],
-          "sortField": "description",
+          "sortField": "name",
         },
       },
     ]

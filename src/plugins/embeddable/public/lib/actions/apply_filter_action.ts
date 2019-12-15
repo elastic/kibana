@@ -18,16 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
 import { IAction, createAction, IncompatibleActionError } from '../ui_actions';
 import { IEmbeddable, EmbeddableInput } from '../embeddables';
+import { esFilters } from '../../../../../plugins/data/public';
 
 export const APPLY_FILTER_ACTION = 'APPLY_FILTER_ACTION';
 
-type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: Filter[] }>;
+type RootEmbeddable = IEmbeddable<EmbeddableInput & { filters: esFilters.Filter[] }>;
 interface ActionContext {
   embeddable: IEmbeddable;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 async function isCompatible(context: ActionContext) {

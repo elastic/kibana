@@ -29,10 +29,10 @@ function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
   
   docker pull centos:7
   
-  echo "Building: kibana${ imageFlavor }-docker"; \\
-  docker build -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
+  echo "Building: kibana${imageFlavor}-docker"; \\
+  docker build -t ${imageTag}${imageFlavor}:${versionTag} -f Dockerfile . || exit 1;
 
-  docker save ${ imageTag }${ imageFlavor }:${ versionTag } | gzip -c > ${ dockerOutputDir }
+  docker save ${imageTag}${imageFlavor}:${versionTag} | gzip -c > ${dockerOutputDir}
   
   exit 0
   `);

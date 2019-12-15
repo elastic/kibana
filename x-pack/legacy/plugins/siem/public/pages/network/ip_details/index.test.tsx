@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -18,6 +18,7 @@ import { mocksSource } from '../../../containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 import { mockUiSettings } from '../../../mock/ui_settings';
 import { createStore, State } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -38,9 +39,12 @@ mockUseKibanaCore.mockImplementation(() => ({
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
+// For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../components/search_bar', () => ({
   SiemSearchBar: () => null,
+}));
+jest.mock('../../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -108,13 +112,10 @@ jest.mock('ui/documentation_links', () => ({
   },
 }));
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-
 describe('Ip Details', () => {
+  const mount = useMountAppended();
+
   beforeAll(() => {
-    console.error = jest.fn();
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
@@ -126,17 +127,17 @@ describe('Ip Details', () => {
   });
 
   afterAll(() => {
-    console.error = originalError;
     delete (global as GlobalWithFetch).fetch;
   });
-  const state: State = mockGlobalState;
 
+  const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
   });
+
   test('it renders', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
     expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
@@ -164,7 +165,7 @@ describe('Ip Details', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('[data-test-subj="ip-details-headline"] [data-test-subj="page_headline_title"]')
+        .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });

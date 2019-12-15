@@ -20,9 +20,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import {
-  Link,
-} from 'react-router';
+import { Link } from 'react-router'; // eslint-disable-line
 
 import classNames from 'classnames';
 
@@ -49,7 +47,7 @@ export class GuideNav extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const currentRoute = nextProps.routes[1];
     const nextRoute = this.props.getNextRoute(currentRoute.name);
     const previousRoute = this.props.getPreviousRoute(currentRoute.name);
@@ -61,11 +59,7 @@ export class GuideNav extends Component {
   }
 
   renderNoItems(name) {
-    return (
-      <p className="guideNavNoItems">
-        { `No ${name} match your search` }
-      </p>
-    );
+    return <p className="guideNavNoItems">{`No ${name} match your search`}</p>;
   }
 
   renderPagination() {
@@ -87,10 +81,7 @@ export class GuideNav extends Component {
     });
 
     const nextButton = (
-      <Link
-        className={nextClasses}
-        to={this.state.nextRoute ? this.state.nextRoute.path : ''}
-      >
+      <Link className={nextClasses} to={this.state.nextRoute ? this.state.nextRoute.path : ''}>
         <span className="fa fa-angle-right" />
       </Link>
     );
@@ -128,21 +119,13 @@ export class GuideNav extends Component {
       'is-menu-button-pinned': this.props.isNavOpen,
     });
 
-    const componentNavItems =
-      this.props.components.filter(item => (
-        item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
-      )).map((item, index) => {
-        const icon =
-          item.hasReact
-            ? <div className="guideNavItem__reactLogo" />
-            : undefined;
+    const componentNavItems = this.props.components
+      .filter(item => item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1)
+      .map((item, index) => {
+        const icon = item.hasReact ? <div className="guideNavItem__reactLogo" /> : undefined;
         return (
           <div key={`componentNavItem-${index}`} className="guideNavItem">
-            <Link
-              className="guideNavItem__link"
-              to={item.path}
-              onClick={this.props.onClickNavItem}
-            >
+            <Link className="guideNavItem__link" to={item.path} onClick={this.props.onClickNavItem}>
               {item.name}
             </Link>
 
@@ -151,21 +134,13 @@ export class GuideNav extends Component {
         );
       });
 
-    const sandboxNavItems =
-      this.props.sandboxes.filter(item => (
-        item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1
-      )).map((item, index) => {
-        const icon =
-          item.hasReact
-            ? <div className="guideNavItem__reactLogo" />
-            : undefined;
+    const sandboxNavItems = this.props.sandboxes
+      .filter(item => item.name.toLowerCase().indexOf(this.state.search.toLowerCase()) !== -1)
+      .map((item, index) => {
+        const icon = item.hasReact ? <div className="guideNavItem__reactLogo" /> : undefined;
         return (
           <div key={`sandboxNavItem-${index}`} className="guideNavItem">
-            <Link
-              className="guideNavItem__link"
-              to={item.path}
-              onClick={this.props.onClickNavItem}
-            >
+            <Link className="guideNavItem__link" to={item.path} onClick={this.props.onClickNavItem}>
               {item.name}
             </Link>
 
@@ -177,18 +152,15 @@ export class GuideNav extends Component {
     return (
       <div className={classes}>
         <div className="guideNav__header">
-          <div
-            className={buttonClasses}
-            onClick={this.props.onToggleNav}
-          />
-          <Link
-            className="guideNav__title"
-            to="/"
-            onClick={this.props.onClickNavItem}
-          >
+          <div className={buttonClasses} onClick={this.props.onToggleNav} />
+          <Link className="guideNav__title" to="/" onClick={this.props.onClickNavItem}>
             Kibana UI Framework <span className="guideNav__version">{this.props.version}</span>
           </Link>
-          <a href="http://elastic.co" className="guideNav__elasticLogo" aria-label="Go to the Elastic website" />
+          <a
+            href="http://elastic.co"
+            className="guideNav__elasticLogo"
+            aria-label="Go to the Elastic website"
+          />
 
           {this.renderPagination()}
         </div>
@@ -205,24 +177,17 @@ export class GuideNav extends Component {
 
         <div className="guideNavItemsContainer">
           <div className="guideNavItems">
-            <div className="guideNavSectionTitle">
-              Components
-            </div>
+            <div className="guideNavSectionTitle">Components</div>
 
-            { componentNavItems.length ? componentNavItems : this.renderNoItems('components') }
+            {componentNavItems.length ? componentNavItems : this.renderNoItems('components')}
 
-            <div className="guideNavSectionTitle">
-              Sandboxes
-            </div>
+            <div className="guideNavSectionTitle">Sandboxes</div>
 
-            { sandboxNavItems.length ? sandboxNavItems : this.renderNoItems('sandboxes') }
+            {sandboxNavItems.length ? sandboxNavItems : this.renderNoItems('sandboxes')}
           </div>
         </div>
 
-        <button
-          className="guideLink guideNav__showButton"
-          onClick={this.props.onShowChrome}
-        >
+        <button className="guideLink guideNav__showButton" onClick={this.props.onShowChrome}>
           Show chrome
         </button>
       </div>

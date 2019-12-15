@@ -20,7 +20,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       'uiExports/(.*)': fileMockPath,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^src/legacy/(.*)': `${kibanaDirectory}/src/legacy/$1`,
-      '^plugins/watcher/models/(.*)': `${xPackKibanaDirectory}/legacy/plugins/watcher/public/models/$1`,
+      '^plugins/watcher/np_ready/application/models/(.*)': `${xPackKibanaDirectory}/legacy/plugins/watcher/public/np_ready/application/models/$1`,
       '^plugins/([^/.]*)(.*)': `${kibanaDirectory}/src/legacy/core_plugins/$1/public$2`,
       '^legacy/plugins/xpack_main/(.*);': `${xPackKibanaDirectory}/legacy/plugins/xpack_main/public/$1`,
       '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': fileMockPath,
@@ -36,7 +36,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       `<rootDir>/dev-tools/jest/setup/polyfills.js`,
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
-    setupFilesAfterEnv: [`${kibanaDirectory}/src/dev/jest/setup/mocks.js`],
+    setupFilesAfterEnv: [
+      `<rootDir>/dev-tools/jest/setup/setup_test.js`,
+      `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
+    ],
     testMatch: ['**/*.test.{js,ts,tsx}'],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
@@ -47,7 +50,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
       '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     ],
-    snapshotSerializers: [`${kibanaDirectory}/node_modules/enzyme-to-json/serializer`],
+    snapshotSerializers: [
+      `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`,
+      `${kibanaDirectory}/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts`,
+    ],
     reporters: [
       'default',
       [

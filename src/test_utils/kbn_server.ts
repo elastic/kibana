@@ -33,7 +33,6 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { CliArgs, Env } from '../core/server/config';
-import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 import KbnServer from '../legacy/server/kbn_server';
 import { CallCluster } from '../legacy/core_plugins/elasticsearch';
@@ -84,9 +83,9 @@ export function createRootWithSettings(
   });
 
   return new Root(
-    new BehaviorSubject(
-      new LegacyObjectToConfigAdapter(defaultsDeep({}, settings, DEFAULTS_SETTINGS))
-    ),
+    {
+      getConfig$: () => new BehaviorSubject(defaultsDeep({}, settings, DEFAULTS_SETTINGS)),
+    },
     env
   );
 }
@@ -270,8 +269,8 @@ export function createTestServers({
         // Override provided configs, we know what the elastic user is now
         kbnSettings.elasticsearch = {
           hosts: [esTestConfig.getUrl()],
-          username: esTestConfig.getUrlParts().username,
-          password: esTestConfig.getUrlParts().password,
+          username: kibanaServerTestUser.username,
+          password: kibanaServerTestUser.password,
         };
       }
 
@@ -279,8 +278,8 @@ export function createTestServers({
         stop: async () => await es.cleanup(),
         es,
         hosts: [esTestConfig.getUrl()],
-        username: esTestConfig.getUrlParts().username,
-        password: esTestConfig.getUrlParts().password,
+        username: kibanaServerTestUser.username,
+        password: kibanaServerTestUser.password,
       };
     },
     startKibana: async () => {

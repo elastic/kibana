@@ -17,14 +17,8 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
-import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
-
-uiModules
-  .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEmbedded', function (Private, $timeout, getAppState) {
-
+export function initVisualizationDirective(app, deps) {
+  app.directive('visualizationEmbedded', function($timeout, getAppState) {
     return {
       restrict: 'E',
       scope: {
@@ -34,18 +28,19 @@ uiModules
         filters: '=',
         query: '=',
       },
-      link: function ($scope, element) {
+      link: function($scope, element) {
         $scope.renderFunction = async () => {
           if (!$scope._handler) {
-            $scope._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject($scope.savedObj, {
-              timeRange: $scope.timeRange,
-              filters: $scope.filters || [],
-              query: $scope.query,
-              appState: getAppState(),
-              uiState: $scope.uiState,
-            });
+            $scope._handler = await deps.embeddables
+              .getEmbeddableFactory('visualization')
+              .createFromObject($scope.savedObj, {
+                timeRange: $scope.timeRange,
+                filters: $scope.filters || [],
+                query: $scope.query,
+                appState: getAppState(),
+                uiState: $scope.uiState,
+              });
             $scope._handler.render(element[0]);
-
           } else {
             $scope._handler.updateInput({
               timeRange: $scope.timeRange,
@@ -55,14 +50,17 @@ uiModules
           }
         };
 
-        $scope.$on('render', (event) => {
+        $scope.$on('render', event => {
           event.preventDefault();
-          $timeout(() => { $scope.renderFunction(); });
+          $timeout(() => {
+            $scope.renderFunction();
+          });
         });
 
         $scope.$on('$destroy', () => {
           $scope._handler.destroy();
         });
-      }
+      },
     };
   });
+}

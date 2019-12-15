@@ -6,20 +6,18 @@
 
 // legacy imports currently necessary to power Graph
 // for a cutover all of these have to be resolved
-import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/autocompleteProviders';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 // @ts-ignore
-import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-// @ts-ignore
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { start as navigation } from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { GraphPlugin } from './plugin';
 
 // @ts-ignore
@@ -36,24 +34,27 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   const Private = injector.get<IPrivate>('Private');
 
   return {
-    $http: injector.get('$http'),
     savedObjectRegistry: Private(SavedObjectRegistryProvider),
     kbnBaseUrl: injector.get('kbnBaseUrl'),
     savedGraphWorkspaces: Private(SavedWorkspacesProvider),
   };
 }
 
+type XpackNpSetupDeps = typeof npSetup.plugins & {
+  licensing: LicensingPluginSetup;
+};
+
 (async () => {
   const instance = new GraphPlugin();
   instance.setup(npSetup.core, {
     __LEGACY: {
-      xpackInfo,
       Storage,
     },
+    ...(npSetup.plugins as XpackNpSetupDeps),
   });
   instance.start(npStart.core, {
-    data,
     npData: npStart.plugins.data,
+    navigation,
     __LEGACY: {
       angularDependencies: await getAngularInjectedDependencies(),
     },

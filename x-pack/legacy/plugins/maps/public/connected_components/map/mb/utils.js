@@ -8,7 +8,6 @@ import _ from 'lodash';
 import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
-
   const mbStyle = mbMap.getStyle();
 
   const mbLayerIdsToRemove = [];
@@ -20,7 +19,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
-  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
+  mbLayerIdsToRemove.forEach(mbLayerId => mbMap.removeLayer(mbLayerId));
 
   const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
@@ -34,7 +33,6 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
     }
   }
   mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
-
 }
 
 /**
@@ -44,11 +42,9 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList) {
  * @param layerList
  */
 export function syncLayerOrderForSingleLayer(mbMap, layerList) {
-
   if (!layerList || layerList.length === 0) {
     return;
   }
-
 
   const mbLayers = mbMap.getStyle().layers.slice();
   const layerIds = mbLayers.map(mbLayer => {
@@ -59,7 +55,9 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   const currentLayerOrderLayerIds = _.uniq(layerIds);
 
   const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
-  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId => currentLayerOrderLayerIds.includes(layerId));
+  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId =>
+    currentLayerOrderLayerIds.includes(layerId)
+  );
 
   let netPos = 0;
   let netNeg = 0;
@@ -72,8 +70,9 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
   if (netPos === 0 && netNeg === 0) {
     return;
   }
-  const movedLayerId = (netPos >= netNeg) && movementArr.find(l => l.movement < 0).id ||
-    (netPos < netNeg) && movementArr.find(l => l.movement > 0).id;
+  const movedLayerId =
+    (netPos >= netNeg && movementArr.find(l => l.movement < 0).id) ||
+    (netPos < netNeg && movementArr.find(l => l.movement > 0).id);
   const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
 
   let nextMbLayerId;
@@ -94,7 +93,6 @@ export function syncLayerOrderForSingleLayer(mbMap, layerList) {
       mbMap.moveLayer(mbLayerId, nextMbLayerId);
     }
   });
-
 }
 
 function getImageData(img) {
@@ -109,25 +107,38 @@ function getImageData(img) {
   return context.getImageData(0, 0, img.width, img.height);
 }
 
-export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+export async function loadSpriteSheetImageData(imgUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'Anonymous';
+    image.onload = el => {
+      const imgData = getImageData(el.currentTarget);
+      resolve(imgData);
+    };
+    image.onerror = e => {
+      reject(e);
+    };
+    image.src = imgUrl;
+  });
+}
 
-  const image = new Image();
-  image.crossOrigin = 'Anonymous';
-  image.onload = (el) => {
-    const imgData = getImageData(el.currentTarget);
-    for (const imageId in json) {
-      if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
-        continue;
-      }
-      const { width, height, x, y, sdf, pixelRatio } = json[imageId];
-      if (typeof width !== 'number' || typeof height !== 'number') {
-        continue;
-      }
-
-      const data = new RGBAImage({ width, height });
-      RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
-      mbMap.addImage(imageId, data, { pixelRatio, sdf });
+export function addSpriteSheetToMapFromImageData(json, imgData, mbMap) {
+  for (const imageId in json) {
+    if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
+      continue;
     }
-  };
-  image.src = imgUrl;
+    const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+    if (typeof width !== 'number' || typeof height !== 'number') {
+      continue;
+    }
+
+    const data = new RGBAImage({ width, height });
+    RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+    mbMap.addImage(imageId, data, { pixelRatio, sdf });
+  }
+}
+
+export async function addSpritesheetToMap(json, imgUrl, mbMap) {
+  const imgData = await loadSpriteSheetImageData(imgUrl);
+  addSpriteSheetToMapFromImageData(json, imgData, mbMap);
 }

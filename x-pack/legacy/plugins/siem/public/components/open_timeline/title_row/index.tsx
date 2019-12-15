@@ -6,11 +6,10 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSelected' | 'title'> & {
   /** The number of timelines currently selected */
@@ -21,9 +20,9 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSele
  * Renders the row containing the tile (e.g. Open Timelines / All timelines)
  * and action buttons (i.e. Favorite Selected and Delete Selected)
  */
-export const TitleRow = pure<Props>(
+export const TitleRow = React.memo<Props>(
   ({ onAddTimelinesToFavorites, onDeleteSelected, selectedTimelinesCount, title }) => (
-    <HeaderPanel title={title}>
+    <HeaderSection title={title}>
       {(onAddTimelinesToFavorites || onDeleteSelected) && (
         <EuiFlexGroup gutterSize="s" responsive={false}>
           {onAddTimelinesToFavorites && (
@@ -55,7 +54,7 @@ export const TitleRow = pure<Props>(
           )}
         </EuiFlexGroup>
       )}
-    </HeaderPanel>
+    </HeaderSection>
   )
 );
 

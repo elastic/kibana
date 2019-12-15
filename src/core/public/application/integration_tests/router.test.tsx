@@ -18,30 +18,24 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History } from 'history';
 import { BehaviorSubject } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { AppMounter, LegacyApp, AppMountParameters } from '../types';
+import { AppMount, LegacyApp, AppMountParameters } from '../types';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { AppRouter, AppNotFound } from '../ui';
 
 const createMountHandler = (htmlString: string) =>
   jest.fn(async ({ appBasePath: basename, element: el }: AppMountParameters) => {
-    ReactDOM.render(
-      <div
-        dangerouslySetInnerHTML={{ __html: `\nbasename: ${basename}\nhtml: ${htmlString}\n` }}
-      />,
-      el
-    );
-    return jest.fn(() => ReactDOM.unmountComponentAtNode(el));
+    el.innerHTML = `<div>\nbasename: ${basename}\nhtml: ${htmlString}\n</div>`;
+    return jest.fn(() => (el.innerHTML = ''));
   });
 
 describe('AppContainer', () => {
-  let apps: Map<string, jest.Mock<ReturnType<AppMounter>, Parameters<AppMounter>>>;
+  let apps: Map<string, jest.Mock<ReturnType<AppMount>, Parameters<AppMount>>>;
   let legacyApps: Map<string, LegacyApp>;
   let history: History;
   let router: ReactWrapper;

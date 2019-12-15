@@ -23,23 +23,26 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { TmsLayer } from 'ui/vis/map/service_settings';
+import { Vis } from 'ui/vis';
+import { RegionMapVisParams } from '../../../region_map/public/types';
 import { SelectOption, SwitchOption } from '../../../kbn_vislib_vis_types/public/components';
-import { RegionMapOptionsProps } from '../../../region_map/public/components/region_map_options';
 import { WmsInternalOptions } from './wms_internal_options';
-import { TileMapOptionsProps } from './tile_map_options';
-import { TileMapVisParams } from '../types';
+import { WMSOptions, TileMapVisParams } from '../types';
+
+interface Props {
+  stateParams: TileMapVisParams | RegionMapVisParams;
+  setValue: (title: 'wms', options: WMSOptions) => void;
+  vis: Vis;
+}
 
 const mapLayerForOption = ({ id }: TmsLayer) => ({ text: id, value: id });
 
-function WmsOptions({ stateParams, setValue, vis }: TileMapOptionsProps | RegionMapOptionsProps) {
+function WmsOptions({ stateParams, setValue, vis }: Props) {
   const { wms } = stateParams;
   const { tmsLayers } = vis.type.editorConfig.collections;
   const tmsLayerOptions = useMemo(() => tmsLayers.map(mapLayerForOption), [tmsLayers]);
 
-  const setWmsOption = <T extends keyof TileMapVisParams['wms']>(
-    paramName: T,
-    value: TileMapVisParams['wms'][T]
-  ) =>
+  const setWmsOption = <T extends keyof WMSOptions>(paramName: T, value: WMSOptions[T]) =>
     setValue('wms', {
       ...wms,
       [paramName]: value,

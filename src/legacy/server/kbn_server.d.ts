@@ -20,7 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
-import { SavedObjectsClientProviderOptions, CoreSetup } from 'src/core/server';
+import { SavedObjectsClientProviderOptions, CoreSetup, CoreStart } from 'src/core/server';
 import {
   ConfigService,
   ElasticsearchServiceSetup,
@@ -36,18 +36,16 @@ import { LegacyServiceSetupDeps, LegacyServiceStartDeps } from '../../core/serve
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LegacyConfig } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
-
-import { CapabilitiesModifier } from './capabilities';
+import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { Capabilities } from '../../core/public';
+import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 
-export interface KibanaConfig {
-  get<T>(key: string): T;
-  has(key: string): boolean;
-}
+export type KibanaConfig = LegacyConfig;
 
 export interface UiApp {
   getId(): string;
@@ -67,10 +65,8 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsLegacyService;
-    usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
@@ -91,7 +87,6 @@ declare module 'hapi' {
     getBasePath(): string;
     getDefaultRoute(): Promise<string>;
     getUiSettingsService(): IUiSettingsClient;
-    getCapabilities(): Promise<Capabilities>;
   }
 
   interface ResponseToolkit {
@@ -100,6 +95,11 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
+
+export interface PluginsSetup {
+  usageCollection: UsageCollectionSetup;
+  [key: string]: object;
+}
 
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
@@ -120,16 +120,13 @@ export default class KbnServer {
     };
     setup: {
       core: CoreSetup;
-      plugins: Record<string, object>;
+      plugins: PluginsSetup;
     };
     start: {
-      core: CoreSetup;
+      core: CoreStart;
       plugins: Record<string, object>;
     };
     stop: null;
-    params: {
-      handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
-    };
   };
   public server: Server;
   public inject: Server['inject'];
@@ -150,5 +147,5 @@ export default class KbnServer {
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsService } from './index_patterns';
+export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
 export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

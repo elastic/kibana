@@ -19,14 +19,11 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker', 'visualize']);
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const log = getService('log');
-
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
 
   describe('visualize app', () => {
     before(async () => {
@@ -38,21 +35,25 @@ export default function ({ getService, getPageObjects }) {
 
     describe('vega chart', () => {
       describe('initial render', () => {
-        it('should not have inspector enabled', async function () {
+        it('should not have inspector enabled', async function() {
           await inspector.expectIsNotEnabled();
         });
 
-        it.skip('should have some initial vega spec text', async function () {
+        it.skip('should have some initial vega spec text', async function() {
           const vegaSpec = await PageObjects.visualize.getVegaSpec();
-          expect(vegaSpec).to.contain('{').and.to.contain('data');
+          expect(vegaSpec)
+            .to.contain('{')
+            .and.to.contain('data');
           expect(vegaSpec.length).to.be.above(500);
         });
 
-        it('should have view and control containers', async function () {
+        it('should have view and control containers', async function() {
           const view = await PageObjects.visualize.getVegaViewContainer();
           expect(view).to.be.ok();
           const size = await view.getSize();
-          expect(size).to.have.property('width').and.to.have.property('height');
+          expect(size)
+            .to.have.property('width')
+            .and.to.have.property('height');
           expect(size.width).to.be.above(0);
           expect(size.height).to.be.above(0);
 
@@ -64,14 +65,14 @@ export default function ({ getService, getPageObjects }) {
       describe('with filters', () => {
         before(async () => {
           log.debug('setAbsoluteRange');
-          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
         });
 
         afterEach(async () => {
           await filterBar.removeAllFilters();
         });
 
-        it.skip('should render different data in response to filter change', async function () {
+        it.skip('should render different data in response to filter change', async function() {
           await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
           await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart_filtered');

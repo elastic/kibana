@@ -7,19 +7,19 @@
 import { RequestFacade, ReportingResponseToolkit, JobDocPayload } from '../../types';
 
 export type HandlerFunction = (
-  exportType: any,
-  jobParams: any,
+  exportType: string,
+  jobParams: object,
   request: RequestFacade,
   h: ReportingResponseToolkit
 ) => any;
 
-export type HandlerErrorFunction = (exportType: any, err: Error) => any;
+export type HandlerErrorFunction = (exportType: string, err: Error) => any;
 
-export interface QueuedJobPayload {
+export interface QueuedJobPayload<JobParamsType> {
   error?: boolean;
   source: {
     job: {
-      payload: JobDocPayload;
+      payload: JobDocPayload<JobParamsType>;
     };
   };
 }

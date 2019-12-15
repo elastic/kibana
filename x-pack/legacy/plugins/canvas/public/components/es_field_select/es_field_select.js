@@ -28,6 +28,7 @@ export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur })
       onBlur={onBlur}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
+      compressed
     />
   );
 };

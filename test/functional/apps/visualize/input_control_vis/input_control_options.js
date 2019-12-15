@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
@@ -30,12 +30,14 @@ export default function ({ getService, getPageObjects }) {
   const FIELD_NAME = 'machine.os.raw';
 
   describe('input control options', () => {
-
     before(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
       // set time range to time with no documents - input controls do not use time filter be default
-      await PageObjects.timePicker.setAbsoluteRange('2017-01-01 00:00:00.000', '2017-01-02 00:00:00.000');
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Jan 1, 2017 @ 00:00:00.000',
+        'Jan 1, 2017 @ 00:00:00.000'
+      );
       await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
       await comboBox.set('indexPatternSelect-0', 'logstash- ');
@@ -43,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
-    it('should not have inspector enabled', async function () {
+    it('should not have inspector enabled', async function() {
       await inspector.expectIsNotEnabled();
     });
 
@@ -57,10 +59,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('updateFiltersOnChange is false', () => {
-
       it('should contain dropdown with terms aggregation results as options', async () => {
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
+        expect(
+          menu
+            .trim()
+            .split('\n')
+            .join()
+        ).to.equal('ios,osx,win 7,win 8,win xp');
       });
 
       it('should display staging control buttons', async () => {
@@ -133,13 +139,15 @@ export default function ({ getService, getPageObjects }) {
     describe('updateFiltersOnChange is true', () => {
       before(async () => {
         await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.checkCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await PageObjects.visualize.checkSwitch('inputControlEditorUpdateFiltersOnChangeCheckbox');
         await PageObjects.visualize.clickGo();
       });
 
       after(async () => {
         await PageObjects.visualize.clickVisEditorTab('options');
-        await PageObjects.visualize.uncheckCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
+        await PageObjects.visualize.uncheckSwitch(
+          'inputControlEditorUpdateFiltersOnChangeCheckbox'
+        );
         await PageObjects.visualize.clickGo();
       });
 
@@ -176,11 +184,19 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should re-create control when global time filter is updated', async () => {
-        await PageObjects.timePicker.setAbsoluteRange('2015-01-01 00:00:00.000', '2016-01-01 00:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2015 @ 00:00:00.000',
+          'Jan 1, 2016 @ 00:00:00.000'
+        );
 
         // Expect control to have values for selected time filter
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
+        expect(
+          menu
+            .trim()
+            .split('\n')
+            .join()
+        ).to.equal('osx,win 7,win 8,win xp');
       });
     });
   });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiSpacer,
@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
   EuiTextColor,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
@@ -43,7 +43,7 @@ function NoDataMessage(props) {
 
 export function NoData(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [useInternalCollection, setUseInternalCollection] = useState(false);
+  const [useInternalCollection, setUseInternalCollection] = useState(props.isCloudEnabled);
 
   async function startSetup() {
     setIsLoading(true);
@@ -64,15 +64,22 @@ export function NoData(props) {
             <EuiSpacer size="m" />
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
-            <EuiHorizontalRule size="half" />
-            <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
-              <EuiTextColor color="default">
-                <FormattedMessage
-                  id="xpack.monitoring.noData.setupMetricbeatInstead"
-                  defaultMessage="Or, set up with Metricbeat (recommended)"
-                />
-              </EuiTextColor>
-            </EuiButtonEmpty>
+            {!props.isCloudEnabled ? (
+              <Fragment>
+                <EuiHorizontalRule size="half" />
+                <EuiButtonEmpty
+                  isDisabled={props.isCollectionEnabledUpdated}
+                  onClick={() => setUseInternalCollection(false)}
+                >
+                  <EuiTextColor color="default">
+                    <FormattedMessage
+                      id="xpack.monitoring.noData.setupMetricbeatInstead"
+                      defaultMessage="Or, set up with Metricbeat (recommended)"
+                    />
+                  </EuiTextColor>
+                </EuiButtonEmpty>
+              </Fragment>
+            ) : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
@@ -108,11 +115,7 @@ export function NoData(props) {
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceAround"
-            gutterSize="s"
-          >
+          <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={true}
@@ -129,7 +132,10 @@ export function NoData(props) {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule size="half" />
-          <EuiButtonEmpty onClick={() => setUseInternalCollection(true)} data-test-subj="useInternalCollection">
+          <EuiButtonEmpty
+            onClick={() => setUseInternalCollection(true)}
+            data-test-subj="useInternalCollection"
+          >
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.monitoring.noData.setupInternalInstead"
@@ -147,5 +153,5 @@ NoData.propTypes = {
   changePath: PropTypes.func,
   isLoading: PropTypes.bool.isRequired,
   reason: PropTypes.object,
-  checkMessage: PropTypes.string
+  checkMessage: PropTypes.string,
 };

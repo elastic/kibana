@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'src/core/public';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
@@ -162,7 +162,7 @@ export function InnerWorkspacePanel({
             <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
           </p>
           <EuiButtonEmpty
-            href="https://discuss.elastic.co/c/kibana"
+            href="https://www.elastic.co/products/kibana/feedback"
             iconType="popout"
             iconSide="right"
             size="xs"
@@ -213,6 +213,8 @@ export function InnerWorkspacePanel({
     return (
       <div className="lnsExpressionRenderer">
         <ExpressionRendererComponent
+          className="lnsExpressionRenderer__component"
+          padding="m"
           expression={expression!}
           renderError={(errorMessage?: string | null) => {
             return (

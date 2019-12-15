@@ -19,9 +19,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
-
+import { I18nProvider } from '@kbn/i18n/react';
 import { EuiWrappingPopover } from '@elastic/eui';
+
 import { OptionsMenu } from './options';
 
 let isOpen = false;
@@ -55,7 +55,7 @@ export function showOptionsPopover({
 
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
+    <I18nProvider>
       <EuiWrappingPopover id="popover" button={anchorElement} isOpen={true} closePopover={onClose}>
         <OptionsMenu
           useMargins={useMargins}
@@ -64,7 +64,7 @@ export function showOptionsPopover({
           onHidePanelTitlesChange={onHidePanelTitlesChange}
         />
       </EuiWrappingPopover>
-    </I18nContext>
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }

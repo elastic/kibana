@@ -20,13 +20,13 @@ describe('<ToolbarSettings />', () => {
   );
 
   test('renders as expected', () => {
-    expect(checkbox(wrapper).props().checked).toEqual(false);
+    expect(checkbox(wrapper).props()['aria-checked']).toEqual(false);
   });
 
   test('activates and deactivates', () => {
-    checkbox(wrapper).simulate('change');
-    expect(checkbox(wrapper).props().checked).toEqual(true);
-    checkbox(wrapper).simulate('change');
-    expect(checkbox(wrapper).props().checked).toEqual(false);
+    checkbox(wrapper).simulate('click');
+    expect(checkbox(wrapper).props()['aria-checked']).toEqual(true);
+    checkbox(wrapper).simulate('click');
+    expect(checkbox(wrapper).props()['aria-checked']).toEqual(false);
   });
 });

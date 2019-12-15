@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Filter, FilterMeta } from '@kbn/es-query';
 import { defaults, isEqual, omit } from 'lodash';
+import { esFilters } from '../../../../common';
 
 /**
  * Compare two filters to see if they match
@@ -29,10 +29,14 @@ import { defaults, isEqual, omit } from 'lodash';
  *
  * @returns {bool} Filters are the same
  */
-export const compareFilters = (first: Filter, second: Filter, comparatorOptions: any = {}) => {
+export const compareFilters = (
+  first: esFilters.Filter,
+  second: esFilters.Filter,
+  comparatorOptions: any = {}
+) => {
   let comparators: any = {};
-  const mapFilter = (filter: Filter) => {
-    const cleaned: FilterMeta = omit(filter, excludedAttributes);
+  const mapFilter = (filter: esFilters.Filter) => {
+    const cleaned: esFilters.FilterMeta = omit(filter, excludedAttributes);
 
     if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
     if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);

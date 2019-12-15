@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function cockroachdbMetricsSpecProvider(server, context) {
+export function cockroachdbMetricsSpecProvider(context) {
   const moduleName = 'cockroachdb';
   return {
     id: 'cockroachdbMetrics',
@@ -33,7 +37,8 @@ export function cockroachdbMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch monitoring metrics from the CockroachDB server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.cockroachdbMetrics.longDescription', {
-      defaultMessage: 'The `cockroachdb` Metricbeat module fetches monitoring metrics from CockroachDB. \
+      defaultMessage:
+        'The `cockroachdb` Metricbeat module fetches monitoring metrics from CockroachDB. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-cockroachdb.html',
@@ -44,20 +49,23 @@ export function cockroachdbMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'e3ba0c30-9766-11e9-9eea-6f554992ec1f',
-          linkLabel: i18n.translate('kbn.server.tutorials.cockroachdbMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'CockroachDB metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.cockroachdbMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'CockroachDB metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-cockroachdb.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-cockroachdb.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/cockroachdb_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

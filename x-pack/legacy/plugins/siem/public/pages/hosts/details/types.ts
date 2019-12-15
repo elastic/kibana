@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Filter } from '@kbn/es-query';
 import { ActionCreator } from 'typescript-fsa';
-import { Query } from 'src/plugins/data/common';
+import { Query, IIndexPattern, esFilters } from 'src/plugins/data/public';
 
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
@@ -19,7 +17,7 @@ import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 interface HostBodyComponentDispatchProps {
@@ -61,7 +59,7 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
-    indexPattern: StaticIndexPattern;
+    indexPattern: IIndexPattern;
     type: hostsModel.HostsType;
     filterQuery: string;
   };

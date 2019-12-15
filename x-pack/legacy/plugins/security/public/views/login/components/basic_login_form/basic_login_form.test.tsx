@@ -33,7 +33,6 @@ const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
     layout: 'form',
-    loginMessage: '',
     ...options,
   } as LoginState;
 };
@@ -51,6 +50,7 @@ describe('BasicLoginForm', () => {
           loginState={loginState}
           next={''}
           intl={null as any}
+          loginAssistanceMessage=""
         />
       )
     ).toMatchSnapshot();
@@ -69,6 +69,7 @@ describe('BasicLoginForm', () => {
         next={''}
         infoMessage={'Hey this is an info message'}
         intl={null as any}
+        loginAssistanceMessage=""
       />
     );
 
@@ -87,6 +88,7 @@ describe('BasicLoginForm', () => {
         loginState={loginState}
         next={''}
         intl={null as any}
+        loginAssistanceMessage=""
       />
     );
 

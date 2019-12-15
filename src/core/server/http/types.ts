@@ -17,6 +17,7 @@
  * under the License.
  */
 import { IContextProvider, IContextContainer } from '../context';
+import { ICspConfig } from '../csp';
 import { RequestHandler, IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -24,6 +25,7 @@ import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
 import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { PluginOpaqueId, RequestHandlerContext } from '..';
 
@@ -52,7 +54,7 @@ export type RequestHandlerContextProvider<
  *
  * @example
  * To handle an incoming request in your plugin you should:
- * - Create a `Router` instance. Router is already configured to use `plugin-id` to prefix path segment for your routes.
+ * - Create a `Router` instance.
  * ```ts
  * const router = httpSetup.createRouter();
  * ```
@@ -87,7 +89,7 @@ export type RequestHandlerContextProvider<
  * }
  * ```
  *
- * - Register route handler for GET request to 'my-app/path/{id}' path
+ * - Register route handler for GET request to 'path/{id}' path
  * ```ts
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const router = httpSetup.createRouter();
@@ -164,10 +166,27 @@ export interface HttpServiceSetup {
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
 
   /**
+   * To define custom logic to perform for the server response.
+   *
+   * @remarks
+   * Doesn't provide the whole response object.
+   * Supports extending response with custom headers.
+   * See {@link OnPreResponseHandler}.
+   *
+   * @param handler {@link OnPreResponseHandler} - function to call.
+   */
+  registerOnPreResponse: (handler: OnPreResponseHandler) => void;
+
+  /**
    * Access or manipulate the Kibana base path
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  /**
+   * The CSP config used for Kibana.
+   */
+  csp: ICspConfig;
 
   /**
    * Flag showing whether a server was configured to use TLS connection.
@@ -184,7 +203,7 @@ export interface HttpServiceSetup {
    * @example
    * ```ts
    * const router = createRouter();
-   * // handler is called when '${my-plugin-id}/path' resource is requested with `GET` method
+   * // handler is called when '/path' resource is requested with `GET` method
    * router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
    * ```
    * @public

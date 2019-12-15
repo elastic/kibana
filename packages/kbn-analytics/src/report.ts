@@ -17,28 +17,50 @@
  * under the License.
  */
 
-import { UnreachableCaseError } from './util';
-import { Metric, Stats, UiStatsMetricReport, METRIC_TYPE } from './metrics';
+import { UnreachableCaseError, wrapArray } from './util';
+import { Metric, Stats, UiStatsMetricType, METRIC_TYPE } from './metrics';
+const REPORT_VERSION = 1;
 
 export interface Report {
-  uiStatsMetrics: {
-    [key: string]: UiStatsMetricReport;
-  };
+  reportVersion: typeof REPORT_VERSION;
+  uiStatsMetrics?: Record<
+    string,
+    {
+      key: string;
+      appName: string;
+      eventName: string;
+      type: UiStatsMetricType;
+      stats: Stats;
+    }
+  >;
+  userAgent?: Record<
+    string,
+    {
+      userAgent: string;
+      key: string;
+      type: METRIC_TYPE.USER_AGENT;
+      appName: string;
+    }
+  >;
 }
 
 export class ReportManager {
+  static REPORT_VERSION = REPORT_VERSION;
   public report: Report;
   constructor(report?: Report) {
     this.report = report || ReportManager.createReport();
   }
-  static createReport() {
-    return { uiStatsMetrics: {} };
+  static createReport(): Report {
+    return { reportVersion: REPORT_VERSION };
   }
   public clearReport() {
     this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
-    return Object.keys(this.report.uiStatsMetrics).length === 0;
+    const { uiStatsMetrics, userAgent } = this.report;
+    const noUiStats = !uiStatsMetrics || Object.keys(uiStatsMetrics).length === 0;
+    const noUserAgent = !userAgent || Object.keys(userAgent).length === 0;
+    return noUiStats && noUserAgent;
   }
   private incrementStats(count: number, stats?: Stats): Stats {
     const { min = 0, max = 0, sum = 0 } = stats || {};
@@ -54,40 +76,61 @@ export class ReportManager {
       sum: newSum,
     };
   }
-  assignReports(newMetrics: Metric[]) {
-    newMetrics.forEach(newMetric => this.assignReport(this.report, newMetric));
+  assignReports(newMetrics: Metric | Metric[]) {
+    wrapArray(newMetrics).forEach(newMetric => this.assignReport(this.report, newMetric));
   }
   static createMetricKey(metric: Metric): string {
     switch (metric.type) {
+      case METRIC_TYPE.USER_AGENT: {
+        const { appName, type } = metric;
+        return `${appName}-${type}`;
+      }
       case METRIC_TYPE.CLICK:
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
-        const { appName, type, eventName } = metric;
+        const { appName, eventName, type } = metric;
         return `${appName}-${type}-${eventName}`;
       }
       default:
-        throw new UnreachableCaseError(metric.type);
+        throw new UnreachableCaseError(metric);
     }
   }
   private assignReport(report: Report, metric: Metric) {
+    const key = ReportManager.createMetricKey(metric);
     switch (metric.type) {
+      case METRIC_TYPE.USER_AGENT: {
+        const { appName, type, userAgent } = metric;
+        if (userAgent) {
+          this.report.userAgent = {
+            [key]: {
+              key,
+              appName,
+              type,
+              userAgent: metric.userAgent,
+            },
+          };
+        }
+        return;
+      }
       case METRIC_TYPE.CLICK:
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
-        const key = ReportManager.createMetricKey(metric);
-        const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-        this.report.uiStatsMetrics[key] = {
-          key,
-          appName,
-          eventName,
-          type,
-          stats: this.incrementStats(count, existingStats),
-        };
+        if (report.uiStatsMetrics) {
+          const existingStats = (report.uiStatsMetrics[key] || {}).stats;
+          this.report.uiStatsMetrics = this.report.uiStatsMetrics || {};
+          this.report.uiStatsMetrics[key] = {
+            key,
+            appName,
+            eventName,
+            type,
+            stats: this.incrementStats(count, existingStats),
+          };
+        }
         return;
       }
       default:
-        throw new UnreachableCaseError(metric.type);
+        throw new UnreachableCaseError(metric);
     }
   }
 }

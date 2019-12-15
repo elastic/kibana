@@ -5,9 +5,7 @@
  */
 
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
-import { services as kibanaCommonServices } from '../../../../test/common/services';
-
-import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
+import { services as commonServices } from '../../common/services';
 
 // @ts-ignore not ts yet
 import { LegacyEsProvider } from './legacy_es';
@@ -25,23 +23,18 @@ import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './s
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 
 export const services = {
-  chance: kibanaApiIntegrationServices.chance,
+  ...commonServices,
+
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
 
-  esArchiver: kibanaCommonServices.esArchiver,
-  kibanaServer: kibanaCommonServices.kibanaServer,
-  retry: kibanaCommonServices.retry,
-
-  es: LegacyEsProvider,
+  legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
   infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
-  security: SecurityServiceProvider,
   siemGraphQLClient: SiemGraphQLClientProvider,
   siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
-  spaces: SpacesServiceProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
 };

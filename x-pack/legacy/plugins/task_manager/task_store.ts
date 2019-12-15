@@ -15,6 +15,9 @@ import {
   SavedObjectAttributes,
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
+  // Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under task_manager/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -70,6 +73,11 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
 }
 
+export interface BulkUpdateTaskFailureResult {
+  error: NonNullable<SavedObject['error']>;
+  task: ConcreteTaskInstance;
+}
+
 export interface UpdateByQueryResult {
   updated: number;
   version_conflicts: number;
@@ -107,8 +115,6 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
-
-    this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
 
   /**
@@ -128,7 +134,7 @@ export class TaskStore {
     const savedObject = await this.savedObjectsRepository.create(
       'task',
       taskInstanceToAttributes(taskInstance),
-      { id: taskInstance.id }
+      { id: taskInstance.id, refresh: false }
     );
 
     return savedObjectToConcreteTaskInstance(savedObject);
@@ -146,88 +152,6 @@ export class TaskStore {
       search_after: opts.searchAfter,
       query: opts.query,
     });
-  }
-
-  /**
-   * Fetches tasks from the index, which are ready to be run.
-   * - runAt is now or past
-   * - id is not currently running in this instance of Kibana
-   * - has a type that is in our task definitions
-   *
-   * @param {TaskQuery} query
-   * @prop {string[]} types - Task types to be queried
-   * @prop {number} size - The number of task instances to retrieve
-   * @returns {Promise<ConcreteTaskInstance[]>}
-   */
-  public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
-    const { docs } = await this.search({
-      query: {
-        bool: {
-          must: [
-            // Either a task with idle status and runAt <= now or
-            // status running with a retryAt <= now.
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.status': 'idle' } },
-                        { range: { 'task.runAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.status': 'running' } },
-                        { range: { 'task.retryAt': { lte: 'now' } } },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            // Either task has an interval or the attempts < the maximum configured
-            {
-              bool: {
-                should: [
-                  { exists: { field: 'task.interval' } },
-                  ...Object.entries(this.definitions).map(([type, definition]) => ({
-                    bool: {
-                      must: [
-                        { term: { 'task.taskType': type } },
-                        {
-                          range: {
-                            'task.attempts': {
-                              lt: definition.maxAttempts || this.maxAttempts,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  })),
-                ],
-              },
-            },
-          ],
-        },
-      },
-      size: 10,
-      sort: {
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'expression',
-            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-          },
-        },
-      },
-      seq_no_primary_term: true,
-    });
-
-    return docs;
   }
 
   /**
@@ -376,6 +300,7 @@ export class TaskStore {
 
     return docs;
   }
+
   /**
    * Updates the specified doc in the index, returning the doc
    * with its version up to date.
@@ -388,7 +313,10 @@ export class TaskStore {
       'task',
       doc.id,
       taskInstanceToAttributes(doc),
-      { version: doc.version }
+      {
+        refresh: false,
+        version: doc.version,
+      }
     );
 
     return savedObjectToConcreteTaskInstance(updatedSavedObject);

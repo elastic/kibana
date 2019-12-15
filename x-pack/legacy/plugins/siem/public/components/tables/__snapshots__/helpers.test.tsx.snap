@@ -1,39 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
-<Component>
-  <Connect(DraggableWrapperComponent)
-    dataProvider={
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "idPrefix-attrName-item1",
-        "kqlQuery": "",
-        "name": "item1",
-        "queryMatch": Object {
-          "displayValue": "item1",
-          "field": "attrName",
-          "operator": ":",
-          "value": "item1",
-        },
-      }
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "idPrefix-attrName-item1",
+      "kqlQuery": "",
+      "name": "item1",
+      "queryMatch": Object {
+        "displayValue": "item1",
+        "field": "attrName",
+        "operator": ":",
+        "value": "item1",
+      },
     }
-    key="idPrefix-attrName-item1"
-    render={[Function]}
-  />
-</Component>
+  }
+  key="idPrefix-attrName-item1"
+  render={[Function]}
+/>
 `;
 
 exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
-<Component>
-  <Connect(DraggableWrapperComponent)
+<DragDropContext
+  onDragEnd={[MockFunction]}
+>
+  <DraggableWrapper
     dataProvider={
       Object {
         "and": Array [],
         "enabled": true,
         "excluded": false,
-        "id": "idPrefix-attrName-item1",
+        "id": "idPrefix-attrName-item1-0",
         "kqlQuery": "",
         "name": "item1",
         "queryMatch": Object {
@@ -44,18 +44,18 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
-    key="idPrefix-attrName-item1"
+    key="idPrefix-attrName-item1-0"
     render={[Function]}
   />
   ,
   <Spacer />
-  <Connect(DraggableWrapperComponent)
+  <DraggableWrapper
     dataProvider={
       Object {
         "and": Array [],
         "enabled": true,
         "excluded": false,
-        "id": "idPrefix-attrName-item2",
+        "id": "idPrefix-attrName-item2-1",
         "kqlQuery": "",
         "name": "item2",
         "queryMatch": Object {
@@ -66,18 +66,18 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
-    key="idPrefix-attrName-item2"
+    key="idPrefix-attrName-item2-1"
     render={[Function]}
   />
   ,
   <Spacer />
-  <Connect(DraggableWrapperComponent)
+  <DraggableWrapper
     dataProvider={
       Object {
         "and": Array [],
         "enabled": true,
         "excluded": false,
-        "id": "idPrefix-attrName-item3",
+        "id": "idPrefix-attrName-item3-2",
         "kqlQuery": "",
         "name": "item3",
         "queryMatch": Object {
@@ -88,11 +88,11 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
-    key="idPrefix-attrName-item3"
+    key="idPrefix-attrName-item3-2"
     render={[Function]}
   />
    
-</Component>
+</DragDropContext>
 `;
 
 exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `

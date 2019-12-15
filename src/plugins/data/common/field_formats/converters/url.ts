@@ -22,7 +22,7 @@ import { escape, memoize } from 'lodash';
 import { getHighlightHtml } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const whitelistUrlSchemes = ['http://', 'https://'];
@@ -50,7 +50,7 @@ const URL_TYPES = [
 const DEFAULT_URL_TYPE = 'a';
 
 export class UrlFormat extends FieldFormat {
-  static id = 'url';
+  static id = FIELD_FORMAT_IDS.URL;
   static title = 'Url';
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,

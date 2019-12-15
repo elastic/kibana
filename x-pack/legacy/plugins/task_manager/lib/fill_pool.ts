@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type BatchRun<T> = (tasks: T[]) => Promise<boolean>;
+import { performance } from 'perf_hooks';
+import { TaskPoolRunResult } from '../task_pool';
+
+export enum FillPoolResult {
+  NoTasksClaimed = 'NoTasksClaimed',
+  RanOutOfCapacity = 'RanOutOfCapacity',
+}
+
+type BatchRun<T> = (tasks: T[]) => Promise<TaskPoolRunResult>;
 type Fetcher<T> = () => Promise<T[]>;
 type Converter<T1, T2> = (t: T1) => T2;
 
@@ -24,18 +32,32 @@ export async function fillPool<TRecord, TRunner>(
   run: BatchRun<TRunner>,
   fetchAvailableTasks: Fetcher<TRecord>,
   converter: Converter<TRecord, TRunner>
-): Promise<void> {
+): Promise<FillPoolResult> {
+  performance.mark('fillPool.start');
   while (true) {
     const instances = await fetchAvailableTasks();
 
     if (!instances.length) {
-      return;
+      performance.mark('fillPool.bailNoTasks');
+      performance.measure(
+        'fillPool.activityDurationUntilNoTasks',
+        'fillPool.start',
+        'fillPool.bailNoTasks'
+      );
+      return FillPoolResult.NoTasksClaimed;
     }
 
     const tasks = instances.map(converter);
 
-    if (!(await run(tasks))) {
-      return;
+    if ((await run(tasks)) === TaskPoolRunResult.RanOutOfCapacity) {
+      performance.mark('fillPool.bailExhaustedCapacity');
+      performance.measure(
+        'fillPool.activityDurationUntilExhaustedCapacity',
+        'fillPool.start',
+        'fillPool.bailExhaustedCapacity'
+      );
+      return FillPoolResult.RanOutOfCapacity;
     }
+    performance.mark('fillPool.cycle');
   }
 }

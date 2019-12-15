@@ -24,21 +24,13 @@ import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
-  // @ts-ignore
   EuiHeader,
-  // @ts-ignore
   EuiHeaderLogo,
-  // @ts-ignore
   EuiHeaderSection,
-  // @ts-ignore
   EuiHeaderSectionItem,
-  // @ts-ignore
   EuiHeaderSectionItemButton,
-  // @ts-ignore
-  EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
-  // @ts-ignore
   EuiImage,
   // @ts-ignore
   EuiNavDrawer,
@@ -171,7 +163,8 @@ interface Props {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<ChromeHelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Rx.Observable<string>;
   legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
@@ -290,6 +283,7 @@ class HeaderUI extends Component<Props, State> {
       basePath,
       breadcrumbs$,
       helpExtension$,
+      helpSupportUrl$,
       intl,
       isLocked,
       kibanaDocLink,
@@ -394,7 +388,14 @@ class HeaderUI extends Component<Props, State> {
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
-              <HeaderHelpMenu {...{ helpExtension$, kibanaDocLink, kibanaVersion }} />
+              <HeaderHelpMenu
+                {...{
+                  helpExtension$,
+                  helpSupportUrl$,
+                  kibanaDocLink,
+                  kibanaVersion,
+                }}
+              />
             </EuiHeaderSectionItem>
 
             <HeaderNavControls side="right" navControls={navControlsRight} />

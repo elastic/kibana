@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectAttributes } from 'src/core/server/types';
-import { Datafeed, Job } from '../../public/jobs/new_job_new/common/job_creator/configs';
+import { SavedObjectAttributes } from 'src/core/public';
+import { Datafeed, Job } from '../../public/application/jobs/new_job/common/job_creator/configs';
 
 export interface ModuleJob {
   id: string;
@@ -80,3 +80,5 @@ export interface DataRecognizerConfigResponse {
     dashboard: KibanaObjectResponse;
   };
 }
+
+export type JobOverride = Partial<Job>;

@@ -10,7 +10,6 @@
       }
     },
     "mappings": {
-      "doc": {
         "dynamic": "strict",
         "properties": {
           "apm-telemetry": {
@@ -484,7 +483,6 @@
             }
           }
         }
-      }
     }
   }
 }

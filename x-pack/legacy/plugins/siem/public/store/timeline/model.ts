@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
-import { defaultHeaders as eventsDefaultHeaders } from '../../components/events_viewer/default_headers';
 import { Sort } from '../../components/timeline/body/sort';
 import { Direction, PinnedEvent } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -25,6 +25,7 @@ export interface TimelineModel {
   description: string;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
+  filters?: esFilters.Filter[];
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -59,6 +60,7 @@ export interface TimelineModel {
     start: number;
     end: number;
   };
+  savedQueryId?: string | null;
   /** When true, show the timeline flyover */
   show: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
@@ -71,7 +73,7 @@ export interface TimelineModel {
   version: string | null;
 }
 
-export const timelineDefaults: Readonly<
+export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
     | 'columns'
@@ -99,13 +101,16 @@ export const timelineDefaults: Readonly<
     | 'savedObjectId'
     | 'version'
   >
-> = {
+>;
+
+export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
   columns: defaultHeaders,
   dataProviders: [],
   description: '',
   eventIdToNoteIds: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
+  filters: [],
   isFavorite: false,
   isLive: false,
   isLoading: false,
@@ -134,33 +139,3 @@ export const timelineDefaults: Readonly<
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,
 };
-
-export const eventsDefaults: Readonly<
-  Pick<
-    TimelineModel,
-    | 'columns'
-    | 'dataProviders'
-    | 'description'
-    | 'eventIdToNoteIds'
-    | 'highlightedDropAndProviderId'
-    | 'historyIds'
-    | 'isFavorite'
-    | 'isLive'
-    | 'itemsPerPage'
-    | 'itemsPerPageOptions'
-    | 'kqlMode'
-    | 'kqlQuery'
-    | 'title'
-    | 'noteIds'
-    | 'pinnedEventIds'
-    | 'pinnedEventsSaveObject'
-    | 'dateRange'
-    | 'show'
-    | 'sort'
-    | 'width'
-    | 'isSaving'
-    | 'isLoading'
-    | 'savedObjectId'
-    | 'version'
-  >
-> = { ...timelineDefaults, columns: eventsDefaultHeaders };

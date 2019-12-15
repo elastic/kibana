@@ -1,5 +1,3 @@
-@import '@elastic/eui/src/components/form/variables';
-
 .spcSpaceSelector {
   @include kibanaFullScreenGraphics;
 }
@@ -26,7 +24,6 @@
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
 }
-
 
 .spcSpaceSelector__searchHolder {
   width: $euiFormMaxWidth; // make sure it's as wide as our default form element width

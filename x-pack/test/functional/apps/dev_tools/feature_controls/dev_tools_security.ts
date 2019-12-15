@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'console', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -90,7 +89,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`can navigate to search profiler`, async () => {
-          await testSubjects.existOrFail('searchProfiler');
+          await testSubjects.existOrFail('searchprofiler');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -173,7 +172,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`can navigate to search profiler`, async () => {
-          await testSubjects.existOrFail('searchProfiler');
+          await testSubjects.existOrFail('searchprofiler');
         });
 
         it(`shows read-only badge`, async () => {

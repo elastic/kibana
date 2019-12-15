@@ -34,7 +34,6 @@ export interface WorkspaceNode {
 export interface WorkspaceEdge {
   weight: number;
   width: number;
-  inferred: boolean;
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
@@ -60,7 +59,6 @@ export interface ServerResultEdge {
   weight: number;
   width: number;
   doc_count?: number;
-  inferred: boolean;
 }
 
 export interface GraphData {

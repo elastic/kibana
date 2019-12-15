@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -14,7 +13,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../../common/projections/errors';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
@@ -32,7 +35,7 @@ export async function getErrorGroups({
   serviceName: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { client } = setup;
 
@@ -106,23 +109,20 @@ export async function getErrorGroups({
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
-  const hits = (idx(resp, _ => _.aggregations.error_groups.buckets) || []).map(
-    bucket => {
-      const source = bucket.sample.hits.hits[0]._source;
-      const message =
-        idx(source, _ => _.error.log.message) ||
-        idx(source, _ => _.error.exception[0].message);
+  const hits = (resp.aggregations?.error_groups.buckets || []).map(bucket => {
+    const source = bucket.sample.hits.hits[0]._source;
+    const message =
+      source.error.log?.message || source.error.exception?.[0]?.message;
 
-      return {
-        message,
-        occurrenceCount: bucket.doc_count,
-        culprit: source.error.culprit,
-        groupId: source.error.grouping_key,
-        latestOccurrenceAt: source['@timestamp'],
-        handled: idx(source, _ => _.error.exception[0].handled)
-      };
-    }
-  );
+    return {
+      message,
+      occurrenceCount: bucket.doc_count,
+      culprit: source.error.culprit,
+      groupId: source.error.grouping_key,
+      latestOccurrenceAt: source['@timestamp'],
+      handled: source.error.exception?.[0].handled
+    };
+  });
 
   return hits;
 }

@@ -25,7 +25,7 @@
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { MappingProperties, SavedObjectsMapping, IndexMapping } from '../../mappings';
-import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsSchema } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
@@ -36,18 +36,18 @@ import {
 } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsConfigType } from '../../saved_objects_config';
-import { Config } from '../../../config';
+import { LegacyConfig } from '../../../legacy/config';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
-  config: Config;
+  config: LegacyConfig;
   savedObjectsConfig: SavedObjectsConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
   savedObjectMappings: SavedObjectsMapping[];
   savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectSchemas: SavedObjectsSchema;
   savedObjectValidations: PropertyValidators;
 }
 
@@ -58,7 +58,7 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
  */
 export class KibanaMigrator {
   private readonly callCluster: CallCluster;
-  private readonly config: Config;
+  private readonly config: LegacyConfig;
   private readonly savedObjectsConfig: SavedObjectsConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
@@ -87,7 +87,7 @@ export class KibanaMigrator {
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
-    this.schema = new SavedObjectsSchema(savedObjectSchemas);
+    this.schema = savedObjectSchemas;
     this.serializer = new SavedObjectsSerializer(this.schema);
     this.mappingProperties = mergeProperties(savedObjectMappings || []);
     this.log = logger;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DiscoveredPlugin, PluginName, PluginOpaqueId } from '../../server';
+import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
@@ -27,6 +27,7 @@ import {
   createPluginStartContext,
 } from './plugin_context';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
+import { InjectedPluginMetadata } from '../injected_metadata';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -55,15 +56,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private readonly satupPlugins: PluginName[] = [];
 
-  constructor(
-    private readonly coreContext: CoreContext,
-    plugins: Array<{ id: PluginName; plugin: DiscoveredPlugin }>
-  ) {
+  constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
     // Generate opaque ids
     const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map(p => [p.id, Symbol(p.id)]));
 
     // Setup dependency map and plugin wrappers
-    plugins.forEach(({ id, plugin }) => {
+    plugins.forEach(({ id, plugin, config = {} }) => {
       // Setup map of dependencies
       this.pluginDependencies.set(id, [
         ...plugin.requiredPlugins,
@@ -76,7 +74,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         new PluginWrapper(
           plugin,
           opaqueIds.get(id)!,
-          createPluginInitializerContext(this.coreContext, opaqueIds.get(id)!, plugin)
+          createPluginInitializerContext(this.coreContext, opaqueIds.get(id)!, plugin, config)
         )
       );
     });

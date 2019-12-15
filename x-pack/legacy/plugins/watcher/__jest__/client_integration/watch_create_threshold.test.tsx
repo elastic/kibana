@@ -7,7 +7,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import {
+  setupEnvironment,
+  pageHelpers,
+  nextTick,
+  wrapBodyResponse,
+  unwrapBodyResponse,
+} from './helpers';
 import { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold.helpers';
 import { getExecuteDetails } from '../../test/fixtures';
 import { WATCH_TYPES } from '../../common/constants';
@@ -33,36 +39,17 @@ const SETTINGS = {
 };
 
 const WATCH_VISUALIZE_DATA = {
-  count: [[1559404800000, 14], [1559448000000, 196], [1559491200000, 44]],
+  count: [
+    [1559404800000, 14],
+    [1559448000000, 196],
+    [1559491200000, 44],
+  ],
 };
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-  getUiSettingsClient: () => ({
-    get: () => {},
-    isDefault: () => true,
-  }),
-}));
-
-jest.mock('ui/time_buckets', () => {
-  class MockTimeBuckets {
-    setBounds(_domain: any) {
-      return {};
-    }
-    getInterval() {
-      return {
-        expression: {},
-      };
-    }
-  }
-  return { TimeBuckets: MockTimeBuckets };
-});
-
-jest.mock('../../public/lib/api', () => ({
-  ...jest.requireActual('../../public/lib/api'),
+jest.mock('../../public/np_ready/application/lib/api', () => ({
+  ...jest.requireActual('../../public/np_ready/application/lib/api'),
   loadIndexPatterns: async () => {
     const INDEX_PATTERNS = [
       { attributes: { title: 'index1' } },
@@ -81,7 +68,7 @@ jest.mock('@elastic/eui', () => ({
   EuiComboBox: (props: any) => (
     <input
       data-test-subj="mockComboBox"
-      onChange={async (syntheticEvent: any) => {
+      onChange={(syntheticEvent: any) => {
         props.onChange([syntheticEvent['0']]);
       }}
     />
@@ -90,7 +77,7 @@ jest.mock('@elastic/eui', () => ({
 
 const { setup } = pageHelpers.watchCreateThreshold;
 
-describe.skip('<ThresholdWatchEdit /> create route', () => {
+describe('<ThresholdWatchEdit /> create route', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateThresholdTestBed;
 
@@ -101,13 +88,9 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
   describe('on component mount', () => {
     beforeEach(async () => {
       testBed = await setup();
-
-      // @ts-ignore (remove when react 16.9.0 is released)
-      await act(async () => {
-        const { component } = testBed;
-        await nextTick();
-        component.update();
-      });
+      const { component } = testBed;
+      await nextTick();
+      component.update();
     });
 
     test('should set the correct page title', () => {
@@ -122,14 +105,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
         httpRequestsMockHelpers.setLoadEsFieldsResponse({ fields: ES_FIELDS });
         httpRequestsMockHelpers.setLoadSettingsResponse(SETTINGS);
         httpRequestsMockHelpers.setLoadWatchVisualizeResponse(WATCH_VISUALIZE_DATA);
-
-        testBed = await setup();
-
-        // @ts-ignore (remove when react 16.9.0 is released)
-        await act(async () => {
-          await nextTick();
-          testBed.component.update();
-        });
       });
 
       describe('form validation', () => {
@@ -171,14 +146,13 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           expect(find('saveWatchButton').props().disabled).toEqual(true);
         });
 
-        test('it should enable the Create button and render additonal content with valid fields', async () => {
+        test('it should enable the Create button and render additional content with valid fields', async () => {
           const { form, find, component, exists } = testBed;
 
           form.setInputValue('nameInput', 'my_test_watch');
           find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
           form.setInputValue('watchTimeFieldSelect', '@timestamp');
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -191,41 +165,30 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           expect(exists('watchActionsPanel')).toBe(true);
         });
 
-        describe('watch conditions', () => {
-          beforeEach(async () => {
-            const { form, find, component } = testBed;
+        // Looks like there is an issue with using 'mockComboBox'.
+        describe.skip('watch conditions', () => {
+          beforeEach(() => {
+            const { form, find } = testBed;
 
             // Name, index and time fields are required before the watch condition expression renders
             form.setInputValue('nameInput', 'my_test_watch');
-            find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
-            form.setInputValue('watchTimeFieldSelect', '@timestamp');
-
-            // @ts-ignore (remove when react 16.9.0 is released)
-            await act(async () => {
-              await nextTick();
-              component.update();
+            act(() => {
+              find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
             });
+            form.setInputValue('watchTimeFieldSelect', '@timestamp');
           });
 
-          test('should require a threshold value', async () => {
-            const { form, find, component } = testBed;
+          test('should require a threshold value', () => {
+            const { form, find } = testBed;
 
-            find('watchThresholdButton').simulate('click');
-
-            // Provide invalid value
-            form.setInputValue('watchThresholdInput', '');
-
-            expect(form.getErrorsMessages()).toContain('A value is required.');
-
-            // Provide valid value
-            form.setInputValue('watchThresholdInput', '0');
-
-            // @ts-ignore (remove when react 16.9.0 is released)
-            await act(async () => {
-              await nextTick();
-              component.update();
+            act(() => {
+              find('watchThresholdButton').simulate('click');
+              // Provide invalid value
+              form.setInputValue('watchThresholdInput', '');
+              // Provide valid value
+              form.setInputValue('watchThresholdInput', '0');
             });
-
+            expect(form.getErrorsMessages()).toContain('A value is required.');
             expect(form.getErrorsMessages().length).toEqual(0);
           });
         });
@@ -240,7 +203,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
           form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -266,7 +228,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           // Next, provide valid field and verify
           form.setInputValue('loggingTextInput', LOGGING_MESSAGE);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -276,7 +237,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -303,7 +264,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   logging_1: 'force_execute',
@@ -335,7 +296,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           // Next, provide valid field and verify
           form.setInputValue('indexInput', INDEX);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -345,7 +305,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -371,7 +331,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   index_1: 'force_execute',
@@ -396,7 +356,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           form.setInputValue('slackMessageTextarea', SLACK_MESSAGE);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -406,7 +365,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -435,7 +394,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   slack_1: 'force_execute',
@@ -467,7 +426,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('emailSubjectInput', EMAIL_SUBJECT);
           form.setInputValue('emailBodyInput', EMAIL_BODY);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -477,7 +435,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -510,7 +468,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   email_1: 'force_execute',
@@ -556,7 +514,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('webhookUsernameInput', USERNAME);
           form.setInputValue('webhookPasswordInput', PASSWORD);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -566,7 +523,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -601,7 +558,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   webhook_1: 'force_execute',
@@ -643,7 +600,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('jiraIssueTypeInput', ISSUE_TYPE);
           form.setInputValue('jiraSummaryInput', SUMMARY);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -653,7 +609,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -690,7 +646,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   jira_1: 'force_execute',
@@ -722,7 +678,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           // Next, provide valid fields and verify
           form.setInputValue('pagerdutyDescriptionInput', DESCRIPTION);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -732,7 +687,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).watch.id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -759,7 +714,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes: {
                   pagerduty_1: 'force_execute',
@@ -782,7 +737,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
           form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -794,7 +748,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           const latestRequest = server.requests[server.requests.length - 1];
 
           const thresholdWatch = {
-            id: JSON.parse(latestRequest.requestBody).id, // watch ID is created dynamically
+            id: unwrapBodyResponse(latestRequest.requestBody).id, // watch ID is created dynamically
             name: WATCH_NAME,
             type: WATCH_TYPES.THRESHOLD,
             isNew: true,
@@ -811,7 +765,7 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
             threshold: 1000,
           };
 
-          expect(latestRequest.requestBody).toEqual(JSON.stringify(thresholdWatch));
+          expect(latestRequest.requestBody).toEqual(wrapBodyResponse(thresholdWatch));
         });
       });
     });

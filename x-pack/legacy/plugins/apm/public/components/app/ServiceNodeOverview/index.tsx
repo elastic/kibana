@@ -34,9 +34,7 @@ const ServiceNodeOverview = () => {
   const { uiFilters, urlParams } = useUrlParams();
   const { serviceName, start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {

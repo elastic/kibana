@@ -11,7 +11,8 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
   }
 >
   <div
-    className="euiFormRow euiFormRow--compressed"
+    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+    id="generated-id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -91,7 +92,8 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
   }
 >
   <div
-    className="euiFormRow euiFormRow--compressed"
+    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+    id="generated-id-row"
   >
     <div
       className="euiFormRow__labelWrapper"
@@ -171,12 +173,14 @@ exports[`Storyshots arguments/AxisConfig/components extended disabled 1`] = `
   }
 >
   <div
-    className="euiText euiText--medium"
+    className="euiText euiText--extraSmall"
   >
     <div
       className="euiTextColor euiTextColor--subdued"
     >
-      The axis is disabled
+      <p>
+        Switch on to view axis settings
+      </p>
     </div>
   </div>
 </div>

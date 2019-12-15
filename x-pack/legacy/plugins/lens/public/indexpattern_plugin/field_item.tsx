@@ -7,44 +7,49 @@
 import React, { useState } from 'react';
 import DateMath from '@elastic/datemath';
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
-  EuiPopover,
-  EuiLoadingSpinner,
+  EuiIconTip,
   EuiKeyboardAccessible,
-  EuiText,
-  EuiToolTip,
-  EuiButtonGroup,
+  EuiLoadingSpinner,
+  EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiIconTip,
+  EuiProgress,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import {
-  Chart,
   Axis,
+  BarSeries,
+  Chart,
+  DataSeriesColorsValues,
   getAxisId,
   getSpecId,
-  BarSeries,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
-  DataSeriesColorsValues,
   TooltipType,
-  niceTimeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Filter, buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
-// @ts-ignore
-import { fieldFormats } from '../../../../../../src/legacy/ui/public/registry/field_formats';
+import {
+  Query,
+  KBN_FIELD_TYPES,
+  ES_FIELD_TYPES,
+  esFilters,
+  esQuery,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
-import { LensFieldIcon, getColorForDataType } from './lens_field_icon';
+import { getColorForDataType, LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
@@ -55,7 +60,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   hideDetails?: boolean;
 }
 
@@ -127,7 +132,12 @@ export function FieldItem(props: FieldItemProps) {
     core.http
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
-          dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
+          dslQuery: esQuery.buildEsQuery(
+            indexPattern as IIndexPattern,
+            query,
+            filters,
+            esQuery.getEsQueryConfig(core.uiSettings)
+          ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           timeFieldName: indexPattern.timeFieldName,
@@ -229,6 +239,7 @@ export function FieldItem(props: FieldItemProps) {
 }
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
+  const fieldFormats = npStart.plugins.data.fieldFormats;
   const { histogram, topValues, indexPattern, field, dateRange, core, sampledValues } = props;
 
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
@@ -280,7 +291,10 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       formatter = { convert: (data: unknown) => JSON.stringify(data) };
     }
   } else {
-    formatter = fieldFormats.getDefaultInstance(field.type, field.esTypes);
+    formatter = fieldFormats.getDefaultInstance(
+      field.type as KBN_FIELD_TYPES,
+      field.esTypes as ES_FIELD_TYPES[]
+    );
   }
 
   const euiButtonColor =
@@ -361,7 +375,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
               )}{' '}
               <strong>
                 {fieldFormats
-                  .getDefaultInstance('number', ['integer'])
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
                   .convert(props.totalDocuments)}
               </strong>{' '}
               {i18n.translate('xpack.lens.indexPattern.ofDocumentsLabel', {

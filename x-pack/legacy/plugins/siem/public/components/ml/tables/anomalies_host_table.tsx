@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
@@ -62,7 +62,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
     } else {
       return (
         <Panel loading={loading}>
-          <HeaderPanel
+          <HeaderSection
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
               pagination.totalItemCount
             )}`}

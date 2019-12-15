@@ -12,8 +12,8 @@ with Kibana sample data and learn to:
 
 
 NOTE: If security is enabled, you must have `read`, `write`, and `manage` privileges
-on the `kibana_sample_data_*` indices. See {xpack-ref}/security-privileges.html[Security Privileges] 
-for more information.
+on the `kibana_sample_data_*` indices. See
+{ref}/security-privileges.html[Security privileges] for more information.
 
 
 [float]

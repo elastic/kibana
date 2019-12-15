@@ -24,7 +24,7 @@ import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minima
 import { WithLogPositionUrlState } from '../../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../../containers/logs/with_log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
-import { ReduxSourceIdBridge, WithStreamItems } from '../../../containers/logs/with_stream_items';
+import { WithStreamItems } from '../../../containers/logs/with_stream_items';
 import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
@@ -44,10 +44,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
-
   return (
     <>
-      <ReduxSourceIdBridge sourceId={sourceId} />
       <LogHighlightsBridge indexPattern={derivedIndexPattern} />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
@@ -87,7 +85,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             scrollUnlockLiveStreaming,
             isScrollLocked,
           }) => (
-            <WithStreamItems initializeOnMount={!isAutoReloading}>
+            <WithStreamItems>
               {({
                 currentHighlightKey,
                 hasMoreAfterEnd,
@@ -96,7 +94,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 isReloading,
                 items,
                 lastLoadedTime,
-                loadNewerEntries,
+                fetchNewerEntries,
               }) => (
                 <ScrollableLogTextStreamView
                   columnConfigurations={(source && source.configuration.logColumns) || []}
@@ -108,7 +106,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   items={items}
                   jumpToTarget={jumpToTargetPosition}
                   lastLoadedTime={lastLoadedTime}
-                  loadNewerItems={loadNewerEntries}
+                  loadNewerItems={fetchNewerEntries}
                   reportVisibleInterval={reportVisiblePositions}
                   scale={textScale}
                   target={targetPosition}
@@ -130,7 +128,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
         <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
-              <LogPageMinimapColumn innerRef={measureRef}>
+              <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
@@ -140,7 +138,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                         visibleMidpointTime,
                         visibleTimeInterval,
                       }) => (
-                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                        <WithStreamItems>
                           {({ isReloading }) => (
                             <LogMinimap
                               height={height}

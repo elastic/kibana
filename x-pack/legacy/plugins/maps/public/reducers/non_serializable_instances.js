@@ -10,6 +10,7 @@ import { MapAdapter } from '../inspector/adapters/map_adapter';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
+const SET_EVENT_HANDLERS = 'SET_EVENT_HANDLERS';
 
 function createInspectorAdapters() {
   const inspectorAdapters = {
@@ -27,6 +28,7 @@ export function nonSerializableInstances(state, action = {}) {
     return {
       inspectorAdapters: createInspectorAdapters(),
       cancelRequestCallbacks: new Map(), // key is request token, value is cancel callback
+      eventHandlers: {},
     };
   }
 
@@ -41,10 +43,14 @@ export function nonSerializableInstances(state, action = {}) {
       return {
         ...state,
       };
+    case SET_EVENT_HANDLERS: {
+      return {
+        ...state,
+        eventHandlers: action.eventHandlers,
+      };
+    }
     default:
       return state;
-
-
   }
 }
 
@@ -57,6 +63,10 @@ export const getCancelRequestCallbacks = ({ nonSerializableInstances }) => {
   return nonSerializableInstances.cancelRequestCallbacks;
 };
 
+export const getEventHandlers = ({ nonSerializableInstances }) => {
+  return nonSerializableInstances.eventHandlers;
+};
+
 // Actions
 export const registerCancelCallback = (requestToken, callback) => {
   return {
@@ -66,14 +76,14 @@ export const registerCancelCallback = (requestToken, callback) => {
   };
 };
 
-export const unregisterCancelCallback = (requestToken) => {
+export const unregisterCancelCallback = requestToken => {
   return {
     type: UNREGISTER_CANCEL_CALLBACK,
     requestToken,
   };
 };
 
-export const cancelRequest = (requestToken) => {
+export const cancelRequest = requestToken => {
   return (dispatch, getState) => {
     if (!requestToken) {
       return;
@@ -84,5 +94,12 @@ export const cancelRequest = (requestToken) => {
       cancelCallback();
       dispatch(unregisterCancelCallback(requestToken));
     }
+  };
+};
+
+export const setEventHandlers = (eventHandlers = {}) => {
+  return {
+    type: SET_EVENT_HANDLERS,
+    eventHandlers,
   };
 };

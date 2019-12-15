@@ -39,7 +39,7 @@ interface ScrollableLogTextStreamViewProps {
   hasMoreBeforeStart: boolean;
   hasMoreAfterEnd: boolean;
   isStreaming: boolean;
-  lastLoadedTime: number | null;
+  lastLoadedTime: Date | null;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
   reportVisibleInterval: (params: {
@@ -143,7 +143,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const hasItems = items.length > 0;
     return (
       <ScrollableLogTextStreamViewWrapper>
-        {isReloading && !hasItems ? (
+        {isReloading && (!isStreaming || !hasItems) ? (
           <InfraLoadingPanel
             width="100%"
             height="100%"
@@ -179,7 +179,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                 />
                 <AutoSizer bounds content detectAnyWindowResize="height">
                   {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => (
-                    <ScrollPanelSizeProbe innerRef={measureRef}>
+                    <ScrollPanelSizeProbe ref={measureRef}>
                       <VerticalScrollPanel
                         height={height}
                         width={width}

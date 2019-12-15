@@ -18,7 +18,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -46,7 +46,7 @@ export default function({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -118,7 +118,7 @@ export default function({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -172,7 +172,7 @@ export default function({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -188,7 +188,7 @@ export default function({ getService }: FtrProviderContext) {
             .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action updated',
+              name: 'My action updated',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -328,11 +328,13 @@ export default function({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'test email action',
+              name: 'test email action',
               actionTypeId: '.email',
               config: {
-                from: 'email-from@example.com',
-                host: 'host-is-ignored-here.example.com',
+                from: 'email-from-1@example.com',
+                // this host is specifically whitelisted in:
+                //    x-pack/test/alerting_api_integration/common/config.ts
+                host: 'some.non.existent.com',
                 port: 666,
               },
               secrets: {
@@ -347,9 +349,9 @@ export default function({ getService }: FtrProviderContext) {
             .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'a test email action 2',
+              name: 'a test email action 2',
               config: {
-                from: 'email-from@example.com',
+                from: 'email-from-2@example.com',
                 service: '__json',
               },
               secrets: {
@@ -399,7 +401,7 @@ export default function({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.authorization',
             })
             .expect(200);

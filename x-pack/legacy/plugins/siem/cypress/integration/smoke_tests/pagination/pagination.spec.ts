@@ -28,14 +28,14 @@ describe('Pagination', () => {
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
-    cy.get(getDraggableField('user.name'))
+    cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .then(text1 => {
         cy.get(getPageButtonSelector(2)).click({ force: true });
         // wait for table to be done loading
         waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
-        cy.get(getDraggableField('user.name'))
+        cy.get(getDraggableField('process.name'))
           .first()
           .invoke('text')
           .should(text2 => {
@@ -55,7 +55,7 @@ describe('Pagination', () => {
     // wait for table to be done loading
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
 
-    cy.get(getDraggableField('user.name'))
+    cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .then(text2 => {
@@ -70,7 +70,7 @@ describe('Pagination', () => {
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     // check uncommon processes table picks up at 3
     cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
-    cy.get(getDraggableField('user.name'))
+    cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .should(text1 => {
@@ -100,7 +100,7 @@ describe('Pagination', () => {
       .last()
       .click({ force: true });
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
-    cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
     // cy.get(getDraggableField('user.name'))
     //   .first()
     //   .invoke('text')

@@ -4,15 +4,14 @@
 >
   <!-- Local nav. -->
   <kbn-top-nav
-    ng-show="chrome.getVisible()"
+    ng-show="isVisible"
     app-name="'dashboard'"
     config="topNavMenu"
 
-    show-search-bar="chrome.getVisible()"
+    show-search-bar="isVisible"
     show-filter-bar="showFilterBar()"
     show-save-query="showSaveQuery"
 
-    filters="model.filters"
     query="model.query"
     saved-query="savedQuery"
     screen-title="screenTitle"
@@ -34,92 +33,20 @@
   The top nav is hidden in embed mode but the filter bar must still be present so
   we show the filter bar on its own here if the chrome is not visible.
 -->
-  <filter-bar
-    ng-if="showFilterBar() && !chrome.getVisible()"
-    class-name="'globalFilterGroup__filterBar'"
+  <kbn-top-nav
+    ng-if="showFilterBar() && !isVisible"
+
+    app-name="'dashboard'"
+    show-search-bar="true"
+    show-filter-bar="true"
+    show-save-query="false"
+    show-date-picker="false"
+
     filters="model.filters"
+    index-patterns="indexPatterns"
     on-filters-updated="onFiltersUpdated"
-    index-patterns="indexPatterns"
-  ></filter-bar>
-
-  <apply-filters-popover
-    filters="appState.$newFilters"
-    on-cancel="onCancelApplyFilters"
-    on-submit="onApplyFilters"
-    index-patterns="indexPatterns"
-  ></apply-filters-popover>
-
-  <div ng-show="getShouldShowEditHelp() || getShouldShowViewHelp()" class="dshStartScreen">
-    <div class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter">
-      <icon type="'dashboardApp'" size="'xxl'" color="'subdued'"></icon>
-
-      <br><br>
-
-      <div ng-show="getShouldShowEditHelp()" class="euiText">
-        <h2
-          i18n-id="kbn.dashboard.fillDashboardTitle"
-          i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
-        >
-        </h2>
-
-        <p>
-          <span
-            i18n-id="kbn.dashboard.addVisualizationDescription1"
-            i18n-default-message="Click the "
-            i18n-context="Part of composite label kbn.dashboard.addVisualizationDescription1 + kbn.dashboard.addVisualizationLinkText + kbn.dashboard.addVisualizationDescription2"
-          ></span>
-          <a
-            kbn-accessible-click
-            class="euiLink"
-            ng-click="showAddPanel()"
-            aria-label="{{::'kbn.dashboard.addVisualizationLinkAriaLabel' | i18n: { defaultMessage: 'Add visualization' } }}"
-            data-test-subj="emptyDashboardAddPanelButton"
-            i18n-id="kbn.dashboard.addVisualizationLinkText"
-            i18n-default-message="Add"
-          ></a>
-          <span
-            i18n-id="kbn.dashboard.addVisualizationDescription2"
-            i18n-default-message=" button in the menu bar above to add a visualization to the dashboard."
-          ></span>
-        </p>
-        <p
-          i18n-id="kbn.dashboard.addVisualizationDescription3"
-          i18n-default-message="If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
-          i18n-values="{
-            html_visitVisualizeAppLink: '<a class=\'euiLink\' href=\'#/visualize\'>' + visitVisualizeAppLinkText + '</a>'
-          }"
-        ></p>
-      </div>
-
-      <div ng-show="getShouldShowViewHelp()" class="euiText">
-        <h2
-          i18n-id="kbn.dashboard.fillDashboardTitle"
-          i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
-        >
-        </h2>
-
-        <p>
-          <span
-            i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription1"
-            i18n-default-message="Click the "
-            i18n-context="Part of composite label kbn.dashboard.howToStartWorkingOnNewDashboardDescription1 + kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText + kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
-          ></span>
-          <a
-            kbn-accessible-click
-            class="euiLink"
-            ng-click="enterEditMode()"
-            i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText"
-            i18n-default-message="Edit"
-          ></a>
-          <span
-            i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
-            i18n-default-message=" button in the menu bar above to start working on your new dashboard."
-          ></span>
-        </p>
-      </div>
-
-    </div>
-  </div>
+  >
+  </kbn-top-nav>
 
   <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
   <div id="dashboardViewport"></div>

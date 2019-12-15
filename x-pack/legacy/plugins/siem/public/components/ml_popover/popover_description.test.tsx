@@ -7,11 +7,11 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { PopoverDescription } from './popover_description';
+import { PopoverDescriptionComponent } from './popover_description';
 
 describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<PopoverDescription />);
+    const wrapper = shallow(<PopoverDescriptionComponent />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });

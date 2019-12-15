@@ -110,7 +110,7 @@ const mapToUrlState = (value: any): LogPositionUrlState | undefined =>
     : undefined;
 
 const mapToPositionUrlState = (value: any) =>
-  value && (typeof value.time === 'number' && typeof value.tiebreaker === 'number')
+  value && typeof value.time === 'number' && typeof value.tiebreaker === 'number'
     ? pickTimeKey(value)
     : undefined;
 

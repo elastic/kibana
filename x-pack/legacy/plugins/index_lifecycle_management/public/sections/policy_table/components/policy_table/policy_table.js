@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
-import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
+import { getIndexListUri } from '../../../../../../index_management/public/app/services/navigation';
 import { BASE_PATH, UIM_EDIT_CLICK } from '../../../../../common/constants';
 import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
@@ -222,22 +222,28 @@ export class PolicyTable extends Component {
   buildActionPanelTree(policy) {
     const hasLinkedIndices = Boolean(policy.linkedIndices && policy.linkedIndices.length);
 
-    const viewIndicesLabel = i18n.translate('xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText', {
-      defaultMessage: 'View indices linked to policy'
-    });
-    const addPolicyToTemplateLabel = i18n.translate('xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText', {
-      defaultMessage: 'Add policy to index template'
-    });
-    const deletePolicyLabel = i18n.translate('xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText', {
-      defaultMessage: 'Delete policy'
-    });
+    const viewIndicesLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
+      {
+        defaultMessage: 'View indices linked to policy',
+      }
+    );
+    const addPolicyToTemplateLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText',
+      {
+        defaultMessage: 'Add policy to index template',
+      }
+    );
+    const deletePolicyLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
+      {
+        defaultMessage: 'Delete policy',
+      }
+    );
     const deletePolicyTooltip = hasLinkedIndices
-      ? i18n.translate(
-        'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
-        {
-          defaultMessage: 'You cannot delete a policy that is being used by an index'
-        }
-      )
+      ? i18n.translate('xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip', {
+          defaultMessage: 'You cannot delete a policy that is being used by an index',
+        })
       : null;
     const items = [];
     if (hasLinkedIndices) {
@@ -272,7 +278,7 @@ export class PolicyTable extends Component {
     const panelTree = {
       id: 0,
       title: i18n.translate('xpack.indexLifecycleMgmt.policyTable.policyActionsMenu.panelTitle', {
-        defaultMessage: 'Policy options'
+        defaultMessage: 'Policy options',
       }),
       items,
     };
@@ -335,7 +341,7 @@ export class PolicyTable extends Component {
         color="primary"
       >
         {i18n.translate('xpack.indexLifecycleMgmt.policyTable.actionsButtonText', {
-          defaultMessage: 'Actions'
+          defaultMessage: 'Actions',
         })}
       </EuiButtonEmpty>
     );
@@ -409,11 +415,7 @@ export class PolicyTable extends Component {
         tableContent = (
           <EuiTable className="policyTable__horizontalScroll">
             <EuiScreenReaderOnly>
-              <caption
-                role="status"
-                aria-relevant="text"
-                aria-live="polite"
-              >
+              <caption role="status" aria-relevant="text" aria-live="polite">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.policyTable.captionText"
                   defaultMessage="Below is the index lifecycle policy table
@@ -458,13 +460,13 @@ export class PolicyTable extends Component {
                 placeholder={i18n.translate(
                   'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
                   {
-                    defaultMessage: 'Search'
+                    defaultMessage: 'Search',
                   }
                 )}
                 aria-label={i18n.translate(
                   'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
                   {
-                    defaultMessage: 'Search policies'
+                    defaultMessage: 'Search policies',
                   }
                 )}
               />

@@ -111,7 +111,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
 
-    return DeauthenticationResult.redirectTo('/logged_out');
+    return DeauthenticationResult.redirectTo(`${this.options.basePath.serverBasePath}/logged_out`);
   }
 
   /**
@@ -214,9 +214,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     const certificateChain = this.getCertificateChain(peerCertificate);
     let accessToken: string;
     try {
-      accessToken = (await this.options.client.callAsInternalUser('shield.delegatePKI', {
-        body: { x509_certificate_chain: certificateChain },
-      })).access_token;
+      accessToken = (
+        await this.options.client.callAsInternalUser('shield.delegatePKI', {
+          body: { x509_certificate_chain: certificateChain },
+        })
+      ).access_token;
     } catch (err) {
       this.logger.debug(
         `Failed to exchange peer certificate chain to an access token: ${err.message}`

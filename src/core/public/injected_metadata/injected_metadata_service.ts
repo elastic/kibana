@@ -26,7 +26,6 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
-import { Capabilities } from '..';
 
 /** @public */
 export interface LegacyNavLink {
@@ -36,6 +35,14 @@ export interface LegacyNavLink {
   url: string;
   icon?: string;
   euiIconType?: string;
+}
+
+export interface InjectedPluginMetadata {
+  id: PluginName;
+  plugin: DiscoveredPlugin;
+  config?: {
+    [key: string]: unknown;
+  };
 }
 
 /** @internal */
@@ -55,11 +62,7 @@ export interface InjectedMetadataParams {
       mode: Readonly<EnvironmentMode>;
       packageInfo: Readonly<PackageInfo>;
     };
-    uiPlugins: Array<{
-      id: PluginName;
-      plugin: DiscoveredPlugin;
-    }>;
-    capabilities: Capabilities;
+    uiPlugins: InjectedPluginMetadata[];
     legacyMode: boolean;
     legacyMetadata: {
       app: unknown;
@@ -109,10 +112,6 @@ export class InjectedMetadataService {
         return this.state.version;
       },
 
-      getCapabilities: () => {
-        return this.state.capabilities;
-      },
-
       getCspConfig: () => {
         return this.state.csp;
       },
@@ -158,17 +157,13 @@ export interface InjectedMetadataSetup {
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
-  getCapabilities: () => Capabilities;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
   };
   /**
    * An array of frontend plugins in topological order.
    */
-  getPlugins: () => Array<{
-    id: string;
-    plugin: DiscoveredPlugin;
-  }>;
+  getPlugins: () => InjectedPluginMetadata[];
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {

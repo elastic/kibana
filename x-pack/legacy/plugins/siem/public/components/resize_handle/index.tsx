@@ -7,7 +7,7 @@
 import React, { useEffect, useRef } from 'react';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { concatMap, takeUntil } from 'rxjs/operators';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export type OnResize = ({ delta, id }: { delta: number; id: string }) => void;
 
@@ -42,16 +42,14 @@ interface Props extends ResizeHandleContainerProps {
 }
 
 const ResizeHandleContainer = styled.div<ResizeHandleContainerProps>`
-  ${({ bottom, height, left, positionAbsolute, right, theme, top }) => css`
-    bottom: ${positionAbsolute && bottom};
-    cursor: ${resizeCursorStyle};
-    height: ${height};
-    left: ${positionAbsolute && left};
-    position: ${positionAbsolute && 'absolute'};
-    right: ${positionAbsolute && right};
-    top: ${positionAbsolute && top};
-    z-index: ${positionAbsolute && theme.eui.euiZLevel1};
-  `}
+  bottom: ${({ positionAbsolute, bottom }) => positionAbsolute && bottom};
+  cursor: ${resizeCursorStyle};
+  height: ${({ height }) => height};
+  left: ${({ positionAbsolute, left }) => positionAbsolute && left};
+  position: ${({ positionAbsolute }) => positionAbsolute && 'absolute'};
+  right: ${({ positionAbsolute, right }) => positionAbsolute && right};
+  top: ${({ positionAbsolute, top }) => positionAbsolute && top};
+  z-index: ${({ positionAbsolute, theme }) => positionAbsolute && theme.eui.euiZLevel1};
 `;
 ResizeHandleContainer.displayName = 'ResizeHandleContainer';
 
@@ -69,7 +67,7 @@ export const Resizeable = React.memo<Props>(
     const dragEventTargets = useRef<Array<{ htmlElement: HTMLElement; prevCursor: string }>>([]);
     const dragSubscription = useRef<Subscription | null>(null);
     const prevX = useRef(0);
-    const ref = useRef<React.RefObject<HTMLElement>>(React.createRef<HTMLElement>());
+    const ref = useRef(null);
     const upSubscription = useRef<Subscription | null>(null);
     const isResizingRef = useRef(false);
 
@@ -80,7 +78,7 @@ export const Resizeable = React.memo<Props>(
     };
     useEffect(() => {
       const move$ = fromEvent<MouseEvent>(document, 'mousemove');
-      const down$ = fromEvent<MouseEvent>(ref.current.current!, 'mousedown');
+      const down$ = fromEvent<MouseEvent>(ref.current!, 'mousedown');
       const up$ = fromEvent<MouseEvent>(document, 'mouseup');
 
       drag$.current = down$.pipe(concatMap(() => move$.pipe(takeUntil(up$))));
@@ -131,7 +129,7 @@ export const Resizeable = React.memo<Props>(
           bottom={bottom}
           data-test-subj="resize-handle-container"
           height={height}
-          innerRef={ref.current}
+          ref={ref}
           left={left}
           positionAbsolute={positionAbsolute}
           right={right}

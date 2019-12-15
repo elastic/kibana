@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const instances = getService('monitoringKibanaInstances');
   const kibanaClusterSummaryStatus = getService('monitoringKibanaSummaryStatus');
@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-yellow-platinum', {
-        from: '2017-08-29 17:24:14.254',
-        to: '2017-08-29 17:25:44.142',
+        from: 'Aug 29, 2017 @ 17:24:14.254',
+        to: 'Aug 29, 2017 @ 17:25:44.142',
       });
 
       // go to kibana instances
@@ -40,6 +40,5 @@ export default function ({ getService, getPageObjects }) {
         health: 'Health: green',
       });
     });
-
   });
 }

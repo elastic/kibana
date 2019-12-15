@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/actions';
@@ -82,7 +81,7 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
   }
 };
 
-const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
+const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
   ({
     activePage,
     data,
@@ -139,13 +138,12 @@ const makeMapStateToProps = () => {
   return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
 };
 
-export const UncommonProcessTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: hostsActions.updateTableActivePage,
-    updateTableLimit: hostsActions.updateTableLimit,
-  }
-)(UncommonProcessTableComponent);
+export const UncommonProcessTable = connect(makeMapStateToProps, {
+  updateTableActivePage: hostsActions.updateTableActivePage,
+  updateTableLimit: hostsActions.updateTableLimit,
+})(UncommonProcessTableComponent);
+
+UncommonProcessTable.displayName = 'UncommonProcessTable';
 
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {
@@ -229,7 +227,10 @@ export const getUncommonColumnsCurated = (pageType: HostsType): UncommonProcessT
   const columns: UncommonProcessTableColumns = getUncommonColumns();
   if (pageType === HostsType.details) {
     return [i18n.HOSTS, i18n.NUMBER_OF_HOSTS].reduce((acc, name) => {
-      acc.splice(acc.findIndex(column => column.name === name), 1);
+      acc.splice(
+        acc.findIndex(column => column.name === name),
+        1
+      );
       return acc;
     }, columns);
   } else {

@@ -34,7 +34,7 @@ export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEA
 ) => {
   const search: ISearch<typeof SYNC_SEARCH_STRATEGY> = (
     request: ISyncSearchRequest,
-    options: ISearchOptions
+    options: ISearchOptions = {}
   ) => {
     const response: Promise<IKibanaSearchResponse> = context.core.http.fetch(
       `/internal/search/${request.serverStrategy}`,

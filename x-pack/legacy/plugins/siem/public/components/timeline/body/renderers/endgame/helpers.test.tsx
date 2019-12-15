@@ -7,7 +7,7 @@
 import {
   getHostNameSeparator,
   getHumanReadableLogonType,
-  useTargetUserAndTargetDomain,
+  getTargetUserAndTargetDomain,
   getUserDomainField,
   getUserNameField,
   getEventDetails,
@@ -102,29 +102,29 @@ describe('helpers', () => {
     });
   });
 
-  describe('#useTargetUserAndTargetDomain', () => {
+  describe('#getTargetUserAndTargetDomain', () => {
     test('it returns false when eventAction is undefined', () => {
-      expect(useTargetUserAndTargetDomain(undefined)).toEqual(false);
+      expect(getTargetUserAndTargetDomain(undefined)).toEqual(false);
     });
 
     test('it returns false when eventAction is null', () => {
-      expect(useTargetUserAndTargetDomain(null)).toEqual(false);
+      expect(getTargetUserAndTargetDomain(null)).toEqual(false);
     });
 
     test('it returns false when eventAction is an empty string', () => {
-      expect(useTargetUserAndTargetDomain('')).toEqual(false);
+      expect(getTargetUserAndTargetDomain('')).toEqual(false);
     });
 
     test('it returns false when eventAction is a random value', () => {
-      expect(useTargetUserAndTargetDomain('a random value')).toEqual(false);
+      expect(getTargetUserAndTargetDomain('a random value')).toEqual(false);
     });
 
     test('it returns true when eventAction is "explicit_user_logon"', () => {
-      expect(useTargetUserAndTargetDomain('explicit_user_logon')).toEqual(true);
+      expect(getTargetUserAndTargetDomain('explicit_user_logon')).toEqual(true);
     });
 
     test('it returns true when eventAction is "user_logoff"', () => {
-      expect(useTargetUserAndTargetDomain('user_logoff')).toEqual(true);
+      expect(getTargetUserAndTargetDomain('user_logoff')).toEqual(true);
     });
   });
 

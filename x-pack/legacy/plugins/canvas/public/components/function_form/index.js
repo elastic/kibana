@@ -105,11 +105,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const FunctionForm = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+export const FunctionForm = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
 
 FunctionForm.propTypes = {
   expressionIndex: PropTypes.number,

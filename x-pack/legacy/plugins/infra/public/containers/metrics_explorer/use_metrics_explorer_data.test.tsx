@@ -8,7 +8,7 @@ import { fetch } from '../../utils/fetch';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 
-import { renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 
 import {
   options,

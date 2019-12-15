@@ -1,0 +1,9 @@
+{
+  "id": "apm",
+  "server": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "apm"],
+  "ui": false,
+  "requiredPlugins": ["apm_oss", "data", "home"]
+}

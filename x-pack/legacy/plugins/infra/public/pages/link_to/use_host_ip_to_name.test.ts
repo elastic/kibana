@@ -6,7 +6,7 @@
 
 import { useHostIpToName } from './use_host_ip_to_name';
 import { fetch } from '../../utils/fetch';
-import { renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 
 const renderUseHostIpToNameHook = () =>
   renderHook(props => useHostIpToName(props.ipAddress, props.indexPattern), {

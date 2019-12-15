@@ -6,20 +6,21 @@
 
 // NP type imports
 import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
-import { DataStart } from 'src/legacy/core_plugins/data/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { LegacyAngularInjectedDependencies } from './render_app';
+import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 
 export interface GraphPluginStartDependencies {
-  data: DataStart;
   npData: ReturnType<DataPlugin['start']>;
+  navigation: NavigationStart;
 }
 
 export interface GraphPluginSetupDependencies {
   __LEGACY: {
     Storage: any;
-    xpackInfo: any;
   };
+  licensing: LicensingPluginSetup;
 }
 
 export interface GraphPluginStartDependencies {
@@ -29,12 +30,12 @@ export interface GraphPluginStartDependencies {
 }
 
 export class GraphPlugin implements Plugin {
-  private dataStart: DataStart | null = null;
+  private navigationStart: NavigationStart | null = null;
   private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private savedObjectsClient: SavedObjectsClientContract | null = null;
   private angularDependencies: LegacyAngularInjectedDependencies | null = null;
 
-  setup(core: CoreSetup, { __LEGACY: { xpackInfo, Storage } }: GraphPluginSetupDependencies) {
+  setup(core: CoreSetup, { __LEGACY: { Storage }, licensing }: GraphPluginSetupDependencies) {
     core.application.register({
       id: 'graph',
       title: 'Graph',
@@ -42,9 +43,10 @@ export class GraphPlugin implements Plugin {
         const { renderApp } = await import('./render_app');
         return renderApp({
           ...params,
+          licensing,
+          navigation: this.navigationStart!,
           npData: this.npDataStart!,
           savedObjectsClient: this.savedObjectsClient!,
-          xpackInfo,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           canEditDrillDownUrls: core.injectedMetadata.getInjectedVar(
@@ -57,7 +59,7 @@ export class GraphPlugin implements Plugin {
           chrome: contextCore.chrome,
           config: contextCore.uiSettings,
           toastNotifications: contextCore.notifications.toasts,
-          indexPatterns: this.dataStart!.indexPatterns.indexPatterns,
+          indexPatterns: this.npDataStart!.indexPatterns,
           ...this.angularDependencies!,
         });
       },
@@ -66,10 +68,9 @@ export class GraphPlugin implements Plugin {
 
   start(
     core: CoreStart,
-    { data, npData, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
+    { npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
   ) {
-    // TODO is this really the right way? I though the app context would give us those
-    this.dataStart = data;
+    this.navigationStart = navigation;
     this.npDataStart = npData;
     this.angularDependencies = angularDependencies;
     this.savedObjectsClient = core.savedObjects.client;

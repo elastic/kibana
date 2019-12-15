@@ -1,7 +1,9 @@
 [role="xpack"]
 [[xpack-ml]]
-== {ml-cap}
+= {ml-cap}
 
+[partintro]
+--
 As datasets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
 cyber attacks, or business issues becomes impractical. Elastic {ml-features}
@@ -22,16 +24,16 @@ can then optionally import that data into an {es} index.
 
 You need the following permissions to use the Data Visualizer with file upload:
 
-* cluster privileges: `monitor`, `manage_index_pipelines`
+* cluster privileges: `monitor`, `manage_ingest_pipelines`
 * index privileges: `read`, `manage`, `index`
 
 For more information, see {ref}/security-privileges.html[Security privileges] 
 and {ref}/built-in-roles.html[Built-in roles].
 
+--
 
-[float]
 [[xpack-ml-anomalies]]
-=== {anomaly-detect-cap}
+== {anomaly-detect-cap}
 
 The Elastic {ml} {anomaly-detect} feature automatically models the normal
 behavior of your time series data — learning trends, periodicity, and more — in
@@ -82,9 +84,8 @@ For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
 and {stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
 
-[float]
 [[xpack-ml-dfanalytics]]
-=== {dfanalytics-cap}
+== {dfanalytics-cap}
 
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 {oldetection} and {regression} algorithms and generate new indices that contain

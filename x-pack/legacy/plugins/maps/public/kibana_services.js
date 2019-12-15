@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../../src/legacy/ui/public/courier';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { esFilters } from '../../../../../src/plugins/data/public';
+import { npStart } from 'ui/new_platform';
 
-export { SearchSource } from 'ui/courier';
-export const indexPatternService = data.indexPatterns.indexPatterns;
+export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
+export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
+export const indexPatternService = npStart.plugins.data.indexPatterns;
 
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
@@ -19,9 +24,10 @@ export async function fetchSearchSourceAndRecordWithInspector({
   inspectorAdapters,
   abortSignal,
 }) {
-  const inspectorRequest = inspectorAdapters.requests.start(
-    requestName,
-    { id: requestId, description: requestDesc });
+  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
+    id: requestId,
+    description: requestDesc,
+  });
   let resp;
   try {
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
@@ -29,10 +35,8 @@ export async function fetchSearchSourceAndRecordWithInspector({
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest
-      .stats(getResponseInspectorStats(searchSource, resp))
-      .ok({ json: resp });
-  } catch(error) {
+    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+  } catch (error) {
     inspectorRequest.error({ error });
     throw error;
   }

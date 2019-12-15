@@ -19,15 +19,13 @@
 
 import expect from '@kbn/expect';
 
-
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
   describe('sample data apis', () => {
-
     describe('list', () => {
       it('should return list of sample data sets with installed status', async () => {
         const resp = await supertest
@@ -55,12 +53,15 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        expect(resp.body).to.eql({ elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 }, kibanaSavedObjectsLoaded: 20 });
+        expect(resp.body).to.eql({
+          elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
+          kibanaSavedObjectsLoaded: 20,
+        });
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
         const resp = await es.search({
-          index: 'kibana_sample_data_flights'
+          index: 'kibana_sample_data_flights',
         });
 
         const doc = resp.hits.hits[0];
@@ -78,7 +79,7 @@ export default function ({ getService }) {
             .set('kbn-xsrf', 'kibana');
 
           const resp = await es.search({
-            index: 'kibana_sample_data_flights'
+            index: 'kibana_sample_data_flights',
           });
 
           const doc = resp.hits.hits[0];
@@ -100,7 +101,7 @@ export default function ({ getService }) {
 
       it('should remove elasticsearch index containing sample data', async () => {
         const resp = await es.indices.exists({
-          index: 'kibana_sample_data_flights'
+          index: 'kibana_sample_data_flights',
         });
         expect(resp).to.be(false);
       });

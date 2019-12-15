@@ -5,12 +5,12 @@
  */
 
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React from 'react';
 import styled from 'styled-components';
 
 import { WithHoverActions } from '../../with_hover_actions';
 import { siemFilterManager } from '../../search_bar';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import * as i18n from './translations';
 
@@ -18,7 +18,7 @@ export * from './helpers';
 
 interface OwnProps {
   children: JSX.Element;
-  filter: Filter;
+  filter: esFilters.Filter;
   onFilterAdded?: () => void;
 }
 
@@ -33,7 +33,7 @@ export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
     return (
       <WithHoverActions
         hoverContent={
-          <HoverActionsContainer data-test-subj="hover-actions-container">
+          <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="none">
             <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
               <EuiIcon data-test-subj="add-to-filter" type="filter" onClick={addToKql} />
             </EuiToolTip>
@@ -51,11 +51,11 @@ export const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
   display: flex;
   flex-direction: row;
-  height: 25px;
+  height: 34px;
   justify-content: center;
   left: 5px;
   position: absolute;
   top: -10px;
-  width: 30px;
+  width: 34px;
   cursor: pointer;
 `;

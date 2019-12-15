@@ -14,56 +14,51 @@ export function Status({ stat, formattedLeader, oldestStat }) {
     follower_index: followerIndex,
     shard_id: shardId,
     operations_written: operationsReceived,
-    failed_read_requests: failedFetches
+    failed_read_requests: failedFetches,
   } = stat;
 
   const {
     operations_written: oldestOperationsReceived,
-    failed_read_requests: oldestFailedFetches
+    failed_read_requests: oldestFailedFetches,
   } = oldestStat;
 
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel', {
-        defaultMessage: 'Follower Index'
+        defaultMessage: 'Follower Index',
       }),
       value: followerIndex,
-      'data-test-subj': 'followerIndex'
+      'data-test-subj': 'followerIndex',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.shardIdLabel', {
-        defaultMessage: 'Shard Id'
+        defaultMessage: 'Shard Id',
       }),
       value: shardId,
-      'data-test-subj': 'shardId'
+      'data-test-subj': 'shardId',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.leaderIndexLabel', {
-        defaultMessage: 'Leader Index'
+        defaultMessage: 'Leader Index',
       }),
       value: formattedLeader,
-      'data-test-subj': 'leaderIndex'
+      'data-test-subj': 'leaderIndex',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.opsSyncedLabel', {
-        defaultMessage: 'Ops Synced'
+        defaultMessage: 'Ops Synced',
       }),
       value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
-      'data-test-subj': 'operationsReceived'
+      'data-test-subj': 'operationsReceived',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.failedFetchesLabel', {
-        defaultMessage: 'Failed Fetches'
+        defaultMessage: 'Failed Fetches',
       }),
       value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
-      'data-test-subj': 'failedFetches'
+      'data-test-subj': 'failedFetches',
     },
   ];
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="ccrDetailStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} data-test-subj="ccrDetailStatus" />;
 }

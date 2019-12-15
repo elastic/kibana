@@ -25,49 +25,53 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
     <div
       className="euiSwitch"
     >
-      <input
-        checked={false}
-        className="euiSwitch__input"
+      <button
+        aria-checked={false}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
         id="cycle"
         name="cycle"
-        onChange={[Function]}
-        type="checkbox"
-      />
-      <span
-        className="euiSwitch__body"
+        onClick={[Function]}
+        role="switch"
+        type="button"
       >
         <span
-          className="euiSwitch__thumb"
-        />
-        <span
-          className="euiSwitch__track"
+          className="euiSwitch__body"
         >
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
+          <span
+            className="euiSwitch__thumb"
           />
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
         </span>
-      </span>
-      <label
+      </button>
+      <span
         className="euiSwitch__label"
-        htmlFor="cycle"
+        id="generated-id"
+        onClick={[Function]}
       >
         Cycle Slides
-      </label>
+      </span>
     </div>
     <hr
       className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -83,6 +87,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
         >
           <div
             className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -128,18 +133,9 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
           >
-            <div
-              className="euiFormRow__labelWrapper"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="generated-id"
-              >
-                 
-              </label>
-            </div>
             <div
               className="euiFormRow__fieldWrapper"
             >
@@ -200,49 +196,53 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
     <div
       className="euiSwitch"
     >
-      <input
-        checked={true}
-        className="euiSwitch__input"
+      <button
+        aria-checked={true}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
         id="cycle"
         name="cycle"
-        onChange={[Function]}
-        type="checkbox"
-      />
-      <span
-        className="euiSwitch__body"
+        onClick={[Function]}
+        role="switch"
+        type="button"
       >
         <span
-          className="euiSwitch__thumb"
-        />
-        <span
-          className="euiSwitch__track"
+          className="euiSwitch__body"
         >
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
+          <span
+            className="euiSwitch__thumb"
           />
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
         </span>
-      </span>
-      <label
+      </button>
+      <span
         className="euiSwitch__label"
-        htmlFor="cycle"
+        id="generated-id"
+        onClick={[Function]}
       >
         Cycle Slides
-      </label>
+      </span>
     </div>
     <hr
       className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -258,6 +258,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
         >
           <div
             className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -303,18 +304,9 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
           >
-            <div
-              className="euiFormRow__labelWrapper"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="generated-id"
-              >
-                 
-              </label>
-            </div>
             <div
               className="euiFormRow__fieldWrapper"
             >
@@ -375,49 +367,53 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
     <div
       className="euiSwitch"
     >
-      <input
-        checked={false}
-        className="euiSwitch__input"
+      <button
+        aria-checked={false}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
         id="cycle"
         name="cycle"
-        onChange={[Function]}
-        type="checkbox"
-      />
-      <span
-        className="euiSwitch__body"
+        onClick={[Function]}
+        role="switch"
+        type="button"
       >
         <span
-          className="euiSwitch__thumb"
-        />
-        <span
-          className="euiSwitch__track"
+          className="euiSwitch__body"
         >
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
+          <span
+            className="euiSwitch__thumb"
           />
-          <svg
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-            focusable="false"
-            height={16}
-            style={null}
-            viewBox="0 0 16 16"
-            width={16}
-            xmlns="http://www.w3.org/2000/svg"
-          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
         </span>
-      </span>
-      <label
+      </button>
+      <span
         className="euiSwitch__label"
-        htmlFor="cycle"
+        id="generated-id"
+        onClick={[Function]}
       >
         Cycle Slides
-      </label>
+      </span>
     </div>
     <hr
       className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -433,6 +429,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
         >
           <div
             className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
           >
             <div
               className="euiFormRow__labelWrapper"
@@ -478,18 +475,9 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiFormRow"
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
           >
-            <div
-              className="euiFormRow__labelWrapper"
-            >
-              <label
-                className="euiFormLabel euiFormRow__label"
-                htmlFor="generated-id"
-              >
-                 
-              </label>
-            </div>
             <div
               className="euiFormRow__fieldWrapper"
             >

@@ -12,46 +12,52 @@ import { Provider } from '../../timeline/data_providers/provider';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
 
-export const DraggableScore = React.memo<{
+export const DraggableScoreComponent = ({
+  id,
+  index = 0,
+  score,
+}: {
   id: string;
   index?: number;
   score: Anomaly;
-}>(
-  ({ id, index = 0, score }): JSX.Element => (
-    <DraggableWrapper
-      key={`draggable-score-draggable-wrapper-${id}`}
-      dataProvider={{
-        and: [],
-        enabled: true,
-        id,
-        name: score.entityName,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: score.entityName,
-          value: score.entityValue,
-          operator: IS_OPERATOR,
-        },
-      }}
-      render={(dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <>
-            {index !== 0 && (
-              <>
-                {','}
-                <Spacer />
-              </>
-            )}
-            {getScoreString(score.severity)}
-          </>
-        )
-      }
-    />
-  )
+}): JSX.Element => (
+  <DraggableWrapper
+    key={`draggable-score-draggable-wrapper-${id}`}
+    dataProvider={{
+      and: [],
+      enabled: true,
+      id,
+      name: score.entityName,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: score.entityName,
+        value: score.entityValue,
+        operator: IS_OPERATOR,
+      },
+    }}
+    render={(dataProvider, _, snapshot) =>
+      snapshot.isDragging ? (
+        <DragEffects>
+          <Provider dataProvider={dataProvider} />
+        </DragEffects>
+      ) : (
+        <>
+          {index !== 0 && (
+            <>
+              {','}
+              <Spacer />
+            </>
+          )}
+          {getScoreString(score.severity)}
+        </>
+      )
+    }
+  />
 );
+
+DraggableScoreComponent.displayName = 'DraggableScoreComponent';
+
+export const DraggableScore = React.memo(DraggableScoreComponent);
 
 DraggableScore.displayName = 'DraggableScore';

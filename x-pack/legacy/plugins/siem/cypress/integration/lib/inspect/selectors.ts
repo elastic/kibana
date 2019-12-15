@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE, HOSTS_PAGE_TAB_URLS, NETWORK_PAGE } from '../urls';
+import { HOSTS_PAGE, HOSTS_PAGE_TAB_URLS, NETWORK_PAGE, NETWORK_TAB_URLS } from '../urls';
 
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
@@ -72,7 +72,7 @@ export const INSPECT_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
   {
     id: '[data-test-subj="table-dns-loading-false"]',
     title: 'Top DNS Domains Table',
-    url: NETWORK_PAGE,
+    url: NETWORK_TAB_URLS.dns,
   },
   {
     id: '[data-test-subj="table-allHosts-loading-false"]',
@@ -90,7 +90,7 @@ export const INSPECT_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
     url: HOSTS_PAGE_TAB_URLS.uncommonProcesses,
   },
   {
-    altInspectId: `[data-test-subj="events-viewer-header"] ${INSPECT_BUTTON_ICON}`,
+    altInspectId: `[data-test-subj="events-viewer-panel"] ${INSPECT_BUTTON_ICON}`,
     id: '[data-test-subj="events-container-loading-false"]',
     title: 'Events Table',
     url: HOSTS_PAGE_TAB_URLS.events,

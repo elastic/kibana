@@ -2,7 +2,6 @@ files:
   include:
     - 'src/legacy/core_plugins/metrics/**/*.s+(a|c)ss'
     - 'src/legacy/core_plugins/timelion/**/*.s+(a|c)ss'
-    - 'src/legacy/ui/public/query_bar/**/*.s+(a|c)ss'
     - 'src/legacy/ui/public/vislib/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/rollup/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/security/**/*.s+(a|c)ss'

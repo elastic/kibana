@@ -7,7 +7,11 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { TaskManager, claimAvailableTasks } from './task_manager';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { mockLogger } from './test_utils';
 
@@ -121,6 +125,85 @@ describe('TaskManager', () => {
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
+  test('allows scheduling existing tasks that may have already been scheduled', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    savedObjectsClient.create.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    client.start();
+
+    const result = await client.ensureScheduled({
+      id: 'my-foo-id',
+      taskType: 'foo',
+      params: {},
+      state: {},
+    });
+
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    savedObjectsClient.create.mockRejectedValueOnce({
+      statusCode: 500,
+    });
+
+    client.start();
+
+    return expect(
+      client.ensureScheduled({
+        id: 'my-foo-id',
+        taskType: 'foo',
+        params: {},
+        state: {},
+      })
+    ).rejects.toMatchObject({
+      statusCode: 500,
+    });
+  });
+
+  test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    savedObjectsClient.create.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    client.start();
+
+    return expect(
+      client.schedule({
+        id: 'my-foo-id',
+        taskType: 'foo',
+        params: {},
+        state: {},
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+    });
+  });
+
   test('allows and queues removing tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     savedObjectsClient.delete.mockResolvedValueOnce({});
@@ -174,6 +257,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
@@ -183,6 +267,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
 
     client.start();
@@ -213,6 +298,38 @@ describe('TaskManager', () => {
       claimAvailableTasks(claim, availableWorkers, logger);
 
       expect(claim).not.toHaveBeenCalled();
+    });
+
+    /**
+     * This handles the case in which Elasticsearch has had inline script disabled.
+     * This is achieved by setting the `script.allowed_types` flag on Elasticsearch to `none`
+     */
+    test('handles failure due to inline scripts being disabled', () => {
+      const logger = mockLogger();
+      const claim = jest.fn(() => {
+        throw Object.assign(new Error(), {
+          msg: '[illegal_argument_exception] cannot execute [inline] scripts',
+          path: '/.kibana_task_manager/_update_by_query',
+          query: {
+            ignore_unavailable: true,
+            refresh: true,
+            max_docs: 200,
+            conflicts: 'proceed',
+          },
+          body:
+            '{"query":{"bool":{"must":[{"term":{"type":"task"}},{"bool":{"must":[{"bool":{"should":[{"bool":{"must":[{"term":{"task.status":"idle"}},{"range":{"task.runAt":{"lte":"now"}}}]}},{"bool":{"must":[{"bool":{"should":[{"term":{"task.status":"running"}},{"term":{"task.status":"claiming"}}]}},{"range":{"task.retryAt":{"lte":"now"}}}]}}]}},{"bool":{"should":[{"exists":{"field":"task.interval"}},{"bool":{"must":[{"term":{"task.taskType":"vis_telemetry"}},{"range":{"task.attempts":{"lt":3}}}]}},{"bool":{"must":[{"term":{"task.taskType":"lens_telemetry"}},{"range":{"task.attempts":{"lt":3}}}]}},{"bool":{"must":[{"term":{"task.taskType":"actions:.server-log"}},{"range":{"task.attempts":{"lt":1}}}]}},{"bool":{"must":[{"term":{"task.taskType":"actions:.slack"}},{"range":{"task.attempts":{"lt":1}}}]}},{"bool":{"must":[{"term":{"task.taskType":"actions:.email"}},{"range":{"task.attempts":{"lt":1}}}]}},{"bool":{"must":[{"term":{"task.taskType":"actions:.index"}},{"range":{"task.attempts":{"lt":1}}}]}},{"bool":{"must":[{"term":{"task.taskType":"actions:.pagerduty"}},{"range":{"task.attempts":{"lt":1}}}]}},{"bool":{"must":[{"term":{"task.taskType":"actions:.webhook"}},{"range":{"task.attempts":{"lt":1}}}]}}]}}]}}]}},"sort":{"_script":{"type":"number","order":"asc","script":{"lang":"expression","source":"doc[\'task.retryAt\'].value || doc[\'task.runAt\'].value"}}},"seq_no_primary_term":true,"script":{"source":"ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;","lang":"painless","params":{"ownerId":"kibana:5b2de169-2785-441b-ae8c-186a1936b17d","retryAt":"2019-10-31T13:35:43.579Z","status":"claiming"}}}',
+          statusCode: 400,
+          response:
+            '{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}],"type":"search_phase_execution_exception","reason":"all shards failed","phase":"query","grouped":true,"failed_shards":[{"shard":0,"index":".kibana_task_manager_1","node":"24A4QbjHSK6prvtopAKLKw","reason":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}],"caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts","caused_by":{"type":"illegal_argument_exception","reason":"cannot execute [inline] scripts"}}},"status":400}',
+        });
+      });
+
+      claimAvailableTasks(claim, 10, logger);
+
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"Task Manager cannot operate when inline scripts are disabled in Elasticsearch"`
+      );
     });
   });
 });

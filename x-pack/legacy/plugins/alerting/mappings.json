@@ -4,6 +4,12 @@
       "enabled": {
         "type": "boolean"
       },
+      "name": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      },
       "alertTypeId": {
         "type": "keyword"
       },
@@ -19,13 +25,16 @@
           "actionRef": {
             "type": "keyword"
           },
+          "actionTypeId": {
+            "type": "keyword"
+          },
           "params": {
             "enabled": false,
             "type": "object"
           }
         }
       },
-      "alertTypeParams": {
+      "params": {
         "enabled": false,
         "type": "object"
       },

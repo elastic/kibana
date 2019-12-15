@@ -1,31 +1,31 @@
 [role="xpack"]
 [[graph-getting-started]]
-=== Using Graph
+== Using Graph
 
-Graph is automatically enabled in {es} and {kib}.
+You must index data into {es} before you can create a graph.  
+<<index-patterns, Learn how>> or get started with a <<add-sample-data, sample data set>>.
 
+[float]
 [[exploring-connections]]
-To start exploring connections in your data:
+=== Graph connections in your data
 
-. From the side navigation, open the graph explorer.
-
-. Select an index pattern to specify what indices you want to explore.
+. From the side navigation, open *Graph*.
 +
-For example, if you are indexing log data with Logstash, you could select the
-`logstash-*` index pattern to visualize connections within the log entries.
+If this is your first graph, follow the prompts to create it.  
+For subsequent graphs, click *New*.
 
-. Select one or more multi-value fields that contain the terms you want to
+. Select a data source to explore.
+
+. Add one or more multi-value fields that contain the terms you want to
 graph. 
 +
-The vertices in the graph are selected from these terms. If you're
-visualizing connections between Apache log entries, you could select the
-`url.raw` field and the `geo.src` field so you can look at which pages are
-being accessed from different locations.
+The vertices in the graph are selected from these terms.
 
 . Enter a search query to discover relationships between terms in the selected
 fields. 
 +
-For example, to generate a graph of the successful requests to
+For example, if you are using the {kib} sample web logs data set, and you want 
+to generate a graph of the successful requests to
 particular pages from different locations, you could search for the 200
 response code. The weight of the connection between two vertices indicates how strongly they
 are related. 
@@ -38,25 +38,86 @@ image::user/graph/images/graph-url-connections.png["URL connections"]
 [role="screenshot"]
 image::user/graph/images/graph-link-summary.png["Link summary"]
 
-. Use the toolbar buttons to explore
+. Use the control bar on the right to explore
 additional connections:
 +
-* To display additional vertices that connect to your graph, click Expand 
-image:user/graph/images/graph-expand-button.jpg[Expand Selection].
+* To display additional vertices that connect to your graph, click the expand icon
+image:user/graph/images/graph-expand-button.png[Expand Selection].
 * To display additional
-connections between the displayed vertices, click Link
-image:user/graph/images/graph-link-button.jpg[Add links to existing terms]  
+connections between the displayed vertices, click the link icon
+image:user/graph/images/graph-link-button.png[Add links to existing terms]. 
 * To explore a particular area of the
-graph, select the vertices you are interested in, and click Expand or Link.
-* To step back through your changes to the graph, click Undo
-image:user/graph/images/graph-undo-button.jpg[Undo].
+graph, select the vertices you are interested in, and then click expand or link.
+* To step back through your changes to the graph, click undo
+image:user/graph/images/graph-undo-button.png[Undo] and redo 
+image:user/graph/images/graph-redo-button.png[Redo].
 
 . To see more relationships in your data, submit additional queries.
 +
 [role="screenshot"]
 image::user/graph/images/graph-add-query.png["Adding networks"]
 
+. *Save* your graph.
 
-NOTE: By default, when you submit a search query, Graph searches all available
-fields. You can constrain your search to a particular field using the Lucene
-query syntax. For example,  `machine.os: osx`.
+[float]
+[[style-vertex-properties]]
+=== Style vertex properties
+
+Each vertex has a color, icon, and label. To change 
+the color or icon of all vertices 
+of a certain field, click the field badge below the search bar, and then
+select *Edit settings*.
+
+To change the color and label of selected vertices, 
+click the style icon image:user/graph/images/graph-style-button.png[Style]
+in the control bar on the right. 
+
+
+[float]
+[[edit-graph-settings]]
+=== Edit graph settings
+
+By default, *Graph* is configured to tune out noise in your data. 
+If this isn't a good fit for your data, use *Settings > Advanced settings*
+to adjust the way *Graph* queries your data. You can tune the graph to show 
+only the results relevant to you and to improve performance.  
+For more information, see <<graph-troubleshooting, Graph troubleshooting>>. 
+
+You can configure the number of vertices that a search or 
+expand operation adds to the graph.
+By default, only the five most relevant terms for any given field are added 
+at a time. This keeps the graph from overflowing. To increase this number, click 
+a field below the search bar, select *Edit Settings*, and change *Terms per hop*.  
+
+[float]
+[[graph-block-terms]]
+=== Block terms from the graph
+Documents that match a blocked term are not allowed in the graph. 
+To block a term, select its vertex and click 
+the block icon
+image:user/graph/images/graph-block-button.png[Block selection]
+in the control panel.  
+For a list of blocked terms, go to *Settings > Blocked terms*.
+
+[float]
+[[graph-drill-down]]
+=== Drill down into raw documents
+With drilldowns, you can display additional information about a 
+selected vertex in a new browser window. For example, you might 
+configure a drilldown URL to perform a web search for the selected vertex term.  
+
+Use the drilldown icon image:user/graph/images/graph-info-icon.png[Drilldown selection] 
+in the control panel to show the drilldown buttons for the selected vertices.
+To configure drilldowns, go to *Settings > Drilldowns*. See also 
+<<disable-drill-down, Disabling drilldown configuration>>.
+
+[float]
+[[graph-run-layout]]
+=== Run and pause layout
+Graph uses a "force layout", where vertices behave like magnets, 
+pushing off of one another. By default, when you add a new vertex to 
+the graph, all vertices begin moving. In some cases, the movement might 
+go on for some time. To freeze the current vertex position, 
+click the pause icon
+image:user/graph/images/graph-pause-button.png[Block selection]
+in the control panel. 

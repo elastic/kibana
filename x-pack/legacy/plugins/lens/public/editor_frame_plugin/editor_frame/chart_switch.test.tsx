@@ -369,7 +369,7 @@ describe('chart_switch', () => {
     );
   });
 
-  it('should not remove layers if the visualization is not changing', () => {
+  it('should not remove layers when switching between subtypes', () => {
     const dispatch = jest.fn();
     const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
@@ -397,6 +397,7 @@ describe('chart_switch', () => {
         initialState: 'therebedragons',
       })
     );
+    expect(frame.removeLayers).not.toHaveBeenCalled();
   });
 
   it('should switch to the updated datasource state', () => {

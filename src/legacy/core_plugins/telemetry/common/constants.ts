@@ -51,7 +51,7 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to the Elastic Telemetry privacy statement.
  */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-privacy-statement`;
+export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
 
 /**
  * The type name used within the Monitoring index to publish localization stats.
@@ -60,7 +60,18 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-pri
 export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';
 
 /**
+ * The type name used to publish telemetry plugin stats.
+ * @type {string}
+ */
+export const TELEMETRY_STATS_TYPE = 'telemetry';
+
+/**
  * UI metric usage type
  * @type {string}
  */
 export const UI_METRIC_USAGE_TYPE = 'ui_metric';
+
+/**
+ * Link to Advanced Settings.
+ */
+export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';

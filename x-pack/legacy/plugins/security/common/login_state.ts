@@ -9,5 +9,4 @@ export type LoginLayout = 'form' | 'error-es-unavailable' | 'error-xpack-unavail
 export interface LoginState {
   layout: LoginLayout;
   allowLogin: boolean;
-  loginMessage: string;
 }

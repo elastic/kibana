@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { StaticIndexPattern, getFromSavedObject } from 'ui/index_patterns';
-import { VisSavedObject } from 'ui/visualize/loader/types';
+import { npStart } from 'ui/new_platform';
+
+import { VisSavedObject } from './visualize_embeddable';
+import { indexPatterns, IIndexPattern } from '../../../../../../plugins/data/public';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
-): Promise<StaticIndexPattern | undefined> {
+): Promise<IIndexPattern | undefined> {
   if (savedVis.vis.type.name !== 'metrics') {
     return savedVis.vis.indexPattern;
   }
 
-  const config = chrome.getUiSettingsClient();
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  const defaultIndex = config.get('defaultIndex');
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const defaultIndex = npStart.core.uiSettings.get('defaultIndex');
 
   if (savedVis.vis.params.index_pattern) {
     const indexPatternObjects = await savedObjectsClient.find({
@@ -39,10 +39,10 @@ export async function getIndexPattern(
       search: `"${savedVis.vis.params.index_pattern}"`,
       searchFields: ['title'],
     });
-    const [indexPattern] = indexPatternObjects.savedObjects.map(getFromSavedObject);
+    const [indexPattern] = indexPatternObjects.savedObjects.map(indexPatterns.getFromSavedObject);
     return indexPattern;
   }
 
   const savedObject = await savedObjectsClient.get('index-pattern', defaultIndex);
-  return getFromSavedObject(savedObject);
+  return indexPatterns.getFromSavedObject(savedObject);
 }

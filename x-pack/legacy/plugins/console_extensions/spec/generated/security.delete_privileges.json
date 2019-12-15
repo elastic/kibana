@@ -13,6 +13,6 @@
     "patterns": [
       "_security/privilege/{application}/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-privilege.html"
+    "documentation": "TODO"
   }
 }

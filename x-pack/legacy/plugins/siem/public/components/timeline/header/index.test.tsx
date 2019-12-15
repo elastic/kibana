@@ -4,24 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { Direction } from '../../../graphql/types';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { mockIndexPattern } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
+import { mockUiSettings } from '../../../mock/ui_settings';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
-import { TimelineHeader } from '.';
+import { TimelineHeaderComponent } from '.';
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+  savedObjects: {},
+}));
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TimelineHeader
+        <TimelineHeaderComponent
           browserFields={{}}
           dataProviders={mockDataProviders}
           id="foo"
@@ -46,7 +57,7 @@ describe('Header', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
+          <TimelineHeaderComponent
             browserFields={{}}
             dataProviders={mockDataProviders}
             id="foo"
@@ -73,7 +84,7 @@ describe('Header', () => {
     test('it renders the unauthorized call out providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeader
+          <TimelineHeaderComponent
             browserFields={{}}
             dataProviders={mockDataProviders}
             id="foo"

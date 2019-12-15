@@ -139,19 +139,16 @@ export function copyToSpaceTestSuiteFactory(
     }
 
     const { countByType } = spaceBucket;
-    const expectedBuckets = Object.entries(expectedCounts).reduce(
-      (acc, entry) => {
-        const [type, count] = entry;
-        return [
-          ...acc,
-          {
-            key: type,
-            doc_count: count,
-          },
-        ];
-      },
-      [] as CountByTypeBucket[]
-    );
+    const expectedBuckets = Object.entries(expectedCounts).reduce((acc, entry) => {
+      const [type, count] = entry;
+      return [
+        ...acc,
+        {
+          key: type,
+          doc_count: count,
+        },
+      ];
+    }, [] as CountByTypeBucket[]);
 
     expectedBuckets.sort(bucketSorter);
     countByType.buckets.sort(bucketSorter);

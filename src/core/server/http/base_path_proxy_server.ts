@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import apm from 'elastic-apm-node';
+
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server, Request } from 'hapi';
 import Url from 'url';
@@ -139,10 +141,12 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
+            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
             await blockUntil();
             return responseToolkit.continue;
           },
         ],
+        validate: { payload: true },
       },
       path: `${this.httpConfig.basePath}/{kbnPath*}`,
     });
@@ -175,6 +179,7 @@ export class BasePathProxyServer {
             return responseToolkit.continue;
           },
         ],
+        validate: { payload: true },
       },
       path: `/__UNSAFE_bypassBasePath/{kbnPath*}`,
     });

@@ -29,7 +29,7 @@ export function createAutoJUnitReporter(junitReportOptions) {
       new MochaSpecReporter(runner, options);
 
       // in CI we also setup the JUnit reporter
-      if (process.env.CI) {
+      if (process.env.CI && !process.env.DISABLE_JUNIT_REPORTER) {
         setupJUnitReportGeneration(runner, junitReportOptions);
       }
     }

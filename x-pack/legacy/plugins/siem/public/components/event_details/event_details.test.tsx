@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -14,26 +14,27 @@ import { TestProviders } from '../../mock/test_providers';
 import { EventDetails } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(
-        <TestProviders>
-          <EventDetails
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            data={mockDetailItemData}
-            id={mockDetailItemDataId}
-            view="table-view"
-            onUpdateColumns={jest.fn()}
-            onViewSelected={jest.fn()}
-            timelineId="test"
-            toggleColumn={jest.fn()}
-          />
-        </TestProviders>
+        <EventDetails
+          browserFields={mockBrowserFields}
+          columnHeaders={defaultHeaders}
+          data={mockDetailItemData}
+          id={mockDetailItemDataId}
+          view="table-view"
+          onUpdateColumns={jest.fn()}
+          onViewSelected={jest.fn()}
+          timelineId="test"
+          toggleColumn={jest.fn()}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

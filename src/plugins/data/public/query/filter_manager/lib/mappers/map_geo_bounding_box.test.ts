@@ -18,7 +18,7 @@
  */
 
 import { mapGeoBoundingBox } from './map_geo_bounding_box';
-import { Filter, GeoBoundingBoxFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapGeoBoundingBox()', () => {
@@ -34,7 +34,7 @@ describe('filter manager utilities', () => {
             bottom_right: { lat: 15, lon: 20 },
           },
         },
-      } as GeoBoundingBoxFilter;
+      } as esFilters.GeoBoundingBoxFilter;
 
       const result = mapGeoBoundingBox(filter);
 
@@ -63,7 +63,8 @@ describe('filter manager utilities', () => {
             bottom_right: { lat: 15, lon: 20 },
           },
         },
-      } as GeoBoundingBoxFilter;
+      } as esFilters.GeoBoundingBoxFilter;
+
       const result = mapGeoBoundingBox(filter);
 
       expect(result).toHaveProperty('key', 'point');
@@ -82,7 +83,7 @@ describe('filter manager utilities', () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      } as Filter;
+      } as esFilters.Filter;
 
       try {
         mapGeoBoundingBox(filter);

@@ -19,8 +19,9 @@
 
 import { createFilterIpRange } from './ip_range';
 import { AggConfigs } from '../../agg_configs';
-import { IpFormat } from '../../../../../../plugins/data/common';
+import { IpFormat } from '../../../../../../plugins/data/public';
 import { BUCKET_TYPES } from '../bucket_agg_types';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
@@ -59,7 +60,7 @@ describe('AggConfig Filters', () => {
         },
       ]);
 
-      const filter = createFilterIpRange(aggConfigs.aggs[0], {
+      const filter = createFilterIpRange(aggConfigs.aggs[0] as IBucketAggConfig, {
         type: 'range',
         from: '0.0.0.0',
         to: '1.1.1.1',
@@ -88,7 +89,7 @@ describe('AggConfig Filters', () => {
         },
       ]);
 
-      const filter = createFilterIpRange(aggConfigs.aggs[0], {
+      const filter = createFilterIpRange(aggConfigs.aggs[0] as IBucketAggConfig, {
         type: 'mask',
         mask: '67.129.65.201/27',
       });

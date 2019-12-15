@@ -23,35 +23,22 @@ import { map } from 'rxjs/operators';
 
 import { PriorityMap } from './priority_map';
 import { BannersList } from './banners_list';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { I18nStart } from '../../i18n';
+import { MountPoint } from '../../types';
 import { UserBannerService } from './user_banner_service';
-
-/**
- * A function that will unmount the banner from the element.
- * @public
- */
-export type OverlayBannerUnmount = () => void;
-
-/**
- * A function that will mount the banner inside the provided element.
- * @param element an element to render into
- * @returns a {@link OverlayBannerUnmount}
- * @public
- */
-export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
 
 /** @public */
 export interface OverlayBannersStart {
   /**
    * Add a new banner
    *
-   * @param mount {@link OverlayBannerMount}
+   * @param mount {@link MountPoint}
    * @param priority optional priority order to display this banner. Higher priority values are shown first.
    * @returns a unique identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
    *          {@link OverlayBannersStart.replace}
    */
-  add(mount: OverlayBannerMount, priority?: number): string;
+  add(mount: MountPoint, priority?: number): string;
 
   /**
    * Remove a banner
@@ -65,12 +52,12 @@ export interface OverlayBannersStart {
    * Replace a banner in place
    *
    * @param id the unique identifier for the banner returned by {@link OverlayBannersStart.add}
-   * @param mount {@link OverlayBannerMount}
+   * @param mount {@link MountPoint}
    * @param priority optional priority order to display this banner. Higher priority values are shown first.
    * @returns a new identifier for the given banner to be used with {@link OverlayBannersStart.remove} and
    *          {@link OverlayBannersStart.replace}
    */
-  replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+  replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 
   /** @internal */
   get$(): Observable<OverlayBanner[]>;
@@ -80,13 +67,13 @@ export interface OverlayBannersStart {
 /** @internal */
 export interface OverlayBanner {
   readonly id: string;
-  readonly mount: OverlayBannerMount;
+  readonly mount: MountPoint;
   readonly priority: number;
 }
 
 interface StartDeps {
   i18n: I18nStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -110,20 +97,16 @@ export class OverlayBannersService {
         if (!banners$.value.has(id)) {
           return false;
         }
-
         banners$.next(banners$.value.remove(id));
-
         return true;
       },
 
-      replace(id: string | undefined, mount: OverlayBannerMount, priority = 0) {
+      replace(id: string | undefined, mount: MountPoint, priority = 0) {
         if (!id || !banners$.value.has(id)) {
           return this.add(mount, priority);
         }
-
         const nextId = genId();
         const nextBanner = { id: nextId, mount, priority };
-
         banners$.next(banners$.value.remove(id).add(nextId, nextBanner));
         return nextId;
       },

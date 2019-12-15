@@ -12,10 +12,11 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
-import { asTime } from '../../../../../../utils/formatters';
+import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
+import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 
 type ItemType = 'transaction' | 'span';
 
@@ -27,12 +28,10 @@ interface IContainerStyleProps {
 
 interface IBarStyleProps {
   type: ItemType;
-  left: number;
-  width: number;
   color: string;
 }
 
-const Container = styled<IContainerStyleProps, 'div'>('div')`
+const Container = styled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
@@ -50,7 +49,7 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   }
 `;
 
-const ItemBar = styled<IBarStyleProps, any>('div')`
+const ItemBar = styled.div<IBarStyleProps>`
   box-sizing: border-box;
   position: relative;
   height: ${px(unit)};
@@ -114,7 +113,7 @@ interface SpanActionToolTipProps {
   item?: IWaterfallItem;
 }
 
-const SpanActionToolTip: React.SFC<SpanActionToolTipProps> = ({
+const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   item,
   children
 }) => {
@@ -133,7 +132,7 @@ const SpanActionToolTip: React.SFC<SpanActionToolTipProps> = ({
 function Duration({ item }: { item: IWaterfallItem }) {
   return (
     <EuiText color="subdued" size="xs">
-      {asTime(item.duration)}
+      {asDuration(item.duration)}
     </EuiText>
   );
 }
@@ -214,7 +213,7 @@ export function WaterfallItem({
             serviceName={item.transaction.service.name}
             query={{
               kuery: encodeURIComponent(
-                `trace.id : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
+                `${TRACE_ID} : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
               )
             }}
             color="danger"

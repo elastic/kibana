@@ -1,27 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ColorFormatEditorComponent should render multiple colors 1`] = `
+exports[`ColorFormatEditor should render multiple colors 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "regex",
-          "name": "Pattern (regular expression)",
+          "name": <FormattedMessage
+            defaultMessage="Pattern (regular expression)"
+            id="common.ui.fieldEditor.color.patternLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "text",
-          "name": "Text color",
+          "name": <FormattedMessage
+            defaultMessage="Text color"
+            id="common.ui.fieldEditor.color.textColorLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "background",
-          "name": "Background color",
+          "name": <FormattedMessage
+            defaultMessage="Background color"
+            id="common.ui.fieldEditor.color.backgroundLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
-          "name": "Example",
+          "name": <FormattedMessage
+            defaultMessage="Example"
+            id="common.ui.fieldEditor.color.exampleLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
@@ -80,28 +96,44 @@ exports[`ColorFormatEditorComponent should render multiple colors 1`] = `
 </Fragment>
 `;
 
-exports[`ColorFormatEditorComponent should render other type normally (range field) 1`] = `
+exports[`ColorFormatEditor should render other type normally (range field) 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "range",
-          "name": "Range (min:max)",
+          "name": <FormattedMessage
+            defaultMessage="Range (min:max)"
+            id="common.ui.fieldEditor.color.rangeLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "text",
-          "name": "Text color",
+          "name": <FormattedMessage
+            defaultMessage="Text color"
+            id="common.ui.fieldEditor.color.textColorLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "background",
-          "name": "Background color",
+          "name": <FormattedMessage
+            defaultMessage="Background color"
+            id="common.ui.fieldEditor.color.backgroundLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
-          "name": "Example",
+          "name": <FormattedMessage
+            defaultMessage="Example"
+            id="common.ui.fieldEditor.color.exampleLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
@@ -153,28 +185,44 @@ exports[`ColorFormatEditorComponent should render other type normally (range fie
 </Fragment>
 `;
 
-exports[`ColorFormatEditorComponent should render string type normally (regex field) 1`] = `
+exports[`ColorFormatEditor should render string type normally (regex field) 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "regex",
-          "name": "Pattern (regular expression)",
+          "name": <FormattedMessage
+            defaultMessage="Pattern (regular expression)"
+            id="common.ui.fieldEditor.color.patternLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "text",
-          "name": "Text color",
+          "name": <FormattedMessage
+            defaultMessage="Text color"
+            id="common.ui.fieldEditor.color.textColorLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "background",
-          "name": "Background color",
+          "name": <FormattedMessage
+            defaultMessage="Background color"
+            id="common.ui.fieldEditor.color.backgroundLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
-          "name": "Example",
+          "name": <FormattedMessage
+            defaultMessage="Example"
+            id="common.ui.fieldEditor.color.exampleLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {

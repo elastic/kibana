@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, Render } from '../../interpreter/types';
+import { ExpressionFunction, Render } from '../../../../plugins/expressions/public';
 import { Arguments, MarkdownVisParams } from './types';
 
 const name = 'markdownVis';

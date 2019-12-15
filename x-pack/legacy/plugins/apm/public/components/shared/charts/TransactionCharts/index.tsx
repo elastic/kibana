@@ -19,7 +19,6 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { isEmpty, flatten } from 'lodash';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
@@ -27,14 +26,20 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   asInteger,
   tpmUnit,
-  TimeFormatter
+  TimeFormatter,
+  getDurationFormatter
 } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { TransactionLineChart } from './TransactionLineChart';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { getTimeFormatter } from '../../../../utils/formatters';
-import { PageLoadCharts } from './PageLoadCharts';
+import { BrowserLineChart } from './BrowserLineChart';
+import { DurationByCountryMap } from './DurationByCountryMap';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_ROUTE_CHANGE,
+  TRANSACTION_REQUEST
+} from '../../../../../common/transaction_types';
 
 interface TransactionChartProps {
   hasMLJob: boolean;
@@ -55,31 +60,29 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
-const RUM_PAGE_LOAD_TYPE = 'page-load';
+export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
+  return (t: number) => formatter(t).formatted;
+}
+
+export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
+  return (p: Coordinate) => {
+    return isValidCoordinateValue(p.y)
+      ? formatter(p.y).formatted
+      : NOT_AVAILABLE_LABEL;
+  };
+}
+
+export function getMaxY(responseTimeSeries: TimeSeries[]) {
+  const coordinates = flatten(
+    responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
+  );
+
+  const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
+
+  return Math.max(...numbers, 0);
+}
 
 export class TransactionCharts extends Component<TransactionChartProps> {
-  public getMaxY = (responseTimeSeries: TimeSeries[]) => {
-    const coordinates = flatten(
-      responseTimeSeries.map((serie: TimeSeries) => serie.data as Coordinate[])
-    );
-
-    const numbers: number[] = coordinates.map((c: Coordinate) =>
-      c.y ? c.y : 0
-    );
-
-    return Math.max(...numbers, 0);
-  };
-
-  public getResponseTimeTickFormatter = (formatter: TimeFormatter) => {
-    return (t: number) => formatter(t);
-  };
-
-  public getResponseTimeTooltipFormatter = (formatter: TimeFormatter) => {
-    return (p: Coordinate) => {
-      return isValidCoordinateValue(p.y) ? formatter(p.y) : NOT_AVAILABLE_LABEL;
-    };
-  };
-
   public getTPMFormatter = (t: number) => {
     const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
@@ -150,8 +153,8 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     const { charts, urlParams } = this.props;
     const { responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
-    const maxY = this.getMaxY(responseTimeSeries);
-    const formatter = getTimeFormatter(maxY);
+    const maxY = getMaxY(responseTimeSeries);
+    const formatter = getDurationFormatter(maxY);
 
     return (
       <>
@@ -167,16 +170,14 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
                     {license =>
-                      this.renderMLHeader(
-                        idx(license, _ => _.features.ml.is_available)
-                      )
+                      this.renderMLHeader(license.features.ml?.is_available)
                     }
                   </LicenseContext.Consumer>
                 </EuiFlexGroup>
                 <TransactionLineChart
                   series={responseTimeSeries}
-                  tickFormatY={this.getResponseTimeTickFormatter(formatter)}
-                  formatTooltipValue={this.getResponseTimeTooltipFormatter(
+                  tickFormatY={getResponseTimeTickFormatter(formatter)}
+                  formatTooltipValue={getResponseTimeTooltipFormatter(
                     formatter
                   )}
                 />
@@ -200,19 +201,30 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGrid>
-        {transactionType === RUM_PAGE_LOAD_TYPE ? (
+        {transactionType === TRANSACTION_PAGE_LOAD && (
           <>
             <EuiSpacer size="s" />
-            <PageLoadCharts />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <EuiPanel>
+                  <DurationByCountryMap />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel>
+                  <BrowserLineChart />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGrid>
           </>
-        ) : null}
+        )}
       </>
     );
   }
 }
 
 function tpmLabel(type?: string) {
-  return type === 'request'
+  return type === TRANSACTION_REQUEST
     ? i18n.translate(
         'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
         {
@@ -229,14 +241,14 @@ function tpmLabel(type?: string) {
 
 function responseTimeLabel(type?: string) {
   switch (type) {
-    case RUM_PAGE_LOAD_TYPE:
+    case TRANSACTION_PAGE_LOAD:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
         {
           defaultMessage: 'Page load times'
         }
       );
-    case 'route-change':
+    case TRANSACTION_ROUTE_CHANGE:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.routeChangeTimesLabel',
         {

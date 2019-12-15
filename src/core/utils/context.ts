@@ -254,23 +254,20 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
-      .reduce(
-        async (contextPromise, [contextName, { provider, source: providerSource }]) => {
-          const resolvedContext = await contextPromise;
+      .reduce(async (contextPromise, [contextName, { provider, source: providerSource }]) => {
+        const resolvedContext = await contextPromise;
 
-          // For the next provider, only expose the context available based on the dependencies of the plugin that
-          // registered that provider.
-          const exposedContext = pick(resolvedContext, [
-            ...this.getContextNamesForSource(providerSource),
-          ]) as Partial<HandlerContextType<THandler>>;
+        // For the next provider, only expose the context available based on the dependencies of the plugin that
+        // registered that provider.
+        const exposedContext = pick(resolvedContext, [
+          ...this.getContextNamesForSource(providerSource),
+        ]) as Partial<HandlerContextType<THandler>>;
 
-          return {
-            ...resolvedContext,
-            [contextName]: await provider(exposedContext, ...contextArgs),
-          };
-        },
-        Promise.resolve({}) as Promise<HandlerContextType<THandler>>
-      );
+        return {
+          ...resolvedContext,
+          [contextName]: await provider(exposedContext, ...contextArgs),
+        };
+      }, Promise.resolve({}) as Promise<HandlerContextType<THandler>>);
   }
 
   private getContextNamesForSource(

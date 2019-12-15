@@ -20,14 +20,9 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { NewVisHelp } from './new_vis_help';
-import chrome from 'ui/chrome';
-
-jest.doMock('ui/chrome');
 
 describe('NewVisHelp', () => {
   it('should render as expected', () => {
-    (chrome.addBasePath as unknown) = (url: string) => `testbasepath${url}`;
-
     expect(
       shallowWithIntl(
         <NewVisHelp
@@ -36,7 +31,7 @@ describe('NewVisHelp', () => {
               aliasUrl: '/my/fancy/new/thing',
               description: 'Some desc',
               highlighted: false,
-              icon: 'wahtever',
+              icon: 'whatever',
               name: 'whatever',
               promotion: {
                 buttonText: 'Do it now!',
@@ -46,6 +41,7 @@ describe('NewVisHelp', () => {
               stage: 'production',
             },
           ]}
+          addBasePath={(url: string) => `testbasepath${url}`}
         />
       )
     ).toMatchInlineSnapshot(`

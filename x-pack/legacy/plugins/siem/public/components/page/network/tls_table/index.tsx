@@ -144,12 +144,9 @@ const makeMapStateToProps = () => {
 };
 
 export const TlsTable = compose<React.ComponentClass<OwnProps>>(
-  connect(
-    makeMapStateToProps,
-    {
-      updateNetworkTable: networkActions.updateNetworkTable,
-    }
-  )
+  connect(makeMapStateToProps, {
+    updateNetworkTable: networkActions.updateNetworkTable,
+  })
 )(TlsTableComponent);
 
 const getSortField = (sortField: TlsSortField): SortingBasicTable => ({

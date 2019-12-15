@@ -23,7 +23,7 @@ export const monospaceTextStyle = (scale: TextScale) => css`
       default:
         return props.theme.eui.euiFontSize;
     }
-  }}
+  }};
   line-height: ${props => props.theme.eui.euiLineHeight};
 `;
 
@@ -59,11 +59,11 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
 
   const CharacterDimensionsProbe = useMemo(
     () => () => (
-      <MonospaceCharacterDimensionsProbe scale={scale} innerRef={measureElement}>
+      <MonospaceCharacterDimensionsProbe scale={scale} ref={measureElement}>
         X
       </MonospaceCharacterDimensionsProbe>
     ),
-    [scale]
+    [measureElement, scale]
   );
 
   return {
@@ -72,11 +72,13 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
   };
 };
 
-const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs<{
+interface MonospaceCharacterDimensionsProbe {
   scale: TextScale;
-}>({
+}
+
+const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(() => ({
   'aria-hidden': true,
-})`
+}))<MonospaceCharacterDimensionsProbe>`
   visibility: hidden;
   position: absolute;
   height: auto;
@@ -84,5 +86,5 @@ const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs<{
   padding: 0;
   margin: 0;
 
-  ${props => monospaceTextStyle(props.scale)}
+  ${props => monospaceTextStyle(props.scale)};
 `;

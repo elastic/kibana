@@ -26,7 +26,7 @@ const StringArgInput = ({ updateValue, value, confirm, commit, argId }) => (
       />
     </EuiFlexItem>
     {confirm && (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
         <EuiButton size="s" onClick={() => commit(value)}>
           {confirm}
         </EuiButton>

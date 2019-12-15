@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React, { FunctionComponent } from 'react';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
+import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import {
   InfraNodeType,
   InfraSnapshotMetricInput,
   InfraSnapshotGroupbyInput,
 } from '../../../graphql/types';
-import { HostToolbarItems } from './host_toolbar_items';
-import { PodToolbarItems } from './pod_toolbar_items';
-import { ContainerToolbarItems } from './container_toolbar_items';
 import { ToolbarWrapper } from './toolbar_wrapper';
 
 import { waffleOptionsSelectors } from '../../../store';
@@ -23,9 +20,10 @@ import { InfraGroupByOptions } from '../../../lib/lib';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
 import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ToolbarProps {
-  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
+  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
   changeMetric: (payload: InfraSnapshotMetricInput) => Action<InfraSnapshotMetricInput>;
   changeGroupBy: (payload: InfraSnapshotGroupbyInput[]) => Action<InfraSnapshotGroupbyInput[]>;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;
@@ -35,7 +33,7 @@ export interface ToolbarProps {
   nodeType: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
 }
 
-const wrapToolbarItems = (ToolbarItems: (props: ToolbarProps) => JSX.Element) => {
+const wrapToolbarItems = (ToolbarItems: FunctionComponent<ToolbarProps>) => {
   return (
     <ToolbarWrapper>
       {props => (
@@ -60,15 +58,7 @@ const wrapToolbarItems = (ToolbarItems: (props: ToolbarProps) => JSX.Element) =>
   );
 };
 
-export const Toolbar = (props: { nodeType: InfraNodeType }) => {
-  switch (props.nodeType) {
-    case InfraNodeType.host:
-      return wrapToolbarItems(HostToolbarItems);
-    case InfraNodeType.pod:
-      return wrapToolbarItems(PodToolbarItems);
-    case InfraNodeType.container:
-      return wrapToolbarItems(ContainerToolbarItems);
-    default:
-      return null;
-  }
+export const Toolbar = ({ nodeType }: { nodeType: InfraNodeType }) => {
+  const ToolbarItems = findToolbar(nodeType);
+  return wrapToolbarItems(ToolbarItems);
 };

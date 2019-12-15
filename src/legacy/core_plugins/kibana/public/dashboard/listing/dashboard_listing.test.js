@@ -42,6 +42,17 @@ jest.mock(
   { virtual: true }
 );
 
+jest.mock('ui/new_platform', () => {
+  return {
+    npStart: {
+      core: {
+        notifications: { toasts: {} },
+        uiSettings: { get: jest.fn(() => 10) },
+      },
+    },
+  };
+});
+
 import React from 'react';
 import { shallow } from 'enzyme';
 

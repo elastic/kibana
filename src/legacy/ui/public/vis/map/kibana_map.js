@@ -22,26 +22,30 @@ import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
-import { zoomToPrecision } from '../../utils/zoom_to_precision';
+import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
 
 function makeFitControl(fitContainer, kibanaMap) {
-
   const FitControl = L.Control.extend({
     options: {
-      position: 'topleft'
+      position: 'topleft',
     },
-    initialize: function (fitContainer, kibanaMap) {
+    initialize: function(fitContainer, kibanaMap) {
       this._fitContainer = fitContainer;
       this._kibanaMap = kibanaMap;
       this._leafletMap = null;
     },
-    onAdd: function (leafletMap) {
+    onAdd: function(leafletMap) {
       this._leafletMap = leafletMap;
-      const fitDatBoundsLabel = i18n.translate('common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
-        { defaultMessage: 'Fit Data Bounds' });
-      $(this._fitContainer).html(`<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`)
+      const fitDatBoundsLabel = i18n.translate(
+        'common.ui.vis.kibanaMap.leaflet.fitDataBoundsAriaLabel',
+        { defaultMessage: 'Fit Data Bounds' }
+      );
+      $(this._fitContainer)
+        .html(
+          `<a class="kuiIcon fa-crop" href="#" title="${fitDatBoundsLabel}" aria-label="${fitDatBoundsLabel}"></a>`
+        )
         .on('click', e => {
           e.preventDefault();
           this._kibanaMap.fitToData();
@@ -49,27 +53,24 @@ function makeFitControl(fitContainer, kibanaMap) {
 
       return this._fitContainer;
     },
-    onRemove: function () {
+    onRemove: function() {
       $(this._fitContainer).off('click');
-    }
+    },
   });
 
   return new FitControl(fitContainer, kibanaMap);
 }
 
 function makeLegendControl(container, kibanaMap, position) {
-
   const LegendControl = L.Control.extend({
-
     options: {
-      position: 'topright'
+      position: 'topright',
     },
 
-    initialize: function (container, kibanaMap, position) {
+    initialize: function(container, kibanaMap, position) {
       this._legendContainer = container;
       this._kibanaMap = kibanaMap;
       this.options.position = position;
-
     },
 
     updateContents() {
@@ -77,21 +78,19 @@ function makeLegendControl(container, kibanaMap, position) {
       const $div = $('<div>').addClass('visMapLegend');
       this._legendContainer.append($div);
       const layers = this._kibanaMap.getLayers();
-      layers.forEach((layer) =>layer.appendLegendContents($div));
+      layers.forEach(layer => layer.appendLegendContents($div));
     },
 
-
-    onAdd: function () {
+    onAdd: function() {
       this._layerUpdateHandle = () => this.updateContents();
       this._kibanaMap.on('layers:update', this._layerUpdateHandle);
       this.updateContents();
       return this._legendContainer.get(0);
     },
-    onRemove: function () {
+    onRemove: function() {
       this._kibanaMap.removeListener('layers:update', this._layerUpdateHandle);
       this._legendContainer.empty();
-    }
-
+    },
   });
 
   return new LegendControl(container, kibanaMap, position);
@@ -102,9 +101,7 @@ function makeLegendControl(container, kibanaMap, position) {
  * Serves as simple abstraction for leaflet as well.
  */
 export class KibanaMap extends EventEmitter {
-
   constructor(containerNode, options) {
-
     super();
     this._containerNode = containerNode;
     this._leafletBaseLayer = null;
@@ -150,10 +147,18 @@ export class KibanaMap extends EventEmitter {
     this._leafletMap.on('zoomend', () => this._updateExtent());
     this._leafletMap.on('dragend', () => this._updateExtent());
 
-    this._leafletMap.on('mousemove', e => this._layers.forEach(layer => layer.movePointer('mousemove', e)));
-    this._leafletMap.on('mouseout', e => this._layers.forEach(layer => layer.movePointer('mouseout', e)));
-    this._leafletMap.on('mousedown', e => this._layers.forEach(layer => layer.movePointer('mousedown', e)));
-    this._leafletMap.on('mouseup', e => this._layers.forEach(layer => layer.movePointer('mouseup', e)));
+    this._leafletMap.on('mousemove', e =>
+      this._layers.forEach(layer => layer.movePointer('mousemove', e))
+    );
+    this._leafletMap.on('mouseout', e =>
+      this._layers.forEach(layer => layer.movePointer('mouseout', e))
+    );
+    this._leafletMap.on('mousedown', e =>
+      this._layers.forEach(layer => layer.movePointer('mousedown', e))
+    );
+    this._leafletMap.on('mouseup', e =>
+      this._layers.forEach(layer => layer.movePointer('mouseup', e))
+    );
     this._leafletMap.on('draw:created', event => {
       const drawType = event.layerType;
       if (drawType === 'rectangle') {
@@ -183,13 +188,13 @@ export class KibanaMap extends EventEmitter {
           bounds: {
             bottom_right: {
               lat: southEastLat,
-              lon: southEastLng
+              lon: southEastLng,
             },
             top_left: {
               lat: northWestLat,
-              lon: northWestLng
-            }
-          }
+              lon: northWestLng,
+            },
+          },
         });
       } else if (drawType === 'polygon') {
         const latLongs = event.layer.getLatLngs()[0];
@@ -197,9 +202,9 @@ export class KibanaMap extends EventEmitter {
           points: latLongs.map(leafletLatLng => {
             return {
               lat: leafletLatLng.lat,
-              lon: leafletLatLng.lng
+              lon: leafletLatLng.lng,
             };
-          })
+          }),
         });
       }
     });
@@ -215,12 +220,8 @@ export class KibanaMap extends EventEmitter {
     return this._layers.slice();
   }
 
-
   addLayer(kibanaLayer) {
-
-
-    const onshowTooltip = (event) => {
-
+    const onshowTooltip = event => {
       if (!this._showTooltip) {
         return;
       }
@@ -238,7 +239,6 @@ export class KibanaMap extends EventEmitter {
           this._popup.setContent(event.content);
         }
       }
-
     };
 
     kibanaLayer.on('showTooltip', onshowTooltip);
@@ -250,7 +250,6 @@ export class KibanaMap extends EventEmitter {
     };
     kibanaLayer.on('hideTooltip', onHideTooltip);
     this._listeners.push({ name: 'hideTooltip', handle: onHideTooltip, layer: kibanaLayer });
-
 
     const onStyleChanged = () => {
       if (this._leafletLegendControl) {
@@ -268,7 +267,6 @@ export class KibanaMap extends EventEmitter {
   }
 
   removeLayer(kibanaLayer) {
-
     if (!kibanaLayer) {
       return;
     }
@@ -286,25 +284,24 @@ export class KibanaMap extends EventEmitter {
     });
 
     //must readd all attributions, because we might have removed dupes
-    this._layers.forEach((layer) => this._addAttributions(layer.getAttributions()));
+    this._layers.forEach(layer => this._addAttributions(layer.getAttributions()));
     if (this._baseLayerSettings) {
       this._addAttributions(this._baseLayerSettings.options.attribution);
     }
   }
 
-
   _addAttributions(attribution) {
     const attributions = getAttributionArray(attribution);
-    attributions.forEach((attribution) => {
-      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+    attributions.forEach(attribution => {
+      this._leafletMap.attributionControl.removeAttribution(attribution); //this ensures we do not add duplicates
       this._leafletMap.attributionControl.addAttribution(attribution);
     });
   }
 
   _removeAttributions(attribution) {
     const attributions = getAttributionArray(attribution);
-    attributions.forEach((attribution) => {
-      this._leafletMap.attributionControl.removeAttribution(attribution);//this ensures we do not add duplicates
+    attributions.forEach(attribution => {
+      this._leafletMap.attributionControl.removeAttribution(attribution); //this ensures we do not add duplicates
     });
   }
 
@@ -326,7 +323,9 @@ export class KibanaMap extends EventEmitter {
     }
     this._leafletMap.remove();
     this._containerNode.innerHTML = '';
-    this._listeners.forEach(listener => listener.layer.removeListener(listener.name, listener.handle));
+    this._listeners.forEach(listener =>
+      listener.layer.removeListener(listener.name, listener.handle)
+    );
   }
 
   getCenter() {
@@ -349,11 +348,11 @@ export class KibanaMap extends EventEmitter {
 
   getZoomLevel = () => {
     return this._leafletMap.getZoom();
-  }
+  };
 
   getMaxZoomLevel = () => {
     return this._leafletMap.getMaxZoom();
-  }
+  };
 
   getGeohashPrecision() {
     return zoomToPrecision(this._leafletMap.getZoom(), 12, this._leafletMap.getMaxZoom());
@@ -378,7 +377,6 @@ export class KibanaMap extends EventEmitter {
   }
 
   _getLeafletBounds(resizeOnFail) {
-
     const boundsRaw = this._leafletMap.getBounds();
     const bounds = this._leafletMap.wrapLatLngBounds(boundsRaw);
 
@@ -388,10 +386,7 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
-    if (
-      southEast.lng === northWest.lng ||
-      southEast.lat === northWest.lat
-    ) {
+    if (southEast.lng === northWest.lng || southEast.lat === northWest.lat) {
       if (resizeOnFail) {
         this._leafletMap.invalidateSize();
         return this._getLeafletBounds(false);
@@ -404,7 +399,6 @@ export class KibanaMap extends EventEmitter {
   }
 
   getBounds() {
-
     const bounds = this._getLeafletBounds(true);
     if (!bounds) {
       return null;
@@ -425,12 +419,12 @@ export class KibanaMap extends EventEmitter {
     return {
       bottom_right: {
         lat: southEastLat,
-        lon: southEastLng
+        lon: southEastLng,
       },
       top_left: {
         lat: northWestLat,
-        lon: northWestLng
-      }
+        lon: northWestLng,
+      },
     };
   }
 
@@ -455,23 +449,22 @@ export class KibanaMap extends EventEmitter {
         rectangle: {
           shapeOptions: {
             stroke: false,
-            color: drawColor
-          }
+            color: drawColor,
+          },
         },
         polygon: {
           shapeOptions: {
-            color: drawColor
-          }
+            color: drawColor,
+          },
         },
-        circlemarker: false
-      }
+        circlemarker: false,
+      },
     };
     this._leafletDrawControl = new L.Control.Draw(drawOptions);
     this._leafletMap.addControl(this._leafletDrawControl);
   }
 
   addFitControl() {
-
     if (this._leafletFitControl || !this._leafletMap) {
       return;
     }
@@ -498,7 +491,7 @@ export class KibanaMap extends EventEmitter {
       this._leafletMap.off('zoomend', zoomWarningMsg);
       this._containerNode.removeAttribute('data-test-subj');
     });
-  }
+  };
 
   setLegendPosition(position) {
     if (this._legendPosition === position) {
@@ -509,8 +502,6 @@ export class KibanaMap extends EventEmitter {
       this._legendPosition = position;
       this._updateLegend();
     }
-
-
   }
 
   _updateLegend() {
@@ -540,11 +531,9 @@ export class KibanaMap extends EventEmitter {
   }
 
   setBaseLayer(settings) {
-
     if (_.isEqual(settings, this._baseLayerSettings)) {
       return;
     }
-
 
     if (settings === null) {
       if (this._leafletBaseLayer && this._leafletMap) {
@@ -564,9 +553,11 @@ export class KibanaMap extends EventEmitter {
 
     let baseLayer;
     if (settings.baseLayerType === 'wms') {
+      //This is user-input that is rendered with the Leaflet attribution control. Needs to be sanitized.
+      this._baseLayerSettings.options.attribution = _.escape(settings.options.attribution);
       baseLayer = this._getWMSBaseLayer(settings.options);
     } else if (settings.baseLayerType === 'tms') {
-      baseLayer = this._getTMSBaseLayer((settings.options));
+      baseLayer = this._getTMSBaseLayer(settings.options);
     }
 
     if (baseLayer) {
@@ -592,7 +583,6 @@ export class KibanaMap extends EventEmitter {
       this._addAttributions(settings.options.attribution);
       this.resize();
     }
-
   }
 
   isInside(bucketRectBounds) {
@@ -601,17 +591,18 @@ export class KibanaMap extends EventEmitter {
   }
 
   async fitToData() {
-
     if (!this._leafletMap) {
       return;
     }
 
-    const boundsArray = await Promise.all(this._layers.map(async (layer) => {
-      return await layer.getBounds();
-    }));
+    const boundsArray = await Promise.all(
+      this._layers.map(async layer => {
+        return await layer.getBounds();
+      })
+    );
 
     let bounds = null;
-    boundsArray.forEach(async (b) => {
+    boundsArray.forEach(async b => {
       if (bounds) {
         bounds.extend(b);
       } else {
@@ -628,7 +619,7 @@ export class KibanaMap extends EventEmitter {
     return L.tileLayer(options.url, {
       minZoom: options.minZoom,
       maxZoom: options.maxZoom,
-      subdomains: options.subdomains || []
+      subdomains: options.subdomains || [],
     });
   }
 
@@ -640,10 +631,12 @@ export class KibanaMap extends EventEmitter {
       maxZoom: options.maxZoom,
       styles: options.styles || '',
       transparent: options.transparent,
-      version: options.version || '1.3.0'
+      version: options.version || '1.3.0',
     };
 
-    return (typeof options.url === 'string' && options.url.length) ? L.tileLayer.wms(options.url, wmsOptions) : null;
+    return typeof options.url === 'string' && options.url.length
+      ? L.tileLayer.wms(options.url, wmsOptions)
+      : null;
   }
 
   _updateExtent() {
@@ -674,7 +667,11 @@ export class KibanaMap extends EventEmitter {
         visualization.uiStateVal('mapZoom', this.getZoomLevel());
       }
       const centerFromMap = this.getCenter();
-      if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
+      if (
+        !centerFromUIState ||
+        centerFromMap.lon !== centerFromUIState[1] ||
+        centerFromMap.lat !== centerFromUIState[0]
+      ) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
     }
@@ -702,13 +699,12 @@ export class KibanaMap extends EventEmitter {
   }
 }
 
-
 function getAttributionArray(attribution) {
   const attributionString = attribution || '';
   let attributions = attributionString.split(/\s*\|\s*/);
-  if (attributions.length === 1) {//temp work-around due to inconsistency in manifests of how attributions are delimited
+  if (attributions.length === 1) {
+    //temp work-around due to inconsistency in manifests of how attributions are delimited
     attributions = attributions[0].split(',');
   }
   return attributions;
 }
-

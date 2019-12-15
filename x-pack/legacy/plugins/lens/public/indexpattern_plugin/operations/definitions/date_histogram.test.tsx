@@ -8,30 +8,29 @@ import React from 'react';
 import { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
-import { EuiSwitch } from '@elastic/eui';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
-jest.mock('ui/new_platform');
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: () => ({
-    get(path: string) {
-      if (path === 'histogram:maxBars') {
-        return 10;
-      }
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      uiSettings: {
+        get: (path: string) => {
+          if (path === 'histogram:maxBars') {
+            return 10;
+          }
+        },
+      },
     },
-  }),
+  },
 }));
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as UiSettingsClientContract,
+  uiSettings: {} as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
@@ -423,7 +422,7 @@ describe('date_histogram', () => {
       );
       instance.find(EuiSwitch).prop('onChange')!({
         target: { checked: true },
-      } as React.ChangeEvent<HTMLInputElement>);
+      } as EuiSwitchEvent);
       expect(setStateSpy).toHaveBeenCalled();
       const newState = setStateSpy.mock.calls[0][0];
       expect(newState).toHaveProperty('layers.third.columns.col1.params.interval', '30d');

@@ -61,5 +61,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { EmbeddablePublicPlugin as Plugin };
-export * from './plugin';
+export { IEmbeddableSetup, IEmbeddableStart } from './plugin';

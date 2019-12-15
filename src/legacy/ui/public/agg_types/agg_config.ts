@@ -26,16 +26,14 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
+import { SearchSourceContract, FetchOptions } from '../courier/types';
 import { AggType } from './agg_type';
-import { FieldParamType } from './param_types/field';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
-import { ContentType } from '../../../../plugins/data/common';
-
-// @ts-ignore
-import { fieldFormats } from '../registry/field_formats';
+import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -205,7 +203,7 @@ export class AggConfig {
   }
 
   write(aggs?: AggConfigs) {
-    return writeParams(this.type.params, this, aggs);
+    return writeParams<AggConfig>(this.type.params, this, aggs);
   }
 
   isFilterable() {
@@ -235,10 +233,10 @@ export class AggConfig {
   /**
    *  Hook for pre-flight logic, see AggType#onSearchRequestStart
    *  @param {Courier.SearchSource} searchSource
-   *  @param {Courier.SearchRequest} searchRequest
+   *  @param {Courier.FetchOptions} options
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: any, options: any) {
+  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
     if (!this.type) {
       return Promise.resolve();
     }
@@ -378,14 +376,16 @@ export class AggConfig {
     if (format) {
       return format.getConverterFor(contentType);
     }
+
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
   fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
+    const fieldFormats = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormats.getDefaultInstance('string');
+    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 
@@ -424,13 +424,15 @@ export class AggConfig {
     }
 
     this.__type = type;
+    let availableFields = [];
 
-    const fieldParam =
-      this.type && (this.type.params.find((p: any) => p.type === 'field') as FieldParamType);
-    // @ts-ignore
-    const availableFields = fieldParam
-      ? fieldParam.getAvailableFields(this.getIndexPattern().fields)
-      : [];
+    const fieldParam = this.type && this.type.params.find((p: any) => p.type === 'field');
+
+    if (fieldParam) {
+      // @ts-ignore
+      availableFields = fieldParam.getAvailableFields(this.getIndexPattern().fields);
+    }
+
     // clear out the previous params except for a few special ones
     this.setParams({
       // split row/columns is "outside" of the agg, so don't reset it

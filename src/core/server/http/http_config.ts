@@ -19,6 +19,7 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
+import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
@@ -38,7 +39,15 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      defaultRoute: schema.maybe(schema.string()),
+      defaultRoute: schema.maybe(
+        schema.string({
+          validate(value) {
+            if (!value.startsWith('/')) {
+              return 'must start with a slash';
+            }
+          },
+        })
+      ),
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,
@@ -72,11 +81,25 @@ export const config = {
       socketTimeout: schema.number({
         defaultValue: 120000,
       }),
+      compression: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        referrerWhitelist: schema.maybe(
+          schema.arrayOf(
+            schema.string({
+              hostname: true,
+            }),
+            { minSize: 1 }
+          )
+        ),
+      }),
     },
     {
       validate: rawConfig => {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
+        }
+        if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
+          return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
         }
 
         if (
@@ -109,22 +132,26 @@ export class HttpConfig {
   public publicDir: string;
   public defaultRoute?: string;
   public ssl: SslConfig;
+  public compression: { enabled: boolean; referrerWhitelist?: string[] };
+  public csp: ICspConfig;
 
   /**
    * @internal
    */
-  constructor(rawConfig: HttpConfigType, env: Env) {
-    this.autoListen = rawConfig.autoListen;
-    this.host = rawConfig.host;
-    this.port = rawConfig.port;
-    this.cors = rawConfig.cors;
-    this.maxPayload = rawConfig.maxPayload;
-    this.basePath = rawConfig.basePath;
-    this.keepaliveTimeout = rawConfig.keepaliveTimeout;
-    this.socketTimeout = rawConfig.socketTimeout;
-    this.rewriteBasePath = rawConfig.rewriteBasePath;
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env: Env) {
+    this.autoListen = rawHttpConfig.autoListen;
+    this.host = rawHttpConfig.host;
+    this.port = rawHttpConfig.port;
+    this.cors = rawHttpConfig.cors;
+    this.maxPayload = rawHttpConfig.maxPayload;
+    this.basePath = rawHttpConfig.basePath;
+    this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
+    this.socketTimeout = rawHttpConfig.socketTimeout;
+    this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
-    this.ssl = new SslConfig(rawConfig.ssl || {});
-    this.defaultRoute = rawConfig.defaultRoute;
+    this.ssl = new SslConfig(rawHttpConfig.ssl || {});
+    this.defaultRoute = rawHttpConfig.defaultRoute;
+    this.compression = rawHttpConfig.compression;
+    this.csp = new CspConfig(rawCspConfig);
   }
 }

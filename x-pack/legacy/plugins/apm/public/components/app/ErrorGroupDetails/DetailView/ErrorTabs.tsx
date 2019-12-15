@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 
 export interface ErrorTab {
@@ -39,7 +38,7 @@ export const metadataTab: ErrorTab = {
 };
 
 export function getTabs(error: APMError) {
-  const hasLogStacktrace = !isEmpty(idx(error, _ => _.error.log.stacktrace));
+  const hasLogStacktrace = !isEmpty(error.error.log?.stacktrace);
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,

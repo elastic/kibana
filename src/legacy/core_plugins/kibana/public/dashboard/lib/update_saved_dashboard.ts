@@ -18,16 +18,15 @@
  */
 
 import _ from 'lodash';
-import { AppState } from 'ui/state_management/app_state';
-import { Timefilter } from 'ui/timefilter';
-import { RefreshInterval } from 'src/plugins/data/public';
+import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
+import { AppState } from '../legacy_imports';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
   appState: AppState,
-  timeFilter: Timefilter,
+  timeFilter: TimefilterContract,
   toJson: <T>(object: T) => string
 ) {
   savedDashboard.title = appState.title;

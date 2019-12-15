@@ -17,37 +17,52 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import _, { forEach } from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
-import { VisualizeLoader } from 'ui/visualize/loader';
-import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
-import { AppState } from 'ui/state_management/app_state';
-import {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { Filter } from '@kbn/es-query';
-import { TimeRange, onlyDisabledFiltersChanged } from '../../../../../../plugins/data/public';
+import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
+import { SavedObject } from 'ui/saved_objects/types';
+import { Vis } from 'ui/vis';
+import { queryGeohashBounds } from 'ui/visualize/loader/utils';
+import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { AppState } from 'ui/state_management/app_state';
+import { npStart } from 'ui/new_platform';
+import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import {
+  IIndexPattern,
+  TimeRange,
+  Query,
+  onlyDisabledFiltersChanged,
+  esFilters,
+  mapAndFlattenFilters,
+} from '../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
   Container,
+  APPLY_FILTER_TRIGGER,
 } from '../../../../../../plugins/embeddable/public';
-import { Query } from '../../../../data/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { dispatchRenderComplete } from '../../../../../../plugins/kibana_utils/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
+export interface VisSavedObject extends SavedObject {
+  vis: Vis;
+  description?: string;
+  searchSource: SearchSourceContract;
+  title: string;
+  uiStateJSON?: string;
+  destroy: () => void;
+}
+
 export interface VisualizeEmbeddableConfiguration {
   savedVisualization: VisSavedObject;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editUrl: string;
-  loader: VisualizeLoader;
   editable: boolean;
   appState?: AppState;
   uiState?: PersistedState;
@@ -56,7 +71,7 @@ export interface VisualizeEmbeddableConfiguration {
 export interface VisualizeInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
-  filters?: Filter[];
+  filters?: esFilters.Filter[];
   vis?: {
     colors?: { [key: string]: string };
   };
@@ -66,29 +81,33 @@ export interface VisualizeInput extends EmbeddableInput {
 
 export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   savedObjectId: string;
   visTypeName: string;
 }
 
+type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.ExpressionLoader>;
+
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
+  private handler?: ExpressionLoader;
   private savedVisualization: VisSavedObject;
-  private loader: VisualizeLoader;
   private appState: AppState | undefined;
   private uiState: PersistedState;
-  private handler?: EmbeddedVisualizeHandler;
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
-  private filters?: Filter[];
+  private filters?: esFilters.Filter[];
   private visCustomizations: VisualizeInput['vis'];
-  private subscription: Subscription;
+  private subscriptions: Subscription[] = [];
+  private expression: string = '';
+  private actions: any = {};
+  private vis: Vis;
+  private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   constructor(
     {
       savedVisualization,
-      loader,
       editUrl,
       indexPatterns,
       editable,
@@ -110,8 +129,12 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       },
       parent
     );
+    this.appState = appState;
     this.savedVisualization = savedVisualization;
-    this.loader = loader;
+    this.vis = this.savedVisualization.vis;
+
+    this.vis.on('update', this.handleVisUpdate);
+    this.vis.on('reload', this.reload);
 
     if (uiState) {
       this.uiState = uiState;
@@ -124,23 +147,31 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.uiState.on('change', this.uiStateChangeHandler);
     }
 
-    this.appState = appState;
+    this.vis._setUiState(this.uiState);
 
-    this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-      this.handleChanges();
-    });
+    this.subscriptions.push(
+      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+        this.handleChanges();
+      })
+    );
   }
 
   public getVisualizationDescription() {
     return this.savedVisualization.description;
   }
 
-  public getInspectorAdapters() {
+  public getInspectorAdapters = () => {
     if (!this.handler) {
       return undefined;
     }
-    return this.handler.inspectorAdapters;
-  }
+    return this.handler.inspect();
+  };
+
+  public openInspector = () => {
+    if (this.handler) {
+      return this.handler.openInspector(this.getTitle() || '');
+    }
+  };
 
   /**
    * Transfers all changes in the containerState.customization into
@@ -168,87 +199,148 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
   }
 
-  public handleChanges() {
+  public async handleChanges() {
     this.transferCustomizationsToUiState();
 
-    const updatedParams: VisualizeUpdateParams = {};
+    let dirty = false;
 
     // Check if timerange has changed
     if (!_.isEqual(this.input.timeRange, this.timeRange)) {
       this.timeRange = _.cloneDeep(this.input.timeRange);
-      updatedParams.timeRange = this.timeRange;
+      dirty = true;
     }
 
     // Check if filters has changed
     if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
-      updatedParams.filters = this.input.filters;
       this.filters = this.input.filters;
+      dirty = true;
     }
 
     // Check if query has changed
     if (!_.isEqual(this.input.query, this.query)) {
-      updatedParams.query = this.input.query;
       this.query = this.input.query;
+      dirty = true;
     }
 
     if (this.output.title !== this.title) {
       this.title = this.output.title;
-      updatedParams.dataAttrs = {
-        title: this.title || '',
-      };
+      if (this.domNode) {
+        this.domNode.setAttribute('data-title', this.title || '');
+      }
     }
 
-    if (this.handler && !_.isEmpty(updatedParams)) {
-      this.handler.update(updatedParams);
-      this.handler.reload();
+    if (this.savedVisualization.description && this.domNode) {
+      this.domNode.setAttribute('data-description', this.savedVisualization.description);
+    }
+
+    if (this.handler && dirty) {
+      this.updateHandler();
     }
   }
 
   /**
    *
    * @param {Element} domNode
-   * @param {ContainerState} containerState
    */
-  public render(domNode: HTMLElement) {
+  public async render(domNode: HTMLElement) {
     this.timeRange = _.cloneDeep(this.input.timeRange);
-    this.query = this.input.query;
-    this.filters = this.input.filters;
 
     this.transferCustomizationsToUiState();
 
-    const dataAttrs: { [key: string]: string } = {
-      'shared-item': '',
-      title: this.output.title || '',
+    this.savedVisualization.vis._setUiState(this.uiState);
+    this.uiState = this.savedVisualization.vis.getUiState();
+
+    // init default actions
+    forEach(this.vis.type.events, (event, eventName) => {
+      if (event.disabled || !eventName) {
+        return;
+      } else {
+        this.actions[eventName] = event.defaultAction;
+      }
+    });
+
+    // This is a hack to give maps visualizations access to data in the
+    // globalState, since they can no longer access it via searchSource.
+    // TODO: Remove this as a part of elastic/kibana#30593
+    this.vis.API.getGeohashBounds = () => {
+      return queryGeohashBounds(this.savedVisualization.vis, {
+        filters: this.filters,
+        query: this.query,
+        searchSource: this.savedVisualization.searchSource,
+      });
     };
+
+    // this is a hack to make editor still work, will be removed once we clean up editor
+    this.vis.hasInspector = () => {
+      const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega'];
+      if (visTypesWithoutInspector.includes(this.vis.type.name)) {
+        return false;
+      }
+      return this.getInspectorAdapters();
+    };
+
+    this.vis.openInspector = this.openInspector;
+
+    const div = document.createElement('div');
+    div.className = `visualize panel-content panel-content--fullWidth`;
+    domNode.appendChild(div);
+    this.domNode = div;
+
+    this.handler = new npStart.plugins.expressions.ExpressionLoader(this.domNode);
+
+    this.subscriptions.push(
+      this.handler.events$.subscribe(async event => {
+        if (this.actions[event.name]) {
+          event.data.aggConfigs = getTableAggs(this.vis);
+          const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
+          const mappedFilters = mapAndFlattenFilters(filters);
+          const timeFieldName = this.vis.indexPattern.timeFieldName;
+
+          npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+            embeddable: this,
+            filters: mappedFilters,
+            timeFieldName,
+          });
+        }
+      })
+    );
+
+    div.setAttribute('data-title', this.output.title || '');
+
     if (this.savedVisualization.description) {
-      dataAttrs.description = this.savedVisualization.description;
+      div.setAttribute('data-description', this.savedVisualization.description);
     }
 
-    const handlerParams: VisualizeLoaderParams = {
-      appState: this.appState,
-      uiState: this.uiState,
-      // Append visualization to container instead of replacing its content
-      append: true,
-      timeRange: _.cloneDeep(this.input.timeRange),
-      query: this.query,
-      filters: this.filters,
-      cssClass: `panel-content panel-content--fullWidth`,
-      dataAttrs,
-    };
+    div.setAttribute('data-test-subj', 'visualizationLoader');
+    div.setAttribute('data-shared-item', '');
+    div.setAttribute('data-rendering-count', '0');
+    div.setAttribute('data-render-complete', 'false');
 
-    this.handler = this.loader.embedVisualizationWithSavedObject(
-      domNode,
-      this.savedVisualization,
-      handlerParams
+    this.subscriptions.push(
+      this.handler.loading$.subscribe(() => {
+        div.setAttribute('data-render-complete', 'false');
+        div.setAttribute('data-loading', '');
+      })
     );
+
+    this.subscriptions.push(
+      this.handler.render$.subscribe(count => {
+        div.removeAttribute('data-loading');
+        div.setAttribute('data-render-complete', 'true');
+        div.setAttribute('data-rendering-count', count.toString());
+        dispatchRenderComplete(div);
+      })
+    );
+
+    this.updateHandler();
   }
 
   public destroy() {
     super.destroy();
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscriptions.forEach(s => s.unsubscribe());
     this.uiState.off('change', this.uiStateChangeHandler);
+    this.savedVisualization.vis.removeListener('reload', this.reload);
+    this.savedVisualization.vis.removeListener('update', this.handleVisUpdate);
     this.savedVisualization.destroy();
     if (this.handler) {
       this.handler.destroy();
@@ -256,11 +348,45 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
   }
 
-  public reload() {
+  public reload = () => {
+    this.handleVisUpdate();
+  };
+
+  private async updateHandler() {
+    const expressionParams: IExpressionLoaderParams = {
+      searchContext: {
+        type: 'kibana_context',
+        timeRange: this.timeRange,
+        query: this.input.query,
+        filters: this.input.filters,
+      },
+      extraHandlers: {
+        vis: this.vis,
+        uiState: this.uiState,
+      },
+    };
+    this.expression = await buildPipeline(this.vis, {
+      searchSource: this.savedVisualization.searchSource,
+      timeRange: this.timeRange,
+    });
+
+    this.vis.filters = { timeRange: this.timeRange };
+
     if (this.handler) {
-      this.handler.reload();
+      this.handler.update(this.expression, expressionParams);
     }
+
+    this.vis.emit('apply');
   }
+
+  private handleVisUpdate = async () => {
+    if (this.appState) {
+      this.appState.vis = this.savedVisualization.vis.getState();
+      this.appState.save();
+    }
+
+    this.updateHandler();
+  };
 
   private uiStateChangeHandler = () => {
     this.updateInput({

@@ -123,9 +123,10 @@ export const composeModuleAndInstalledJobs = (
 ): SiemJob[] => {
   const installedJobsIds = installedJobs.map(installedJob => installedJob.id);
 
-  return [...installedJobs, ...moduleSiemJobs.filter(mj => !installedJobsIds.includes(mj.id))].sort(
-    (a, b) => a.id.localeCompare(b.id)
-  );
+  return [
+    ...installedJobs,
+    ...moduleSiemJobs.filter(mj => !installedJobsIds.includes(mj.id)),
+  ].sort((a, b) => a.id.localeCompare(b.id));
 };
 /**
  * Creates a list of SiemJobs by composing JobSummary jobs (installed jobs) and Module

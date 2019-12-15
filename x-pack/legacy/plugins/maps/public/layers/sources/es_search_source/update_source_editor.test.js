@@ -15,7 +15,7 @@ const defaultProps = {
   indexPatternId: 'indexPattern1',
   onChange: () => {},
   filterByMapBounds: true,
-  tooltipProperties: [],
+  tooltipFields: [],
   sortOrder: 'DESC',
   useTopHits: false,
   topHitsSplitField: 'trackId',
@@ -23,33 +23,19 @@ const defaultProps = {
 };
 
 test('should render update source editor', async () => {
-  const component = shallow(
-    <UpdateSourceEditor
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<UpdateSourceEditor {...defaultProps} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should enable sort order select when sort field provided', async () => {
-  const component = shallow(
-    <UpdateSourceEditor
-      {...defaultProps}
-      sortField="@timestamp"
-    />
-  );
+  const component = shallow(<UpdateSourceEditor {...defaultProps} sortField="@timestamp" />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should render top hits form when useTopHits is true', async () => {
-  const component = shallow(
-    <UpdateSourceEditor
-      {...defaultProps}
-      useTopHits={true}
-    />
-  );
+  const component = shallow(<UpdateSourceEditor {...defaultProps} useTopHits={true} />);
 
   expect(component).toMatchSnapshot();
 });

@@ -1,0 +1,682 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
+<DashboardEmptyScreen
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  onLinkClick={[MockFunction]}
+  showLinkToVisualize={true}
+>
+  <I18nProvider>
+    <IntlProvider
+      defaultLocale="en"
+      formats={
+        Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        }
+      }
+      locale="en"
+      messages={Object {}}
+      textComponent={Symbol(react.fragment)}
+    >
+      <PseudoLocaleWrapper>
+        <EuiPage
+          className="dshStartScreen"
+          restrictWidth="36em"
+        >
+          <div
+            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            style={
+              Object {
+                "maxWidth": "36em",
+              }
+            }
+          >
+            <EuiPageBody
+              component="main"
+              restrictWidth={false}
+            >
+              <main
+                className="euiPageBody"
+              >
+                <EuiPageContent
+                  horizontalPosition="center"
+                  panelPaddingSize="l"
+                  verticalPosition="center"
+                >
+                  <EuiPanel
+                    className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                    paddingSize="l"
+                  >
+                    <div
+                      className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                    >
+                      <EuiIcon
+                        color="subdued"
+                        size="xxl"
+                        type="dashboardApp"
+                      >
+                        <EuiIconEmpty
+                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                          focusable="false"
+                          style={null}
+                        >
+                          <svg
+                            className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiText
+                        grow={true}
+                      >
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <h2
+                            key="0.5"
+                          >
+                            This dashboard is empty. Let’s fill it up!
+                          </h2>
+                        </div>
+                      </EuiText>
+                      <EuiSpacer
+                        size="m"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--m"
+                        />
+                      </EuiSpacer>
+                      <EuiText
+                        size="m"
+                      >
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <p>
+                            Click the 
+                            <EuiLink
+                              aria-label="Add visualization"
+                              data-test-subj="emptyDashboardAddPanelButton"
+                              onClick={[MockFunction]}
+                            >
+                              <button
+                                aria-label="Add visualization"
+                                className="euiLink euiLink--primary"
+                                data-test-subj="emptyDashboardAddPanelButton"
+                                onClick={[MockFunction]}
+                                type="button"
+                              >
+                                Add
+                              </button>
+                            </EuiLink>
+                             button in the menu bar above to add a visualization to the dashboard.
+                          </p>
+                        </div>
+                      </EuiText>
+                      <EuiSpacer
+                        size="m"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--m"
+                        />
+                      </EuiSpacer>
+                      <p
+                        data-test-subj="linkToVisualizeParagraph"
+                      >
+                        <EuiButton
+                          data-test-subj="addVisualizationButton"
+                          fill={true}
+                          iconSide="right"
+                          iconType="arrowDown"
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--iconRight euiButton--fill"
+                            data-test-subj="addVisualizationButton"
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButton__icon"
+                                size="m"
+                                type="arrowDown"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden="true"
+                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                  focusable="false"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                    focusable="false"
+                                    height={16}
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                              <span
+                                className="euiButton__text"
+                              >
+                                Create new
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </p>
+                    </div>
+                  </EuiPanel>
+                </EuiPageContent>
+              </main>
+            </EuiPageBody>
+          </div>
+        </EuiPage>
+      </PseudoLocaleWrapper>
+    </IntlProvider>
+  </I18nProvider>
+</DashboardEmptyScreen>
+`;
+
+exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] = `
+<DashboardEmptyScreen
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  onLinkClick={[MockFunction]}
+  showLinkToVisualize={false}
+>
+  <I18nProvider>
+    <IntlProvider
+      defaultLocale="en"
+      formats={
+        Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        }
+      }
+      locale="en"
+      messages={Object {}}
+      textComponent={Symbol(react.fragment)}
+    >
+      <PseudoLocaleWrapper>
+        <EuiPage
+          className="dshStartScreen"
+          restrictWidth="36em"
+        >
+          <div
+            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            style={
+              Object {
+                "maxWidth": "36em",
+              }
+            }
+          >
+            <EuiPageBody
+              component="main"
+              restrictWidth={false}
+            >
+              <main
+                className="euiPageBody"
+              >
+                <EuiPageContent
+                  horizontalPosition="center"
+                  panelPaddingSize="l"
+                  verticalPosition="center"
+                >
+                  <EuiPanel
+                    className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                    paddingSize="l"
+                  >
+                    <div
+                      className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                    >
+                      <EuiIcon
+                        color="subdued"
+                        size="xxl"
+                        type="dashboardApp"
+                      >
+                        <EuiIconEmpty
+                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                          focusable="false"
+                          style={null}
+                        >
+                          <svg
+                            className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+                            focusable="false"
+                            height={16}
+                            style={null}
+                            viewBox="0 0 16 16"
+                            width={16}
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </EuiIconEmpty>
+                      </EuiIcon>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiText
+                        grow={true}
+                      >
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <h2
+                            key="0.5"
+                          >
+                            This dashboard is empty. Let’s fill it up!
+                          </h2>
+                        </div>
+                      </EuiText>
+                      <EuiSpacer
+                        size="m"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--m"
+                        />
+                      </EuiSpacer>
+                      <EuiText
+                        size="m"
+                      >
+                        <div
+                          className="euiText euiText--medium"
+                        >
+                          <p>
+                            Click the 
+                            <EuiLink
+                              aria-label="Edit dashboard"
+                              data-test-subj=""
+                              onClick={[MockFunction]}
+                            >
+                              <button
+                                aria-label="Edit dashboard"
+                                className="euiLink euiLink--primary"
+                                data-test-subj=""
+                                onClick={[MockFunction]}
+                                type="button"
+                              >
+                                Edit
+                              </button>
+                            </EuiLink>
+                             button in the menu bar above to start working on your new dashboard.
+                          </p>
+                        </div>
+                      </EuiText>
+                    </div>
+                  </EuiPanel>
+                </EuiPageContent>
+              </main>
+            </EuiPageBody>
+          </div>
+        </EuiPage>
+      </PseudoLocaleWrapper>
+    </IntlProvider>
+  </I18nProvider>
+</DashboardEmptyScreen>
+`;

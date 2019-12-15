@@ -17,9 +17,9 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
       data-focus-lock-disabled="disabled"
     >
       <div
-        aira-modal="true"
         aria-describedby="generated-id"
         aria-live="assertive"
+        aria-modal="true"
         class="euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-withTitle"
         role="dialog"
         style="top: -16px; left: -22px; z-index: 2000;"
@@ -56,26 +56,35 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Auto Play
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                   <button
@@ -86,26 +95,35 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Toolbar
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                 </div>
@@ -141,9 +159,9 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
       data-focus-lock-disabled="disabled"
     >
       <div
-        aira-modal="true"
         aria-describedby="generated-id"
         aria-live="assertive"
+        aria-modal="true"
         class="euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen euiPopover__panel-withTitle"
         role="dialog"
         style="top: -16px; left: -22px; z-index: 2000;"
@@ -293,54 +311,58 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                     <div
                       class="euiSwitch"
                     >
-                      <input
-                        class="euiSwitch__input"
+                      <button
+                        aria-checked="false"
+                        aria-labelledby="generated-id"
+                        class="euiSwitch__button"
                         id="cycle"
                         name="cycle"
-                        type="checkbox"
-                      />
-                      <span
-                        class="euiSwitch__body"
+                        role="switch"
+                        type="button"
                       >
                         <span
-                          class="euiSwitch__thumb"
-                        />
-                        <span
-                          class="euiSwitch__track"
+                          class="euiSwitch__body"
                         >
-                          <svg
-                            class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon"
-                            focusable="false"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                          <span
+                            class="euiSwitch__thumb"
+                          />
+                          <span
+                            class="euiSwitch__track"
                           >
-                            <path
-                              d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                            />
-                          </svg>
-                          <svg
-                            class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked"
-                            focusable="false"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                              fill-rule="evenodd"
-                            />
-                          </svg>
+                            <svg
+                              class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon"
+                              focusable="false"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                              />
+                            </svg>
+                            <svg
+                              class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked"
+                              focusable="false"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                                fill-rule="evenodd"
+                              />
+                            </svg>
+                          </span>
                         </span>
-                      </span>
-                      <label
+                      </button>
+                      <span
                         class="euiSwitch__label"
-                        for="cycle"
+                        id="generated-id"
                       >
                         Cycle Slides
-                      </label>
+                      </span>
                     </div>
                     <hr
                       class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
@@ -354,6 +376,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                         >
                           <div
                             class="euiFormRow euiFormRow--compressed"
+                            id="generated-id-row"
                           >
                             <div
                               class="euiFormRow__labelWrapper"
@@ -396,18 +419,9 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                           class="euiFlexItem euiFlexItem--flexGrowZero"
                         >
                           <div
-                            class="euiFormRow"
+                            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+                            id="generated-id-row"
                           >
-                            <div
-                              class="euiFormRow__labelWrapper"
-                            >
-                              <label
-                                class="euiFormLabel euiFormRow__label"
-                                for="generated-id"
-                              >
-                                 
-                              </label>
-                            </div>
                             <div
                               class="euiFormRow__fieldWrapper"
                             >
@@ -466,9 +480,9 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
       data-focus-lock-disabled="disabled"
     >
       <div
-        aira-modal="true"
         aria-describedby="generated-id"
         aria-live="assertive"
+        aria-modal="true"
         class="euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-withTitle"
         role="dialog"
         style="top: -16px; left: -22px; z-index: 2000;"
@@ -505,26 +519,35 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Auto Play
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                   <button
@@ -535,26 +558,35 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
                       class="euiContextMenu__itemLayout"
                     >
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__icon"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z"
+                        />
+                      </svg>
                       <span
                         class="euiContextMenuItem__text"
                       >
                         Toolbar
                       </span>
                       <svg
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiContextMenu__arrow"
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
                         focusable="false"
                         height="16"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
-                      />
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
                     </span>
                   </button>
                 </div>
@@ -573,6 +605,260 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
 </div>
 `;
 
-exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] = `"<div><div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-lock-disabled=\\"disabled\\"><div class=\\"euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen euiPopover__panel-withTitle\\" aria-live=\\"assertive\\" role=\\"dialog\\" aira-modal=\\"true\\" aria-describedby=\\"generated-id\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"0\\"><div class=\\"euiPopoverTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path d=\\"M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z\\"></path></svg><span class=\\"euiContextMenuItem__text\\">Auto Play</span><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z\\"></path></svg></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path d=\\"M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z\\"></path></svg><span class=\\"euiContextMenuItem__text\\">Toolbar</span><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z\\"></path></svg></span></button></div></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"0\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M10.843 13.069L6.232 8.384a.546.546 0 0 1 0-.768l4.61-4.685a.552.552 0 0 0 0-.771.53.53 0 0 0-.759 0l-4.61 4.684a1.65 1.65 0 0 0 0 2.312l4.61 4.684a.53.53 0 0 0 .76 0 .552.552 0 0 0 0-.771z\\"></path></svg><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><input class=\\"euiSwitch__input\\" name=\\"toolbarHide\\" id=\\"generated-id\\" type=\\"checkbox\\" data-test-subj=\\"hideToolbarSwitch\\" aria-describedby=\\"generated-id-help\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon\\" focusable=\\"false\\"><path d=\\"M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z\\"></path></svg><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked\\" focusable=\\"false\\"><path fill-rule=\\"evenodd\\" d=\\"M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12\\"></path></svg></span></span><label class=\\"euiSwitch__label\\" for=\\"generated-id\\">Hide Toolbar</label></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div></div></div>"`;
+exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] = `
+<div>
+  <div>
+    <div
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="-1"
+    />
+    <div
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="-1"
+    />
+    <div
+      data-focus-lock-disabled="disabled"
+    >
+      <div
+        aria-describedby="generated-id"
+        aria-live="assertive"
+        aria-modal="true"
+        class="euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen euiPopover__panel-withTitle"
+        role="dialog"
+        style="top: -16px; left: -22px; z-index: 2000;"
+      >
+        <div
+          class="euiPopover__panelArrow euiPopover__panelArrow--top"
+          style="left: 10px; top: 0px;"
+        />
+        <div>
+          <div
+            class="euiContextMenu"
+            style="height: 0px;"
+          >
+            <div
+              class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft"
+              tabindex="0"
+            >
+              <div
+                class="euiPopoverTitle"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
+                >
+                  Settings
+                </span>
+              </div>
+              <div>
+                <div>
+                  <button
+                    class="euiContextMenuItem"
+                    type="button"
+                  >
+                    <span
+                      class="euiContextMenu__itemLayout"
+                    >
+                      <svg
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z"
+                        />
+                      </svg>
+                      <span
+                        class="euiContextMenuItem__text"
+                      >
+                        Auto Play
+                      </span>
+                      <svg
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                  <button
+                    class="euiContextMenuItem"
+                    type="button"
+                  >
+                    <span
+                      class="euiContextMenu__itemLayout"
+                    >
+                      <svg
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z"
+                        />
+                      </svg>
+                      <span
+                        class="euiContextMenuItem__text"
+                      >
+                        Toolbar
+                      </span>
+                      <svg
+                        class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z"
+                          fill-rule="nonzero"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft"
+              tabindex="0"
+            >
+              <button
+                class="euiContextMenuPanelTitle"
+                data-test-subj="contextMenuPanelTitleButton"
+                type="button"
+              >
+                <span
+                  class="euiContextMenu__itemLayout"
+                >
+                  <svg
+                    class="euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon"
+                    focusable="false"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.843 13.069L6.232 8.384a.546.546 0 0 1 0-.768l4.61-4.685a.552.552 0 0 0 0-.771.53.53 0 0 0-.759 0l-4.61 4.684a1.65 1.65 0 0 0 0 2.312l4.61 4.684a.53.53 0 0 0 .76 0 .552.552 0 0 0 0-.771z"
+                      fill-rule="nonzero"
+                    />
+                  </svg>
+                  <span
+                    class="euiContextMenu__text"
+                  >
+                    Toolbar
+                  </span>
+                </span>
+              </button>
+              <div>
+                <div>
+                  <div
+                    style="padding: 16px;"
+                  >
+                    <div
+                      class="euiFormRow"
+                      id="generated-id-row"
+                    >
+                      <div
+                        class="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          class="euiSwitch"
+                        >
+                          <button
+                            aria-checked="false"
+                            aria-describedby="generated-id-help"
+                            aria-labelledby="generated-id"
+                            class="euiSwitch__button"
+                            data-test-subj="hideToolbarSwitch"
+                            id="generated-id"
+                            name="toolbarHide"
+                            role="switch"
+                            type="button"
+                          >
+                            <span
+                              class="euiSwitch__body"
+                            >
+                              <span
+                                class="euiSwitch__thumb"
+                              />
+                              <span
+                                class="euiSwitch__track"
+                              >
+                                <svg
+                                  class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon"
+                                  focusable="false"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                                  />
+                                </svg>
+                                <svg
+                                  class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked"
+                                  focusable="false"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                          <span
+                            class="euiSwitch__label"
+                            id="generated-id"
+                          >
+                            Hide Toolbar
+                          </span>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="generated-id-help"
+                        >
+                          Hide the toolbar when the mouse is not within the Canvas?
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      data-focus-guard="true"
+      style="width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;"
+      tabindex="-1"
+    />
+  </div>
+</div>
+`;
 
-exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] = `"<div><div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-lock-disabled=\\"disabled\\"><div class=\\"euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-withTitle\\" aria-live=\\"assertive\\" role=\\"dialog\\" aira-modal=\\"true\\" aria-describedby=\\"generated-id\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"0\\"><div class=\\"euiPopoverTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path d=\\"M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z\\"></path></svg><span class=\\"euiContextMenuItem__text\\">Auto Play</span><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z\\"></path></svg></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path d=\\"M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z\\"></path></svg><span class=\\"euiContextMenuItem__text\\">Toolbar</span><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z\\"></path></svg></span></button></div></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"0\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M10.843 13.069L6.232 8.384a.546.546 0 0 1 0-.768l4.61-4.685a.552.552 0 0 0 0-.771.53.53 0 0 0-.759 0l-4.61 4.684a1.65 1.65 0 0 0 0 2.312l4.61 4.684a.53.53 0 0 0 .76 0 .552.552 0 0 0 0-.771z\\"></path></svg><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><input class=\\"euiSwitch__input\\" name=\\"toolbarHide\\" id=\\"generated-id\\" type=\\"checkbox\\" data-test-subj=\\"hideToolbarSwitch\\" aria-describedby=\\"generated-id-help\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon\\" focusable=\\"false\\"><path d=\\"M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z\\"></path></svg><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked\\" focusable=\\"false\\"><path fill-rule=\\"evenodd\\" d=\\"M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12\\"></path></svg></span></span><label class=\\"euiSwitch__label\\" for=\\"generated-id\\">Hide Toolbar</label></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div></div></div>"`;
+exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] = `"<div><div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-lock-disabled=\\"disabled\\"><div class=\\"euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-withTitle\\" aria-live=\\"assertive\\" role=\\"dialog\\" aria-modal=\\"true\\" aria-describedby=\\"generated-id\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"0\\"><div class=\\"euiPopoverTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path d=\\"M4.608 3.063C4.345 2.895 4 3.089 4 3.418v9.167c0 .329.345.523.608.356l7.2-4.584a.426.426 0 0 0 0-.711l-7.2-4.583zm.538-.844l7.2 4.583a1.426 1.426 0 0 1 0 2.399l-7.2 4.583C4.21 14.38 3 13.696 3 12.585V3.418C3 2.307 4.21 1.624 5.146 2.22z\\"></path></svg><span class=\\"euiContextMenuItem__text\\">Auto Play</span><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z\\"></path></svg></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path d=\\"M0 6h4v4H0V6zm1 1v2h2V7H1zm5-1h4v4H6V6zm1 1v2h2V7H7zm5-1h4v4h-4V6zm1 3h2V7h-2v2z\\"></path></svg><span class=\\"euiContextMenuItem__text\\">Toolbar</span><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__arrow\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M5.157 13.069l4.611-4.685a.546.546 0 0 0 0-.768L5.158 2.93a.552.552 0 0 1 0-.771.53.53 0 0 1 .759 0l4.61 4.684c.631.641.63 1.672 0 2.312l-4.61 4.684a.53.53 0 0 1-.76 0 .552.552 0 0 1 0-.771z\\"></path></svg></span></button></div></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"0\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiContextMenu__icon\\" focusable=\\"false\\"><path fill-rule=\\"nonzero\\" d=\\"M10.843 13.069L6.232 8.384a.546.546 0 0 1 0-.768l4.61-4.685a.552.552 0 0 0 0-.771.53.53 0 0 0-.759 0l-4.61 4.684a1.65 1.65 0 0 0 0 2.312l4.61 4.684a.53.53 0 0 0 .76 0 .552.552 0 0 0 0-.771z\\"></path></svg><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\" id=\\"generated-id-row\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><button id=\\"generated-id\\" aria-checked=\\"true\\" class=\\"euiSwitch__button\\" role=\\"switch\\" type=\\"button\\" aria-labelledby=\\"generated-id\\" data-test-subj=\\"hideToolbarSwitch\\" name=\\"toolbarHide\\" aria-describedby=\\"generated-id-help\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon\\" focusable=\\"false\\"><path d=\\"M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z\\"></path></svg><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked\\" focusable=\\"false\\"><path fill-rule=\\"evenodd\\" d=\\"M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12\\"></path></svg></span></span></button><span class=\\"euiSwitch__label\\" id=\\"generated-id\\">Hide Toolbar</span></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div><div data-focus-guard=\\"true\\" tabindex=\\"-1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div></div></div>"`;

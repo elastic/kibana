@@ -5,16 +5,19 @@
  */
 
 import { AbstractESSource } from './es_source';
-import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
-import { METRIC_TYPE } from '../../../common/constants';
-import _ from 'lodash';
+import { ESAggMetricField } from '../fields/es_agg_field';
+import { ESDocField } from '../fields/es_doc_field';
+import {
+  METRIC_TYPE,
+  COUNT_AGG_TYPE,
+  COUNT_PROP_LABEL,
+  COUNT_PROP_NAME,
+  FIELD_ORIGIN,
+} from '../../../common/constants';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
-
   static METRIC_SCHEMA_CONFIG = {
     group: 'metrics',
     name: 'metric',
@@ -27,116 +30,114 @@ export class AbstractESAggSource extends AbstractESSource {
       METRIC_TYPE.MAX,
       METRIC_TYPE.MIN,
       METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT
+      METRIC_TYPE.UNIQUE_COUNT,
     ],
-    defaults: [
-      { schema: 'metric', type: METRIC_TYPE.COUNT }
-    ]
+    defaults: [{ schema: 'metric', type: METRIC_TYPE.COUNT }],
   };
 
-  _formatMetricKey(metric) {
-    const aggType = metric.type;
-    const fieldName = metric.field;
-    return aggType !== METRIC_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
+  constructor(descriptor, inspectorAdapters) {
+    super(descriptor, inspectorAdapters);
+    this._metricFields = this._descriptor.metrics
+      ? this._descriptor.metrics.map(metric => {
+          const esDocField = metric.field
+            ? new ESDocField({ fieldName: metric.field, source: this })
+            : null;
+          return new ESAggMetricField({
+            label: metric.label,
+            esDocField: esDocField,
+            aggType: metric.type,
+            source: this,
+            origin: this.getOriginForField(),
+          });
+        })
+      : [];
   }
 
-  _formatMetricLabel(metric) {
-    const aggType = metric.type;
-    const fieldName = metric.field;
-    return aggType !== METRIC_TYPE.COUNT ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
-  }
-
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === METRIC_TYPE.COUNT) {
-        return true;
+  createField({ fieldName, label }) {
+    //if there is a corresponding field with a custom label, use that one.
+    if (!label) {
+      const matchField = this._metricFields.find(field => field.getName() === fieldName);
+      if (matchField) {
+        label = matchField.getLabel();
       }
+    }
 
-      if (field) {
-        return true;
-      }
-      return false;
+    if (fieldName === COUNT_PROP_NAME) {
+      return new ESAggMetricField({
+        aggType: COUNT_AGG_TYPE,
+        label: label,
+        source: this,
+        origin: this.getOriginForField(),
+      });
+    }
+    //this only works because aggType is a fixed set and does not include the `_of_` string
+    const [aggType, docField] = fieldName.split(AGG_DELIMITER);
+    const esDocField = new ESDocField({ fieldName: docField, source: this });
+    return new ESAggMetricField({
+      label: label,
+      esDocField,
+      aggType,
+      source: this,
+      origin: this.getOriginForField(),
     });
+  }
+
+  getMetricFieldForName(fieldName) {
+    return this.getMetricFields().find(metricField => {
+      return metricField.getName() === fieldName;
+    });
+  }
+
+  getOriginForField() {
+    return FIELD_ORIGIN.SOURCE;
+  }
+
+  getMetricFields() {
+    const metrics = this._metricFields.filter(esAggField => esAggField.isValid());
     if (metrics.length === 0) {
-      metrics.push({ type: METRIC_TYPE.COUNT });
+      metrics.push(
+        new ESAggMetricField({
+          aggType: COUNT_AGG_TYPE,
+          source: this,
+          origin: this.getOriginForField(),
+        })
+      );
     }
     return metrics;
   }
 
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      const metricKey = this._formatMetricKey(metric);
-      const metricLabel = metric.label ? metric.label : this._formatMetricLabel(metric);
-      const metricCopy = { ...metric };
-      delete metricCopy.label;
-      return {
-        ...metricCopy,
-        propertyKey: metricKey,
-        propertyLabel: metricLabel
-      };
-    });
+  formatMetricKey(aggType, fieldName) {
+    return aggType !== COUNT_AGG_TYPE ? `${aggType}${AGG_DELIMITER}${fieldName}` : COUNT_PROP_NAME;
   }
 
-  async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
+  formatMetricLabel(aggType, fieldName) {
+    return aggType !== COUNT_AGG_TYPE ? `${aggType} of ${fieldName}` : COUNT_PROP_LABEL;
   }
 
   createMetricAggConfigs() {
-    return this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== METRIC_TYPE.COUNT) {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
+    return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
+  }
+
+  async getNumberFields() {
+    return this.getMetricFields();
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
-    let indexPattern;
-    try {
-      indexPattern = await this._getIndexPattern();
-    } catch(error) {
-      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
-      return properties;
-    }
-
     const metricFields = this.getMetricFields();
-    const tooltipProperties = [];
-    metricFields.forEach((metricField) => {
+    const tooltipPropertiesPromises = [];
+    metricFields.forEach(metricField => {
       let value;
       for (const key in properties) {
-        if (properties.hasOwnProperty(key) && metricField.propertyKey === key) {
+        if (properties.hasOwnProperty(key) && metricField.getName() === key) {
           value = properties[key];
           break;
         }
       }
 
-      const tooltipProperty  = new ESAggMetricTooltipProperty(
-        metricField.propertyKey,
-        metricField.propertyLabel,
-        value,
-        indexPattern,
-        metricField
-      );
-      tooltipProperties.push(tooltipProperty);
+      const tooltipPromise = metricField.createTooltipProperty(value);
+      tooltipPropertiesPromises.push(tooltipPromise);
     });
 
-    return tooltipProperties;
-
+    return await Promise.all(tooltipPropertiesPromises);
   }
-
 }

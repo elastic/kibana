@@ -159,9 +159,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkDnsTable = connect(
-  makeMapStateToProps,
-  {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  }
-)(NetworkDnsTableComponent);
+export const NetworkDnsTable = connect(makeMapStateToProps, {
+  updateNetworkTable: networkActions.updateNetworkTable,
+})(NetworkDnsTableComponent);

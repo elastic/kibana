@@ -80,10 +80,10 @@ function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedAr
 export const withUnconnectedElementsLoadedTelemetry = function<P extends object>(
   Component: React.ComponentType<P>,
   trackMetric = trackCanvasUiMetric
-): React.SFC<P & ElementsLoadedTelemetryProps> {
+): React.FC<P & ElementsLoadedTelemetryProps> {
   return function ElementsLoadedTelemetry(
     props: P & ElementsLoadedTelemetryProps
-  ): React.SFCElement<P> {
+  ): React.FunctionComponentElement<P> {
     const { telemetryElementCounts, workpad, telemetryResolvedArgs, ...other } = props;
 
     const [currentWorkpadId, setWorkpadId] = useState<string | undefined>(undefined);

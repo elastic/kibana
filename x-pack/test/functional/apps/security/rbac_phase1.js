@@ -1,60 +1,66 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
-export default function ({ getService, getPageObjects }) {
-
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('rbac ', function () {
+  describe('rbac ', function() {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('security/discover');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
         kibana: {
-          global: ['all']
+          global: ['all'],
         },
         elasticsearch: {
-          'indices': [{
-            'names': ['logstash-*'],
-            'privileges': ['read', 'view_index_metadata']
-          }]
-        }
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+        },
       });
 
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_read', {
         kibana: {
-          global: ['read']
+          global: ['read'],
         },
         elasticsearch: {
-          'indices': [{
-            'names': ['logstash-*'],
-            'privileges': ['read', 'view_index_metadata']
-          }]
-        }
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
+        },
       });
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
       await PageObjects.security.addUser({
-        username: 'kibanauser', password: 'changeme',
-        confirmPassword: 'changeme', fullname: 'kibanafirst kibanalast',
-        email: 'kibanauser@myEmail.com', save: true,
-        roles: ['rbac_all']
+        username: 'kibanauser',
+        password: 'changeme',
+        confirmPassword: 'changeme',
+        fullname: 'kibanafirst kibanalast',
+        email: 'kibanauser@myEmail.com',
+        save: true,
+        roles: ['rbac_all'],
       });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -66,10 +72,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
       await PageObjects.security.addUser({
-        username: 'kibanareadonly', password: 'changeme',
-        confirmPassword: 'changeme', fullname: 'kibanareadonlyFirst kibanareadonlyLast',
-        email: 'kibanareadonly@myEmail.com', save: true,
-        roles: ['rbac_read']
+        username: 'kibanareadonly',
+        password: 'changeme',
+        confirmPassword: 'changeme',
+        fullname: 'kibanareadonlyFirst kibanareadonlyLast',
+        email: 'kibanareadonly@myEmail.com',
+        save: true,
+        roles: ['rbac_read'],
       });
       log.debug('After Add user: , userObj.userName');
       const users1 = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -79,14 +88,11 @@ export default function ({ getService, getPageObjects }) {
       expect(user.roles).to.eql(['rbac_read']);
       expect(user.fullname).to.eql('kibanareadonlyFirst kibanareadonlyLast');
       expect(user.reserved).to.be(false);
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
-
     //   this is to acertain that all role assigned to the user can perform actions like creating a Visualization
-    it('rbac all role can save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
+    it('rbac all role can save a visualization', async function() {
       const vizName1 = 'Visualization VerticalBarChart';
 
       log.debug('log in as kibanauser with rbac_all role');
@@ -96,16 +102,21 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug(
+        'Set absolute time range from "' +
+          PageObjects.timePicker.defaultStartTime +
+          '" to "' +
+          PageObjects.timePicker.defaultEndTime +
+          '"'
+      );
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
-    after(async function () {
-      await PageObjects.security.logout();
+    after(async function() {
+      await PageObjects.security.forceLogout();
     });
-
   });
 }

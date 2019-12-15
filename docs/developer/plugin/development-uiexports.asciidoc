@@ -8,7 +8,6 @@ An aggregate list of available UiExport types:
 | Type | Purpose
 | hacks | Any module that should be included in every application
 | visTypes | Modules that register providers with the `ui/registry/vis_types` registry.
-| fieldFormats | Modules that register providers with the `ui/registry/field_formats` registry.
 | inspectorViews | Modules that register custom inspector views via the `viewRegistry` in `ui/inspector`.
 | chromeNavControls | Modules that register providers with the `ui/registry/chrome_nav_controls` registry.
 | navbarExtensions | Modules that register providers with the `ui/registry/navbar_extensions` registry.

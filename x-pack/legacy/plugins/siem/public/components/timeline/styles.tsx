@@ -6,7 +6,9 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
-import styled, { css } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
+
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /**
  * OFFSET PIXEL VALUES
@@ -18,30 +20,35 @@ export const OFFSET_SCROLLBAR = 17;
  * TIMELINE BODY
  */
 
-export const TimelineBody = styled.div.attrs({
-  className: 'siemTimeline__body',
-})<{ bodyHeight: number }>`
-  ${({ bodyHeight, theme }) => css`
-    height: ${bodyHeight + 'px'};
-    overflow: auto;
-    scrollbar-width: thin;
+// SIDE EFFECT: the following creates a global class selector
+export const TimelineBodyGlobalStyle = createGlobalStyle`
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
+    overflow: hidden;
+  }
+`;
 
-    &::-webkit-scrollbar {
-      height: ${theme.eui.euiScrollBar};
-      width: ${theme.eui.euiScrollBar};
-    }
+export const TimelineBody = styled.div.attrs(({ className }) => ({
+  className: `siemTimeline__body ${className}`,
+}))<{ bodyHeight: number }>`
+  height: ${({ bodyHeight }) => bodyHeight + 'px'};
+  overflow: auto;
+  scrollbar-width: thin;
 
-    &::-webkit-scrollbar-thumb {
-      background-clip: content-box;
-      background-color: ${rgba(theme.eui.euiColorDarkShade, 0.5)};
-      border: ${theme.eui.euiScrollBarCorner} solid transparent;
-    }
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
 
-    &::-webkit-scrollbar-corner,
-    &::-webkit-scrollbar-track {
-      background-color: transparent;
-    }
-  `}
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 TimelineBody.displayName = 'TimelineBody';
 
@@ -49,39 +56,38 @@ TimelineBody.displayName = 'TimelineBody';
  * EVENTS TABLE
  */
 
-export const EventsTable = styled.div.attrs({
-  className: 'siemEventsTable',
+export const EventsTable = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable ${className}`,
   role: 'table',
-})``;
+}))``;
 EventsTable.displayName = 'EventsTable';
 
 /* EVENTS HEAD */
 
-export const EventsThead = styled.div.attrs({
-  className: 'siemEventsTable__thead',
+export const EventsThead = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__thead ${className}`,
   role: 'rowgroup',
-})`
-  ${({ theme }) => css`
-    background-color: ${theme.eui.euiColorEmptyShade};
-    border-bottom: ${theme.eui.euiBorderWidthThick} solid ${theme.eui.euiColorLightShade};
-    position: sticky;
-    top: 0;
-    z-index: ${theme.eui.euiZLevel1};
-  `}
+}))`
+  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThick} solid
+    ${({ theme }) => theme.eui.euiColorLightShade};
+  position: sticky;
+  top: 0;
+  z-index: ${({ theme }) => theme.eui.euiZLevel1};
 `;
 EventsThead.displayName = 'EventsThead';
 
-export const EventsTrHeader = styled.div.attrs({
-  className: 'siemEventsTable__trHeader',
+export const EventsTrHeader = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__trHeader ${className}`,
   role: 'row',
-})`
+}))`
   display: flex;
 `;
 EventsTrHeader.displayName = 'EventsTrHeader';
 
-export const EventsThGroupActions = styled.div.attrs({
-  className: 'siemEventsTable__thGroupActions',
-})<{ actionsColumnWidth: number }>`
+export const EventsThGroupActions = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__thGroupActions ${className}`,
+}))<{ actionsColumnWidth: number }>`
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
   justify-content: space-between;
@@ -89,17 +95,17 @@ export const EventsThGroupActions = styled.div.attrs({
 `;
 EventsThGroupActions.displayName = 'EventsThGroupActions';
 
-export const EventsThGroupData = styled.div.attrs({
-  className: 'siemEventsTable__thGroupData',
-})`
+export const EventsThGroupData = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__thGroupData ${className}`,
+}))`
   display: flex;
 `;
 EventsThGroupData.displayName = 'EventsThGroupData';
 
-export const EventsTh = styled.div.attrs({
-  className: 'siemEventsTable__th',
+export const EventsTh = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__th ${className}`,
   role: 'columnheader',
-})<{ isDragging?: boolean; position?: string }>`
+}))<{ isDragging?: boolean; position?: string }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -118,66 +124,62 @@ export const EventsTh = styled.div.attrs({
 `;
 EventsTh.displayName = 'EventsTh';
 
-export const EventsThContent = styled.div.attrs({
-  className: 'siemEventsTable__thContent',
-})<{ textAlign?: string }>`
-  ${({ textAlign, theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    font-weight: ${theme.eui.euiFontWeightSemiBold};
-    line-height: ${theme.eui.euiLineHeight};
-    min-width: 0;
-    padding: ${theme.eui.paddingSizes.xs};
-    text-align: ${textAlign};
-    width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
-  `}
+export const EventsThContent = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__thContent ${className}`,
+}))<{ textAlign?: string }>`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  line-height: $({ theme }) =>theme.eui.euiLineHeight};
+  min-width: 0;
+  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  text-align: ${({ textAlign }) => textAlign};
+  width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
 `;
 EventsThContent.displayName = 'EventsThContent';
 
 /* EVENTS BODY */
 
-export const EventsTbody = styled.div.attrs({
-  className: 'siemEventsTable__tbody',
+export const EventsTbody = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__tbody ${className}`,
   role: 'rowgroup',
-})`
+}))`
   overflow-x: hidden;
 `;
 EventsTbody.displayName = 'EventsTbody';
 
-export const EventsTrGroup = styled.div.attrs({
-  className: 'siemEventsTable__trGroup',
-})<{ className?: string }>`
-  ${({ theme }) => css`
-    border-bottom: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorLightShade};
+export const EventsTrGroup = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__trGroup ${className}`,
+}))<{ className?: string }>`
+  border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
+    ${({ theme }) => theme.eui.euiColorLightShade};
 
-    &:hover {
-      background-color: ${theme.eui.euiTableHoverColor};
-    }
-  `}
+  &:hover {
+    background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
+  }
 `;
 EventsTrGroup.displayName = 'EventsTrGroup';
 
-export const EventsTrData = styled.div.attrs({
-  className: 'siemEventsTable__trData',
+export const EventsTrData = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__trData ${className}`,
   role: 'row',
-})`
+}))`
   display: flex;
 `;
 EventsTrData.displayName = 'EventsTrData';
 
-export const EventsTrSupplement = styled.div.attrs({
-  className: 'siemEventsTable__trSupplement',
-})<{ className: string }>`
-  ${({ theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    padding: 0 ${theme.eui.paddingSizes.xs} 0 ${theme.eui.paddingSizes.xl};
-  `}
+export const EventsTrSupplement = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__trSupplement ${className}`,
+}))<{ className: string }>`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0
+    ${({ theme }) => theme.eui.paddingSizes.xl};
 `;
 EventsTrSupplement.displayName = 'EventsTrSupplement';
 
-export const EventsTdGroupActions = styled.div.attrs({
-  className: 'siemEventsTable__tdGroupActions',
-})<{ actionsColumnWidth: number }>`
+export const EventsTdGroupActions = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__tdGroupActions ${className}`,
+}))<{ actionsColumnWidth: number }>`
   display: flex;
   justify-content: space-between;
   flex: 0 0 ${({ actionsColumnWidth }) => actionsColumnWidth + 'px'};
@@ -185,17 +187,17 @@ export const EventsTdGroupActions = styled.div.attrs({
 `;
 EventsTdGroupActions.displayName = 'EventsTdGroupActions';
 
-export const EventsTdGroupData = styled.div.attrs({
-  className: 'siemEventsTable__tdGroupData',
-})`
+export const EventsTdGroupData = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__tdGroupData ${className}`,
+}))`
   display: flex;
 `;
 EventsTdGroupData.displayName = 'EventsTdGroupData';
 
-export const EventsTd = styled.div.attrs({
-  className: 'siemEventsTable__td',
+export const EventsTd = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__td ${className}`,
   role: 'cell',
-})`
+}))`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -207,17 +209,15 @@ export const EventsTd = styled.div.attrs({
 `;
 EventsTd.displayName = 'EventsTd';
 
-export const EventsTdContent = styled.div.attrs({
-  className: 'siemEventsTable__tdContent',
-})<{ textAlign?: string }>`
-  ${({ textAlign, theme }) => css`
-    font-size: ${theme.eui.euiFontSizeXS};
-    line-height: ${theme.eui.euiLineHeight};
-    min-width: 0;
-    padding: ${theme.eui.paddingSizes.xs};
-    text-align: ${textAlign};
-    width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
-  `}
+export const EventsTdContent = styled.div.attrs(({ className }) => ({
+  className: `siemEventsTable__tdContent ${className}`,
+}))<{ textAlign?: string }>`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
+  min-width: 0;
+  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  text-align: ${({ textAlign }) => textAlign};
+  width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
 `;
 EventsTdContent.displayName = 'EventsTdContent';
 
@@ -225,9 +225,9 @@ EventsTdContent.displayName = 'EventsTdContent';
  * EVENTS HEADING
  */
 
-export const EventsHeading = styled.div.attrs({
-  className: 'siemEventsHeading',
-})<{ isLoading: boolean }>`
+export const EventsHeading = styled.div.attrs(({ className }) => ({
+  className: `siemEventsHeading ${className}`,
+}))<{ isLoading: boolean }>`
   align-items: center;
   display: flex;
 
@@ -237,81 +237,75 @@ export const EventsHeading = styled.div.attrs({
 `;
 EventsHeading.displayName = 'EventsHeading';
 
-export const EventsHeadingTitleButton = styled.button.attrs({
-  className: 'siemEventsHeading__title siemEventsHeading__title--aggregatable',
+export const EventsHeadingTitleButton = styled.button.attrs(({ className }) => ({
+  className: `siemEventsHeading__title siemEventsHeading__title--aggregatable ${className}`,
   type: 'button',
-})`
-  ${({ theme }) => css`
-    align-items: center;
-    display: flex;
-    font-weight: inherit;
-    min-width: 0;
+}))`
+  align-items: center;
+  display: flex;
+  font-weight: inherit;
+  min-width: 0;
 
-    &:hover,
-    &:focus {
-      color: ${theme.eui.euiColorPrimary};
-      text-decoration: underline;
-    }
+  &:hover,
+  &:focus {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+    text-decoration: underline;
+  }
 
-    &:hover {
-      cursor: pointer;
-    }
+  &:hover {
+    cursor: pointer;
+  }
 
-    & > * + * {
-      margin-left: ${theme.eui.euiSizeXS};
-    }
-  `}
+  & > * + * {
+    margin-left: ${({ theme }) => theme.eui.euiSizeXS};
+  }
 `;
 EventsHeadingTitleButton.displayName = 'EventsHeadingTitleButton';
 
-export const EventsHeadingTitleSpan = styled.span.attrs({
-  className: 'siemEventsHeading__title siemEventsHeading__title--notAggregatable',
-})`
+export const EventsHeadingTitleSpan = styled.span.attrs(({ className }) => ({
+  className: `siemEventsHeading__title siemEventsHeading__title--notAggregatable ${className}`,
+}))`
   min-width: 0;
 `;
 EventsHeadingTitleSpan.displayName = 'EventsHeadingTitleSpan';
 
-export const EventsHeadingExtra = styled.div.attrs({
-  className: 'siemEventsHeading__extra',
-})<{ className?: string }>`
-  ${({ theme }) => css`
-    margin-left: auto;
+export const EventsHeadingExtra = styled.div.attrs(({ className }) => ({
+  className: `siemEventsHeading__extra ${className}`,
+}))`
+  margin-left: auto;
 
-    &.siemEventsHeading__extra--close {
-      opacity: 0;
-      transition: all ${theme.eui.euiAnimSpeedNormal} ease;
-      visibility: hidden;
-
-      .siemEventsTable__th:hover & {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
-  `}
-`;
-EventsHeadingExtra.displayName = 'EventsHeadingExtra';
-
-export const EventsHeadingHandle = styled.div.attrs({
-  className: 'siemEventsHeading__handle',
-})`
-  ${({ theme }) => css`
-    background-color: ${theme.eui.euiBorderColor};
-    height: 100%;
+  &.siemEventsHeading__extra--close {
     opacity: 0;
-    transition: all ${theme.eui.euiAnimSpeedNormal} ease;
+    transition: all ${({ theme }) => theme.eui.euiAnimSpeedNormal} ease;
     visibility: hidden;
-    width: ${theme.eui.euiBorderWidthThick};
 
-    .siemEventsTable__thead:hover & {
+    .siemEventsTable__th:hover & {
       opacity: 1;
       visibility: visible;
     }
+  }
+`;
+EventsHeadingExtra.displayName = 'EventsHeadingExtra';
 
-    &:hover {
-      background-color: ${theme.eui.euiColorPrimary};
-      cursor: col-resize;
-    }
-  `}
+export const EventsHeadingHandle = styled.div.attrs(({ className }) => ({
+  className: `siemEventsHeading__handle ${className}`,
+}))`
+  background-color: ${({ theme }) => theme.eui.euiBorderColor};
+  height: 100%;
+  opacity: 0;
+  transition: all ${({ theme }) => theme.eui.euiAnimSpeedNormal} ease;
+  visibility: hidden;
+  width: ${({ theme }) => theme.eui.euiBorderWidthThick};
+
+  .siemEventsTable__thead:hover & {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.eui.euiColorPrimary};
+    cursor: col-resize;
+  }
 `;
 EventsHeadingHandle.displayName = 'EventsHeadingHandle';
 

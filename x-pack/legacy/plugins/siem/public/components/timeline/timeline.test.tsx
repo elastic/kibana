@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -23,9 +23,10 @@ import {
   ENABLE_CLASS_NAME,
   EXCLUDE_CLASS_NAME,
 } from './data_providers/provider_item_actions';
-import { Timeline } from './timeline';
+import { TimelineComponent } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 const testFlyoutHeight = 980;
 
@@ -33,6 +34,7 @@ const mockUseKibanaCore = useKibanaCore as jest.Mock;
 jest.mock('../../lib/compose/kibana_core');
 mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,
+  savedObjects: {},
 }));
 
 describe('Timeline', () => {
@@ -49,15 +51,18 @@ describe('Timeline', () => {
     { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
   ];
 
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <Timeline
+        <TimelineComponent
           browserFields={mockBrowserFields}
           columns={defaultHeaders}
           id="foo"
           dataProviders={mockDataProviders}
           end={endDate}
+          filters={[]}
           flyoutHeight={testFlyoutHeight}
           flyoutHeaderHeight={flyoutHeaderHeight}
           indexPattern={indexPattern}
@@ -87,12 +92,13 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <Timeline
+            <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
@@ -125,12 +131,13 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <Timeline
+            <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
@@ -163,12 +170,13 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <Timeline
+            <TimelineComponent
               browserFields={mockBrowserFields}
               columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
               end={endDate}
+              filters={[]}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
@@ -206,12 +214,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -251,12 +260,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -304,12 +314,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -361,12 +372,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -421,12 +433,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -471,12 +484,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -527,12 +541,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
@@ -587,12 +602,13 @@ describe('Timeline', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <Timeline
+              <TimelineComponent
                 browserFields={mockBrowserFields}
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 end={endDate}
+                filters={[]}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}

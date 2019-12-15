@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
+import _ from 'lodash';
+import stats from 'stats-lite';
+import prettyMilliseconds from 'pretty-ms';
+import { performance, PerformanceObserver } from 'perf_hooks';
 import { initRoutes } from './init_routes';
-
-function avg(items) {
-  return (
-    items.reduce((sum, val) => {
-      return sum + val;
-    }, 0) / items.length
-  );
-}
 
 export default function TaskManagerPerformanceAPI(kibana) {
   return new kibana.Plugin({
@@ -27,35 +24,46 @@ export default function TaskManagerPerformanceAPI(kibana) {
 
     init(server) {
       const taskManager = server.plugins.task_manager;
-      const performanceState = {
-        runningAverageTasks: 0,
-        averagesTaken: [],
-        runningAverageLeadTime: -1,
-        averagesTakenLeadTime: [],
-        leadTimeQueue: [],
-      };
+      const performanceState = resetPerfState({});
 
-      setInterval(() => {
+      let lastFlush = new Date();
+      function flushPerfStats() {
+        setTimeout(flushPerfStats, 5000);
+        const prevFlush = lastFlush;
+        lastFlush = new Date();
+
         const tasks = performanceState.leadTimeQueue.length;
-        console.log(`I have processed ${tasks} tasks in the past 5s`);
+        const title = `[Perf${performanceState.capturing ? ' (capturing)' : ''}]`;
+        const seconds = parseInt((lastFlush - prevFlush) / 1000);
+        console.log(
+          `${title} I have processed ${tasks} tasks in the past ${seconds}s (${tasks /
+            seconds} per second)`
+        );
         if (tasks > 0) {
-          const latestAverage = avg(performanceState.leadTimeQueue.splice(0, tasks));
+          const latestAverage = avg(performanceState.leadTimeQueue.splice(0, tasks)).mean;
 
           performanceState.averagesTakenLeadTime.push(latestAverage);
           performanceState.averagesTaken.push(tasks);
           if (performanceState.averagesTakenLeadTime.length > 1) {
-            performanceState.runningAverageLeadTime = avg(performanceState.averagesTakenLeadTime);
-            performanceState.runningAverageTasks = avg(performanceState.averagesTaken);
+            performanceState.runningAverageLeadTime = avg(
+              performanceState.averagesTakenLeadTime
+            ).mean;
+            performanceState.runningAverageTasksPerSecond =
+              avg(performanceState.averagesTaken).mean / 5;
           } else {
             performanceState.runningAverageLeadTime = latestAverage;
-            performanceState.runningAverageTasks = tasks;
+            performanceState.runningAverageTasksPerSecond = tasks / 5;
           }
         }
-      }, 5000);
+      }
+
+      setTimeout(flushPerfStats, 5000);
+
+      const title = 'Perf Test Task';
 
       taskManager.registerTaskDefinitions({
         performanceTestTask: {
-          title: 'Perf Test Task',
+          title,
           description: 'A task for stress testing task_manager.',
           timeout: '1m',
 
@@ -64,27 +72,41 @@ export default function TaskManagerPerformanceAPI(kibana) {
               async run() {
                 const { params, state } = taskInstance;
 
-                const runAt = millisecondsFromNow(5000);
+                const counter = state.counter ? state.counter : 1;
+
                 const now = Date.now();
                 const leadTime = now - taskInstance.runAt;
                 performanceState.leadTimeQueue.push(leadTime);
 
-                const counter = (state.counter ? 1 + state.counter : 1);
+                // schedule to run next cycle as soon as possible
+                const runAt = calRunAt(params, counter);
 
                 const stateUpdated = {
                   ...state,
-                  counter
+                  counter: counter + 1,
                 };
 
-                if(params.trackExecutionTimeline) {
-                  stateUpdated.timeline = stateUpdated.timeline || [];
-                  stateUpdated.timeline.push({
-                    owner: taskInstance.owner.split('-')[0],
-                    counter,
-                    leadTime,
-                    ranAt: now
-                  });
+                if (params.trackExecutionTimeline && state.perf && state.perf.id) {
+                  performance.mark(`perfTask_run_${state.perf.id}_${counter}`);
+                  performance.measure(
+                    'perfTask.markUntilRun',
+                    `perfTask_markAsRunning_${state.perf.id}_${counter}`,
+                    `perfTask_run_${state.perf.id}_${counter}`
+                  );
+                  if (counter === 1) {
+                    performance.measure(
+                      'perfTask.firstRun',
+                      `perfTask_schedule_${state.perf.id}`,
+                      `perfTask_run_${state.perf.id}_${counter}`
+                    );
+                    performance.measure(
+                      'perfTask.firstMarkAsRunningTillRan',
+                      `perfTask_markAsRunning_${state.perf.id}_${counter}`,
+                      `perfTask_run_${state.perf.id}_${counter}`
+                    );
+                  }
                 }
+
                 return {
                   state: stateUpdated,
                   runAt,
@@ -95,17 +117,255 @@ export default function TaskManagerPerformanceAPI(kibana) {
         },
       });
 
-      initRoutes(server, performanceState);
+      taskManager.addMiddleware({
+        async beforeSave({ taskInstance, ...opts }) {
+          const modifiedInstance = {
+            ...taskInstance,
+          };
+
+          if (taskInstance.params && taskInstance.params.trackExecutionTimeline) {
+            modifiedInstance.state = modifiedInstance.state || {};
+            modifiedInstance.state.perf = modifiedInstance.state.perf || {};
+            modifiedInstance.state.perf.id = uuid.v4().replace(/-/gi, '_');
+            performance.mark(`perfTask_schedule_${modifiedInstance.state.perf.id}`);
+          }
+
+          return {
+            ...opts,
+            taskInstance: modifiedInstance,
+          };
+        },
+
+        async beforeMarkRunning({ taskInstance, ...opts }) {
+          const modifiedInstance = {
+            ...taskInstance,
+          };
+
+          if (
+            modifiedInstance.state &&
+            modifiedInstance.state.perf &&
+            modifiedInstance.state.perf.id
+          ) {
+            const { counter = 1 } = modifiedInstance.state;
+            performance.mark(`perfTask_markAsRunning_${modifiedInstance.state.perf.id}_${counter}`);
+            if (counter === 1) {
+              performance.measure(
+                'perfTask.firstMarkAsRunning',
+                `perfTask_schedule_${modifiedInstance.state.perf.id}`,
+                `perfTask_markAsRunning_${modifiedInstance.state.perf.id}_${counter}`
+              );
+            } else if (counter > 1) {
+              performance.measure(
+                'perfTask.runUntilNextMarkAsRunning',
+                `perfTask_run_${modifiedInstance.state.perf.id}_${counter - 1}`,
+                `perfTask_markAsRunning_${modifiedInstance.state.perf.id}_${counter}`
+              );
+            }
+          }
+
+          return {
+            ...opts,
+            taskInstance: modifiedInstance,
+          };
+        },
+      });
+
+      const perfApi = {
+        capture() {
+          resetPerfState(performanceState);
+          performanceState.capturing = true;
+          performance.mark('perfTest.start');
+        },
+        endCapture() {
+          return new Promise(resolve => {
+            performanceState.performance.summarize.push([resolve, perfApi.summarize]);
+
+            performance.mark('perfTest.end');
+            performance.measure('perfTest.duration', 'perfTest.start', 'perfTest.end');
+          });
+        },
+        summarize(perfTestDuration) {
+          const {
+            runningAverageTasksPerSecond,
+            runningAverageLeadTime,
+            performance,
+          } = performanceState;
+
+          const {
+            numberOfTasksRanOverall,
+            elasticsearchApiCalls,
+            activityDuration,
+            sleepDuration,
+            cycles,
+            claimAvailableTasksNoTasks,
+            claimAvailableTasksNoAvailableWorkers,
+            taskPoolAttemptToRun,
+            taskRunnerMarkTaskAsRunning,
+          } = performance;
+
+          const perfRes = {
+            perfTestDuration: prettyMilliseconds(perfTestDuration),
+            runningAverageTasksPerSecond,
+            runningAverageLeadTime,
+            numberOfTasksRanOverall,
+            claimAvailableTasksNoTasks,
+            claimAvailableTasksNoAvailableWorkers,
+            elasticsearchApiCalls: _.mapValues(elasticsearchApiCalls, avg),
+            sleepDuration: prettyMilliseconds(stats.sum(sleepDuration)),
+            activityDuration: prettyMilliseconds(stats.sum(activityDuration)),
+            cycles,
+            taskPoolAttemptToRun: avg(taskPoolAttemptToRun),
+            taskRunnerMarkTaskAsRunning: avg(taskRunnerMarkTaskAsRunning),
+          };
+
+          resetPerfState(performanceState);
+
+          return perfRes;
+        },
+      };
+
+      initRoutes(server, perfApi);
     },
   });
 }
 
-function millisecondsFromNow(ms) {
-  if (!ms) {
-    return;
+function calRunAt(params, counter) {
+  const runAt = counter === 1 ? new Date(params.startAt) : new Date();
+  return runAt.getTime() < params.runUntil ? runAt : undefined;
+}
+
+function avg(items) {
+  const mode = stats.mode(items);
+  return {
+    mean: parseInt(stats.mean(items)),
+    range: {
+      min: parseInt(typeof mode === 'number' ? mode : _.min([...mode])),
+      max: parseInt(typeof mode === 'number' ? mode : _.max([...mode])),
+    },
+  };
+}
+
+function resetPerfState(target) {
+  if (target.performanceObserver) {
+    target.performanceObserver.disconnect();
   }
 
-  const dt = new Date();
-  dt.setTime(dt.getTime() + ms);
-  return dt;
+  const performanceState = Object.assign(target, {
+    capturing: false,
+    runningAverageTasksPerSecond: 0,
+    averagesTaken: [],
+    runningAverageLeadTime: -1,
+    averagesTakenLeadTime: [],
+    leadTimeQueue: [],
+    performance: {
+      numberOfTasksRanOverall: 0,
+      cycles: {
+        fillPoolStarts: 0,
+        fillPoolCycles: 0,
+        fillPoolBail: 0,
+        fillPoolBailNoTasks: 0,
+      },
+      claimAvailableTasksNoTasks: 0,
+      claimAvailableTasksNoAvailableWorkers: 0,
+      elasticsearchApiCalls: {
+        timeUntilFirstRun: [],
+        timeUntilFirstMarkAsRun: [],
+        firstMarkAsRunningTillRan: [],
+        timeFromMarkAsRunTillRun: [],
+        timeFromRunTillNextMarkAsRun: [],
+        claimAvailableTasks: [],
+      },
+      activityDuration: [],
+      sleepDuration: [],
+      taskPollerActivityDurationPreScheduleComplete: [],
+      taskPoolAttemptToRun: [],
+      taskRunnerMarkTaskAsRunning: [],
+
+      summarize: [],
+    },
+  });
+
+  performanceState.performanceObserver = new PerformanceObserver((list, observer) => {
+    list.getEntries().forEach(entry => {
+      const { name, duration } = entry;
+      switch (name) {
+        // Elasticsearch Api Calls
+        case 'perfTask.firstRun':
+          performanceState.performance.elasticsearchApiCalls.timeUntilFirstRun.push(duration);
+          break;
+        case 'perfTask.firstMarkAsRunning':
+          performanceState.performance.elasticsearchApiCalls.timeUntilFirstMarkAsRun.push(duration);
+          break;
+        case 'perfTask.firstMarkAsRunningTillRan':
+          performanceState.performance.elasticsearchApiCalls.firstMarkAsRunningTillRan.push(
+            duration
+          );
+          break;
+        case 'perfTask.markUntilRun':
+          performanceState.performance.elasticsearchApiCalls.timeFromMarkAsRunTillRun.push(
+            duration
+          );
+          break;
+        case 'perfTask.runUntilNextMarkAsRunning':
+          performanceState.performance.elasticsearchApiCalls.timeFromRunTillNextMarkAsRun.push(
+            duration
+          );
+          break;
+        case 'claimAvailableTasks':
+          performanceState.performance.elasticsearchApiCalls.claimAvailableTasks.push(duration);
+          break;
+        case 'TaskPoller.sleepDuration':
+          performanceState.performance.sleepDuration.push(duration);
+          break;
+        case 'fillPool.activityDurationUntilNoTasks':
+          performanceState.performance.activityDuration.push(duration);
+          break;
+        case 'fillPool.activityDurationUntilExhaustedCapacity':
+          performanceState.performance.activityDuration.push(duration);
+          break;
+        case 'fillPool.bailExhaustedCapacity':
+          performanceState.performance.cycles.fillPoolBail++;
+          break;
+        case 'fillPool.bailNoTasks':
+          performanceState.performance.cycles.fillPoolBail++;
+          performanceState.performance.cycles.fillPoolBailNoTasks++;
+          break;
+        case 'fillPool.start':
+          performanceState.performance.cycles.fillPoolStarts++;
+          break;
+        case 'fillPool.cycle':
+          performanceState.performance.cycles.fillPoolCycles++;
+          break;
+          break;
+        case 'claimAvailableTasks.noTasks':
+          performanceState.performance.claimAvailableTasksNoTasks++;
+          break;
+        case 'claimAvailableTasks.noAvailableWorkers':
+          performanceState.performance.claimAvailableTasksNoAvailableWorkers++;
+          break;
+        case 'taskPool.attemptToRun':
+          performanceState.performance.taskPoolAttemptToRun.push(duration);
+          break;
+        case 'taskRunner.markTaskAsRunning':
+          performanceState.performance.taskRunnerMarkTaskAsRunning.push(duration);
+          break;
+        case 'perfTest.duration':
+          observer.disconnect();
+          const { summarize } = performanceState.performance;
+          if (summarize && summarize.length) {
+            summarize.splice(0, summarize.length).forEach(([resolve, summarize]) => {
+              resolve(summarize(duration));
+            });
+          }
+          break;
+        default:
+          if (name.startsWith('perfTask_run_')) {
+            performanceState.performance.numberOfTasksRanOverall++;
+          }
+      }
+    });
+  });
+  performanceState.performanceObserver.observe({ entryTypes: ['measure', 'mark'] });
+
+  return performanceState;
 }

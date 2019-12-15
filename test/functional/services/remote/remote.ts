@@ -38,6 +38,17 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const coveragePrefix = 'coveragejson:';
   const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
   let logSubscription: undefined | Rx.Subscription;
+  type BrowserStorage = 'sessionStorage' | 'localStorage';
+
+  const clearBrowserStorage = async (storageType: BrowserStorage) => {
+    try {
+      await driver.executeScript(`window.${storageType}.clear();`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the '${storageType}' property from 'Window'`)) {
+        throw error;
+      }
+    }
+  };
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
     log,
@@ -69,7 +80,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         driver,
         logging.Type.BROWSER,
         config.get('browser.logPollingMs'),
-        lifecycle.cleanup$ as any
+        lifecycle.cleanup.after$
       )
         .pipe(
           mergeMap(logEntry => {
@@ -99,7 +110,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     }
   }
 
-  lifecycle.on('beforeTests', async () => {
+  lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
     await driver
@@ -109,7 +120,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
-  lifecycle.on('beforeTestSuite', async () => {
+  lifecycle.beforeTestSuite.add(async () => {
     windowSizeStack.unshift(
       await driver
         .manage()
@@ -118,21 +129,21 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     );
   });
 
-  lifecycle.on('beforeEachTest', async () => {
+  lifecycle.beforeEachTest.add(async () => {
     await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
-  lifecycle.on('afterTestSuite', async () => {
+  lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
     await driver
       .manage()
       .window()
       .setRect({ width, height });
-    await driver.executeScript('window.sessionStorage.clear();');
-    await driver.executeScript('window.localStorage.clear();');
+    await clearBrowserStorage('sessionStorage');
+    await clearBrowserStorage('localStorage');
   });
 
-  lifecycle.on('cleanup', async () => {
+  lifecycle.cleanup.add(async () => {
     if (logSubscription) {
       await new Promise(r => logSubscription!.add(r));
     }

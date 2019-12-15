@@ -22,7 +22,7 @@ const COMMON_HEADERS = {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es: Client = getService('es');
+  const es: Client = getService('legacyEs');
   const callCluster: CallCluster = (((path: 'search', searchParams: SearchParams) => {
     return es[path].call(es, searchParams);
   }) as unknown) as CallCluster;
@@ -95,9 +95,10 @@ export default ({ getService }: FtrProviderContext) => {
       const olderDate = moment()
         .subtract(100, 'days')
         .valueOf();
+
+      // @ts-ignore optional type: string
       await es.index({
         index: '.kibana',
-        type: '_doc',
         body: {
           type: 'lens-ui-telemetry',
           'lens-ui-telemetry': {

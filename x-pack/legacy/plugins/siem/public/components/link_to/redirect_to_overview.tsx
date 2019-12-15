@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { RedirectWrapper } from './redirect_wrapper';
 import { SiemPageName } from '../../pages/home/types';
 

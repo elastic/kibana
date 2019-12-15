@@ -11,10 +11,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
-import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { formatAngularHttpError } from 'ui/notify/lib';
-import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -29,20 +27,15 @@ import { GraphVisualization } from './components/graph_visualization';
 import gws from './angular/graph_client_workspace.js';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
-import { urlTemplateRegex } from  './helpers/url_template';
-import {
-  asAngularSyncedObservable,
-} from './helpers/as_observable';
+import { urlTemplateRegex } from './helpers/url_template';
+import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
-import {
-  createGraphStore,
-  datasourceSelector,
-  hasFieldsSelector
-} from './state_management';
+import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
+import { formatHttpError } from './helpers/format_http_error';
+import { checkLicense } from '../../../../plugins/graph/common/check_license';
 
 export function initGraphApp(angularModule, deps) {
   const {
-    xpackInfo,
     chrome,
     savedGraphWorkspaces,
     toastNotifications,
@@ -56,7 +49,6 @@ export function initGraphApp(angularModule, deps) {
     savedObjectRegistry,
     capabilities,
     coreStart,
-    $http,
     Storage,
     canEditDrillDownUrls,
     graphSavePolicy,
@@ -64,26 +56,15 @@ export function initGraphApp(angularModule, deps) {
 
   const app = angularModule;
 
-  function checkLicense(kbnBaseUrl) {
-    const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
-      xpackInfo.get('features.graph.enableAppLink');
-    if (!licenseAllowsToShowThisPage) {
-      const message = xpackInfo.get('features.graph.message');
-      const newUrl = addAppRedirectMessageToUrl(addBasePath(kbnBaseUrl), message);
-      window.location.href = newUrl;
-      throw new Error('Graph license error');
-    }
-  }
-
-  app.directive('vennDiagram', function (reactDirective) {
+  app.directive('vennDiagram', function(reactDirective) {
     return reactDirective(VennDiagram);
   });
 
-  app.directive('graphVisualization', function (reactDirective) {
+  app.directive('graphVisualization', function(reactDirective) {
     return reactDirective(GraphVisualization);
   });
 
-  app.directive('graphListing', function (reactDirective) {
+  app.directive('graphListing', function(reactDirective) {
     return reactDirective(Listing, [
       ['coreStart', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
@@ -98,98 +79,97 @@ export function initGraphApp(angularModule, deps) {
     ]);
   });
 
-  app.directive('graphApp', function (reactDirective) {
-    return reactDirective(GraphApp, [
-      ['storage', { watchDepth: 'reference' }],
-      ['isInitialized', { watchDepth: 'reference' }],
-      ['currentIndexPattern', { watchDepth: 'reference' }],
-      ['indexPatternProvider', { watchDepth: 'reference' }],
-      ['isLoading', { watchDepth: 'reference' }],
-      ['onQuerySubmit', { watchDepth: 'reference' }],
-      ['initialQuery', { watchDepth: 'reference' }],
-      ['confirmWipeWorkspace', { watchDepth: 'reference' }],
-      ['coreStart', { watchDepth: 'reference' }],
-      ['noIndexPatterns', { watchDepth: 'reference' }],
-      ['reduxStore', { watchDepth: 'reference' }],
-      ['pluginDataStart', { watchDepth: 'reference' }],
-    ], { restrict: 'A' });
+  app.directive('graphApp', function(reactDirective) {
+    return reactDirective(
+      GraphApp,
+      [
+        ['storage', { watchDepth: 'reference' }],
+        ['isInitialized', { watchDepth: 'reference' }],
+        ['currentIndexPattern', { watchDepth: 'reference' }],
+        ['indexPatternProvider', { watchDepth: 'reference' }],
+        ['isLoading', { watchDepth: 'reference' }],
+        ['onQuerySubmit', { watchDepth: 'reference' }],
+        ['initialQuery', { watchDepth: 'reference' }],
+        ['confirmWipeWorkspace', { watchDepth: 'reference' }],
+        ['coreStart', { watchDepth: 'reference' }],
+        ['noIndexPatterns', { watchDepth: 'reference' }],
+        ['reduxStore', { watchDepth: 'reference' }],
+        ['pluginDataStart', { watchDepth: 'reference' }],
+      ],
+      { restrict: 'A' }
+    );
   });
 
-  app.directive('graphVisualization', function (reactDirective) {
+  app.directive('graphVisualization', function(reactDirective) {
     return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
   });
 
-  app.config(function ($routeProvider) {
-    $routeProvider.when('/home', {
-      template: listingTemplate,
-      badge: getReadonlyBadge,
-      controller($location, $scope) {
-        checkLicense(kbnBaseUrl);
-        const services = savedObjectRegistry.byLoaderPropertiesName;
-        const graphService = services['Graph workspace'];
+  app.config(function($routeProvider) {
+    $routeProvider
+      .when('/home', {
+        template: listingTemplate,
+        badge: getReadonlyBadge,
+        controller($location, $scope) {
+          const services = savedObjectRegistry.byLoaderPropertiesName;
+          const graphService = services['Graph workspace'];
 
-        $scope.listingLimit = config.get('savedObjects:listingLimit');
-        $scope.create = () => {
-          $location.url(getNewPath());
-        };
-        $scope.find = (search) => {
-          return graphService.find(search, $scope.listingLimit);
-        };
-        $scope.editItem = (workspace) => {
-          $location.url(getEditPath(workspace));
-        };
-        $scope.getViewUrl = (workspace) => getEditUrl(addBasePath, workspace);
-        $scope.delete = (workspaces) => {
-          return graphService.delete(workspaces.map(({ id }) => id));
-        };
-        $scope.capabilities = capabilities;
-        $scope.initialFilter = ($location.search()).filter || '';
-        $scope.coreStart = coreStart;
-        setBreadcrumbs({ chrome });
-      }
-    })
+          $scope.listingLimit = config.get('savedObjects:listingLimit');
+          $scope.create = () => {
+            $location.url(getNewPath());
+          };
+          $scope.find = search => {
+            return graphService.find(search, $scope.listingLimit);
+          };
+          $scope.editItem = workspace => {
+            $location.url(getEditPath(workspace));
+          };
+          $scope.getViewUrl = workspace => getEditUrl(addBasePath, workspace);
+          $scope.delete = workspaces => {
+            return graphService.delete(workspaces.map(({ id }) => id));
+          };
+          $scope.capabilities = capabilities;
+          $scope.initialFilter = $location.search().filter || '';
+          $scope.coreStart = coreStart;
+          setBreadcrumbs({ chrome });
+        },
+      })
       .when('/workspace/:id?', {
         template: appTemplate,
         badge: getReadonlyBadge,
         resolve: {
-          savedWorkspace: function ($route) {
-            return $route.current.params.id ? savedGraphWorkspaces.get($route.current.params.id)
-              .catch(
-                function () {
+          savedWorkspace: function($route) {
+            return $route.current.params.id
+              ? savedGraphWorkspaces.get($route.current.params.id).catch(function() {
                   toastNotifications.addDanger(
                     i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                       defaultMessage: 'Missing workspace',
                     })
                   );
-                }
-              ) : savedGraphWorkspaces.get();
-
+                })
+              : savedGraphWorkspaces.get();
           },
-          //Copied from example found in wizard.js ( Kibana TODO - can't
-          indexPatterns: function () {
-            return savedObjectsClient.find({
-              type: 'index-pattern',
-              fields: ['title', 'type'],
-              perPage: 10000
-            }).then(response => response.savedObjects);
+          indexPatterns: function() {
+            return savedObjectsClient
+              .find({
+                type: 'index-pattern',
+                fields: ['title', 'type'],
+                perPage: 10000,
+              })
+              .then(response => response.savedObjects);
           },
-          GetIndexPatternProvider: function () {
+          GetIndexPatternProvider: function() {
             return indexPatterns;
           },
-        }
+        },
       })
       .otherwise({
-        redirectTo: '/home'
+        redirectTo: '/home',
       });
   });
 
-
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function ($scope, $route, $location, confirmModal) {
-    checkLicense(kbnBaseUrl);
-
+  app.controller('graphuiPlugin', function($scope, $route, $location, confirmModal) {
     function handleError(err) {
-      checkLicense(kbnBaseUrl);
       const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
         defaultMessage: 'Graph Error',
         description: '"Graph" is a product name and should not be translated.',
@@ -207,54 +187,64 @@ export function initGraphApp(angularModule, deps) {
     }
 
     async function handleHttpError(error) {
-      checkLicense(kbnBaseUrl);
-      toastNotifications.addDanger(formatAngularHttpError(error));
+      toastNotifications.addDanger(formatHttpError(error));
     }
 
     // Replacement function for graphClientWorkspace's comms so
     // that it works with Kibana.
     function callNodeProxy(indexName, query, responseHandler) {
       const request = {
-        index: indexName,
-        query: query
+        body: JSON.stringify({
+          index: indexName,
+          query: query,
+        }),
       };
       $scope.loading = true;
-      return $http.post('../api/graph/graphExplore', request)
-        .then(function (resp) {
-          if (resp.data.resp.timed_out) {
+      return coreStart.http
+        .post('../api/graph/graphExplore', request)
+        .then(function(data) {
+          const response = data.resp;
+          if (response.timed_out) {
             toastNotifications.addWarning(
               i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
                 defaultMessage: 'Exploration timed out',
               })
             );
           }
-          responseHandler(resp.data.resp);
+          responseHandler(response);
         })
         .catch(handleHttpError)
         .finally(() => {
           $scope.loading = false;
+          $scope.$digest();
         });
     }
 
-
     //Helper function for the graphClientWorkspace to perform a query
-    const callSearchNodeProxy = function (indexName, query, responseHandler) {
+    const callSearchNodeProxy = function(indexName, query, responseHandler) {
       const request = {
-        index: indexName,
-        body: query
+        body: JSON.stringify({
+          index: indexName,
+          body: query,
+        }),
       };
       $scope.loading = true;
-      $http.post('../api/graph/searchProxy', request)
-        .then(function (resp) {
-          responseHandler(resp.data.resp);
+      coreStart.http
+        .post('../api/graph/searchProxy', request)
+        .then(function(data) {
+          const response = data.resp;
+          responseHandler(response);
         })
         .catch(handleHttpError)
         .finally(() => {
           $scope.loading = false;
+          $scope.$digest();
         });
     };
 
-    $scope.indexPatternProvider = createCachedIndexPatternProvider($route.current.locals.GetIndexPatternProvider.get);
+    $scope.indexPatternProvider = createCachedIndexPatternProvider(
+      $route.current.locals.GetIndexPatternProvider.get
+    );
 
     const store = createGraphStore({
       basePath: getBasePath(),
@@ -265,10 +255,10 @@ export function initGraphApp(angularModule, deps) {
           indexName: indexPattern,
           vertex_fields: [],
           // Here we have the opportunity to look up labels for nodes...
-          nodeLabeller: function () {
+          nodeLabeller: function() {
             //   console.log(newNodes);
           },
-          changeHandler: function () {
+          changeHandler: function() {
             //Allows DOM to update with graph layout changes.
             $scope.$apply();
           },
@@ -278,10 +268,10 @@ export function initGraphApp(angularModule, deps) {
         };
         $scope.workspace = gws.createWorkspace(options);
       },
-      setLiveResponseFields: (fields) => {
+      setLiveResponseFields: fields => {
         $scope.liveResponseFields = fields;
       },
-      setUrlTemplates: (urlTemplates) => {
+      setUrlTemplates: urlTemplates => {
         $scope.urlTemplates = urlTemplates;
       },
       getWorkspace: () => {
@@ -297,7 +287,7 @@ export function initGraphApp(angularModule, deps) {
         $scope.workspaceInitialized = true;
       },
       savePolicy: graphSavePolicy,
-      changeUrl: (newUrl) => {
+      changeUrl: newUrl => {
         $scope.$evalAsync(() => {
           $location.url(newUrl);
         });
@@ -320,9 +310,8 @@ export function initGraphApp(angularModule, deps) {
     const allSavingDisabled = graphSavePolicy === 'none';
     $scope.spymode = 'request';
     $scope.colors = colorChoices;
-    $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
-    $scope.nodeClick = function (n, $event) {
-
+    $scope.isColorDark = color => isColorDark(...hexToRgb(color));
+    $scope.nodeClick = function(n, $event) {
       //Selection logic - shift key+click helps selects multiple nodes
       // Without the shift key we deselect all prior selections (perhaps not
       // a great idea for touch devices with no concept of shift key)
@@ -332,7 +321,6 @@ export function initGraphApp(angularModule, deps) {
         n.isSelected = prevSelection;
       }
 
-
       if ($scope.workspace.toggleNodeSelection(n)) {
         $scope.selectSelected(n);
       } else {
@@ -340,15 +328,14 @@ export function initGraphApp(angularModule, deps) {
       }
     };
 
-    $scope.clickEdge = function (edge) {
-      if (edge.inferred) {
-        $scope.setDetail ({ 'inferredEdge': edge });
-      }else {
-        $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
-      }
+    $scope.clickEdge = function(edge) {
+      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [
+        edge.topSrc,
+        edge.topTarget,
+      ]);
     };
 
-    $scope.submit = function (searchTerm) {
+    $scope.submit = function(searchTerm) {
       $scope.workspaceInitialized = true;
       const numHops = 2;
       if (searchTerm.startsWith('{')) {
@@ -357,12 +344,11 @@ export function initGraphApp(angularModule, deps) {
           if (query.vertices) {
             // Is a graph explore request
             $scope.workspace.callElasticsearch(query);
-          }else {
+          } else {
             // Is a regular query DSL query
             $scope.workspace.search(query, $scope.liveResponseFields, numHops);
           }
-        }
-        catch (err) {
+        } catch (err) {
           handleError(err);
         }
         return;
@@ -370,28 +356,28 @@ export function initGraphApp(angularModule, deps) {
       $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
     };
 
-    $scope.selectSelected = function (node) {
+    $scope.selectSelected = function(node) {
       $scope.detail = {
-        latestNodeSelection: node
+        latestNodeSelection: node,
       };
-      return $scope.selectedSelectedVertex = node;
+      return ($scope.selectedSelectedVertex = node);
     };
 
-    $scope.isSelectedSelected = function (node) {
+    $scope.isSelectedSelected = function(node) {
       return $scope.selectedSelectedVertex === node;
     };
 
-    $scope.openUrlTemplate = function (template) {
+    $scope.openUrlTemplate = function(template) {
       const url = template.url;
       const newUrl = url.replace(urlTemplateRegex, template.encoder.encode($scope.workspace));
       window.open(newUrl, '_blank');
     };
 
-    $scope.aceLoaded = (editor) => {
+    $scope.aceLoaded = editor => {
       editor.$blockScrolling = Infinity;
     };
 
-    $scope.setDetail = function (data) {
+    $scope.setDetail = function(data) {
       $scope.detail = data;
     };
 
@@ -402,7 +388,7 @@ export function initGraphApp(angularModule, deps) {
       }
       const confirmModalOptions = {
         onConfirm: callback,
-        onCancel: (() => {}),
+        onCancel: () => {},
         confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
           defaultMessage: 'Leave anyway',
         }),
@@ -411,19 +397,23 @@ export function initGraphApp(angularModule, deps) {
         }),
         ...options,
       };
-      confirmModal(text || i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
-        defaultMessage: 'If you leave now, you will lose unsaved changes.',
-      }), confirmModalOptions);
+      confirmModal(
+        text ||
+          i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
+            defaultMessage: 'If you leave now, you will lose unsaved changes.',
+          }),
+        confirmModalOptions
+      );
     }
     $scope.confirmWipeWorkspace = canWipeWorkspace;
 
-    $scope.performMerge = function (parentId, childId) {
+    $scope.performMerge = function(parentId, childId) {
       let found = true;
       while (found) {
         found = false;
         for (const i in $scope.detail.mergeCandidates) {
           const mc = $scope.detail.mergeCandidates[i];
-          if ((mc.id1 === childId) || (mc.id2 === childId)) {
+          if (mc.id1 === childId || mc.id2 === childId) {
             $scope.detail.mergeCandidates.splice(i, 1);
             found = true;
             break;
@@ -434,20 +424,19 @@ export function initGraphApp(angularModule, deps) {
       $scope.detail = null;
     };
 
-    $scope.handleMergeCandidatesCallback = function (termIntersects) {
+    $scope.handleMergeCandidatesCallback = function(termIntersects) {
       const mergeCandidates = [];
       for (const i in termIntersects) {
         const ti = termIntersects[i];
         mergeCandidates.push({
-          'id1': ti.id1,
-          'id2': ti.id2,
-          'term1': ti.term1,
-          'term2': ti.term2,
-          'v1': ti.v1,
-          'v2': ti.v2,
-          'overlap': ti.overlap
+          id1: ti.id1,
+          id2: ti.id2,
+          term1: ti.term1,
+          term2: ti.term2,
+          v1: ti.v1,
+          v2: ti.v2,
+          overlap: ti.overlap,
         });
-
       }
       $scope.detail = { mergeCandidates };
     };
@@ -465,8 +454,8 @@ export function initGraphApp(angularModule, deps) {
       tooltip: i18n.translate('xpack.graph.topNavMenu.newWorkspaceTooltip', {
         defaultMessage: 'Create a new workspace',
       }),
-      run: function () {
-        canWipeWorkspace(function () {
+      run: function() {
+        canWipeWorkspace(function() {
           $scope.$evalAsync(() => {
             if ($location.url() === '/workspace/') {
               $route.reload();
@@ -495,7 +484,8 @@ export function initGraphApp(angularModule, deps) {
         tooltip: () => {
           if (allSavingDisabled) {
             return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
-              defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+              defaultMessage:
+                'No changes to saved workspaces are permitted by the current save policy',
             });
           } else {
             return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
@@ -503,7 +493,7 @@ export function initGraphApp(angularModule, deps) {
             });
           }
         },
-        disableButton: function () {
+        disableButton: function() {
           return allSavingDisabled || !hasFieldsSelector(store.getState());
         },
         run: () => {
@@ -517,7 +507,9 @@ export function initGraphApp(angularModule, deps) {
     }
     $scope.topNavMenu.push({
       key: 'inspect',
-      disableButton: function () { return $scope.workspace === null; },
+      disableButton: function() {
+        return $scope.workspace === null;
+      },
       label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
         defaultMessage: 'Inspect',
       }),
@@ -535,7 +527,9 @@ export function initGraphApp(angularModule, deps) {
 
     $scope.topNavMenu.push({
       key: 'settings',
-      disableButton: function () { return datasourceSelector(store.getState()).type === 'none'; },
+      disableButton: function() {
+        return datasourceSelector(store.getState()).type === 'none';
+      },
       label: i18n.translate('xpack.graph.topNavMenu.settingsLabel', {
         defaultMessage: 'Settings',
       }),
@@ -543,22 +537,31 @@ export function initGraphApp(angularModule, deps) {
         defaultMessage: 'Settings',
       }),
       run: () => {
-        const settingsObservable = asAngularSyncedObservable(() => ({
-          blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
-          unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
-          canEditDrillDownUrls: canEditDrillDownUrls
-        }), $scope.$digest.bind($scope));
+        const settingsObservable = asAngularSyncedObservable(
+          () => ({
+            blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
+            unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
+            canEditDrillDownUrls: canEditDrillDownUrls,
+          }),
+          $scope.$digest.bind($scope)
+        );
         coreStart.overlays.openFlyout(
-          <Provider store={store}>
-            <Settings observable={settingsObservable} />
-          </Provider>, {
+          toMountPoint(
+            <Provider store={store}>
+              <Settings observable={settingsObservable} />
+            </Provider>
+          ),
+          {
             size: 'm',
-            closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
+            closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', {
+              defaultMessage: 'Close',
+            }),
             'data-test-subj': 'graphSettingsFlyout',
             ownFocus: true,
             className: 'gphSettingsFlyout',
             maxWidth: 520,
-          });
+          }
+        );
       },
     });
 
@@ -579,7 +582,7 @@ export function initGraphApp(angularModule, deps) {
     };
 
     $scope.closeMenus = () => {
-      _.forOwn($scope.menus, function (_, key) {
+      _.forOwn($scope.menus, function(_, key) {
         $scope.menus[key] = false;
       });
     };
@@ -594,5 +597,5 @@ export function initGraphApp(angularModule, deps) {
       $scope.noIndexPatterns = $route.current.locals.indexPatterns.length === 0;
     }
   });
-//End controller
+  //End controller
 }

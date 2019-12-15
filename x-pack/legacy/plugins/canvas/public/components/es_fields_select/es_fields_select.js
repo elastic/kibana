@@ -25,6 +25,7 @@ export const ESFieldsSelect = ({ selected, fields, onChange, onFocus, onBlur }) 
       className="canvasFieldsSelect"
       onFocus={onFocus}
       onBlur={onBlur}
+      compressed
     />
   );
 };

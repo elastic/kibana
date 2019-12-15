@@ -80,7 +80,6 @@ describe('graph_visualization', () => {
   ];
   const edges: GroupAwareWorkspaceEdge[] = [
     {
-      inferred: false,
       isSelected: true,
       label: '',
       topSrc: nodes[0],
@@ -91,7 +90,6 @@ describe('graph_visualization', () => {
       width: 2,
     },
     {
-      inferred: false,
       isSelected: true,
       label: '',
       topSrc: nodes[1],

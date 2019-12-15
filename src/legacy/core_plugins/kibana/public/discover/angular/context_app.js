@@ -18,13 +18,13 @@
  */
 
 import _ from 'lodash';
-import { getServices, callAfterBindingsWorkaround } from './../kibana_services';
+import { getServices, callAfterBindingsWorkaround, getAngularModule } from './../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
 import {
   createInitialQueryParametersState,
-  QueryParameterActionsProvider,
+  getQueryParameterActions,
   QUERY_PARAMETER_KEYS,
 } from './context/query_parameters';
 import {
@@ -34,17 +34,12 @@ import {
   QueryActionsProvider,
 } from './context/query';
 
-const { uiModules, timefilter } = getServices();
+const { timefilter } = getServices();
 
 // load directives
 import '../../../../data/public/legacy';
 
-const module = uiModules.get('apps/context', [
-  'elasticsearch',
-  'kibana',
-  'kibana/config',
-  'ngRoute',
-]);
+const module = getAngularModule();
 
 module.directive('contextApp', function ContextApp() {
   return {
@@ -67,7 +62,7 @@ module.directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, config, Private) {
-  const queryParameterActions = Private(QueryParameterActionsProvider);
+  const queryParameterActions = getQueryParameterActions();
   const queryActions = Private(QueryActionsProvider);
 
   timefilter.disableAutoRefreshSelector();
@@ -76,49 +71,55 @@ function ContextAppController($scope, config, Private) {
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
     getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
-    this.discoverUrl,
+    this.discoverUrl
   );
 
-  this.actions = _.mapValues({
-    ...queryParameterActions,
-    ...queryActions,
-  }, (action) => (...args) => action(this.state)(...args));
+  this.actions = _.mapValues(
+    {
+      ...queryParameterActions,
+      ...queryActions,
+    },
+    action => (...args) => action(this.state)(...args)
+  );
 
   this.constants = {
     FAILURE_REASONS,
     LOADING_STATUS,
   };
 
-  $scope.$watchGroup([
-    () => this.state.rows.predecessors,
-    () => this.state.rows.anchor,
-    () => this.state.rows.successors,
-  ], (newValues) => this.actions.setAllRows(...newValues));
+  $scope.$watchGroup(
+    [
+      () => this.state.rows.predecessors,
+      () => this.state.rows.anchor,
+      () => this.state.rows.successors,
+    ],
+    newValues => this.actions.setAllRows(...newValues)
+  );
 
   /**
    * Sync properties to state
    */
   $scope.$watchCollection(
     () => ({
-      ...(_.pick(this, QUERY_PARAMETER_KEYS)),
+      ..._.pick(this, QUERY_PARAMETER_KEYS),
       indexPatternId: this.indexPattern.id,
     }),
-    (newQueryParameters) => {
+    newQueryParameters => {
       const { queryParameters } = this.state;
       if (
-        (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorId !== queryParameters.anchorId)
-        || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
+        newQueryParameters.indexPatternId !== queryParameters.indexPatternId ||
+        newQueryParameters.anchorId !== queryParameters.anchorId ||
+        !_.isEqual(newQueryParameters.sort, queryParameters.sort)
       ) {
         this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       } else if (
-        (newQueryParameters.predecessorCount !== queryParameters.predecessorCount)
-        || (newQueryParameters.successorCount !== queryParameters.successorCount)
-        || (!_.isEqual(newQueryParameters.filters, queryParameters.filters))
+        newQueryParameters.predecessorCount !== queryParameters.predecessorCount ||
+        newQueryParameters.successorCount !== queryParameters.successorCount ||
+        !_.isEqual(newQueryParameters.filters, queryParameters.filters)
       ) {
         this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
-    },
+    }
   );
 
   /**
@@ -129,12 +130,11 @@ function ContextAppController($scope, config, Private) {
       predecessorCount: this.state.queryParameters.predecessorCount,
       successorCount: this.state.queryParameters.successorCount,
     }),
-    (newParameters) => {
+    newParameters => {
       _.assign(this, newParameters);
-    },
+    }
   );
 }
-
 
 function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
   return {

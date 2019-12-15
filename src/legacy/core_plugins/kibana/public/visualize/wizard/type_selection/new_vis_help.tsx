@@ -20,11 +20,11 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
-import chrome from 'ui/chrome';
 import { VisTypeAliasListEntry } from './type_selection';
 
 interface Props {
   promotedTypes: VisTypeAliasListEntry[];
+  addBasePath: (path: string) => string;
 }
 
 export function NewVisHelp(props: Props) {
@@ -42,7 +42,7 @@ export function NewVisHelp(props: Props) {
             <strong>{t.promotion!.description}</strong>
           </p>
           <EuiButton
-            href={chrome.addBasePath(t.aliasUrl)}
+            href={props.addBasePath(t.aliasUrl)}
             fill
             size="s"
             iconType="popout"

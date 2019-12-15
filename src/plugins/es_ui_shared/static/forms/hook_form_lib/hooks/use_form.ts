@@ -65,15 +65,12 @@ export function useForm<T extends object = FormData>(
 
   const stripEmptyFields = (fields: FieldsMap): FieldsMap => {
     if (formOptions.stripEmptyFields) {
-      return Object.entries(fields).reduce(
-        (acc, [key, field]) => {
-          if (typeof field.value !== 'string' || field.value.trim() !== '') {
-            acc[key] = field;
-          }
-          return acc;
-        },
-        {} as FieldsMap
-      );
+      return Object.entries(fields).reduce((acc, [key, field]) => {
+        if (typeof field.value !== 'string' || field.value.trim() !== '') {
+          acc[key] = field;
+        }
+        return acc;
+      }, {} as FieldsMap);
     }
     return fields;
   };

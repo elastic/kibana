@@ -5,29 +5,19 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
+    "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js & node ../../../../scripts/eslint ./public/pages/detection_engine/mitre/mitre_tactics_techniques.ts --fix",
     "build-graphql-types": "node scripts/generate_types_from_graphql.js",
     "cypress:open": "../../../node_modules/.bin/cypress open",
-    "cypress:run": "../../../node_modules/.bin/cypress run --spec ./cypress/integration/**/*.spec.ts --reporter ../../../node_modules/mocha-multi-reporters --reporter-options configFile=./reporter_config.json; ../../../node_modules/.bin/mochawesome-merge --reportDir ../../../../target/kibana-siem/cypress/results > ../../../../target/kibana-siem/cypress/results/output.json; ../../../node_modules/.bin/marge ../../../../target/kibana-siem/cypress/results/output.json --reportDir ../../../../target/kibana-siem/cypress/results; mkdir -p ../../../../target/junit && cp ../../../../target/kibana-siem/cypress/results/*.xml ../../../../target/junit/"
+    "cypress:run": "../../../node_modules/.bin/cypress run --spec ./cypress/integration/**/*.spec.ts --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./reporter_config.json; status=$?; ../../../node_modules/.bin/mochawesome-merge --reportDir ../../../../target/kibana-siem/cypress/results > ../../../../target/kibana-siem/cypress/results/output.json; ../../../../node_modules/.bin/marge ../../../../target/kibana-siem/cypress/results/output.json --reportDir ../../../../target/kibana-siem/cypress/results; mkdir -p ../../../../target/junit && cp ../../../../target/kibana-siem/cypress/results/*.xml ../../../../target/junit/ && exit $status;"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.110",
     "@types/js-yaml": "^3.12.1",
-    "@types/react-beautiful-dnd": "^10.0.1"
+    "@types/react-beautiful-dnd": "^11.0.3"
   },
   "dependencies": {
     "lodash": "^4.17.15",
-    "react-beautiful-dnd": "^10.0.1",
+    "react-beautiful-dnd": "^12.2.0",
     "react-markdown": "^4.0.6"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
-    "nohoist": [
-      "**/mochawesome",
-      "**/mochawesome/**",
-      "**/mocha-multi-reporters",
-      "**/mocha-multi-reporters/**"
-    ]
   }
 }

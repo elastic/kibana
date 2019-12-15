@@ -58,9 +58,6 @@ const makeMapStateToProps = () => {
   return (state: State) => getErrorSelector(state);
 };
 
-export const ErrorToastDispatcher = connect(
-  makeMapStateToProps,
-  {
-    removeError: appActions.removeError,
-  }
-)(ErrorToastDispatcherComponent);
+export const ErrorToastDispatcher = connect(makeMapStateToProps, {
+  removeError: appActions.removeError,
+})(ErrorToastDispatcherComponent);

@@ -6,10 +6,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
@@ -26,6 +24,7 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
+import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 
 interface OverviewPageProps {
   basePath: string;
@@ -109,8 +108,8 @@ export const OverviewPage = ({
       if (indexPattern) {
         const staticIndexPattern = toStaticIndexPattern(indexPattern);
         const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
-        const ast = fromKueryExpression(combinedFilterString);
-        const elasticsearchQuery = toElasticsearchQuery(ast, staticIndexPattern);
+        const ast = esKuery.fromKueryExpression(combinedFilterString);
+        const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
       }
     }
@@ -151,6 +150,10 @@ export const OverviewPage = ({
         <StatusPanel
           absoluteDateRangeStart={absoluteDateRangeStart}
           absoluteDateRangeEnd={absoluteDateRangeEnd}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          filters={filters}
+          statusFilter={statusFilter}
           sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />

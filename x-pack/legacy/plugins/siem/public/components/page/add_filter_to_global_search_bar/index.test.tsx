@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
@@ -13,9 +12,10 @@ import { apolloClientObservable, mockGlobalState, TestProviders } from '../../..
 import { createStore, State } from '../../../store';
 import { siemFilterManager } from '../../search_bar';
 import { AddFilterToGlobalSearchBar } from '.';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 interface MockSiemFilterManager {
-  addFilters: (filters: Filter[]) => void;
+  addFilters: (filters: esFilters.Filter[]) => void;
 }
 const mockSiemFilterManager: MockSiemFilterManager = siemFilterManager as MockSiemFilterManager;
 jest.mock('../../search_bar', () => ({
@@ -36,33 +36,31 @@ describe('AddFilterToGlobalSearchBar Component', () => {
 
   test('Rendering', async () => {
     const wrapper = shallow(
-      <TestProviders store={store}>
-        <AddFilterToGlobalSearchBar
-          filter={{
-            meta: {
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'phrase',
-              key: 'host.name',
-              value: 'siem-kibana',
-              params: {
+      <AddFilterToGlobalSearchBar
+        filter={{
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            value: 'siem-kibana',
+            params: {
+              query: 'siem-kibana',
+            },
+          },
+          query: {
+            match: {
+              'host.name': {
                 query: 'siem-kibana',
+                type: 'phrase',
               },
             },
-            query: {
-              match: {
-                'host.name': {
-                  query: 'siem-kibana',
-                  type: 'phrase',
-                },
-              },
-            },
-          }}
-        >
-          <>{'siem-kibana'}</>
-        </AddFilterToGlobalSearchBar>
-      </TestProviders>
+          },
+        }}
+      >
+        <>{'siem-kibana'}</>
+      </AddFilterToGlobalSearchBar>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

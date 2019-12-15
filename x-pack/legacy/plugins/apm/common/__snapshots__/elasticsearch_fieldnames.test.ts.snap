@@ -102,6 +102,8 @@ exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
 exports[`Error URL_FULL 1`] = `undefined`;
 
+exports[`Error USER_AGENT_NAME 1`] = `undefined`;
+
 exports[`Error USER_ID 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
@@ -206,6 +208,8 @@ exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
 exports[`Span URL_FULL 1`] = `undefined`;
 
+exports[`Span USER_AGENT_NAME 1`] = `undefined`;
+
 exports[`Span USER_ID 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
@@ -309,5 +313,7 @@ exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
+
+exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;

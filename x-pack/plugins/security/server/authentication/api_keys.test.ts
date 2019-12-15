@@ -4,37 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APIKeys } from './api_keys';
 import { IClusterClient, IScopedClusterClient } from '../../../../../src/core/server';
+import { SecurityLicense } from '../licensing';
+import { APIKeys } from './api_keys';
+
 import {
   httpServerMock,
   loggingServiceMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
+import { licenseMock } from '../licensing/index.mock';
 
 describe('API Keys', () => {
   let apiKeys: APIKeys;
   let mockClusterClient: jest.Mocked<IClusterClient>;
   let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
-  const mockIsSecurityFeatureDisabled = jest.fn();
+  let mockLicense: jest.Mocked<SecurityLicense>;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockClusterClient.asScoped.mockReturnValue((mockScopedClusterClient as unknown) as jest.Mocked<
-      IScopedClusterClient
-    >);
-    mockIsSecurityFeatureDisabled.mockReturnValue(false);
+    mockClusterClient.asScoped.mockReturnValue(
+      (mockScopedClusterClient as unknown) as jest.Mocked<IScopedClusterClient>
+    );
+
+    mockLicense = licenseMock.create();
+    mockLicense.isEnabled.mockReturnValue(true);
+
     apiKeys = new APIKeys({
       clusterClient: mockClusterClient,
       logger: loggingServiceMock.create().get('api-keys'),
-      isSecurityFeatureDisabled: mockIsSecurityFeatureDisabled,
+      license: mockLicense,
     });
   });
 
   describe('create()', () => {
     it('returns null when security feature is disabled', async () => {
-      mockIsSecurityFeatureDisabled.mockReturnValue(true);
+      mockLicense.isEnabled.mockReturnValue(false);
       const result = await apiKeys.create(httpServerMock.createKibanaRequest(), {
         name: '',
         role_descriptors: {},
@@ -44,7 +50,7 @@ describe('API Keys', () => {
     });
 
     it('calls callCluster with proper parameters', async () => {
-      mockIsSecurityFeatureDisabled.mockReturnValue(false);
+      mockLicense.isEnabled.mockReturnValue(true);
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
         id: '123',
         name: 'key-name',
@@ -77,7 +83,7 @@ describe('API Keys', () => {
 
   describe('invalidate()', () => {
     it('returns null when security feature is disabled', async () => {
-      mockIsSecurityFeatureDisabled.mockReturnValue(true);
+      mockLicense.isEnabled.mockReturnValue(false);
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
         id: '123',
       });
@@ -86,7 +92,7 @@ describe('API Keys', () => {
     });
 
     it('calls callCluster with proper parameters', async () => {
-      mockIsSecurityFeatureDisabled.mockReturnValue(false);
+      mockLicense.isEnabled.mockReturnValue(true);
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],
@@ -111,7 +117,7 @@ describe('API Keys', () => {
     });
 
     it(`Only passes id as a parameter`, async () => {
-      mockIsSecurityFeatureDisabled.mockReturnValue(false);
+      mockLicense.isEnabled.mockReturnValue(true);
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValueOnce({
         invalidated_api_keys: ['api-key-id-1'],
         previously_invalidated_api_keys: [],

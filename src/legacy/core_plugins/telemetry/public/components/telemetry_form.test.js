@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '../services/telemetry_opt_in.test.mocks';
+import { mockInjectedMetadata } from '../services/telemetry_opt_in.test.mocks';
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TelemetryForm } from './telemetry_form';
@@ -25,37 +25,59 @@ import { TelemetryOptInProvider } from '../services';
 
 const buildTelemetryOptInProvider = () => {
   const mockHttp = {
-    post: jest.fn()
+    post: jest.fn(),
   };
 
   const mockInjector = {
-    get: (key) => {
+    get: key => {
       switch (key) {
         case '$http':
           return mockHttp;
+        case 'allowChangingOptInStatus':
+          return true;
         default:
           return null;
       }
-    }
+    },
   };
 
   const chrome = {
-    addBasePath: (url) => url
+    addBasePath: url => url,
   };
 
   return new TelemetryOptInProvider(mockInjector, chrome);
 };
 
 describe('TelemetryForm', () => {
-  it('renders as expected', () => {
-    expect(shallowWithIntl(
-      <TelemetryForm
-        spacesEnabled={false}
-        query={{ text: '' }}
-        onQueryMatchChange={jest.fn()}
-        telemetryOptInProvider={buildTelemetryOptInProvider()}
-        enableSaving={true}
-      />)
+  it('renders as expected when allows to change optIn status', () => {
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: true });
+
+    expect(
+      shallowWithIntl(
+        <TelemetryForm
+          spacesEnabled={false}
+          query={{ text: '' }}
+          onQueryMatchChange={jest.fn()}
+          telemetryOptInProvider={buildTelemetryOptInProvider()}
+          enableSaving={true}
+        />
+      )
+    ).toMatchSnapshot();
+  });
+
+  it(`doesn't render form when not allowed to change optIn status`, () => {
+    mockInjectedMetadata({ telemetryOptedIn: null, allowChangingOptInStatus: false });
+
+    expect(
+      shallowWithIntl(
+        <TelemetryForm
+          spacesEnabled={false}
+          query={{ text: '' }}
+          onQueryMatchChange={jest.fn()}
+          telemetryOptInProvider={buildTelemetryOptInProvider()}
+          enableSaving={true}
+        />
+      )
     ).toMatchSnapshot();
   });
 });

@@ -35,7 +35,7 @@ export class OptInBanner extends React.PureComponent<Props> {
     const title = (
       <FormattedMessage
         id="telemetry.welcomeBanner.title"
-        defaultMessage="Help us improve the Elastic Stack!"
+        defaultMessage="Help us improve the Elastic Stack"
       />
     );
     return (
@@ -45,12 +45,18 @@ export class OptInBanner extends React.PureComponent<Props> {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton size="s" onClick={() => this.props.optInClick(true)}>
-              <FormattedMessage id="telemetry.welcomeBanner.yesButtonLabel" defaultMessage="Yes" />
+              <FormattedMessage
+                id="telemetry.welcomeBanner.enableButtonLabel"
+                defaultMessage="Enable"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton size="s" onClick={() => this.props.optInClick(false)}>
-              <FormattedMessage id="telemetry.welcomeBanner.noButtonLabel" defaultMessage="No" />
+              <FormattedMessage
+                id="telemetry.welcomeBanner.disableButtonLabel"
+                defaultMessage="Disable"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

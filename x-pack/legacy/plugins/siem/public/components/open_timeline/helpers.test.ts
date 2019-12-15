@@ -235,6 +235,7 @@ describe('helpers', () => {
         },
         description: '',
         eventIdToNoteIds: {},
+        filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
         id: 'savedObject-1',
@@ -321,6 +322,7 @@ describe('helpers', () => {
         },
         description: '',
         eventIdToNoteIds: {},
+        filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
         id: 'savedObject-1',
@@ -400,6 +402,165 @@ describe('helpers', () => {
         dataProviders: [],
         description: '',
         eventIdToNoteIds: {},
+        filters: [],
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        isFavorite: false,
+        isLive: false,
+        isLoading: false,
+        isSaving: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: null,
+          filterQueryDraft: null,
+        },
+        title: '',
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        dateRange: {
+          start: 0,
+          end: 0,
+        },
+        show: false,
+        sort: {
+          columnId: '@timestamp',
+          sortDirection: 'desc',
+        },
+        width: 1100,
+        id: 'savedObject-1',
+      });
+    });
+
+    test('should merge filters object back with json object', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+        filters: [
+          {
+            meta: {
+              alias: null,
+              controlledBy: null,
+              disabled: false,
+              index: null,
+              key: 'event.category',
+              negate: false,
+              params: '{"query":"file"}',
+              type: 'phrase',
+              value: null,
+            },
+            query: '{"match_phrase":{"event.category":"file"}}',
+            exists: null,
+          },
+          {
+            meta: {
+              alias: null,
+              controlledBy: null,
+              disabled: false,
+              index: null,
+              key: '@timestamp',
+              negate: false,
+              params: null,
+              type: 'exists',
+              value: 'exists',
+            },
+            query: null,
+            exists: '{"field":"@timestamp"}',
+          },
+        ],
+        version: '1',
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false);
+      expect(newTimeline).toEqual({
+        savedObjectId: 'savedObject-1',
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            width: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'message',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.category',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            width: 180,
+          },
+        ],
+        version: '1',
+        dataProviders: [],
+        description: '',
+        eventIdToNoteIds: {},
+        filters: [
+          {
+            $state: {
+              store: 'appState',
+            },
+            meta: {
+              alias: null,
+              controlledBy: null,
+              disabled: false,
+              index: null,
+              key: 'event.category',
+              negate: false,
+              params: {
+                query: 'file',
+              },
+              type: 'phrase',
+              value: null,
+            },
+            query: {
+              match_phrase: {
+                'event.category': 'file',
+              },
+            },
+          },
+          {
+            $state: {
+              store: 'appState',
+            },
+            exists: {
+              field: '@timestamp',
+            },
+            meta: {
+              alias: null,
+              controlledBy: null,
+              disabled: false,
+              index: null,
+              key: '@timestamp',
+              negate: false,
+              params: null,
+              type: 'exists',
+              value: 'exists',
+            },
+          },
+        ],
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,

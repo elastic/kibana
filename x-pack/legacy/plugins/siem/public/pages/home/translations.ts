@@ -18,6 +18,10 @@ export const NETWORK = i18n.translate('xpack.siem.navigation.network', {
   defaultMessage: 'Network',
 });
 
+export const DETECTION_ENGINE = i18n.translate('xpack.siem.navigation.detectionEngine', {
+  defaultMessage: 'Detection engine',
+});
+
 export const TIMELINES = i18n.translate('xpack.siem.navigation.timelines', {
   defaultMessage: 'Timelines',
 });

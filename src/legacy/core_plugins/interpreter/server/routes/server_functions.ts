@@ -19,8 +19,10 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { serializeProvider, API_ROUTE } from '../../common';
+import { serializeProvider } from '../../../../../plugins/expressions/common';
 import { createHandlers } from '../lib/create_handlers';
+
+const API_ROUTE = '/api/interpreter';
 
 /**
  * Register the Canvas function endopints.
@@ -73,7 +75,7 @@ function runServerFunctions(server: any) {
 
       // Send the initial headers.
       res.writeHead(200, {
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/x-ndjson',
         Connection: 'keep-alive',
         'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache',
@@ -81,8 +83,7 @@ function runServerFunctions(server: any) {
 
       // Write a length-delimited response
       const streamResult = (result: any) => {
-        const payload = JSON.stringify(result) + '\n';
-        res.write(`${payload.length}:${payload}`);
+        res.write(JSON.stringify(result) + '\n');
       };
 
       // Tries to run an interpreter function, and ensures a consistent error payload on failure.

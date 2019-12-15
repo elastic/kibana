@@ -96,6 +96,11 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { field: TlsFields._id, direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: { direction: Direction.desc },
+        },
       },
     },
     details: {
@@ -130,6 +135,11 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
           sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [networkModel.IpDetailsTableType.http]: {
+          activePage: 0,
+          limit: 10,
+          sort: { direction: Direction.desc },
         },
       },
     },

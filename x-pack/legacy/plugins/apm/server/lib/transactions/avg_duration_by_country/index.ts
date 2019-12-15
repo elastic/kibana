@@ -9,19 +9,30 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
+import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 
 export async function getTransactionAvgDurationByCountry({
   setup,
-  serviceName
+  serviceName,
+  transactionName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
+  transactionName?: string;
 }) {
   const { uiFiltersES, client, start, end, indices } = setup;
+  const transactionNameFilter = transactionName
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+    : [];
   const params = {
     index: indices['apm_oss.transactionIndices'],
     body: {
@@ -30,8 +41,9 @@ export async function getTransactionAvgDurationByCountry({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            ...transactionNameFilter,
             { term: { [PROCESSOR_EVENT]: 'transaction' } },
-            { term: { [TRANSACTION_TYPE]: 'page-load' } },
+            { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
             { exists: { field: CLIENT_GEO_COUNTRY_ISO_CODE } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES

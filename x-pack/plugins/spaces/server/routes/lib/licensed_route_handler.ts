@@ -6,7 +6,7 @@
 
 import { RequestHandler } from 'src/core/server';
 import { ObjectType } from '@kbn/config-schema';
-import { LICENSE_STATUS } from '../../../../licensing/server/constants';
+import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 
 export const createLicensedRouteHandler = <
   P extends ObjectType<any>,
@@ -19,8 +19,8 @@ export const createLicensedRouteHandler = <
     const { license } = context.licensing;
     const licenseCheck = license.check('spaces', 'basic');
     if (
-      licenseCheck.check === LICENSE_STATUS.Unavailable ||
-      licenseCheck.check === LICENSE_STATUS.Invalid
+      licenseCheck.state === LICENSE_CHECK_STATE.Unavailable ||
+      licenseCheck.state === LICENSE_CHECK_STATE.Invalid
     ) {
       return responseToolkit.forbidden({ body: { message: licenseCheck.message! } });
     }

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import 'ui/registry/field_formats';
 import 'uiExports/contextMenuActions';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
-import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/fieldFormats';
@@ -31,21 +29,17 @@ import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
-import 'uiExports/visEditorTypes';
 import 'uiExports/visTypes';
 import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
-import { capabilities } from 'ui/capabilities';
-
 import chrome from 'ui/chrome';
-import { getVisualizeLoader } from 'ui/visualize/loader';
+import { npStart } from 'ui/new_platform';
 
 import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
-import { npSetup } from 'ui/new_platform';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
@@ -57,10 +51,14 @@ import { showNewVisModal } from '../wizard';
 import { SavedVisualizations } from '../types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
-import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
+import {
+  VisualizeEmbeddable,
+  VisualizeInput,
+  VisualizeOutput,
+  VisSavedObject,
+} from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
-import { VisSavedObject } from '../../../../../ui/public/visualize/loader/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -110,7 +108,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           if (!visType) {
             return false;
           }
-          if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
+          if (npStart.core.uiSettings.get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
@@ -122,7 +120,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.get().visualize.save as boolean;
+    return npStart.core.application.capabilities.visualize.save as boolean;
   }
 
   public getDisplayName() {
@@ -144,9 +142,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const visId = savedObject.id as string;
 
       const editUrl = visId
-        ? chrome.addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        ? npStart.core.http.basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
         : '';
-      const loader = await getVisualizeLoader();
       const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
@@ -158,7 +155,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       return new VisualizeEmbeddable(
         {
           savedVisualization: savedObject,
-          loader,
           indexPatterns,
           editUrl,
           editable: this.isEditable(),
@@ -197,17 +193,16 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (this.visTypes) {
-      showNewVisModal(this.visTypes, {
-        editorParams: ['addToDashboard'],
-      });
+      showNewVisModal(
+        this.visTypes,
+        {
+          editorParams: ['addToDashboard'],
+        },
+        npStart.core.http.basePath.prepend,
+        npStart.core.uiSettings,
+        npStart.core.savedObjects
+      );
     }
     return undefined;
   }
 }
-
-VisualizeEmbeddableFactory.createVisualizeEmbeddableFactory().then(embeddableFactory => {
-  npSetup.plugins.embeddable.registerEmbeddableFactory(
-    VISUALIZE_EMBEDDABLE_TYPE,
-    embeddableFactory
-  );
-});

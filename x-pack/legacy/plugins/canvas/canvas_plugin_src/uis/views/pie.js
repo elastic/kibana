@@ -14,11 +14,24 @@ const { Pie: strings } = ViewStrings;
 export const pie = () => ({
   name: 'pie',
   displayName: strings.getDisplayName(),
-  modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
+  modelArgs: [
+    ['color', { label: 'Slice Labels' }],
+    ['size', { label: 'Slice Angles' }],
+  ],
   args: [
     {
       name: 'palette',
       argType: 'palette',
+    },
+    {
+      name: 'legend',
+      displayName: strings.getLegendDisplayName(),
+      help: strings.getLegendHelp(),
+      argType: 'select',
+      default: 'ne',
+      options: {
+        choices: legendOptions,
+      },
     },
     {
       name: 'hole',
@@ -32,13 +45,6 @@ export const pie = () => ({
       },
     },
     {
-      name: 'labels',
-      displayName: strings.getLabelsDisplayName(),
-      help: strings.getLabelsHelp(),
-      argType: 'toggle',
-      default: true,
-    },
-    {
       name: 'labelRadius',
       displayName: strings.getLabelRadiusDisplayName(),
       help: strings.getLabelRadiusHelp(),
@@ -50,21 +56,25 @@ export const pie = () => ({
       },
     },
     {
-      name: 'legend',
-      displayName: strings.getLegendDisplayName(),
-      help: strings.getLegendHelp(),
-      argType: 'select',
-      default: 'ne',
-      options: {
-        choices: legendOptions,
-      },
-    },
-    {
       name: 'radius',
       displayName: strings.getRadiusDisplayName(),
       help: strings.getRadiusHelp(),
       argType: 'percentage',
       default: 1,
+    },
+    {
+      name: 'tilt',
+      displayName: strings.getTiltDisplayName(),
+      help: strings.getTiltHelp(),
+      argType: 'percentage',
+      default: 1,
+    },
+    {
+      name: 'labels',
+      displayName: strings.getLabelsDisplayName(),
+      help: strings.getLabelsHelp(),
+      argType: 'toggle',
+      default: true,
     },
     {
       name: 'seriesStyle',
@@ -74,13 +84,6 @@ export const pie = () => ({
     {
       name: 'font',
       argType: 'font',
-    },
-    {
-      name: 'tilt',
-      displayName: strings.getTiltDisplayName(),
-      help: strings.getTiltHelp(),
-      argType: 'percentage',
-      default: 1,
     },
   ],
   resolve({ context }) {

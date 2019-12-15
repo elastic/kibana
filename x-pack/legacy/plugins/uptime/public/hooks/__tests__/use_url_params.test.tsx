@@ -8,7 +8,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from '../use_url_params';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 import { UptimeRefreshContext } from '../../contexts';
 
 interface MockUrlParamsComponentProps {

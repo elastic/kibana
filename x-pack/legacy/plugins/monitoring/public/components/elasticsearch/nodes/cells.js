@@ -11,14 +11,10 @@ import { EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 function OfflineCell() {
-  return (
-    <div className="monTableCell__number monTableCell__offline">
-      N/A
-    </div>
-  );
+  return <div className="monTableCell__number monTableCell__offline">N/A</div>;
 }
 
-const getSlopeArrow = (slope) => {
+const getSlopeArrow = slope => {
   if (slope || slope === 0) {
     return slope > 0 ? 'up' : 'down';
   }
@@ -53,16 +49,16 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
               defaultMessage: '{metric} max',
               values: {
-                metric: metricVal(maxVal, format, isPercent)
-              }
+                metric: metricVal(maxVal, format, isPercent),
+              },
             })}
           </EuiText>
           <EuiText size="xs">
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
               defaultMessage: '{metric} min',
               values: {
-                metric: metricVal(minVal, format, isPercent)
-              }
+                metric: metricVal(minVal, format, isPercent),
+              },
             })}
           </EuiText>
         </EuiFlexItem>
@@ -70,10 +66,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     );
   }
 
-  return <OfflineCell/>;
+  return <OfflineCell />;
 }
 
-export {
-  OfflineCell,
-  MetricCell
-};
+export { OfflineCell, MetricCell };

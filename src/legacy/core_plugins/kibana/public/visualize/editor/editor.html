@@ -1,7 +1,7 @@
 <visualize-app class="app-container visEditor visEditor--{{ vis.type.name }}">
   <!-- Linked search. -->
   <div
-      ng-show="chrome.getVisible()"
+      ng-show="isVisible"
       ng-if="vis.type.requiresSearch && state.linked"
       class="fullWidth visEditor__linkedMessage"
     >
@@ -33,12 +33,13 @@
     show-query-bar is set to "true".
   -->
   <kbn-top-nav
+    ng-if="isVisible"
     app-name="'visualize'"
     config="topNavMenu"
     show-search-bar="true"
     show-query-bar="true"
     show-query-input="showQueryInput()"
-    show-filter-bar="showFilterBar() && chrome.getVisible()"
+    show-filter-bar="showFilterBar() && isVisible"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
     query="state.query"
@@ -64,13 +65,20 @@
     The top nav is hidden in embed mode but the filter bar must still be present so
     we show the filter bar on its own here if the chrome is not visible.
   -->
-  <filter-bar
-    ng-if="vis.type.options.showFilterBar && !chrome.getVisible()"
-    class-name="'globalFilterGroup__filterBar'"
+  <kbn-top-nav
+    ng-if="showFilterBar() && !isVisible"
+
+    app-name="'visualize'"
+    show-search-bar="true"
+    show-filter-bar="true"
+    show-save-query="false"
+    show-date-picker="false"
+
     filters="filters"
     on-filters-updated="onFiltersUpdated"
     index-patterns="[indexPattern]"
-  ></filter-bar>
+  >
+  </kbn-top-nav>
 
   <div
     class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"
@@ -83,7 +91,7 @@
   </div>
 
   <visualization-embedded
-    ng-if="!chrome.getVisible()"
+    ng-if="!isVisible"
     class="visualize"
     saved-obj="savedVis"
     ui-state="uiState"
@@ -102,7 +110,7 @@
   >
   </h1>
   <visualization-editor
-    ng-if="chrome.getVisible()"
+    ng-if="isVisible"
     saved-obj="savedVis"
     ui-state="uiState"
     time-range="timeRange"

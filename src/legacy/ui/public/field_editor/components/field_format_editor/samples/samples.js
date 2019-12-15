@@ -22,11 +22,12 @@ import PropTypes from 'prop-types';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class FormatEditorSamplesComponent extends PureComponent {
+export class FormatEditorSamples extends PureComponent {
   static defaultProps = {
-    sampleType: 'text'
+    sampleType: 'text',
   };
   static propTypes = {
     samples: PropTypes.arrayOf(
@@ -39,13 +40,12 @@ export class FormatEditorSamplesComponent extends PureComponent {
   };
 
   render() {
-    const { samples, intl, sampleType } = this.props;
+    const { samples, sampleType } = this.props;
 
     const columns = [
       {
         field: 'input',
-        name: intl.formatMessage({
-          id: 'common.ui.fieldEditor.samples.inputHeader',
+        name: i18n.translate('common.ui.fieldEditor.samples.inputHeader', {
           defaultMessage: 'Input',
         }),
         render: input => {
@@ -54,21 +54,21 @@ export class FormatEditorSamplesComponent extends PureComponent {
       },
       {
         field: 'output',
-        name: intl.formatMessage({
-          id: 'common.ui.fieldEditor.samples.outputHeader',
+        name: i18n.translate('common.ui.fieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
         render: output => {
-          return sampleType === 'html' ?
-            (
-              <div
+          return sampleType === 'html' ? (
+            <div
               /*
                * Justification for dangerouslySetInnerHTML:
                * Sample output may contain HTML tags, like URL image/audio format.
                */
-                dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
-              />
-            ) : (<div>{output}</div>);
+              dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
+            />
+          ) : (
+            <div>{output}</div>
+          );
         },
       },
     ];
@@ -89,5 +89,3 @@ export class FormatEditorSamplesComponent extends PureComponent {
     ) : null;
   }
 }
-
-export const FormatEditorSamples = injectI18n(FormatEditorSamplesComponent);

@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { EuiTheme } from '../../../../common/eui_styled_components';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -31,63 +30,70 @@ export const InventoryFormatterTypeRT = rt.keyof({
   bytes: null,
   number: null,
   percent: null,
+  highPercision: null,
 });
+export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
 
-export const InventoryMetricRT = rt.string;
+export const InventoryMetricRT = rt.keyof({
+  hostSystemOverview: null,
+  hostCpuUsage: null,
+  hostFilesystem: null,
+  hostK8sOverview: null,
+  hostK8sCpuCap: null,
+  hostK8sDiskCap: null,
+  hostK8sMemoryCap: null,
+  hostK8sPodCap: null,
+  hostLoad: null,
+  hostMemoryUsage: null,
+  hostNetworkTraffic: null,
+  hostDockerOverview: null,
+  hostDockerInfo: null,
+  hostDockerTop5ByCpu: null,
+  hostDockerTop5ByMemory: null,
+  podOverview: null,
+  podCpuUsage: null,
+  podMemoryUsage: null,
+  podLogUsage: null,
+  podNetworkTraffic: null,
+  containerOverview: null,
+  containerCpuKernel: null,
+  containerCpuUsage: null,
+  containerDiskIOOps: null,
+  containerDiskIOBytes: null,
+  containerMemory: null,
+  containerNetworkTraffic: null,
+  nginxHits: null,
+  nginxRequestRate: null,
+  nginxActiveConnections: null,
+  nginxRequestsPerConnection: null,
+  awsOverview: null,
+  awsCpuUtilization: null,
+  awsNetworkBytes: null,
+  awsNetworkPackets: null,
+  awsDiskioBytes: null,
+  awsDiskioOps: null,
+  awsEC2CpuUtilization: null,
+  awsEC2NetworkTraffic: null,
+  awsEC2DiskIOBytes: null,
+  awsS3TotalRequests: null,
+  awsS3NumberOfObjects: null,
+  awsS3BucketSize: null,
+  awsS3DownloadBytes: null,
+  awsS3UploadBytes: null,
+  awsRDSCpuTotal: null,
+  awsRDSConnections: null,
+  awsRDSQueriesExecuted: null,
+  awsRDSActiveTransactions: null,
+  awsRDSLatency: null,
+  awsSQSMessagesVisible: null,
+  awsSQSMessagesDelayed: null,
+  awsSQSMessagesSent: null,
+  awsSQSMessagesEmpty: null,
+  awsSQSOldestMessage: null,
+  custom: null,
+});
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
-
-export const SeriesOverridesRT = rt.intersection([
-  rt.type({
-    color: rt.string,
-  }),
-  rt.partial({
-    type: InventoryVisTypeRT,
-    name: rt.string,
-    formatter: InventoryFormatterTypeRT,
-    formatterTemplate: rt.string,
-    gaugeMax: rt.number,
-  }),
-]);
-
-export const VisConfigRT = rt.partial({
-  stacked: rt.boolean,
-  type: InventoryVisTypeRT,
-  formatter: InventoryFormatterTypeRT,
-  formatterTemplate: rt.string,
-  seriesOverrides: rt.record(rt.string, rt.union([rt.undefined, SeriesOverridesRT])),
-});
-
-export const InventorySectionTypeRT = rt.keyof({
-  chart: null,
-  gauges: null,
-});
-
-export type InventorySectionType = rt.TypeOf<typeof InventorySectionTypeRT>;
-
-export const SectionRT = rt.intersection([
-  rt.type({
-    id: InventoryMetricRT,
-    label: rt.string,
-    requires: rt.array(rt.string),
-    visConfig: VisConfigRT,
-    type: InventorySectionTypeRT,
-  }),
-  rt.partial({
-    linkToId: rt.string,
-  }),
-]);
-
-export const InventoryDetailLayoutRT = rt.type({
-  id: rt.string,
-  label: rt.string,
-  sections: rt.array(SectionRT),
-});
-
-export type InventoryDetailSection = rt.TypeOf<typeof SectionRT>;
-export type InventoryDetailLayout = rt.TypeOf<typeof InventoryDetailLayoutRT>;
-
-export type InventoryDetailLayoutCreator = (theme: EuiTheme) => InventoryDetailLayout[];
 
 export const TSVBMetricTypeRT = rt.keyof({
   avg: null,
@@ -175,6 +181,8 @@ export const TSVBSeriesRT = rt.intersection([
   }),
 ]);
 
+export type TSVBSeries = rt.TypeOf<typeof TSVBSeriesRT>;
+
 export const TSVBMetricModelRT = rt.intersection([
   rt.type({
     id: InventoryMetricRT,
@@ -189,6 +197,7 @@ export const TSVBMetricModelRT = rt.intersection([
     filter: rt.string,
     map_field_to: rt.string,
     id_type: rt.keyof({ cloud: null, node: null }),
+    drop_last_bucket: rt.boolean,
   }),
 ]);
 
@@ -272,14 +281,57 @@ export const SnapshotModelRT = rt.record(
 );
 export type SnapshotModel = rt.TypeOf<typeof SnapshotModelRT>;
 
+export const SnapshotMetricTypeRT = rt.keyof({
+  count: null,
+  cpu: null,
+  load: null,
+  memory: null,
+  tx: null,
+  rx: null,
+  logRate: null,
+  diskIOReadBytes: null,
+  diskIOWriteBytes: null,
+  s3TotalRequests: null,
+  s3NumberOfObjects: null,
+  s3BucketSize: null,
+  s3DownloadBytes: null,
+  s3UploadBytes: null,
+  rdsConnections: null,
+  rdsQueriesExecuted: null,
+  rdsActiveTransactions: null,
+  rdsLatency: null,
+  sqsMessagesVisible: null,
+  sqsMessagesDelayed: null,
+  sqsMessagesSent: null,
+  sqsMessagesEmpty: null,
+  sqsOldestMessage: null,
+});
+
+export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
+
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot?: { [name: string]: SnapshotModel };
+  snapshot: { [name: string]: SnapshotModel };
+  defaultSnapshot: SnapshotMetricType;
+  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
+  defaultTimeRangeInSeconds: number;
 }
 
 export interface InventoryModel {
   id: string;
+  displayName: string;
   requiredModules: string[];
-  layout: InventoryDetailLayoutCreator;
+  fields: {
+    id: string;
+    name: string;
+    ip?: string;
+  };
+  crosslinkSupport: {
+    details: boolean;
+    logs: boolean;
+    apm: boolean;
+    uptime: boolean;
+  };
   metrics: InventoryMetrics;
+  requiredMetrics: InventoryMetric[];
 }

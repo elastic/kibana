@@ -7,7 +7,6 @@
 import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
@@ -35,18 +34,11 @@ describe('Create Rollup Job, step 3: Terms', () => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setIndexPatternValidityResponse();
 
-    ({
-      find,
-      exists,
-      actions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      table,
-    } = setup());
+    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table } = setup());
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
-  const keywordFields =  ['b-keywordField', 'd-keywordField'];
+  const keywordFields = ['b-keywordField', 'd-keywordField'];
 
   const goToStepAndOpenFieldChooser = async () => {
     await goToStep(3);
@@ -116,7 +108,10 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
     describe('when no terms are available', () => {
       it('should indicate it to the user', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: [], keywordFields: [] });
+        httpRequestsMockHelpers.setIndexPatternValidityResponse({
+          numericFields: [],
+          keywordFields: [],
+        });
         await goToStepAndOpenFieldChooser();
 
         const { tableCellsValues } = table.getMetaData('rollupJobTermsFieldChooser-table');

@@ -22,7 +22,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   hasArrow={true}
   id="addTooltipFieldPopover"
   isOpen={false}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="m"
 >
   <EuiSelectable
@@ -87,7 +87,7 @@ exports[`Should render 1`] = `
   hasArrow={true}
   id="addTooltipFieldPopover"
   isOpen={false}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="m"
 >
   <EuiSelectable

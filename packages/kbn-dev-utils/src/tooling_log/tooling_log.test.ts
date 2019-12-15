@@ -112,10 +112,7 @@ describe('#getWritten$()', () => {
     const done$ = new Rx.Subject();
     const promise = log
       .getWritten$()
-      .pipe(
-        takeUntil(done$),
-        toArray()
-      )
+      .pipe(takeUntil(done$), toArray())
       .toPromise();
 
     log.debug('foo');

@@ -15,9 +15,7 @@ import {
   isEmpty,
   first
 } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
-import { StringMap } from '../../../../../../../../typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 
@@ -191,7 +189,7 @@ function getServices(items: IWaterfallItem[]) {
   return uniq(serviceNames);
 }
 
-export type IServiceColors = StringMap<string>;
+export type IServiceColors = Record<string, string>;
 
 function getServiceColors(services: string[]) {
   const assignedColors = [
@@ -225,7 +223,7 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
     }
 
     const item = itemsById[id];
-    const isTransaction = idx(item, _ => _.docType) === 'transaction';
+    const isTransaction = item?.docType === 'transaction';
     if (isTransaction) {
       return (item as IWaterfallItemTransaction).transaction;
     }

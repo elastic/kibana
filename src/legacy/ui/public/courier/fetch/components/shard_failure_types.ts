@@ -24,6 +24,7 @@ export interface Request {
   sort: unknown;
   stored_fields: string[];
 }
+
 export interface ResponseWithShardFailure {
   _shards: {
     failed: number;

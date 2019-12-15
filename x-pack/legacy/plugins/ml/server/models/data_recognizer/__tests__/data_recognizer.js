@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { DataRecognizer } from '../data_recognizer';
 
@@ -36,10 +34,65 @@ describe('ML - data recognizer', () => {
     expect(ids.join()).to.equal(moduleIds.join());
   });
 
-
   it('getModule - load a single module', async () => {
     const module = await dr.getModule(moduleIds[0]);
     expect(module.id).to.equal(moduleIds[0]);
   });
 
+  describe('jobOverrides', () => {
+    it('should apply job overrides correctly', () => {
+      // arrange
+      const prefix = 'pre-';
+      const testJobId = 'test-job';
+      const moduleConfig = {
+        jobs: [
+          {
+            id: `${prefix}${testJobId}`,
+            config: {
+              groups: ['nginx'],
+              analysis_config: {
+                bucket_span: '1h',
+              },
+              analysis_limits: {
+                model_memory_limit: '256mb',
+                influencers: ['region'],
+              },
+              calendars: ['calendar-1'],
+            },
+          },
+        ],
+      };
+      const jobOverrides = [
+        {
+          analysis_limits: {
+            model_memory_limit: '512mb',
+            influencers: [],
+          },
+        },
+        {
+          job_id: testJobId,
+          groups: [],
+        },
+      ];
+      // act
+      dr.applyJobConfigOverrides(moduleConfig, jobOverrides, prefix);
+      // assert
+      expect(moduleConfig.jobs).to.eql([
+        {
+          config: {
+            analysis_config: {
+              bucket_span: '1h',
+            },
+            analysis_limits: {
+              model_memory_limit: '512mb',
+              influencers: [],
+            },
+            groups: [],
+            calendars: ['calendar-1'],
+          },
+          id: 'pre-test-job',
+        },
+      ]);
+    });
+  });
 });

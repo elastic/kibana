@@ -2,11 +2,11 @@
 
 exports[`UrlFormatEditor should render label template help 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={true}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -124,7 +124,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={Array []}
   />
@@ -133,11 +133,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
 
 exports[`UrlFormatEditor should render normally 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -255,7 +255,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={Array []}
   />
@@ -264,11 +264,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
 
 exports[`UrlFormatEditor should render url template help 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={true}
     onClose={[Function]}
   />
@@ -386,7 +386,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={Array []}
   />
@@ -395,11 +395,11 @@ exports[`UrlFormatEditor should render url template help 1`] = `
 
 exports[`UrlFormatEditor should render width and height fields if image 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -566,7 +566,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={
       Array [

@@ -20,16 +20,21 @@
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
-import { Filter } from '@kbn/es-query';
-import { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
-import { Timefilter } from 'ui/timefilter';
-import { AppStateClass as TAppStateClass } from 'ui/state_management/app_state';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { Query } from '../../../data/public';
+import {
+  stateMonitorFactory,
+  StateMonitor,
+  AppStateClass as TAppStateClass,
+  migrateLegacyQuery,
+} from './legacy_imports';
+import {
+  Query,
+  esFilters,
+  TimefilterContract as Timefilter,
+} from '../../../../../../src/plugins/data/public';
 
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
@@ -50,11 +55,12 @@ export class DashboardStateManager {
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
-    filterBars: Filter[];
+    filterBars: esFilters.Filter[];
     query: Query;
   };
   private stateDefaults: DashboardAppStateDefaults;
   private hideWriteControls: boolean;
+  private kibanaVersion: string;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
   private stateMonitor: StateMonitor<DashboardAppStateDefaults>;
@@ -69,11 +75,14 @@ export class DashboardStateManager {
     savedDashboard,
     AppStateClass,
     hideWriteControls,
+    kibanaVersion,
   }: {
     savedDashboard: SavedObjectDashboard;
     AppStateClass: TAppStateClass<DashboardAppState>;
     hideWriteControls: boolean;
+    kibanaVersion: string;
   }) {
+    this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
 
@@ -85,7 +94,7 @@ export class DashboardStateManager {
     // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
     // want to handle BWC, we must not only migrate the data stored with saved Dashboard, but also any old state in the
     // url.
-    migrateAppState(this.appState);
+    migrateAppState(this.appState, kibanaVersion);
 
     this.isDirty = false;
 
@@ -147,7 +156,8 @@ export class DashboardStateManager {
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
-        panelState
+        panelState,
+        this.kibanaVersion
       );
 
       if (
@@ -303,7 +313,7 @@ export class DashboardStateManager {
     return this.savedDashboard.timeRestore;
   }
 
-  public getLastSavedFilterBars(): Filter[] {
+  public getLastSavedFilterBars(): esFilters.Filter[] {
     return this.lastSavedDashboardFilters.filterBars;
   }
 
@@ -461,7 +471,7 @@ export class DashboardStateManager {
    * Applies the current filter state to the dashboard.
    * @param filter An array of filter bar filters.
    */
-  public applyFilters(query: Query, filters: Filter[]) {
+  public applyFilters(query: Query, filters: esFilters.Filter[]) {
     this.appState.query = query;
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);

@@ -10,6 +10,7 @@ import React from 'react';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 
 interface IBucket {
   key: number;
@@ -51,6 +52,9 @@ interface Props {
   title: React.ReactNode;
 }
 
+const tooltipHeader = (bucket: FormattedBucket) =>
+  asRelativeDateTimeRange(bucket.x0, bucket.x);
+
 export function ErrorDistribution({ distribution, title }: Props) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
@@ -73,6 +77,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
         xType="time"
         buckets={buckets}

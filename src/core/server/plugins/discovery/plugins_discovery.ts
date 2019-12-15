@@ -29,7 +29,7 @@ import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
-const fsReadDir$ = bindNodeCallback(readdir);
+const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
 const fsStat$ = bindNodeCallback(stat);
 
 /**

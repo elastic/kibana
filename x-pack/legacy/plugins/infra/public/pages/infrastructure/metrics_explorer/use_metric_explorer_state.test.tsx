@@ -5,7 +5,7 @@
  */
 
 import { fetch } from '../../../utils/fetch';
-import { renderHook } from 'react-hooks-testing-library';
+import { renderHook } from '@testing-library/react-hooks';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import React from 'react';
@@ -172,7 +172,7 @@ describe('useMetricsExplorerState', () => {
 
   describe('handleLoadMore', () => {
     it('should load more based on the afterKey', async () => {
-      const { result, waitForNextUpdate } = renderUseMetricsExplorerStateHook();
+      const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerStateHook();
       expect(result.current.data).toBe(null);
       expect(result.current.loading).toBe(true);
       await waitForNextUpdate();
@@ -189,7 +189,7 @@ describe('useMetricsExplorerState', () => {
       } as any);
       const { handleLoadMore } = result.current;
       handleLoadMore(pageInfo.afterKey!);
-      await waitForNextUpdate();
+      await rerender();
       expect(result.current.loading).toBe(true);
       await waitForNextUpdate();
       expect(result.current.loading).toBe(false);

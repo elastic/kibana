@@ -93,7 +93,7 @@ export interface JobTableProps {
   onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
 }
 
-export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
+export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5;
 
@@ -123,7 +123,11 @@ export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobT
       }}
     />
   );
-});
+};
+
+JobsTableComponent.displayName = 'JobsTableComponent';
+
+export const JobsTable = React.memo(JobsTableComponent);
 
 JobsTable.displayName = 'JobsTable';
 

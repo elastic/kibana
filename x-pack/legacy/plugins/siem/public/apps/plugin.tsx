@@ -15,11 +15,6 @@ import template from './template.html';
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-export interface StartObject {
-  core: LegacyCoreStart;
-  plugins: PluginsStart;
-}
-
 export class Plugin {
   constructor(
     // @ts-ignore this is added to satisfy the New Platform typing constraint,
@@ -30,8 +25,7 @@ export class Plugin {
     this.chrome = chrome;
   }
 
-  public start(start: StartObject): void {
-    const { core, plugins } = start;
+  public start(core: LegacyCoreStart, plugins: PluginsStart) {
     // @ts-ignore improper type description
     this.chrome.setRootTemplate(template);
     const checkForRoot = () => {

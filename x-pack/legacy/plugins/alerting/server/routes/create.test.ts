@@ -12,8 +12,10 @@ server.route(createAlertRoute);
 
 const mockedAlert = {
   alertTypeId: '1',
+  name: 'abc',
   interval: '10s',
-  alertTypeParams: {
+  tags: ['foo'],
+  params: {
     bar: true,
   },
   actions: [
@@ -39,53 +41,39 @@ test('creates an alert with proper parameters', async () => {
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
     id: '123',
+    actions: [
+      {
+        ...mockedAlert.actions[0],
+        actionTypeId: 'test',
+      },
+    ],
   });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
   expect(response).toMatchInlineSnapshot(`
+    Object {
+      "actions": Array [
         Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "2",
-              "params": Object {
-                "foo": true,
-              },
-            },
-          ],
-          "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
+          "actionTypeId": "test",
+          "group": "default",
+          "id": "2",
+          "params": Object {
+            "foo": true,
           },
-          "id": "123",
-          "interval": "10s",
-        }
-    `);
-  expect(alertsClient.create).toHaveBeenCalledTimes(1);
-  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "data": Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "2",
-              "params": Object {
-                "foo": true,
-              },
-            },
-          ],
-          "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
-          "enabled": true,
-          "interval": "10s",
-          "throttle": null,
         },
+      ],
+      "alertTypeId": "1",
+      "id": "123",
+      "interval": "10s",
+      "name": "abc",
+      "params": Object {
+        "bar": true,
       },
-    ]
+      "tags": Array [
+        "foo",
+      ],
+    }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
   expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -102,11 +90,15 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
           "enabled": true,
           "interval": "10s",
+          "name": "abc",
+          "params": Object {
+            "bar": true,
+          },
+          "tags": Array [
+            "foo",
+          ],
           "throttle": null,
         },
       },

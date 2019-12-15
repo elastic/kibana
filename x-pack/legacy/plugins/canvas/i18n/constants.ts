@@ -15,6 +15,7 @@ export const CSV = 'CSV';
 export const DATEMATH = '`datemath`';
 export const DATATABLE = '`datatable`';
 export const ELASTICSEARCH = 'Elasticsearch';
+export const ELASTICSEARCH_SHORT = 'ES';
 export const FONT_FAMILY = '`font-family`';
 export const FONT_WEIGHT = '`font-weight`';
 export const HEX = 'HEX';
@@ -32,6 +33,8 @@ export const PDF = 'PDF';
 export const POST = 'POST';
 export const RGB = 'RGB';
 export const SQL = 'SQL';
+export const SQL_URL =
+  'https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-spec.html';
 export const SVG = 'SVG';
 export const TIMELION = 'Timelion';
 export const TINYMATH = '`TinyMath`';

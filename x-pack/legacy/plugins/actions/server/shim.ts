@@ -9,10 +9,13 @@ import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
 import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager';
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import {
+  PluginSetupContract as EncryptedSavedObjectsSetupContract,
+  PluginStartContract as EncryptedSavedObjectsStartContract,
+} from '../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import {
   CoreSetup,
@@ -24,11 +27,14 @@ import {
 // due to being marked as dependencies
 interface Plugins extends Hapi.PluginProperties {
   task_manager: TaskManager;
-  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
 }
 
 export interface Server extends Legacy.Server {
   plugins: Plugins;
+}
+
+export interface KibanaConfig {
+  index: string;
 }
 
 /**
@@ -36,16 +42,11 @@ export interface Server extends Legacy.Server {
  */
 export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
-export type SecurityPluginSetupContract = Pick<SecurityPlugin, 'config' | 'registerLegacyAPI'>;
+export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
-export type EncryptedSavedObjectsSetupContract = Pick<EncryptedSavedObjectsPlugin, 'registerType'>;
 export type TaskManagerSetupContract = Pick<
   TaskManager,
   'addMiddleware' | 'registerTaskDefinitions'
->;
-export type EncryptedSavedObjectsStartContract = Pick<
-  EncryptedSavedObjectsPlugin,
-  'isEncryptionError' | 'getDecryptedAsInternalUser'
 >;
 
 /**
@@ -54,6 +55,7 @@ export type EncryptedSavedObjectsStartContract = Pick<
 export interface ActionsPluginInitializerContext {
   logger: LoggerFactory;
   config: {
+    kibana$: Rx.Observable<KibanaConfig>;
     create(): Rx.Observable<ActionsConfigType>;
   };
 }
@@ -73,12 +75,12 @@ export interface ActionsPluginsSetup {
   security?: SecurityPluginSetupContract;
   task_manager: TaskManagerSetupContract;
   xpack_main: XPackMainPluginSetupContract;
-  encrypted_saved_objects: EncryptedSavedObjectsSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
 }
 export interface ActionsPluginsStart {
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
-  encrypted_saved_objects: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
   task_manager: TaskManagerStartContract;
 }
 
@@ -101,6 +103,9 @@ export function shim(
   const initializerContext: ActionsPluginInitializerContext = {
     logger: newPlatform.coreContext.logger,
     config: {
+      kibana$: Rx.of({
+        index: server.config().get('kibana.index'),
+      }),
       create() {
         return Rx.of({
           enabled: server.config().get('xpack.actions.enabled') as boolean,
@@ -126,7 +131,8 @@ export function shim(
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
     task_manager: server.plugins.task_manager,
     xpack_main: server.plugins.xpack_main,
-    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
+    encryptedSavedObjects: newPlatform.setup.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
   };
 
   const pluginsStart: ActionsPluginsStart = {
@@ -134,7 +140,8 @@ export function shim(
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,
-    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
+    encryptedSavedObjects: newPlatform.start.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
     task_manager: server.plugins.task_manager,
   };
 

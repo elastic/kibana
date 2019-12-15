@@ -27,14 +27,14 @@ const plugins = [
   //
   // See https://github.com/babel/proposals/issues/12 for progress
   require.resolve('@babel/plugin-proposal-class-properties'),
-];
-const isTestEnv = process.env.BABEL_ENV === 'test' || process.env.NODE_ENV === 'test';
 
-// Only load the idx plugin in non-test environments, since it conflicts with
-// Jest's coverage mapping.
-if (!isTestEnv) {
-  plugins.push(require.resolve('@kbn/elastic-idx/babel'));
-}
+  // Optional Chaining proposal is stage 3 (https://github.com/tc39/proposal-optional-chaining)
+  // Need this since we are using TypeScript 3.7+
+  require.resolve('@babel/plugin-proposal-optional-chaining'),
+  // Nullish coalescing proposal is stage 3 (https://github.com/tc39/proposal-nullish-coalescing)
+  // Need this since we are using TypeScript 3.7+
+  require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
+];
 
 module.exports = {
   presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],

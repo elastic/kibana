@@ -24,6 +24,7 @@ import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
 import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
+import { SourceLoadingPage } from '../../components/source_loading_page';
 
 interface InfrastructurePageProps extends RouteComponentProps {
   uiCapabilities: UICapabilities;
@@ -41,10 +42,9 @@ export const InfrastructurePage = injectUICapabilities(
 
         <HelpCenterContent
           feedbackLink="https://discuss.elastic.co/c/metrics"
-          feedbackLinkText={i18n.translate(
-            'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-            { defaultMessage: 'Provide feedback for Metrics' }
-          )}
+          appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+            defaultMessage: 'Metrics',
+          })}
         />
 
         <Header
@@ -96,11 +96,15 @@ export const InfrastructurePage = injectUICapabilities(
                 {({ configuration, createDerivedIndexPattern }) => (
                   <MetricsExplorerOptionsContainer.Provider>
                     <WithMetricsExplorerOptionsUrlState />
-                    <MetricsExplorerPage
-                      derivedIndexPattern={createDerivedIndexPattern('metrics')}
-                      source={configuration}
-                      {...props}
-                    />
+                    {configuration ? (
+                      <MetricsExplorerPage
+                        derivedIndexPattern={createDerivedIndexPattern('metrics')}
+                        source={configuration}
+                        {...props}
+                      />
+                    ) : (
+                      <SourceLoadingPage />
+                    )}
                   </MetricsExplorerOptionsContainer.Provider>
                 )}
               </WithSource>

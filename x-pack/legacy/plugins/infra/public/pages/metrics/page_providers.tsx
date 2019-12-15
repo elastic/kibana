@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { MetricsTimeContainer } from '../../containers/metrics/with_metrics_time';
+import { MetricsTimeContainer } from './containers/with_metrics_time';
 import { Source } from '../../containers/source';
 
 export const withMetricPageProviders = <T extends object>(Component: React.ComponentType<T>) => (

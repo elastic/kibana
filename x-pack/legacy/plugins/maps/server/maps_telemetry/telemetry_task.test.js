@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getMockKbnServer,
-  getMockTaskInstance,
-} from '../test_utils';
+import { getMockKbnServer, getMockTaskInstance } from '../test_utils';
 import { telemetryTaskRunner } from './telemetry_task';
 import * as mapsTelemetry from './maps_telemetry';
 jest.mock('./maps_telemetry');
 
 const expectedAttributes = {
   expect: 'values',
-  toBe: 'populated'
+  toBe: 'populated',
 };
 
 const generateTelemetry = ({ includeAttributes = true } = {}) => {
   mapsTelemetry.getMapsTelemetry = async () => ({ // eslint-disable-line
-    attributes: includeAttributes ? expectedAttributes : {}
+    attributes: includeAttributes ? expectedAttributes : {},
   });
 };
 

@@ -21,15 +21,15 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { Vis } from '../../../../visualizations/public';
+import { getAngularModule } from '../../get_inner_angular';
+import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 
-describe('Table Vis - AggTableGroup Directive', function () {
+describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
   let $compile;
-  let Vis;
   let indexPattern;
   let tableAggResponse;
   const tabifiedData = {};
@@ -47,15 +47,22 @@ describe('Table Vis - AggTableGroup Directive', function () {
         { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
       ],
     });
-    vis2.aggs.aggs.forEach(function (agg, i) {
+    vis2.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets);
   };
 
-  beforeEach(ngMock.module('kibana'));
+  const initLocalAngular = () => {
+    const tableVisModule = getAngularModule('kibana/table_vis', npStart.core);
+    initTableVisLegacyModule(tableVisModule);
+  };
+
+  beforeEach(initLocalAngular);
+
+  beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
-    ngMock.inject(function ($injector, Private) {
+    ngMock.inject(function($injector, Private) {
       // this is provided in table_vis_controller.js
       // tech debt that will be resolved through further deangularization and moving tests to jest
       /*
@@ -69,7 +76,6 @@ describe('Table Vis - AggTableGroup Directive', function () {
 
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      Vis = Private(VisProvider);
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
@@ -79,14 +85,14 @@ describe('Table Vis - AggTableGroup Directive', function () {
   );
 
   let $scope;
-  beforeEach(function () {
+  beforeEach(function() {
     $scope = $rootScope.$new();
   });
-  afterEach(function () {
+  afterEach(function() {
     $scope.$destroy();
   });
 
-  it('renders a simple split response properly', async function () {
+  it('renders a simple split response properly', async function() {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
@@ -107,7 +113,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
     expect($el.find('kbn-agg-table').length).to.be(1);
   });
 
-  it('renders nothing if the table list is empty', function () {
+  it('renders nothing if the table list is empty', function() {
     const $el = $(
       '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
     );
@@ -123,10 +129,13 @@ describe('Table Vis - AggTableGroup Directive', function () {
     expect($subTables.length).to.be(0);
   });
 
-  it('renders a complex response properly', async function () {
+  it('renders a complex response properly', async function() {
     $scope.dimensions = {
       splitRow: [{ accessor: 0, params: {} }],
-      buckets: [{ accessor: 2, params: {} }, { accessor: 4, params: {} }],
+      buckets: [
+        { accessor: 2, params: {} },
+        { accessor: 4, params: {} },
+      ],
       metrics: [
         { accessor: 1, params: {} },
         { accessor: 3, params: {} },
@@ -149,7 +158,7 @@ describe('Table Vis - AggTableGroup Directive', function () {
     const $subTableHeaders = $el.find('.kbnAggTable__groupHeader');
     expect($subTableHeaders.length).to.be(3);
 
-    $subTableHeaders.each(function (i) {
+    $subTableHeaders.each(function(i) {
       expect($(this).text()).to.be(group.tables[i].title);
     });
   });

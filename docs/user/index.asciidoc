@@ -16,7 +16,9 @@ include::dashboard.asciidoc[]
 
 include::canvas.asciidoc[]
 
-include::extend.asciidoc[]
+include::graph/index.asciidoc[]
+
+include::ml/index.asciidoc[]
 
 include::{kib-repo-dir}/maps/index.asciidoc[]
 

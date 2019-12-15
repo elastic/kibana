@@ -3,10 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { performance } from 'perf_hooks';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 import { Logger } from './types';
-import { fillPool } from './lib/fill_pool';
+import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { intervalFromNow } from './lib/intervals';
@@ -15,6 +18,7 @@ import {
   TaskDictionary,
   ConcreteTaskInstance,
   RunContext,
+  TaskInstanceWithId,
   TaskInstance,
 } from './task';
 import { TaskPoller } from './task_poller';
@@ -27,6 +31,9 @@ import {
   OwnershipClaimingOpts,
   ClaimOwnershipResult,
 } from './task_store';
+import { identifyEsError } from './lib/identify_es_error';
+
+const VERSION_CONFLICT_STATUS = 409;
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -55,13 +62,14 @@ export class TaskManager {
   private readonly pollerInterval: number;
   private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
-  private poller: TaskPoller;
+  private poller: TaskPoller<FillPoolResult>;
   private logger: Logger;
   private pool: TaskPool;
   private startQueue: Array<() => void> = [];
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
+    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
   };
 
   /**
@@ -85,8 +93,6 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
-    /* Kibana UUID needs to be pulled live (not cached), as it takes a long time
-     * to initialize, and can change after startup */
     const store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
@@ -108,13 +114,14 @@ export class TaskManager {
         store,
         definitions: this.definitions,
         beforeRun: this.middleware.beforeRun,
+        beforeMarkRunning: this.middleware.beforeMarkRunning,
       });
-    const poller = new TaskPoller({
+    const poller = new TaskPoller<FillPoolResult>({
       logger: this.logger,
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      work: (): Promise<void> =>
+      work: (): Promise<FillPoolResult> =>
         fillPool(
-          pool.run,
+          async tasks => await pool.run(tasks),
           () =>
             claimAvailableTasks(
               this.store.claimAvailableTasks.bind(this.store),
@@ -219,6 +226,26 @@ export class TaskManager {
   }
 
   /**
+   * Schedules a task with an Id
+   *
+   * @param task - The task being scheduled.
+   * @returns {Promise<TaskInstanceWithId>}
+   */
+  public async ensureScheduled(
+    taskInstance: TaskInstanceWithId,
+    options?: any
+  ): Promise<TaskInstanceWithId> {
+    try {
+      return await this.schedule(taskInstance, options);
+    } catch (err) {
+      if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        return taskInstance;
+      }
+      throw err;
+    }
+  }
+
+  /**
    * Fetches a paginatable list of scheduled tasks.
    *
    * @param opts - The query options used to filter tasks
@@ -259,20 +286,44 @@ export async function claimAvailableTasks(
   logger: Logger
 ) {
   if (availableWorkers > 0) {
-    const { docs, claimedTasks } = await claim({
-      size: availableWorkers,
-      claimOwnershipUntil: intervalFromNow('30s')!,
-    });
+    performance.mark('claimAvailableTasks_start');
 
-    if (docs.length !== claimedTasks) {
-      logger.warn(
-        `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+    try {
+      const { docs, claimedTasks } = await claim({
+        size: availableWorkers,
+        claimOwnershipUntil: intervalFromNow('30s')!,
+      });
+
+      if (claimedTasks === 0) {
+        performance.mark('claimAvailableTasks.noTasks');
+      }
+      performance.mark('claimAvailableTasks_stop');
+      performance.measure(
+        'claimAvailableTasks',
+        'claimAvailableTasks_start',
+        'claimAvailableTasks_stop'
       );
+
+      if (docs.length !== claimedTasks) {
+        logger.warn(
+          `[Task Ownership error]: (${claimedTasks}) tasks were claimed by Kibana, but (${docs.length}) tasks were fetched`
+        );
+      }
+      return docs;
+    } catch (ex) {
+      if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
+        logger.warn(
+          `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
+        );
+      } else {
+        throw ex;
+      }
     }
-    return docs;
+  } else {
+    performance.mark('claimAvailableTasks.noAvailableWorkers');
+    logger.info(
+      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
+    );
   }
-  logger.info(
-    `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
-  );
   return [];
 }

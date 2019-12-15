@@ -143,7 +143,7 @@ const ErrorGroupList: React.FC<Props> = props => {
         align: 'right',
         render: (value?: number) =>
           value ? (
-            <TimestampTooltip time={value} precision="minutes" />
+            <TimestampTooltip time={value} timeUnit="minutes" />
           ) : (
             NOT_AVAILABLE_LABEL
           )

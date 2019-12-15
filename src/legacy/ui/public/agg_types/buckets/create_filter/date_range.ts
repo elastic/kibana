@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
 import moment from 'moment';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 import { DateRangeKey } from '../date_range';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRangeKey) => {
-  const filter: RangeFilterParams = {};
+  const filter: esFilters.RangeFilterParams = {};
   if (from) filter.gte = moment(from).toISOString();
   if (to) filter.lt = moment(to).toISOString();
   if (to && from) filter.format = 'strict_date_optional_time';
 
-  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+  return esFilters.buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 };

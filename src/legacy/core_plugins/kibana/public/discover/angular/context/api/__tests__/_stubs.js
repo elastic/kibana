@@ -26,7 +26,8 @@ export function createIndexPatternsStub() {
     get: sinon.spy(indexPatternId =>
       Promise.resolve({
         id: indexPatternId,
-        isTimeNanosBased: () => false
+        isTimeNanosBased: () => false,
+        popularizeField: () => {},
       })
     ),
   };
@@ -45,18 +46,24 @@ export function createSearchSourceStub(hits, timeField) {
     }),
   };
 
-  searchSourceStub.setParent = sinon.stub(SearchSource.prototype, 'setParent').returns(searchSourceStub);
-  searchSourceStub.setField = sinon.stub(SearchSource.prototype, 'setField').returns(searchSourceStub);
+  searchSourceStub.setParent = sinon
+    .stub(SearchSource.prototype, 'setParent')
+    .returns(searchSourceStub);
+  searchSourceStub.setField = sinon
+    .stub(SearchSource.prototype, 'setField')
+    .returns(searchSourceStub);
   searchSourceStub.getField = sinon.stub(SearchSource.prototype, 'getField').callsFake(key => {
     const previousSetCall = searchSourceStub.setField.withArgs(key).lastCall;
     return previousSetCall ? previousSetCall.args[1] : null;
   });
-  searchSourceStub.fetch = sinon.stub(SearchSource.prototype, 'fetch').callsFake(() => Promise.resolve({
-    hits: {
-      hits: searchSourceStub._stubHits,
-      total: searchSourceStub._stubHits.length,
-    },
-  }));
+  searchSourceStub.fetch = sinon.stub(SearchSource.prototype, 'fetch').callsFake(() =>
+    Promise.resolve({
+      hits: {
+        hits: searchSourceStub._stubHits,
+        total: searchSourceStub._stubHits.length,
+      },
+    })
+  );
 
   searchSourceStub._restore = () => {
     searchSourceStub.setParent.restore();
@@ -88,7 +95,8 @@ export function createContextSearchSourceStub(hits, timeField = '@timestamp') {
     const filteredHits = searchSourceStub._stubHits
       .filter(
         hit =>
-          moment(hit[timeField]).isSameOrAfter(timeRange.gte) && moment(hit[timeField]).isSameOrBefore(timeRange.lte)
+          moment(hit[timeField]).isSameOrAfter(timeRange.gte) &&
+          moment(hit[timeField]).isSameOrBefore(timeRange.lte)
       )
       .sort(sortFunction);
     return Promise.resolve({

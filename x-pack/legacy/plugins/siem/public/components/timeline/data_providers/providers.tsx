@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText } from '@elastic/eui';
 import * as React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import {
@@ -46,7 +45,7 @@ interface Props {
 const ROW_OF_DATA_PROVIDERS_HEIGHT = 43; // px
 
 const PanelProviders = styled.div`
-  position: relative
+  position: relative;
   display: flex;
   flex-direction: row;
   min-height: 100px;
@@ -61,6 +60,14 @@ PanelProviders.displayName = 'PanelProviders';
 const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
   position: relative;
   flex-grow: unset;
+
+  .euiFlexItem {
+    flex: 1 0 auto;
+  }
+
+  .euiFlexItem--flexGrowZero {
+    flex: 0 0 auto;
+  }
 `;
 
 PanelProvidersGroupContainer.displayName = 'PanelProvidersGroupContainer';
@@ -68,6 +75,7 @@ PanelProvidersGroupContainer.displayName = 'PanelProvidersGroupContainer';
 /** A row of data providers in the timeline drop zone */
 const PanelProviderGroupContainer = styled(EuiFlexGroup)`
   height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
+  min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   margin: 5px 0px;
 `;
 
@@ -103,7 +111,7 @@ export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): st
  * 2) temporarily disabling a data provider
  * 3) applying boolean negation to the data provider
  */
-export const Providers = pure<Props>(
+export const Providers = React.memo<Props>(
   ({
     browserFields,
     id,

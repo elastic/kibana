@@ -17,34 +17,9 @@
  * under the License.
  */
 
-import { dataPluginMock } from '../../../../core_plugins/data/public/mocks';
+import { indexPatterns as npIndexPatterns } from '../../../../../plugins/data/public';
 
-const dataSetup = dataPluginMock.createSetup();
-
-// mocks for stateful code
-export const { FieldImpl } = dataSetup.indexPatterns!.__LEGACY;
-export const {
-  FieldList,
-  flattenHitWrapper,
-  formatHitProvider,
-  indexPatterns,
-} = dataSetup.indexPatterns!;
+export const flattenHitWrapper = npIndexPatterns.flattenHitWrapper;
 
 // static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternSelect,
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
-} from '../../../../core_plugins/data/public';
+export { getFromSavedObject, getRoutes } from '../../../../core_plugins/data/public';

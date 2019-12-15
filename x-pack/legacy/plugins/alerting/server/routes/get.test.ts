@@ -14,13 +14,14 @@ const mockedAlert = {
   id: '1',
   alertTypeId: '1',
   interval: '10s',
-  alertTypeParams: {
+  params: {
     bar: true,
   },
   actions: [
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         foo: true,
       },

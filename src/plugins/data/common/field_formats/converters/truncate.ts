@@ -20,12 +20,12 @@
 import { trunc } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 const omission = '...';
 
 export class TruncateFormat extends FieldFormat {
-  static id = 'truncate';
+  static id = FIELD_FORMAT_IDS.TRUNCATE;
   static title = 'Truncated String';
   static fieldType = KBN_FIELD_TYPES.STRING;
 

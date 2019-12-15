@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VisProvider } from './vis';
+export { Vis } from '../../../core_plugins/visualizations/public/np_ready/public/vis';

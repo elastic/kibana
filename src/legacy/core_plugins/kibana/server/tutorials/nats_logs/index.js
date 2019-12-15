@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
-export function natsLogsSpecProvider(server, context) {
+export function natsLogsSpecProvider(context) {
   const moduleName = 'nats';
   const geoipRequired = false;
   const uaRequired = false;
@@ -37,7 +41,8 @@ export function natsLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse logs created by Nats.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.natsLogs.longDescription', {
-      defaultMessage: 'The `nats` Filebeat module parses logs created by Nats. \
+      defaultMessage:
+        'The `nats` Filebeat module parses logs created by Nats. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
@@ -48,20 +53,23 @@ export function natsLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'Filebeat-nats-overview-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.natsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'NATS logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.natsLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'NATS logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-nats.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-nats.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/nats_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

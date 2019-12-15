@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastInput } from '../../../../../src/core/public';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobId, JobSummary } from '../../index.d';
 import { ReportLink } from './report_link';
 import { DownloadButton } from './download_button';
@@ -16,14 +17,14 @@ export const getWarningMaxSizeToast = (
   getReportLink: () => string,
   getDownloadLink: (jobId: JobId) => string
 ): ToastInput => ({
-  title: (
+  title: toMountPoint(
     <FormattedMessage
       id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
       defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
       values={{ reportObjectType: job.type, reportObjectTitle: job.title }}
     />
   ),
-  text: (
+  text: toMountPoint(
     <Fragment>
       <p>
         <FormattedMessage

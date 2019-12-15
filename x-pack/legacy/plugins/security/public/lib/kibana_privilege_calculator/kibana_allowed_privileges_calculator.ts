@@ -6,7 +6,10 @@
 
 import _ from 'lodash';
 import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../common/model';
-import { areActionsFullyCovered, compareActions } from '../../../common/privilege_calculator_utils';
+import {
+  areActionsFullyCovered,
+  compareActions,
+} from '../../../../../../plugins/security/common/privilege_calculator_utils';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import {

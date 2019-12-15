@@ -82,7 +82,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     <EuiPopover
       anchorPosition="downCenter"
       button={
-        <Icon
+        <ForwardRef(Styled(EuiIcon))
           type="iInCircle"
         />
       }
@@ -105,9 +105,9 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiSpacer
                   size="m"
                 />
-                <LargeScore>
+                <ForwardRef(Styled(EuiText))>
                   17
-                </LargeScore>
+                </ForwardRef(Styled(EuiText))>
               </React.Fragment>,
               "title": "Max Anomaly Score",
             },
@@ -149,7 +149,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <PreferenceFormattedDate
+                  <Memo(PreferenceFormattedDate)
                     value={2019-06-16T06:00:00.000Z}
                   />
                 </EuiFlexItem>

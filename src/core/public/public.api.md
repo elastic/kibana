@@ -5,18 +5,21 @@
 ```ts
 
 import { Breadcrumb } from '@elastic/eui';
+import { EuiButtonEmptyProps } from '@elastic/eui';
+import { EuiGlobalToastListToast } from '@elastic/eui';
+import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
-import { EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
 export interface App extends AppBase {
-    mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+    chromeless?: boolean;
+    mount: AppMount | AppMountDeprecated;
 }
 
 // @public (undocumented)
@@ -34,7 +37,8 @@ export interface AppBase {
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
+    // @deprecated
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public (undocumented)
@@ -47,10 +51,14 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
+    // @deprecated
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public
+export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+// @public @deprecated
 export interface AppMountContext {
     core: {
         application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp'>;
@@ -60,12 +68,16 @@ export interface AppMountContext {
         i18n: I18nStart;
         notifications: NotificationsStart;
         overlays: OverlayStart;
-        uiSettings: UiSettingsClientContract;
+        savedObjects: SavedObjectsStart;
+        uiSettings: IUiSettingsClient;
         injectedMetadata: {
             getInjectedVar: (name: string, defaultValue?: any) => unknown;
         };
     };
 }
+
+// @public @deprecated
+export type AppMountDeprecated = (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
 export interface AppMountParameters {
@@ -118,12 +130,44 @@ export interface ChromeDocTitle {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+    appName: string;
+    content?: (element: HTMLDivElement) => () => void;
+    links?: ChromeHelpExtensionMenuLink[];
+}
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
+    linkType: 'custom';
+    content: React.ReactNode;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+    linkType: 'discuss';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+    linkType: 'documentation';
+    href: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
+    linkType: 'github';
+    labels: string[];
+    title?: string;
+};
+
+// @public (undocumented)
+export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
 
 // @public (undocumented)
 export interface ChromeNavControl {
     // (undocumented)
-    mount(targetDomElement: HTMLElement): () => void;
+    mount: MountPoint;
     // (undocumented)
     order?: number;
 }
@@ -215,6 +259,7 @@ export interface ChromeStart {
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+    setHelpSupportUrl(url: string): void;
     setIsCollapsed(isCollapsed: boolean): void;
     setIsVisible(isVisible: boolean): void;
 }
@@ -238,13 +283,14 @@ export interface CoreContext {
 }
 
 // @public
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     application: ApplicationSetup;
-    // (undocumented)
+    // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
+    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -254,7 +300,7 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
-    uiSettings: UiSettingsClientContract;
+    uiSettings: IUiSettingsClient;
 }
 
 // @public
@@ -280,7 +326,7 @@ export interface CoreStart {
     // (undocumented)
     savedObjects: SavedObjectsStart;
     // (undocumented)
-    uiSettings: UiSettingsClientContract;
+    uiSettings: IUiSettingsClient;
 }
 
 // @internal
@@ -428,9 +474,6 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @public (undocumented)
-export type HttpBody = BodyInit | null | any;
-
-// @public (undocumented)
 export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
@@ -439,13 +482,14 @@ export interface HttpErrorRequest {
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse extends IHttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
 }
 
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
+    asResponse?: boolean;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -458,7 +502,14 @@ export interface HttpFetchQuery {
 }
 
 // @public
-export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+export interface HttpHandler {
+    // (undocumented)
+    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+        asResponse: true;
+    }): Promise<IHttpResponse<TResponseBody>>;
+    // (undocumented)
+    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+}
 
 // @public (undocumented)
 export interface HttpHeadersInit {
@@ -470,8 +521,8 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+    response?(httpResponse: IHttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 }
 
 // @public
@@ -490,12 +541,6 @@ export interface HttpRequestInit {
     referrerPolicy?: ReferrerPolicy;
     signal?: AbortSignal | null;
     window?: null;
-}
-
-// @public (undocumented)
-export interface HttpResponse extends InterceptedHttpResponse {
-    // (undocumented)
-    request: Readonly<Request>;
 }
 
 // @public (undocumented)
@@ -576,18 +621,48 @@ export interface IHttpInterceptController {
 }
 
 // @public (undocumented)
-export interface InterceptedHttpResponse {
-    // (undocumented)
-    body?: HttpBody;
-    // (undocumented)
-    response?: Response;
+export interface IHttpResponse<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly request: Readonly<Request>;
+    readonly response?: Readonly<Response>;
+}
+
+// @public
+export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly response?: Readonly<Response>;
 }
 
 // @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
 
+// @public
+export interface IUiSettingsClient {
+    get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
+    get: <T = any>(key: string, defaultOverride?: T) => T;
+    getAll: () => Readonly<Record<string, UiSettingsParams_2 & UserProvidedValues_2>>;
+    getSaved$: <T = any>() => Observable<{
+        key: string;
+        newValue: T;
+        oldValue: T;
+    }>;
+    getUpdate$: <T = any>() => Observable<{
+        key: string;
+        newValue: T;
+        oldValue: T;
+    }>;
+    getUpdateErrors$: () => Observable<Error>;
+    isCustom: (key: string) => boolean;
+    isDeclared: (key: string) => boolean;
+    isDefault: (key: string) => boolean;
+    isOverridden: (key: string) => boolean;
+    overrideLocalDefault: (key: string, newDefault: any) => void;
+    remove: (key: string) => Promise<boolean>;
+    set: (key: string, value: any) => Promise<boolean>;
+}
+
 // @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup<any> {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     // 
     // @deprecated (undocumented)
@@ -618,6 +693,9 @@ export interface LegacyNavLink {
     url: string;
 }
 
+// @public
+export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
 // @public (undocumented)
 export interface NotificationsSetup {
     // (undocumented)
@@ -630,12 +708,9 @@ export interface NotificationsStart {
     toasts: ToastsStart;
 }
 
-// @public
-export type OverlayBannerMount = (element: HTMLElement) => OverlayBannerUnmount;
-
 // @public (undocumented)
 export interface OverlayBannersStart {
-    add(mount: OverlayBannerMount, priority?: number): string;
+    add(mount: MountPoint, priority?: number): string;
     // Warning: (ae-forgotten-export) The symbol "OverlayBanner" needs to be exported by the entry point index.d.ts
     // 
     // @internal (undocumented)
@@ -643,11 +718,8 @@ export interface OverlayBannersStart {
     // (undocumented)
     getComponent(): JSX.Element;
     remove(id: string): boolean;
-    replace(id: string | undefined, mount: OverlayBannerMount, priority?: number): string;
+    replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
-
-// @public
-export type OverlayBannerUnmount = () => void;
 
 // @public
 export interface OverlayRef {
@@ -659,17 +731,14 @@ export interface OverlayRef {
 export interface OverlayStart {
     // (undocumented)
     banners: OverlayBannersStart;
+    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    openFlyout: OverlayFlyoutStart['open'];
+    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    openModal: (modalChildren: React.ReactNode, modalProps?: {
-        className?: string;
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+    openModal: OverlayModalStart['open'];
 }
 
 // @public (undocumented)
@@ -689,7 +758,7 @@ export interface PackageInfo {
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
     start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
@@ -700,7 +769,11 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
+    // (undocumented)
+    readonly config: {
+        get: <T extends object = ConfigSchema>() => T;
+    };
     // (undocumented)
     readonly env: {
         mode: Readonly<EnvironmentMode>;
@@ -813,7 +886,7 @@ export class SavedObjectsClient {
     bulkUpdate<T extends SavedObjectAttributes>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     create: <T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     delete: (type: string, id: string) => Promise<{}>;
-    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "searchFields" | "defaultSearchOperator" | "hasReference" | "sortField" | "page" | "perPage" | "fields">) => Promise<SavedObjectsFindResponsePublic<T>>;
+    find: <T extends SavedObjectAttributes>(options: Pick<SavedObjectsFindOptions, "search" | "filter" | "type" | "page" | "perPage" | "sortField" | "fields" | "searchFields" | "hasReference" | "defaultSearchOperator">) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T extends SavedObjectAttributes>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
     update<T extends SavedObjectAttributes>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
@@ -867,6 +940,82 @@ export interface SavedObjectsFindResponsePublic<T extends SavedObjectAttributes 
 }
 
 // @public
+export interface SavedObjectsImportConflictError {
+    // (undocumented)
+    type: 'conflict';
+}
+
+// @public
+export interface SavedObjectsImportError {
+    // (undocumented)
+    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    title?: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportMissingReferencesError {
+    // (undocumented)
+    blocking: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    references: Array<{
+        type: string;
+        id: string;
+    }>;
+    // (undocumented)
+    type: 'missing_references';
+}
+
+// @public
+export interface SavedObjectsImportResponse {
+    // (undocumented)
+    errors?: SavedObjectsImportError[];
+    // (undocumented)
+    success: boolean;
+    // (undocumented)
+    successCount: number;
+}
+
+// @public
+export interface SavedObjectsImportRetry {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    overwrite: boolean;
+    // (undocumented)
+    replaceReferences: Array<{
+        type: string;
+        from: string;
+        to: string;
+    }>;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportUnknownError {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    statusCode: number;
+    // (undocumented)
+    type: 'unknown';
+}
+
+// @public
+export interface SavedObjectsImportUnsupportedTypeError {
+    // (undocumented)
+    type: 'unsupported_type';
+}
+
+// @public
 export interface SavedObjectsMigrationVersion {
     // (undocumented)
     [pluginName: string]: string;
@@ -916,35 +1065,39 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     _version?: SavedObject<T>['version'];
 }
 
-export { Toast }
+// Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// 
+// @public (undocumented)
+export type Toast = ToastInputFields & {
+    id: string;
+};
 
 // @public
-export type ToastInput = string | ToastInputFields | Promise<ToastInputFields>;
+export type ToastInput = string | ToastInputFields;
 
 // @public
-export type ToastInputFields = Pick<Toast, Exclude<keyof Toast, 'id'>>;
+export type ToastInputFields = Pick<EuiGlobalToastListToast, Exclude<keyof EuiGlobalToastListToast, 'id' | 'text' | 'title'>> & {
+    title?: string | MountPoint;
+    text?: string | MountPoint;
+};
 
 // @public
 export class ToastsApi implements IToasts {
     constructor(deps: {
-        uiSettings: UiSettingsClientContract;
+        uiSettings: IUiSettingsClient;
     });
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     add(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addDanger(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addError(error: Error, options: ErrorToastOptions): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addSuccess(toastOrTitle: ToastInput): Toast;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
+    remove(toastOrId: Toast | string): void;
     // @internal (undocumented)
-    registerOverlays(overlays: OverlayStart): void;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: Reexported declarations are not supported
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ToastApi"
-    remove(toast: Toast): void;
+    start({ overlays, i18n }: {
+        overlays: OverlayStart;
+        i18n: I18nStart;
+    }): void;
     }
 
 // @public (undocumented)
@@ -954,41 +1107,13 @@ export type ToastsSetup = IToasts;
 export type ToastsStart = IToasts;
 
 // @public (undocumented)
-export class UiSettingsClient {
-    // Warning: (ae-forgotten-export) The symbol "UiSettingsClientParams" needs to be exported by the entry point index.d.ts
-    constructor(params: UiSettingsClientParams);
-    get$(key: string, defaultOverride?: any): Rx.Observable<any>;
-    get(key: string, defaultOverride?: any): any;
-    getAll(): Record<string, UiSettingsParams_2 & UserProvidedValues_2<any>>;
-    getSaved$(): Rx.Observable<{
-        key: string;
-        newValue: any;
-        oldValue: any;
-    }>;
-    getUpdate$(): Rx.Observable<{
-        key: string;
-        newValue: any;
-        oldValue: any;
-    }>;
-    getUpdateErrors$(): Rx.Observable<Error>;
-    isCustom(key: string): boolean;
-    isDeclared(key: string): boolean;
-    isDefault(key: string): boolean;
-    isOverridden(key: string): boolean;
-    overrideLocalDefault(key: string, newDefault: any): void;
-    remove(key: string): Promise<boolean>;
-    set(key: string, val: any): Promise<boolean>;
-    stop(): void;
-    }
-
-// @public
-export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
-
-// @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
     [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
 }
+
+// @public
+export type UnmountCallback = () => void;
 
 
 ```

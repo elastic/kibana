@@ -18,9 +18,10 @@
  */
 
 import { NumeralFormat } from './numeral';
+import { FIELD_FORMAT_IDS } from '../types';
 
 export class BytesFormat extends NumeralFormat {
-  static id = 'bytes';
+  static id = FIELD_FORMAT_IDS.BYTES;
   static title = 'Bytes';
 
   id = BytesFormat.id;

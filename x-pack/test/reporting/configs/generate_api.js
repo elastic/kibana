@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { format as formatUrl } from 'url';
 import { getApiIntegrationConfig } from '../../api_integration/config';
 import { getReportingApiConfig } from './api';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
@@ -17,7 +17,9 @@ export default async function ({ readConfigFile }) {
 
   const apiTestConfig = await getApiIntegrationConfig({ readConfigFile });
   const reportingApiConfig = await getReportingApiConfig({ readConfigFile });
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../../functional/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../../functional/config.js')
+  );
 
   return {
     ...reportingApiConfig,
@@ -35,8 +37,8 @@ export default async function ({ readConfigFile }) {
         `--server.maxPayloadBytes=1679958`,
         `--server.port=${kbnTestConfig.getPort()}`,
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
-        `--elasticsearch.password=${servers.elasticsearch.password}`,
-        `--elasticsearch.username=${servers.elasticsearch.username}`,
+        `--elasticsearch.username=${kibanaServerTestUser.username}`,
+        `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--xpack.reporting.csv.enablePanelActionDownload=true`,
         `--xpack.reporting.csv.maxSizeBytes=2850`,
         `--xpack.reporting.queue.pollInterval=3000`,

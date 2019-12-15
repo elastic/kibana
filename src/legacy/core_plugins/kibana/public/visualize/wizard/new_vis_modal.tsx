@@ -22,8 +22,8 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import chrome from 'ui/chrome';
-import { VisType } from 'ui/vis';
+import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
+import { VisType } from '../legacy_imports';
 import { VisualizeConstants } from '../visualize_constants';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';
@@ -35,6 +35,9 @@ interface TypeSelectionProps {
   onClose: () => void;
   visTypesRegistry: TypesStart;
   editorParams?: string[];
+  addBasePath: (path: string) => string;
+  uiSettings: IUiSettingsClient;
+  savedObjects: SavedObjectsStart;
 }
 
 interface TypeSelectionState {
@@ -54,7 +57,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = chrome.getUiSettingsClient().get('visualize:enableLabs');
+    this.isLabsEnabled = props.uiSettings.get('visualize:enableLabs');
 
     this.state = {
       showSearchVisModal: false,
@@ -79,7 +82,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
-          <SearchSelection onSearchSelected={this.onSearchSelected} visType={this.state.visType} />
+          <SearchSelection
+            onSearchSelected={this.onSearchSelected}
+            visType={this.state.visType}
+            uiSettings={this.props.uiSettings}
+            savedObjects={this.props.savedObjects}
+          />
         </EuiModal>
       ) : (
         <EuiModal
@@ -92,6 +100,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
+            addBasePath={this.props.addBasePath}
           />
         </EuiModal>
       );
@@ -123,8 +132,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location = chrome.addBasePath(visType.aliasUrl);
-
+      window.location.assign(this.props.addBasePath(visType.aliasUrl));
+      if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
+        this.props.onClose();
+      }
       return;
     }
 

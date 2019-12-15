@@ -13,23 +13,26 @@ exports[`Storyshots arguments/AxisConfig simple 1`] = `
   <div
     className="euiSwitch euiSwitch--compressed"
   >
-    <input
-      checked={false}
-      className="euiSwitch__input"
+    <button
+      aria-checked={false}
+      aria-label=""
+      className="euiSwitch__button"
       id="generated-id"
-      onChange={[Function]}
-      type="checkbox"
-    />
-    <span
-      className="euiSwitch__body"
+      onClick={[Function]}
+      role="switch"
+      type="button"
     >
       <span
-        className="euiSwitch__thumb"
-      />
-      <span
-        className="euiSwitch__track"
-      />
-    </span>
+        className="euiSwitch__body"
+      >
+        <span
+          className="euiSwitch__thumb"
+        />
+        <span
+          className="euiSwitch__track"
+        />
+      </span>
+    </button>
   </div>
 </div>
 `;
@@ -47,23 +50,26 @@ exports[`Storyshots arguments/AxisConfig/components simple template 1`] = `
   <div
     className="euiSwitch euiSwitch--compressed"
   >
-    <input
-      checked={false}
-      className="euiSwitch__input"
+    <button
+      aria-checked={false}
+      aria-label=""
+      className="euiSwitch__button"
       id="generated-id"
-      onChange={[Function]}
-      type="checkbox"
-    />
-    <span
-      className="euiSwitch__body"
+      onClick={[Function]}
+      role="switch"
+      type="button"
     >
       <span
-        className="euiSwitch__thumb"
-      />
-      <span
-        className="euiSwitch__track"
-      />
-    </span>
+        className="euiSwitch__body"
+      >
+        <span
+          className="euiSwitch__thumb"
+        />
+        <span
+          className="euiSwitch__track"
+        />
+      </span>
+    </button>
   </div>
 </div>
 `;

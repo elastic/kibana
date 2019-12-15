@@ -8,8 +8,6 @@
  * A handful of helper functions for testing the task manager.
  */
 
-import sinon from 'sinon';
-
 // Caching this here to avoid setTimeout mocking affecting our tests.
 const nativeTimeout = setTimeout;
 
@@ -18,10 +16,10 @@ const nativeTimeout = setTimeout;
  */
 export function mockLogger() {
   return {
-    info: sinon.stub(),
-    debug: sinon.stub(),
-    warn: sinon.stub(),
-    error: sinon.stub(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
   };
 }
 

@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
-export function traefikLogsSpecProvider(server, context) {
+export function traefikLogsSpecProvider(context) {
   const moduleName = 'traefik';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
@@ -34,7 +38,8 @@ export function traefikLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.traefikLogs.longDescription', {
-      defaultMessage: 'The `traefik` Filebeat module parses access logs created by Traefik. \
+      defaultMessage:
+        'The `traefik` Filebeat module parses access logs created by Traefik. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
@@ -45,20 +50,23 @@ export function traefikLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'Filebeat-Traefik-Dashboard-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Traefik logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.traefikLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Traefik logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-traefik.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-traefik.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

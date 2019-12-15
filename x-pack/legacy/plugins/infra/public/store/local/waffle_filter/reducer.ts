@@ -16,8 +16,8 @@ export interface KueryFilterQuery {
 export type FilterQuery = KueryFilterQuery;
 
 export interface SerializedFilterQuery {
-  query: FilterQuery;
-  serializedQuery: string;
+  query: FilterQuery | null;
+  serializedQuery: string | null;
 }
 
 export interface WaffleFilterState {

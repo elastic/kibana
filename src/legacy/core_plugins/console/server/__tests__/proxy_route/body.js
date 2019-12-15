@@ -29,14 +29,13 @@ describe('Console Proxy Route', () => {
   const teardowns = [];
   let request;
 
-
   beforeEach(() => {
     request = async (method, path, response) => {
       sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub(response));
       const server = new Server();
       server.route(
         createProxyRoute({
-          baseUrl: 'http://localhost:9200',
+          hosts: ['http://localhost:9200'],
         })
       );
 

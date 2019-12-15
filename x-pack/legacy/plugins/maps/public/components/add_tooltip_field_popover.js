@@ -13,13 +13,13 @@ import {
   EuiSelectable,
   EuiButton,
   EuiSpacer,
-  EuiTextAlign
+  EuiTextAlign,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
-const sortByLabel  = (a, b) => {
+const sortByLabel = (a, b) => {
   return a.label.localeCompare(b.label);
 };
 
@@ -47,15 +47,16 @@ function getOptions(fields, selectedFields) {
 }
 
 export class AddTooltipFieldPopover extends Component {
-
   state = {
     isPopoverOpen: false,
     checkedFields: [],
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.fields !== prevState.prevFields
-      || nextProps.selectedFields !== prevState.prevSelectedFields) {
+    if (
+      nextProps.fields !== prevState.prevFields ||
+      nextProps.selectedFields !== prevState.prevSelectedFields
+    ) {
       return {
         options: getOptions(nextProps.fields, nextProps.selectedFields),
         checkedFields: [],
@@ -71,15 +72,15 @@ export class AddTooltipFieldPopover extends Component {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
   _closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
-  _onSelect = (options) => {
+  _onSelect = options => {
     const checkedFields = options
       .filter(option => {
         return option.checked === 'on';
@@ -92,13 +93,13 @@ export class AddTooltipFieldPopover extends Component {
       checkedFields,
       options,
     });
-  }
+  };
 
   _onAdd = () => {
     this.props.onAdd(this.state.checkedFields);
     this.setState({ checkedFields: [] });
     this._closePopover();
-  }
+  };
 
   _renderAddButton() {
     return (
@@ -108,31 +109,25 @@ export class AddTooltipFieldPopover extends Component {
         iconType="plusInCircleFilled"
         isDisabled={!this.props.fields}
       >
-        <FormattedMessage
-          id="xpack.maps.tooltipSelector.togglePopoverLabel"
-          defaultMessage="Add"
-        />
+        <FormattedMessage id="xpack.maps.tooltipSelector.togglePopoverLabel" defaultMessage="Add" />
       </EuiButtonEmpty>
     );
   }
 
   _renderContent() {
-    const addLabel = this.state.checkedFields.length === 0
-      ? i18n.translate('xpack.maps.tooltipSelector.addLabelWithoutCount', {
-        defaultMessage: 'Add',
-      })
-      : i18n.translate('xpack.maps.tooltipSelector.addLabelWithCount', {
-        defaultMessage: 'Add {count}',
-        values: { count: this.state.checkedFields.length }
-      });
+    const addLabel =
+      this.state.checkedFields.length === 0
+        ? i18n.translate('xpack.maps.tooltipSelector.addLabelWithoutCount', {
+            defaultMessage: 'Add',
+          })
+        : i18n.translate('xpack.maps.tooltipSelector.addLabelWithCount', {
+            defaultMessage: 'Add {count}',
+            values: { count: this.state.checkedFields.length },
+          });
 
     return (
       <Fragment>
-        <EuiSelectable
-          searchable
-          options={this.state.options}
-          onChange={this._onSelect}
-        >
+        <EuiSelectable searchable options={this.state.options} onChange={this._onSelect}>
           {(list, search) => (
             <div style={{ width: '300px' }}>
               <EuiPopoverTitle>{search}</EuiPopoverTitle>
@@ -166,6 +161,7 @@ export class AddTooltipFieldPopover extends Component {
         button={this._renderAddButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
+        ownFocus
       >
         {this._renderContent()}
       </EuiPopover>

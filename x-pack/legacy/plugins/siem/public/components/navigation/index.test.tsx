@@ -11,49 +11,52 @@ import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
-import { TabNavigationProps } from './tab_navigation/types';
 import { HostsTableType } from '../../store/hosts/model';
 import { RouteSpyState } from '../../utils/route/types';
+import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
+jest.mock('ui/new_platform');
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 
 describe('SIEM Navigation', () => {
-  const mockProps: TabNavigationProps & RouteSpyState = {
+  const mockProps: SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState = {
     pageName: 'hosts',
     pathName: '/hosts',
     detailName: undefined,
     search: '',
     tabName: HostsTableType.authentications,
     navTabs,
-    [CONSTANTS.timerange]: {
-      global: {
-        [CONSTANTS.timerange]: {
-          from: 1558048243696,
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: 1558134643697,
-          toStr: 'now',
+    urlState: {
+      [CONSTANTS.timerange]: {
+        global: {
+          [CONSTANTS.timerange]: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+          linkTo: ['timeline'],
         },
-        linkTo: ['timeline'],
-      },
-      timeline: {
-        [CONSTANTS.timerange]: {
-          from: 1558048243696,
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: 1558134643697,
-          toStr: 'now',
+        timeline: {
+          [CONSTANTS.timerange]: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+          linkTo: ['global'],
         },
-        linkTo: ['global'],
       },
-    },
-    [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
-    [CONSTANTS.filters]: [],
-    [CONSTANTS.timeline]: {
-      id: '',
-      isOpen: false,
+      [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
+      [CONSTANTS.filters]: [],
+      [CONSTANTS.timeline]: {
+        id: '',
+        isOpen: false,
+      },
     },
   };
   const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
@@ -61,6 +64,13 @@ describe('SIEM Navigation', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
       navTabs: {
+        'detection-engine': {
+          disabled: false,
+          href: '#/link-to/detection-engine',
+          id: 'detection-engine',
+          name: 'Detection engine',
+          urlKey: 'detection-engine',
+        },
         hosts: {
           disabled: false,
           href: '#/link-to/hosts',
@@ -132,9 +142,17 @@ describe('SIEM Navigation', () => {
       tabName: undefined,
     });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, {
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
+      filters: [],
       navTabs: {
+        'detection-engine': {
+          disabled: false,
+          href: '#/link-to/detection-engine',
+          id: 'detection-engine',
+          name: 'Detection engine',
+          urlKey: 'detection-engine',
+        },
         hosts: {
           disabled: false,
           href: '#/link-to/hosts',
@@ -164,17 +182,13 @@ describe('SIEM Navigation', () => {
           urlKey: 'timeline',
         },
       },
-      pageName: 'network',
-      pathName: '/network',
-      search: '',
-      tabName: undefined,
-      query: { query: '', language: 'kuery' },
-      filters: [],
+      pageName: 'hosts',
+      pathName: '/hosts',
+      query: { language: 'kuery', query: '' },
       savedQuery: undefined,
-      timeline: {
-        id: '',
-        isOpen: false,
-      },
+      search: '',
+      tabName: 'authentications',
+      timeline: { id: '', isOpen: false },
       timerange: {
         global: {
           linkTo: ['timeline'],

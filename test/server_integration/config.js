@@ -23,22 +23,20 @@ import {
   ElasticsearchSupertestProvider,
 } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      retry: commonConfig.get('services.retry'),
+      ...commonConfig.get('services'),
       supertest: KibanaSupertestProvider,
       supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,
     },
     servers: commonConfig.get('servers'),
     junit: {
-      reportName: 'Integration Tests'
+      reportName: 'Integration Tests',
     },
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {

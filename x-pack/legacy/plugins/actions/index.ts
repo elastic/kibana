@@ -22,10 +22,10 @@ export function actions(kibana: any) {
   return new kibana.Plugin({
     id: 'actions',
     configPrefix: 'xpack.actions',
-    require: ['kibana', 'elasticsearch', 'task_manager', 'encrypted_saved_objects'],
+    require: ['kibana', 'elasticsearch', 'task_manager', 'encryptedSavedObjects'],
     isEnabled(config: Legacy.KibanaConfig) {
       return (
-        config.get('xpack.encrypted_saved_objects.enabled') === true &&
+        config.get('xpack.encryptedSavedObjects.enabled') === true &&
         config.get('xpack.actions.enabled') === true &&
         config.get('xpack.task_manager.enabled') === true
       );
@@ -33,7 +33,7 @@ export function actions(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(false),
+          enabled: Joi.boolean().default(true),
           whitelistedHosts: Joi.array()
             .items(
               Joi.string()

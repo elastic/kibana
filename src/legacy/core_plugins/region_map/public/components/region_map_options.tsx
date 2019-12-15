@@ -82,7 +82,10 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
   const setField = useCallback(
     (paramName: 'selectedJoinField', value: FileLayerField['name']) => {
       if (stateParams.selectedLayer) {
-        setValue(paramName, stateParams.selectedLayer.fields.find(f => f.name === value));
+        setValue(
+          paramName,
+          stateParams.selectedLayer.fields.find(f => f.name === value)
+        );
       }
     },
     [setValue, stateParams.selectedLayer]

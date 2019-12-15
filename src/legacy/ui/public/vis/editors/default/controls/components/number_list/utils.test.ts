@@ -27,15 +27,18 @@ import {
   getNextModel,
   getRange,
 } from './utils';
-import { Range } from '../../../../../../utils/range';
+import { NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
 
 describe('NumberList utils', () => {
   let modelList: NumberRowModel[];
-  let range: Range;
+  let range: NumberListRange;
 
   beforeEach(() => {
-    modelList = [{ value: 1, id: '1', isInvalid: false }, { value: 2, id: '2', isInvalid: false }];
+    modelList = [
+      { value: 1, id: '1', isInvalid: false },
+      { value: 2, id: '2', isInvalid: false },
+    ];
     range = {
       min: 1,
       max: 10,

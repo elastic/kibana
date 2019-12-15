@@ -19,6 +19,9 @@ export const LOGIN_PAGE = '/login';
 
 /** The SIEM app's Network page */
 export const NETWORK_PAGE = '/app/siem#/network';
+export const NETWORK_TAB_URLS = {
+  dns: `${NETWORK_PAGE}/dns`,
+};
 
 /** The SIEM app's Overview page */
 export const OVERVIEW_PAGE = '/app/siem#/overview';

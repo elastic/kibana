@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { take } from 'rxjs/operators';
 import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
@@ -25,8 +26,8 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
-import { fromRoot } from '../../utils';
-import { createCSPRuleString } from '../../server/csp';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -42,21 +43,31 @@ export function uiRenderMixin(kbnServer, server, config) {
   let defaultInjectedVars = {};
   kbnServer.afterPluginsInit(() => {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
-    defaultInjectedVars = defaultInjectedVarProviders
-      .reduce((allDefaults, { fn, pluginSpec }) => (
+    defaultInjectedVars = defaultInjectedVarProviders.reduce(
+      (allDefaults, { fn, pluginSpec }) =>
         mergeVariables(
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
-        )
-      ), {});
+        ),
+      {}
+    );
   });
 
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
-  server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
-  server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
-  server.exposeStaticDir('/node_modules/@elastic/charts/dist/{path*}', fromRoot('node_modules/@elastic/charts/dist'));
+  server.exposeStaticDir(
+    '/node_modules/@elastic/eui/dist/{path*}',
+    fromRoot('node_modules/@elastic/eui/dist')
+  );
+  server.exposeStaticDir(
+    '/node_modules/@kbn/ui-framework/dist/{path*}',
+    fromRoot('node_modules/@kbn/ui-framework/dist')
+  );
+  server.exposeStaticDir(
+    '/node_modules/@elastic/charts/dist/{path*}',
+    fromRoot('node_modules/@elastic/charts/dist')
+  );
 
   const translationsCache = { translations: null, hash: null };
   server.route({
@@ -80,11 +91,12 @@ export function uiRenderMixin(kbnServer, server, config) {
           .digest('hex');
       }
 
-      return h.response(translationsCache.translations)
+      return h
+        .response(translationsCache.translations)
         .header('cache-control', 'must-revalidate')
         .header('content-type', 'application/json')
         .etag(translationsCache.hash);
-    }
+    },
   });
 
   // register the bootstrap.js route after plugins are initialized so that we can
@@ -105,42 +117,38 @@ export function uiRenderMixin(kbnServer, server, config) {
         const isCore = !app;
 
         const uiSettings = request.getUiSettingsService();
-        const darkMode = !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:darkMode')
-          : false;
+        const darkMode =
+          !authEnabled || request.auth.isAuthenticated
+            ? await uiSettings.get('theme:darkMode')
+            : false;
 
         const basePath = config.get('server.basePath');
         const regularBundlePath = `${basePath}/bundles`;
         const dllBundlePath = `${basePath}/built_assets/dlls`;
         const styleSheetPaths = [
           `${dllBundlePath}/vendors.style.dll.css`,
-          ...(
-            darkMode ?
-              [
+          ...(darkMode
+            ? [
                 `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
                 `${basePath}/node_modules/@elastic/charts/dist/theme_only_dark.css`,
-              ] : [
+              ]
+            : [
                 `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${basePath}/node_modules/@elastic/charts/dist/theme_only_light.css`,
-              ]
-          ),
+              ]),
           `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
-          ...(
-            !isCore ? [`${regularBundlePath}/${app.getId()}.style.css`] : []
-          ),
+          ...(!isCore ? [`${regularBundlePath}/${app.getId()}.style.css`] : []),
           ...kbnServer.uiExports.styleSheetPaths
-            .filter(path => (
-              path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
-            ))
-            .map(path => (
+            .filter(path => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light'))
+            .map(path =>
               path.localPath.endsWith('.scss')
                 ? `${basePath}/built_assets/css/${path.publicPath}`
                 : `${basePath}/${path.publicPath}`
-            ))
-            .reverse()
+            )
+            .reverse(),
         ];
 
         const bootstrap = new AppBootstrap({
@@ -149,17 +157,18 @@ export function uiRenderMixin(kbnServer, server, config) {
             regularBundlePath,
             dllBundlePath,
             styleSheetPaths,
-          }
+          },
         });
 
         const body = await bootstrap.getJsFile();
         const etag = await bootstrap.getJsFileHash();
 
-        return h.response(body)
+        return h
+          .response(body)
           .header('cache-control', 'must-revalidate')
           .header('content-type', 'application/javascript')
           .etag(etag);
-      }
+      },
     });
   });
 
@@ -179,14 +188,14 @@ export function uiRenderMixin(kbnServer, server, config) {
       } catch (err) {
         throw Boom.boomify(err);
       }
-    }
+    },
   });
 
   async function getUiSettings({ request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
     return props({
       defaults: uiSettings.getRegistered(),
-      user: includeUserProvidedConfig && uiSettings.getUserProvided()
+      user: includeUserProvidedConfig && uiSettings.getUserProvided(),
     });
   }
 
@@ -206,7 +215,12 @@ export function uiRenderMixin(kbnServer, server, config) {
     };
   }
 
-  async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
+  async function renderApp({
+    app,
+    h,
+    includeUserProvidedConfig = true,
+    injectedVarsOverrides = {},
+  }) {
     const request = h.request;
     const basePath = request.getBasePath();
     const uiSettings = await getUiSettings({ request, includeUserProvidedConfig });
@@ -215,17 +229,28 @@ export function uiRenderMixin(kbnServer, server, config) {
     const legacyMetadata = getLegacyKibanaPayload({
       app,
       basePath,
-      uiSettings
+      uiSettings,
     });
 
     // Get the list of new platform plugins.
     // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
-    const uiPlugins = [
-      ...kbnServer.newPlatform.__internals.uiPlugins.public.entries()
-    ].map(([id, plugin]) => ({ id, plugin }));
+    const uiPluginConfigs = kbnServer.newPlatform.__internals.uiPlugins.browserConfigs;
+    const uiPlugins = await Promise.all(
+      [...kbnServer.newPlatform.__internals.uiPlugins.public.entries()].map(
+        async ([id, plugin]) => {
+          const config$ = uiPluginConfigs.get(id);
+          if (config$) {
+            return { id, plugin, config: await config$.pipe(take(1)).toPromise() };
+          } else {
+            return { id, plugin, config: {} };
+          }
+        }
+      )
+    );
+    const { strict, warnLegacyBrowsers, header } = kbnServer.newPlatform.setup.core.http.csp;
 
     const response = h.view('ui_app', {
-      strictCsp: config.get('csp.strict'),
+      strictCsp: strict,
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
@@ -243,32 +268,29 @@ export function uiRenderMixin(kbnServer, server, config) {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         csp: {
-          warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
+          warnLegacyBrowsers,
         },
         vars: await replaceInjectedVars(
           request,
           mergeVariables(
             injectedVarsOverrides,
             app ? await server.getInjectedUiAppVars(app.getId()) : {},
-            defaultInjectedVars,
-          ),
+            defaultInjectedVars
+          )
         ),
 
         uiPlugins,
 
         legacyMetadata,
-
-        capabilities: await request.getCapabilities(),
       },
     });
 
-    const csp = createCSPRuleString(config.get('csp.rules'));
-    response.header('content-security-policy', csp);
+    response.header('content-security-policy', header);
 
     return response;
   }
 
-  server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {
+  server.decorate('toolkit', 'renderApp', function(app, injectedVarsOverrides) {
     return renderApp({
       app,
       h: this,
@@ -277,7 +299,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     });
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
     return renderApp({
       app,
       h: this,

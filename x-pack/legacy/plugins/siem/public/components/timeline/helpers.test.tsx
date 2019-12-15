@@ -5,13 +5,12 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
 import { mockIndexPattern } from '../../mock';
 
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { EsQueryConfig } from '../../lib/keury';
+import { esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
@@ -117,7 +116,7 @@ describe('Build KQL Query', () => {
 });
 
 describe('Combined Queries', () => {
-  const config: EsQueryConfig = {
+  const config: esQuery.EsQueryConfig = {
     allowLeadingWildcards: true,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: true,
@@ -157,6 +156,52 @@ describe('Combined Queries', () => {
     ).toEqual({
       filterQuery:
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
+    });
+  });
+
+  test('No Data Provider & No kqlQuery & with Filters', () => {
+    const isEventViewer = true;
+    expect(
+      combineQueries({
+        config,
+        dataProviders: [],
+        indexPattern: mockIndexPattern,
+        browserFields: mockBrowserFields,
+        filters: [
+          {
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            meta: {
+              alias: null,
+              disabled: false,
+              key: 'event.category',
+              negate: false,
+              params: { query: 'file' },
+              type: 'phrase',
+            },
+            query: { match_phrase: { 'event.category': 'file' } },
+          },
+          {
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            meta: {
+              alias: null,
+              disabled: false,
+              key: 'host.name',
+              negate: false,
+              type: 'exists',
+              value: 'exists',
+            },
+            exists: { field: 'host.name' },
+          } as esFilters.Filter,
+        ],
+        kqlQuery: { query: '', language: 'kuery' },
+        kqlMode: 'search',
+        start: startDate,
+        end: endDate,
+        isEventViewer,
+      })
+    ).toEqual({
+      filterQuery:
+        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521830963132}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1521862432253}}}],"minimum_should_match":1}}]}},{"exists":{"field":"host.name"}}],"should":[],"must_not":[]}}',
     });
   });
 

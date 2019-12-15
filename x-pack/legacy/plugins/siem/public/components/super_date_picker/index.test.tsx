@@ -14,6 +14,8 @@ import { createStore, State } from '../../store';
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
@@ -72,38 +74,6 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
         expect(store.getState().inputs.global.timerange.fromStr).toBe('now/d');
         expect(store.getState().inputs.global.timerange.toStr).toBe('now/d');
-      });
-
-      test('Make Sure it is this week', () => {
-        wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_This_week"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/w');
-        expect(store.getState().inputs.global.timerange.toStr).toBe('now/w');
-      });
-
-      test('Make Sure it is week to date', () => {
-        wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Week_to date"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/w');
-        expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
       test('Make Sure to (end date) is superior than from (start date)', () => {
@@ -166,60 +136,6 @@ describe('SIEM Super Date Picker', () => {
             .at(1)
             .text()
         ).toBe('Last 15 minutesToday');
-      });
-
-      test('Today and Year to date is in Recently used date ranges', () => {
-        wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        expect(
-          wrapper
-            .find('div.euiQuickSelectPopover__section')
-            .at(1)
-            .text()
-        ).toBe('Year to dateToday');
-      });
-
-      test('Today and Last 15 minutes and Year to date is in Recently used date ranges', () => {
-        wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('button.euiQuickSelect__applyButton')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Year_to date"]')
-          .first()
-          .simulate('click');
-        wrapper.update();
-
-        expect(
-          wrapper
-            .find('div.euiQuickSelectPopover__section')
-            .at(1)
-            .text()
-        ).toBe('Year to dateLast 15 minutesToday');
       });
 
       test('Make sure that it does not add any duplicate if you click again on today', () => {

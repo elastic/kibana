@@ -22,10 +22,12 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { timefilterServiceMock } from '../../../../core_plugins/data/public/timefilter/timefilter_service.mock';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
-
-jest.mock('ui/new_platform');
+const mockTimeHistory = {
+  add: () => {},
+  get: () => {
+    return [];
+  },
+};
 
 const dataShim = {
   ui: {
@@ -77,7 +79,7 @@ describe('TopNavMenu', () => {
       <TopNavMenu
         appName={'test'}
         showSearchBar={true}
-        timeHistory={timefilterSetupMock.history}
+        timeHistory={mockTimeHistory}
         data={dataShim as any}
       />
     );

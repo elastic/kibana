@@ -23,14 +23,10 @@ At the root of the Kibana repository, run the following commands:
 
 ```sh
 # OSS
-yarn spec_to_console \
-  -g "<ELASTICSEARCH-REPO-FOLDER>/rest-api-spec/src/main/resources/rest-api-spec/api/*" \
-  -d "src/legacy/core_plugins/console/api_server/spec/generated"
+yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/rest-api-spec/src/main/resources/rest-api-spec/api/*" -d "src/legacy/core_plugins/console/server/api_server/spec/generated"
 
 # X-pack
-yarn spec_to_console \
-  -g "<ELASTICSEARCH-REPO-FOLDER>/x-pack/plugin/src/test/resources/rest-api-spec/api/*" \
-  -d "x-pack/plugins/console_extensions/spec/generated"
+yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/x-pack/plugin/src/test/resources/rest-api-spec/api/*" -d "x-pack/legacy/plugins/console_extensions/spec/generated"
 ```
 
 ### Information used in Console that is not available in the REST spec

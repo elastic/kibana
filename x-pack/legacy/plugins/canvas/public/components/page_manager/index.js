@@ -32,9 +32,6 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export const PageManager = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   withState('deleteId', 'setDeleteId', null)
 )(Component);

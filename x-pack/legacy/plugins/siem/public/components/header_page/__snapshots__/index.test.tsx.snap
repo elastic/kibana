@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderPage it renders 1`] = `
+<Header
+  border={true}
+>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <FlexItem>
+      <EuiTitle
+        size="l"
+      >
+        <h1
+          data-test-subj="header-page-title"
+        >
+          Test title
+           
+          <EuiBetaBadge
+            label="Beta"
+            tooltipContent="Test tooltip"
+            tooltipPosition="bottom"
+          />
+        </h1>
+      </EuiTitle>
+      <Subtitle
+        data-test-subj="header-page-subtitle"
+        items="Test subtitle"
+      />
+      <Subtitle
+        data-test-subj="header-page-subtitle-2"
+        items="Test subtitle 2"
+      />
+    </FlexItem>
+    <FlexItem
+      data-test-subj="header-page-supplements"
+      grow={false}
+    >
+      <p>
+        Test supplement
+      </p>
+    </FlexItem>
+  </EuiFlexGroup>
+</Header>
+`;

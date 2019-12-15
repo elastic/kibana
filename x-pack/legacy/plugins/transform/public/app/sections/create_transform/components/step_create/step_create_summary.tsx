@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
-export const StepCreateSummary: SFC = React.memo(() => {
+export const StepCreateSummary: FC = React.memo(() => {
   return null;
 });

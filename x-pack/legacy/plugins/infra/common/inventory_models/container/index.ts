@@ -4,13 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { layout } from './layout';
+import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
 export const container: InventoryModel = {
   id: 'container',
+  displayName: i18n.translate('xpack.infra.inventoryModel.container.displayName', {
+    defaultMessage: 'Docker Containers',
+  }),
   requiredModules: ['docker'],
-  layout,
+  crosslinkSupport: {
+    details: true,
+    logs: true,
+    apm: true,
+    uptime: true,
+  },
+  fields: {
+    id: 'container.id',
+    name: 'container.name',
+    ip: 'continaer.ip_address',
+  },
   metrics,
+  requiredMetrics: [
+    'containerOverview',
+    'containerCpuUsage',
+    'containerMemory',
+    'containerNetworkTraffic',
+    'containerDiskIOBytes',
+    'containerDiskIOOps',
+  ],
 };

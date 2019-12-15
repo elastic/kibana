@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, IRouter, Logger } from '../../../../../src/core/server';
+import { CoreSetup, IClusterClient, IRouter, Logger } from '../../../../../src/core/server';
 import { Authentication } from '../authentication';
+import { Authorization } from '../authorization';
 import { ConfigType } from '../config';
+
 import { defineAuthenticationRoutes } from './authentication';
-import { LegacyAPI } from '../plugin';
+import { defineAuthorizationRoutes } from './authorization';
+import { defineApiKeysRoutes } from './api_keys';
+import { defineIndicesRoutes } from './indices';
+import { defineUsersRoutes } from './users';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -16,12 +21,18 @@ import { LegacyAPI } from '../plugin';
 export interface RouteDefinitionParams {
   router: IRouter;
   basePath: CoreSetup['http']['basePath'];
+  csp: CoreSetup['http']['csp'];
   logger: Logger;
+  clusterClient: IClusterClient;
   config: ConfigType;
   authc: Authentication;
-  getLegacyAPI: () => LegacyAPI;
+  authz: Authorization;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
+  defineAuthorizationRoutes(params);
+  defineApiKeysRoutes(params);
+  defineIndicesRoutes(params);
+  defineUsersRoutes(params);
 }

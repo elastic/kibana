@@ -60,6 +60,33 @@ const SavedDataProviderRuntimeType = runtimeTypes.partial({
 });
 
 /*
+ *  Filters Types
+ */
+const SavedFilterMetaRuntimeType = runtimeTypes.partial({
+  alias: unionWithNullType(runtimeTypes.string),
+  controlledBy: unionWithNullType(runtimeTypes.string),
+  disabled: unionWithNullType(runtimeTypes.boolean),
+  field: unionWithNullType(runtimeTypes.string),
+  formattedValue: unionWithNullType(runtimeTypes.string),
+  index: unionWithNullType(runtimeTypes.string),
+  key: unionWithNullType(runtimeTypes.string),
+  negate: unionWithNullType(runtimeTypes.boolean),
+  params: unionWithNullType(runtimeTypes.string),
+  type: unionWithNullType(runtimeTypes.string),
+  value: unionWithNullType(runtimeTypes.string),
+});
+
+const SavedFilterRuntimeType = runtimeTypes.partial({
+  exists: unionWithNullType(runtimeTypes.string),
+  meta: unionWithNullType(SavedFilterMetaRuntimeType),
+  match_all: unionWithNullType(runtimeTypes.string),
+  missing: unionWithNullType(runtimeTypes.string),
+  query: unionWithNullType(runtimeTypes.string),
+  range: unionWithNullType(runtimeTypes.string),
+  script: unionWithNullType(runtimeTypes.string),
+});
+
+/*
  *  kqlQuery -> filterQuery Types
  */
 const SavedKueryFilterQueryRuntimeType = runtimeTypes.partial({
@@ -110,10 +137,12 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
+  filters: unionWithNullType(runtimeTypes.array(SavedFilterRuntimeType)),
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
+  savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
   created: unionWithNullType(runtimeTypes.number),
   createdBy: unionWithNullType(runtimeTypes.string),

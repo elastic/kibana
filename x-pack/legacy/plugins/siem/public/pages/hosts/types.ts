@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { ActionCreator } from 'typescript-fsa';
-import { Filter } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
+import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
 
 import { SiemPageName } from '../home/types';
 import { hostsModel } from '../../store';
@@ -19,7 +17,7 @@ export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
 
 export interface HostsComponentReduxProps {
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }
 
 export interface HostsComponentDispatchProps {
@@ -35,7 +33,7 @@ export type HostsTabsProps = HostsComponentDispatchProps &
   HostsQueryProps & {
     filterQuery: string;
     type: hostsModel.HostsType;
-    indexPattern: StaticIndexPattern;
+    indexPattern: IIndexPattern;
   };
 
 export type HostsQueryProps = GlobalTimeArgs;

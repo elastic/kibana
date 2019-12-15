@@ -25,9 +25,9 @@ import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
-import { buildQueryFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../plugins/data/public';
 
 import { getEnableExternalUrls } from '../helpers/vega_config_provider';
 
@@ -45,13 +45,10 @@ const vegaFunctions = {
 
 for (const funcName of Object.keys(vegaFunctions)) {
   if (!vega.expressionFunction(funcName)) {
-    vega.expressionFunction(
-      funcName,
-      function handlerFwd(...args) {
-        const view = this.context.dataflow;
-        view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
-      }
-    );
+    vega.expressionFunction(funcName, function handlerFwd(...args) {
+      const view = this.context.dataflow;
+      view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
+    });
   }
 }
 
@@ -79,11 +76,12 @@ export class VegaBaseView {
   }
 
   async init() {
-    if (this._initialized) throw new Error();  // safety
+    if (this._initialized) throw new Error(); // safety
     this._initialized = true;
 
     try {
-      this._$parentEl.empty()
+      this._$parentEl
+        .empty()
         .addClass(`vgaVis`)
         .css('flex-direction', this._parser.containerDir);
 
@@ -101,8 +99,9 @@ export class VegaBaseView {
         // Force a height here because css is not loaded in mocha test
         .css('height', '100%')
         .appendTo(this._$parentEl);
-      this._$controls = $(`<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`)
-        .appendTo(this._$parentEl);
+      this._$controls = $(
+        `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
+      ).appendTo(this._$parentEl);
 
       this._addDestroyHandler(() => {
         if (this._$container) {
@@ -147,13 +146,16 @@ export class VegaBaseView {
         // because user can only supply pure JSON data structure.
         uri = uri.url;
       } else if (!this._enableExternalUrls) {
-        throw new Error(i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
-          defaultMessage: 'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
-          values: {
-            enableExternalUrls: 'vega.enableExternalUrls: true',
-            kibanaConfigFileName: 'kibana.yml',
-          },
-        }));
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage', {
+            defaultMessage:
+              'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
+            values: {
+              enableExternalUrls: 'vega.enableExternalUrls: true',
+              kibanaConfigFileName: 'kibana.yml',
+            },
+          })
+        );
       }
       return originalSanitize(uri, options);
     };
@@ -195,7 +197,8 @@ export class VegaBaseView {
     // Which is being fixed as part of jQuery 3.3.0
     const heightExtraPadding = 6;
     const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
-    const height = Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
+    const height =
+      Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
     // Somehow the `height` signal in vega becomes zero if the height is set exactly to
     // an even number. This is a dirty workaround for this.
     // when vega itself is updated again, it should be checked whether this is still
@@ -218,7 +221,6 @@ export class VegaBaseView {
     this._view = view;
 
     if (view) {
-
       // Global vega expression handler uses it to call custom functions
       view._kibanaView = this;
 
@@ -246,10 +248,15 @@ export class VegaBaseView {
       const handlerFunc = vegaFunctions[funcName];
       if (!handlerFunc || !this[handlerFunc]) {
         // in case functions don't match the list above
-        throw new Error(i18n.translate('visTypeVega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage', {
-          defaultMessage: '{funcName} is not defined for this graph',
-          values: { funcName: `${funcName}()` },
-        }));
+        throw new Error(
+          i18n.translate(
+            'visTypeVega.vegaParser.baseView.functionIsNotDefinedForGraphErrorMessage',
+            {
+              defaultMessage: '{funcName} is not defined for this graph',
+              values: { funcName: `${funcName}()` },
+            }
+          )
+        );
       }
       await this[handlerFunc](...args);
     } catch (err) {
@@ -263,7 +270,7 @@ export class VegaBaseView {
    */
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
-    const filter = buildQueryFilter(query, indexId);
+    const filter = esFilters.buildQueryFilter(query, indexId);
     this._queryfilter.addFilters(filter);
   }
 
@@ -274,7 +281,7 @@ export class VegaBaseView {
   async removeFilterHandler(query, index) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const indexId = await this._findIndex(index);
-    const filter = buildQueryFilter(query, indexId);
+    const filter = esFilters.buildQueryFilter(query, indexId);
 
     // This is a workaround for the https://github.com/elastic/kibana/issues/18863
     // Once fixed, replace with a direct call (no await is needed because its not async)
@@ -325,13 +332,16 @@ export class VegaBaseView {
       const startDate = dateMath.parse(start);
       const endDate = dateMath.parse(end);
       if (!startDate || !endDate || !startDate.isValid() || !endDate.isValid()) {
-        throw new Error(i18n.translate('visTypeVega.vegaParser.baseView.timeValuesTypeErrorMessage', {
-          defaultMessage: 'Error setting time filter: both time values must be either relative or absolute dates. {start}, {end}',
-          values: {
-            start: `start=${JSON.stringify(start)}`,
-            end: `end=${JSON.stringify(end)}`,
-          },
-        }));
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.baseView.timeValuesTypeErrorMessage', {
+            defaultMessage:
+              'Error setting time filter: both time values must be either relative or absolute dates. {start}, {end}',
+            values: {
+              start: `start=${JSON.stringify(start)}`,
+              end: `end=${JSON.stringify(end)}`,
+            },
+          })
+        );
       }
       reverse = startDate.isAfter(endDate);
       if (isValidAbsStart || isValidAbsEnd) {
@@ -360,8 +370,10 @@ export class VegaBaseView {
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
-        console.log('You can access the Vega view with VEGA_DEBUG. ' +
-          'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
+        console.log(
+          'You can access the Vega view with VEGA_DEBUG. ' +
+            'Learn more at https://vega.github.io/vega/docs/api/debugging/.'
+        );
       }
       const debugObj = {};
       window.VEGA_DEBUG = debugObj;

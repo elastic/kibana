@@ -6,6 +6,7 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
+import { createAnomaliesResolvers } from './graphql/anomalies';
 import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
 import { createEsValueResolvers, createEventsResolvers } from './graphql/events';
@@ -27,17 +28,12 @@ import { createTimelineResolvers } from './graphql/timeline';
 import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
-import { Logger } from './utils/logger';
 import { createTlsResolvers } from './graphql/tls';
 
-export interface Config {
-  mocking: boolean;
-  logger: Logger;
-}
-
-export const initServer = (libs: AppBackendLibs, config: Config) => {
+export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
+      createAnomaliesResolvers(libs) as IResolvers,
       createAuthenticationsResolvers(libs) as IResolvers,
       createEsValueResolvers() as IResolvers,
       createEventsResolvers(libs) as IResolvers,

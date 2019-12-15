@@ -104,9 +104,9 @@ describe('Fields Browser', () => {
 
     openTimelineFieldsBrowser();
 
-    cy.get(
-      `[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`
-    ).uncheck();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).uncheck({
+      force: true,
+    });
 
     clickOutsideFieldsBrowser();
 
@@ -185,7 +185,9 @@ describe('Fields Browser', () => {
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check({
+      force: true,
+    });
 
     clickOutsideFieldsBrowser();
 
@@ -235,7 +237,9 @@ describe('Fields Browser', () => {
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="field-${toggleField}-checkbox"]`).check({
+      force: true,
+    });
 
     clickOutsideFieldsBrowser();
 
@@ -245,7 +249,7 @@ describe('Fields Browser', () => {
 
     openTimelineFieldsBrowser();
 
-    cy.get('[data-test-subj="timeline"] [data-test-subj="reset-fields"]').click();
+    cy.get('[data-test-subj="timeline"] [data-test-subj="reset-fields"]').click({ force: true });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${toggleField}"]`).should(
       'not.exist'

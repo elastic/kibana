@@ -8,9 +8,12 @@ import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { TaskManager } from '../../task_manager';
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import {
+  PluginSetupContract as EncryptedSavedObjectsSetupContract,
+  PluginStartContract as EncryptedSavedObjectsStartContract,
+} from '../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import {
   CoreSetup,
@@ -28,7 +31,6 @@ import {
 interface Plugins extends Hapi.PluginProperties {
   actions: ActionsPlugin;
   task_manager: TaskManager;
-  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
 }
 
 export interface Server extends Legacy.Server {
@@ -39,17 +41,12 @@ export interface Server extends Legacy.Server {
  * Shim what we're thinking setup and start contracts will look like
  */
 export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
-export type SecurityPluginSetupContract = Pick<SecurityPlugin, 'config' | 'registerLegacyAPI'>;
+export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
-export type EncryptedSavedObjectsSetupContract = Pick<EncryptedSavedObjectsPlugin, 'registerType'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
 export type TaskManagerSetupContract = Pick<
   TaskManager,
   'addMiddleware' | 'registerTaskDefinitions'
->;
-export type EncryptedSavedObjectsStartContract = Pick<
-  EncryptedSavedObjectsPlugin,
-  'isEncryptionError' | 'getDecryptedAsInternalUser'
 >;
 
 /**
@@ -75,13 +72,13 @@ export interface AlertingPluginsSetup {
   task_manager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
-  encrypted_saved_objects: EncryptedSavedObjectsSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
-  encrypted_saved_objects: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
   task_manager: TaskManagerStartContract;
 }
 
@@ -122,7 +119,8 @@ export function shim(
     task_manager: server.plugins.task_manager,
     actions: server.plugins.actions.setup,
     xpack_main: server.plugins.xpack_main,
-    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
+    encryptedSavedObjects: newPlatform.setup.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
   };
 
   const pluginsStart: AlertingPluginsStart = {
@@ -131,7 +129,8 @@ export function shim(
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,
-    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
+    encryptedSavedObjects: newPlatform.start.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
     task_manager: server.plugins.task_manager,
   };
 

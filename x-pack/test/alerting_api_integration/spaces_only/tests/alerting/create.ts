@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('create', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -27,21 +27,51 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     }
 
     it('should handle create alert request appropriately', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(
+          getTestAlertData({
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
       expect(response.body).to.eql({
         id: response.body.id,
-        actions: [],
+        name: 'abc',
+        tags: ['foo'],
+        actions: [
+          {
+            id: createdAction.id,
+            actionTypeId: createdAction.actionTypeId,
+            group: 'default',
+            params: {},
+          },
+        ],
         enabled: true,
         alertTypeId: 'test.noop',
-        alertTypeParams: {},
+        params: {},
         createdBy: null,
-        interval: '10s',
+        interval: '1m',
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',

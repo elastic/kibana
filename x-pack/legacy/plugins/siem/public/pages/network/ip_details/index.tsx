@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -21,9 +20,11 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../../components/page/network/flow_target_select_connected';
 import { IpOverview } from '../../../components/page/network/ip_overview';
 import { SiemSearchBar } from '../../../components/search_bar';
+import { WrapperPage } from '../../../components/wrapper_page';
 import { IpOverviewQuery } from '../../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { ConditionalFlexGroup } from '../../../pages/network/navigation/conditional_flex_group';
@@ -32,69 +33,74 @@ import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '.
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../../store/network/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import { NetworkEmptyPage } from '../network_empty_page';
-
-import { IPDetailsComponentProps } from './types';
-export { getBreadcrumbs } from './utils';
-import { TlsQueryTable } from './tls_query_table';
-import { UsersQueryTable } from './users_query_table';
-import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
+import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
+import { TlsQueryTable } from './tls_query_table';
+import { IPDetailsComponentProps } from './types';
+import { UsersQueryTable } from './users_query_table';
+import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
+import { esQuery } from '../../../../../../../../src/plugins/data/public';
+
+export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
 
-export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
-  ({
-    detailName,
-    filters,
-    flowTarget,
-    from,
-    isInitializing,
-    query,
-    setAbsoluteRangeDatePicker,
-    setIpDetailsTablesActivePageToZero,
-    setQuery,
-    to,
-  }) => {
-    const narrowDateRange = useCallback(
-      (score, interval) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
-    );
-    const core = useKibanaCore();
+export const IPDetailsComponent = ({
+  detailName,
+  filters,
+  flowTarget,
+  from,
+  isInitializing,
+  query,
+  setAbsoluteRangeDatePicker,
+  setIpDetailsTablesActivePageToZero,
+  setQuery,
+  to,
+}: IPDetailsComponentProps) => {
+  const type = networkModel.NetworkType.details;
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      setAbsoluteRangeDatePicker({
+        id: 'global',
+        from: fromTo.from,
+        to: fromTo.to,
+      });
+    },
+    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
+  );
+  const core = useKibanaCore();
 
-    useEffect(() => {
-      setIpDetailsTablesActivePageToZero(null);
-    }, [detailName]);
+  useEffect(() => {
+    setIpDetailsTablesActivePageToZero(null);
+  }, [detailName]);
 
-    return (
-      <>
-        <WithSource sourceId="default" data-test-subj="ip-details-page">
-          {({ indicesExist, indexPattern }) => {
-            const ip = decodeIpv6(detailName);
-            const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters,
-            });
-            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <StickyContainer>
-                <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
-                </FiltersGlobal>
+  return (
+    <>
+      <WithSource sourceId="default" data-test-subj="ip-details-page">
+        {({ indicesExist, indexPattern }) => {
+          const ip = decodeIpv6(detailName);
+          const filterQuery = convertToBuildEsQuery({
+            config: esQuery.getEsQueryConfig(core.uiSettings),
+            indexPattern,
+            queries: [query],
+            filters,
+          });
 
+          return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar indexPattern={indexPattern} id="global" />
+              </FiltersGlobal>
+
+              <WrapperPage>
                 <HeaderPage
+                  border
                   data-test-subj="ip-details-headline"
+                  draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
                   subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
                   title={ip}
-                  draggableArguments={{ field: `${flowTarget}.ip`, value: ip }}
                 >
                   <FlowTargetSelectConnected />
                 </HeaderPage>
@@ -103,7 +109,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                   skip={isInitializing}
                   sourceId="default"
                   filterQuery={filterQuery}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                   ip={ip}
                 >
                   {({ id, inspect, ipOverviewData, loading, refetch }) => (
@@ -122,7 +128,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                           anomaliesData={anomaliesData}
                           loading={loading}
                           isLoadingAnomaliesData={isLoadingAnomaliesData}
-                          type={networkModel.NetworkType.details}
+                          type={type}
                           flowTarget={flowTarget}
                           refetch={refetch}
                           setQuery={setQuery}
@@ -153,7 +159,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -167,7 +173,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -185,7 +191,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -199,7 +205,7 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                       ip={ip}
                       skip={isInitializing}
                       startDate={from}
-                      type={networkModel.NetworkType.details}
+                      type={type}
                       setQuery={setQuery}
                       indexPattern={indexPattern}
                     />
@@ -215,7 +221,19 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
-                  type={networkModel.NetworkType.details}
+                  type={type}
+                  setQuery={setQuery}
+                />
+
+                <EuiSpacer />
+
+                <NetworkHttpQueryTable
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  ip={ip}
+                  skip={isInitializing}
+                  startDate={from}
+                  type={type}
                   setQuery={setQuery}
                 />
 
@@ -229,36 +247,40 @@ export const IPDetailsComponent = React.memo<IPDetailsComponentProps>(
                   setQuery={setQuery}
                   skip={isInitializing}
                   startDate={from}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                 />
 
                 <EuiSpacer />
 
-                <AnomaliesNetworkTable
+                <AnomaliesQueryTabBody
+                  filterQuery={filterQuery}
+                  setQuery={setQuery}
                   startDate={from}
                   endDate={to}
                   skip={isInitializing}
                   ip={ip}
-                  type={networkModel.NetworkType.details}
+                  type={type}
                   flowTarget={flowTarget}
                   narrowDateRange={narrowDateRange}
+                  hideHistogramIfEmpty={true}
+                  AnomaliesTableComponent={AnomaliesNetworkTable}
                 />
-              </StickyContainer>
-            ) : (
-              <>
-                <HeaderPage title={ip} />
+              </WrapperPage>
+            </StickyContainer>
+          ) : (
+            <WrapperPage>
+              <HeaderPage border title={ip} />
 
-                <NetworkEmptyPage />
-              </>
-            );
-          }}
-        </WithSource>
-        <SpyRoute />
-      </>
-    );
-  }
-);
+              <NetworkEmptyPage />
+            </WrapperPage>
+          );
+        }}
+      </WithSource>
 
+      <SpyRoute />
+    </>
+  );
+};
 IPDetailsComponent.displayName = 'IPDetailsComponent';
 
 const makeMapStateToProps = () => {
@@ -272,10 +294,7 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const IPDetails = connect(
-  makeMapStateToProps,
-  {
-    setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-    setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-  }
-)(IPDetailsComponent);
+export const IPDetails = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
+  setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
+})(React.memo(IPDetailsComponent));

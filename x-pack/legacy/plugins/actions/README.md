@@ -19,10 +19,9 @@ action types.
 
 ## Usage
 
-1. Enable the actions plugin in the `kibana.yml` by setting `xpack.actions.enabled: true`.
-2. Develop and register an action type (see action types -> example).
-3. Create an action by using the RESTful API (see actions -> create action).
-4. Use alerts to execute actions or execute manually (see firing actions).
+1. Develop and register an action type (see action types -> example).
+2. Create an action by using the RESTful API (see actions -> create action).
+3. Use alerts to execute actions or execute manually (see firing actions).
 
 ## Kibana Actions Configuration
 Implemented under the [Actions Config](./server/actions_config.ts).
@@ -97,7 +96,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |actionTypeId|The id value of the action type you want to call when the action executes.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
@@ -140,7 +139,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
 
@@ -273,7 +272,7 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 
 ## index, action id: `.index`
 
-The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
 #### config properties
 
@@ -302,7 +301,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "id": "d6f1e228-1806-4a72-83ac-e06f3d5c2fbe",
     "attributes": {
         "actionTypeId": ".slack",
-        "description": "post to slack",
+        "name": "post to slack",
         "config": {}
     },
     "references": [],

@@ -1,0 +1,12 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+// Search profiler plugin styles
+
+// Prefix all styles with "prfDevTool" to avoid conflicts.
+// Examples
+//   prfDevTool__
+//   prfDevTool__cell
+//   prfDevTool__shardDetails
+
+@import 'styles/index';

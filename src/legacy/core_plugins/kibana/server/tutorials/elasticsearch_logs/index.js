@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
-export function elasticsearchLogsSpecProvider(server, context) {
+export function elasticsearchLogsSpecProvider(context) {
   const moduleName = 'elasticsearch';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
@@ -35,7 +39,8 @@ export function elasticsearchLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse logs created by Elasticsearch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.longDescription', {
-      defaultMessage: 'The `elasticsearch` Filebeat module parses logs created by Elasticsearch. \
+      defaultMessage:
+        'The `elasticsearch` Filebeat module parses logs created by Elasticsearch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-elasticsearch.html',
@@ -44,19 +49,22 @@ export function elasticsearchLogsSpecProvider(server, context) {
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.elasticsearchLogs.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
-        path: '/app/kibana#/discover'
+        label: i18n.translate(
+          'kbn.server.tutorials.elasticsearchLogs.artifacts.application.label',
+          {
+            defaultMessage: 'Discover',
+          }
+        ),
+        path: '/app/kibana#/discover',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-elasticsearch.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-elasticsearch.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

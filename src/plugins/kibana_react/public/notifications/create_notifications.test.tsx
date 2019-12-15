@@ -52,9 +52,20 @@ test('can display string element as title', () => {
   wrapper.toasts.show({ title: 'foo' });
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchObject({
-    title: 'foo',
-  });
+  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": undefined,
+      "iconType": undefined,
+      "onClose": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment />,
+      },
+      "title": MountPoint {
+        "reactNode": "foo",
+      },
+      "toastLifeTimeMs": undefined,
+    }
+  `);
 });
 
 test('can display React element as title', () => {
@@ -67,10 +78,12 @@ test('can display React element as title', () => {
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect((notifications.toasts.add.mock.calls[0][0] as any).title).toMatchInlineSnapshot(`
-        <div>
-          bar
-        </div>
-    `);
+    MountPoint {
+      "reactNode": <div>
+        bar
+      </div>,
+    }
+  `);
 });
 
 test('can display React element as toast body', () => {
@@ -81,12 +94,14 @@ test('can display React element as toast body', () => {
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
   expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <div>
-            baz
-          </div>
-        </React.Fragment>
-    `);
+    MountPoint {
+      "reactNode": <React.Fragment>
+        <div>
+          baz
+        </div>
+      </React.Fragment>,
+    }
+  `);
 });
 
 test('can set toast properties', () => {
@@ -102,17 +117,21 @@ test('can set toast properties', () => {
   });
 
   expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "color": "danger",
-          "iconType": "foo",
-          "onClose": undefined,
-          "text": <React.Fragment>
-            1
-          </React.Fragment>,
-          "title": "2",
-          "toastLifeTimeMs": 3,
-        }
-    `);
+    Object {
+      "color": "danger",
+      "iconType": "foo",
+      "onClose": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment>
+          1
+        </React.Fragment>,
+      },
+      "title": MountPoint {
+        "reactNode": "2",
+      },
+      "toastLifeTimeMs": 3,
+    }
+  `);
 });
 
 test('can display success, warning and danger toasts', () => {
@@ -124,21 +143,48 @@ test('can display success, warning and danger toasts', () => {
   wrapper.toasts.danger({ title: '3' });
 
   expect(notifications.toasts.add).toHaveBeenCalledTimes(3);
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchObject({
-    title: '1',
-    color: 'success',
-    iconType: 'check',
-  });
-  expect(notifications.toasts.add.mock.calls[1][0]).toMatchObject({
-    title: '2',
-    color: 'warning',
-    iconType: 'help',
-  });
-  expect(notifications.toasts.add.mock.calls[2][0]).toMatchObject({
-    title: '3',
-    color: 'danger',
-    iconType: 'alert',
-  });
+  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": "success",
+      "iconType": "check",
+      "onClose": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment />,
+      },
+      "title": MountPoint {
+        "reactNode": "1",
+      },
+      "toastLifeTimeMs": undefined,
+    }
+  `);
+  expect(notifications.toasts.add.mock.calls[1][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": "warning",
+      "iconType": "help",
+      "onClose": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment />,
+      },
+      "title": MountPoint {
+        "reactNode": "2",
+      },
+      "toastLifeTimeMs": undefined,
+    }
+  `);
+  expect(notifications.toasts.add.mock.calls[2][0]).toMatchInlineSnapshot(`
+    Object {
+      "color": "danger",
+      "iconType": "alert",
+      "onClose": undefined,
+      "text": MountPoint {
+        "reactNode": <React.Fragment />,
+      },
+      "title": MountPoint {
+        "reactNode": "3",
+      },
+      "toastLifeTimeMs": undefined,
+    }
+  `);
 });
 
 test('if body is not set, renders it empty', () => {
@@ -147,7 +193,9 @@ test('if body is not set, renders it empty', () => {
 
   wrapper.toasts.success({ title: '1' });
 
-  expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(
-    `<React.Fragment />`
-  );
+  expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
+    MountPoint {
+      "reactNode": <React.Fragment />,
+    }
+  `);
 });

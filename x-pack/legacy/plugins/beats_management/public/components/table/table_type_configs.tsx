@@ -246,7 +246,10 @@ export const BeatsTableType: TableType = {
         name: i18n.translate('xpack.beatsManagement.beatsTable.typeLabel', {
           defaultMessage: 'Type',
         }),
-        options: uniq(data.map(({ type }: { type: any }) => ({ value: type })), 'value'),
+        options: uniq(
+          data.map(({ type }: { type: any }) => ({ value: type })),
+          'value'
+        ),
       },
     ],
   }),

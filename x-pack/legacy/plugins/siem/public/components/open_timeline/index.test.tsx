@@ -422,7 +422,6 @@ describe('StatefulOpenTimeline', () => {
       ).toEqual({
         '10849df0-7b44-11e9-a608-ab3d811609': (
           <NotePreviews
-            isModal={false}
             notes={
               mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
                 ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
@@ -492,7 +491,7 @@ describe('StatefulOpenTimeline', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="header-panel-title"]')
+        .find('[data-test-subj="header-section-title"]')
         .first()
         .text()
     ).toEqual(title);

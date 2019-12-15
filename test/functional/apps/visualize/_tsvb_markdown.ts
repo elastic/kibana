@@ -43,7 +43,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
-        await timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await timePicker.setAbsoluteRange(
+          'Sep 22, 2015 @ 06:00:00.000',
+          'Sep 22, 2015 @ 11:00:00.000'
+        );
       });
 
       it('should render subtabs and table variables markdown components', async () => {

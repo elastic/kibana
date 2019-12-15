@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function envoyproxyLogsSpecProvider(server, context) {
+export function envoyproxyLogsSpecProvider(context) {
   const moduleName = 'envoyproxy';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {

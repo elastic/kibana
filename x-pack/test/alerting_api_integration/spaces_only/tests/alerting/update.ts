@@ -26,7 +26,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert');
 
       const updatedData = {
-        alertTypeParams: {
+        name: 'bcd',
+        tags: ['bar'],
+        params: {
           foo: true,
         },
         interval: '12s',
@@ -40,6 +42,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .expect(200, {
           ...updatedData,
           id: createdAlert.id,
+          tags: ['bar'],
           alertTypeId: 'test.noop',
           createdBy: null,
           enabled: true,
@@ -63,7 +66,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .put(`${getUrlPrefix(Spaces.other.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          alertTypeParams: {
+          name: 'bcd',
+          tags: ['foo'],
+          params: {
             foo: true,
           },
           interval: '12s',

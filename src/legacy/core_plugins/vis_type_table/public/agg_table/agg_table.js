@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import aggTableTemplate from './agg_table.html';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { getFormat } from '../legacy_imports';
 import { i18n } from '@kbn/i18n';
 
 export function KbnAggTable(config, RecursionHelper) {
@@ -37,12 +37,12 @@ export function KbnAggTable(config, RecursionHelper) {
       filter: '=',
     },
     controllerAs: 'aggTable',
-    compile: function ($el) {
+    compile: function($el) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
       return RecursionHelper.compile($el);
     },
-    controller: function ($scope) {
+    controller: function($scope) {
       const self = this;
 
       self._saveAs = require('@elastic/filesaver').saveAs;
@@ -51,12 +51,12 @@ export function KbnAggTable(config, RecursionHelper) {
         quoteValues: config.get('csv:quoteValues'),
       };
 
-      self.exportAsCsv = function (formatted) {
+      self.exportAsCsv = function(formatted) {
         const csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
         self._saveAs(csv, self.csv.filename);
       };
 
-      self.toCsv = function (formatted) {
+      self.toCsv = function(formatted) {
         const rows = $scope.table.rows;
         const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -72,25 +72,29 @@ export function KbnAggTable(config, RecursionHelper) {
         }
 
         // escape each cell in each row
-        const csvRows = rows.map(function (row) {
+        const csvRows = rows.map(function(row) {
           return Object.entries(row).map(([k, v]) => {
             return escape(formatted ? columns.find(c => c.id === k).formatter.convert(v) : v);
           });
         });
 
         // add the columns to the rows
-        csvRows.unshift(columns.map(function (col) {
-          return escape(formatted ? col.title : col.name);
-        }));
+        csvRows.unshift(
+          columns.map(function(col) {
+            return escape(formatted ? col.title : col.name);
+          })
+        );
 
-        return csvRows.map(function (row) {
-          return row.join(self.csv.separator) + '\r\n';
-        }).join('');
+        return csvRows
+          .map(function(row) {
+            return row.join(self.csv.separator) + '\r\n';
+          })
+          .join('');
       };
 
       $scope.$watchMulti(
         ['table', 'exportTitle', 'percentageCol', 'totalFunc', '=scope.dimensions'],
-        function () {
+        function() {
           const { table, exportTitle, percentageCol } = $scope;
           const showPercentage = percentageCol !== '';
 
@@ -109,7 +113,7 @@ export function KbnAggTable(config, RecursionHelper) {
           const { buckets, metrics } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
-            .map(function (col, i) {
+            .map(function(col, i) {
               const isBucket = buckets.find(bucket => bucket.accessor === i);
               const dimension = isBucket || metrics.find(metric => metric.accessor === i);
 
@@ -146,13 +150,13 @@ export function KbnAggTable(config, RecursionHelper) {
                 const sum = tableRows => {
                   return _.reduce(
                     tableRows,
-                    function (prev, curr) {
+                    function(prev, curr) {
                       // some metrics return undefined for some of the values
                       // derivative is an example of this as it returns undefined in the first row
                       if (curr[col.id] === undefined) return prev;
                       return prev + curr[col.id];
                     },
-                    0,
+                    0
                   );
                 };
 
@@ -218,12 +222,12 @@ export function KbnAggTable(config, RecursionHelper) {
               $scope.formattedColumns,
               percentageCol,
               table.rows,
-              insertAtIndex,
+              insertAtIndex
             );
             $scope.rows = rows;
             $scope.formattedColumns = cols;
           }
-        },
+        }
       );
     },
   };

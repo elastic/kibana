@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { openSans } from '../../fonts';
+import { openSans } from '../../../common/fonts';
 import { font } from '../font';
 import { functionWrapper } from './utils';
 

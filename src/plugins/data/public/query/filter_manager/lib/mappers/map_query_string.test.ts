@@ -17,27 +17,28 @@
  * under the License.
  */
 
-import { QueryStringFilter, buildQueryFilter, buildEmptyFilter } from '@kbn/es-query';
 import { mapQueryString } from './map_query_string';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapQueryString()', () => {
     test('should return the key and value for matching filters', async () => {
-      const filter: QueryStringFilter = buildQueryFilter(
+      const filter = esFilters.buildQueryFilter(
         { query_string: { query: 'foo:bar' } },
-        'index'
+        'index',
+        ''
       );
-      const result = mapQueryString(filter);
+      const result = mapQueryString(filter as esFilters.Filter);
 
       expect(result).toHaveProperty('key', 'query');
       expect(result).toHaveProperty('value', 'foo:bar');
     });
 
     test('should return undefined for none matching', async done => {
-      const filter = buildEmptyFilter(true) as QueryStringFilter;
+      const filter = esFilters.buildEmptyFilter(true);
 
       try {
-        mapQueryString(filter);
+        mapQueryString(filter as esFilters.Filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();

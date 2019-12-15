@@ -11,7 +11,7 @@ import { createAlertInstanceFactory } from './create_alert_instance_factory';
 import { AlertInstance } from './alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from './validate_alert_type_params';
-import { EncryptedSavedObjectsStartContract } from '../shim';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 import {
   AlertType,
@@ -94,12 +94,12 @@ export class TaskRunnerFactory {
         const services = getServices(fakeRequest);
         // Ensure API key is still valid and user has access
         const {
-          attributes: { alertTypeParams, actions, interval, throttle, muteAll, mutedInstanceIds },
+          attributes: { params, actions, interval, throttle, muteAll, mutedInstanceIds },
           references,
         } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
 
         // Validate
-        const validatedAlertTypeParams = validateAlertTypeParams(alertType, alertTypeParams);
+        const validatedAlertTypeParams = validateAlertTypeParams(alertType, params);
 
         // Inject ids into actions
         const actionsWithIds = actions.map(action => {
@@ -148,8 +148,12 @@ export class TaskRunnerFactory {
         await Promise.all(
           Object.keys(alertInstances).map(alertInstanceId => {
             const alertInstance = alertInstances[alertInstanceId];
-            if (alertInstance.hasScheduledActions(throttle)) {
-              if (muteAll || mutedInstanceIds.includes(alertInstanceId)) {
+            if (alertInstance.hasScheduledActions()) {
+              if (
+                alertInstance.isThrottled(throttle) ||
+                muteAll ||
+                mutedInstanceIds.includes(alertInstanceId)
+              ) {
                 return;
               }
               const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;

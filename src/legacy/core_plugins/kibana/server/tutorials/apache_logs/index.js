@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
-export function apacheLogsSpecProvider(server, context) {
+export function apacheLogsSpecProvider(context) {
   const moduleName = 'apache';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
@@ -34,7 +38,8 @@ export function apacheLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.apacheLogs.longDescription', {
-      defaultMessage: 'The apache Filebeat module parses access and error logs created by the Apache HTTP server. \
+      defaultMessage:
+        'The apache Filebeat module parses access and error logs created by the Apache HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-apache.html',
@@ -45,20 +50,23 @@ export function apacheLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'Filebeat-Apache-Dashboard-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.apacheLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Apache logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.apacheLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Apache logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-apache.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-apache.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

@@ -19,7 +19,12 @@
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
+import {
+  ContentType,
+  FIELD_FORMAT_IDS,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
+} from './types';
 import {
   htmlContentTypeSetup,
   textContentTypeSetup,
@@ -68,7 +73,16 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  constructor(public _params: any = {}) {}
+  protected readonly _params: any;
+  protected getConfig: Function | undefined;
+
+  constructor(_params: any = {}, getConfig?: Function) {
+    this._params = _params;
+
+    if (getConfig) {
+      this.getConfig = getConfig;
+    }
+  }
 
   /**
    * Convert a raw value to a formatted string
@@ -170,7 +184,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): ReturnType<typeof createCustomFieldFormat> {
+  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
     return createCustomFieldFormat(convertFn);
   }
 
@@ -180,6 +194,18 @@ export abstract class FieldFormat {
       [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
+
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
+  }
 }
 
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+/**
+ * @string id type is needed for creating custom converters.
+ */
+export type IFieldFormatId = FIELD_FORMAT_IDS | string;
+export type IFieldFormatType = (new (params?: any, getConfig?: Function) => FieldFormat) & {
+  id: IFieldFormatId;
+  fieldType: string | string[];
+};

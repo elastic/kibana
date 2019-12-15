@@ -5,6 +5,7 @@
  */
 
 import { compact, isObject } from 'lodash';
+import { Maybe } from '../../typings/common';
 
 export interface KeyValuePair {
   key: string;
@@ -12,7 +13,7 @@ export interface KeyValuePair {
 }
 
 export const flattenObject = (
-  item: Record<string, any | any[]> | null | undefined,
+  item: Maybe<Record<string, any | any[]>>,
   parentKey?: string
 ): KeyValuePair[] => {
   if (item) {

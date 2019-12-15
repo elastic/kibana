@@ -11,8 +11,10 @@ import { ComponentStrings } from '../../../i18n';
 const { MultiElementSettings: strings } = ComponentStrings;
 
 export const MultiElementSettings: FunctionComponent = () => (
-  <EuiText size="s">
-    <p>{strings.getMultipleElementsDescription()}</p>
-    <p>{strings.getMultipleElementsActionsDescription()}</p>
-  </EuiText>
+  <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
+    <EuiText size="s">
+      <p>{strings.getMultipleElementsDescription()}</p>
+      <p>{strings.getMultipleElementsActionsDescription()}</p>
+    </EuiText>
+  </div>
 );

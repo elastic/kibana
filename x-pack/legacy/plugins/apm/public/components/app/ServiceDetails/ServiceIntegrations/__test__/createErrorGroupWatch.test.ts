@@ -7,23 +7,30 @@
 import { isArray, isObject, isString } from 'lodash';
 import mustache from 'mustache';
 import uuid from 'uuid';
-import { StringMap } from '../../../../../../typings/common';
-// @ts-ignore
 import * as rest from '../../../../../services/rest/watcher';
 import { createErrorGroupWatch } from '../createErrorGroupWatch';
 import { esResponse } from './esResponse';
+import { HttpServiceBase } from 'kibana/public';
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
 
+jest.mock('../../../../../services/rest/callApi', () => ({
+  callApi: () => Promise.resolve(null)
+}));
+
 describe('createErrorGroupWatch', () => {
   let createWatchResponse: string;
   let tmpl: any;
+  const createWatchSpy = jest
+    .spyOn(rest, 'createWatch')
+    .mockResolvedValue(undefined);
+
   beforeEach(async () => {
-    jest.spyOn(uuid, 'v4').mockReturnValue(new Buffer('mocked-uuid'));
-    jest.spyOn(rest, 'createWatch').mockReturnValue(undefined);
+    jest.spyOn(uuid, 'v4').mockReturnValue(Buffer.from('mocked-uuid'));
 
     createWatchResponse = await createErrorGroupWatch({
+      http: {} as HttpServiceBase,
       emails: ['my@email.dk', 'mySecond@email.dk'],
       schedule: {
         daily: {
@@ -37,19 +44,19 @@ describe('createErrorGroupWatch', () => {
       apmIndexPatternTitle: 'myIndexPattern'
     });
 
-    const watchBody = rest.createWatch.mock.calls[0][1];
+    const watchBody = createWatchSpy.mock.calls[0][0].watch;
     const templateCtx = {
       payload: esResponse,
       metadata: watchBody.metadata
     };
 
-    tmpl = renderMustache(rest.createWatch.mock.calls[0][1], templateCtx);
+    tmpl = renderMustache(createWatchSpy.mock.calls[0][0].watch, templateCtx);
   });
 
   afterEach(() => jest.restoreAllMocks());
 
   it('should call createWatch with correct args', () => {
-    expect(rest.createWatch.mock.calls[0][0]).toBe('apm-mocked-uuid');
+    expect(createWatchSpy.mock.calls[0][0].id).toBe('apm-mocked-uuid');
   });
 
   it('should format slack message correctly', () => {
@@ -79,14 +86,17 @@ describe('createErrorGroupWatch', () => {
   });
 
   it('should return watch id', async () => {
-    const id = rest.createWatch.mock.calls[0][0];
+    const id = createWatchSpy.mock.calls[0][0].id;
     expect(createWatchResponse).toEqual(id);
   });
 });
 
 // Recursively iterate a nested structure and render strings as mustache templates
-type InputOutput = string | string[] | StringMap<any>;
-function renderMustache(input: InputOutput, ctx: StringMap): InputOutput {
+type InputOutput = string | string[] | Record<string, any>;
+function renderMustache(
+  input: InputOutput,
+  ctx: Record<string, unknown>
+): InputOutput {
   if (isString(input)) {
     return mustache.render(input, {
       ctx,

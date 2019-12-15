@@ -145,12 +145,9 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const UsersTable = connect(
-  makeMapStateToProps,
-  {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  }
-)(UsersTableComponent);
+export const UsersTable = connect(makeMapStateToProps, {
+  updateNetworkTable: networkActions.updateNetworkTable,
+})(UsersTableComponent);
 
 const getSortField = (sortField: UsersSortField): SortingBasicTable => {
   switch (sortField.field) {

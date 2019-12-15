@@ -7,6 +7,14 @@ Use {ref}/search-aggregations.html[aggregations] to plot large data sets without
 Aggregations group your documents into buckets and calculate metrics for each bucket.
 Your documents stay in Elasticsearch and only the metrics for each group are returned to your computer.
 
+Use aggregated layers with document layers to show aggregated views when the map shows larger
+amounts of the globe and individual documents when the map shows smaller regions.
+
+In the following example, the Grid aggregation layer is only visible when the map is at zoom levels 0 through 5. The Documents layer is only visible when the map is at zoom levels 4 through 24.
+See the <<maps-add-elasticsearch-layer, Getting started>> tutorial for more details on configuring the layers.
+
+[role="screenshot"]
+image::maps/images/grid_to_docs.gif[]
 
 [role="xpack"]
 [[maps-grid-aggregation]]
@@ -26,17 +34,22 @@ The point location is the weighted centroid for all geo-points in the gridded ce
 
 [role="xpack"]
 [[maps-top-hits-aggregation]]
-=== Most recent entities
+=== Top hits per entity
 
-Most recent entities uses {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by entity.
-Then, {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation] accumulates the most recent documents for each entry.
+You can display the most relevant documents per entity, for example, the most recent GPS tracks per flight.
+To get this data, {es} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
+then accumulates the most relevant documents based on sort order for each entry using a {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation].
 
-Most recent entities is available for <<vector-layer, vector layers>> with *Documents* source.
-To enable most recent entities, click "Show most recent documents by entity" and configure the following:
+Top hits per entity is available for <<vector-layer, vector layers>> with *Documents* source.
+To enable top hits:
 
+. In *Sorting*, select the *Show documents per entity* checkbox.
 . Set *Entity* to the field that identifies entities in your documents.
 This field will be used in the terms aggregation to group your documents into entity buckets.
 . Set *Documents per entity* to configure the maximum number of documents accumulated per entity.
+
+[role="screenshot"]
+image::maps/images/top_hits.png[]
 
 [role="xpack"]
 [[point-to-point]]

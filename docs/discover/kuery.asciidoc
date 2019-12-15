@@ -19,14 +19,13 @@ they appear. This means documents with "quick brown fox" will match, but so will
 to search for a phrase.
 
 The query parser will no longer split on whitespace. Multiple search terms must be separated by explicit
-boolean operators. Note that boolean operators are not case sensitive.
+boolean operators. Lucene will combine search terms with an `or` by default, so `response:200 extension:php` would 
+become `response:200 or extension:php` in KQL. This will match documents where response matches 200, extension matches php, or both. 
+Note that boolean operators are not case sensitive.
 
-`response:200 extension:php` in lucene would become `response:200 and extension:php`.
- This will match documents where response matches 200 and extension matches php.
+We can make terms required by using `and`.
 
-We can make terms optional by using `or`.
-
-`response:200 or extension:php` will match documents where response matches 200, extension matches php, or both.
+`response:200 and extension:php` will match documents where response matches 200 and extension matches php.
 
 By default, `and` has a higher precedence than `or`.
 
@@ -73,7 +72,7 @@ set these terms will be matched against all fields. For example, a query for `re
 in the response field, but a query for just `200` will search for 200 across all fields in your index.
 ============
 
-===== Nested Field Support
+==== Nested Field Support
 
 KQL supports querying on {ref}/nested.html[nested fields] through a special syntax. You can query nested fields in subtly different
 ways, depending on the results you want, so crafting nested queries requires extra thought.
@@ -85,7 +84,8 @@ There are two main approaches to take:
 * *Parts of the query can match different nested documents.* This is how a regular object field works. 
  Although generally less useful, there might be occasions where you want to query a nested field in this way.
 
-Let's take a look at the first approach. In the following document, `items` is a nested field:
+Let's take a look at the first approach. In the following document, `items` is a nested field. Each document in the nested 
+field contains a name, stock, and category.
 
 [source,json]
 ----------------------------------
@@ -116,20 +116,37 @@ Let's take a look at the first approach. In the following document, `items` is a
 }
 ----------------------------------
 
+===== Match a single nested document
+
 To find stores that have more than 10 bananas in stock, you would write a query like this:
 
 `items:{ name:banana and stock > 10 }`
 
-`items` is the "nested path". Everything inside the curly braces (the "nested group") must match a single document. 
-For example, `items:{ name:banana and stock:9 }` does not match because there isn't a single nested document that 
-matches the entire query in the nested group. 
+`items` is the "nested path". Everything inside the curly braces (the "nested group") must match a single nested document. 
 
-What if you want to find a store with more than 10 bananas that *also* stocks vegetables? This is the second way of querying a nested field, and you can do it like this:
+The following example returns no matches because no single nested document has bananas with a stock of 9.
+
+`items:{ name:banana and stock:9 }`
+
+==== Match different nested documents
+
+The subqueries in this example are in separate nested groups and can match different nested documents.
+
+`items:{ name:banana } and items:{ stock:9 }`
+
+`name:banana` matches the first document in the array and `stock:9` matches the third document in the array.
+
+==== Combine approaches
+
+You can combine these two approaches to create complex queries. What if you wanted to find a store with more than 10 
+bananas that *also* stocks vegetables? You could do this:
 
 `items:{ name:banana and stock > 10 } and items:{ category:vegetable }`
 
 The first nested group (`name:banana and stock > 10`) must still match a single document, but the `category:vegetables`
 subquery can match a different nested document because it is in a separate group.
+
+==== Nested fields inside other nested fields
 
 KQL's syntax also supports nested fields inside of other nested fields&mdash;you simply have to specify the full path. Suppose you
 have a document where `level1` and `level2` are both nested fields:

@@ -10,8 +10,10 @@ export { hostsModel } from './hosts';
 export { dragAndDropModel } from './drag_and_drop';
 export { networkModel } from './network';
 
+export type KueryFilterQueryKind = 'kuery' | 'lucene';
+
 export interface KueryFilterQuery {
-  kind: 'kuery';
+  kind: KueryFilterQueryKind;
   expression: string;
 }
 

@@ -11,7 +11,7 @@ import {
   APM_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID
+  LOGSTASH_SYSTEM_ID,
 } from '../../../../common/constants';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 import { KIBANA_STATS_TYPE } from '../../../../../../../../src/legacy/server/status/constants';
@@ -25,16 +25,16 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
   const filters = [
     {
       range: {
-        'timestamp': {
+        timestamp: {
           gte: start,
-          lte: end
-        }
-      }
-    }
+          lte: end,
+        },
+      },
+    },
   ];
 
   if (clusterUuid) {
-    filters.push({ term: { 'cluster_uuid': clusterUuid } });
+    filters.push({ term: { cluster_uuid: clusterUuid } });
   }
 
   const nodesClause = [];
@@ -45,9 +45,9 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
           { term: { 'node_stats.node_id': nodeUuid } },
           { term: { 'kibana_stats.kibana.uuid': nodeUuid } },
           { term: { 'beats_stats.beat.uuid': nodeUuid } },
-          { term: { 'logstash_stats.logstash.uuid': nodeUuid } }
-        ]
-      }
+          { term: { 'logstash_stats.logstash.uuid': nodeUuid } },
+        ],
+      },
     });
   }
 
@@ -55,15 +55,13 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
     index: Object.values(indexPatterns),
     size: 0,
     ignoreUnavailable: true,
-    filterPath: [
-      'aggregations.indices.buckets'
-    ],
+    filterPath: ['aggregations.indices.buckets'],
     body: {
       query: {
         bool: {
           filter: filters,
           must: nodesClause,
-        }
+        },
       },
       aggs: {
         indices: {
@@ -74,76 +72,89 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
           aggs: {
             es_uuids: {
               terms: {
-                field: 'node_stats.node_id'
+                field: 'node_stats.node_id',
               },
               aggs: {
                 by_timestamp: {
                   max: {
-                    field: 'timestamp'
-                  }
-                }
-              }
+                    field: 'timestamp',
+                  },
+                },
+              },
             },
             kibana_uuids: {
               terms: {
-                field: 'kibana_stats.kibana.uuid'
+                field: 'kibana_stats.kibana.uuid',
               },
               aggs: {
                 by_timestamp: {
                   max: {
-                    field: 'timestamp'
-                  }
-                }
-              }
+                    field: 'timestamp',
+                  },
+                },
+              },
             },
             beats_uuids: {
               terms: {
-                field: 'beats_stats.beat.uuid'
+                field: 'beats_stats.beat.uuid',
               },
               aggs: {
                 by_timestamp: {
                   max: {
-                    field: 'timestamp'
-                  }
+                    field: 'timestamp',
+                  },
                 },
                 beat_type: {
                   terms: {
-                    field: 'beats_stats.beat.type'
-                  }
+                    field: 'beats_stats.beat.type',
+                  },
                 },
                 cluster_uuid: {
                   terms: {
-                    field: 'cluster_uuid'
-                  }
-                }
-              }
+                    field: 'cluster_uuid',
+                  },
+                },
+              },
             },
             logstash_uuids: {
               terms: {
-                field: 'logstash_stats.logstash.uuid'
+                field: 'logstash_stats.logstash.uuid',
               },
               aggs: {
                 by_timestamp: {
                   max: {
-                    field: 'timestamp'
-                  }
+                    field: 'timestamp',
+                  },
                 },
                 cluster_uuid: {
                   terms: {
-                    field: 'cluster_uuid'
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                    field: 'cluster_uuid',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return await callWithRequest(req, 'search', params);
 };
+
+async function doesIndexExist(req, index) {
+  const params = {
+    index,
+    size: 0,
+    terminate_after: 1,
+    ignoreUnavailable: true,
+    filterPath: ['hits.total.value'],
+  };
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const response = await callWithRequest(req, 'search', params);
+  return get(response, 'hits.total.value', 0) > 0;
+}
 
 async function detectProducts(req, isLiveCluster) {
   const result = {
@@ -161,37 +172,28 @@ async function detectProducts(req, isLiveCluster) {
     },
     [LOGSTASH_SYSTEM_ID]: {
       mightExist: false,
-    }
+    },
   };
 
   const detectionSearch = [
     {
       id: BEATS_SYSTEM_ID,
-      indices: [
-        '*beat-*',
-        '.management-beats*',
-      ]
+      indices: ['*beat-*', '.management-beats*'],
     },
     {
       id: LOGSTASH_SYSTEM_ID,
-      indices: [
-        'logstash-*',
-        '.logstash*',
-      ]
+      indices: ['logstash-*', '.logstash*'],
     },
     {
       id: APM_SYSTEM_ID,
-      indices: [
-        'apm-*'
-      ]
-    }
+      indices: ['apm-*'],
+    },
   ];
 
   if (isLiveCluster) {
-    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
     for (const { id, indices } of detectionSearch) {
-      const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
-      if (response.length) {
+      const exists = await doesIndexExist(req, indices.join(','));
+      if (exists) {
         result[id].mightExist = true;
       }
     }
@@ -223,6 +225,19 @@ function isBeatFromAPM(bucket) {
   return get(beatType, 'buckets[0].key') === 'apm-server';
 }
 
+async function hasNecessaryPermissions(req) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const response = await callWithRequest(req, 'transport.request', {
+    method: 'POST',
+    path: '/_security/user/_has_privileges',
+    body: {
+      cluster: ['monitor'],
+    },
+  });
+  // If there is some problem, assume they do not have access
+  return get(response, 'has_all_requested', false);
+}
+
 /**
  * Determines if we should ignore this bucket from this product.
  *
@@ -246,13 +261,15 @@ function shouldSkipBucket(product, bucket) {
   return false;
 }
 
-async function getLiveKibanaInstance(req) {
-  const { collectorSet } = req.server.usage;
-  const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
-  if (!await kibanaStatsCollector.isReady()) {
+async function getLiveKibanaInstance(usageCollection) {
+  if (!usageCollection) {
     return null;
   }
-  return collectorSet.toApiFieldNames(await kibanaStatsCollector.fetch());
+  const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
+  if (!(await kibanaStatsCollector.isReady())) {
+    return null;
+  }
+  return usageCollection.toApiFieldNames(await kibanaStatsCollector.fetch());
 }
 
 async function getLiveElasticsearchClusterUuid(req) {
@@ -274,8 +291,8 @@ async function getLiveElasticsearchCollectionEnabled(req) {
     filter_path: [
       'persistent.xpack.monitoring',
       'transient.xpack.monitoring',
-      'defaults.xpack.monitoring'
-    ]
+      'defaults.xpack.monitoring',
+    ],
   });
   const sources = ['persistent', 'transient', 'defaults'];
   for (const source of sources) {
@@ -313,9 +330,25 @@ async function getLiveElasticsearchCollectionEnabled(req) {
  * @param {*} nodeUuid Optional and will be used to filter down the query if used
  * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
-export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
+export const getCollectionStatus = async (
+  req,
+  indexPatterns,
+  clusterUuid,
+  nodeUuid,
+  skipLiveData
+) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+  const hasPermissions = await hasNecessaryPermissions(req);
+
+  if (!hasPermissions) {
+    return {
+      _meta: {
+        hasPermissions: false,
+      },
+    };
+  }
+  console.log('OKOKOKOK');
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
   const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 
@@ -327,17 +360,15 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
     { name: ELASTICSEARCH_SYSTEM_ID, token: '-es-' },
   ];
 
-  const [
-    recentDocuments,
-    detectedProducts
-  ] = await Promise.all([
+  const [recentDocuments, detectedProducts] = await Promise.all([
     await getRecentMonitoringDocuments(req, indexPatterns, clusterUuid, nodeUuid),
-    await detectProducts(req, isLiveCluster)
+    await detectProducts(req, isLiveCluster),
   ]);
 
-
   const liveEsNodes = skipLiveData || !isLiveCluster ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(req);
+  const { usageCollection } = req.server.newPlatform.setup.plugins;
+  const liveKibanaInstance =
+    skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(usageCollection);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
@@ -389,47 +420,64 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         }
       }
       productStatus.totalUniqueInstanceCount = Object.keys(map).length;
-      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
-      productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(
+        internalCollectorsUuidsMap
+      ).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
+        partiallyMigratedUuidsMap
+      ).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
-        ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
-          ...accum,
-          [uuid]: {
-            ...internalCollectorsUuidsMap[uuid],
-            ...productStatus.byUuid[uuid],
-            isInternalCollector: true,
-            isNetNewUser: false,
-          }
-        }), {}),
-        ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
-          ...accum,
-          [uuid]: {
-            ...partiallyMigratedUuidsMap[uuid],
-            ...productStatus.byUuid[uuid],
-            isPartiallyMigrated: true,
-            isNetNewUser: false,
-          }
-        }), {}),
-        ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
-          ...accum,
-          [uuid]: {
-            ...fullyMigratedUuidsMap[uuid],
-            ...productStatus.byUuid[uuid],
-            isFullyMigrated: true,
-            isNetNewUser: false,
-          }
-        }), {}),
+        ...Object.keys(internalCollectorsUuidsMap).reduce(
+          (accum, uuid) => ({
+            ...accum,
+            [uuid]: {
+              ...internalCollectorsUuidsMap[uuid],
+              ...productStatus.byUuid[uuid],
+              isInternalCollector: true,
+              isNetNewUser: false,
+            },
+          }),
+          {}
+        ),
+        ...Object.keys(partiallyMigratedUuidsMap).reduce(
+          (accum, uuid) => ({
+            ...accum,
+            [uuid]: {
+              ...partiallyMigratedUuidsMap[uuid],
+              ...productStatus.byUuid[uuid],
+              isPartiallyMigrated: true,
+              isNetNewUser: false,
+            },
+          }),
+          {}
+        ),
+        ...Object.keys(fullyMigratedUuidsMap).reduce(
+          (accum, uuid) => ({
+            ...accum,
+            [uuid]: {
+              ...fullyMigratedUuidsMap[uuid],
+              ...productStatus.byUuid[uuid],
+              isFullyMigrated: true,
+              isNetNewUser: false,
+            },
+          }),
+          {}
+        ),
       };
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
-      const considerAllInstancesMigrated = product.name === ELASTICSEARCH_SYSTEM_ID &&
-        clusterUuid === liveClusterUuid && !liveClusterInternalCollectionEnabled;
+      const considerAllInstancesMigrated =
+        product.name === ELASTICSEARCH_SYSTEM_ID &&
+        clusterUuid === liveClusterUuid &&
+        !liveClusterInternalCollectionEnabled;
       const internalTimestamps = [];
       for (const indexBucket of indexBuckets) {
-        const isFullyMigrated = considerAllInstancesMigrated || indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+        const isFullyMigrated =
+          considerAllInstancesMigrated ||
+          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
@@ -444,8 +492,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
             if (otherMap[key]) {
               partiallyMigratedUuidsMap[key] = otherMap[key] || {};
               delete otherMap[key];
-            }
-            else {
+            } else {
               map[key] = {};
               if (product.name === KIBANA_SYSTEM_ID && key === kibanaUuid) {
                 map[key].isPrimary = true;
@@ -467,41 +514,54 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
       productStatus.totalUniqueInstanceCount = uniq([
         ...Object.keys(internalCollectorsUuidsMap),
         ...Object.keys(fullyMigratedUuidsMap),
-        ...Object.keys(partiallyMigratedUuidsMap)
+        ...Object.keys(partiallyMigratedUuidsMap),
       ]).length;
-      productStatus.totalUniqueInternallyCollectedCount = Object.keys(internalCollectorsUuidsMap).length;
-      productStatus.totalUniquePartiallyMigratedCount = Object.keys(partiallyMigratedUuidsMap).length;
+      productStatus.totalUniqueInternallyCollectedCount = Object.keys(
+        internalCollectorsUuidsMap
+      ).length;
+      productStatus.totalUniquePartiallyMigratedCount = Object.keys(
+        partiallyMigratedUuidsMap
+      ).length;
       productStatus.totalUniqueFullyMigratedCount = Object.keys(fullyMigratedUuidsMap).length;
       productStatus.byUuid = {
         ...productStatus.byUuid,
-        ...Object.keys(internalCollectorsUuidsMap).reduce((accum, uuid) => ({
-          ...accum,
-          [uuid]: {
-            ...internalCollectorsUuidsMap[uuid],
-            ...productStatus.byUuid[uuid],
-            isInternalCollector: true,
-            isNetNewUser: false,
-          }
-        }), {}),
-        ...Object.keys(partiallyMigratedUuidsMap).reduce((accum, uuid) => ({
-          ...accum,
-          [uuid]: {
-            ...partiallyMigratedUuidsMap[uuid],
-            ...productStatus.byUuid[uuid],
-            isPartiallyMigrated: true,
-            lastInternallyCollectedTimestamp: internalTimestamps[0],
-            isNetNewUser: false,
-          }
-        }), {}),
-        ...Object.keys(fullyMigratedUuidsMap).reduce((accum, uuid) => ({
-          ...accum,
-          [uuid]: {
-            ...fullyMigratedUuidsMap[uuid],
-            ...productStatus.byUuid[uuid],
-            isFullyMigrated: true,
-            isNetNewUser: false
-          }
-        }), {}),
+        ...Object.keys(internalCollectorsUuidsMap).reduce(
+          (accum, uuid) => ({
+            ...accum,
+            [uuid]: {
+              ...internalCollectorsUuidsMap[uuid],
+              ...productStatus.byUuid[uuid],
+              isInternalCollector: true,
+              isNetNewUser: false,
+            },
+          }),
+          {}
+        ),
+        ...Object.keys(partiallyMigratedUuidsMap).reduce(
+          (accum, uuid) => ({
+            ...accum,
+            [uuid]: {
+              ...partiallyMigratedUuidsMap[uuid],
+              ...productStatus.byUuid[uuid],
+              isPartiallyMigrated: true,
+              lastInternallyCollectedTimestamp: internalTimestamps[0],
+              isNetNewUser: false,
+            },
+          }),
+          {}
+        ),
+        ...Object.keys(fullyMigratedUuidsMap).reduce(
+          (accum, uuid) => ({
+            ...accum,
+            [uuid]: {
+              ...fullyMigratedUuidsMap[uuid],
+              ...productStatus.byUuid[uuid],
+              isFullyMigrated: true,
+              isNetNewUser: false,
+            },
+          }),
+          {}
+        ),
       };
     }
 
@@ -517,7 +577,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
             ...byUuid,
             [esNode.id]: {
               node: esNode,
-              isNetNewUser: true
+              isNetNewUser: true,
             },
           };
         }
@@ -532,8 +592,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
         productStatus.byUuid = {
           [kibanaLiveUuid]: {
             instance: liveKibanaInstance,
-            isNetNewUser: true
-          }
+            isNetNewUser: true,
+          },
         };
       }
     }
@@ -547,7 +607,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
     liveClusterUuid,
-    isOnCloud: get(req.server.plugins, 'cloud.config.isCloudEnabled', false)
+    hasPermissions,
   };
 
   return status;

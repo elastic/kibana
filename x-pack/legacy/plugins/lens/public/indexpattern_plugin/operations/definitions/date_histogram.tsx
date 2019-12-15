@@ -15,6 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiFieldNumber,
   EuiSelect,
   EuiFlexItem,
@@ -154,7 +155,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       restrictedInterval(field!.aggregationRestrictions)
     );
 
-    function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
+    function onChangeAutoInterval(ev: EuiSwitchEvent) {
       const value = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
       setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     }

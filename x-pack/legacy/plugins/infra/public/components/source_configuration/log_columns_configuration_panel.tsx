@@ -39,9 +39,13 @@ interface LogColumnsConfigurationPanelProps {
   moveLogColumn: (sourceIndex: number, destinationIndex: number) => void;
 }
 
-export const LogColumnsConfigurationPanel: React.FunctionComponent<
-  LogColumnsConfigurationPanelProps
-> = ({ addLogColumn, moveLogColumn, availableFields, isLoading, logColumnConfiguration }) => {
+export const LogColumnsConfigurationPanel: React.FunctionComponent<LogColumnsConfigurationPanelProps> = ({
+  addLogColumn,
+  moveLogColumn,
+  availableFields,
+  isLoading,
+  logColumnConfiguration,
+}) => {
   const onDragEnd = useCallback(
     ({ source, destination }: DropResult) =>
       destination && moveLogColumn(source.index, destination.index),
@@ -104,9 +108,7 @@ interface LogColumnConfigurationPanelProps {
   dragHandleProps: DragHandleProps;
 }
 
-const LogColumnConfigurationPanel: React.FunctionComponent<
-  LogColumnConfigurationPanelProps
-> = props => (
+const LogColumnConfigurationPanel: React.FunctionComponent<LogColumnConfigurationPanelProps> = props => (
   <>
     <EuiSpacer size="m" />
     {props.logColumnConfigurationProps.type === 'timestamp' ? (
@@ -122,9 +124,10 @@ const LogColumnConfigurationPanel: React.FunctionComponent<
   </>
 );
 
-const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
-  LogColumnConfigurationPanelProps
-> = ({ logColumnConfigurationProps, dragHandleProps }) => (
+const TimestampLogColumnConfigurationPanel: React.FunctionComponent<LogColumnConfigurationPanelProps> = ({
+  logColumnConfigurationProps,
+  dragHandleProps,
+}) => (
   <ExplainedLogColumnConfigurationPanel
     fieldName="Timestamp"
     helpText={
@@ -142,9 +145,10 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
   />
 );
 
-const MessageLogColumnConfigurationPanel: React.FunctionComponent<
-  LogColumnConfigurationPanelProps
-> = ({ logColumnConfigurationProps, dragHandleProps }) => (
+const MessageLogColumnConfigurationPanel: React.FunctionComponent<LogColumnConfigurationPanelProps> = ({
+  logColumnConfigurationProps,
+  dragHandleProps,
+}) => (
   <ExplainedLogColumnConfigurationPanel
     fieldName="Message"
     helpText={

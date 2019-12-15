@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
-
 import _ from 'lodash';
 import { State } from 'ui/state_management/state';
-import { FilterManager } from '../../../../../../plugins/data/public';
+import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
 
 type GetAppStateFunc = () => State | undefined | null;
 
@@ -73,8 +71,8 @@ export class FilterStateManager {
 
       const newGlobalFilters = _.cloneDeep(globalFilters);
       const newAppFilters = _.cloneDeep(appFilters);
-      FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE);
-      FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE);
+      FilterManager.setFiltersStore(newAppFilters, esFilters.FilterStateStore.APP_STATE);
+      FilterManager.setFiltersStore(newGlobalFilters, esFilters.FilterStateStore.GLOBAL_STATE);
 
       this.filterManager.setFilters(newGlobalFilters.concat(newAppFilters));
     }, 10);

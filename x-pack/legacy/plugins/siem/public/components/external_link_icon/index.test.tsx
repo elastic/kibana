@@ -5,7 +5,6 @@
  */
 
 import { mount } from 'enzyme';
-import 'jest-styled-components';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';

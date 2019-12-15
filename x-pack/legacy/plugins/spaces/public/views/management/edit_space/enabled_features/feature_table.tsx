@@ -8,7 +8,7 @@ import { EuiCheckbox, EuiIcon, EuiInMemoryTable, EuiSwitch, EuiText, IconType } 
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { Feature } from '../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../plugins/features/public';
 import { Space } from '../../../../../common/model/space';
 import { ToggleAllFeatures } from './toggle_all_features';
 
@@ -102,9 +102,8 @@ export class FeatureTable extends Component<Props, {}> {
             id={record.feature.id}
             checked={checked}
             onChange={this.onChange(record.feature.id) as any}
-            aria-label={
-              checked ? `${record.feature.name} visible` : `${record.feature.name} disabled`
-            }
+            label={`${record.feature.name} visible`}
+            showLabel={false}
           />
         );
       },

@@ -28,11 +28,13 @@
 
 import _ from 'lodash';
 import { TimeRange } from 'src/plugins/data/public';
-import { Schemas } from '../visualize/loader/pipeline_helpers/build_pipeline';
 import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { IndexPattern } from '../../../core_plugins/data/public';
+import { SearchSourceContract, FetchOptions } from '../courier/types';
+
+type Schemas = Record<string, any>;
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -124,7 +126,10 @@ export class AggConfigs {
     return aggConfigs;
   }
 
-  createAggConfig(params: AggConfig | AggConfigOptions, { addToAggConfigs = true } = {}) {
+  createAggConfig<T extends AggConfig = AggConfig>(
+    params: AggConfig | AggConfigOptions,
+    { addToAggConfigs = true } = {}
+  ) {
     let aggConfig;
     if (params instanceof AggConfig) {
       aggConfig = params;
@@ -135,7 +140,7 @@ export class AggConfigs {
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
     }
-    return aggConfig;
+    return aggConfig as T;
   }
 
   /**
@@ -253,13 +258,10 @@ export class AggConfigs {
     // collect all the aggregations
     const aggregations = this.aggs
       .filter(agg => agg.enabled && agg.type)
-      .reduce(
-        (requestValuesAggs, agg: AggConfig) => {
-          const aggs = agg.getRequestAggs();
-          return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
-        },
-        [] as AggConfig[]
-      );
+      .reduce((requestValuesAggs, agg: AggConfig) => {
+        const aggs = agg.getRequestAggs();
+        return aggs ? requestValuesAggs.concat(aggs) : requestValuesAggs;
+      }, [] as AggConfig[]);
     // move metrics to the end
     return _.sortBy(aggregations, (agg: AggConfig) =>
       agg.type.type === AggGroupNames.Metrics ? 1 : 0
@@ -282,13 +284,10 @@ export class AggConfigs {
    * @return {array[AggConfig]}
    */
   getResponseAggs(): AggConfig[] {
-    return this.getRequestAggs().reduce(
-      function(responseValuesAggs, agg: AggConfig) {
-        const aggs = agg.getResponseAggs();
-        return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
-      },
-      [] as AggConfig[]
-    );
+    return this.getRequestAggs().reduce(function(responseValuesAggs, agg: AggConfig) {
+      const aggs = agg.getResponseAggs();
+      return aggs ? responseValuesAggs.concat(aggs) : responseValuesAggs;
+    }, [] as AggConfig[]);
   }
 
   /**
@@ -307,7 +306,7 @@ export class AggConfigs {
     return _.find(reqAgg.getResponseAggs(), { id });
   }
 
-  onSearchRequestStart(searchSource: any, options: any) {
+  onSearchRequestStart(searchSource: SearchSourceContract, options?: FetchOptions) {
     return Promise.all(
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))

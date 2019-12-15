@@ -5,102 +5,44 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiToolTip,
   EuiEmptyPrompt,
-  EuiTitle
+  EuiTitle,
+  EuiPagination
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { sum } from 'lodash';
-import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import styled from 'styled-components';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
+import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { history } from '../../../../utils/history';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { MaybeViewTraceLink } from './MaybeViewTraceLink';
+import { units, px } from '../../../../style/variables';
 
-function MaybeViewTraceLink({
-  transaction,
-  waterfall
-}: {
-  transaction: ITransaction;
-  waterfall: IWaterfall;
-}) {
-  const viewFullTraceButtonLabel = i18n.translate(
-    'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
-    {
-      defaultMessage: 'View full trace'
-    }
-  );
+const PaginationContainer = styled.div`
+  margin-left: ${px(units.quarter)};
+  display: flex;
+  align-items: center;
 
-  // the traceroot cannot be found, so we cannot link to it
-  if (!waterfall.traceRoot) {
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
-            {
-              defaultMessage: 'The trace parent cannot be found'
-            }
-          )}
-        >
-          <EuiButton iconType="apmTrace" disabled={true}>
-            {viewFullTraceButtonLabel}
-          </EuiButton>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
+  > span:first-of-type {
+    font-weight: 600;
   }
 
-  const isRoot =
-    transaction.transaction.id === waterfall.traceRoot.transaction.id;
-
-  // the user is already viewing the full trace, so don't link to it
-  if (isRoot) {
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
-            {
-              defaultMessage: 'Currently viewing the full trace'
-            }
-          )}
-        >
-          <EuiButton iconType="apmTrace" disabled={true}>
-            {viewFullTraceButtonLabel}
-          </EuiButton>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-
-    // the user is viewing a zoomed in version of the trace. Link to the full trace
-  } else {
-    const traceRoot = waterfall.traceRoot;
-    return (
-      <EuiFlexItem grow={false}>
-        <TransactionDetailLink
-          serviceName={traceRoot.service.name}
-          transactionId={traceRoot.transaction.id}
-          traceId={traceRoot.trace.id}
-          transactionName={traceRoot.transaction.name}
-          transactionType={traceRoot.transaction.type}
-        >
-          <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
-        </TransactionDetailLink>
-      </EuiFlexItem>
-    );
+  > span:last-of-type {
+    margin-right: ${px(units.half)};
   }
-}
+`;
 
 interface Props {
   urlParams: IUrlParams;
@@ -108,15 +50,36 @@ interface Props {
   waterfall: IWaterfall;
   exceedsMax: boolean;
   isLoading: boolean;
+  traceSamples: IBucket['samples'];
 }
 
-export const WaterfallWithSummmary: React.SFC<Props> = ({
+export const WaterfallWithSummmary: React.FC<Props> = ({
   urlParams,
   location,
   waterfall,
   exceedsMax,
-  isLoading
+  isLoading,
+  traceSamples
 }) => {
+  const [sampleActivePage, setSampleActivePage] = useState(0);
+
+  useEffect(() => {
+    setSampleActivePage(0);
+  }, [traceSamples]);
+
+  const goToSample = (index: number) => {
+    setSampleActivePage(index);
+    const sample = traceSamples[index];
+    history.push({
+      ...history.location,
+      search: fromQuery({
+        ...toQuery(history.location.search),
+        transactionId: sample.transactionId,
+        traceId: sample.traceId
+      })
+    });
+  };
+
   const { entryTransaction } = waterfall;
   if (!entryTransaction) {
     const content = isLoading ? (
@@ -140,7 +103,7 @@ export const WaterfallWithSummmary: React.SFC<Props> = ({
   return (
     <EuiPanel paddingSize="m">
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'baseLine' }}>
           <EuiTitle size="xs">
             <h5>
               {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
@@ -148,8 +111,19 @@ export const WaterfallWithSummmary: React.SFC<Props> = ({
               })}
             </h5>
           </EuiTitle>
+          {traceSamples && (
+            <PaginationContainer>
+              <span>{sampleActivePage + 1}</span>
+              <span>/{traceSamples.length}</span>
+              <EuiPagination
+                pageCount={traceSamples.length}
+                activePage={sampleActivePage}
+                onPageClick={goToSample}
+                compressed
+              />
+            </PaginationContainer>
+          )}
         </EuiFlexItem>
-
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>

@@ -27,20 +27,17 @@ export const validateConfigurationBlocks = (configurationBlocks: ConfigurationBl
       );
     }
 
-    const interfaceConfig = blockSchema.configs.reduce(
-      (props, config) => {
-        if (config.options) {
-          props[config.id] = t.keyof(Object.fromEntries(
-            config.options.map(opt => [opt.value, null])
-          ) as Record<string, null>);
-        } else if (config.validation) {
-          props[config.id] = validationMap[config.validation];
-        }
+    const interfaceConfig = blockSchema.configs.reduce((props, config) => {
+      if (config.options) {
+        props[config.id] = t.keyof(
+          Object.fromEntries(config.options.map(opt => [opt.value, null])) as Record<string, null>
+        );
+      } else if (config.validation) {
+        props[config.id] = validationMap[config.validation];
+      }
 
-        return props;
-      },
-      {} as t.Props
-    );
+      return props;
+    }, {} as t.Props);
 
     const runtimeInterface = createConfigurationBlockInterface(
       t.literal(blockSchema.id),

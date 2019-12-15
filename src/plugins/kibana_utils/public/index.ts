@@ -17,12 +17,15 @@
  * under the License.
  */
 
+export { defer } from '../common';
 export * from './core';
 export * from './errors';
-export * from './store';
+export * from './field_mapping';
 export * from './parse';
 export * from './render_complete';
-export * from './store';
-export * from './errors';
-export * from './field_mapping';
+export * from './resize_checker';
+export * from './state_containers';
 export * from './storage';
+export * from './storage/hashed_item_store';
+export * from './state_management/state_hash';
+export * from './state_management/url';

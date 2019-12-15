@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
 import { each, union } from 'lodash';
 import { dedupFilters } from './dedup_filters';
+import { esFilters } from '../../../../common';
 
 /**
  * Remove duplicate filters from an array of filters
@@ -28,10 +28,10 @@ import { dedupFilters } from './dedup_filters';
 
  * @returns {object} The original filters array with duplicates removed
  */
-export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
-  let results: Filter[] = [];
+export const uniqFilters = (filters: esFilters.Filter[], comparatorOptions: any = {}) => {
+  let results: esFilters.Filter[] = [];
 
-  each(filters, (filter: Filter) => {
+  each(filters, (filter: esFilters.Filter) => {
     results = union(results, dedupFilters(results, [filter]), comparatorOptions);
   });
 

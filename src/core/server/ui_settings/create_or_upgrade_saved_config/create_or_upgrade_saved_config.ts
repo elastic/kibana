@@ -19,7 +19,7 @@
 
 import { defaults } from 'lodash';
 
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../../saved_objects/types';
+import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { SavedObjectsErrorHelpers } from '../../saved_objects/';
 import { Logger } from '../../logging';
 
@@ -33,9 +33,9 @@ interface Options {
   handleWriteErrors: boolean;
 }
 
-export async function createOrUpgradeSavedConfig<T extends SavedObjectAttribute = any>(
+export async function createOrUpgradeSavedConfig(
   options: Options
-): Promise<Record<string, T> | undefined> {
+): Promise<Record<string, any> | undefined> {
   const { savedObjectsClient, version, buildNum, log, handleWriteErrors } = options;
 
   // try to find an older config we can upgrade

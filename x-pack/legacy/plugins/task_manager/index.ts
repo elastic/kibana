@@ -40,7 +40,8 @@ export function taskManager(kibana: any) {
           .default(3000),
         index: Joi.string()
           .description('The name of the index used to store task information.')
-          .default('.kibana_task_manager'),
+          .default('.kibana_task_manager')
+          .invalid(['.tasks']),
         max_workers: Joi.number()
           .description(
             'The maximum number of tasks that this Kibana instance will run simultaneously.'
@@ -72,16 +73,7 @@ export function taskManager(kibana: any) {
         }
       );
       this.kbnServer.afterPluginsInit(() => {
-        (async () => {
-          // The code block below can't await directly within "afterPluginsInit"
-          // callback due to circular dependency. The server isn't "ready" until
-          // this code block finishes. Migrations wait for server to be ready before
-          // executing. Saved objects repository waits for migrations to finish before
-          // finishing the request. To avoid this, we'll await within a separate
-          // function block.
-          await this.kbnServer.server.kibanaMigrator.runMigrations();
-          plugin.start();
-        })();
+        plugin.start();
       });
       server.expose(setupContract);
     },

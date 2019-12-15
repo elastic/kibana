@@ -41,9 +41,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
 
   async function handleIndex(record) {
     const { index, settings, mappings, aliases } = record.value;
-
-    // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
-    const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
     const isKibana = index.startsWith('.kibana');
 
     async function attemptToCreate(attemptNumber = 1) {
@@ -55,17 +52,19 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
         await client.indices.create({
           method: 'PUT',
           index,
-          include_type_name: isPre7Mapping,
           body: {
             settings,
             mappings,
-            aliases
+            aliases,
           },
         });
 
         stats.createdIndex(index, { settings });
       } catch (err) {
-        if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
+        if (
+          get(err, 'body.error.type') !== 'resource_already_exists_exception' ||
+          attemptNumber >= 3
+        ) {
           throw err;
         }
 
@@ -107,6 +106,6 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

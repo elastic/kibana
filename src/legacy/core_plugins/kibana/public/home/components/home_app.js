@@ -18,37 +18,34 @@
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import {
-  HashRouter as Router,
-  Switch,
-  Route,
-} from 'react-router-dom';
+import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
-import {
-  getServices
-} from '../kibana_services';
+import { getServices } from '../kibana_services';
+import { npSetup } from 'ui/new_platform';
 
 export function HomeApp({ directories }) {
   const {
-    telemetryOptInProvider,
-    shouldShowTelemetryOptIn,
     getInjected,
     savedObjectsClient,
     getBasePath,
     addBasePath,
+    telemetryOptInProvider: { setOptInNoticeSeen },
   } = getServices();
+  const { cloud } = npSetup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
 
-  const isCloudEnabled = getInjected('isCloudEnabled', false);
   const apmUiEnabled = getInjected('apmUiEnabled', true);
   const mlEnabled = getInjected('mlEnabled', false);
+  const defaultAppId = getInjected('kbnDefaultAppId', 'discover');
 
-  const renderTutorialDirectory = (props) => {
+  const renderTutorialDirectory = props => {
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
@@ -58,7 +55,7 @@ export function HomeApp({ directories }) {
     );
   };
 
-  const renderTutorial = (props) => {
+  const renderTutorial = props => {
     return (
       <Tutorial
         addBasePath={addBasePath}
@@ -72,54 +69,45 @@ export function HomeApp({ directories }) {
   };
 
   return (
-    <Router>
-      <Switch>
-        <Route
-          path="/home/tutorial/:id"
-          render={renderTutorial}
-        />
-        <Route
-          path="/home/tutorial_directory/:tab?"
-          render={renderTutorialDirectory}
-        />
-        <Route
-          path="/home/feature_directory"
-        >
-          <FeatureDirectory
-            addBasePath={addBasePath}
-            directories={directories}
-          />
-        </Route>
-        <Route
-          path="/home"
-        >
-          <Home
-            addBasePath={addBasePath}
-            directories={directories}
-            apmUiEnabled={apmUiEnabled}
-            mlEnabled={mlEnabled}
-            find={savedObjectsClient.find}
-            localStorage={localStorage}
-            urlBasePath={getBasePath()}
-            shouldShowTelemetryOptIn={shouldShowTelemetryOptIn}
-            setOptIn={telemetryOptInProvider.setOptIn}
-            fetchTelemetry={telemetryOptInProvider.fetchExample}
-            getTelemetryBannerId={telemetryOptInProvider.getBannerId}
-          />
-        </Route>
-      </Switch>
-    </Router>
+    <I18nProvider>
+      <Router>
+        <Switch>
+          <Route path="/home/tutorial/:id" render={renderTutorial} />
+          <Route path="/home/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+          <Route exact path="/home/feature_directory">
+            <FeatureDirectory addBasePath={addBasePath} directories={directories} />
+          </Route>
+          <Route exact path="/home">
+            <Home
+              addBasePath={addBasePath}
+              directories={directories}
+              apmUiEnabled={apmUiEnabled}
+              mlEnabled={mlEnabled}
+              find={savedObjectsClient.find}
+              localStorage={localStorage}
+              urlBasePath={getBasePath()}
+              onOptInSeen={setOptInNoticeSeen}
+            />
+          </Route>
+          <Route path="/home">
+            <Redirect to={`/${defaultAppId}`} />
+          </Route>
+        </Switch>
+      </Router>
+    </I18nProvider>
   );
 }
 
 HomeApp.propTypes = {
-  directories: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    showOnHomePage: PropTypes.bool.isRequired,
-    category: PropTypes.string.isRequired,
-  })),
+  directories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      showOnHomePage: PropTypes.bool.isRequired,
+      category: PropTypes.string.isRequired,
+    })
+  ),
 };

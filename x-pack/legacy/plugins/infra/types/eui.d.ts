@@ -41,7 +41,7 @@ declare module '@elastic/eui' {
     toggleOpenOnMobile?: () => void;
     isOpenOnMobile?: boolean;
   };
-  export const EuiSideNav: React.SFC<EuiSideNavProps>;
+  export const EuiSideNav: React.FC<EuiSideNavProps>;
 
   type EuiErrorBoundaryProps = CommonProps & {
     children: React.ReactNode;
@@ -52,10 +52,6 @@ declare module '@elastic/eui' {
     children: React.ReactNode;
     sizes: EuiSizesResponsive[];
   };
-
-  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
-
-  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
 
   type EuiInMemoryTableProps = CommonProps & {
     items?: any;
@@ -72,6 +68,7 @@ declare module '@elastic/eui' {
     rowProps?: any;
     cellProps?: any;
     responsive?: boolean;
+    itemIdToExpandedRowMap?: any;
   };
-  export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
+  export const EuiInMemoryTable: React.FC<EuiInMemoryTableProps>;
 }

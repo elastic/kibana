@@ -10,6 +10,10 @@ import { minutesFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -202,7 +206,7 @@ describe('TaskManagerRunner', () => {
     await promise;
 
     expect(wasCancelled).toBeTruthy();
-    sinon.assert.neverCalledWithMatch(logger.warn, /not cancellable/);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   test('warns if cancel is called on a non-cancellable task', async () => {
@@ -220,7 +224,10 @@ describe('TaskManagerRunner', () => {
     await runner.cancel();
     await promise;
 
-    sinon.assert.calledWithMatch(logger.warn, /not cancellable/);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"The task bar \\"foo\\" is not cancellable."`
+    );
   });
 
   test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
@@ -420,6 +427,74 @@ describe('TaskManagerRunner', () => {
     );
   });
 
+  test('it returns false when markTaskAsRunning fails due to VERSION_CONFLICT_STATUS', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon
+      .stub()
+      .throws(
+        SavedObjectsErrorHelpers.decorateConflictError(new Error('repo error')).output.payload
+      );
+
+    expect(await runner.markTaskAsRunning()).toEqual(false);
+  });
+
+  test('it throw when markTaskAsRunning fails for unexpected reasons', async () => {
+    const id = _.random(1, 20).toString();
+    const initialAttempts = _.random(1, 3);
+    const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
+    const timeoutMinutes = 1;
+    const getRetryStub = sinon.stub().returns(nextRetry);
+    const { runner, store } = testOpts({
+      instance: {
+        id,
+        attempts: initialAttempts,
+        interval: undefined,
+      },
+      definitions: {
+        bar: {
+          timeout: `${timeoutMinutes}m`,
+          getRetry: getRetryStub,
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
+      },
+    });
+
+    store.update = sinon
+      .stub()
+      .throws(SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id').output.payload);
+
+    return expect(runner.markTaskAsRunning()).rejects.toMatchInlineSnapshot(`
+              Object {
+                "error": "Not Found",
+                "message": "Saved object [type/id] not found",
+                "statusCode": 404,
+              }
+            `);
+  });
+
   test('uses getRetry (returning true) to set retryAt when defined', async () => {
     const id = _.random(1, 20).toString();
     const initialAttempts = _.random(1, 3);
@@ -601,6 +676,7 @@ describe('TaskManagerRunner', () => {
     };
     const runner = new TaskManagerRunner({
       beforeRun: context => Promise.resolve(context),
+      beforeMarkRunning: context => Promise.resolve(context),
       logger,
       store,
       instance: Object.assign(
@@ -655,9 +731,10 @@ describe('TaskManagerRunner', () => {
     await runner.run();
 
     if (shouldBeValid) {
-      sinon.assert.notCalled(logger.warn);
+      expect(logger.warn).not.toHaveBeenCalled();
     } else {
-      sinon.assert.calledWith(logger.warn, sinon.match(/invalid task result/i));
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toMatch(/invalid task result/i);
     }
   }
 

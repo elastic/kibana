@@ -8,23 +8,21 @@ import { TileLayer } from './tile_layer';
 import _ from 'lodash';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { isRetina } from '../meta';
-import { addSpritesheetToMap } from '../connected_components/map/mb/utils';//todo move this implementation
+import {
+  addSpriteSheetToMapFromImageData,
+  loadSpriteSheetImageData,
+} from '../connected_components/map/mb/utils'; //todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
-  'fill': ['fill-opacity'],
-  'line': ['line-opacity'],
-  'circle': ['circle-opacity'],
-  'background': ['background-opacity'],
-  'symbol': ['icon-opacity', 'text-opacity']
+  fill: ['fill-opacity'],
+  line: ['line-opacity'],
+  circle: ['circle-opacity'],
+  background: ['background-opacity'],
+  symbol: ['icon-opacity', 'text-opacity'],
 };
 
 export class VectorTileLayer extends TileLayer {
-
   static type = LAYER_TYPE.VECTOR_TILE;
-
-  constructor({ layerDescriptor, source, style }) {
-    super({ layerDescriptor, source, style });
-  }
 
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
@@ -38,15 +36,21 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
     const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {//data is immmutable
+    if (sourceDataRequest) {
+      //data is immmutable
       return;
     }
-    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta(isRetina());
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, styleAndSprites, {});
-    } catch(error) {
+      const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
+      const data = {
+        ...styleAndSprites,
+        spriteSheetImageData,
+      };
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, {});
+    } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
@@ -74,6 +78,15 @@ export class VectorTileLayer extends TileLayer {
     }
     const vectorStyleAndSprites = sourceDataRequest.getData();
     return vectorStyleAndSprites.spriteMeta;
+  }
+
+  _getSpriteImageData() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return null;
+    }
+    const vectorStyleAndSprites = sourceDataRequest.getData();
+    return vectorStyleAndSprites.spriteSheetImageData;
   }
 
   getMbLayerIds() {
@@ -111,15 +124,12 @@ export class VectorTileLayer extends TileLayer {
   }
 
   syncLayerWithMB(mbMap) {
-
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle) {
       return;
     }
 
     let initialBootstrapCompleted = false;
-
-    //sync sources
     const sourceIds = Object.keys(vectorStyle.sources);
     sourceIds.forEach(sourceId => {
       if (initialBootstrapCompleted) {
@@ -136,7 +146,6 @@ export class VectorTileLayer extends TileLayer {
     });
 
     if (!initialBootstrapCompleted) {
-
       //sync spritesheet
       const spriteMeta = this._getSpriteMeta();
       if (!spriteMeta) {
@@ -149,7 +158,12 @@ export class VectorTileLayer extends TileLayer {
           newJson[namespacedImageId] = spriteMeta.json[imageId];
         }
       }
-      addSpritesheetToMap(newJson, spriteMeta.png, mbMap);
+
+      const imageData = this._getSpriteImageData();
+      if (!imageData) {
+        return;
+      }
+      addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
 
       //sync layers
       vectorStyle.layers.forEach(layer => {
@@ -161,27 +175,37 @@ export class VectorTileLayer extends TileLayer {
         const newLayerObject = {
           ...layer,
           source: this._generateMbId(layer.source),
-          id: mbLayerId
+          id: mbLayerId,
         };
 
-        if (newLayerObject.type === 'symbol' && newLayerObject.layout && typeof newLayerObject.layout['icon-image'] === 'string') {
-          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(newLayerObject.layout['icon-image']);
+        if (
+          newLayerObject.type === 'symbol' &&
+          newLayerObject.layout &&
+          typeof newLayerObject.layout['icon-image'] === 'string'
+        ) {
+          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
+            newLayerObject.layout['icon-image']
+          );
         }
 
-        if (newLayerObject.type === 'fill' && newLayerObject.paint && typeof newLayerObject.paint['fill-pattern'] === 'string') {
-          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(newLayerObject.paint['fill-pattern']);
+        if (
+          newLayerObject.type === 'fill' &&
+          newLayerObject.paint &&
+          typeof newLayerObject.paint['fill-pattern'] === 'string'
+        ) {
+          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
+            newLayerObject.paint['fill-pattern']
+          );
         }
 
         mbMap.addLayer(newLayerObject);
       });
-
     }
 
     this._setTileLayerProperties(mbMap);
   }
 
   _setOpacityForType(mbMap, mbLayer, mbLayerId) {
-
     const opacityProps = MB_STYLE_TYPE_TO_OPACITY[mbLayer.type];
     if (!opacityProps) {
       return;
@@ -210,7 +234,6 @@ export class VectorTileLayer extends TileLayer {
   }
 
   _setTileLayerProperties(mbMap) {
-
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle) {
       return;
@@ -222,7 +245,5 @@ export class VectorTileLayer extends TileLayer {
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
     });
-
   }
-
 }

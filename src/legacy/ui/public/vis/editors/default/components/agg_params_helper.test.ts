@@ -121,7 +121,10 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: {},
         getIndexPattern: jest.fn(() => ({
-          fields: [{ name: '@timestamp', type: 'date' }, { name: 'geo_desc', type: 'string' }],
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'geo_desc', type: 'string' },
+          ],
         })),
         params: {
           orderBy: 'orderBy',

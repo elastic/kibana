@@ -17,6 +17,7 @@ import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
+import { useTimelineTypeContext } from '../../timeline_context';
 
 interface Props {
   id: string;
@@ -67,44 +68,48 @@ export const EventColumnView = React.memo<Props>(
     timelineId,
     toggleShowNotes,
     updateNote,
-  }) => (
-    <EventsTrData data-test-subj="event-column-view">
-      <Actions
-        actionsColumnWidth={actionsColumnWidth}
-        associateNote={associateNote}
-        checked={false}
-        expanded={expanded}
-        data-test-subj="actions"
-        eventId={id}
-        eventIsPinned={isEventPinned}
-        getNotesByIds={getNotesByIds}
-        isEventViewer={isEventViewer}
-        loading={loading}
-        noteIds={eventIdToNoteIds[id] || emptyNotes}
-        onEventToggled={onEventToggled}
-        onPinClicked={getPinOnClick({
-          allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
-          eventId: id,
-          onPinEvent,
-          onUnPinEvent,
-          isEventPinned,
-        })}
-        showCheckboxes={false}
-        showNotes={showNotes}
-        toggleShowNotes={toggleShowNotes}
-        updateNote={updateNote}
-      />
+  }) => {
+    const timelineTypeContext = useTimelineTypeContext();
 
-      <DataDrivenColumns
-        _id={id}
-        columnHeaders={columnHeaders}
-        columnRenderers={columnRenderers}
-        data={data}
-        onColumnResized={onColumnResized}
-        timelineId={timelineId}
-      />
-    </EventsTrData>
-  ),
+    return (
+      <EventsTrData data-test-subj="event-column-view">
+        <Actions
+          actionsColumnWidth={actionsColumnWidth}
+          associateNote={associateNote}
+          checked={false}
+          expanded={expanded}
+          data-test-subj="actions"
+          eventId={id}
+          eventIsPinned={isEventPinned}
+          getNotesByIds={getNotesByIds}
+          isEventViewer={isEventViewer}
+          loading={loading}
+          noteIds={eventIdToNoteIds[id] || emptyNotes}
+          onEventToggled={onEventToggled}
+          onPinClicked={getPinOnClick({
+            allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
+            eventId: id,
+            onPinEvent,
+            onUnPinEvent,
+            isEventPinned,
+          })}
+          showCheckboxes={timelineTypeContext.showCheckboxes}
+          showNotes={showNotes}
+          toggleShowNotes={toggleShowNotes}
+          updateNote={updateNote}
+        />
+
+        <DataDrivenColumns
+          _id={id}
+          columnHeaders={columnHeaders}
+          columnRenderers={columnRenderers}
+          data={data}
+          onColumnResized={onColumnResized}
+          timelineId={timelineId}
+        />
+      </EventsTrData>
+    );
+  },
   (prevProps, nextProps) => {
     return (
       prevProps.id === nextProps.id &&

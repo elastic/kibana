@@ -20,7 +20,6 @@
 import { ViewMode, EmbeddableOutput, isErrorEmbeddable } from '../../../../';
 import { AddPanelAction } from './add_panel_action';
 import { EmbeddableFactory } from '../../../../embeddables';
-import { Filter, FilterStateStore } from '@kbn/es-query';
 import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
@@ -32,6 +31,7 @@ import { GetEmbeddableFactory } from '../../../../types';
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
@@ -51,8 +51,8 @@ beforeEach(async () => {
     () => null
   );
 
-  const derivedFilter: Filter = {
-    $state: { store: FilterStateStore.APP_STATE },
+  const derivedFilter: esFilters.Filter = {
+    $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };

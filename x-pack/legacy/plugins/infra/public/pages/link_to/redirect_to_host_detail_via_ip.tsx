@@ -8,7 +8,7 @@ import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { replaceMetricTimeInQueryString } from '../../containers/metrics/with_metrics_time';
+import { replaceMetricTimeInQueryString } from '../metrics/containers/with_metrics_time';
 import { useHostIpToName } from './use_host_ip_to_name';
 import { getFromFromLocation, getToFromLocation } from './query_params';
 import { LoadingPage } from '../../components/loading_page';

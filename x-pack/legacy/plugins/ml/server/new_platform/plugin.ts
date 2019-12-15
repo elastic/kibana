@@ -10,15 +10,14 @@ import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CloudSetup } from '../../../../../plugins/cloud/server';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
-// @ts-ignore: could not find declaration file for module
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
-// @ts-ignore: could not find declaration file for module
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
-// @ts-ignore: could not find declaration file for module
 import { LICENSE_TYPE } from '../../common/constants/license';
 // @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
@@ -30,7 +29,6 @@ import { dataFeedRoutes } from '../routes/datafeeds';
 import { indicesRoutes } from '../routes/indices';
 // @ts-ignore: could not find declaration file for module
 import { jobValidationRoutes } from '../routes/job_validation';
-// @ts-ignore: could not find declaration file for module
 import { makeMlUsageCollector } from '../lib/ml_telemetry';
 // @ts-ignore: could not find declaration file for module
 import { notificationRoutes } from '../routes/notification_settings';
@@ -56,7 +54,6 @@ import { jobServiceRoutes } from '../routes/job_service';
 import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 // @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
-// @ts-ignore: could not find declaration file for module
 import { initMlServerLog, LogInitialization } from '../client/log';
 
 type CoreHttpSetup = CoreSetup['http'];
@@ -73,12 +70,6 @@ export interface MlCoreSetup {
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
   savedObjects: SavedObjectsLegacyService;
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: (collector: any) => void;
-    };
-  };
 }
 export interface MlInitializerContext extends PluginInitializerContext {
   legacyConfig: KibanaConfig;
@@ -89,6 +80,8 @@ export interface PluginsSetup {
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
+  usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -100,15 +93,10 @@ export interface RouteInitialization {
   xpackMainPlugin?: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  cloud?: CloudSetup;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: (collector: any) => void;
-    };
-  };
   savedObjects: SavedObjectsLegacyService;
 }
 
@@ -205,11 +193,10 @@ export class Plugin {
       xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
       spacesPlugin: plugins.spaces,
+      cloud: plugins.cloud,
     };
-
     const usageInitializationDeps: UsageInitialization = {
       elasticsearchPlugin: plugins.elasticsearch,
-      usage: core.usage,
       savedObjects: core.savedObjects,
     };
 
@@ -236,7 +223,7 @@ export class Plugin {
     fileDataVisualizerRoutes(extendedRouteInitializationDeps);
 
     initMlServerLog(logInitializationDeps);
-    makeMlUsageCollector(usageInitializationDeps);
+    makeMlUsageCollector(plugins.usageCollection, usageInitializationDeps);
   }
 
   public stop() {}
