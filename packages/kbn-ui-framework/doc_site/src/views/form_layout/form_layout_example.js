@@ -22,12 +22,7 @@
 import React from 'react';
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes } from '../../components';
 
 import FieldGroup from './field_group';
 import fieldGroupSource from '!!raw-loader!./field_group';
@@ -37,13 +32,16 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="FieldGroup"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: fieldGroupSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: fieldGroupHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: fieldGroupSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: fieldGroupHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <FieldGroup />

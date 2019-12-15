@@ -6,15 +6,10 @@
 
 import _ from 'lodash';
 import React from 'react';
-import {
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
-} from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
 import { TOCEntry } from './toc_entry';
 
 export class LayerTOC extends React.Component {
-
   componentWillUnmount() {
     this._updateDebounced.cancel();
   }
@@ -33,14 +28,14 @@ export class LayerTOC extends React.Component {
     }
 
     // Layer list is displayed in reverse order so index needs to reversed to get back to original reference.
-    const reverseIndex = (index) => {
+    const reverseIndex = index => {
       return this.props.layerList.length - index - 1;
     };
 
     const prevIndex = reverseIndex(source.index);
     const newIndex = reverseIndex(destination.index);
     const newOrder = [];
-    for(let i = 0; i < this.props.layerList.length; i++) {
+    for (let i = 0; i < this.props.layerList.length; i++) {
       newOrder.push(i);
     }
     newOrder.splice(prevIndex, 1);
@@ -54,21 +49,15 @@ export class LayerTOC extends React.Component {
     const reverseLayerList = [...this.props.layerList].reverse();
 
     if (this.props.isReadOnly) {
-      return reverseLayerList
-        .map((layer) => {
-          return (
-            <TOCEntry
-              key={layer.getId()}
-              layer={layer}
-            />
-          );
-        });
+      return reverseLayerList.map(layer => {
+        return <TOCEntry key={layer.getId()} layer={layer} />;
+      });
     }
 
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
-          {(provided, snapshot) => (
+          {(provided, snapshot) =>
             reverseLayerList.map((layer, idx) => (
               <EuiDraggable
                 spacing="none"
@@ -88,18 +77,13 @@ export class LayerTOC extends React.Component {
                 )}
               </EuiDraggable>
             ))
-          )}
+          }
         </EuiDroppable>
       </EuiDragDropContext>
     );
   }
 
   render() {
-    return (
-      <div data-test-subj="mapLayerTOC">
-        {this._renderLayers()}
-      </div>
-    );
+    return <div data-test-subj="mapLayerTOC">{this._renderLayers()}</div>;
   }
 }
-

@@ -17,16 +17,10 @@
  * under the License.
  */
 
-export default function (kibana) {
-
+export default function(kibana) {
   return new kibana.Plugin({
-
     uiExports: {
-      docViews: [
-        'plugins/kbn_doc_views/kbn_doc_views'
-      ]
-    }
-
+      docViews: ['plugins/kbn_doc_views/kbn_doc_views'],
+    },
   });
-
 }

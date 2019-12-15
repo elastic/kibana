@@ -12,7 +12,7 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID
+  LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
 
 const SCENARIOS = [
@@ -21,32 +21,32 @@ const SCENARIOS = [
     data: {
       totalUniqueInstanceCount: 0,
       detected: {
-        mightExist: false
-      }
-    }
+        mightExist: false,
+      },
+    },
   },
   {
     name: 'only detectable instances',
     data: {
       totalUniqueInstanceCount: 0,
       detected: {
-        mightExist: true
-      }
-    }
+        mightExist: true,
+      },
+    },
   },
   {
     name: 'allMonitoredByMetricbeat',
     data: {
       totalUniqueInstanceCount: 1,
       totalUniqueFullyMigratedCount: 1,
-    }
+    },
   },
   {
     name: 'internalCollectionOn',
     data: {
       totalUniqueInstanceCount: 1,
-      totalUniquePartiallyMigratedCount: 1
-    }
+      totalUniquePartiallyMigratedCount: 1,
+    },
   },
   {
     name: 'allInternalCollection',
@@ -54,26 +54,26 @@ const SCENARIOS = [
       totalUniqueInstanceCount: 1,
       totalUniqueFullyMigratedCount: 0,
       totalUniquePartiallyMigratedCount: 0,
-    }
-  }
+    },
+  },
 ];
 
 const PRODUCTS = [
   {
-    name: ELASTICSEARCH_SYSTEM_ID
+    name: ELASTICSEARCH_SYSTEM_ID,
   },
   {
-    name: KIBANA_SYSTEM_ID
+    name: KIBANA_SYSTEM_ID,
   },
   {
-    name: LOGSTASH_SYSTEM_ID
+    name: LOGSTASH_SYSTEM_ID,
   },
   {
-    name: BEATS_SYSTEM_ID
+    name: BEATS_SYSTEM_ID,
   },
   {
-    name: APM_SYSTEM_ID
-  }
+    name: APM_SYSTEM_ID,
+  },
 ];
 
 describe('setupMode SetupModeTooltip', () => {
