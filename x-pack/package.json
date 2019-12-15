@@ -231,7 +231,7 @@
     "fp-ts": "^2.0.5",
     "geojson-rewind": "^0.3.1",
     "get-port": "4.2.0",
-    "getos": "^3.1.0",
+    "getos": "^3.1.1",
     "git-url-parse": "11.1.2",
     "github-markdown-css": "^2.10.0",
     "glob": "^7.1.2",
