@@ -101,7 +101,7 @@ module.exports = {
             options: {
               modules: true,
               localIdentName: '[name]__[local]___[hash:base64:5]',
-              camelCase: true,
+              localsConvention: 'camelCaseOnly',
               sourceMap: !isProd,
             },
           },
