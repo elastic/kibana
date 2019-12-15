@@ -46,7 +46,7 @@ export const SourceFieldForm = React.memo(({ defaultValue }: Props) => {
     <Form form={form}>
       <FormRow
         title={i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldTitle', {
-          defaultMessage: 'Source field',
+          defaultMessage: '_source field',
         })}
         description={
           <>
