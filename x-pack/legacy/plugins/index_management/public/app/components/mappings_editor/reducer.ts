@@ -18,7 +18,8 @@ import {
 import { PARAMETERS_DEFINITION } from './constants';
 
 export interface MappingsConfiguration {
-  dynamic: boolean | string;
+  enabled?: boolean;
+  throwErrorsForUnmappedFields?: boolean;
   date_detection: boolean;
   numeric_detection: boolean;
   dynamic_date_formats: string[];

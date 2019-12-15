@@ -15,7 +15,7 @@ export const DocumentFieldsHeader = () => {
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsTitle', {
-            defaultMessage: 'Document fields',
+            defaultMessage: 'Mapped fields',
           })}
         </h2>
       </EuiTitle>

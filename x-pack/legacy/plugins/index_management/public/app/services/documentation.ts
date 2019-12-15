@@ -150,6 +150,10 @@ class DocumentationService {
   public getEnablingFielddataLink() {
     return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
   }
+
+  public getDateFormatLink() {
+    return `${this.esDocsBase}/mapping-date-format.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();
