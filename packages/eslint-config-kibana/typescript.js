@@ -108,8 +108,6 @@ module.exports = {
               }
             }
           ],
-          'indent': 'off',
-          '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
           '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
           '@typescript-eslint/member-ordering': ['error', {
@@ -126,15 +124,9 @@ module.exports = {
             lib: 'never'
           }],
           '@typescript-eslint/no-var-requires': 'error',
-          '@typescript-eslint/type-annotation-spacing': 'error',
           '@typescript-eslint/unified-signatures': 'error',
-          'arrow-body-style': 'error',
-          'arrow-parens': 'error',
-          'comma-dangle': ['error', 'always-multiline'],
           'constructor-super': 'error',
-          'curly': 'error',
           'dot-notation': 'error',
-          'eol-last': 'error',
           'eqeqeq': ['error', 'always', {'null': 'ignore'}],
           'guard-for-in': 'error',
           'import/order': ['error', {
@@ -145,8 +137,6 @@ module.exports = {
             ],
           }],
           'max-classes-per-file': ['error', 1],
-          'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
-          'new-parens': 'error',
           'no-bitwise': 'error',
           'no-caller': 'error',
           'no-cond-assign': 'error',
@@ -155,30 +145,19 @@ module.exports = {
           'no-empty': 'error',
           'no-extend-native': 'error',
           'no-eval': 'error',
-          'no-multiple-empty-lines': 'error',
           'no-new-wrappers': 'error',
           'no-shadow': 'error',
           'no-throw-literal': 'error',
-          'no-trailing-spaces': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',
           'no-unused-expressions': 'error',
           'no-unused-labels': 'error',
           'no-var': 'error',
-          'object-curly-spacing': 'error',
           'object-shorthand': 'error',
           'one-var': [ 'error', 'never' ],
           'prefer-const': 'error',
           'prefer-rest-params': 'error',
-          'quotes': ['error', 'double', { 'avoidEscape': true }],
-          'quote-props': ['error', 'consistent-as-needed'],
           'radix': 'error',
-          'semi': 'error',
-          'space-before-function-paren': ['error', {
-            'anonymous': 'never',
-            'named': 'never',
-            'asyncArrow': 'always'
-          }],
           'spaced-comment': ["error", "always", {
             "exceptions": ["/"]
           }],

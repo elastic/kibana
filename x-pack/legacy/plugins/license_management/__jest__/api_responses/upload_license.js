@@ -10,7 +10,6 @@ export const UPLOAD_LICENSE_EXPIRED = [
   '{"acknowledged": "true", "license_status": "expired"}',
 ];
 
-/* eslint-disable max-len */
 export const UPLOAD_LICENSE_REQUIRES_ACK = [
   200,
   { 'Content-Type': 'application/json' },
@@ -24,7 +23,6 @@ export const UPLOAD_LICENSE_REQUIRES_ACK = [
       }
     }`,
 ];
-/* eslint-enable max-len */
 
 export const UPLOAD_LICENSE_SUCCESS = [
   200,
