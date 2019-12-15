@@ -76,7 +76,6 @@ describe('serializeThresholdWatch', () => {
       },
       condition: {
         script: {
-          // eslint-disable-next-line max-len
           source:
             "ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) { return true; } } return false;",
           params: {
@@ -86,7 +85,6 @@ describe('serializeThresholdWatch', () => {
       },
       transform: {
         script: {
-          // eslint-disable-next-line max-len
           source:
             "HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i]['metricAgg'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;",
           params: {
@@ -186,7 +184,6 @@ describe('serializeThresholdWatch', () => {
       },
       condition: {
         script: {
-          // eslint-disable-next-line max-len
           source:
             "ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) { return true; } } return false;",
           params: {
@@ -196,7 +193,6 @@ describe('serializeThresholdWatch', () => {
       },
       transform: {
         script: {
-          // eslint-disable-next-line max-len
           source:
             "HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i]['metricAgg'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;",
           params: {
@@ -296,7 +292,6 @@ describe('serializeThresholdWatch', () => {
       },
       condition: {
         script: {
-          // eslint-disable-next-line max-len
           source:
             "ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) { return true; } } return false;",
           params: {
@@ -306,7 +301,6 @@ describe('serializeThresholdWatch', () => {
       },
       transform: {
         script: {
-          // eslint-disable-next-line max-len
           source:
             "HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i]['metricAgg'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;",
           params: {
