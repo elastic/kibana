@@ -13,18 +13,20 @@ export const ccrDataEnricher = async (indicesList, callWithRequest) => {
     method: 'GET',
   };
   try {
-    const { follower_indices: followerIndices } = await callWithRequest('transport.request', params);
+    const { follower_indices: followerIndices } = await callWithRequest(
+      'transport.request',
+      params
+    );
     return indicesList.map(index => {
-      const isFollowerIndex  = !!followerIndices.find((followerIndex) => {
+      const isFollowerIndex = !!followerIndices.find(followerIndex => {
         return followerIndex.follower_index === index.name;
       });
       return {
         ...index,
-        isFollowerIndex
+        isFollowerIndex,
       };
     });
   } catch (e) {
     return indicesList;
   }
-
 };

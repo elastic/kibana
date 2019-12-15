@@ -46,12 +46,14 @@ describe('getOSInfo', () => {
     os.release.mockImplementation(() => '4.9.93-linuxkit-aufs');
 
     // Mock getos response
-    getos.mockImplementation((cb) => cb(null, {
-      os: 'linux',
-      dist: 'Ubuntu Linux',
-      codename: 'precise',
-      release: '12.04'
-    }));
+    getos.mockImplementation(cb =>
+      cb(null, {
+        os: 'linux',
+        dist: 'Ubuntu Linux',
+        codename: 'precise',
+        release: '12.04',
+      })
+    );
 
     const osInfo = await getOSInfo();
 

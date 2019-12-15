@@ -33,7 +33,7 @@ import { findPluginSpecs } from '../../../legacy/plugin_discovery';
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
  * it is enabled in the Kibana server.
  */
-const getUiExports = async (kibanaPluginIds) => {
+const getUiExports = async kibanaPluginIds => {
   const xpackEnabled = kibanaPluginIds.includes('xpack_main');
 
   const { spec$ } = await findPluginSpecs({
@@ -87,9 +87,9 @@ export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
   const migratorOptions = {
     config: { get: path => config[path] },
     savedObjectsConfig: {
-      'scrollDuration': '5m',
-      'batchSize': 100,
-      'pollInterval': 100,
+      scrollDuration: '5m',
+      batchSize: 100,
+      pollInterval: 100,
     },
     kibanaConfig: {
       index: '.kibana',
@@ -155,11 +155,15 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
           },
         },
       },
-      ignore: [409]
+      ignore: [409],
     });
 
     if (resp.total !== resp.deleted) {
-      log.warning('delete by query deleted %d of %d total documents, trying again', resp.deleted, resp.total);
+      log.warning(
+        'delete by query deleted %d of %d total documents, trying again',
+        resp.deleted,
+        resp.total
+      );
       continue;
     }
 

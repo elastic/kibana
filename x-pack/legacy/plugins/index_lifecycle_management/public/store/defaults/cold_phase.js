@@ -22,9 +22,9 @@ export const defaultColdPhase = {
   [PHASE_NODE_ATTRS]: '',
   [PHASE_REPLICA_COUNT]: '',
   [PHASE_FREEZE_ENABLED]: false,
-  [PHASE_INDEX_PRIORITY]: 0
+  [PHASE_INDEX_PRIORITY]: 0,
 };
 export const defaultEmptyColdPhase = {
   ...defaultColdPhase,
-  [PHASE_INDEX_PRIORITY]: ''
+  [PHASE_INDEX_PRIORITY]: '',
 };

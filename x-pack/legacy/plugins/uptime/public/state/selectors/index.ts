@@ -14,3 +14,7 @@ export const isIntegrationsPopupOpen = ({ ui: { integrationsPopoverOpen } }: App
 export const getMonitorDetails = (state: AppState, summary: any) => {
   return state.monitor.monitorDetailsList[summary.monitor_id];
 };
+
+export const getMonitorLocations = (state: AppState, monitorId: string) => {
+  return state.monitor.monitorLocationsList?.get(monitorId);
+};

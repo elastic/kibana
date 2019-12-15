@@ -22,14 +22,14 @@ export const getIndexPatternsMock = () => {
     {
       id: 'indexPattern1',
       attributes: {
-        title: 'indexPattern1'
-      }
+        title: 'indexPattern1',
+      },
     },
     {
       id: 'indexPattern2',
       attributes: {
-        title: 'indexPattern2'
-      }
-    }
+        title: 'indexPattern2',
+      },
+    },
   ]);
 };
