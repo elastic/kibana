@@ -18,6 +18,8 @@
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import 'ui/autoload/all';
+
+import 'uiExports/interpreter';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
 

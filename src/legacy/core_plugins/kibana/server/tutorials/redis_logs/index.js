@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function redisLogsSpecProvider(context) {
   const moduleName = 'redis';
@@ -34,7 +38,8 @@ export function redisLogsSpecProvider(context) {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.redisLogs.longDescription', {
-      defaultMessage: 'The `redis` Filebeat module parses error and slow logs created by Redis. \
+      defaultMessage:
+        'The `redis` Filebeat module parses error and slow logs created by Redis. \
 For Redis to write error logs, make sure the `logfile` option, from the \
 Redis configuration file, is set to `redis-server.log`. \
 The slow logs are read directly from Redis via the `SLOWLOG` command. \
@@ -51,20 +56,23 @@ Note that the `slowlog` fileset is experimental. \
       dashboards: [
         {
           id: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.redisLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Redis logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.redisLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Redis logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-redis.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-redis.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

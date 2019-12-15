@@ -23,9 +23,7 @@ const ErrorList = ({ errors }) => {
         <EuiDescriptionListTitle>
           {statusCode} {friendlyName}
         </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          {message}
-        </EuiDescriptionListDescription>
+        <EuiDescriptionListDescription>{message}</EuiDescriptionListDescription>
       </Fragment>
     );
   });
@@ -39,11 +37,7 @@ export function CheckerErrors(props) {
   return (
     <Fragment>
       <EuiSpacer />
-      <EuiCallOut
-        title="Errors found"
-        color="danger"
-        className="eui-textLeft"
-      >
+      <EuiCallOut title="Errors found" color="danger" className="eui-textLeft">
         <p>
           <FormattedMessage
             id="xpack.monitoring.noData.checkerErrors.checkEsSettingsErrorMessage"
@@ -62,5 +56,5 @@ export function CheckerErrors(props) {
 }
 
 CheckerErrors.propTypes = {
-  errors: PropTypes.array
+  errors: PropTypes.array,
 };

@@ -169,6 +169,20 @@ describe('#start()', () => {
     expect(mockUiNewPlatformStart).toHaveBeenCalledWith(expect.any(Object), {});
   });
 
+  it('resolves getStartServices with core and plugin APIs', async () => {
+    const legacyPlatform = new LegacyPlatformService({
+      ...defaultParams,
+    });
+
+    legacyPlatform.setup(defaultSetupDeps);
+    legacyPlatform.start(defaultStartDeps);
+
+    const { getStartServices } = mockUiNewPlatformSetup.mock.calls[0][0];
+    const [coreStart, pluginsStart] = await getStartServices();
+    expect(coreStart).toEqual(expect.any(Object));
+    expect(pluginsStart).toBe(defaultStartDeps.plugins);
+  });
+
   describe('useLegacyTestHarness = false', () => {
     it('passes the targetDomElement to ui/chrome', () => {
       const legacyPlatform = new LegacyPlatformService({
