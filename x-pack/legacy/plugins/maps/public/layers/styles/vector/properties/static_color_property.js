@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { StaticStyleProperty } from './static_style_property';
 
-
 export class StaticColorProperty extends StaticStyleProperty {
-
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
     mbMap.setPaintProperty(mbLayerId, 'circle-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
@@ -37,5 +34,4 @@ export class StaticColorProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', this._options.color);
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
   }
-
 }

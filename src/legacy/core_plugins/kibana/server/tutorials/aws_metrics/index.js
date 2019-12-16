@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function awsMetricsSpecProvider(context) {
   const moduleName = 'aws';
@@ -30,10 +34,12 @@ export function awsMetricsSpecProvider(context) {
     }),
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.awsMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
+      defaultMessage:
+        'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.awsMetrics.longDescription', {
-      defaultMessage: 'The `aws` Metricbeat module fetches monitoring metrics from the AWS APIs and Cloudwatch. \
+      defaultMessage:
+        'The `aws` Metricbeat module fetches monitoring metrics from the AWS APIs and Cloudwatch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aws.html',
@@ -45,20 +51,23 @@ export function awsMetricsSpecProvider(context) {
       dashboards: [
         {
           id: 'c5846400-f7fb-11e8-af03-c999c9dea608-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.awsMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'AWS metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.awsMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'AWS metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-aws.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-aws.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/aws_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

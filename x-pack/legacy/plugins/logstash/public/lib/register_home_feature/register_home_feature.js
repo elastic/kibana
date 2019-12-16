@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 
 import { i18n } from '@kbn/i18n';
 
 FeatureCatalogueRegistryProvider.register($injector => {
-
   const licenseService = $injector.get('logstashLicenseService');
   if (!licenseService.enableLinks) {
     return;
@@ -26,6 +28,6 @@ FeatureCatalogueRegistryProvider.register($injector => {
     icon: 'pipelineApp',
     path: '/app/kibana#/management/logstash/pipelines',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

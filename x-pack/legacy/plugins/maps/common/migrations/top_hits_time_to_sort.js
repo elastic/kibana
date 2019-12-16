@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import {  ES_SEARCH, SORT_ORDER } from '../constants';
+import { ES_SEARCH, SORT_ORDER } from '../constants';
 
 function isEsDocumentSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
@@ -18,10 +18,11 @@ export function topHitsTimeToSort({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach((layerDescriptor) => {
+  layerList.forEach(layerDescriptor => {
     if (isEsDocumentSource(layerDescriptor)) {
       if (_.has(layerDescriptor, 'sourceDescriptor.topHitsTimeField')) {
-        layerDescriptor.sourceDescriptor.sortField = layerDescriptor.sourceDescriptor.topHitsTimeField;
+        layerDescriptor.sourceDescriptor.sortField =
+          layerDescriptor.sourceDescriptor.topHitsTimeField;
         layerDescriptor.sourceDescriptor.sortOrder = SORT_ORDER.DESC;
         delete layerDescriptor.sourceDescriptor.topHitsTimeField;
       }

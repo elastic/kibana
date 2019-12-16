@@ -38,7 +38,6 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 
-
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const basePath = getServices().getBasePath();
   const renderCards = () => {

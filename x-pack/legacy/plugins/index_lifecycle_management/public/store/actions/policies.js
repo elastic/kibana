@@ -24,13 +24,10 @@ export const fetchPolicies = (withIndices, callback) => async dispatch => {
   let policies;
   try {
     policies = await loadPolicies(withIndices);
-  }
-  catch (err) {
-    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.loadPolicyErrorMessage',
-      {
-        defaultMessage: 'Error loading policies',
-      },
-    );
+  } catch (err) {
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.loadPolicyErrorMessage', {
+      defaultMessage: 'Error loading policies',
+    });
     showApiError(err, title);
     return false;
   }
@@ -43,5 +40,8 @@ export const fetchPolicies = (withIndices, callback) => async dispatch => {
   return policies;
 };
 
-
-export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({ phase, key, value }));
+export const setPhaseData = createAction(SET_PHASE_DATA, (phase, key, value) => ({
+  phase,
+  key,
+  value,
+}));

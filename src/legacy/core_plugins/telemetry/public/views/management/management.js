@@ -25,10 +25,10 @@ import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {
   resolve: {
-    telemetryManagementSection: function (Private) {
+    telemetryManagementSection: function(Private) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
 
-      const Component = (props) => (
+      const Component = props => (
         <TelemetryForm
           showAppliesSettingMessage={true}
           telemetryOptInProvider={telemetryOptInProvider}
@@ -37,6 +37,6 @@ routes.defaults(/\/management/, {
       );
 
       registerSettingsComponent(PAGE_FOOTER_COMPONENT, Component, true);
-    }
-  }
+    },
+  },
 });

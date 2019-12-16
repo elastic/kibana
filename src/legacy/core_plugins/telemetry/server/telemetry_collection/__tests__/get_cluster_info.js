@@ -28,7 +28,6 @@ export function mockGetClusterInfo(callCluster, clusterInfo, req) {
 }
 
 describe('get_cluster_info', () => {
-
   it('uses callCluster to get info API', () => {
     const callCluster = sinon.stub();
     const response = Promise.resolve({});
@@ -37,5 +36,4 @@ describe('get_cluster_info', () => {
 
     expect(getClusterInfo(callCluster)).to.be(response);
   });
-
 });
