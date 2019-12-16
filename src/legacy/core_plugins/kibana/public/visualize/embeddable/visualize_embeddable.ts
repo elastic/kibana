@@ -59,6 +59,7 @@ export interface VisSavedObject extends SavedObject {
   destroy: () => void;
   savedSearchRefName?: string;
   savedSearchId?: string;
+  savedSearch?: any;
   visState: any;
 }
 

@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import './_saved_vis';
+import { npStart } from 'ui/new_platform';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectLoader } from 'ui/saved_objects';
+// @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
+// @ts-ignore
 import { findListItems } from './find_list_items';
-import { npStart } from '../../../../../ui/public/new_platform';
-
+import { createSavedVisClass } from './_saved_vis';
 const app = uiModules.get('app/visualize');
 
 // Register this service with the saved object registry so it can be
@@ -35,18 +36,28 @@ savedObjectManagementRegistry.register({
   title: 'visualizations',
 });
 
-app.service('savedVisualizations', function (SavedVis, Private) {
+app.service('savedVisualizations', function() {
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const services = {
+    savedObjectsClient,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
   const visTypes = visualizations.types;
-  const savedObjectClient = Private(SavedObjectsClientProvider);
+  const SavedVis = createSavedVisClass(services);
+  const urlFor = (id: string) => {
+    return `#/visualize/edit/${encodeURIComponent(id)}`;
+  };
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
-    savedObjectClient,
+    savedObjectsClient,
     npStart.core.chrome
   );
 
-  saveVisualizationLoader.mapHitSource = function (source, id) {
+  saveVisualizationLoader.mapHitSource = (source: any, id: string) => {
     source.id = id;
-    source.url = this.urlFor(id);
+    source.url = urlFor(id);
 
     let typeName = source.typeName;
     if (source.visState) {
@@ -72,18 +83,17 @@ app.service('savedVisualizations', function (SavedVis, Private) {
     return source;
   };
 
-  saveVisualizationLoader.urlFor = function (id) {
-    return `#/visualize/edit/${encodeURIComponent(id)}`;
-  };
+  saveVisualizationLoader.urlFor = (id: string) => urlFor(id);
 
   // This behaves similarly to find, except it returns visualizations that are
   // defined as appExtensions and which may not conform to type: visualization
-  saveVisualizationLoader.findListItems = function (search = '', size = 100) {
+  // @ts-ignore
+  saveVisualizationLoader.findListItems = function(search = '', size = 100) {
     return findListItems({
       search,
       size,
       mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
-      savedObjectsClient: this.savedObjectsClient,
+      savedObjectsClient,
       visTypes: visualizations.types.getAliases(),
     });
   };

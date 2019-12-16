@@ -66,7 +66,7 @@ export interface SavedObjectKibanaServices {
 }
 
 export interface SavedObjectConfig {
-  afterESResp?: () => any;
+  afterESResp?: (savedObject: SavedObject) => SavedObject;
   clearSavedIndexPattern?: boolean;
   defaults?: any;
   extractReferences?: (opts: {

@@ -24,9 +24,9 @@
  *
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
-import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { Vis } from 'ui/vis';
+import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { SearchSourceContract } from 'ui/courier';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { updateOldState } from '../../../../visualizations/public';
@@ -34,18 +34,67 @@ import { VisualizeConstants } from '../visualize_constants';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { SavedSearch } from '../../discover/types';
+import { VisSavedObject } from '../legacy_imports';
 
 import { createSavedSearchesService } from '../../discover';
 
-export function createSavedVisClass() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
+async function _afterEsResp(savedVis: VisSavedObject, services: any) {
+  await _getLinkedSavedSearch(savedVis, services);
+  savedVis.searchSource!.setField('size', 0);
+  savedVis.vis = savedVis.vis ? _updateVis(savedVis) : await _createVis(savedVis);
+  return savedVis;
+}
 
+async function _getLinkedSavedSearch(savedVis: VisSavedObject, services: any) {
+  const linkedSearch = !!savedVis.savedSearchId;
+  const current = savedVis.savedSearch;
+
+  if (linkedSearch && current && current.id === savedVis.savedSearchId) {
+    return;
+  }
+
+  if (savedVis.savedSearch) {
+    savedVis.searchSource!.setParent(savedVis.savedSearch.searchSource.getParent());
+    savedVis.savedSearch.destroy();
+    delete savedVis.savedSearch;
+  }
+  const savedSearches = createSavedSearchesService(services);
+
+  if (linkedSearch) {
+    savedVis.savedSearch = await savedSearches.get(savedVis.savedSearchId!);
+    savedVis.searchSource!.setParent(savedVis.savedSearch!.searchSource);
+  }
+}
+
+async function _createVis(savedVis: VisSavedObject) {
+  savedVis.visState = updateOldState(savedVis.visState);
+
+  // visState doesn't yet exist when importing a visualization, so we can't
+  // assume that exists at this point. If it does exist, then we're not
+  // importing a visualization, so we want to sync the title.
+  if (savedVis.visState) {
+    savedVis.visState.title = savedVis.title;
+  }
+  // the typescript compiler is wrong here, will be right when vis.js -> vis.ts
+  // @ts-ignore
+  savedVis.vis = new Vis(savedVis.searchSource!.getField('index'), savedVis.visState);
+
+  savedVis.vis!.savedSearchId = savedVis.savedSearchId;
+
+  return savedVis.vis;
+}
+
+function _updateVis(savedVis: VisSavedObject) {
+  if (savedVis.vis && savedVis.searchSource) {
+    savedVis.vis.indexPattern = savedVis.searchSource.getField('index');
+    savedVis.visState.title = savedVis.title;
+    savedVis.vis.setState(savedVis.visState);
+    savedVis.vis.savedSearchId = savedVis.savedSearchId;
+  }
+  return savedVis.vis;
+}
+
+export function createSavedVisClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedVis extends SavedObjectClass {
@@ -71,6 +120,7 @@ export function createSavedVisClass() {
       if (typeof opts !== 'object') {
         opts = { id: opts };
       }
+      const visState = !opts.type ? null : { type: opts.type };
       // Gives our SavedWorkspace the properties of a SavedObject
       super({
         type: SavedVis.type,
@@ -82,74 +132,20 @@ export function createSavedVisClass() {
         indexPattern: opts.indexPattern as IndexPattern,
         defaults: {
           title: '',
-          visState: (function() {
-            if (!opts.type) return null;
-            return { type: opts.type };
-          })(),
+          visState,
           uiStateJSON: '{}',
           description: '',
           savedSearchId: opts.savedSearchId,
           version: 1,
         },
+        // @ts-ignore
+        afterESResp: (savedObject: SavedObject) =>
+          _afterEsResp(savedObject as VisSavedObject, services),
       });
       this.showInRecentlyAccessed = true;
       this.getFullPath = () => {
         return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;
       };
-    }
-
-    async _afterEsResp() {
-      await this._getLinkedSavedSearch();
-      this.searchSource!.setField('size', 0);
-      return this.vis ? this._updateVis() : this._createVis();
-    }
-
-    async _getLinkedSavedSearch() {
-      const linkedSearch = !!this.savedSearchId;
-      const current = this.savedSearch;
-
-      if (linkedSearch && current && current.id === this.savedSearchId) {
-        return;
-      }
-
-      if (this.savedSearch) {
-        this.searchSource!.setParent(this.savedSearch.searchSource.getParent());
-        this.savedSearch.destroy();
-        delete this.savedSearch;
-      }
-      const savedSearches = createSavedSearchesService(services);
-
-      if (linkedSearch) {
-        this.savedSearch = await savedSearches.get(this.savedSearchId!);
-        this.searchSource!.setParent(this.savedSearch!.searchSource);
-      }
-    }
-
-    async _createVis() {
-      this.visState = updateOldState(this.visState);
-
-      // visState doesn't yet exist when importing a visualization, so we can't
-      // assume that exists at this point. If it does exist, then we're not
-      // importing a visualization, so we want to sync the title.
-      if (this.visState) {
-        this.visState.title = this.title;
-      }
-      // the typescript compiler is wrong here, will be right when vis.js -> vis.ts
-      // @ts-ignore
-      this.vis = new Vis(this.searchSource!.getField('index'), this.visState);
-
-      this.vis!.savedSearchId = this.savedSearchId;
-
-      return this.vis;
-    }
-
-    _updateVis() {
-      if (this.vis && this.searchSource) {
-        this.vis.indexPattern = this.searchSource.getField('index');
-        this.visState.title = this.title;
-        this.vis.setState(this.visState);
-        this.vis.savedSearchId = this.savedSearchId;
-      }
     }
   }
 

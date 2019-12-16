@@ -71,7 +71,7 @@ export async function applyESResp(
       injectReferences(savedObject, resp.references);
     }
     if (typeof config.afterESResp === 'function') {
-      await config.afterESResp.call(savedObject);
+      savedObject = await config.afterESResp(savedObject);
     }
     return savedObject;
   } catch (e) {
