@@ -4,34 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-  Fragment,
-} from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { ml } from '../../../../services/ml_api_service';
 import { JobGroup } from '../job_group';
 import { getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
 
-import {
-  EuiSearchBar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 function loadGroups() {
-  return ml.jobs.groups()
-    .then((groups) => {
+  return ml.jobs
+    .groups()
+    .then(groups => {
       return groups.map(g => ({
         value: g.id,
         view: (
           <div className="group-item">
-            <JobGroup name={g.id} />&nbsp;
+            <JobGroup name={g.id} />
+            &nbsp;
             <span>
               <FormattedMessage
                 id="xpack.ml.jobsList.jobFilterBar.jobGroupTitle"
@@ -40,10 +33,10 @@ function loadGroups() {
               />
             </span>
           </div>
-        )
+        ),
       }));
     })
-    .catch((error) => {
+    .catch(error => {
       console.log(error);
       return [];
     });
@@ -63,13 +56,16 @@ class JobFilterBarUI extends Component {
     // If job id is selected in url, filter table to that id
     const selectedId = getSelectedJobIdFromUrl(window.location.href);
     if (selectedId !== undefined) {
-      this.setState({
-        selectedId
-      }, () => {
-        // trigger onChange with query for job id to trigger table filter
-        const query = EuiSearchBar.Query.parse(selectedId);
-        this.onChange({ query });
-      });
+      this.setState(
+        {
+          selectedId,
+        },
+        () => {
+          // trigger onChange with query for job id to trigger table filter
+          const query = EuiSearchBar.Query.parse(selectedId);
+          this.onChange({ query });
+        }
+      );
     }
   }
 
@@ -92,7 +88,7 @@ class JobFilterBarUI extends Component {
 
   render() {
     const { intl } = this.props;
-    const { error,  selectedId } = this.state;
+    const { error, selectedId } = this.state;
     const filters = [
       {
         type: 'field_value_toggle_group',
@@ -102,24 +98,24 @@ class JobFilterBarUI extends Component {
             value: 'opened',
             name: intl.formatMessage({
               id: 'xpack.ml.jobsList.jobFilterBar.openedLabel',
-              defaultMessage: 'Opened'
-            })
+              defaultMessage: 'Opened',
+            }),
           },
           {
             value: 'closed',
             name: intl.formatMessage({
               id: 'xpack.ml.jobsList.jobFilterBar.closedLabel',
-              defaultMessage: 'Closed'
-            })
+              defaultMessage: 'Closed',
+            }),
           },
           {
             value: 'failed',
             name: intl.formatMessage({
               id: 'xpack.ml.jobsList.jobFilterBar.failedLabel',
-              defaultMessage: 'Failed'
-            })
-          }
-        ]
+              defaultMessage: 'Failed',
+            }),
+          },
+        ],
       },
       {
         type: 'field_value_toggle_group',
@@ -129,59 +125,59 @@ class JobFilterBarUI extends Component {
             value: 'started',
             name: intl.formatMessage({
               id: 'xpack.ml.jobsList.jobFilterBar.startedLabel',
-              defaultMessage: 'Started'
-            })
+              defaultMessage: 'Started',
+            }),
           },
           {
             value: 'stopped',
             name: intl.formatMessage({
               id: 'xpack.ml.jobsList.jobFilterBar.stoppedLabel',
-              defaultMessage: 'Stopped'
-            })
-          }
-        ]
+              defaultMessage: 'Stopped',
+            }),
+          },
+        ],
       },
       {
         type: 'field_value_selection',
         field: 'groups',
         name: intl.formatMessage({
           id: 'xpack.ml.jobsList.jobFilterBar.groupLabel',
-          defaultMessage: 'Group'
+          defaultMessage: 'Group',
         }),
         multiSelect: 'or',
         cache: 10000,
-        options: () => loadGroups()
-      }
-
+        options: () => loadGroups(),
+      },
     ];
     // if prop flag for default filter set to true
     // set defaultQuery to job id and force trigger filter with onChange - pass it the query object for the job id
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem data-test-subj="mlJobListSearchBar" grow={false}>
-          {selectedId === undefined &&
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            filters={filters}
-            onChange={this.onChange}
-            className="mlJobFilterBar"
-          />
-          }
-          {selectedId !== undefined &&
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            defaultQuery={selectedId}
-            filters={filters}
-            onChange={this.onChange}
-            className="mlJobFilterBar"
-          />}
+          {selectedId === undefined && (
+            <EuiSearchBar
+              box={{
+                incremental: true,
+              }}
+              filters={filters}
+              onChange={this.onChange}
+              className="mlJobFilterBar"
+            />
+          )}
+          {selectedId !== undefined && (
+            <EuiSearchBar
+              box={{
+                incremental: true,
+              }}
+              defaultQuery={selectedId}
+              filters={filters}
+              onChange={this.onChange}
+              className="mlJobFilterBar"
+            />
+          )}
           <EuiFormRow
             fullWidth
-            isInvalid={(error !== null)}
+            isInvalid={error !== null}
             error={getError(error)}
             style={{ maxHeight: '0px' }}
           >

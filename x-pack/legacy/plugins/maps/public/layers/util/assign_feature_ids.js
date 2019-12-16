@@ -16,7 +16,6 @@ function generateNumericalId() {
 }
 
 export function assignFeatureIds(featureCollection) {
-
   // wrt https://github.com/elastic/kibana/issues/39317
   // In constrained resource environments, mapbox-gl may throw a stackoverflow error due to hitting the browser's recursion limit. This crashes Kibana.
   // This error is thrown in mapbox-gl's quicksort implementation, when it is sorting all the features by id.
@@ -39,7 +38,7 @@ export function assignFeatureIds(featureCollection) {
     const feature = featureCollection.features[i];
     features.push({
       type: 'Feature',
-      geometry: feature.geometry,  // do not copy geometry, this object can be massive
+      geometry: feature.geometry, // do not copy geometry, this object can be massive
       properties: {
         // preserve feature id provided by source so features can be referenced across fetches
         [FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
@@ -52,6 +51,6 @@ export function assignFeatureIds(featureCollection) {
 
   return {
     type: 'FeatureCollection',
-    features
+    features,
   };
 }

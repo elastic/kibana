@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { readKeystore }  from './read_keystore';
+import { readKeystore } from './read_keystore';
 
 jest.mock('../../legacy/server/keystore');
 import { Keystore } from '../../legacy/server/keystore';
@@ -35,8 +35,8 @@ describe('cli/serve/read_keystore', () => {
     const data = readKeystore();
     expect(data).toEqual({
       elasticsearch: {
-        password: 'changeme'
-      }
+        password: 'changeme',
+      },
     });
   });
 

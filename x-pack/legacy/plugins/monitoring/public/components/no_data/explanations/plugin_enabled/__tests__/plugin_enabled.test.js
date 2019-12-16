@@ -13,13 +13,9 @@ describe('ExplainPluginEnabled', () => {
     const reason = {
       property: 'xpack.monitoring.enabled',
       data: 'false',
-      context: 'cluster'
+      context: 'cluster',
     };
-    const component = renderWithIntl(
-      <ExplainPluginEnabled
-        {...{ reason }}
-      />
-    );
+    const component = renderWithIntl(<ExplainPluginEnabled {...{ reason }} />);
     expect(component).toMatchSnapshot();
   });
 });

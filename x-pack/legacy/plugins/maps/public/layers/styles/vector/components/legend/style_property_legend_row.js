@@ -14,23 +14,28 @@ import { StyleLegendRow } from '../../../components/style_legend_row';
 const EMPTY_VALUE = '';
 
 export class StylePropertyLegendRow extends Component {
-
   _formatValue = value => {
     if (!this.props.fieldFormatter || value === EMPTY_VALUE) {
       return value;
     }
 
     return this.props.fieldFormatter(value);
-  }
+  };
 
   render() {
     const { meta: range, style } = this.props;
 
     const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
-    const minLabel = this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange ? `< ${min}` : min;
+    const minLabel =
+      this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange
+        ? `< ${min}`
+        : min;
 
     const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
-    const maxLabel = this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange ? `> ${max}` : max;
+    const maxLabel =
+      this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange
+        ? `> ${max}`
+        : max;
 
     return (
       <StyleLegendRow
@@ -48,5 +53,5 @@ StylePropertyLegendRow.propTypes = {
   label: PropTypes.string,
   fieldFormatter: PropTypes.func,
   meta: PropTypes.object,
-  style: PropTypes.object
+  style: PropTypes.object,
 };
