@@ -10,7 +10,7 @@
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
-    "typescript": "3.7.2"
+    "typescript": "3.7.3"
   },
   "peerDependencies": {
     "joi": "^13.5.2",
