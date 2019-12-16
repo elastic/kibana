@@ -12,11 +12,7 @@ const isEmpty = value => {
   return !value || !value.trim().length;
 };
 
-const hasSpaces = (value) => (
-  typeof value === 'string'
-    ? value.includes(' ')
-    : false
-);
+const hasSpaces = value => (typeof value === 'string' ? value.includes(' ') : false);
 
 const beginsWithPeriod = value => {
   return value[0] === '.';
@@ -32,78 +28,78 @@ const findIllegalCharacters = value => {
   }, []);
 };
 
-export const indexNameValidator = (value) => {
+export const indexNameValidator = value => {
   if (isEmpty(value)) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndexForm.errors.nameMissingMessage"
         defaultMessage="Name is required."
-      />
-    )];
+      />,
+    ];
   }
 
   if (beginsWithPeriod(value)) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndexForm.errors.nameBeginsWithPeriodMessage"
         defaultMessage="Name can't begin with a period."
-      />
-    )];
+      />,
+    ];
   }
 
   const illegalCharacters = findIllegalCharacters(value);
 
   if (illegalCharacters.length) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndexForm.errors.nameIllegalCharactersMessage"
         defaultMessage="Remove the characters {characterList} from your name."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
-      />
-    )];
+      />,
+    ];
   }
 
-  if(hasSpaces(value)) {
-    return [(
+  if (hasSpaces(value)) {
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndex.indexNameValidation.noEmptySpace"
         defaultMessage="Spaces are not allowed in the name."
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;
 };
 
-export const leaderIndexValidator = (value) => {
+export const leaderIndexValidator = value => {
   if (isEmpty(value)) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexMissingMessage"
         defaultMessage="Leader index is required."
-      />
-    )];
+      />,
+    ];
   }
 
   const illegalCharacters = findIllegalCharacters(value);
 
   if (illegalCharacters.length) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndexForm.errors.leaderIndexIllegalCharactersMessage"
         defaultMessage="Remove the characters {characterList} from your leader index."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
-      />
-    )];
+      />,
+    ];
   }
 
-  if(hasSpaces(value)) {
-    return [(
+  if (hasSpaces(value)) {
+    return [
       <FormattedMessage
         id="xpack.crossClusterReplication.followerIndex.leaderIndexValidation.noEmptySpace"
         defaultMessage="Spaces are not allowed in the leader index."
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;

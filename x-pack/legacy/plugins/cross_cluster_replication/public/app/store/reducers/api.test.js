@@ -17,7 +17,7 @@ jest.mock('../../constants', () => ({
   SECTIONS: {
     AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
     FOLLOWER_INDEX: 'followerIndex',
-  }
+  },
 }));
 
 describe('CCR Api reducers', () => {

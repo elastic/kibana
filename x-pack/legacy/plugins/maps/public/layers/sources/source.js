@@ -7,7 +7,6 @@
 import { copyPersistentState } from '../../reducers/util';
 
 export class AbstractSource {
-
   static isIndexingSource = false;
 
   static renderEditor() {
@@ -141,5 +140,3 @@ export class AbstractSource {
     throw new Error(`Source#loadStylePropsMeta not implemented`);
   }
 }
-
-

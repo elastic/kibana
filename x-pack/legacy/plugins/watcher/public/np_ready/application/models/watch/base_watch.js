@@ -39,7 +39,7 @@ export class BaseWatch {
 
   updateWatchStatus = watchStatus => {
     this.watchStatus = watchStatus;
-  }
+  };
 
   createAction = (type, defaults) => {
     const ActionTypes = Action.getActionTypes();
@@ -49,7 +49,7 @@ export class BaseWatch {
       throw new Error(
         i18n.translate('xpack.watcher.models.baseWatch.createUnknownActionTypeErrorMessage', {
           defaultMessage: 'Attempted to create unknown action type {type}.',
-          values: { type }
+          values: { type },
         })
       );
     }
@@ -59,19 +59,19 @@ export class BaseWatch {
 
     const action = new ActionType(props);
     this.addAction(action);
-  }
+  };
 
-  addAction = (action) => {
+  addAction = action => {
     if (checkActionIdCollision(this.actions, action)) {
       action.id = createActionId(this.actions, action.type);
     }
 
     this.actions.push(action);
-  }
+  };
 
-  deleteAction = (action) => {
+  deleteAction = action => {
     remove(this.actions, action);
-  }
+  };
 
   resetActions = () => {
     this.actions = [];
@@ -115,22 +115,22 @@ export class BaseWatch {
       name: this.name,
       type: this.type,
       isNew: this.isNew,
-      actions: map(this.actions, action => action.upstreamJson)
+      actions: map(this.actions, action => action.upstreamJson),
     };
   }
 
-  isEqualTo = (otherWatch) => {
+  isEqualTo = otherWatch => {
     // We need to create a POJO copies because isEqual would return false
     // because of property getters
     const cleanWatch = {
-      ...this
+      ...this,
     };
     const cleanOtherWatch = {
-      ...otherWatch
+      ...otherWatch,
     };
 
     return isEqual(cleanWatch, cleanOtherWatch);
-  }
+  };
 
   static typeName = i18n.translate('xpack.watcher.models.baseWatch.typeName', {
     defaultMessage: 'Watch',

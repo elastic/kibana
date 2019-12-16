@@ -41,11 +41,13 @@ const CPU_STATS_FILE = 'cpu.stat';
 const readFile = promisify(fs.readFile);
 
 export function readControlGroups() {
-  return readFile(PROC_SELF_CGROUP_FILE)
-    .then(data => {
-      const response = {};
+  return readFile(PROC_SELF_CGROUP_FILE).then(data => {
+    const response = {};
 
-      data.toString().split(/\n/).forEach(line => {
+    data
+      .toString()
+      .split(/\n/)
+      .forEach(line => {
         const matches = line.match(CONTROL_GROUP_RE);
 
         if (matches === null) {
@@ -58,8 +60,8 @@ export function readControlGroups() {
         });
       });
 
-      return response;
-    });
+    return response;
+  });
 }
 
 function fileContentsToInteger(path) {
@@ -85,71 +87,80 @@ export function readCPUStat(controlGroup) {
     const stat = {
       number_of_elapsed_periods: -1,
       number_of_times_throttled: -1,
-      time_throttled_nanos: -1
+      time_throttled_nanos: -1,
     };
 
-    readFile(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE)).then(data => {
-      data.toString().split(/\n/).forEach(line => {
-        const fields = line.split(/\s+/);
+    readFile(joinPath(PROC_CGROUP_CPU_DIR, controlGroup, CPU_STATS_FILE))
+      .then(data => {
+        data
+          .toString()
+          .split(/\n/)
+          .forEach(line => {
+            const fields = line.split(/\s+/);
 
-        switch(fields[0]) {
-          case 'nr_periods':
-            stat.number_of_elapsed_periods = parseInt(fields[1], 10);
-            break;
+            switch (fields[0]) {
+              case 'nr_periods':
+                stat.number_of_elapsed_periods = parseInt(fields[1], 10);
+                break;
 
-          case 'nr_throttled':
-            stat.number_of_times_throttled = parseInt(fields[1], 10);
-            break;
+              case 'nr_throttled':
+                stat.number_of_times_throttled = parseInt(fields[1], 10);
+                break;
 
-          case 'throttled_time':
-            stat.time_throttled_nanos = parseInt(fields[1], 10);
-            break;
+              case 'throttled_time':
+                stat.time_throttled_nanos = parseInt(fields[1], 10);
+                break;
+            }
+          });
+
+        resolve(stat);
+      })
+      .catch(err => {
+        if (err.code === 'ENOENT') {
+          return resolve(stat);
         }
+
+        reject(err);
       });
-
-      resolve(stat);
-    }).catch(err => {
-      if (err.code === 'ENOENT') {
-        return resolve(stat);
-      }
-
-      reject(err);
-    });
   });
 }
 
 export function getAllStats(options = {}) {
   return new Promise((resolve, reject) => {
-    readControlGroups().then(groups => {
-      const cpuPath = options.cpuPath || groups[GROUP_CPU];
-      const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
+    readControlGroups()
+      .then(groups => {
+        const cpuPath = options.cpuPath || groups[GROUP_CPU];
+        const cpuAcctPath = options.cpuAcctPath || groups[GROUP_CPUACCT];
 
-      // prevents undefined cgroup paths
-      if (!cpuPath || !cpuAcctPath) {
-        return resolve(null);
-      }
+        // prevents undefined cgroup paths
+        if (!cpuPath || !cpuAcctPath) {
+          return resolve(null);
+        }
 
-      return Promise.all([
-        readCPUAcctUsage(cpuAcctPath),
-        readCPUFsPeriod(cpuPath),
-        readCPUFsQuota(cpuPath),
-        readCPUStat(cpuPath)
-      ]).then(([ cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat ]) => {
-        resolve({
-          cpuacct: {
-            control_group: cpuAcctPath,
-            usage_nanos: cpuAcctUsage
-          },
+        return Promise.all([
+          readCPUAcctUsage(cpuAcctPath),
+          readCPUFsPeriod(cpuPath),
+          readCPUFsQuota(cpuPath),
+          readCPUStat(cpuPath),
+        ])
+          .then(([cpuAcctUsage, cpuFsPeriod, cpuFsQuota, cpuStat]) => {
+            resolve({
+              cpuacct: {
+                control_group: cpuAcctPath,
+                usage_nanos: cpuAcctUsage,
+              },
 
-          cpu: {
-            control_group: cpuPath,
-            cfs_period_micros: cpuFsPeriod,
-            cfs_quota_micros: cpuFsQuota,
-            stat: cpuStat
-          }
-        });
-      }).catch(rejectUnlessFileNotFound);
-    }).catch(rejectUnlessFileNotFound);
+              cpu: {
+                control_group: cpuPath,
+                cfs_period_micros: cpuFsPeriod,
+                cfs_quota_micros: cpuFsQuota,
+                stat: cpuStat,
+              },
+            });
+          })
+          .catch(rejectUnlessFileNotFound);
+      })
+      .catch(rejectUnlessFileNotFound);
 
     function rejectUnlessFileNotFound(err) {
       if (err.code === 'ENOENT') {

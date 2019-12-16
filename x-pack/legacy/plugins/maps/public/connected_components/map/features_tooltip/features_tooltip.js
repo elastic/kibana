@@ -14,11 +14,10 @@ import { TooltipHeader } from './tooltip_header';
 
 const VIEWS = {
   PROPERTIES_VIEW: 'PROPERTIES_VIEW',
-  GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW'
+  GEOMETRY_FILTER_VIEW: 'GEOMETRY_FILTER_VIEW',
 };
 
 export class FeaturesTooltip extends React.Component {
-
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -26,24 +25,24 @@ export class FeaturesTooltip extends React.Component {
       return {
         currentFeature: nextProps.features ? nextProps.features[0] : null,
         view: VIEWS.PROPERTIES_VIEW,
-        prevFeatures: nextProps.features
+        prevFeatures: nextProps.features,
       };
     }
 
     return null;
   }
 
-  _setCurrentFeature = (feature) => {
+  _setCurrentFeature = feature => {
     this.setState({ currentFeature: feature });
-  }
+  };
 
   _showGeometryFilterView = () => {
     this.setState({ view: VIEWS.GEOMETRY_FILTER_VIEW });
-  }
+  };
 
   _showPropertiesView = () => {
     this.setState({ view: VIEWS.PROPERTIES_VIEW });
-  }
+  };
 
   _renderActions(geoFields) {
     if (!this.props.isLocked || geoFields.length === 0) {
@@ -51,10 +50,7 @@ export class FeaturesTooltip extends React.Component {
     }
 
     return (
-      <EuiLink
-        className="mapFeatureTooltip_actionLinks"
-        onClick={this._showGeometryFilterView}
-      >
+      <EuiLink className="mapFeatureTooltip_actionLinks" onClick={this._showGeometryFilterView}>
         <FormattedMessage
           id="xpack.maps.tooltip.showGeometryFilterViewLinkLabel"
           defaultMessage="Filter by geometry"
@@ -69,16 +65,20 @@ export class FeaturesTooltip extends React.Component {
     }
 
     // line geometry can only create filters for geo_shape fields.
-    if (featureGeometry.type === GEO_JSON_TYPE.LINE_STRING
-      || featureGeometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
+    if (
+      featureGeometry.type === GEO_JSON_TYPE.LINE_STRING ||
+      featureGeometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING
+    ) {
       return this.props.geoFields.filter(({ geoFieldType }) => {
         return geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE;
       });
     }
 
     // TODO support geo distance filters for points
-    if (featureGeometry.type === GEO_JSON_TYPE.POINT
-      || featureGeometry.type === GEO_JSON_TYPE.MULTI_POINT) {
+    if (
+      featureGeometry.type === GEO_JSON_TYPE.POINT ||
+      featureGeometry.type === GEO_JSON_TYPE.MULTI_POINT
+    ) {
       return [];
     }
 
@@ -92,9 +92,9 @@ export class FeaturesTooltip extends React.Component {
 
     return this.props.loadPreIndexedShape({
       layerId: this.state.currentFeature.layerId,
-      featureId: this.state.currentFeature.id
+      featureId: this.state.currentFeature.id,
     });
-  }
+  };
 
   render() {
     if (!this.state.currentFeature) {
@@ -103,7 +103,7 @@ export class FeaturesTooltip extends React.Component {
 
     const currentFeatureGeometry = this.props.loadFeatureGeometry({
       layerId: this.state.currentFeature.layerId,
-      featureId: this.state.currentFeature.id
+      featureId: this.state.currentFeature.id,
     });
     const geoFields = this._filterGeoFields(currentFeatureGeometry);
 

@@ -38,10 +38,7 @@ export function extractReferences({ attributes, references = [] }) {
     delete panel.id;
   });
   return {
-    references: [
-      ...references,
-      ...panelReferences,
-    ],
+    references: [...references, ...panelReferences],
     attributes: {
       ...attributes,
       panelsJSON: JSON.stringify(panels),
@@ -61,7 +58,7 @@ export function injectReferences(savedObject, references) {
   if (!Array.isArray(panels)) {
     return;
   }
-  panels.forEach((panel) => {
+  panels.forEach(panel => {
     if (!panel.panelRefName) {
       return;
     }

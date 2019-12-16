@@ -20,13 +20,12 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {  getServices } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import html from './discover_field.html';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import './string_progress_bar';
 import detailsHtml from './lib/detail_views/string.html';
-
 
 export function createDiscoverFieldDirective($compile) {
   return {
@@ -40,46 +39,50 @@ export function createDiscoverFieldDirective($compile) {
       onRemoveField: '=',
       onShowDetails: '=',
     },
-    link: function ($scope, $elem) {
+    link: function($scope, $elem) {
       let detailsElem;
       let detailScope;
 
-      const init = function () {
+      const init = function() {
         if ($scope.field.details) {
           $scope.toggleDetails($scope.field, true);
         }
 
         $scope.addRemoveButtonLabel = $scope.field.display
           ? i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
-            defaultMessage: 'remove',
-          })
+              defaultMessage: 'remove',
+            })
           : i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
-            defaultMessage: 'add',
-          });
+              defaultMessage: 'add',
+            });
       };
 
-      const getWarnings = function (field) {
+      const getWarnings = function(field) {
         let warnings = [];
 
         if (field.scripted) {
-          warnings.push(i18n.translate('kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription', {
-            defaultMessage: 'Scripted fields can take a long time to execute.',
-          }));
+          warnings.push(
+            i18n.translate(
+              'kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
+              {
+                defaultMessage: 'Scripted fields can take a long time to execute.',
+              }
+            )
+          );
         }
 
         if (warnings.length > 1) {
-          warnings = warnings.map(function (warning, i) {
+          warnings = warnings.map(function(warning, i) {
             return (i > 0 ? '\n' : '') + (i + 1) + ' - ' + warning;
           });
         }
 
         return warnings;
-
       };
 
       $scope.canVisualize = getServices().capabilities.visualize.show;
 
-      $scope.toggleDisplay = function (field) {
+      $scope.toggleDisplay = function(field) {
         if (field.display) {
           $scope.onRemoveField(field.name);
         } else {
@@ -100,20 +103,21 @@ export function createDiscoverFieldDirective($compile) {
         $scope.toggleDetails(field);
       };
 
-      $scope.toggleDetails = function (field, recompute) {
+      $scope.toggleDetails = function(field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
           $scope.onShowDetails(field, recompute);
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
-          detailScope.getBucketAriaLabel = (bucket) => {
+          detailScope.getBucketAriaLabel = bucket => {
             return i18n.translate('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
               defaultMessage: 'Value: {value}',
               values: {
-                value: bucket.display === ''
-                  ? i18n.translate('kbn.discover.fieldChooser.discoverField.emptyStringText', {
-                    defaultMessage: 'Empty string',
-                  })
-                  : bucket.display,
+                value:
+                  bucket.display === ''
+                    ? i18n.translate('kbn.discover.fieldChooser.discoverField.emptyStringText', {
+                        defaultMessage: 'Empty string',
+                      })
+                    : bucket.display,
               },
             });
           };
@@ -132,7 +136,6 @@ export function createDiscoverFieldDirective($compile) {
       };
 
       init();
-    }
+    },
   };
 }
-
