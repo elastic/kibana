@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.6>>
 * <<release-notes-6.8.5>>
 * <<release-notes-6.8.4>>
 * <<release-notes-6.8.3>>
@@ -92,6 +93,17 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+
+[[release-notes-6.8.6]]
+== {kib} 6.8.6
+
+[float]
+[[bug-6.8.6]]
+=== Bug fix
+Maps::
+* Sanitizes attribution {pull}52309[#52309]
+
+
 [[release-notes-6.8.5]]
 == {kib} 6.8.5
 
@@ -140,7 +152,7 @@ Machine Learning::
 Operations::
 * Introduces two new configurable global socket timeouts {pull}31603[#31603]
 
- 
+
 [[release-notes-6.8.1]]
 == {kib} 6.8.1
 
@@ -166,13 +178,13 @@ Machine Learning::
 == {kib} 6.8.0
 
 
-See <<breaking-changes, breaking changes>> for the changes to be aware of 
+See <<breaking-changes, breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 [float]
 [[enhancements-6.8.0]]
 === Enhancements
-Security:: 
+Security::
 * Updates {kib} to support changes to licensing of security features {pull}35889[#35889]
 Visualize::
 * Sets a default timeout for all "waitFor" methods {pull}34756[#34756]
@@ -194,7 +206,7 @@ Machine Learning::
 == {kib} 6.7.2
 
 
-See <<breaking-changes, breaking changes>> for the changes to be aware of 
+See <<breaking-changes, breaking changes>> for the changes to be aware of
 when migrating your application from one version of {kib} to another.
 
 
@@ -246,7 +258,7 @@ Visualizations::
 == {kib} 6.7.1
 
 
-See <<breaking-changes, breaking changes>> for the changes to be aware of 
+See <<breaking-changes, breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 [float]
@@ -254,7 +266,7 @@ when migrating your application from one version of Kibana to another.
 
 Monitoring::
 * If you have a version 7.0 monitoring cluster, a version 6.7 production
-cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in 
+cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
 {kib}. {issue}34357[#34357]
 
 [float]
@@ -285,7 +297,7 @@ Security::
 * Forces user to re-authenticate if token refresh fails with 400 status code {pull}33774[#33774]
 Uptime::
 * Removes crosshair synchronization to avoid display bug {pull}33660[#33660]
-Visualizations:: 
+Visualizations::
 * Fixes missing formatting for values in table titles {pull}33566[#33566]
 * Allows editing of `editorState` in data panel {pull}33305[#33305]
 * Fixes issue with dark theme and visualization legends {pull}34199[#34199]
@@ -302,7 +314,7 @@ Visualizations::
 
 Monitoring::
 * If you have a version 7.0 monitoring cluster, a version 6.7 production
-cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in 
+cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in
 {kib}. {issue}34357[#34357]
 
 [float]
@@ -333,12 +345,12 @@ Geo::
 Infrastructure::
 * Add a source settings UI {pull}26786[#26786]
 * Adds Discuss feedback links to Infrastructure and Logs {pull}29519[#29519]
-Management:: 
+Management::
 * Adds support for frozen indices to Index Management {pull}28855[#28855]
 * Adds `doc_table:hideTimeColumn` advanced setting {pull}23897[#23897]
 * Allows select settings to specify labels for their values {pull}29584[#29584]
 * Makes badges clickable to filter in index management {pull}29635[#29635]
-* Orders {es} Management apps in order of most used to least used {pull}30145[#30145] 
+* Orders {es} Management apps in order of most used to least used {pull}30145[#30145]
 * Add Rollup toggle to Index Management {pull}28721[#28721]
 * Adds follower badge to Index Management {pull}29177[#29177]
 * Adds set priority action support to ILM UI {pull}29205[#29205]
@@ -399,7 +411,7 @@ Canvas::
 * Fixes element selection on page flip {pull}32111[#32111]
 Cross-Cluster Replication::
 * Improves the Add Cluster page {pull}29142[#29142]
-Infrastructure::   
+Infrastructure::
 * Reverts ECS changes for 6.7 {pull}31961[#31961]
 * Fixes log Rules for AuditD Filebeat Module {pull}28289[#28289]
 * Updates WaffleMap legend to use gray/blue gradient {pull}28206[#28206]
@@ -441,7 +453,7 @@ Infrastructure::
 * Sets color to transparent if dynamic vector value is null {pull}27821[#27821]
 * Fixes table to display name instead of ID {pull}32051[#32051]
 * Handles “no metrics” data gracefully {pull}29424[#29424]
-Kibana App:: 
+Kibana App::
 * Removes dollar key stripping from search requests {pull}30483[#30483]
 * Adds referenced pipeline aggs to every level of query {pull}31121[#31121]
 * Introduces workaround for Vega height bug {pull}31461[#31461]
@@ -659,7 +671,7 @@ Visualize::
 [[release-notes-6.6.2]]
 == {kib} 6.6.2
 
-See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
+See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 
@@ -693,7 +705,7 @@ Visualizations::
 [[release-notes-6.6.1]]
 == {kib} 6.6.1
 
-See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
+See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 
@@ -756,15 +768,15 @@ Platform::
 [[known-issues-6.6.0]]
 === Known issues
 Canvas::
-A known issue prevents Canvas from loading outside of the default space. {pull}27262[#27262]   
+A known issue prevents Canvas from loading outside of the default space. {pull}27262[#27262]
 +
-This issue will be fixed in a future bug fix release. {pull}29393[#29393]  
+This issue will be fixed in a future bug fix release. {pull}29393[#29393]
 
 Visualizations::
 A known issue prevents filtering on legend items in area, bar, and line charts. {pull}28176[#28176]
 +
 This issue will be fixed in a future bug fix release. {pull}29592[#29592]
-               
+
 Plugin settings::
 {kib} may not start when using deprecated plugin settings in kibana.yml
 +
@@ -779,7 +791,7 @@ Operations::
 
 [float]
 [[plugin-6.6.0]]
-=== Plugin API Changes 
+=== Plugin API Changes
 See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-6[Kibana plugin API changes in 6.6].
 
 [float]
@@ -788,7 +800,7 @@ See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-6[Kibana plugin A
 6.6.0 includes the following highlights:
 
 * Index Lifecycle Management
-* Remote Clusters and Cross Cluster Replication 
+* Remote Clusters and Cross Cluster Replication
 * Upgrade Assistant for Elasticsearch 7.0
 
 For more information, see <<release-highlights-6.6.0, 6.6.0 Release Highlights>>.
@@ -889,7 +901,7 @@ Geo::
 * Fixes TMS without EMS access {pull}28111[#28111]
 * Removes fetch ‘finally’ block to fix map loading error {pull}28306[#28306]
 * Ensures reporting works with unsaturated baselayers {pull}28185[#28185]
-Infrastructure:: 
+Infrastructure::
 * Fixes potential color bugs {pull}26292[#26292]
 * Changes time range for waffle map from last hour to last 5m {pull}26278[#26278]
 * Fixes AutoRefresh button on node detail page {pull}26426[#26426]
@@ -1052,7 +1064,7 @@ Visualizations::
 [[breaking-changes-6.5.4]]
 === Breaking changes
 
-See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+See <<breaking-changes, Breaking changes>> for the changes to be aware of
 when migrating your application from one version of {kib} to another.
 
 [float]
@@ -1069,15 +1081,15 @@ Canvas::
 Kibana App::
 * Fixes vertical scroll on long legends {pull}23806[#23806]
 * Fixes a problem that caused {kib} to set the {es} timeout to 0,
-instead of excluding it. As a result, visualizations 
+instead of excluding it. As a result, visualizations
 returned partial data or errors. {pull}27217[#27217]
 
 Machine Learning::
-* Fixes population chart marker positions and swimlane race 
+* Fixes population chart marker positions and swimlane race
 condition {pull}26716[#26716]
 
 Management::
-* Fixes rollup indices request failures so that they don't block the Create 
+* Fixes rollup indices request failures so that they don't block the Create
 Index Pattern button {pull}26988[#26988]
 
 Security::
@@ -1095,7 +1107,7 @@ Visualization::
 [[breaking-changes-6.5.3]]
 === Breaking changes
 
-See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+See <<breaking-changes, Breaking changes>> for the changes to be aware of
 when migrating your application from one version of {kib} to another.
 
 [float]
@@ -1104,7 +1116,7 @@ when migrating your application from one version of {kib} to another.
 Platform::
 * Returns support for `i18n.defaultLocale` and marks it as deprecated {pull}26556[#26556]
 +
-`i18n.defaultLocale` has been renamed to `i18n.locale` to better reflect what 
+`i18n.defaultLocale` has been renamed to `i18n.locale` to better reflect what
 this setting actually does since the default is always English locale.
 
 [float]
@@ -1116,7 +1128,7 @@ Canvas::
 * Reduces HTTP POST generation on selections and drags {pull}26391[#26391]
 
 Dashboard::
-* Fixes an issue where read only roles were unable to view pagination controls 
+* Fixes an issue where read only roles were unable to view pagination controls
 on saved searches in a dashboard panel {pull}26224[#26224]
 
 Monitoring::
@@ -1126,7 +1138,7 @@ Monitoring::
 Querying &amp; Filtering::
 * Specifies the timeout for the `_msearch` in the body {pull}26446[#26446]
 +
-Resolves the issue with the `_msearch` timeouts being specified incorrectly, 
+Resolves the issue with the `_msearch` timeouts being specified incorrectly,
 which caused them to be ignored."
 
 Platform::
@@ -1139,7 +1151,7 @@ Security::
 Updates documentation links to `run_as`, `index`, and `cluster` privilege categories.
 
 Visualizations::
-* Fixes the `group by terms` functionality in Time Series Visual Builder 
+* Fixes the `group by terms` functionality in Time Series Visual Builder
 so it correctly shows the Metric and Gauge visualizations {pull}26520[#26520]
 
 
@@ -1150,7 +1162,7 @@ so it correctly shows the Metric and Gauge visualizations {pull}26520[#26520]
 [[breaking-changes-6.5.2]]
 === Breaking changes
 
-See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+See <<breaking-changes, Breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 [float]
@@ -1235,7 +1247,7 @@ Visualizations::
 [[breaking-changes-6.5.1]]
 === Breaking changes
 
-See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+See <<breaking-changes, Breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 [float]
@@ -1312,10 +1324,10 @@ This will be fixed in a future bug fix release, at which time you can go back to
 
 * {kib} ignores the timezone setting `dateFormat:tz` {pull}25596[#25596]
 +
-If you use the default `browser` setting for `dateFormat:tz`, 
-you're fine. If you use any other setting for `dateFormat:tz`, and you use 
-Absolute time ranges, you might see issues where {kib} initially 
-shows data in your browser's local timezone instead of the configured timezone. 
+If you use the default `browser` setting for `dateFormat:tz`,
+you're fine. If you use any other setting for `dateFormat:tz`, and you use
+Absolute time ranges, you might see issues where {kib} initially
+shows data in your browser's local timezone instead of the configured timezone.
 Refreshing the page usually corrects the issue.
 This will be fixed in a future bug fix release.
 
@@ -1330,14 +1342,14 @@ The setting is meant to be deprecated, and using the replacement setting `loggin
 Monitoring::
 * Deprecates `xpack:defaultAdminEmail` for monitoring alerts {pull}22195[#22195]
 +
-The `xpack:defaultAdminEmail` UI Setting is deprecated for Monitoring, but is still 
-fully supported for the Watcher UI. To receive cluster alert notification emails, 
+The `xpack:defaultAdminEmail` UI Setting is deprecated for Monitoring, but is still
+fully supported for the Watcher UI. To receive cluster alert notification emails,
 configure `xpack.monitoring.cluster_alerts.email_notifications.email_address` in `kibana.yml`.
 
 [float]
 === Plugin API changes
 
-See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-5[Kibana plugin API changes in 6.5], which describes changes to the visualizations 
+See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-5[Kibana plugin API changes in 6.5], which describes changes to the visualizations
 response handler, data schema, and aggregations.
 
 
@@ -1346,16 +1358,16 @@ response handler, data schema, and aggregations.
 
 * Spaces
 * Canvas
-* Monitoring of cross-cluster replication 
+* Monitoring of cross-cluster replication
 * Rollup jobs in Management
 * Rolled up data in visualizations
-* Beats central management 
-* Infrastructure and Logs 
+* Beats central management
+* Infrastructure and Logs
 * Distributed tracing in APM
 * Data Visualizer and File Data Visualizer in Machine Learning
 * Two new sample data sets
 
-For an overview of the new features that were added in 6.5.0 and how the user 
+For an overview of the new features that were added in 6.5.0 and how the user
 experience improved, see the <<release-highlights-6.5.0, 6.5.0 Release Highlights>>.
 
 [float]
@@ -1687,8 +1699,8 @@ Visualizations::
 [[breaking-6.4.3]]
 === Breaking changes
 
-See <<breaking-changes, breaking changes>> for the changes 
-to be aware of when migrating your application from one version of 
+See <<breaking-changes, breaking changes>> for the changes
+to be aware of when migrating your application from one version of
 {kib} to another.
 
 
@@ -1708,17 +1720,17 @@ Monitoring::
 * Preserves the state of cross cluster search {pull}24331[#24331]
 
 Security::
-* Fixes an issue with reporting that could potentially send authentication 
-credentials to third parties (CVE-2018-17245).  See 
+* Fixes an issue with reporting that could potentially send authentication
+credentials to third parties (CVE-2018-17245).  See
 https://www.elastic.co/blog/elastic-support-alert-kibana-reporting-vulnerability[this blog post].  {pull}24177[#24177]
-* Fixes an issue with the console API that might allow arbitrary files to be 
-included from the system (CVE-2018-17246). See 
+* Fixes an issue with the console API that might allow arbitrary files to be
+included from the system (CVE-2018-17246). See
 https://www.elastic.co/community/security[Security issues]. {pull}24398[#24398]
 
 Visualization::
-* Fixes the editor so that updating `aggconfigs` in a visualization 
+* Fixes the editor so that updating `aggconfigs` in a visualization
 and then calling `vis.updateState()` works correctly {pull}22869[#22869]
-* Fixes a memory leak in `vislib`, where the scope used for the legend was never 
+* Fixes a memory leak in `vislib`, where the scope used for the legend was never
 destroyed, which caused memory to pile up in a dashboard that has auto-refresh enabled {pull}24134[#24134]
 * Fixes pie charts so that they work properly when the time window doesn't have
 any data {pull}24031[#24031]
@@ -1755,7 +1767,7 @@ Design::
 * Resolves a problem that caused tooltips to generate an error in Internet Explorer 11 {pull}23006[#23006]
 
 Discover::
-* Fixes regression in `CallClient` that caused request errors, 
+* Fixes regression in `CallClient` that caused request errors,
 such as timeouts, to result in fatal errors {pull}22558[#22558]
 * Improves test coverage for `CallClient` error cases {pull}22599[#22599]
 * Adds explicit format parameter to `docvalue_fields` requests {pull}22771[#22771]
@@ -1779,22 +1791,22 @@ Management::
 Monitoring::
 * Uses 0 as the default for shard count if the node is not found {pull}21000[#21000]
 * Fixes logging when Monitoring reinitializes with a HUP signal (#22464) {pull}22513[#22513]
-* Fixes the problem where the *Shard Legend* panel in *Monitoring > Indices* 
+* Fixes the problem where the *Shard Legend* panel in *Monitoring > Indices*
 only shows one replica per shard {pull}23183[#23183]
 
 Platform::
 * Calculates the content length for the export API {pull}22847[#22847]
 * Relies on RFC1123 when validating `server.host` {pull}22469[#22469]
-* Fixes a problem with force `del()` when `bundleDir` is outside the current 
+* Fixes a problem with force `del()` when `bundleDir` is outside the current
 working directory {pull}22981[#22981]
 +
-Trying to run a {kib} optimization (usually after installing or disabling a plugin) 
-from a directory that is not a parent of the `optimize.bundleDir` configuration or 
-the {kib} installation no longer fails with "Cannot delete files/folders outside 
+Trying to run a {kib} optimization (usually after installing or disabling a plugin)
+from a directory that is not a parent of the `optimize.bundleDir` configuration or
+the {kib} installation no longer fails with "Cannot delete files/folders outside
 the current working directory."
 
 Reporting::
-* Removes the `shouldComponentUpdate` function from `MarkdownVisComponent` 
+* Removes the `shouldComponentUpdate` function from `MarkdownVisComponent`
 because it caused reporting failures {pull}21501[#21501]
 
 
@@ -1803,7 +1815,7 @@ Sharing::
 * Adds detection of invalid JSON searchSource to saved_object and dashboard {pull}20379[#20379]
 * Updates dashboard-only mode to display saved searches {pull}22685[#22685]
 * Adds `aria-label` to search input on dashboard listing view {pull}22467[#22467]
-* In the Controls visualization, safely handles case where value can not be 
+* In the Controls visualization, safely handles case where value can not be
 extracted from Kibana filter {pull}22885[#22885]
 
 Visualization::
@@ -1820,15 +1832,15 @@ Visualization::
 Platform::
 * Replaces `SearchSource` fetch with `fetchAsRejectablePromise` {pull}20130[#20130]
 +
-`SearchSource` exposed two methods for fetching, `fetch` and `fetchAsRejectablePromise`. 
-`fetch` provided a broken implementation because it never set an `errorHandler` on 
-the created `SearchRequest` instance. This resulted in a method that worked fine 
-until the underlying {es} request failed. Then {kib} would crash because 
+`SearchSource` exposed two methods for fetching, `fetch` and `fetchAsRejectablePromise`.
+`fetch` provided a broken implementation because it never set an `errorHandler` on
+the created `SearchRequest` instance. This resulted in a method that worked fine
+until the underlying {es} request failed. Then {kib} would crash because
 `SearchRequest` would attempt to call `errorHandler` which was undefined.
 +
-The only difference between `fetch` and `fetchAsRejectablePromise` was how errors 
-were handled. This change removes the original fetch method and renames 
-`fetchAsRejectablePromise` as fetch. It also moves `errorHandler` into 
+The only difference between `fetch` and `fetchAsRejectablePromise` was how errors
+were handled. This change removes the original fetch method and renames
+`fetchAsRejectablePromise` as fetch. It also moves `errorHandler` into
 the constructor of `SearchRequest` and throws an error when not provided.
 
 [float]
@@ -1843,13 +1855,13 @@ improved, see <<release-highlights-6.4.0, 6.4.0 Release Highlights>>.
 === Enhancements
 
 APM::
-* Adds `compressed` prop to the EuiFormRows for a more compressed looking form. 
+* Adds `compressed` prop to the EuiFormRows for a more compressed looking form.
 Works nicely for smaller screensizes. {pull}19204[#19204]
 * Updates Ruby onboarding instructions {pull}21477[#21477]
 * Syncs stored_objects with files from APM Server {pull}21096[#21096]
 
 Console::
-* [Fixes #19178] Adds support for Console autocompletion of missing 
+* [Fixes #19178] Adds support for Console autocompletion of missing
 Query Domain Specific Language (DSL) features {pull}19318[#19318]
 * [Fixes #19138] Adds `regexp` to query DSL support for Console autocompletion {pull}19176[#19176]
 * [Fixes #20141] Adds support to Console for autocompletion of template names in API endpoints {pull}20218[#20218]
@@ -1864,14 +1876,14 @@ Discover::
 
 Grok Debugger::
 * Converts the Grok Debugger to use React and EUI components {pull}20027[#20027]
-* [Fixes #17857] Adds syntax highlighting for grok expressions 
+* [Fixes #17857] Adds syntax highlighting for grok expressions
 in the *Grok pattern* text area of the Grok Debugger {pull}18572[#18572]
 
 Logstash::
 
-* Creates a new class that represents the pipeline in a flat structure to make it easier 
+* Creates a new class that represents the pipeline in a flat structure to make it easier
 for the Config view to visualize data {pull}19084[#19084]
-* [Fixes #18423, #18020] Adds a new visualization of Logstash pipelines that mimics what 
+* [Fixes #18423, #18020] Adds a new visualization of Logstash pipelines that mimics what
 users see when they look at the corresponding configuration file {pull}18597[#18597]
 * [Fixes #19006] Adds a *Netflow Overview dashboard* button at the end of the Netflow tutorial {pull}19299[#19299]
 
@@ -1914,14 +1926,14 @@ Management::
 * [Fixes #19741] Modifies the logic for showing the *Extend Trial* pane {pull}20211[#20211]
 * [Fixes #19269] Refactors the *Management > Index Pattern > Edit field*
 and *Create scripted field* pages to use React and EUI {pull}20245[#20245]
-* [Fixes #11804] Adds the ability to run scripted fields so users can view the results and see if the script works 
+* [Fixes #11804] Adds the ability to run scripted fields so users can view the results and see if the script works
 as intended {pull}20746[#20746]
 * Adds a field formatter for a static lookup table/map {pull}19637[#19637]
 * [Fixes #19872] Improves warnings for delete and force merge {pull}20264[#20264]
 * [Fixes #17045] Refactors the *Management > Advanced Settings* page to use React and EUI {pull}17465[#17465]
 * [Fixes #19185] Updates querying for saved objects to use the saved objects API {pull}19193[#19193]
-* [Fixes #18584] Adds support for index patterns to leverage 
-https://www.elastic.co/guide/en/elasticsearch/guide/current/optimistic-concurrency-control.html[optimistic concurrency], 
+* [Fixes #18584] Adds support for index patterns to leverage
+https://www.elastic.co/guide/en/elasticsearch/guide/current/optimistic-concurrency-control.html[optimistic concurrency],
  which is supported through the saved objects API {pull}18937[#18937]
 * Converts the *Users* and *Edit User* pages of security management to the EUI {pull}20739[#20739]
 * Updates the *Saved Objects* UI {pull}17426[#17426]
@@ -1952,26 +1964,26 @@ Platform::
 * Adds Apache 2.0 license headers to the top of each file {pull}19383[#19383]
 
 Security::
-* [Fixes #18178] Implements {kib} privileges to enable role-based access 
-control in {kib} without granting {kib} users direct access to the `.kibana 
+* [Fixes #18178] Implements {kib} privileges to enable role-based access
+control in {kib} without granting {kib} users direct access to the `.kibana
 index` {pull}19723[#19723]
 
 Sharing::
 * [Fixes #16611] Adds a status check to the *Add data* tutorials {pull}17732[#17732]
 * [Fixes #17679] Adds an `isBeta` flag so the UI can indicate when an *Add Data* module
 is in Beta mode {pull}20049[#20049]
-* [Fixes #17803] Adds the ability to publish {kib} saved objects from 
+* [Fixes #17803] Adds the ability to publish {kib} saved objects from
 an *Add Data* tutorial {pull}19559[#19559]
 * [Fixes #16473, #10813] Adds REST endpoints for listing, installing, and uninstalling sample data sets {pull}17807[#17807]
 * Allows panels in the dashboard to include custom actions {pull}18877[#18877]
 +
-This enables you to include actions specific to the type of visualization or search in the panel. 
-For example, some visualizations might have an action for creating a machine learning 
+This enables you to include actions specific to the type of visualization or search in the panel.
+For example, some visualizations might have an action for creating a machine learning
 job while others might have actions for generating a report or creating a watch.
 
-* [Fixes #14529] Adds a *Dynamic Options* toggle switch to the Controls visualization 
+* [Fixes #14529] Adds a *Dynamic Options* toggle switch to the Controls visualization
 {pull}18985[#18985]
-+ 
++
 When set to true, the *Dropdown Options* list is updated and filtered by the user input.
 
 * Adds a notification service to {kib} that can be used to send
@@ -1990,15 +2002,15 @@ Telemetry::
 Visualization::
 * [Fixes #18918] Allows setting an offset relative to {kib} time {pull}19709[#19709]
 +
-For example, you can set a Timelion expression as 
-`.es(index=logstash*,timefield=@timestamp,offset=timerange:-1)`. 
-When the time picker is set to "last 15 minutes", the offset is `-900s`. 
+For example, you can set a Timelion expression as
+`.es(index=logstash*,timefield=@timestamp,offset=timerange:-1)`.
+When the time picker is set to "last 15 minutes", the offset is `-900s`.
 When the time picker is set to "last 24", the offset is `-86400s`.
- 
+
 * Allows splitting series on multiple fields {pull}17855[#17855]
 +
-Splitting lines, bars, and so on in charts on multiple fields no longer requires 
-you to create a scripted field that contains the value of all other fields. 
+Splitting lines, bars, and so on in charts on multiple fields no longer requires
+you to create a scripted field that contains the value of all other fields.
 You can now define multiple aggregations to split your chart on multiple fields.
 
 * [Fixes #5517] Adds multiple colorramps to coordinate maps {pull}17403[#17403]
@@ -2030,7 +2042,7 @@ Discover::
 * Replaces notifier warnings in Discover with toasts {pull}20650[#20650]
 * Tests the `callClient.js` client {pull}20605[#20605]
 * Fixes a bug in which Discover erroneously shows shard failures message {pull}21003[#21003]
-* [Fixes #16771] Fixes bug in Discover where the code expected the shard failure's `reason` 
+* [Fixes #16771] Fixes bug in Discover where the code expected the shard failure's `reason`
 property to be a string or number, when it's really an object  {pull}21601[#21601]
 * [Fixes #15143, #17696] Incrementally increases the context time window {pull}16878[#16878]
 * [Fixes #18636] In the Filter editor, hides fields until they are scrolled into view to decrease load time {pull}18640[#18640]
@@ -2092,10 +2104,10 @@ longer see the message when they use the Cancel or Back button to go back to the
 * Removes Close buttons from *Saved Object Relationship* flyout and *Index Management* flyout {pull}20043[#20043]
 * In Watcher, replace uses of Notifier with toastNotifications {pull}20538[#20538]
 * [Fixes #20611] Re-enables the `indexPattern:placeholder` setting {pull}20685[#20685]
-*  Adds `SearchStrategyRegistry` and `defaultSearchStrategy` to support existing search behavior 
+*  Adds `SearchStrategyRegistry` and `defaultSearchStrategy` to support existing search behavior
 and integrates it with `CallClient` {pull}20497[#20497]
 * [Fixes #21512] Fixes broken link to saved object from *Relationship* flyout {pull}21513[#21513]
-* [Fixes #21572] Blocks users from interacting with the UI while saved objects 
+* [Fixes #21572] Blocks users from interacting with the UI while saved objects
 are deleted {pull}21575[#21575]
 * [Fixes #21615]  Fixes saved objects item count and table filtering {pull}21574[#21574]
 * Swaps Watcher `create action` tooltips {pull}21717[#21717]
@@ -2105,7 +2117,7 @@ are deleted {pull}21575[#21575]
 * [Fixes #18756] Fixes Ace editor warnings {pull}18893[#18893]
 * Fixes Ace warnings in Console output {pull}19272[#19272]
 * [Fixes #19802] Fixes search in *Advanced Settings* {pull}19841[#19841]
-* [Fixes #20156] In *Advanced Settings*, changes the display of the JSON default setting value to 
+* [Fixes #20156] In *Advanced Settings*, changes the display of the JSON default setting value to
 use EuiCodeBlock and uses the `overflowHeight` prop for long values {pull}20744[#20744]
 * Adds test coverage around the relationships endpoints to validate responses and check error handling {pull}19737[#19737]
 * Updates data test subject to use correct property from item object {pull}20794[#20794]
@@ -2121,7 +2133,7 @@ Monitoring::
 * [Fixes #20628] Uses 0 as the default for shard count if the node is not found {pull}21000[#21000]
 * [Fixes #21308] Ensures {kib} passes down the `expiry_date` for the license {pull}21354[#21354]
 * Fixes capitalization typo for `className` attribute {pull}20104[#20104]
-* [Fixes #18104] Refactors the {es} Indices Listing to use Base Controller and a React component 
+* [Fixes #18104] Refactors the {es} Indices Listing to use Base Controller and a React component
 instead of an Angular directive {pull}18595[#18595]
 * Adds collector classes for objects that are registered in a `CollectorSet` {pull}19098[#19098]
 * Ensures functional tests work correctly for the summary status component {pull}19289[#19289]
@@ -2170,13 +2182,13 @@ Operations::
 * [devUtils/procRunner] Waits for proc to exit so can fallback to SIGKILL {pull}20918[#20918]
 * [Fixes #19700] Turns off `object-literal-sort-keys` rule {pull}20274[#20274]
 * Converts `ResizeChecker` and `render-complete` tools to TypeScript {pull}20531[#20531]
-* Solves a problem where the `toApiFieldNames` method in the Stats API was converting 
+* Solves a problem where the `toApiFieldNames` method in the Stats API was converting
 arrays in the data to objects. {pull}21053[#21053]
 * Returns keystore data as a structured object. {pull}22022[#22022]
 
 Platform::
 * [Fixes #20573] Removes unnecessary`kbn-version` header on all HTTP responses {pull}20551[#20551]
-* [Fixes #18779] Renames `@kbn/babel-preset/common` and `node` and `webpack` 
+* [Fixes #18779] Renames `@kbn/babel-preset/common` and `node` and `webpack`
 to `@kbn/babel-preset/common_preset` and `node_preset` and `webpack_preset` {pull}19025[#19025]
 * Upgrades RxJS from `6.1.0` to `6.2.1` {pull}20209[#20209]
 * Uses TSLint to handle errors in `kbn_internal_native_observable` types {pull}20705[#20705]
@@ -2204,7 +2216,7 @@ to `@kbn/babel-preset/common_preset` and `node_preset` and `webpack_preset` {pul
 * Adds `import()` support to `eslint-plugin-no-unsanitized` {pull}19315[#19315]
 * Checks filename casing in CI {pull}19282[#19282]
 * Ensures all failures are logged {pull}19271[#19271]
-* Uses https://github.com/sindresorhus/execa[execa] in plugin-helpers so that errors include 
+* Uses https://github.com/sindresorhus/execa[execa] in plugin-helpers so that errors include
 `stdout` with helpful information {pull}20110[#20110]
 * [tslint] Ensures that the status code is 1 when an error occurs in a linter {pull}20567[#20567]
 * [tslint] Adds helper for running tslint on specific projects {pull}20866[#20866]
@@ -2227,13 +2239,13 @@ Security::
 * [Fixes #20600, #20177] Improves communication for {es}/{xpack} being unavailable {pull}21124[#21124]
 * [RBAC Phase 1] Updates application privileges when {xpack} license changes {pull}19839[#19839]
 * [Fixes #16516] Disallows use of `dangerouslySetInnerHTML` on React components {pull}17759[#17759]
-* Exposes `getSavedObjectsRepository` from Saved Objects Service to allow callers 
+* Exposes `getSavedObjectsRepository` from Saved Objects Service to allow callers
 to obtain an instance of the repository directly {pull}19677[#19677]
 * [Saved Objects Client] Returns information about what is missing in the 404 {pull}19868[#19868]
 * No longer sets certs and keys for proxied calls to {es} {pull}17804[#17804]
 +
-Resolved issue with using PKI to authenticate the internal server user against 
-{es} when {security} is disabled or the realms in {es} are configured with 
+Resolved issue with using PKI to authenticate the internal server user against
+{es} when {security} is disabled or the realms in {es} are configured with
 PKI taking precedence to basic authentication.
 
 
@@ -2256,7 +2268,7 @@ Sharing::
 * [Fixes #20062] Uses absolute path for sample data {pull}20244[#20244]
 * Removes `display` from timefilter refreshInterval state {pull}20348[#20348]
 * Removes Angular dependency from Field and FieldList {pull}20589[#20589]
-* [Fixes #21326] Moves the global state management out of `kbn_global_timepicker.js` and into `timefilter.js` so all of the 
+* [Fixes #21326] Moves the global state management out of `kbn_global_timepicker.js` and into `timefilter.js` so all of the
 timefilter code resides in a single location and timefilter itself is responsible for updating the global state {pull}21440[#21440]
 * [Fixes #21438] Sets pause to `true` when refresh interval is zero {pull}21498[#21498]
 * [Fixes #21551] Ensures the Range control correctly handles response when read-only user does not have index permission {pull}21557[#21557]
@@ -2299,7 +2311,7 @@ Visualization::
 * Removes Angular from `AggConfigs` {pull}17682[#17682]
 * [Fixes #16595] Explicitly passes filters and queries to dashboard visualizations and saved searches {pull}19172[#19172]
 * Removes Angular from courier request handler {pull}20032[#20032]
-* Replaces `showMeticsAtAllLevels`, which is missing an "r" in the word metrics, 
+* Replaces `showMeticsAtAllLevels`, which is missing an "r" in the word metrics,
 with `showMetricsAtAllLevels` {pull}20369[#20369]
 * Moves the visualize editor out of visualize directive {pull}20263[#20263]
 * Splits edit state from saved state {pull}20323[#20323]
@@ -2354,11 +2366,11 @@ with `showMetricsAtAllLevels` {pull}20369[#20369]
 === Bug fixes
 
 Accessibility::
-* [Fixes #19012] Adds missing aria-level attribute on the solutions page in {kib}. In 
+* [Fixes #19012] Adds missing aria-level attribute on the solutions page in {kib}. In
 particular, it adds aria-level to KuiCardDescriptionTitle. {pull}20579[#20579]
 
 Dashboard::
-* [Fixes #20635] Reduces the scale factor to 4 when migrating panels that are in 
+* [Fixes #20635] Reduces the scale factor to 4 when migrating panels that are in
 a dashboard with margins. {pull}20727[#20727]
 
 Discover::
@@ -2367,26 +2379,26 @@ Discover::
 Monitoring::
 * Fixes issues with sorting and filtering of {es} nodes {pull}20383[#20383]
 +
-This issue fixes the sorting and filtering of rows in the table of {es} nodes 
+This issue fixes the sorting and filtering of rows in the table of {es} nodes
 in the {kib} Monitoring UI.
 
 Reporting::
-* Fixes issue with running Chromium headless over HTTP when accessing {kib} 
+* Fixes issue with running Chromium headless over HTTP when accessing {kib}
 publicly via HTTPS {pull}20528[#20528]
 
 Visualization::
-* [Fixes #19378, #16884] Fixes editor sidebar to better handle long field 
+* [Fixes #19378, #16884] Fixes editor sidebar to better handle long field
 names {pull}20476[#20476]
-* [Fixes #20240] Fixes issues with the flickering of visualizations on 
+* [Fixes #20240] Fixes issues with the flickering of visualizations on
 refresh {pull}20848[#20848]
-* Avoids shard failures when performing a `geo_bounding_box` filter on coordinate 
-maps {pull}19548[#19548] 
+* Avoids shard failures when performing a `geo_bounding_box` filter on coordinate
+maps {pull}19548[#19548]
 * Fixes disabled aggregations in the visualization editor {pull}20450[#20450]
 
 [float]
 === Important documentation and developer changes
 Platform::
-* Defaults to running the {es} functional test server from a snapshot locally 
+* Defaults to running the {es} functional test server from a snapshot locally
 in the {xpack} directory {pull}20585[#20585]
 
 Visualization::
@@ -2399,14 +2411,14 @@ Visualization::
 [[enhancement-6.3.1]]
 === Enhancements
 Management::
-* [Fixes #19475] Replaces the `watch-type-select` directive in Watcher 
+* [Fixes #19475] Replaces the `watch-type-select` directive in Watcher
 with buttons {pull}19782[#19782]
 +
 [role="screenshot"]
 image::images/management-watcher-2-buttons.png[]
 
 Monitoring::
-* Improves the experience of enabling monitoring collection when the page is set 
+* Improves the experience of enabling monitoring collection when the page is set
 to an absolute time range {pull}19451[#19451]
 
 Operations::
@@ -2417,26 +2429,26 @@ Operations::
 === Bug fixes
 
 Machine Learning::
-* Fixes issues when watching the scope of single metric viewer 
+* Fixes issues when watching the scope of single metric viewer
 data {pull}19029[#19029]
 
 Management::
 * [Fixes #19617] Shows internal indices if *Include system indices* is toggled
 on and no other indices exist {pull}19618[#19618]
-* [Fixes #19483] Adds `aria-labelledby` to index details flyout to tell 
-screen reader what to announce when the flyout is opened {pull}19776[#19776] 
+* [Fixes #19483] Adds `aria-labelledby` to index details flyout to tell
+screen reader what to announce when the flyout is opened {pull}19776[#19776]
 * [Fixes #19048] Adds heading hierarchy to Management landing page and `role='group'`
 to panels to aid screen reader accessibility {pull}19777[#19777]
 * [Fixes #19482] Adds `aria-label` to Indices Management search input {pull}19778[#19778]
 * [Fixes #19474] Adds `described-by` attribute to `duration-selection` directive
 to make children inputs accessible to screen readers {pull}19779[#19779]
-* [Fixes #19814] Guards against calling `fieldWildcardMatcher` or `fieldWildcardFilter` 
+* [Fixes #19814] Guards against calling `fieldWildcardMatcher` or `fieldWildcardFilter`
 with undefined {pull}19865[#19865]
 
 
 Operations::
 * Allows the plugin installer to remove an {xpack} plugin if it exists {pull}19327[#19327]
-* Changes license checker and generator behavior to only add dev dependencies 
+* Changes license checker and generator behavior to only add dev dependencies
 with the `--dev` flag {pull}19626[#19626]
 
 Platform::
@@ -2444,7 +2456,7 @@ Platform::
 {pull}20018[#20018]
 +
 When using {xpack}, it was previously possible for {kib} to get stuck in a "red"
-state, preventing access to the {kib} applications, if {kib} and {es} were 
+state, preventing access to the {kib} applications, if {kib} and {es} were
 started at the same time. We've fixed this issue to ensure that {kib} is always
 usable when it's able to talk to {es}.
 
@@ -2453,7 +2465,7 @@ Sharing::
 label {pull}19830[#19830]
 
 Visualization::
-* [Fixes #19191] Shows tooltip when string and integer fields are used 
+* [Fixes #19191] Shows tooltip when string and integer fields are used
 for joining region maps to {es} results {pull}19447[#19447]
 
 
@@ -2468,11 +2480,11 @@ for joining region maps to {es} results {pull}19447[#19447]
 
 Operations::
 +
-As of Kibana 6.3.0, X-Pack is bundled by default in the default distribution. 
+As of Kibana 6.3.0, X-Pack is bundled by default in the default distribution.
 Existing X-Pack users should remove the plugin before upgrading.
 +
-There is a known issue preventing `bin/kibana-plugin` from removing the pre-existing 
-plugin after upgrading. This will be resolved in 6.3.1. If you happen to encounter this issue, 
+There is a known issue preventing `bin/kibana-plugin` from removing the pre-existing
+plugin after upgrading. This will be resolved in 6.3.1. If you happen to encounter this issue,
 there are a few options:
 +
 * **Uninstall the plugin before upgrading:** `bin/kibana-plugin remove x-pack`
@@ -2588,9 +2600,9 @@ manages its dependencies {pull}17829[#17829]
 
 Management::
 
-* In 6.2.4, if users edit a watch or a logstash pipeline and navigate away from 
-the page without saving, a confirmation modals asks if they want to save the 
-changes. In 6.3, the prompt was disabled to fix {pull}19488[#19488] and 
+* In 6.2.4, if users edit a watch or a logstash pipeline and navigate away from
+the page without saving, a confirmation modals asks if they want to save the
+changes. In 6.3, the prompt was disabled to fix {pull}19488[#19488] and
 {pull}19608[#19608].
 
 
