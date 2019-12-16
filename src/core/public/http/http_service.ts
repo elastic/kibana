@@ -21,7 +21,7 @@ import { HttpSetup, HttpStart } from './types';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
-import { AnonymousPaths } from './anonymous_paths';
+import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
 import { CoreService } from '../../types';
@@ -33,18 +33,18 @@ interface HttpDeps {
 
 /** @internal */
 export class HttpService implements CoreService<HttpSetup, HttpStart> {
+  private readonly anonymousPaths = new AnonymousPathsService();
   private readonly loadingCount = new LoadingCountService();
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const kibanaVersion = injectedMetadata.getKibanaVersion();
     const basePath = new BasePath(injectedMetadata.getBasePath());
-    const anonymousPaths = new AnonymousPaths(basePath);
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
 
     return {
       basePath,
-      anonymousPaths,
+      anonymousPaths: this.anonymousPaths.setup({ basePath }),
       intercept: fetchService.intercept.bind(fetchService),
       fetch: fetchService.fetch.bind(fetchService),
       delete: fetchService.delete.bind(fetchService),
