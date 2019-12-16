@@ -29,6 +29,7 @@ disabledPlugins
 webpackstats.json
 /config/*
 !/config/kibana.yml
+!/config/apm.dev.js
 coverage
 selenium
 .babel_register_cache.json

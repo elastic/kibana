@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getConfig, isKibanaDistributable } from '../../../apm';
+import { getConfig, isKibanaDistributable } from '../../../dev/apm';
 import agent from 'elastic-apm-node';
 
 const apmEnabled = !isKibanaDistributable && process.env.ELASTIC_APM_ACTIVE === 'true';
@@ -41,10 +41,13 @@ export function getApmConfig(appMetadata) {
   const navLink = appMetadata.getNavLink();
   const pageUrl = navLink ? navLink.toJSON().url : appMetadata._url;
 
-  const config = ({ ... getConfig('kibana-frontend'), ...{
-    active: true,
-    pageLoadTransactionName: pageUrl,
-  } });
+  const config = {
+    ...getConfig('kibana-frontend'),
+    ...{
+      active: true,
+      pageLoadTransactionName: pageUrl,
+    },
+  };
   /**
    * Get current active backend transaction to make distrubuted tracing
    * work for rendering the app
@@ -53,11 +56,14 @@ export function getApmConfig(appMetadata) {
 
   if (backendTransaction) {
     const { sampled, traceId } = backendTransaction;
-    return { ...config, ...{
-      pageLoadTraceId: traceId,
-      pageLoadSampled: sampled,
-      pageLoadSpanId: backendTransaction.ensureParentId()
-    } };
+    return {
+      ...config,
+      ...{
+        pageLoadTraceId: traceId,
+        pageLoadSampled: sampled,
+        pageLoadSpanId: backendTransaction.ensureParentId(),
+      },
+    };
   }
   return config;
 }
