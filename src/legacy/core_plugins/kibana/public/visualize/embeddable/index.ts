@@ -19,3 +19,4 @@
 export { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 export { VisualizeEmbeddable, VisualizeInput } from './visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+export { LENS_EMBEDDABLE_TYPE } from './constants';
