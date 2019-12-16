@@ -13,7 +13,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiButton,
+  EuiButtonEmpty,
   EuiSelect,
   EuiSpacer,
   EuiFieldNumber,
@@ -142,12 +142,34 @@ export class FieldRuleEditor extends Component<Props, {}> {
         <EuiFlexItem grow={1}>
           {this.renderFieldValueInput(comparisonType.id, rowRuleValue, valueIndex)}
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace={true}>
+            {renderAddValueButton ? (
+              <EuiButtonIcon
+                iconSize="s"
+                iconType="plusInCircle"
+                onClick={this.onAddAlternateValue}
+                color="primary"
+                data-test-subj="addAlternateValueButton"
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton',
+                  {
+                    defaultMessage: 'Add alternate value',
+                  }
+                )}
+              />
+            ) : (
+              <EuiSpacer />
+            )}
+          </EuiFormRow>
+        </EuiFlexItem>
         {renderDeleteButton && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={1}>
             <EuiFormRow hasEmptyLabelSpace={true}>
               <EuiButtonIcon
                 iconType="trash"
                 color="danger"
+                iconSize="s"
                 data-test-subj={`fieldRuleEditorDeleteValue fieldRuleEditorDeleteValue-${valueIndex}`}
                 aria-label={i18n.translate(
                   'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
@@ -160,26 +182,6 @@ export class FieldRuleEditor extends Component<Props, {}> {
             </EuiFormRow>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={1}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
-            {renderAddValueButton ? (
-              <EuiButton
-                onClick={this.onAddAlternateValue}
-                iconType="plusInCircle"
-                color="primary"
-                size="s"
-                data-test-subj="addAlternateValueButton"
-              >
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton"
-                  defaultMessage="add alternate value"
-                />
-              </EuiButton>
-            ) : (
-              <EuiSpacer />
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };

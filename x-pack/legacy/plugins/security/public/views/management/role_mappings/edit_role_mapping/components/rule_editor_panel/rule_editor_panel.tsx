@@ -97,7 +97,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                 <Fragment>
                   {validationWarning}
                   {this.getEditor()}
-                  <EuiSpacer />
+                  <EuiSpacer size="xl" />
                   {this.getModeToggle()}
                   {this.getConfirmModeChangePrompt()}
                 </Fragment>

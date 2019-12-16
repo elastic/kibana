@@ -143,7 +143,7 @@ export class MappingInfoPanel extends Component<Props, State> {
                 defaultMessage="Choose which roles to assign to your users."
               />
             </span>
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="m" />
             <EuiLink
               data-test-subj="switchToRoleTemplatesButton"
               onClick={() => {
@@ -209,7 +209,7 @@ export class MappingInfoPanel extends Component<Props, State> {
                 />
               </EuiLink>
             </span>
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="m" />
             <EuiLink
               onClick={() => {
                 this.onRolesModeChange('roles');

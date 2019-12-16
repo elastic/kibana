@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -14,7 +15,7 @@ import {
   EuiCallOut,
   EuiText,
   EuiSwitch,
-  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RoleTemplate } from '../../../../../../../common/model';
@@ -45,18 +46,23 @@ export const RoleTemplateEditor = ({
       {getTemplateConfigurationFields()}
       {getEditorForTemplate()}
       <EuiFlexItem grow={false}>
-        <EuiFormRow>
-          <EuiLink
-            color="danger"
-            onClick={() => onDelete(roleTemplate)}
-            data-test-subj="deleteRoleTemplateButton"
-          >
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
-              defaultMessage="Delete role template"
-            />
-          </EuiLink>
-        </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="trash"
+              color="danger"
+              size="xs"
+              onClick={() => onDelete(roleTemplate)}
+              data-test-subj="deleteRoleTemplateButton"
+            >
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
+                defaultMessage="Delete role template"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -48,11 +48,12 @@ export class RuleGroupEditor extends Component<Props, {}> {
                   color="danger"
                   onClick={this.props.onDelete}
                   size="s"
+                  iconType="trash"
                   data-test-subj="deleteRuleGroupButton"
                 >
                   <FormattedMessage
                     id="xpack.security.management.editRoleMapping.deleteRuleGroupButton"
-                    defaultMessage="Delete rule group"
+                    defaultMessage="Delete"
                   />
                 </EuiButtonEmpty>
               </EuiFlexItem>
