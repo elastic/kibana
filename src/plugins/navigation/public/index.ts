@@ -24,6 +24,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { TopNavMenuData, TopNavMenu } from './top_nav_menu';
 
+export { NavigationPublicPluginSetup, NavigationPublicPluginStart } from './types';
+
 // Export plugin after all other imports
 import { NavigationPublicPlugin } from './plugin';
 export { NavigationPublicPlugin as Plugin };

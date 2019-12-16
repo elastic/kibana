@@ -247,8 +247,8 @@ export const npStart = {
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
-      }
-    }
+      },
+    },
   },
 };
 
