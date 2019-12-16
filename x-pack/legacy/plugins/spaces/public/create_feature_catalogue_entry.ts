@@ -6,13 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  FeatureCatalogueEntry,
   FeatureCatalogueCategory,
-  FeatureCatalogueRegistryProvider,
-  // @ts-ignore
-} from 'ui/registry/feature_catalogue';
+} from '../../../../../src/plugins/home/public';
 import { getSpacesFeatureDescription } from './lib/constants';
 
-FeatureCatalogueRegistryProvider.register(() => {
+export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
   return {
     id: 'spaces',
     title: i18n.translate('xpack.spaces.spacesTitle', {
@@ -24,4 +23,4 @@ FeatureCatalogueRegistryProvider.register(() => {
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN,
   };
-});
+};
