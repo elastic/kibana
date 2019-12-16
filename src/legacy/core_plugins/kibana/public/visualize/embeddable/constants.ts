@@ -18,4 +18,3 @@
  */
 
 export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
-export const LENS_EMBEDDABLE_TYPE = 'lens';

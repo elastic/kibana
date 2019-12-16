@@ -22,7 +22,6 @@ export const DashboardConstants = {
   NEW_VISUALIZATION_ID_PARAM: 'addVisualization',
   LANDING_PAGE_PATH: '/dashboards',
   CREATE_NEW_DASHBOARD_URL: '/dashboard',
-  NEW_LENS_VISUALIZATION_ID_PARAM: 'addLens',
 };
 
 export function createDashboardEditUrl(id: string) {
