@@ -160,7 +160,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl?addToDashboard');
       expect(onClose).toHaveBeenCalled();
     });
   });
