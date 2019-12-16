@@ -41,7 +41,7 @@ export function actions(kibana: any) {
                 .allow('*')
             )
             .sparse(false)
-            .default([]),
+            .default(['*']),
         })
         .default();
     },

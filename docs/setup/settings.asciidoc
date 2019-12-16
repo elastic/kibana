@@ -390,6 +390,11 @@ Rollup user interface.
 
 `i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
+`xpack.actions.whitelistedHosts:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of host names which actions such as email, slack, pagerduty, and
+webhook can connect to.  An element of `*` indicates any host can be connected
+to.  An empty array indicates no hosts can be connected to.
+
 
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
