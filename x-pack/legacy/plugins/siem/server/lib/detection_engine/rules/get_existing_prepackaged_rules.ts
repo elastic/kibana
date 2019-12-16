@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INTERNAL_PREPACKAGED_KEY } from '../../../../common/constants';
+import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
@@ -20,7 +20,7 @@ export const getExistingPrepackagedRules = async ({
 }): Promise<RuleAlertType[]> => {
   const firstPrepackedRules = await findRules({
     alertsClient,
-    filter: `alert.attributes.tags: "${INTERNAL_PREPACKAGED_KEY}"`,
+    filter: `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`,
     perPage,
     page: 1,
   });
@@ -40,7 +40,7 @@ export const getExistingPrepackagedRules = async ({
         // page index starts at 2 as we already got the first page and we have more pages to go
         return findRules({
           alertsClient,
-          filter: `alert.attributes.tags: "${INTERNAL_PREPACKAGED_KEY}"`,
+          filter: `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`,
           perPage,
           page: page + 2,
         });

@@ -13,6 +13,7 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   INTERNAL_RULE_ID_KEY,
+  INTERNAL_IMMUTABLE_KEY,
 } from '../../../../../common/constants';
 import { RuleAlertType } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
@@ -109,12 +110,24 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   data: [getResult()],
 });
 
-export const getFindResultWithMultiHits = (data: RuleAlertType[]): FindHit => ({
-  page: 1,
-  perPage: 1,
-  total: 2,
+export const getFindResultWithMultiHits = ({
   data,
-});
+  page = 1,
+  perPage = 1,
+  total,
+}: {
+  data: RuleAlertType[];
+  page?: number;
+  perPage?: number;
+  total?: number;
+}) => {
+  return {
+    page,
+    perPage,
+    total: total != null ? total : data.length,
+    data,
+  };
+};
 
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
@@ -172,7 +185,7 @@ export const createActionResult = (): ActionResult => ({
 export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`],
+  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
   params: {
     description: 'Detecting root and admin users',

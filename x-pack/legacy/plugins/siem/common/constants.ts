@@ -46,7 +46,7 @@ export const SIGNALS_ID = `${APP_ID}.signals`;
  */
 export const INTERNAL_IDENTIFIER = '__internal';
 export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
-export const INTERNAL_PREPACKAGED_KEY = `${INTERNAL_IDENTIFIER}_prepackaged`;
+export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
 
 /**
  * Detection engine routes

@@ -8,7 +8,7 @@ import { defaults } from 'lodash/fp';
 import { AlertAction } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
 import { UpdateRuleParams } from './types';
-import { updateTags } from './update_tags';
+import { addTags } from './add_tags';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -118,7 +118,11 @@ export const updateRules = async ({
   return alertsClient.update({
     id: rule.id,
     data: {
-      tags: updateTags(rule.tags, tags),
+      tags: addTags(
+        tags,
+        rule.params.ruleId,
+        immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
+      ),
       name: calculateName({ updatedName: name, originalName: rule.name }),
       interval: calculateInterval(interval, rule.interval),
       actions,
