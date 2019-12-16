@@ -1,18 +1,18 @@
 [[document-context]]
 == Viewing a document in context
 
-Once you've narrowed your search to a specific event, 
-you might want to inspect the documents that occurred 
-immediately before and after the event. With the Context view, 
+Once you've narrowed your search to a specific event,
+you might want to inspect the documents that occurred
+immediately before and after the event. With the Context view,
 you can do just that for index patterns that contain time-based events.
 
-To open the Context view, click the Expand icon in the document table, and then click
-*View surrounding documents.* 
+To open the Context view, click the expand icon (<) in the document table, and then click
+*View surrounding documents.*
 
-The documents are sorted 
+The documents are sorted
 by the time field specified in the index pattern and displayed using the
-same set of columns as the *Discover* view from which the context was opened. 
-The anchor document is highlighted in blue. 
+same set of columns as the *Discover* view from which the context was opened.
+The anchor document is highlighted in blue.
 
 
 [role="screenshot"]
@@ -22,9 +22,9 @@ image::images/Discover-ContextView.png[Context View]
 [[filter-context]]
 === Filter the context
 
-The 
+The
 filters you applied in *Discover* are carried over to the Context view. Pinned filters remain active, while normal
-filters are copied in a disabled state. You can re-enabled these filters to
+filters are copied in a disabled state. You can re-enable these filters to
 refine your context view.
 
 If the Context view contains a large number of documents not related to the event under
@@ -35,23 +35,23 @@ display.
 [[change-context-size]]
 === Change the number of surrounding documents
 
-By default, five newer and older 
-documents are listed. To increase the number of documents that surround the anchor document, 
+By default, the five newer and older
+documents are listed. To increase the number of documents that surround the anchor document,
 click *Load*.  Five documents are added with each click, but you can change this number in Advanced Settings.
 
 [float]
 [[configure-context-ContextView]]
 === Configure the context view
 
-To configure the Context view, use these settings in <<advanced-options, *Management >
-Advanced Settings*>>.
+To configure the Context view, use these settings in <<advanced-options,
+Advanced Settings>>.
 
 [horizontal]
 `context:defaultSize`:: The number of documents to display by default.
 `context:step`:: The default number of documents to load with each button click.
-`context:tieBreakerFields`:: The field to use for tiebreaking in case of equal time field values. 
+`context:tieBreakerFields`:: The field to use for tiebreaking in case of equal time field values.
 The default is the
-`_doc` field. 
+`_doc` field.
 +
 You can enter a comma-separated list of field
 names, which is checked in sequence for suitability when a context is
@@ -64,6 +64,3 @@ use fields that have {ref}/doc-values.html[doc values] enabled to achieve
 good performance and avoid unnecessary {ref}/modules-fielddata.html[field
 data] usage. Common examples for suitable fields include log line numbers,
 monotonically increasing counters and high-precision timestamps.
-
-
-

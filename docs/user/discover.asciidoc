@@ -22,8 +22,7 @@ With *Discover*, you can:
 === Set up your index pattern
 
 The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>
-to define the data to work with. The current index pattern and options for
-changing it are in the upper left.
+to define the data to work with. The current index pattern is in the upper left.
 If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
 which has a pre-built index pattern.
 
@@ -45,7 +44,7 @@ which offers a simplified query syntax.
 For example, if
 you search for `day_of_week : Friday`, you'll get a list of all documents
 in which `day_of_week` is set to `Friday`. If you prefer
-Lucene query syntax, you can switch to it from the KQL menu.
+<<lucene-query, Lucene query syntax>>, you can switch to it from the KQL menu.
 
 [float]
 === Filter your search results
@@ -67,18 +66,16 @@ image::images/filter-field.png[height=317]
 
 The sortable documents table
 lists the documents that match your search.
-By default, the table includes a column for the time field and a second column that
-lists every field and its value, which can be overwhelming to go through.
+By default, the table includes columns for the time field and the document `_source`,
 To zero in on specific a field, click *add* next to the field name in the left sidebar.
-The first field you add replaces the _source column.
-For example, if you add the `clientip`, `response`, and `request` fields,
-the document table will include columns for those three fields.
+For example, if you add the `currency`, `customer_last_name`, and `day_of_week` fields,
+the document table includes columns for those three fields.
 
 [float]
 === Examine document contents
 
 From the documents table, you can expand a document to
-examine its field data in either table for JSON format.
+examine its field data in either table or JSON format.
 The table view provides yet another filtering option&mdash;filtering for whether the field
 is present.  See <<document-data, Viewing document data>> for details.
 
@@ -86,7 +83,7 @@ is present.  See <<document-data, Viewing document data>> for details.
 === View a document in context
 
 Suppose you're troubleshooting your data, and you've narrowed down your results to a single document.
-Now you want to to see all the documents that occurred just before and after the
+Now you want to to see the documents that occurred just before and after the
 document that you are looking at. You can do that by expanding the document and
 clicking <<document-context, View surrounding documents>>.
 
