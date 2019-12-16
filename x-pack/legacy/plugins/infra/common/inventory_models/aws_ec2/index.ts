@@ -13,7 +13,7 @@ export const awsEC2: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModels.awsEC2.displayName', {
     defaultMessage: 'EC2 Instances',
   }),
-  requiredDataset: 'aws',
+  requiredModule: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
