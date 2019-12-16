@@ -41,14 +41,29 @@ const FormNav = styled.div`
   text-align: right;
 `;
 
+export const isDatasetEnabled = (datasets: EuiCheckboxGroupIdToSelectedMap): boolean =>
+  Object.keys(datasets).filter(d => datasets[d] === true).length > 0;
+
+const validateAddDataSourceForm = (formState: FormState): boolean => {
+  if (formState.datasourceName === '') return false;
+  if (!isDatasetEnabled(formState.datasets)) return false;
+  return true;
+};
+
 export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
   const [formState, setFormState] = useState<FormState>({ datasourceName: '', datasets: {} });
+  const [showErrors, setShowErrors] = useState<boolean>(false);
   const { notifications } = useCore();
   const { toDetailView } = useLinks();
   const { pkgName, pkgTitle, pkgVersion, datasets } = props;
 
   const handleRequestInstallDatasource = async () => {
+    const isFormValid = validateAddDataSourceForm(formState);
+    if (!isFormValid) {
+      setShowErrors(true);
+      return;
+    }
     try {
       await installDatasource({
         pkgkey: `${pkgName}-${pkgVersion}`,
@@ -98,6 +113,7 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
           onCheckboxChange={onCheckboxChange}
           onTextChange={onTextChange}
           formState={formState}
+          showErrors={showErrors}
         />
       ),
     },

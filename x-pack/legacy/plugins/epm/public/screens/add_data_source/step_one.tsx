@@ -13,13 +13,14 @@ import {
   EuiCheckboxGroup,
   EuiCheckboxGroupOption,
 } from '@elastic/eui';
-import { FormState } from './add_data_source_form';
+import { FormState, isDatasetEnabled } from './add_data_source_form';
 
 interface AddDataSourceFormProps {
   formState: FormState;
   onCheckboxChange: (name: string) => void;
   onTextChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
   datasetCheckboxes: EuiCheckboxGroupOption[];
+  showErrors: boolean;
 }
 
 export const StepOne = ({
@@ -27,7 +28,9 @@ export const StepOne = ({
   onCheckboxChange,
   onTextChange,
   datasetCheckboxes,
+  showErrors,
 }: AddDataSourceFormProps) => {
+  const { datasourceName, datasets } = formState;
   return (
     <Fragment>
       <EuiForm>
@@ -41,12 +44,13 @@ export const StepOne = ({
             </Fragment>
           }
         >
-          <EuiFormRow label="Data source name" describedByIds={['data-source-name']}>
-            <EuiFieldText
-              name="datasourceName"
-              value={formState.datasourceName}
-              onChange={onTextChange}
-            />
+          <EuiFormRow
+            isInvalid={showErrors && datasourceName === ''}
+            label="Data source name"
+            describedByIds={['data-source-name']}
+            error="Enter a data source name"
+          >
+            <EuiFieldText name="datasourceName" value={datasourceName} onChange={onTextChange} />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         <EuiHorizontalRule />
@@ -57,10 +61,14 @@ export const StepOne = ({
             <Fragment>Select the data you want to send to your Elastic Search cluster.</Fragment>
           }
         >
-          <EuiFormRow describedByIds={['select-inputs']}>
+          <EuiFormRow
+            describedByIds={['select-inputs']}
+            isInvalid={showErrors && !isDatasetEnabled(datasets)}
+            error="Select at least one input"
+          >
             <EuiCheckboxGroup
               options={datasetCheckboxes}
-              idToSelectedMap={formState.datasets}
+              idToSelectedMap={datasets}
               onChange={onCheckboxChange}
             />
           </EuiFormRow>
