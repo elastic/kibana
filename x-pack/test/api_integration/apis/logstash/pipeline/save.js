@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('save', () => {
@@ -22,23 +22,17 @@ export default function ({ getService }) {
 
     it('should create the specified pipeline', async () => {
       await supertest
-        .put(
-          '/api/logstash/pipeline/fast_generator'
-        )
+        .put('/api/logstash/pipeline/fast_generator')
         .set('kbn-xsrf', 'xxx')
         .send({
           id: 'fast_generator',
           description: 'foobar baz',
           username: 'seger',
-          pipeline: 'input { generator {} }\n\n output { stdout {} }'
+          pipeline: 'input { generator {} }\n\n output { stdout {} }',
         })
         .expect(204);
 
-      const { body } = await supertest
-        .get(
-          '/api/logstash/pipeline/fast_generator'
-        )
-        .expect(200);
+      const { body } = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
 
       expect(body.description).to.eql('foobar baz');
     });

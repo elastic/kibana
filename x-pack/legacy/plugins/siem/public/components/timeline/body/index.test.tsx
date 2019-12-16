@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
@@ -16,6 +15,7 @@ import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
@@ -40,6 +40,8 @@ jest.mock('../../../lib/helpers/scheduler', () => ({
 }));
 
 describe('Body', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
@@ -205,7 +207,7 @@ describe('Body', () => {
     const dispatchAddNoteToEvent = jest.fn();
     const dispatchOnPinEvent = jest.fn();
 
-    const addaNoteToEvent = (wrapper: ReactWrapper, note: string) => {
+    const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper
         .find('[data-test-subj="add-note"]')
         .first()

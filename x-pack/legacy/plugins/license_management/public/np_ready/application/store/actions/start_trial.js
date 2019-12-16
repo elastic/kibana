@@ -7,9 +7,7 @@
 import { createAction } from 'redux-actions';
 import { canStartTrial, startTrial } from '../../lib/es';
 
-export const trialStatusLoaded = createAction(
-  'LICENSE_MANAGEMENT_TRIAL_STATUS_LOADED'
-);
+export const trialStatusLoaded = createAction('LICENSE_MANAGEMENT_TRIAL_STATUS_LOADED');
 
 export const loadTrialStatus = () => async (dispatch, getState, { http }) => {
   const trialOK = await canStartTrial(http);

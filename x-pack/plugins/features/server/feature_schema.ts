@@ -8,7 +8,7 @@ import Joi from 'joi';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { FeatureWithAllOrReadPrivileges } from './feature';
+import { FeatureWithAllOrReadPrivileges } from '../common/feature';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
