@@ -27,7 +27,7 @@ export const CopyToParameter = ({ defaultToggleValue }: Props) => (
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.copyToDocLinkText', {
-        defaultMessage: 'Copy-to documentation',
+        defaultMessage: 'Copy to documentation',
       }),
       href: documentationService.getCopyToLink(),
     }}

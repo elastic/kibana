@@ -113,7 +113,7 @@ class DocumentationService {
   }
 
   public getIgnoreAboveLink() {
-    return `${this.esDocsBase}/ignore_above.html`;
+    return `${this.esDocsBase}/ignore-above.html`;
   }
 
   public getFielddataLink() {
