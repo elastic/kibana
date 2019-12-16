@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
-import { licensingMock } from '../../../../../../plugins/licensing/server/licensing.mock';
+import { licensingMock } from '../../../../../../plugins/licensing/server/licensing.mocks';
 
 function createLicense(license = {}, features = {}) {
   return licensingMock.createLicense({

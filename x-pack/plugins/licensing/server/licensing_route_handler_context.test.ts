@@ -5,7 +5,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { licenseMock } from '../common/licensing.mock';
+import { licenseMock } from '../common/licensing.mocks';
 
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 

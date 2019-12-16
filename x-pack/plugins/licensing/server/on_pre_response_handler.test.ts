@@ -6,7 +6,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { httpServiceMock, httpServerMock } from '../../../../src/core/server/mocks';
-import { licenseMock } from '../common/licensing.mock';
+import { licenseMock } from '../common/licensing.mocks';
 
 describe('createOnPreResponseHandler', () => {
   it('sets license.signature header immediately for non-error responses', async () => {

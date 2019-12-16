@@ -11,7 +11,7 @@ import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';
-import { licenseMock } from '../common/licensing.mock';
+import { licenseMock } from '../common/licensing.mocks';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
 
