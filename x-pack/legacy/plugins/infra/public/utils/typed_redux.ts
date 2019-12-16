@@ -58,6 +58,8 @@ interface ActionCreators {
 
 type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends () => infer R
   ? () => R
+  : WrappedActionCreator extends (payload: void) => infer R
+  ? () => R
   : WrappedActionCreator extends (payload: infer A) => infer R
   ? (payload: A) => R
   : never;
