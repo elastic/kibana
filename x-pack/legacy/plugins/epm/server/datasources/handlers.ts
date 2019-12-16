@@ -32,10 +32,13 @@ export async function handleRequestInstallDatasource(
   const { pkgkey, datasets, datasourceName } = request.payload;
   const user = await request.server.plugins.security?.getUser(request);
   if (!user) return Boom.unauthorized('Must be logged in to perform this operation');
-
+  if (!pkgkey) return Boom.badRequest('Please supply a value for pkgkey in the POST payload');
+  if (!datasets) return Boom.badRequest('Please supply a value for datasets in the POST payload');
+  if (!datasourceName) {
+    return Boom.badRequest('Please supply a value for datasourceName in the POST payload');
+  }
   const savedObjectsClient = getClient(request);
   const callCluster = getClusterAccessor(extra.context.esClient, request);
-
   try {
     const result = await createDatasource({
       savedObjectsClient,
