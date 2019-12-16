@@ -75,15 +75,24 @@ describe('alerts_list component empty', () => {
       data: [],
     });
     const deps = {
-      core: coreMock.createStart(),
+      core: {
+        ...coreMock.createStart(),
+        injectedMetadata: {
+          getInjectedVar(name: string) {
+            if (name === 'createAlertUiEnabled') {
+              return true;
+            }
+          },
+        },
+      },
       plugins: {
         capabilities: {
           get() {
             return {
-              alerting: {
-                delete: true,
-                save: true,
-                show: true,
+              siem: {
+                'alerting:show': true,
+                'alerting:save': true,
+                'alerting:delete': true,
               },
             };
           },
@@ -184,15 +193,24 @@ describe('alerts_list component with items', () => {
       data: [],
     });
     const deps = {
-      core: coreMock.createStart(),
+      core: {
+        ...coreMock.createStart(),
+        injectedMetadata: {
+          getInjectedVar(name: string) {
+            if (name === 'createAlertUiEnabled') {
+              return true;
+            }
+          },
+        },
+      },
       plugins: {
         capabilities: {
           get() {
             return {
-              alerting: {
-                delete: true,
-                save: true,
-                show: true,
+              siem: {
+                'alerting:show': true,
+                'alerting:save': true,
+                'alerting:delete': true,
               },
             };
           },
@@ -255,15 +273,24 @@ describe('alerts_list component empty with show only capability', () => {
       data: [],
     });
     const deps = {
-      core: coreMock.createStart(),
+      core: {
+        ...coreMock.createStart(),
+        injectedMetadata: {
+          getInjectedVar(name: string) {
+            if (name === 'createAlertUiEnabled') {
+              return true;
+            }
+          },
+        },
+      },
       plugins: {
         capabilities: {
           get() {
             return {
-              alerting: {
-                delete: false,
-                save: false,
-                show: true,
+              siem: {
+                'alerting:show': true,
+                'alerting:save': false,
+                'alerting:delete': false,
               },
             };
           },
@@ -361,15 +388,24 @@ describe('alerts_list with show only capability', () => {
       data: [],
     });
     const deps = {
-      core: coreMock.createStart(),
+      core: {
+        ...coreMock.createStart(),
+        injectedMetadata: {
+          getInjectedVar(name: string) {
+            if (name === 'createAlertUiEnabled') {
+              return true;
+            }
+          },
+        },
+      },
       plugins: {
         capabilities: {
           get() {
             return {
-              alerting: {
-                delete: false,
-                save: false,
-                show: true,
+              siem: {
+                'alerting:show': true,
+                'alerting:save': false,
+                'alerting:delete': false,
               },
             };
           },

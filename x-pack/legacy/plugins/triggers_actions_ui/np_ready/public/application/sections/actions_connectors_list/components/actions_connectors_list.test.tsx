@@ -48,10 +48,10 @@ describe('actions_connectors_list component empty', () => {
         capabilities: {
           get() {
             return {
-              actions: {
-                delete: true,
-                save: true,
-                show: true,
+              siem: {
+                'actions:show': true,
+                'actions:save': true,
+                'actions:delete': true,
               },
             };
           },
@@ -134,10 +134,10 @@ describe('actions_connectors_list component with items', () => {
         capabilities: {
           get() {
             return {
-              actions: {
-                delete: true,
-                save: true,
-                show: true,
+              siem: {
+                'actions:show': true,
+                'actions:save': true,
+                'actions:delete': true,
               },
             };
           },
@@ -208,10 +208,10 @@ describe('actions_connectors_list component empty with show only capability', ()
         capabilities: {
           get() {
             return {
-              actions: {
-                delete: false,
-                save: false,
-                show: true,
+              siem: {
+                'actions:show': true,
+                'actions:save': false,
+                'actions:delete': false,
               },
             };
           },
@@ -287,10 +287,10 @@ describe('actions_connectors_list with show only capability', () => {
         capabilities: {
           get() {
             return {
-              actions: {
-                delete: false,
-                save: false,
-                show: true,
+              siem: {
+                'actions:show': true,
+                'actions:save': false,
+                'actions:delete': false,
               },
             };
           },
