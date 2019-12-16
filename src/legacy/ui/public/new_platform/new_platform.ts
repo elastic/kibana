@@ -33,8 +33,11 @@ import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 import { LicensingPluginSetup } from '../../../../../x-pack/plugins/licensing/common/types';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 
 export interface PluginsSetup {
+  bfetch: BfetchPublicSetup;
   data: ReturnType<DataPlugin['setup']>;
   embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
@@ -45,9 +48,11 @@ export interface PluginsSetup {
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface PluginsStart {
+  bfetch: BfetchPublicStart;
   data: ReturnType<DataPlugin['start']>;
   embeddable: IEmbeddableStart;
   eui_utils: EuiUtilsStart;

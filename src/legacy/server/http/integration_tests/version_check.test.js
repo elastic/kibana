@@ -25,7 +25,7 @@ const src = resolve.bind(null, __dirname, '../../../../../src');
 const versionHeader = 'kbn-version';
 const version = require(src('../package.json')).version; // eslint-disable-line import/no-dynamic-require
 
-describe('version_check request filter', function () {
+describe('version_check request filter', function() {
   let root;
   beforeAll(async () => {
     root = kbnTestServer.createRoot();
@@ -36,31 +36,29 @@ describe('version_check request filter', function () {
     kbnTestServer.getKbnServer(root).server.route({
       path: '/version_check/test/route',
       method: 'GET',
-      handler: function () {
+      handler: function() {
         return 'ok';
-      }
+      },
     });
   }, 30000);
 
   afterAll(async () => await root.shutdown());
 
-  it('accepts requests with the correct version passed in the version header', async function () {
+  it('accepts requests with the correct version passed in the version header', async function() {
     await kbnTestServer.request
       .get(root, '/version_check/test/route')
       .set(versionHeader, version)
       .expect(200, 'ok');
   });
 
-  it('rejects requests with an incorrect version passed in the version header', async function () {
+  it('rejects requests with an incorrect version passed in the version header', async function() {
     await kbnTestServer.request
       .get(root, '/version_check/test/route')
       .set(versionHeader, `invalid:${version}`)
       .expect(400, /"Browser client is out of date/);
   });
 
-  it('accepts requests that do not include a version header', async function () {
-    await kbnTestServer.request
-      .get(root, '/version_check/test/route')
-      .expect(200, 'ok');
+  it('accepts requests that do not include a version header', async function() {
+    await kbnTestServer.request.get(root, '/version_check/test/route').expect(200, 'ok');
   });
 });

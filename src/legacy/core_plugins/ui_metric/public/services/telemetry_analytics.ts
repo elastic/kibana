@@ -16,61 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npSetup } from 'ui/new_platform';
 
-import { Reporter, UiStatsMetricType } from '@kbn/analytics';
-// @ts-ignore
-import { addSystemApiHeader } from 'ui/system_api';
-
-let telemetryReporter: Reporter;
-
-export const setTelemetryReporter = (aTelemetryReporter: Reporter): void => {
-  telemetryReporter = aTelemetryReporter;
+export const createUiStatsReporter = (appName: string) => {
+  const { usageCollection } = npSetup.plugins;
+  return usageCollection.reportUiStats.bind(usageCollection, appName);
 };
-
-export const getTelemetryReporter = () => {
-  return telemetryReporter;
-};
-
-export const createUiStatsReporter = (appName: string) => (
-  type: UiStatsMetricType,
-  eventNames: string | string[],
-  count?: number
-): void => {
-  if (telemetryReporter) {
-    return telemetryReporter.reportUiStats(appName, type, eventNames, count);
-  }
-};
-
-export const trackUserAgent = (appName: string) => {
-  if (telemetryReporter) {
-    return telemetryReporter.reportUserAgent(appName);
-  }
-};
-
-interface AnalyicsReporterConfig {
-  localStorage: any;
-  debug: boolean;
-  kfetch: any;
-}
-
-export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, debug, kfetch } = config;
-
-  return new Reporter({
-    debug,
-    storage: localStorage,
-    async http(report) {
-      const response = await kfetch({
-        method: 'POST',
-        pathname: '/api/telemetry/report',
-        body: JSON.stringify(report),
-        headers: addSystemApiHeader({}),
-      });
-
-      if (response.status !== 'ok') {
-        throw Error('Unable to store report.');
-      }
-      return response;
-    },
-  });
-}

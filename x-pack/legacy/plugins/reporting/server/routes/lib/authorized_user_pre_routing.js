@@ -18,7 +18,10 @@ function authorizedUserPreRoutingFn(server) {
     const xpackInfo = server.plugins.xpack_main.info;
 
     if (!xpackInfo || !xpackInfo.isAvailable()) {
-      server.log(['reporting', 'authorizedUserPreRouting', 'debug'], 'Unable to authorize user before xpack info is available.');
+      server.log(
+        ['reporting', 'authorizedUserPreRouting', 'debug'],
+        'Unable to authorize user before xpack info is available.'
+      );
       return boom.notFound();
     }
 
@@ -33,8 +36,8 @@ function authorizedUserPreRoutingFn(server) {
       return boom.unauthorized(`Sorry, you aren't authenticated`);
     }
 
-    const authorizedRoles = [ superuserRole, ...config.get('xpack.reporting.roles.allow') ];
-    if(!user.roles.find(role => authorizedRoles.includes(role))) {
+    const authorizedRoles = [superuserRole, ...config.get('xpack.reporting.roles.allow')];
+    if (!user.roles.find(role => authorizedRoles.includes(role))) {
       return boom.forbidden(`Sorry, you don't have access to Reporting`);
     }
 

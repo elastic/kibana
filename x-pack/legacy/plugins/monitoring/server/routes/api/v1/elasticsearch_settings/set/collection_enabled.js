@@ -15,7 +15,7 @@ export function setCollectionEnabledRoute(server) {
     method: 'PUT',
     path: '/api/monitoring/v1/elasticsearch_settings/set/collection_enabled',
     config: {
-      validate: {}
+      validate: {},
     },
     async handler(req) {
       try {
@@ -24,7 +24,6 @@ export function setCollectionEnabledRoute(server) {
       } catch (err) {
         throw handleSettingsError(err);
       }
-    }
+    },
   });
 }
-

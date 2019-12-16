@@ -25,12 +25,10 @@ export class GrokdebuggerRequest {
             grok: {
               field: 'rawEvent',
               pattern_definitions: this.customPatterns,
-              patterns: [
-                this.pattern.toString()
-              ]
-            }
-          }
-        ]
+              patterns: [this.pattern.toString()],
+            },
+          },
+        ],
       },
       docs: [
         {
@@ -38,10 +36,10 @@ export class GrokdebuggerRequest {
           _type: 'grokdebugger',
           _id: 'grokdebugger',
           _source: {
-            rawEvent: this.rawEvent.toString()
-          }
-        }
-      ]
+            rawEvent: this.rawEvent.toString(),
+          },
+        },
+      ],
     };
   }
 
@@ -50,7 +48,7 @@ export class GrokdebuggerRequest {
     const opts = {
       rawEvent: downstreamGrokdebuggerRequest.rawEvent,
       pattern: downstreamGrokdebuggerRequest.pattern,
-      customPatterns: downstreamGrokdebuggerRequest.customPatterns
+      customPatterns: downstreamGrokdebuggerRequest.customPatterns,
     };
 
     return new GrokdebuggerRequest(opts);

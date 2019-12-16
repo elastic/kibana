@@ -17,7 +17,7 @@ import { SessionStorageMock } from '../../../../services/__test__/SessionStorage
 function renderServiceOverview() {
   return render(<ServiceOverview />);
 }
-
+jest.mock('ui/new_platform');
 const coreMock = ({
   http: {
     basePath: {

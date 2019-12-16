@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 import { getEsShardTimeout } from '../helpers';
 
@@ -37,7 +37,6 @@ const TIMEFIELD = '%timefield%';
  * This class parses ES requests specified in the data.url objects.
  */
 export class EsQueryParser {
-
   constructor(timeCache, searchCache, filters, onWarning) {
     this._timeCache = timeCache;
     this._searchCache = searchCache;
@@ -61,10 +60,12 @@ export class EsQueryParser {
     if (body === undefined) {
       url.body = body = {};
     } else if (!_.isPlainObject(body)) {
-      throw new Error(i18n.translate('visTypeVega.esQueryParser.urlBodyValueTypeErrorMessage', {
-        defaultMessage: '{configName} must be an object',
-        values: { configName: 'url.body' },
-      }));
+      throw new Error(
+        i18n.translate('visTypeVega.esQueryParser.urlBodyValueTypeErrorMessage', {
+          defaultMessage: '{configName} must be an object',
+          values: { configName: 'url.body' },
+        })
+      );
     }
 
     // Migrate legacy %context_query% into context & timefield values
@@ -72,31 +73,51 @@ export class EsQueryParser {
     delete url[LEGACY_CONTEXT];
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
-        throw new Error(i18n.translate('visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage', {
-          defaultMessage: '{dataUrlParam} must not have legacy {legacyContext} and {bodyQueryConfigName} values at the same time',
-          values: {
-            legacyContext: `"${LEGACY_CONTEXT}"`,
-            bodyQueryConfigName: '"body.query"',
-            dataUrlParam: '"data.url"',
-          },
-        }));
+        throw new Error(
+          i18n.translate(
+            'visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyAndBodyQueryValuesAtTheSameTimeErrorMessage',
+            {
+              defaultMessage:
+                '{dataUrlParam} must not have legacy {legacyContext} and {bodyQueryConfigName} values at the same time',
+              values: {
+                legacyContext: `"${LEGACY_CONTEXT}"`,
+                bodyQueryConfigName: '"body.query"',
+                dataUrlParam: '"data.url"',
+              },
+            }
+          )
+        );
       } else if (usesContext) {
         throw new Error(
-          i18n.translate('visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage', {
-            defaultMessage: '{dataUrlParam} must not have {legacyContext} together with {context} or {timefield}',
+          i18n.translate(
+            'visTypeVega.esQueryParser.dataUrlMustNotHaveLegacyContextTogetherWithContextOrTimefieldErrorMessage',
+            {
+              defaultMessage:
+                '{dataUrlParam} must not have {legacyContext} together with {context} or {timefield}',
+              values: {
+                legacyContext: `"${LEGACY_CONTEXT}"`,
+                context: `"${CONTEXT}"`,
+                timefield: `"${TIMEFIELD}"`,
+                dataUrlParam: '"data.url"',
+              },
+            }
+          )
+        );
+      } else if (
+        legacyContext !== true &&
+        (typeof legacyContext !== 'string' || legacyContext.length === 0)
+      ) {
+        throw new Error(
+          i18n.translate('visTypeVega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
+            defaultMessage:
+              'Legacy {legacyContext} can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
             values: {
               legacyContext: `"${LEGACY_CONTEXT}"`,
-              context: `"${CONTEXT}"`,
-              timefield: `"${TIMEFIELD}"`,
-              dataUrlParam: '"data.url"',
+              trueValue: 'true',
+              timestampParam: '"@timestamp"',
             },
-          }));
-      } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
-        throw new Error(i18n.translate('visTypeVega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
-          // eslint-disable-next-line max-len
-          defaultMessage: 'Legacy {legacyContext} can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
-          values: { legacyContext: `"${LEGACY_CONTEXT}"`, trueValue: 'true', timestampParam: '"@timestamp"' },
-        }));
+          })
+        );
       }
 
       usesContext = true;
@@ -108,30 +129,37 @@ export class EsQueryParser {
       }
       result += '}';
 
-      this._onWarning(i18n.translate('visTypeVega.esQueryParser.legacyUrlShouldChangeToWarningMessage', {
-        defaultMessage: 'Legacy {urlParam}: {legacyUrl} should change to {result}',
-        values: {
-          legacyUrl: `"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}`,
-          result,
-          urlParam: '"url"',
-        },
-      }));
+      this._onWarning(
+        i18n.translate('visTypeVega.esQueryParser.legacyUrlShouldChangeToWarningMessage', {
+          defaultMessage: 'Legacy {urlParam}: {legacyUrl} should change to {result}',
+          values: {
+            legacyUrl: `"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}`,
+            result,
+            urlParam: '"url"',
+          },
+        })
+      );
     }
 
     if (body.query !== undefined) {
       if (usesContext) {
-        throw new Error(i18n.translate('visTypeVega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage', {
-          defaultMessage: '{urlContext} and {timefield} must not be used when {queryParam} is set',
-          values: {
-            timefield: `url.${TIMEFIELD}`,
-            urlContext: `url.${CONTEXT}`,
-            queryParam: 'url.body.query',
-          },
-        }));
+        throw new Error(
+          i18n.translate(
+            'visTypeVega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage',
+            {
+              defaultMessage:
+                '{urlContext} and {timefield} must not be used when {queryParam} is set',
+              values: {
+                timefield: `url.${TIMEFIELD}`,
+                urlContext: `url.${CONTEXT}`,
+                queryParam: 'url.body.query',
+              },
+            }
+          )
+        );
       }
       this._injectContextVars(body.query, true);
     } else if (usesContext) {
-
       if (timefield) {
         // Inject range filter based on the timefilter values
         body.query = { range: { [timefield]: this._createRangeFilter({ [TIMEFILTER]: true }) } };
@@ -151,7 +179,7 @@ export class EsQueryParser {
     return { dataObject, url };
   }
 
-  mapRequest = (request) => {
+  mapRequest = request => {
     const esRequest = request.url;
     if (this._esShardTimeout) {
       // remove possible timeout query param to prevent two conflicting timeout parameters
@@ -164,7 +192,7 @@ export class EsQueryParser {
     } else {
       return esRequest;
     }
-  }
+  };
 
   /**
    * Process items generated by parseUrl()
@@ -190,7 +218,7 @@ export class EsQueryParser {
     if (obj && typeof obj === 'object') {
       if (Array.isArray(obj)) {
         // For arrays, replace MUST_CLAUSE and MUST_NOT_CLAUSE string elements
-        for (let pos = 0; pos < obj.length;) {
+        for (let pos = 0; pos < obj.length; ) {
           const item = obj[pos];
           if (isQuery && (item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)) {
             const ctxTag = item === MUST_CLAUSE ? 'must' : 'must_not';
@@ -223,13 +251,15 @@ export class EsQueryParser {
             if (size === true) {
               size = 50; // by default, try to get ~80 values
             } else if (typeof size !== 'number') {
-              throw new Error(i18n.translate('visTypeVega.esQueryParser.autointervalValueTypeErrorMessage', {
-                defaultMessage: '{autointerval} must be either {trueValue} or a number',
-                values: {
-                  autointerval: `"${AUTOINTERVAL}"`,
-                  trueValue: 'true',
-                },
-              }));
+              throw new Error(
+                i18n.translate('visTypeVega.esQueryParser.autointervalValueTypeErrorMessage', {
+                  defaultMessage: '{autointerval} must be either {trueValue} or a number',
+                  values: {
+                    autointerval: `"${AUTOINTERVAL}"`,
+                    trueValue: 'true',
+                  },
+                })
+              );
             }
             const bounds = this._timeCache.getTimeBounds();
             obj.interval = EsQueryParser._roundInterval((bounds.max - bounds.min) / size);
@@ -251,15 +281,18 @@ export class EsQueryParser {
               this._injectContextVars(subObj, isQuery);
               continue;
             default:
-              throw new Error(i18n.translate('visTypeVega.esQueryParser.timefilterValueErrorMessage', {
-                defaultMessage: '{timefilter} property must be set to {trueValue}, {minValue}, or {maxValue}',
-                values: {
-                  timefilter: `"${TIMEFILTER}"`,
-                  trueValue: 'true',
-                  minValue: '"min"',
-                  maxValue: '"max"',
-                },
-              }));
+              throw new Error(
+                i18n.translate('visTypeVega.esQueryParser.timefilterValueErrorMessage', {
+                  defaultMessage:
+                    '{timefilter} property must be set to {trueValue}, {minValue}, or {maxValue}',
+                  values: {
+                    timefilter: `"${TIMEFILTER}"`,
+                    trueValue: 'true',
+                    minValue: '"min"',
+                    maxValue: '"max"',
+                  },
+                })
+              );
           }
         }
       }
@@ -296,12 +329,14 @@ export class EsQueryParser {
     if (opts.shift) {
       const shift = opts.shift;
       if (typeof shift !== 'number') {
-        throw new Error(i18n.translate('visTypeVega.esQueryParser.shiftMustValueTypeErrorMessage', {
-          defaultMessage: '{shiftParam} must be a numeric value',
-          values: {
-            shiftParam: '"shift"',
-          },
-        }));
+        throw new Error(
+          i18n.translate('visTypeVega.esQueryParser.shiftMustValueTypeErrorMessage', {
+            defaultMessage: '{shiftParam} must be a numeric value',
+            values: {
+              shiftParam: '"shift"',
+            },
+          })
+        );
       }
       let multiplier;
       switch (opts.unit || 'd') {
@@ -326,13 +361,15 @@ export class EsQueryParser {
           multiplier = 1000;
           break;
         default:
-          throw new Error(i18n.translate('visTypeVega.esQueryParser.unknownUnitValueErrorMessage', {
-            defaultMessage: 'Unknown {unitParamName} value. Must be one of: [{unitParamValues}]',
-            values: {
-              unitParamName: '"unit"',
-              unitParamValues: '"week", "day", "hour", "minute", "second"',
-            },
-          }));
+          throw new Error(
+            i18n.translate('visTypeVega.esQueryParser.unknownUnitValueErrorMessage', {
+              defaultMessage: 'Unknown {unitParamName} value. Must be one of: [{unitParamValues}]',
+              values: {
+                unitParamName: '"unit"',
+                unitParamValues: '"week", "day", "hour", "minute", "second"',
+              },
+            })
+          );
       }
       result += shift * multiplier;
     }
@@ -347,39 +384,38 @@ export class EsQueryParser {
    */
   static _roundInterval(interval) {
     switch (true) {
-      case (interval <= 500):         // <= 0.5s
+      case interval <= 500: // <= 0.5s
         return '100ms';
-      case (interval <= 5000):        // <= 5s
+      case interval <= 5000: // <= 5s
         return '1s';
-      case (interval <= 7500):        // <= 7.5s
+      case interval <= 7500: // <= 7.5s
         return '5s';
-      case (interval <= 15000):       // <= 15s
+      case interval <= 15000: // <= 15s
         return '10s';
-      case (interval <= 45000):       // <= 45s
+      case interval <= 45000: // <= 45s
         return '30s';
-      case (interval <= 180000):      // <= 3m
+      case interval <= 180000: // <= 3m
         return '1m';
-      case (interval <= 450000):      // <= 9m
+      case interval <= 450000: // <= 9m
         return '5m';
-      case (interval <= 1200000):     // <= 20m
+      case interval <= 1200000: // <= 20m
         return '10m';
-      case (interval <= 2700000):     // <= 45m
+      case interval <= 2700000: // <= 45m
         return '30m';
-      case (interval <= 7200000):     // <= 2h
+      case interval <= 7200000: // <= 2h
         return '1h';
-      case (interval <= 21600000):    // <= 6h
+      case interval <= 21600000: // <= 6h
         return '3h';
-      case (interval <= 86400000):    // <= 24h
+      case interval <= 86400000: // <= 24h
         return '12h';
-      case (interval <= 604800000):   // <= 1w
+      case interval <= 604800000: // <= 1w
         return '24h';
-      case (interval <= 1814400000):  // <= 3w
+      case interval <= 1814400000: // <= 3w
         return '1w';
-      case (interval < 3628800000):   // <  2y
+      case interval < 3628800000: // <  2y
         return '30d';
       default:
         return '1y';
     }
   }
-
 }
