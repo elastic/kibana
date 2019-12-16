@@ -168,6 +168,7 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
+      pulse: pulseSetup,
       http: httpSetup,
       uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,

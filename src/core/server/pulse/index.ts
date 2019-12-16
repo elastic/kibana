@@ -26,6 +26,10 @@ import { Logger } from '../logging';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
 
+export interface InternalPulseService {
+  getChannel: (id: string) => PulseChannel;
+}
+
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
 }
@@ -55,7 +59,7 @@ export class PulseService {
       })
     );
   }
-  public async setup(deps: PulseSetupDeps) {
+  public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
     this.log.debug('Setting up pulse service');
 
     // poll for instructions every second for this deployment
