@@ -32,10 +32,6 @@ Built-In-Actions are configured using the _xpack.actions_ namespoace under _kiba
 
 | Namespaced Key                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Type                  |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-<<<<<<< HEAD
-| _xpack.actions._**enabled**          | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | boolean               |
-| _xpack.actions._**whitelistedHosts** | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
-=======
 | _xpack.actions._**enabled**          | Feature toggle which enabled Actions in Kibana.  | boolean               |
 | _xpack.actions._**whitelistedHosts** | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
 
@@ -44,7 +40,6 @@ It is worth noting that the **whitelistedHosts** configuation applies to built-i
 
 Uniquely, the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about [here](https://v2.developer.pagerduty.com/docs/events-api-v2)) as a default, but this too, must be included in the whitelist before the PagerDuty action can be used.
 
->>>>>>> master
 
 ### Configuration Utilities
 
