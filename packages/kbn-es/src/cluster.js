@@ -35,7 +35,7 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
@@ -261,9 +261,12 @@ exports.Cluster = class Cluster {
     const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
+      esArgs.push(`xpack.security.http.ssl.truststore.path=${ES_P12_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.truststore.type=PKCS12`);
+      esArgs.push(`xpack.security.http.ssl.truststore.password=${ES_P12_PASSWORD}`);
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
