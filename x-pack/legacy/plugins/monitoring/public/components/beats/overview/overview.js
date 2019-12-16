@@ -114,7 +114,7 @@ export function BeatsOverview({
           <h1>
             <FormattedMessage
               id="xpack.monitoring.beats.overview.heading"
-              defaultMessage="Beats overview"
+              defaultMessage="Beats Overview"
             />
           </h1>
         </EuiScreenReaderOnly>
