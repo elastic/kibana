@@ -6,11 +6,7 @@
 
 import { VectorStyle } from './vector_style';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import {
-  COLOR_GRADIENTS,
-  DEFAULT_FILL_COLORS,
-  DEFAULT_LINE_COLORS
-} from '../color_utils';
+import { COLOR_GRADIENTS, DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../color_utils';
 import chrome from 'ui/chrome';
 
 const DEFAULT_ICON = 'airfield';
@@ -32,7 +28,11 @@ export const VECTOR_STYLES = {
 };
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
-export const POLYGON_STYLES = [VECTOR_STYLES.FILL_COLOR, VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
+export const POLYGON_STYLES = [
+  VECTOR_STYLES.FILL_COLOR,
+  VECTOR_STYLES.LINE_COLOR,
+  VECTOR_STYLES.LINE_WIDTH,
+];
 
 export function getDefaultProperties(mapColors = []) {
   return {
@@ -41,7 +41,7 @@ export function getDefaultProperties(mapColors = []) {
       options: {
         symbolizeAs: SYMBOLIZE_AS_CIRCLE,
         symbolId: DEFAULT_ICON,
-      }
+      },
     },
   };
 }
@@ -49,8 +49,7 @@ export function getDefaultProperties(mapColors = []) {
 export function getDefaultStaticProperties(mapColors = []) {
   // Colors must be state-aware to reduce unnecessary incrementation
   const lastColor = mapColors.pop();
-  const nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1)
-    % DEFAULT_FILL_COLORS.length;
+  const nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1) % DEFAULT_FILL_COLORS.length;
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
@@ -61,31 +60,31 @@ export function getDefaultStaticProperties(mapColors = []) {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         color: nextFillColor,
-      }
+      },
     },
     [VECTOR_STYLES.LINE_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        color: nextLineColor
-      }
+        color: nextLineColor,
+      },
     },
     [VECTOR_STYLES.LINE_WIDTH]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 1
-      }
+        size: 1,
+      },
     },
     [VECTOR_STYLES.ICON_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: DEFAULT_ICON_SIZE
-      }
+        size: DEFAULT_ICON_SIZE,
+      },
     },
     [VECTOR_STYLES.ICON_ORIENTATION]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        orientation: 0
-      }
+        orientation: 0,
+      },
     },
     [VECTOR_STYLES.LABEL]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
@@ -118,8 +117,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
     [VECTOR_STYLES.LINE_COLOR]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
@@ -129,8 +128,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
     [VECTOR_STYLES.LINE_WIDTH]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
@@ -141,8 +140,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
     [VECTOR_STYLES.ICON_SIZE]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
@@ -153,8 +152,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
     [VECTOR_STYLES.ICON_ORIENTATION]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
@@ -163,8 +162,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
     [VECTOR_STYLES.LABEL]: {
       type: VectorStyle.STYLE_TYPE.STATIC,

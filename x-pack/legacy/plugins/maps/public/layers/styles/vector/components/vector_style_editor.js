@@ -13,10 +13,7 @@ import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import {
-  getDefaultDynamicProperties,
-  getDefaultStaticProperties,
-} from '../vector_style_defaults';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../vector_constants';
@@ -52,11 +49,11 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadFields() {
-    const getFieldMeta = async (field) => {
+    const getFieldMeta = async field => {
       return {
         label: await field.getLabel(),
         name: field.getName(),
-        origin: field.getOrigin()
+        origin: field.getOrigin(),
       };
     };
 
@@ -367,9 +364,7 @@ export class VectorStyleEditor extends Component {
     }
 
     return (
-      <EuiFormRow
-        display="columnCompressedSwitch"
-      >
+      <EuiFormRow display="columnCompressedSwitch">
         <EuiSwitch
           label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
             defaultMessage: 'Apply global time to style metadata requests',

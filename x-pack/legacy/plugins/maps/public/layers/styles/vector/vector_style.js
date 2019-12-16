@@ -7,7 +7,12 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES, VECTOR_STYLES } from './vector_style_defaults';
+import {
+  getDefaultProperties,
+  LINE_STYLES,
+  POLYGON_STYLES,
+  VECTOR_STYLES,
+} from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
   GEO_JSON_TYPE,
@@ -38,7 +43,6 @@ const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
 const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export class VectorStyle extends AbstractStyle {
-
   static type = LAYER_STYLE_TYPE.VECTOR;
   static STYLE_TYPE = STYLE_TYPE;
   static createDescriptor(properties = {}, isTimeAware = true) {
@@ -56,22 +60,43 @@ export class VectorStyle extends AbstractStyle {
   constructor(descriptor = {}, source, layer) {
     super();
     this._source = source;
-    this._layer  = layer;
+    this._layer = layer;
     this._descriptor = {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
 
-    this._lineColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.LINE_COLOR], VECTOR_STYLES.LINE_COLOR);
-    this._fillColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.FILL_COLOR], VECTOR_STYLES.FILL_COLOR);
-    this._lineWidthStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH], VECTOR_STYLES.LINE_WIDTH);
-    this._iconSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.ICON_SIZE], VECTOR_STYLES.ICON_SIZE);
-    // eslint-disable-next-line max-len
-    this._iconOrientationProperty = this._makeOrientationProperty(this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION], VECTOR_STYLES.ICON_ORIENTATION);
-    this._labelStyleProperty = this._makeLabelProperty(this._descriptor.properties[VECTOR_STYLES.LABEL]);
-    this._labelSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE], VECTOR_STYLES.LABEL_SIZE);
-    // eslint-disable-next-line max-len
-    this._labelColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR], VECTOR_STYLES.LABEL_COLOR);
+    this._lineColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
+      VECTOR_STYLES.LINE_COLOR
+    );
+    this._fillColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
+      VECTOR_STYLES.FILL_COLOR
+    );
+    this._lineWidthStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
+      VECTOR_STYLES.LINE_WIDTH
+    );
+    this._iconSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
+      VECTOR_STYLES.ICON_SIZE
+    );
+    this._iconOrientationProperty = this._makeOrientationProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
+      VECTOR_STYLES.ICON_ORIENTATION
+    );
+    this._labelStyleProperty = this._makeLabelProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL]
+    );
+    this._labelSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
+      VECTOR_STYLES.LABEL_SIZE
+    );
+    this._labelColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
+      VECTOR_STYLES.LABEL_COLOR
+    );
   }
 
   _getAllStyleProperties() {
@@ -90,7 +115,7 @@ export class VectorStyle extends AbstractStyle {
   renderEditor({ layer, onStyleDescriptorChange }) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName, settings) => {
-      rawProperties[propertyName] = settings;//override single property, but preserve the rest
+      rawProperties[propertyName] = settings; //override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
@@ -136,7 +161,6 @@ export class VectorStyle extends AbstractStyle {
    * can then use to update store state via dispatch.
    */
   getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
-
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
@@ -146,9 +170,9 @@ export class VectorStyle extends AbstractStyle {
     });
 
     dynamicProperties.forEach(key => {
-
       const dynamicProperty = originalProperties[key];
-      const fieldName = dynamicProperty && dynamicProperty.options.field && dynamicProperty.options.field.name;
+      const fieldName =
+        dynamicProperty && dynamicProperty.options.field && dynamicProperty.options.field.name;
       if (!fieldName) {
         return;
       }
@@ -164,31 +188,32 @@ export class VectorStyle extends AbstractStyle {
       updatedProperties[key] = {
         type: DynamicStyleProperty.type,
         options: {
-          ...originalProperties[key].options
-        }
+          ...originalProperties[key].options,
+        },
       };
       delete updatedProperties[key].options.field;
-
     });
 
     if (Object.keys(updatedProperties).length === 0) {
       return {
         hasChanges: false,
-        nextStyleDescriptor: { ...this._descriptor }
+        nextStyleDescriptor: { ...this._descriptor },
       };
     }
 
     return {
       hasChanges: true,
-      nextStyleDescriptor: VectorStyle.createDescriptor({
-        ...originalProperties,
-        ...updatedProperties,
-      }, this.isTimeAware())
+      nextStyleDescriptor: VectorStyle.createDescriptor(
+        {
+          ...originalProperties,
+          ...updatedProperties,
+        },
+        this.isTimeAware()
+      ),
     };
   }
 
   async pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
-
     const features = _.get(sourceDataRequest.getData(), 'features', []);
     if (features.length === 0) {
       return {};
@@ -223,8 +248,8 @@ export class VectorStyle extends AbstractStyle {
       hasFeatureType: {
         [VECTOR_SHAPE_TYPES.POINT]: hasPoints,
         [VECTOR_SHAPE_TYPES.LINE]: hasLines,
-        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons
-      }
+        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons,
+      },
     };
 
     dynamicProperties.forEach(dynamicProperty => {
@@ -258,34 +283,38 @@ export class VectorStyle extends AbstractStyle {
 
   getDynamicPropertiesArray() {
     const styleProperties = this._getAllStyleProperties();
-    return styleProperties.filter(styleProperty => (styleProperty.isDynamic() && styleProperty.isComplete()));
+    return styleProperties.filter(
+      styleProperty => styleProperty.isDynamic() && styleProperty.isComplete()
+    );
   }
 
-  _isOnlySingleFeatureType = async (featureType) => {
+  _isOnlySingleFeatureType = async featureType => {
     return isOnlySingleFeatureType(
       featureType,
       await this._source.getSupportedShapeTypes(),
-      this._getStyleMeta().hasFeatureType);
-  }
+      this._getStyleMeta().hasFeatureType
+    );
+  };
 
   _getIsPointsOnly = async () => {
     return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT);
-  }
+  };
 
   _getIsLinesOnly = async () => {
     return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.LINE);
-  }
+  };
 
   _getIsPolygonsOnly = async () => {
     return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
-  }
+  };
 
-  _getFieldMeta = (fieldName) => {
-
+  _getFieldMeta = fieldName => {
     const fieldMetaFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
 
     const dynamicProps = this.getDynamicPropertiesArray();
-    const dynamicProp = dynamicProps.find(dynamicProp => { return fieldName === dynamicProp.getField().getName(); });
+    const dynamicProp = dynamicProps.find(dynamicProp => {
+      return fieldName === dynamicProp.getField().getName();
+    });
 
     if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
       return fieldMetaFromLocalFeatures;
@@ -317,12 +346,11 @@ export class VectorStyle extends AbstractStyle {
     const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
 
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
-
-  }
+  };
 
   _getStyleMeta = () => {
     return _.get(this._descriptor, '__styleMeta', {});
-  }
+  };
 
   getIcon = () => {
     const styles = this.getRawProperties();
@@ -338,7 +366,7 @@ export class VectorStyle extends AbstractStyle {
         symbolId={symbolId}
       />
     );
-  }
+  };
 
   async _getLegendDetailStyleProperties() {
     const isLinesOnly = await this._getIsLinesOnly();
@@ -365,7 +393,7 @@ export class VectorStyle extends AbstractStyle {
   renderLegendDetails() {
     const loadRows = async () => {
       const styles = await this._getLegendDetailStyleProperties();
-      const promises = styles.map(async (style) => {
+      const promises = styles.map(async style => {
         return {
           label: await style.getField().getLabel(),
           fieldFormatter: await this._source.getFieldFormatter(style.getField().getName()),
@@ -380,39 +408,39 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getFeatureStyleParams() {
-    return this.getDynamicPropertiesArray()
-      .map(styleProperty => {
+    return this.getDynamicPropertiesArray().map(styleProperty => {
+      // "feature-state" data expressions are not supported with layout properties.
+      // To work around this limitation, some styling values must fall back to geojson property values.
+      let supportsFeatureState;
+      let isScaled;
+      // TODO move first check into DynamicSizeProperty.supportsFeatureState
+      if (
+        styleProperty.getStyleName() === VECTOR_STYLES.ICON_SIZE &&
+        this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON
+      ) {
+        supportsFeatureState = false;
+        isScaled = true;
+      } else {
+        supportsFeatureState = styleProperty.supportsFeatureState();
+        isScaled = styleProperty.isScaled();
+      }
 
-        // "feature-state" data expressions are not supported with layout properties.
-        // To work around this limitation, some styling values must fall back to geojson property values.
-        let supportsFeatureState;
-        let isScaled;
-        // TODO move first check into DynamicSizeProperty.supportsFeatureState
-        if (styleProperty.getStyleName() === VECTOR_STYLES.ICON_SIZE
-          && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
-          supportsFeatureState = false;
-          isScaled = true;
-        } else {
-          supportsFeatureState = styleProperty.supportsFeatureState();
-          isScaled = styleProperty.isScaled();
-        }
-
-        const field = styleProperty.getField();
-        return {
-          supportsFeatureState,
-          isScaled,
-          isOrdinal: styleProperty.isOrdinal(),
-          name: field.getName(),
-          meta: this._getFieldMeta(field.getName()),
-          computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
-        };
-      });
+      const field = styleProperty.getField();
+      return {
+        supportsFeatureState,
+        isScaled,
+        isOrdinal: styleProperty.isOrdinal(),
+        name: field.getName(),
+        meta: this._getFieldMeta(field.getName()),
+        computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
+      };
+    });
   }
 
   clearFeatureState(featureCollection, mbMap, sourceId) {
     const tmpFeatureIdentifier = {
       source: null,
-      id: null
+      id: null,
     };
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
@@ -441,14 +469,14 @@ export class VectorStyle extends AbstractStyle {
       return;
     }
 
-    const featureStateParams  = this._getFeatureStyleParams();
+    const featureStateParams = this._getFeatureStyleParams();
     if (featureStateParams.length === 0) {
       return;
     }
 
     const tmpFeatureIdentifier = {
       source: null,
-      id: null
+      id: null,
     };
     const tmpFeatureState = {};
 
@@ -457,8 +485,18 @@ export class VectorStyle extends AbstractStyle {
       const feature = featureCollection.features[i];
 
       for (let j = 0; j < featureStateParams.length; j++) {
-        const { supportsFeatureState, isScaled, isOrdinal, name, meta: range, computedName } = featureStateParams[j];
-        const styleValue = isOrdinal ? this._getOrdinalValue(feature.properties[name], isScaled, range) : feature.properties[name];
+        const {
+          supportsFeatureState,
+          isScaled,
+          isOrdinal,
+          name,
+          meta: range,
+          computedName,
+        } = featureStateParams[j];
+
+        const styleValue = isOrdinal
+          ? this._getOrdinalValue(feature.properties[name], isScaled, range)
+          : feature.properties[name];
 
         if (supportsFeatureState) {
           tmpFeatureState[computedName] = styleValue;
@@ -535,7 +573,7 @@ export class VectorStyle extends AbstractStyle {
     //Ignore this custom label
     if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
       return this._source.createField({
-        fieldName: fieldDescriptor.name
+        fieldName: fieldDescriptor.name,
       });
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       let matchingField = null;

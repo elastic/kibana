@@ -7,11 +7,7 @@
 import moment from 'moment';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
-import {
-  beatsAggFilterPath,
-  beatsUuidsAgg,
-  beatsAggResponseHandler,
-} from './_beats_stats';
+import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 
 export function handleResponse(...args) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(...args);
@@ -22,7 +18,7 @@ export function handleResponse(...args) {
     stats: {
       totalEvents,
       bytesSent,
-    }
+    },
   };
 }
 
@@ -45,8 +41,8 @@ export async function getStats(req, beatsIndexPattern, clusterUuid) {
         end,
         clusterUuid,
       }),
-      aggs: beatsUuidsAgg(maxBucketSize)
-    }
+      aggs: beatsUuidsAgg(maxBucketSize),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

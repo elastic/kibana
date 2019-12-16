@@ -5,17 +5,15 @@
  */
 
 import { createAction } from 'redux-actions';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 import { clearCacheIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';
 
 import { clearRowStatus, reloadIndices } from '../actions';
 
-export const clearCacheIndicesStart = createAction(
-  'INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START'
-);
-export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
+export const clearCacheIndicesStart = createAction('INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START');
+export const clearCacheIndices = ({ indexNames }) => async dispatch => {
   dispatch(clearCacheIndicesStart({ indexNames }));
   try {
     await request(indexNames);
@@ -27,7 +25,7 @@ export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
   notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
       defaultMessage: 'Successfully cleared cache: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') }
+      values: { indexNames: indexNames.join(', ') },
     })
   );
 };

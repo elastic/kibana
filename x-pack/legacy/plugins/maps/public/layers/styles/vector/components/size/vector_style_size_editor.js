@@ -7,8 +7,8 @@
 import React from 'react';
 
 import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
-import  { DynamicSizeSelection } from './dynamic_size_selection';
-import  { StaticSizeSelection } from './static_size_selection';
+import { DynamicSizeSelection } from './dynamic_size_selection';
+import { StaticSizeSelection } from './static_size_selection';
 
 export function VectorStyleSizeEditor(props) {
   return (

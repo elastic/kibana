@@ -9,5 +9,5 @@ export const API_STATUS = {
   LOADING: 'loading',
   UPDATING: 'updating',
   SAVING: 'saving',
-  DELETING: 'deleting'
+  DELETING: 'deleting',
 };
