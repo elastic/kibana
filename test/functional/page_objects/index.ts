@@ -50,6 +50,7 @@ import { TimelionPageProvider } from './timelion_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
 // @ts-ignore not TS yet
 import { VisualizePageProvider } from './visualize_page';
+import { VisualEditorPageProvider } from './visual_editor_page';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -70,4 +71,5 @@ export const pageObjects = {
   timePicker: TimePickerPageProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,
+  visEditor: VisualEditorPageProvider,
 };

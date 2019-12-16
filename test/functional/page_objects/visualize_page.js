@@ -340,11 +340,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async inputControlSubmit() {
-      await testSubjects.clickWhenNotDisabled('inputControlSubmitBtn');
-      await this.waitForVisualizationRenderingStabilized();
-    }
-
     async inputControlClear() {
       await testSubjects.click('inputControlClearBtn');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -843,7 +838,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await this.clickVisualizationByName(vizName);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
-
+    // vis_chart service
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     async getXAxisLabels() {
       const xAxis = await find.byCssSelector('.visAxis--x.visAxis__column--bottom');
       const $ = await xAxis.parseDomContent();
@@ -1033,6 +1029,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
     }
+
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     async expectError() {
       return await testSubjects.existOrFail('visLibVisualizeError');
