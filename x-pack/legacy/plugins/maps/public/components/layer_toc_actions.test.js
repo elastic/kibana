@@ -11,18 +11,24 @@ import { LayerTocActions } from './layer_toc_actions';
 
 let supportsFitToBounds;
 const layerMock = {
-  supportsFitToBounds: () => { return supportsFitToBounds; },
-  isVisible: () => { return true; },
+  supportsFitToBounds: () => {
+    return supportsFitToBounds;
+  },
+  isVisible: () => {
+    return true;
+  },
   getIconAndTooltipContent: (zoom, isUsingSearch) => {
     return {
       icon: <span>mockIcon</span>,
       tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
-      footnotes: [{
-        icon: <span>mockFootnoteIcon</span>,
-        message: `simulated footnote at isUsingSearch: ${isUsingSearch}`
-      }],
+      footnotes: [
+        {
+          icon: <span>mockFootnoteIcon</span>,
+          message: `simulated footnote at isUsingSearch: ${isUsingSearch}`,
+        },
+      ],
     };
-  }
+  },
 };
 
 const defaultProps = {
@@ -39,52 +45,36 @@ describe('LayerTocActions', () => {
   });
 
   test('is rendered', async () => {
-    const component = shallowWithIntl(
-      <LayerTocActions
-        {...defaultProps}
-      />
-    );
+    const component = shallowWithIntl(<LayerTocActions {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   test('should not show edit actions in read only mode', async () => {
-    const component = shallowWithIntl(
-      <LayerTocActions
-        {...defaultProps}
-        isReadOnly={true}
-      />
-    );
+    const component = shallowWithIntl(<LayerTocActions {...defaultProps} isReadOnly={true} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   test('should disable fit to data when supportsFitToBounds is false', async () => {
     supportsFitToBounds = false;
-    const component = shallowWithIntl(
-      <LayerTocActions
-        {...defaultProps}
-      />
-    );
+    const component = shallowWithIntl(<LayerTocActions {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 });

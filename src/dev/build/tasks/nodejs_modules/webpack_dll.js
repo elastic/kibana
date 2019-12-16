@@ -49,7 +49,9 @@ export async function getDllEntries(manifestPath, whiteListedModules, baseDir = 
   // Only includes modules who are not in the white list of modules
   // and that are node_modules
   return modules.filter(entry => {
-    const isWhiteListed = whiteListedModules.some(nonEntry => normalizePosixPath(entry).includes(`node_modules/${nonEntry}`));
+    const isWhiteListed = whiteListedModules.some(nonEntry =>
+      normalizePosixPath(entry).includes(`node_modules/${nonEntry}`)
+    );
     const isNodeModule = entry.includes('node_modules');
 
     // NOTE: when using dynamic imports on webpack the entry paths could be created
@@ -100,24 +102,20 @@ export async function cleanDllModuleFromEntryPath(logger, entryPath) {
     `!${normalizedModuleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
   ]);
 
-  await deleteAll(filesToDelete.filter(path => {
-    const relativePath = relative(moduleDir, path);
-    return !relativePath.endsWith('package.json') || relativePath.includes('node_modules');
-  }));
+  await deleteAll(
+    filesToDelete.filter(path => {
+      const relativePath = relative(moduleDir, path);
+      return !relativePath.endsWith('package.json') || relativePath.includes('node_modules');
+    })
+  );
 
   // Mark this module as cleaned
   modulePkg.cleaned = true;
 
   // Rewrite modified package.json
-  await write(
-    modulePkgPath,
-    JSON.stringify(modulePkg, null, 2)
-  );
+  await write(modulePkgPath, JSON.stringify(modulePkg, null, 2));
 }
 
 export async function writeEmptyFileForDllEntry(entryPath) {
-  await write(
-    entryPath,
-    ''
-  );
+  await write(entryPath, '');
 }

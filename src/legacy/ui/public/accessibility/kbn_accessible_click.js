@@ -37,10 +37,7 @@
  * Apply this directive to any of these elements to automatically do the above.
  */
 
-import {
-  accessibleClickKeys,
-  keyCodes,
-} from '@elastic/eui';
+import { accessibleClickKeys, keyCodes } from '@elastic/eui';
 import { uiModules } from '../modules';
 
 export function KbnAccessibleClickProvider() {
@@ -64,7 +61,9 @@ export function KbnAccessibleClickProvider() {
       }
 
       if (elementType === 'A' && attrs.href !== undefined) {
-        throw new Error(`kbnAccessibleClick doesn't need to be used on a link if it has a href attribute.`);
+        throw new Error(
+          `kbnAccessibleClick doesn't need to be used on a link if it has a href attribute.`
+        );
       }
 
       // We're emulating a click action, so we should already have a regular click handler defined.
@@ -92,5 +91,4 @@ export function KbnAccessibleClickProvider() {
   };
 }
 
-uiModules.get('kibana')
-  .directive('kbnAccessibleClick', KbnAccessibleClickProvider);
+uiModules.get('kibana').directive('kbnAccessibleClick', KbnAccessibleClickProvider);

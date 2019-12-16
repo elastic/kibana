@@ -9,14 +9,14 @@ import { wrapEsError } from '../../../lib/error_wrappers';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { Pipeline } from '../../../models/pipeline';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function savePipeline(callWithRequest, pipelineId, pipelineBody) {
   return callWithRequest('index', {
     index: INDEX_NAMES.PIPELINES,
     id: pipelineId,
     body: pipelineBody,
-    refresh: 'wait_for'
+    refresh: 'wait_for',
   });
 }
 
@@ -42,7 +42,7 @@ export function registerSaveRoute(server) {
         .catch(e => wrapEsError(e));
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

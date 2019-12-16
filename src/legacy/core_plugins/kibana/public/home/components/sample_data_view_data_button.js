@@ -19,12 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiIcon,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../kibana_services';
@@ -33,8 +28,8 @@ export class SampleDataViewDataButton extends React.Component {
   addBasePath = getServices().addBasePath;
 
   state = {
-    isPopoverOpen: false
-  }
+    isPopoverOpen: false,
+  };
 
   togglePopoverVisibility = () => {
     this.setState(prevState => ({
@@ -50,14 +45,20 @@ export class SampleDataViewDataButton extends React.Component {
 
   render() {
     const viewDataButtonLabel = i18n.translate('kbn.home.sampleDataSetCard.viewDataButtonLabel', {
-      defaultMessage: 'View data' });
-    const viewDataButtonAriaLabel = i18n.translate('kbn.home.sampleDataSetCard.viewDataButtonAriaLabel', {
-      defaultMessage: 'View {datasetName}',
-      values: {
-        datasetName: this.props.name,
-      },
+      defaultMessage: 'View data',
     });
-    const dashboardPath = this.addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
+    const viewDataButtonAriaLabel = i18n.translate(
+      'kbn.home.sampleDataSetCard.viewDataButtonAriaLabel',
+      {
+        defaultMessage: 'View {datasetName}',
+        values: {
+          datasetName: this.props.name,
+        },
+      }
+    );
+    const dashboardPath = this.addBasePath(
+      `/app/kibana#/dashboard/${this.props.overviewDashboard}`
+    );
 
     if (this.props.appLinks.length === 0) {
       return (
@@ -74,13 +75,8 @@ export class SampleDataViewDataButton extends React.Component {
     const additionalItems = this.props.appLinks.map(({ path, label, icon }) => {
       return {
         name: label,
-        icon: (
-          <EuiIcon
-            type={icon}
-            size="m"
-          />
-        ),
-        href: this.addBasePath(path)
+        icon: <EuiIcon type={icon} size="m" />,
+        href: this.addBasePath(path),
       };
     });
     const panels = [
@@ -89,18 +85,14 @@ export class SampleDataViewDataButton extends React.Component {
         items: [
           {
             name: i18n.translate('kbn.home.sampleDataSetCard.dashboardLinkLabel', {
-              defaultMessage: 'Dashboard' }),
-            icon: (
-              <EuiIcon
-                type="dashboardApp"
-                size="m"
-              />
-            ),
+              defaultMessage: 'Dashboard',
+            }),
+            icon: <EuiIcon type="dashboardApp" size="m" />,
             href: dashboardPath,
           },
-          ...additionalItems
-        ]
-      }
+          ...additionalItems,
+        ],
+      },
     ];
     const popoverButton = (
       <EuiButton
@@ -121,10 +113,7 @@ export class SampleDataViewDataButton extends React.Component {
         panelPaddingSize="none"
         anchorPosition="downCenter"
       >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={panels}
-        />
+        <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
     );
   }
@@ -134,9 +123,11 @@ SampleDataViewDataButton.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   overviewDashboard: PropTypes.string.isRequired,
-  appLinks: PropTypes.arrayOf(PropTypes.shape({
-    path: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-  })).isRequired,
+  appLinks: PropTypes.arrayOf(
+    PropTypes.shape({
+      path: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };

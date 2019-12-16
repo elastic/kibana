@@ -39,25 +39,35 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const ALL_TAB_ID = 'all';
 const OTHERS_TAB_ID = 'others';
 
-const isOtherCategory = (directory) => {
-  return directory.category !== FeatureCatalogueCategory.DATA && directory.category !== FeatureCatalogueCategory.ADMIN;
+const isOtherCategory = directory => {
+  return (
+    directory.category !== FeatureCatalogueCategory.DATA &&
+    directory.category !== FeatureCatalogueCategory.ADMIN
+  );
 };
 
 export class FeatureDirectory extends React.Component {
-
   constructor(props) {
     super(props);
 
-    this.tabs = [{
-      id: ALL_TAB_ID,
-      name: i18n.translate('kbn.home.directory.tabs.allTitle', { defaultMessage: 'All' }),
-    }, {
-      id: FeatureCatalogueCategory.DATA,
-      name: i18n.translate('kbn.home.directory.tabs.dataTitle', { defaultMessage: 'Data Exploration & Visualization' }),
-    }, {
-      id: FeatureCatalogueCategory.ADMIN,
-      name: i18n.translate('kbn.home.directory.tabs.administrativeTitle', { defaultMessage: 'Administrative' }),
-    }];
+    this.tabs = [
+      {
+        id: ALL_TAB_ID,
+        name: i18n.translate('kbn.home.directory.tabs.allTitle', { defaultMessage: 'All' }),
+      },
+      {
+        id: FeatureCatalogueCategory.DATA,
+        name: i18n.translate('kbn.home.directory.tabs.dataTitle', {
+          defaultMessage: 'Data Exploration & Visualization',
+        }),
+      },
+      {
+        id: FeatureCatalogueCategory.ADMIN,
+        name: i18n.translate('kbn.home.directory.tabs.administrativeTitle', {
+          defaultMessage: 'Administrative',
+        }),
+      },
+    ];
     if (props.directories.some(isOtherCategory)) {
       this.tabs.push({
         id: OTHERS_TAB_ID,
@@ -66,7 +76,7 @@ export class FeatureDirectory extends React.Component {
     }
 
     this.state = {
-      selectedTabId: ALL_TAB_ID
+      selectedTabId: ALL_TAB_ID,
     };
   }
 
@@ -86,11 +96,11 @@ export class FeatureDirectory extends React.Component {
         {tab.name}
       </EuiTab>
     ));
-  }
+  };
 
   renderDirectories = () => {
     return this.props.directories
-      .filter((directory) => {
+      .filter(directory => {
         if (this.state.selectedTabId === ALL_TAB_ID) {
           return true;
         }
@@ -99,7 +109,7 @@ export class FeatureDirectory extends React.Component {
         }
         return this.state.selectedTabId === directory.category;
       })
-      .map((directory) => {
+      .map(directory => {
         return (
           <EuiFlexItem key={directory.id}>
             <Synopsis
@@ -120,20 +130,13 @@ export class FeatureDirectory extends React.Component {
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>
-              <FormattedMessage
-                id="kbn.home.directory.directoryTitle"
-                defaultMessage="Directory"
-              />
+              <FormattedMessage id="kbn.home.directory.directoryTitle" defaultMessage="Directory" />
             </h1>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiTabs className="homeDirectoryTabs">
-            {this.renderTabs()}
-          </EuiTabs>
+          <EuiTabs className="homeDirectoryTabs">{this.renderTabs()}</EuiTabs>
           <EuiSpacer />
-          <EuiFlexGrid columns={4}>
-            { this.renderDirectories() }
-          </EuiFlexGrid>
+          <EuiFlexGrid columns={4}>{this.renderDirectories()}</EuiFlexGrid>
         </EuiPageBody>
       </EuiPage>
     );
@@ -142,13 +145,15 @@ export class FeatureDirectory extends React.Component {
 
 FeatureDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    icon: PropTypes.string.isRequired,
-    path: PropTypes.string.isRequired,
-    showOnHomePage: PropTypes.bool.isRequired,
-    category: PropTypes.string.isRequired
-  }))
+  directories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      showOnHomePage: PropTypes.bool.isRequired,
+      category: PropTypes.string.isRequired,
+    })
+  ),
 };

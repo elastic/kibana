@@ -21,13 +21,11 @@ import React from 'react';
 import sinon from 'sinon';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import {
-  ListControl,
-} from './list_control';
+import { ListControl } from './list_control';
 
 const options = ['choice1', 'choice2'];
 
-const formatOptionLabel = (value) => {
+const formatOptionLabel = value => {
   return `${value} + formatting`;
 };
 
@@ -38,28 +36,32 @@ beforeEach(() => {
 });
 
 test('renders ListControl', () => {
-  const component = shallowWithIntl(<ListControl.WrappedComponent
-    id="mock-list-control"
-    label="list control"
-    options={options}
-    selectedOptions={[]}
-    multiselect={true}
-    controlIndex={0}
-    stageFilter={stageFilter}
-    formatOptionLabel={formatOptionLabel}
-  />);
+  const component = shallowWithIntl(
+    <ListControl.WrappedComponent
+      id="mock-list-control"
+      label="list control"
+      options={options}
+      selectedOptions={[]}
+      multiselect={true}
+      controlIndex={0}
+      stageFilter={stageFilter}
+      formatOptionLabel={formatOptionLabel}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('disableMsg', () => {
-  const component = shallowWithIntl(<ListControl.WrappedComponent
-    id="mock-list-control"
-    label="list control"
-    multiselect={true}
-    controlIndex={0}
-    stageFilter={stageFilter}
-    formatOptionLabel={formatOptionLabel}
-    disableMsg={'control is disabled to test rendering when disabled'}
-  />);
+  const component = shallowWithIntl(
+    <ListControl.WrappedComponent
+      id="mock-list-control"
+      label="list control"
+      multiselect={true}
+      controlIndex={0}
+      stageFilter={stageFilter}
+      formatOptionLabel={formatOptionLabel}
+      disableMsg={'control is disabled to test rendering when disabled'}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
