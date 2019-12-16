@@ -6,15 +6,17 @@
 
 import {
   KibanaContextProvider,
+  KibanaReactContextValue,
   useKibana,
   useUiSetting,
   useUiSetting$,
   withKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartCore, StartPlugins } from '../../apps/plugin';
+import { StartServices } from '../../apps/plugin';
 
+export type KibanaContext = KibanaReactContextValue<StartServices>;
 export interface WithKibanaProps {
-  kibana: { services: StartCore & StartPlugins };
+  kibana: KibanaContext;
 }
 
 export { KibanaContextProvider, useKibana, useUiSetting, useUiSetting$, withKibana };
