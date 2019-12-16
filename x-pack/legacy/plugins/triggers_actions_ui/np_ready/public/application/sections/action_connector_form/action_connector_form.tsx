@@ -29,7 +29,7 @@ import { ActionConnector, IErrorObject } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ActionConnectorProps {
-  initialConnector: any;
+  initialConnector: ActionConnector;
   actionTypeName: string;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
