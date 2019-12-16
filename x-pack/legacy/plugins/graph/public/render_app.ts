@@ -38,7 +38,7 @@ import {
   IndexPatternsContract,
 } from '../../../../../src/plugins/data/public';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
-import { LicensingPluginSetup } from '../../../../plugins/licensing/common/types';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { checkLicense } from '../../../../plugins/graph/common/check_license';
 
 /**

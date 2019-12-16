@@ -9,10 +9,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 function hasEqualKeys(a, b) {
-  return isEqual(
-    Object.keys(a).sort(),
-    Object.keys(b).sort()
-  );
+  return isEqual(Object.keys(a).sort(), Object.keys(b).sort());
 }
 
 export function initializeAppState(AppState, stateName, defaultState) {
@@ -41,7 +38,7 @@ export function initializeAppState(AppState, stateName, defaultState) {
   // - if it's not an object, check if defaultState and current appState are of the same type.
   if (
     (typeof defaultState === 'object' && !hasEqualKeys(defaultState, appState[stateName])) ||
-    (typeof defaultState !== typeof appState[stateName])
+    typeof defaultState !== typeof appState[stateName]
   ) {
     appState[stateName] = cloneDeep(defaultState);
     appState.save();

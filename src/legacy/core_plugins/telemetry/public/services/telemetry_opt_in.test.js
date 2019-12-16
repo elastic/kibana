@@ -32,17 +32,21 @@ describe('TelemetryOptInProvider', () => {
         if (simulatePutError) {
           return Promise.reject('Something happened');
         }
-      })
+      }),
     };
 
     const mockChrome = {
-      addBasePath: (url) => url
+      addBasePath: url => url,
     };
 
-    mockInjectedMetadata({ telemetryOptedIn: optedIn, allowChangingOptInStatus: true, telemetryNotifyUserAboutOptInDefault: true });
+    mockInjectedMetadata({
+      telemetryOptedIn: optedIn,
+      allowChangingOptInStatus: true,
+      telemetryNotifyUserAboutOptInDefault: true,
+    });
 
     const mockInjector = {
-      get: (key) => {
+      get: key => {
         switch (key) {
           case '$http': {
             return mockHttp;
@@ -50,7 +54,7 @@ describe('TelemetryOptInProvider', () => {
           default:
             throw new Error('unexpected injector request: ' + key);
         }
-      }
+      },
     };
 
     const provider = new TelemetryOptInProvider(mockInjector, mockChrome, false);
@@ -59,7 +63,6 @@ describe('TelemetryOptInProvider', () => {
       mockHttp,
     };
   };
-
 
   it('should return the current opt-in status', () => {
     const { provider: optedInProvider } = setup({ optedIn: true });
