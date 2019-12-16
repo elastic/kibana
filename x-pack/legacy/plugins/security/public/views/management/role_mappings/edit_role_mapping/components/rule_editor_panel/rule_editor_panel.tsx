@@ -10,6 +10,7 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
   EuiCallOut,
+  EuiErrorBoundary,
   EuiIcon,
   EuiLink,
   EuiFlexGroup,
@@ -92,13 +93,15 @@ export class RuleEditorPanel extends Component<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow fullWidth isInvalid={validationResult && validationResult.isInvalid}>
-              <Fragment>
-                {validationWarning}
-                {this.getEditor()}
-                <EuiSpacer />
-                {this.getModeToggle()}
-                {this.getConfirmModeChangePrompt()}
-              </Fragment>
+              <EuiErrorBoundary>
+                <Fragment>
+                  {validationWarning}
+                  {this.getEditor()}
+                  <EuiSpacer />
+                  {this.getModeToggle()}
+                  {this.getConfirmModeChangePrompt()}
+                </Fragment>
+              </EuiErrorBoundary>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>

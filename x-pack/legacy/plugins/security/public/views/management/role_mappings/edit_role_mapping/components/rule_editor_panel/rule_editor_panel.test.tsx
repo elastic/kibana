@@ -16,6 +16,7 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 // warnings in the console which adds unnecessary noise to the test output.
 import 'test_utils/stub_web_worker';
 import { AllRule, FieldRule } from '../../../model';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 describe('RuleEditorPanel', () => {
   it('renders the visual editor when no rules are defined', () => {
@@ -88,5 +89,20 @@ describe('RuleEditorPanel', () => {
     expect(rules).toEqual({
       all: [{ field: { username: '*' } }],
     });
+  });
+
+  it('catches errors thrown by child components', () => {
+    const props = {
+      rawRules: {},
+      onChange: jest.fn(),
+      onValidityChange: jest.fn(),
+      validateForm: false,
+    };
+    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+
+    wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
+
+    expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
+    expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
   });
 });
