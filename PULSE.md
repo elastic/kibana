@@ -8,11 +8,11 @@ At the heart of this proof of concept are two components: the *service* and the 
 The *service* represents the remote REST API that would be deployed an elastic.co URL. In
 this POC, the service exists as a plugin in Kibana so we can easily develop on it side by
 side with the changes to Kibana itself. It's contained in
-`[x-pack/plugins/pulse_poc](./x-pack/plugins/pulse_poc)` and is accessible at
+[`x-pack/plugins/pulse_poc`](./x-pack/plugins/pulse_poc) and is accessible at
 `http://localhost:5601/api/pulse_poc`.
 
 The *client* represents the core service within Kibana that manages interactions with the
-remote service. It's contained in [src/core/server/pulse](./src/core/server/pulse).
+remote service. It's contained in [`src/core/server/pulse`](./src/core/server/pulse).
 
 The client periodically sends data, organized by *channel* to the service. The client
 also periodically retrieves *instructions* from the service, which are also organized by
@@ -47,13 +47,13 @@ yarn start --no-base-path
 ## Adding a channel
 
 To add a channel to the service, create a directory for that channel in
-`[x-pack/plugins/pulse_poc/server/channels](./x-pack/plugins/pulse_poc/server/channels)`.
+[`x-pack/plugins/pulse_poc/server/channels`](./x-pack/plugins/pulse_poc/server/channels).
 An empty directory is technically enough to allow receiving data for that channel, but in
 practice you'll want to add at least one `check` function so the channel is providing
 value back to the product in some way.
 
 To add a channel to the client, create a TypeScript file for that channel in
-`[src/core/server/pulse/collectors](./src/core/server/pulse/collectors)`. In practice,
+[`src/core/server/pulse/collectors`](./src/core/server/pulse/collectors). In practice,
 this file should export a record collector. See "Sending data" below.
 
 ## Adding instructions
@@ -69,7 +69,7 @@ that should be included in the response.
 ## Sending data
 
 To send data from the client, you must use a channel *collector*. Collectors are defined
-in `[src/core/server/pulse/collectors](./src/core/server/pulse/collectors)` and must each
+in [`src/core/server/pulse/collectors`](./src/core/server/pulse/collectors) and must each
 export an asynchronous function `getRecords()`, which should return an array of one or
 more telemetry records for that channel. Each record will ultimately be stored as an
 individual document in that channel's index by the service.
