@@ -17,34 +17,19 @@
  * under the License.
  */
 
-import React from 'react';
-import { npSetup, npStart } from 'ui/new_platform';
+import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
+import { DataPublicPluginStart } from '../../data/public';
 
-const customExtension = {
-  id: 'registered-prop',
-  label: 'Registered Button',
-  description: 'Registered Demo',
-  run() {},
-  testId: 'demoRegisteredNewButton',
-};
+export interface NavigationPublicPluginSetup {
+  registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
+}
 
-npSetup.plugins.navigation.registerMenuItem(customExtension);
+export interface NavigationPublicPluginStart {
+  ui: {
+    TopNavMenu: React.ComponentType<TopNavMenuProps>;
+  };
+}
 
-export const AppWithTopNav = () => {
-  const { TopNavMenu } = npStart.plugins.navigation.ui;
-  const config = [
-    {
-      id: 'new',
-      label: 'New Button',
-      description: 'New Demo',
-      run() {},
-      testId: 'demoNewButton',
-    },
-  ];
-
-  return (
-    <TopNavMenu appName="demo-app" config={config}>
-      Hey
-    </TopNavMenu>
-  );
-};
+export interface NavigationPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
