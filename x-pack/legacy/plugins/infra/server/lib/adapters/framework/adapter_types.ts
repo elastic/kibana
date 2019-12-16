@@ -8,7 +8,7 @@ import { SearchResponse, GenericParams } from 'elasticsearch';
 import { Lifecycle } from 'hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
-import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../../../../../plugins/apm/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
@@ -28,12 +28,12 @@ export interface InfraServerPluginDeps {
 export interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
   name?: string;
-  index?: string;
+  index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: string;
+  fields?: string | string[];
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;

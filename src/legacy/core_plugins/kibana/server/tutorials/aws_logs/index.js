@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function awsLogsSpecProvider(server, context) {
   const moduleName = 'aws';
@@ -34,7 +38,8 @@ export function awsLogsSpecProvider(server, context) {
       defaultMessage: 'Collect AWS logs from S3 bucket with Filebeat.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.awsLogs.longDescription', {
-      defaultMessage: 'Collect AWS logs by exporting them to an S3 bucket which is configured with SQS notification. \
+      defaultMessage:
+        'Collect AWS logs by exporting them to an S3 bucket which is configured with SQS notification. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-aws.html',
@@ -48,17 +53,17 @@ export function awsLogsSpecProvider(server, context) {
           linkLabel: i18n.translate('kbn.server.tutorials.awsLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'AWS S3 server access log dashboard',
           }),
-          isOverview: true
-        }
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-aws.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-aws.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/aws_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

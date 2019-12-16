@@ -19,21 +19,20 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function({ getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'header', 'common']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/40912
   describe.skip('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
-    describe('create and delete', function () {
-
-      before(async function () {
+    describe('create and delete', function() {
+      before(async function() {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.deleteAllVisualizations();
       });
 
-      it('create new viz', async function () {
+      it('create new viz', async function() {
         // type markdown is used for simplicity
         await PageObjects.visualize.createSimpleMarkdownViz(vizName);
         await PageObjects.visualize.gotoVisualizationLandingPage();
@@ -41,7 +40,7 @@ export default function ({ getPageObjects }) {
         expect(visCount).to.equal(1);
       });
 
-      it('delete all viz', async function () {
+      it('delete all viz', async function() {
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '1');
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '2');
         await PageObjects.visualize.gotoVisualizationLandingPage();
@@ -52,12 +51,11 @@ export default function ({ getPageObjects }) {
         await PageObjects.visualize.deleteAllVisualizations();
         visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(visCount).to.equal(0);
-
       });
     });
 
-    describe('search', function () {
-      before(async function () {
+    describe('search', function() {
+      before(async function() {
         // create one new viz
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.navigateToNewVisualization();
@@ -68,42 +66,41 @@ export default function ({ getPageObjects }) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
       });
 
-      it('matches on the first word', async function () {
+      it('matches on the first word', async function() {
         await PageObjects.visualize.searchForItemWithName('Hello');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(itemCount).to.equal(1);
       });
 
-      it('matches the second word', async function () {
+      it('matches the second word', async function() {
         await PageObjects.visualize.searchForItemWithName('World');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(itemCount).to.equal(1);
       });
 
-      it('matches the second word prefix', async function () {
+      it('matches the second word prefix', async function() {
         await PageObjects.visualize.searchForItemWithName('Wor');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(itemCount).to.equal(1);
       });
 
-      it('does not match mid word', async function () {
+      it('does not match mid word', async function() {
         await PageObjects.visualize.searchForItemWithName('orld');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(itemCount).to.equal(0);
       });
 
-      it('is case insensitive', async function () {
+      it('is case insensitive', async function() {
         await PageObjects.visualize.searchForItemWithName('hello world');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(itemCount).to.equal(1);
       });
 
-      it('is using AND operator', async function () {
+      it('is using AND operator', async function() {
         await PageObjects.visualize.searchForItemWithName('hello banana');
         const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
         expect(itemCount).to.equal(0);
       });
     });
-
   });
 }

@@ -3,16 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MachineLearningAPIProvider } from './api';
+import { MlApi } from './api';
 
 import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
-  mlApi: ProvidedType<typeof MachineLearningAPIProvider>
+  mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
 

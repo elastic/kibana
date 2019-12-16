@@ -32,11 +32,16 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+import { SavedObjectFinderUi } from '../../../../../../../plugins/kibana_react/public';
+import { getServices } from '../../kibana_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
 
 export function OpenSearchPanel(props) {
+  const {
+    core: { uiSettings, savedObjects },
+  } = getServices();
+
   return (
     <EuiFlyout ownFocus onClose={props.onClose} data-test-subj="loadSearchForm">
       <EuiFlyoutHeader hasBorder>
@@ -50,7 +55,7 @@ export function OpenSearchPanel(props) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinder
+        <SavedObjectFinderUi
           noItemsMessage={
             <FormattedMessage
               id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
@@ -70,6 +75,8 @@ export function OpenSearchPanel(props) {
             window.location.assign(props.makeUrl(id));
             props.onClose();
           }}
+          uiSettings={uiSettings}
+          savedObjects={savedObjects}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

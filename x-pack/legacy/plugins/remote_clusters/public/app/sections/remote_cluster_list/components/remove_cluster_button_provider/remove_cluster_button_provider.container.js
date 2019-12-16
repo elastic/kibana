@@ -6,15 +6,13 @@
 
 import { connect } from 'react-redux';
 
-import {
-  removeClusters,
-} from '../../../../store/actions';
+import { removeClusters } from '../../../../store/actions';
 
 import { RemoveClusterButtonProvider as RemoveClusterButtonProviderComponent } from './remove_cluster_button_provider';
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    removeClusters: (names) => {
+    removeClusters: names => {
       dispatch(removeClusters(names));
     },
   };
@@ -22,5 +20,5 @@ const mapDispatchToProps = (dispatch) => {
 
 export const RemoveClusterButtonProvider = connect(
   undefined,
-  mapDispatchToProps,
+  mapDispatchToProps
 )(RemoveClusterButtonProviderComponent);

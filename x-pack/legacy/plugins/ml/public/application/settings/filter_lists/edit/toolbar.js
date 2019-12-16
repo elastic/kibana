@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for the toolbar section of the edit filter list page,
  * holding a search bar, and buttons for adding and deleting items from the list.
@@ -15,12 +14,7 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSearchBar,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 
 import { AddItemPopover } from '../components/add_item_popover';
 
@@ -32,27 +26,20 @@ function renderToolsRight(
   selectedItemCount
 ) {
   return [
-    (
-      <AddItemPopover
-        addItems={addItems}
-        canCreateFilter={canCreateFilter}
-        key="add_item_btn"
+    <AddItemPopover addItems={addItems} canCreateFilter={canCreateFilter} key="add_item_btn" />,
+    <EuiButton
+      color="danger"
+      size="s"
+      disabled={selectedItemCount === 0 || canDeleteFilter === false}
+      onClick={deleteSelectedItems}
+      key="delete_item_btn"
+    >
+      <FormattedMessage
+        id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+        defaultMessage="Delete item"
       />
-    ),
-    (
-      <EuiButton
-        color="danger"
-        size="s"
-        disabled={(selectedItemCount === 0 || canDeleteFilter === false)}
-        onClick={deleteSelectedItems}
-        key="delete_item_btn"
-      >
-        <FormattedMessage
-          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-          defaultMessage="Delete item"
-        />
-      </EuiButton>
-    )];
+    </EuiButton>,
+  ];
 }
 
 export function EditFilterListToolbar({
@@ -61,8 +48,8 @@ export function EditFilterListToolbar({
   onSearchChange,
   addItems,
   deleteSelectedItems,
-  selectedItemCount }) {
-
+  selectedItemCount,
+}) {
   const toolsRight = renderToolsRight(
     canCreateFilter,
     canDeleteFilter,
@@ -75,11 +62,7 @@ export function EditFilterListToolbar({
     <React.Fragment>
       <EuiFlexGroup alignItems="center" gutterSize="xl">
         <EuiFlexItem>
-          <EuiSearchBar
-            toolsRight={toolsRight}
-            onChange={onSearchChange}
-            filters={[]}
-          />
+          <EuiSearchBar toolsRight={toolsRight} onChange={onSearchChange} filters={[]} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </React.Fragment>
@@ -91,5 +74,5 @@ EditFilterListToolbar.propTypes = {
   onSearchChange: PropTypes.func.isRequired,
   addItems: PropTypes.func.isRequired,
   deleteSelectedItems: PropTypes.func.isRequired,
-  selectedItemCount: PropTypes.number.isRequired
+  selectedItemCount: PropTypes.number.isRequired,
 };

@@ -150,13 +150,16 @@ export const siem = (kibana: any) => {
         },
         route: route.bind(server),
       };
-
       // @ts-ignore-next-line: setup.plugins is too loosely typed
       plugin(initializerContext).setup(setup.core, setup.plugins);
 
       initServerWithKibana(initializerContext, serverFacade);
     },
     config(Joi: Root) {
+      // See x-pack/plugins/siem/server/config.ts if you're adding another
+      // value where the configuration has to be duplicated at the moment.
+      // When we move over to the new platform completely this will be
+      // removed and only server/config.ts should be used.
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),

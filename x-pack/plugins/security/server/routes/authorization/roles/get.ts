@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDefinitionParams } from '../..';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { wrapError } from '../../../errors';
+import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetRolesRoutes({ router, authz, clusterClient }: RouteDefinitionParams) {
@@ -30,18 +30,14 @@ export function defineGetRolesRoutes({ router, authz, clusterClient }: RouteDefi
             body: transformElasticsearchRoleToRole(
               elasticsearchRole,
               request.params.name,
-              authz.getApplicationName()
+              authz.applicationName
             ),
           });
         }
 
         return response.notFound();
       } catch (error) {
-        const wrappedError = wrapError(error);
-        return response.customError({
-          body: wrappedError,
-          statusCode: wrappedError.output.statusCode,
-        });
+        return response.customError(wrapIntoCustomErrorResponse(error));
       }
     })
   );

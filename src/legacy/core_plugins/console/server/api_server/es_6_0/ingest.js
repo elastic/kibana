@@ -20,10 +20,10 @@
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {
-    __one_of: [ false, true ]
+    __one_of: [false, true],
   },
   if: '',
-  tag: ''
+  tag: '',
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/append-processor.html
@@ -31,27 +31,27 @@ const appendProcessorDefinition = {
   append: {
     __template: {
       field: '',
-      value: []
+      value: [],
     },
     field: '',
     value: [],
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/bytes-processor.html
 const bytesProcessorDefinition = {
   bytes: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     target_field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/convert-processor.html
@@ -59,18 +59,18 @@ const convertProcessorDefinition = {
   convert: {
     __template: {
       field: '',
-      type: ''
+      type: '',
     },
     field: '',
     type: {
-      __one_of: [ 'integer', 'float', 'string', 'boolean', 'auto' ]
+      __one_of: ['integer', 'float', 'string', 'boolean', 'auto'],
     },
     target_field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/date-processor.html
@@ -78,15 +78,15 @@ const dateProcessorDefinition = {
   date: {
     __template: {
       field: '',
-      formats: []
+      formats: [],
     },
     field: '',
     target_field: '@timestamp',
     formats: [],
     timezone: 'UTC',
     locale: 'ENGLISH',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html
@@ -94,18 +94,18 @@ const dateIndexNameProcessorDefinition = {
   date_index_name: {
     __template: {
       field: '',
-      date_rounding: ''
+      date_rounding: '',
     },
     field: '',
     date_rounding: {
-      __one_of: [ 'y', 'M', 'w', 'd', 'h', 'm', 's' ]
+      __one_of: ['y', 'M', 'w', 'd', 'h', 'm', 's'],
     },
     date_formats: [],
     timezone: 'UTC',
     locale: 'ENGLISH',
     index_name_format: 'yyyy-MM-dd',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dissect-processor.html
@@ -113,47 +113,47 @@ const dissectProcessorDefinition = {
   dissect: {
     __template: {
       field: '',
-      pattern: ''
+      pattern: '',
     },
     field: '',
     pattern: '',
     append_separator: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/dot-expand-processor.html
 const dotExpanderProcessorDefinition = {
   dot_expander: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     path: '',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/drop-processor.html
 const dropProcessorDefinition = {
   drop: {
     __template: {},
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/fail-processor.html
 const failProcessorDefinition = {
   fail: {
     __template: {
-      message: ''
+      message: '',
     },
     message: '',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/foreach-processor.html
@@ -161,14 +161,14 @@ const foreachProcessorDefinition = {
   foreach: {
     __template: {
       field: '',
-      processor: {}
+      processor: {},
     },
     field: '',
     processor: {
-      __scope_link: '_processor'
+      __scope_link: '_processor',
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html
@@ -176,19 +176,19 @@ const grokProcessorDefinition = {
   grok: {
     __template: {
       field: '',
-      patterns: []
+      patterns: [],
     },
     field: '',
     patterns: [],
     pattern_definitions: {},
     trace_match: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/gsub-processor.html
@@ -197,13 +197,13 @@ const gsubProcessorDefinition = {
     __template: {
       field: '',
       pattern: '',
-      replacement: ''
+      replacement: '',
     },
     field: '',
     pattern: '',
     replacement: '',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/join-processor.html
@@ -211,27 +211,27 @@ const joinProcessorDefinition = {
   join: {
     __template: {
       field: '',
-      separator: ''
+      separator: '',
     },
     field: '',
     separator: '',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/json-processor.html
 const jsonProcessorDefinition = {
   json: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     target_field: '',
     add_to_root: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/kv-processor.html
@@ -240,7 +240,7 @@ const kvProcessorDefinition = {
     __template: {
       field: '',
       field_split: '',
-      value_split: ''
+      value_split: '',
     },
     field: '',
     field_split: '',
@@ -248,46 +248,46 @@ const kvProcessorDefinition = {
     target_field: '',
     include_keys: [],
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/lowercase-processor.html
 const lowercaseProcessorDefinition = {
   lowercase: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/pipeline-processor.html
 const pipelineProcessorDefinition = {
   pipeline: {
     __template: {
-      name: ''
+      name: '',
     },
     name: '',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/remove-processor.html
 const removeProcessorDefinition = {
   remove: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/rename-processor.html
@@ -295,15 +295,15 @@ const renameProcessorDefinition = {
   rename: {
     __template: {
       field: '',
-      target_field: ''
+      target_field: '',
     },
     field: '',
     target_field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/script-processor.html
@@ -315,8 +315,8 @@ const scriptProcessorDefinition = {
     id: '',
     source: '',
     params: {},
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/set-processor.html
@@ -324,15 +324,15 @@ const setProcessorDefinition = {
   set: {
     __template: {
       field: '',
-      value: ''
+      value: '',
     },
     field: '',
     value: '',
     override: {
-      __one_of: [ true, false ]
+      __one_of: [true, false],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/split-processor.html
@@ -340,55 +340,55 @@ const splitProcessorDefinition = {
   split: {
     __template: {
       field: '',
-      separator: ''
+      separator: '',
     },
     field: '',
     separator: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/sort-processor.html
 const sortProcessorDefinition = {
   sort: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     order: 'asc',
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/trim-processor.html
 const trimProcessorDefinition = {
   trim: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/uppercase-processor.html
 const uppercaseProcessorDefinition = {
   uppercase: {
     __template: {
-      field: ''
+      field: '',
     },
     field: '',
     ignore_missing: {
-      __one_of: [ false, true ]
+      __one_of: [false, true],
     },
-    ...commonPipelineParams
-  }
+    ...commonPipelineParams,
+  },
 };
 
 const processorDefinition = {
@@ -417,15 +417,13 @@ const processorDefinition = {
     splitProcessorDefinition,
     sortProcessorDefinition,
     trimProcessorDefinition,
-    uppercaseProcessorDefinition
-  ]
+    uppercaseProcessorDefinition,
+  ],
 };
 
 const pipelineDefinition = {
   description: '',
-  processors: [
-    processorDefinition
-  ],
+  processors: [processorDefinition],
   version: 123,
 };
 
@@ -433,23 +431,20 @@ export const register = api => {
   // Note: this isn't an actual API endpoint. It exists so the forEach processor's "processor" field
   // may recursively use the autocomplete rules for any processor.
   api.addEndpointDescription('_processor', {
-    data_autocomplete_rules: processorDefinition
+    data_autocomplete_rules: processorDefinition,
   });
 
   api.addEndpointDescription('ingest.put_pipeline', {
     methods: ['PUT'],
-    patterns: [
-      '_ingest/pipeline/{id}'
-    ],
-    data_autocomplete_rules: pipelineDefinition
+    patterns: ['_ingest/pipeline/{id}'],
+    data_autocomplete_rules: pipelineDefinition,
   });
 
   api.addEndpointDescription('ingest.simulate', {
     data_autocomplete_rules: {
       pipeline: pipelineDefinition,
-      docs: [
-      ]
-    }
+      docs: [],
+    },
   });
 };
 

@@ -10,8 +10,7 @@ import * as React from 'react';
 
 import { TruncatableText } from '.';
 
-// No style rules found on passed Component
-describe.skip('TruncatableText', () => {
+describe('TruncatableText', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<TruncatableText>{'Hiding in plain sight'}</TruncatableText>);
     expect(toJson(wrapper)).toMatchSnapshot();

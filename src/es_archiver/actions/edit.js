@@ -31,44 +31,48 @@ export async function editAction({ prefix, dataDir, log, handler }) {
   const archives = (
     await globby('**/*.gz', {
       cwd: prefix ? resolve(dataDir, prefix) : dataDir,
-      absolute: true
+      absolute: true,
     })
   ).map(path => ({
     path,
-    rawPath: path.slice(0, -3)
+    rawPath: path.slice(0, -3),
   }));
 
-  await Promise.all(archives.map(async archive => {
-    await createPromiseFromStreams([
-      Fs.createReadStream(archive.path),
-      createGunzip(),
-      Fs.createWriteStream(archive.rawPath)
-    ]);
+  await Promise.all(
+    archives.map(async archive => {
+      await createPromiseFromStreams([
+        Fs.createReadStream(archive.path),
+        createGunzip(),
+        Fs.createWriteStream(archive.rawPath),
+      ]);
 
-    await unlinkAsync(archive.path);
+      await unlinkAsync(archive.path);
 
-    log.info(
-      `Extracted %s to %s`,
-      relative(process.cwd(), archive.path),
-      relative(process.cwd(), archive.rawPath)
-    );
-  }));
+      log.info(
+        `Extracted %s to %s`,
+        relative(process.cwd(), archive.path),
+        relative(process.cwd(), archive.rawPath)
+      );
+    })
+  );
 
   await handler();
 
-  await Promise.all(archives.map(async archive => {
-    await createPromiseFromStreams([
-      Fs.createReadStream(archive.rawPath),
-      createGzip({ level: Z_BEST_COMPRESSION }),
-      Fs.createWriteStream(archive.path)
-    ]);
+  await Promise.all(
+    archives.map(async archive => {
+      await createPromiseFromStreams([
+        Fs.createReadStream(archive.rawPath),
+        createGzip({ level: Z_BEST_COMPRESSION }),
+        Fs.createWriteStream(archive.path),
+      ]);
 
-    await unlinkAsync(archive.rawPath);
+      await unlinkAsync(archive.rawPath);
 
-    log.info(
-      `Archived %s to %s`,
-      relative(process.cwd(), archive.rawPath),
-      relative(process.cwd(), archive.path)
-    );
-  }));
+      log.info(
+        `Archived %s to %s`,
+        relative(process.cwd(), archive.rawPath),
+        relative(process.cwd(), archive.path)
+      );
+    })
+  );
 }
