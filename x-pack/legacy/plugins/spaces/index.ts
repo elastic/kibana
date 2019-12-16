@@ -84,7 +84,6 @@ export const spaces = (kibana: Record<string, any>) =>
         request: Legacy.Request,
         server: Server
       ) {
-        const kbnServer = (server as unknown) as KbnServer;
         // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
         // Known usages:
         // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
