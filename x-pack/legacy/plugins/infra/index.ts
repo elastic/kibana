@@ -16,7 +16,7 @@ import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { InfraSetup } from '../../../plugins/infra/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../plugins/apm/server';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {

@@ -102,7 +102,7 @@ function useStateWithLocalStorage<State>(
   const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(state));
-  }, [state]);
+  }, [key, state]);
   return [state, setState];
 }
 

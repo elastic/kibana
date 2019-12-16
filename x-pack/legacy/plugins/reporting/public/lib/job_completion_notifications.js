@@ -14,9 +14,7 @@ export const jobCompletionNotifications = {
   },
 
   getAll() {
-    const sessionValue = sessionStorage.getItem(
-      JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY
-    );
+    const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
     return sessionValue ? JSON.parse(sessionValue) : [];
   },
 
@@ -32,9 +30,6 @@ export const jobCompletionNotifications = {
   },
 
   _set(jobs) {
-    sessionStorage.setItem(
-      JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
-      JSON.stringify(jobs)
-    );
+    sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));
   },
 };

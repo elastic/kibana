@@ -85,17 +85,17 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     combinedQuery,
   } = useKibanaContext();
   const pageTitle =
-    savedSearch.id !== undefined
+    savedSearch !== null
       ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
           defaultMessage: 'saved search {savedSearchTitle}',
-          values: { savedSearchTitle: savedSearch.title },
+          values: { savedSearchTitle: savedSearch.attributes.title as string },
         })
       : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
           defaultMessage: 'index pattern {indexPatternTitle}',
           values: { indexPatternTitle: indexPattern.title },
         });
-  const displayQueryWarning = savedSearch.id !== undefined;
-  const tempQuery = savedSearch.id === undefined ? undefined : combinedQuery;
+  const displayQueryWarning = savedSearch !== null;
+  const tempQuery = savedSearch === null ? undefined : combinedQuery;
 
   /**
    * Loads recognizer module configuration.

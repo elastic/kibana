@@ -59,16 +59,14 @@ import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-
 npSetup.plugins.kibana_legacy.forwardApp('doc', 'discover', { keepPrefix: true });
 npSetup.plugins.kibana_legacy.forwardApp('context', 'discover', { keepPrefix: true });
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
-routes
-  .otherwise({
-    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
-  });
+routes.otherwise({
+  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`,
+});
 
 uiModules.get('kibana').run(showAppRedirectNotification);

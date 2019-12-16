@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
-import { ConcreteTaskInstance } from '../../../task_manager';
+import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {
@@ -30,7 +30,7 @@ beforeAll(() => {
   mockedTaskInstance = {
     id: '',
     attempts: 0,
-    status: 'running',
+    status: TaskStatus.Running,
     version: '123',
     runAt: new Date(),
     scheduledAt: new Date(),

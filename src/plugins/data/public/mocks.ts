@@ -74,6 +74,7 @@ const createStartContract = (): Start => {
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
+      SearchBar: jest.fn(),
     },
     indexPatterns: {} as IndexPatternsContract,
   };
