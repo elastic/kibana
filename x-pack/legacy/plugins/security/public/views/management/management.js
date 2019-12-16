@@ -20,88 +20,87 @@ import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
-routes.defaults(/^\/management\/security(\/|$)/, {
-  resolve: {
-    showLinks(kbnUrl, Promise) {
-      if (!xpackInfo.get('features.security.showLinks')) {
-        toastNotifications.addDanger({
-          title: xpackInfo.get('features.security.linksMessage')
-        });
-        kbnUrl.redirect('/management');
-        return Promise.halt();
-      }
-    }
-  }
-}).defaults(/\/management/, {
-  resolve: {
-    securityManagementSection: function (ShieldUser) {
-      const showSecurityLinks = xpackInfo.get('features.security.showLinks');
+routes
+  .defaults(/^\/management\/security(\/|$)/, {
+    resolve: {
+      showLinks(kbnUrl, Promise) {
+        if (!xpackInfo.get('features.security.showLinks')) {
+          toastNotifications.addDanger({
+            title: xpackInfo.get('features.security.linksMessage'),
+          });
+          kbnUrl.redirect('/management');
+          return Promise.halt();
+        }
+      },
+    },
+  })
+  .defaults(/\/management/, {
+    resolve: {
+      securityManagementSection: function(ShieldUser) {
+        const showSecurityLinks = xpackInfo.get('features.security.showLinks');
 
-      function deregisterSecurity() {
-        management.deregister('security');
-      }
+        function deregisterSecurity() {
+          management.deregister('security');
+        }
 
-      function ensureSecurityRegistered() {
-        const registerSecurity = () => management.register('security', {
-          display: i18n.translate(
-            'xpack.security.management.securityTitle', {
-              defaultMessage: 'Security',
-            }),
-          order: 100,
-          icon: 'securityApp',
-        });
-        const getSecurity = () => management.getSection('security');
+        function ensureSecurityRegistered() {
+          const registerSecurity = () =>
+            management.register('security', {
+              display: i18n.translate('xpack.security.management.securityTitle', {
+                defaultMessage: 'Security',
+              }),
+              order: 100,
+              icon: 'securityApp',
+            });
+          const getSecurity = () => management.getSection('security');
 
-        const security = (management.hasItem('security')) ? getSecurity() : registerSecurity();
+          const security = management.hasItem('security') ? getSecurity() : registerSecurity();
 
-        if (!security.hasItem('users')) {
-          security.register('users', {
-            name: 'securityUsersLink',
-            order: 10,
-            display: i18n.translate(
-              'xpack.security.management.usersTitle', {
+          if (!security.hasItem('users')) {
+            security.register('users', {
+              name: 'securityUsersLink',
+              order: 10,
+              display: i18n.translate('xpack.security.management.usersTitle', {
                 defaultMessage: 'Users',
               }),
-            url: `#${USERS_PATH}`,
-          });
-        }
+              url: `#${USERS_PATH}`,
+            });
+          }
 
-        if (!security.hasItem('roles')) {
-          security.register('roles', {
-            name: 'securityRolesLink',
-            order: 20,
-            display: i18n.translate(
-              'xpack.security.management.rolesTitle', {
+          if (!security.hasItem('roles')) {
+            security.register('roles', {
+              name: 'securityRolesLink',
+              order: 20,
+              display: i18n.translate('xpack.security.management.rolesTitle', {
                 defaultMessage: 'Roles',
               }),
-            url: `#${ROLES_PATH}`,
-          });
-        }
+              url: `#${ROLES_PATH}`,
+            });
+          }
 
-        if (!security.hasItem('apiKeys')) {
-          security.register('apiKeys', {
-            name: 'securityApiKeysLink',
-            order: 30,
-            display: i18n.translate(
-              'xpack.security.management.apiKeysTitle', {
+          if (!security.hasItem('apiKeys')) {
+            security.register('apiKeys', {
+              name: 'securityApiKeysLink',
+              order: 30,
+              display: i18n.translate('xpack.security.management.apiKeysTitle', {
                 defaultMessage: 'API Keys',
               }),
-            url: `#${API_KEYS_PATH}`,
-          });
+              url: `#${API_KEYS_PATH}`,
+            });
+          }
         }
-      }
 
-      if (!showSecurityLinks) {
-        deregisterSecurity();
-      } else {
-        // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
-        // management screens
-        //
-        // $promise is used here because the result is an ngResource, not a promise itself
-        return ShieldUser.getCurrent().$promise
-          .then(ensureSecurityRegistered)
-          .catch(deregisterSecurity);
-      }
-    }
-  }
-});
+        if (!showSecurityLinks) {
+          deregisterSecurity();
+        } else {
+          // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
+          // management screens
+          //
+          // $promise is used here because the result is an ngResource, not a promise itself
+          return ShieldUser.getCurrent()
+            .$promise.then(ensureSecurityRegistered)
+            .catch(deregisterSecurity);
+        }
+      },
+    },
+  });

@@ -25,7 +25,7 @@ import { esFilters } from '../../../../../../plugins/data/public';
 function toRange(sliderValue) {
   return {
     gte: sliderValue.min,
-    lte: sliderValue.max
+    lte: sliderValue.max,
   };
 }
 
@@ -58,7 +58,8 @@ export class RangeFilterManager extends FilterManager {
     const newFilter = esFilters.buildRangeFilter(
       this.indexPattern.fields.getByName(this.fieldName),
       toRange(value),
-      this.indexPattern);
+      this.indexPattern
+    );
     newFilter.meta.key = this.fieldName;
     newFilter.meta.controlledBy = this.controlId;
     return newFilter;

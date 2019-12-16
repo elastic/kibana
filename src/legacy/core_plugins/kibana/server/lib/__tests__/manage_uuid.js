@@ -22,8 +22,8 @@ import sinon from 'sinon';
 import { createTestServers } from '../../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';
 
-describe('legacy/core_plugins/kibana/server/lib', function () {
-  describe('manage_uuid', function () {
+describe('legacy/core_plugins/kibana/server/lib', function() {
+  describe('manage_uuid', function() {
     const testUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
     let kbn;
     let kbnServer;
@@ -31,9 +31,9 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
     let config;
     let servers;
 
-    before(async function () {
+    before(async function() {
       servers = createTestServers({
-        adjustTimeout: (t) => {
+        adjustTimeout: t => {
           this.timeout(t);
         },
       });
@@ -44,7 +44,7 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
     });
 
     // Clear uuid stuff from previous test runs
-    beforeEach(function () {
+    beforeEach(function() {
       kbnServer.server.log = sinon.stub();
       config = kbnServer.server.config();
     });
@@ -54,18 +54,18 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
       kbn.stop();
     });
 
-    it('ensure config uuid is validated as a guid', async function () {
+    it('ensure config uuid is validated as a guid', async function() {
       config.set('server.uuid', testUuid);
       expect(config.get('server.uuid')).to.be(testUuid);
 
       expect(() => {
         config.set('server.uuid', 'foouid');
-      }).to.throwException((e) => {
+      }).to.throwException(e => {
         expect(e.name).to.be('ValidationError');
       });
     });
 
-    it('finds the previously set uuid with config match', async function () {
+    it('finds the previously set uuid with config match', async function() {
       const msg = `Kibana instance UUID: ${testUuid}`;
       config.set('server.uuid', testUuid);
 
@@ -75,7 +75,7 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
       expect(kbnServer.server.log.lastCall.args[1]).to.be.eql(msg);
     });
 
-    it('updates the previously set uuid with config value', async function () {
+    it('updates the previously set uuid with config value', async function() {
       config.set('server.uuid', testUuid);
 
       await manageUuid(kbnServer.server);
@@ -89,7 +89,7 @@ describe('legacy/core_plugins/kibana/server/lib', function () {
       expect(kbnServer.server.log.lastCall.args[1]).to.be(msg);
     });
 
-    it('resumes the uuid stored in data and sets it to the config', async function () {
+    it('resumes the uuid stored in data and sets it to the config', async function() {
       const partialMsg = 'Resuming persistent Kibana instance UUID';
       config.set('server.uuid'); // set to undefined
 

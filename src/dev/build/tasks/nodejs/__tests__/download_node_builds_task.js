@@ -32,10 +32,7 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
   });
 
   function setup({ failOnUrl } = {}) {
-    const platforms = [
-      { getName: () => 'foo' },
-      { getName: () => 'bar' },
-    ];
+    const platforms = [{ getName: () => 'foo' }, { getName: () => 'bar' }];
 
     const log = {};
     const config = {
@@ -76,14 +73,14 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
       url: 'foo:url',
       sha256: 'foo:sha256',
       destination: 'foo:downloadPath',
-      retries: 3
+      retries: 3,
     });
     sinon.assert.calledWithExactly(DownloadNS.download, {
       log,
       url: 'bar:url',
       sha256: 'bar:sha256',
       destination: 'bar:downloadPath',
-      retries: 3
+      retries: 3,
     });
   });
 
@@ -94,7 +91,9 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
       await DownloadNodeBuildsTask.run(config, log);
       throw new Error('Expected DownloadNodeBuildsTask to reject');
     } catch (error) {
-      expect(error).to.have.property('message').be('Download failed for reasons');
+      expect(error)
+        .to.have.property('message')
+        .be('Download failed for reasons');
     }
   });
 });

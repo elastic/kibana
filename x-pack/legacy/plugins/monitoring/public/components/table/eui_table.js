@@ -5,12 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiButton,
-  EuiSpacer,
-  EuiSearchBar
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
 
@@ -22,7 +17,6 @@ export function EuiMonitoringTable({
   productName,
   ...props
 }) {
-
   const [hasItems, setHasItem] = React.useState(items.length > 0);
 
   if (search.box && !search.box['data-test-subj']) {
@@ -35,7 +29,7 @@ export function EuiMonitoringTable({
 
   if (search) {
     const oldOnChange = search.onChange;
-    search.onChange = (arg) => {
+    search.onChange = arg => {
       const filteredItems = EuiSearchBar.Query.execute(arg.query, items, props.executeQueryOptions);
       setHasItem(filteredItems.length > 0);
       oldOnChange && oldOnChange(arg);
@@ -54,13 +48,13 @@ export function EuiMonitoringTable({
   if (setupMode && setupMode.enabled) {
     footerContent = (
       <Fragment>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
           {i18n.translate('xpack.monitoring.euiTable.setupNewButtonLabel', {
             defaultMessage: 'Monitor another {identifier} with Metricbeat',
             values: {
-              identifier: getIdentifier(productName)
-            }
+              identifier: getIdentifier(productName),
+            },
           })}
         </EuiButton>
       </Fragment>
@@ -70,7 +64,9 @@ export function EuiMonitoringTable({
   return (
     <div data-test-subj={`${props.className}Container`}>
       <EuiInMemoryTable
-        data-test-subj={items.length && hasItems === true ? 'monitoringTableHasData' : 'monitoringTableNoData'}
+        data-test-subj={
+          items.length && hasItems === true ? 'monitoringTableHasData' : 'monitoringTableNoData'
+        }
         items={items}
         search={search}
         columns={columns}

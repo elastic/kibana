@@ -19,10 +19,7 @@ export async function addCluster(cluster) {
 }
 
 export async function editCluster(cluster) {
-  const {
-    name,
-    ...rest
-  } = cluster;
+  const { name, ...rest } = cluster;
 
   const request = sendPut(name, rest);
   return await trackUserRequest(request, UIM_CLUSTER_UPDATE);
