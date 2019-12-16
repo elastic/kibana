@@ -17,20 +17,27 @@
  * under the License.
  */
 
-import { IFieldType } from './fields';
+import { first } from 'rxjs/operators';
+import {
+  APICaller,
+  CallAPIOptions,
+  CoreSetup,
+  ElasticsearchServiceSetup,
+  KibanaRequest,
+} from 'kibana/server';
+import { registerValueSuggestionsRoute } from './value_suggestions_route';
 
-export interface IIndexPattern {
-  [key: string]: any;
-  fields: IFieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
+const getAPICallerFn = (elasticsearch: ElasticsearchServiceSetup) => async (
+  request: KibanaRequest
+): Promise<APICaller> => {
+  const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
+
+  return (endpoint: string, params?: Record<string, any>, options?: CallAPIOptions) =>
+    client.asScoped(request).callAsCurrentUser(endpoint, params, options);
+};
+
+export function registerRoutes({ http, elasticsearch }: CoreSetup): void {
+  const router = http.createRouter();
+
+  registerValueSuggestionsRoute(router, getAPICallerFn(elasticsearch));
 }

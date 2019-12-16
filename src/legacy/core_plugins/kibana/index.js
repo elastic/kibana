@@ -28,7 +28,6 @@ import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
 import { scriptsApi } from './server/routes/api/scripts';
-import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
@@ -334,7 +333,6 @@ export default function(kibana) {
       exportApi(server);
       homeApi(server);
       managementApi(server);
-      registerSuggestionsApi(server);
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
