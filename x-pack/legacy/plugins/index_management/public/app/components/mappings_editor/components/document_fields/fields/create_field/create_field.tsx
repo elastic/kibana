@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
-  EuiIcon,
   EuiComboBox,
   EuiFormRow,
 } from '@elastic/eui';

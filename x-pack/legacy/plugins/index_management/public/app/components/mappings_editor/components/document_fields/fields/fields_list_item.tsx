@@ -10,9 +10,8 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiBadge,
-  EuiNotificationBadge,
   EuiButtonIcon,
-  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -60,7 +59,6 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
   const {
     source,
     isMultiField,
-    childFields,
     canHaveChildFields,
     hasChildFields,
     canHaveMultiFields,
@@ -190,8 +188,14 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
-                {TYPE_DEFINITION[source.type].label}
-                {isMultiField ? ' multi-field' : ''} {/* e.g., "Text multi-field" */}
+                {isMultiField
+                  ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
+                      defaultMessage: '{dataType} multi-field',
+                      values: {
+                        dataType: TYPE_DEFINITION[source.type].label,
+                      },
+                    })
+                  : TYPE_DEFINITION[source.type].label}
               </EuiBadge>
             </EuiFlexItem>
             {canHaveMultiFields && (
@@ -201,15 +205,27 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                     grow={false}
                     className="mappingsEditor__fieldsListItem__multiFieldButton"
                   >
-                    <EuiButtonEmpty
-                      onClick={addField}
-                      iconType="plusInCircleFilled"
-                      data-test-subj="addMultiFieldButton"
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        <p>
+                          {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldToolipLabel', {
+                            defaultMessage:
+                              'Multi-fields are useful to index the same field in different ways.',
+                          })}
+                        </p>
+                      }
                     >
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldButtonLabel', {
-                        defaultMessage: 'Add multi-field',
-                      })}
-                    </EuiButtonEmpty>
+                      <EuiButtonEmpty
+                        onClick={addField}
+                        iconType="plusInCircleFilled"
+                        data-test-subj="addMultiFieldButton"
+                      >
+                        {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldButtonLabel', {
+                          defaultMessage: 'Add multi-field',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </>
