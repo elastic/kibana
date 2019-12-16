@@ -398,7 +398,7 @@
     "exit-hook": "^2.2.0",
     "faker": "1.1.0",
     "fetch-mock": "^7.3.9",
-    "geckodriver": "^1.19.0",
+    "geckodriver": "^1.19.1",
     "getopts": "^2.2.4",
     "grunt": "1.0.4",
     "grunt-available-tasks": "^0.6.3",
