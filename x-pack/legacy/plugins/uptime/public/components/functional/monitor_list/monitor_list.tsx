@@ -89,7 +89,7 @@ export const MonitorListComponent = (props: Props) => {
     },
     {
       align: 'left',
-      width: '20%',
+      width: '30%',
       field: 'state.monitor.name',
       name: labels.NAME_COLUMN_LABEL,
       render: (name: string, summary: MonitorSummary) => (
@@ -120,7 +120,6 @@ export const MonitorListComponent = (props: Props) => {
       field: 'monitor_id',
       name: '',
       sortable: true,
-      width: '50px',
       isExpander: true,
       render: (id: string) => {
         return (
