@@ -10926,7 +10926,6 @@
     "xpack.siem.eventsOverTime.showing": "显示",
     "xpack.siem.eventsOverTime.unit": "{totalCount, plural, =1 {event} other {events}}",
     "xpack.siem.flyout.button.text": "时间线",
-    "xpack.siem.footer.loadingEventsData": "正在加载事件",
     "xpack.siem.network.navigation.anomaliesTitle": "异常",
     "xpack.siem.network.navigation.dnsTitle": "DNS",
     "xpack.siem.network.navigation.flowsTitle": "Flows",

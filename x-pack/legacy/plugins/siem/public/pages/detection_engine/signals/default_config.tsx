@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../../../components/timeline/body/column_headers/default_headers';
 import {
@@ -14,6 +16,11 @@ import {
 import * as i18n from './translations';
 import { SubsetTimelineModel, timelineDefaults } from '../../../store/timeline/model';
 import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { sendSignalsToTimelineAction, updateSignalStatusAction } from './actions';
+import { FILTER_OPEN } from './components/signals_filter_group/signals_filter_group';
+
+import { TimelineAction, TimelineActionProps } from '../../../components/timeline/body/actions';
+import { CreateTimeline, SetEventsDeletedProps, SetEventsLoadingProps } from './types';
 
 export const signalsOpenFilters: esFilters.Filter[] = [
   {
@@ -123,4 +130,74 @@ export const signalsHeaders: ColumnHeader[] = [
 export const signalsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
   columns: signalsHeaders,
+  showCheckboxes: true,
+  showRowRenderers: false,
 };
+
+export const requiredFieldsForActions = [
+  '@timestamp',
+  'signal.original_time',
+  'signal.rule.filters',
+  'signal.rule.from',
+  'signal.rule.language',
+  'signal.rule.query',
+  'signal.rule.to',
+  'signal.rule.id',
+];
+
+export const getSignalsActions = ({
+  setEventsLoading,
+  setEventsDeleted,
+  createTimeline,
+  status,
+  kbnVersion,
+}: {
+  setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
+  setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
+  createTimeline: CreateTimeline;
+  status: 'open' | 'closed';
+  kbnVersion: string;
+}): TimelineAction[] => [
+  {
+    getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
+      <EuiToolTip
+        data-test-subj="send-signal-to-timeline-tool-tip"
+        content={i18n.ACTION_VIEW_IN_TIMELINE}
+      >
+        <EuiButtonIcon
+          data-test-subj={'send-signal-to-timeline-tool-tip'}
+          onClick={() => sendSignalsToTimelineAction({ createTimeline, data })}
+          iconType="tableDensityNormal"
+          aria-label="Next"
+        />
+      </EuiToolTip>
+    ),
+    id: 'sendSignalToTimeline',
+    width: 26,
+  },
+  {
+    getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
+      <EuiToolTip
+        data-test-subj="update-signal-status-tool-tip"
+        content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
+      >
+        <EuiButtonIcon
+          data-test-subj={'update-signal-status-button'}
+          onClick={() =>
+            updateSignalStatusAction({
+              signalIds: [eventId],
+              status,
+              setEventsLoading,
+              setEventsDeleted,
+              kbnVersion,
+            })
+          }
+          iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
+          aria-label="Next"
+        />
+      </EuiToolTip>
+    ),
+    id: 'updateSignalStatus',
+    width: 26,
+  },
+];

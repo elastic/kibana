@@ -177,6 +177,7 @@ export const mockGlobalState: State = {
     },
     timelineById: {
       test: {
+        deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
@@ -191,13 +192,17 @@ export const mockGlobalState: State = {
         isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null, filterQueryDraft: null },
+        loadingEventIds: [],
         title: '',
         noteIds: [],
         dateRange: {
           start: 0,
           end: 0,
         },
+        selectedEventIds: {},
         show: false,
+        showRowRenderers: true,
+        showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],

@@ -20,7 +20,13 @@ import {
   pinEvent,
   removeColumn,
   removeProvider,
+  setEventsDeleted,
+  clearEventsDeleted,
+  setEventsLoading,
+  clearEventsLoading,
   setKqlFilterQueryDraft,
+  setSelected,
+  clearSelected,
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
@@ -61,6 +67,9 @@ import {
   pinTimelineEvent,
   removeTimelineColumn,
   removeTimelineProvider,
+  setDeletedTimelineEvents,
+  setLoadingTimelineEvents,
+  setSelectedTimelineEvents,
   unPinTimelineEvent,
   updateHighlightedDropAndProvider,
   updateKqlFilterQueryDraft,
@@ -103,17 +112,39 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
   }))
-  .case(createTimeline, (state, { id, show, columns, itemsPerPage, sort }) => ({
-    ...state,
-    timelineById: addNewTimeline({
-      columns,
-      id,
-      itemsPerPage,
-      sort,
-      show,
-      timelineById: state.timelineById,
-    }),
-  }))
+  .case(
+    createTimeline,
+    (
+      state,
+      {
+        id,
+        dateRange,
+        show,
+        columns,
+        itemsPerPage,
+        kqlQuery,
+        sort,
+        showCheckboxes,
+        showRowRenderers,
+        filters,
+      }
+    ) => ({
+      ...state,
+      timelineById: addNewTimeline({
+        columns,
+        dateRange,
+        filters,
+        id,
+        itemsPerPage,
+        kqlQuery,
+        sort,
+        show,
+        showCheckboxes,
+        showRowRenderers,
+        timelineById: state.timelineById,
+      }),
+    })
+  )
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
     timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
@@ -215,6 +246,63 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         isSaving: false,
+      },
+    },
+  }))
+  .case(setEventsDeleted, (state, { id, eventIds, isDeleted }) => ({
+    ...state,
+    timelineById: setDeletedTimelineEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isDeleted,
+    }),
+  }))
+  .case(clearEventsDeleted, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        deletedEventIds: [],
+      },
+    },
+  }))
+  .case(setEventsLoading, (state, { id, eventIds, isLoading }) => ({
+    ...state,
+    timelineById: setLoadingTimelineEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isLoading,
+    }),
+  }))
+  .case(clearEventsLoading, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        loadingEventIds: [],
+      },
+    },
+  }))
+  .case(setSelected, (state, { id, eventIds, isSelected }) => ({
+    ...state,
+    timelineById: setSelectedTimelineEvents({
+      id,
+      eventIds,
+      timelineById: state.timelineById,
+      isSelected,
+    }),
+  }))
+  .case(clearSelected, (state, { id }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        selectedEventIds: {},
       },
     },
   }))

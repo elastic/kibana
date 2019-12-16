@@ -10837,7 +10837,6 @@
     "xpack.siem.eventsOverTime.showing": "表示中",
     "xpack.siem.eventsOverTime.unit": "{totalCount, plural, =1 {event} other {events}}",
     "xpack.siem.flyout.button.text": "タイムライン",
-    "xpack.siem.footer.loadingEventsData": "イベントを読み込み中",
     "xpack.siem.network.navigation.anomaliesTitle": "異常",
     "xpack.siem.network.navigation.dnsTitle": "DNS",
     "xpack.siem.network.navigation.flowsTitle": "Flow",

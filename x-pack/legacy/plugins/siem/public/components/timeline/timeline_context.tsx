@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, memo, useContext, useEffect, useState } from 'react';
+import { TimelineAction } from './body/actions';
 
 const initTimelineContext = false;
 export const TimelineContext = createContext<boolean>(initTimelineContext);
@@ -17,15 +18,19 @@ export const useTimelineWidthContext = () => useContext(TimelineWidthContext);
 export interface TimelineTypeContextProps {
   documentType?: string;
   footerText?: string;
-  showCheckboxes: boolean;
-  showRowRenderers: boolean;
+  loadingText?: string;
+  queryFields?: string[];
+  selectAll?: boolean;
+  timelineActions?: TimelineAction[];
   title?: string;
 }
 const initTimelineType: TimelineTypeContextProps = {
   documentType: undefined,
   footerText: undefined,
-  showCheckboxes: false,
-  showRowRenderers: true,
+  loadingText: undefined,
+  queryFields: [],
+  selectAll: undefined,
+  timelineActions: [],
   title: undefined,
 };
 export const TimelineTypeContext = createContext<TimelineTypeContextProps>(initTimelineType);
