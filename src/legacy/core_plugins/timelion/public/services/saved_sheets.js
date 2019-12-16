@@ -40,6 +40,7 @@ module.service('savedSheets', function() {
     indexPatterns: npStart.plugins.data.indexPatterns,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
+    config: npStart.core.uiSettings,
   };
 
   const SavedSheet = createSavedSheetClass(services);
