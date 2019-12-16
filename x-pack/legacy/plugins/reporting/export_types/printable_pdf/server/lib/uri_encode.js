@@ -9,16 +9,16 @@ import { encodeUriQuery } from './encode_uri_query';
 
 function toKeyValue(obj) {
   const parts = [];
-  forEach(obj, function (value, key) {
+  forEach(obj, function(value, key) {
     if (isArray(value)) {
-      forEach(value, function (arrayValue) {
+      forEach(value, function(arrayValue) {
         const keyStr = encodeUriQuery(key, true);
-        const valStr = (arrayValue === true ? '' : '=' + encodeUriQuery(arrayValue, true));
+        const valStr = arrayValue === true ? '' : '=' + encodeUriQuery(arrayValue, true);
         parts.push(keyStr + valStr);
       });
     } else {
       const keyStr = encodeUriQuery(key, true);
-      const valStr = (value === true ? '' : '=' + encodeUriQuery(value, true));
+      const valStr = value === true ? '' : '=' + encodeUriQuery(value, true);
       parts.push(keyStr + valStr);
     }
   });

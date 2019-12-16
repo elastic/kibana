@@ -19,21 +19,19 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const CallOuts = () => {
   return (
     <div>
       <EuiCallOut
-        title={(
+        title={
           <FormattedMessage
             id="kbn.management.settings.callOutCautionTitle"
             defaultMessage="Caution: You can break stuff here"
           />
-        )}
+        }
         color="warning"
         iconType="bolt"
       >
@@ -45,7 +43,7 @@ export const CallOuts = () => {
             Some of these settings may be undocumented, unsupported or experimental.
             If a field has a default value, blanking the field will reset it to its default which may be
             unacceptable given other configuration directives.
-            Deleting a custom setting will permanently remove it from Kibana&apos;s config."
+            Deleting a custom setting will permanently remove it from Kibana's config."
           />
         </p>
       </EuiCallOut>

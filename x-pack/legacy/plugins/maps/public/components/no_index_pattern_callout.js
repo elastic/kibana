@@ -14,11 +14,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function NoIndexPatternCallout() {
   return (
     <EuiCallOut
-      title={
-        i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
-          defaultMessage: `Couldn't find any index patterns with geospatial fields`
-        })
-      }
+      title={i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
+        defaultMessage: `Couldn't find any index patterns with geospatial fields`,
+      })}
       color="warning"
     >
       <p>

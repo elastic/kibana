@@ -20,7 +20,6 @@
 import _ from 'lodash';
 
 export class FilterManager {
-
   constructor(controlId, fieldName, indexPattern, queryFilter) {
     this.controlId = controlId;
     this.fieldName = fieldName;
@@ -41,8 +40,11 @@ export class FilterManager {
   }
 
   findFilters() {
-    const kbnFilters = _.flatten([this.queryFilter.getAppFilters(), this.queryFilter.getGlobalFilters()]);
-    return kbnFilters.filter((kbnFilter) => {
+    const kbnFilters = _.flatten([
+      this.queryFilter.getAppFilters(),
+      this.queryFilter.getGlobalFilters(),
+    ]);
+    return kbnFilters.filter(kbnFilter => {
       return _.get(kbnFilter, 'meta.controlledBy') === this.controlId;
     });
   }

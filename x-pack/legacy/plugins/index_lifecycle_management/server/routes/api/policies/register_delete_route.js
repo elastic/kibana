@@ -7,14 +7,14 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 async function deletePolicies(policyNames, callWithRequest) {
   const params = {
     method: 'DELETE',
     path: `/_ilm/policy/${encodeURIComponent(policyNames)}`,
     // we allow 404 since they may have no policies
-    ignore: [ 404 ]
+    ignore: [404],
   };
 
   return await callWithRequest('transport.request', params);
@@ -27,7 +27,7 @@ export function registerDeleteRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/policies/{policyNames}',
     method: 'DELETE',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { policyNames } = request.params;
       try {
@@ -41,7 +41,7 @@ export function registerDeleteRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

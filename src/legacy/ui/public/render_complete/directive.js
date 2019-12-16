@@ -26,7 +26,7 @@ export function createRenderCompleteDirective() {
       const el = $element[0];
       const renderCompleteHelper = new RenderCompleteHelper(el);
       $scope.$on('$destroy', renderCompleteHelper.destroy);
-    }
+    },
   };
 }
 

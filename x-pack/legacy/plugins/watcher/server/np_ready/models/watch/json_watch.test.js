@@ -11,14 +11,14 @@ describe('JsonWatch', () => {
     let props;
     beforeEach(() => {
       props = {
-        watch: 'foo'
+        watch: 'foo',
       };
     });
 
     it('should populate all expected fields', () => {
       const actual = new JsonWatch(props);
       const expected = {
-        watch: 'foo'
+        watch: 'foo',
       };
 
       expect(actual).toMatchObject(expected);
@@ -77,7 +77,7 @@ describe('JsonWatch', () => {
     beforeEach(() => {
       props = {
         watch: 'foo',
-        watchJson: 'bar'
+        watchJson: 'bar',
       };
     });
 
@@ -109,7 +109,7 @@ describe('JsonWatch', () => {
           transform: 'transform',
           throttle_period: 'throttle_period',
           throttle_period_in_millis: 'throttle_period_in_millis',
-        }
+        },
       };
     });
 
@@ -132,7 +132,7 @@ describe('JsonWatch', () => {
       upstreamJson.watchJson.metadata = {
         name: 'foobar',
         xpack: { prop: 'val' },
-        foo: 'bar'
+        foo: 'bar',
       };
 
       const jsonWatch = JsonWatch.fromUpstreamJson(upstreamJson);
@@ -153,7 +153,7 @@ describe('JsonWatch', () => {
     let downstreamJson;
     beforeEach(() => {
       downstreamJson = {
-        watch: { foo: { bar: 'baz' } }
+        watch: { foo: { bar: 'baz' } },
       };
     });
 

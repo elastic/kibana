@@ -24,7 +24,8 @@ export const createTrycloudOption1 = () => ({
     defaultMessage: 'Option 1: Try in Elastic Cloud',
   }),
   textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.textPre', {
-    defaultMessage: 'Go to [Elastic Cloud]({link}). Register if you \
+    defaultMessage:
+      'Go to [Elastic Cloud]({link}). Register if you \
 do not already have an account. Free 14-day trial available.\n\n\
 Log into the Elastic Cloud console\n\n\
 To create a cluster, in Elastic Cloud console:\n\
@@ -35,7 +36,7 @@ To create a cluster, in Elastic Cloud console:\n\
  5. Go to the new Cloud Kibana instance and follow the Kibana Home instructions',
     values: {
       link: 'https://www.elastic.co/cloud/as-a-service/signup?blade=kib',
-    }
+    },
   }),
 });
 
@@ -44,12 +45,13 @@ export const createTrycloudOption2 = () => ({
     defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
   }),
   textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option2.textPre', {
-    defaultMessage: 'If you are running this Kibana instance against a hosted Elasticsearch instance, \
+    defaultMessage:
+      'If you are running this Kibana instance against a hosted Elasticsearch instance, \
 proceed with manual setup.\n\n\
 Save the **Elasticsearch** endpoint as {urlTemplate} and the cluster **Password** as {passwordTemplate} for your records',
     values: {
       urlTemplate: '`<es_url>`',
       passwordTemplate: '`<password>`',
-    }
+    },
   }),
 });

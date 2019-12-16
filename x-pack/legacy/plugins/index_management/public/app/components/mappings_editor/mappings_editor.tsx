@@ -11,7 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import {
   ConfigurationForm,
   CONFIGURATION_FIELDS,
-  DocumentFieldsHeaders,
+  DocumentFieldsHeader,
   DocumentFields,
   DocumentFieldsJsonEditor,
 } from './components';
@@ -42,23 +42,21 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
   return (
     <IndexSettingsProvider indexSettings={indexSettings}>
       <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-        {({ editor, getProperties }) => {
-          const renderEditor = () => {
-            if (editor === 'json') {
-              return <DocumentFieldsJsonEditor defaultValue={getProperties()} />;
-            }
-            return <DocumentFields />;
-          };
+        {({ editor: editorType, getProperties }) => {
+          const editor =
+            editorType === 'json' ? (
+              <DocumentFieldsJsonEditor defaultValue={getProperties()} />
+            ) : (
+              <DocumentFields />
+            );
 
           return (
             <div className="mappingsEditor">
               <ConfigurationForm defaultValue={configurationDefaultValue} />
               <EuiSpacer />
-              <DocumentFieldsHeaders />
+              <DocumentFieldsHeader />
               <EuiSpacer />
-              {renderEditor()}
-              {/* <EuiSpacer size={'l'} />
-            <EditorToggleControls editor={editor} /> */}
+              {editor}
             </div>
           );
         }}

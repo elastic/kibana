@@ -7,7 +7,7 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function formatPolicies(policiesMap) {
   if (policiesMap.status === 404) {
@@ -28,7 +28,7 @@ async function fetchPolicies(callWithRequest) {
     method: 'GET',
     path: '/_ilm/policy',
     // we allow 404 since they may have no policies
-    ignore: [ 404 ]
+    ignore: [404],
   };
 
   return await callWithRequest('transport.request', params);
@@ -41,7 +41,7 @@ async function addLinkedIndices(policiesMap, callWithRequest) {
     method: 'GET',
     path: '/*/_ilm/explain',
     // we allow 404 since they may have no policies
-    ignore: [ 404 ]
+    ignore: [404],
   };
 
   const policyExplanation = await callWithRequest('transport.request', params);
@@ -60,7 +60,7 @@ export function registerFetchRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/policies',
     method: 'GET',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { withIndices } = request.query;
       try {
@@ -78,7 +78,7 @@ export function registerFetchRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

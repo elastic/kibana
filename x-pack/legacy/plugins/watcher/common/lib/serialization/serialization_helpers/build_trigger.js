@@ -10,7 +10,7 @@ watch.trigger.schedule
 export function buildTrigger(triggerIntervalSize, triggerIntervalUnit) {
   return {
     schedule: {
-      interval: `${triggerIntervalSize}${triggerIntervalUnit}`
+      interval: `${triggerIntervalSize}${triggerIntervalUnit}`,
     },
   };
 }
