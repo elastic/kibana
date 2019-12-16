@@ -25,7 +25,19 @@ export {
   ToolingLogCollectingWriter,
 } from './tooling_log';
 export { createAbsolutePathSerializer } from './serializers';
-export { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } from './certs';
+export {
+  CA_CERT_PATH,
+  ES_KEY_PATH,
+  ES_CERT_PATH,
+  ES_P12_PATH,
+  ES_P12_PASSWORD,
+  ES_EMPTYPASSWORD_P12_PATH,
+  ES_NOPASSWORD_P12_PATH,
+  KBN_KEY_PATH,
+  KBN_CERT_PATH,
+  KBN_P12_PATH,
+  KBN_P12_PASSWORD,
+} from './certs';
 export { run, createFailError, createFlagError, combineErrors, isFailError, Flags } from './run';
 export { REPO_ROOT } from './constants';
 export { KbnClient } from './kbn_client';
