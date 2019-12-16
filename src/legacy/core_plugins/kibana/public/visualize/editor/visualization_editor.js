@@ -18,7 +18,7 @@
  */
 
 export function initVisEditorDirective(app, deps) {
-  app.directive('visualizationEditor', function ($timeout, getAppState) {
+  app.directive('visualizationEditor', function($timeout, getAppState) {
     return {
       restrict: 'E',
       scope: {
@@ -28,10 +28,12 @@ export function initVisEditorDirective(app, deps) {
         filters: '=',
         query: '=',
       },
-      link: function ($scope, element) {
+      link: function($scope, element) {
         const editorType = $scope.savedObj.vis.type.editor;
-        const Editor = typeof editorType === 'function' ? editorType :
-          deps.editorTypes.find(editor => editor.key === editorType);
+        const Editor =
+          typeof editorType === 'function'
+            ? editorType
+            : deps.editorTypes.find(editor => editor.key === editorType);
 
         const editor = new Editor(element[0], $scope.savedObj);
 
@@ -45,15 +47,17 @@ export function initVisEditorDirective(app, deps) {
           });
         };
 
-        $scope.$on('render', (event) => {
+        $scope.$on('render', event => {
           event.preventDefault();
-          $timeout(() => { $scope.renderFunction(); });
+          $timeout(() => {
+            $scope.renderFunction();
+          });
         });
 
         $scope.$on('$destroy', () => {
           editor.destroy();
         });
-      }
+      },
     };
   });
 }

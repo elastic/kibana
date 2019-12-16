@@ -56,10 +56,10 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
           terms: {
             field: '_index',
             size: limit,
-          }
-        }
+          },
+        },
       },
-    }
+    },
   };
 
   try {
@@ -69,19 +69,19 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
     }
 
     return sortBy(
-      response.aggregations.indices.buckets.map(bucket => {
-        return bucket.key;
-      })
-        .map((indexName) => {
+      response.aggregations.indices.buckets
+        .map(bucket => {
+          return bucket.key;
+        })
+        .map(indexName => {
           return {
             name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName)
+            tags: indexPatternCreationType.getIndexTags(indexName),
           };
-        })
-      , 'name'
+        }),
+      'name'
     );
-  }
-  catch (err) {
+  } catch (err) {
     const type = get(err, 'body.error.caused_by.type');
     if (type === 'index_not_found_exception') {
       // This happens in a CSS environment when the controlling node returns a 500 even though the data

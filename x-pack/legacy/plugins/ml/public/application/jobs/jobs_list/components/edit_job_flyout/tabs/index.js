@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export { JobDetails } from './job_details';
 export { Detectors } from './detectors';
 export { Datafeed } from './datafeed';

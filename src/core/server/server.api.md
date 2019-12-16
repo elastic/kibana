@@ -577,6 +577,22 @@ export interface CoreStart {
 }
 
 // @public
+export class CspConfig implements ICspConfig {
+    // @internal
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    // (undocumented)
+    static readonly DEFAULT: CspConfig;
+    // (undocumented)
+    readonly header: string;
+    // (undocumented)
+    readonly rules: string[];
+    // (undocumented)
+    readonly strict: boolean;
+    // (undocumented)
+    readonly warnLegacyBrowsers: boolean;
+}
+
+// @public
 export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
     body?: T;
     headers?: ResponseHeaders;
@@ -715,6 +731,7 @@ export interface HttpServiceSetup {
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
+    csp: ICspConfig;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
@@ -742,6 +759,14 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// @public
+export interface ICspConfig {
+    readonly header: string;
+    readonly rules: string[];
+    readonly strict: boolean;
+    readonly warnLegacyBrowsers: boolean;
+}
 
 // @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {

@@ -23,12 +23,12 @@ import index from '../index';
 import { noop } from 'lodash';
 import sinon from 'sinon';
 
-describe('plugins/console', function () {
-  describe('#deprecate()', function () {
+describe('plugins/console', function() {
+  describe('#deprecate()', function() {
     let transformDeprecations;
 
-    before(function () {
-      const Plugin = function (options) {
+    before(function() {
+      const Plugin = function(options) {
         this.deprecations = options.deprecations;
       };
 
@@ -40,12 +40,12 @@ describe('plugins/console', function () {
       };
     });
 
-    describe('proxyConfig', function () {
-      it('leaves the proxyConfig settings', function () {
+    describe('proxyConfig', function() {
+      it('leaves the proxyConfig settings', function() {
         const proxyConfigOne = {};
         const proxyConfigTwo = {};
         const settings = {
-          proxyConfig: [proxyConfigOne, proxyConfigTwo]
+          proxyConfig: [proxyConfigOne, proxyConfigTwo],
         };
 
         transformDeprecations(settings);
@@ -53,9 +53,9 @@ describe('plugins/console', function () {
         expect(settings.proxyConfig[1]).to.be(proxyConfigTwo);
       });
 
-      it('logs a warning when proxyConfig is specified', function () {
+      it('logs a warning when proxyConfig is specified', function() {
         const settings = {
-          proxyConfig: []
+          proxyConfig: [],
         };
 
         const log = sinon.spy();
@@ -63,7 +63,7 @@ describe('plugins/console', function () {
         expect(log.calledOnce).to.be(true);
       });
 
-      it(`doesn't log a warning when proxyConfig isn't specified`, function () {
+      it(`doesn't log a warning when proxyConfig isn't specified`, function() {
         const settings = {};
 
         const log = sinon.spy();

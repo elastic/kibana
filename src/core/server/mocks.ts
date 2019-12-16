@@ -19,6 +19,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
+import { CspConfig } from './csp';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -93,6 +94,7 @@ function createCoreSetupMock() {
     registerOnPostAuth: httpService.registerOnPostAuth,
     registerOnPreResponse: httpService.registerOnPreResponse,
     basePath: httpService.basePath,
+    csp: CspConfig.DEFAULT,
     isTlsEnabled: httpService.isTlsEnabled,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),

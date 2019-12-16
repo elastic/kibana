@@ -6,9 +6,16 @@
 
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
-export default function ({ getService, getPageObjects }) {
-
-  const PageObjects = getPageObjects(['security', 'settings', 'monitoring', 'discover', 'common', 'reporting', 'header']);
+export default function({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects([
+    'security',
+    'settings',
+    'monitoring',
+    'discover',
+    'common',
+    'reporting',
+    'header',
+  ]);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -16,42 +23,45 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-
-
-  describe('secure roles and permissions', function () {
+  describe('secure roles and permissions', function() {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('security/discover');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
 
-    it('should add new role logstash_reader', async function () {
+    it('should add new role logstash_reader', async function() {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('logstash_reader', {
         elasticsearch: {
-          'indices': [{
-            'names': ['logstash-*'],
-            'privileges': ['read', 'view_index_metadata']
-          }]
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+            },
+          ],
         },
         kibana: {
-          global: ['all']
-        }
+          global: ['all'],
+        },
       });
     });
 
-    it('should add new user', async function () {
+    it('should add new user', async function() {
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
       await PageObjects.security.addUser({
-        username: 'Rashmi', password: 'changeme',
-        confirmPassword: 'changeme', fullname: 'RashmiFirst RashmiLast',
-        email: 'rashmi@myEmail.com', save: true,
-        roles: ['logstash_reader', 'kibana_user']
+        username: 'Rashmi',
+        password: 'changeme',
+        confirmPassword: 'changeme',
+        fullname: 'RashmiFirst RashmiLast',
+        email: 'rashmi@myEmail.com',
+        save: true,
+        roles: ['logstash_reader', 'kibana_user'],
       });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
@@ -64,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.login('Rashmi', 'changeme');
     });
 
-    it('Kibana User navigating to Management gets permission denied', async function () {
+    it('Kibana User navigating to Management gets permission denied', async function() {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
       await retry.tryForTime(2000, async () => {
@@ -72,7 +82,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function () {
+    it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function() {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Saved Search');
       log.debug('click Reporting button');
@@ -82,9 +92,8 @@ export default function ({ getService, getPageObjects }) {
       expect(queueReportError).to.be(true);
     });
 
-    after(async function () {
+    after(async function() {
       await PageObjects.security.forceLogout();
     });
-
   });
 }
