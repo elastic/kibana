@@ -45,3 +45,5 @@ export const OpenSignals = React.memo<{ totalCount: number }>(({ totalCount }) =
     </>
   );
 });
+
+OpenSignals.displayName = 'OpenSignals';

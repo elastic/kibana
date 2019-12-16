@@ -82,6 +82,8 @@ export const StepRuleDescription = memo<StepRuleDescriptionProps>(
   }
 );
 
+StepRuleDescription.displayName = 'StepRuleDescription';
+
 interface ListItems {
   title: NonNullable<ReactNode>;
   description: NonNullable<ReactNode>;

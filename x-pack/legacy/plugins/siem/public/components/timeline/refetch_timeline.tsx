@@ -43,6 +43,8 @@ const TimelineRefetchComponent = memo<OwnProps>(
   }
 );
 
+TimelineRefetchComponent.displayName = 'TimelineRefetchComponent';
+
 export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
   connect(null, {
     setTimelineQuery: inputsActions.setQuery,

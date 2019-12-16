@@ -67,3 +67,5 @@ export const ManageTimelineContext = memo<ManageTimelineContextProps>(
     );
   }
 );
+
+ManageTimelineContext.displayName = 'ManageTimelineContext';

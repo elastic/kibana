@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';

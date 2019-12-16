@@ -29,3 +29,5 @@ export const ManageRoutesSpy = memo(({ children }: ManageRoutesSpyProps) => {
     </RouterSpyStateContext.Provider>
   );
 });
+
+ManageRoutesSpy.displayName = 'ManageRoutesSpy';

@@ -62,3 +62,5 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
     );
   }
 );
+
+TimelineDetailsComponentQuery.displayName = 'TimelineDetailsComponentQuery';

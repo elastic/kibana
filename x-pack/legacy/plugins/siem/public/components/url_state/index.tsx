@@ -46,3 +46,5 @@ export const UseUrlState = React.memo<UrlStateProps>(props => {
   const urlStateReduxProps: RouteSpyState & UrlStateProps = { ...routeProps, ...props };
   return <UrlStateRedux {...urlStateReduxProps} />;
 });
+
+UseUrlState.displayName = 'UseUrlState';

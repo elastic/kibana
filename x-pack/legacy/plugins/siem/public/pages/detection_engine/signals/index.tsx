@@ -49,6 +49,8 @@ export const SignalsTableFilterGroup = React.memo(
   }
 );
 
+SignalsTableFilterGroup.displayName = 'SignalsTableFilterGroup';
+
 export const SignalsTable = React.memo(() => {
   const [filterGroup, setFilterGroup] = useState(FILTER_OPEN);
 

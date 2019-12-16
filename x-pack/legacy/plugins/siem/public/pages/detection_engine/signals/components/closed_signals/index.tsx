@@ -43,3 +43,5 @@ export const ClosedSignals = React.memo<{ totalCount: number }>(({ totalCount })
     </>
   );
 });
+
+ClosedSignals.displayName = 'ClosedSignals';

@@ -26,3 +26,5 @@ export const PageRouter: FC<RouterProps> = memo(({ history }) => (
     </Router>
   </ManageRoutesSpy>
 ));
+
+PageRouter.displayName = 'PageRouter';

@@ -98,6 +98,8 @@ const Attributes = React.memo<AttributesProps>(({ children }) => {
   );
 });
 
+Attributes.displayName = 'Attributes';
+
 export const StatefulEvent = React.memo<Props>(
   ({
     actionsColumnWidth,

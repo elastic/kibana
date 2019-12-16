@@ -15,7 +15,7 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
 
 const TimelinesContainer = styled.div`
-  width: 100%:
+  width: 100%;
 `;
 TimelinesContainer.displayName = 'TimelinesContainer';
 
@@ -45,3 +45,5 @@ export const TimelinesPage = React.memo<OwnProps>(({ apolloClient }) => (
     <SpyRoute />
   </>
 ));
+
+TimelinesPage.displayName = 'TimelinesPage';

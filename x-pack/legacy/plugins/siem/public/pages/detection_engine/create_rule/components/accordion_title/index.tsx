@@ -25,3 +25,5 @@ export const AccordionTitle = memo<AccordionTitleProps>(({ name, title, type }) 
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
+
+AccordionTitle.displayName = 'AccordionTitle';

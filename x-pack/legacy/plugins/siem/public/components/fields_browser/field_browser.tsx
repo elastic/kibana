@@ -237,3 +237,5 @@ export const FieldsBrowser = React.memo<Props>(
     );
   }
 );
+
+FieldsBrowser.displayName = 'FieldsBrowser';

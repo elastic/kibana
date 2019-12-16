@@ -91,3 +91,5 @@ export const FilterLabel = memo<Props>(({ filter, valueLabel }) => {
       );
   }
 });
+
+FilterLabel.displayName = 'FilterLabel';

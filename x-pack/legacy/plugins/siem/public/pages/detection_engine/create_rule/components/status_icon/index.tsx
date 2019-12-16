@@ -35,3 +35,5 @@ export const RuleStatusIcon = memo<RuleStatusIconProps>(({ name, type }) => {
     </RuleStatusIconStyled>
   );
 });
+
+RuleStatusIcon.displayName = 'RuleStatusIcon';

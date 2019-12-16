@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import {
   EuiBasicTable,
   EuiButton,
@@ -103,6 +105,8 @@ const OpenSignals = React.memo(() => {
   );
 });
 
+OpenSignals.displayName = 'OpenSignals';
+
 const ClosedSignals = React.memo(() => {
   return (
     <>
@@ -132,6 +136,8 @@ const ClosedSignals = React.memo(() => {
     </>
   );
 });
+
+ClosedSignals.displayName = 'ClosedSignals';
 
 const Signals = React.memo(() => {
   const sampleChartOptions = [

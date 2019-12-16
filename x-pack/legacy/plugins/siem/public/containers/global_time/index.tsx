@@ -75,6 +75,8 @@ export const GlobalTimeComponent = React.memo(
   }
 );
 
+GlobalTimeComponent.displayName = 'GlobalTimeComponent';
+
 const mapStateToProps = (state: State) => {
   const timerange: inputsModel.TimeRange = inputsSelectors.globalTimeRangeSelector(state);
   return {

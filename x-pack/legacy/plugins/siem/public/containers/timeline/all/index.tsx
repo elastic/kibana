@@ -100,3 +100,5 @@ export const AllTimelinesQuery = React.memo<OwnProps>(
     );
   }
 );
+
+AllTimelinesQuery.displayName = 'AllTimelinesQuery';

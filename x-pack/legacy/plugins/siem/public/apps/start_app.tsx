@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHashHistory } from 'history';
+import { createHashHistory, History } from 'history';
 import React, { memo, FC } from 'react';
+import { Store } from 'redux';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -36,6 +37,43 @@ import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabili
 
 import { ApolloClientContext } from '../utils/apollo_context';
 
+interface AppPluginRootProps {
+  history: History;
+  store: Store;
+  apolloClient: AppFrontendLibs['apolloClient'];
+}
+
+const AppPluginRoot = memo<AppPluginRootProps>(({ history, store, apolloClient }) => {
+  const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+  return (
+    <EuiErrorBoundary>
+      <I18nContext>
+        <ManageGlobalToaster>
+          <ReduxStoreProvider store={store}>
+            <ApolloProvider client={apolloClient}>
+              <ApolloClientContext.Provider value={apolloClient}>
+                <ThemeProvider
+                  theme={() => ({
+                    eui: darkMode ? euiDarkVars : euiLightVars,
+                    darkMode,
+                  })}
+                >
+                  <MlCapabilitiesProvider>
+                    <PageRouter history={history} />
+                  </MlCapabilitiesProvider>
+                </ThemeProvider>
+                <ErrorToastDispatcher />
+                <GlobalToaster />
+              </ApolloClientContext.Provider>
+            </ApolloProvider>
+          </ReduxStoreProvider>
+        </ManageGlobalToaster>
+      </I18nContext>
+    </EuiErrorBoundary>
+  );
+});
+AppPluginRoot.displayName = 'AppPluginRoot';
+
 const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const history = createHashHistory();
 
@@ -43,37 +81,10 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
 
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
-  const AppPluginRoot = memo(() => {
-    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
-    return (
-      <EuiErrorBoundary>
-        <I18nContext>
-          <ManageGlobalToaster>
-            <ReduxStoreProvider store={store}>
-              <ApolloProvider client={libs.apolloClient}>
-                <ApolloClientContext.Provider value={libs.apolloClient}>
-                  <ThemeProvider
-                    theme={() => ({
-                      eui: darkMode ? euiDarkVars : euiLightVars,
-                      darkMode,
-                    })}
-                  >
-                    <MlCapabilitiesProvider>
-                      <PageRouter history={history} />
-                    </MlCapabilitiesProvider>
-                  </ThemeProvider>
-                  <ErrorToastDispatcher />
-                  <GlobalToaster />
-                </ApolloClientContext.Provider>
-              </ApolloProvider>
-            </ReduxStoreProvider>
-          </ManageGlobalToaster>
-        </I18nContext>
-      </EuiErrorBoundary>
-    );
-  });
-  return <AppPluginRoot />;
+  return <AppPluginRoot history={history} store={store} apolloClient={libs.apolloClient} />;
 });
+
+StartApp.displayName = 'StartApp';
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
@@ -95,3 +106,5 @@ export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
     </KibanaContextProvider>
   )
 );
+
+SiemApp.displayName = 'SiemApp';

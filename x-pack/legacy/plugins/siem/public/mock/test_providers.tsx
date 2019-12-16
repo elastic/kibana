@@ -101,6 +101,8 @@ export const TestProviders = React.memo<Props>(
   )
 );
 
+TestProviders.displayName = 'TestProviders';
+
 export const TestProviderWithoutDragAndDrop = React.memo<Props>(
   ({ children, store = createStore(state, apolloClientObservable) }) => (
     <I18nProvider>
@@ -108,3 +110,5 @@ export const TestProviderWithoutDragAndDrop = React.memo<Props>(
     </I18nProvider>
   )
 );
+
+TestProviderWithoutDragAndDrop.displayName = 'TestProviderWithoutDragAndDrop';
