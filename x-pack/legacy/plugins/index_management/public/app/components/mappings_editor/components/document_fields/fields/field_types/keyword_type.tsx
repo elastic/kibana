@@ -7,6 +7,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
@@ -65,6 +66,12 @@ export const KeywordType = ({ field }: Props) => {
           description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
             defaultMessage: 'How to pre-process the keyword prior to indexing.',
           })}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerDocLinkText', {
+              defaultMessage: 'Normalizer documentation',
+            }),
+            href: documentationService.getNormalizerLink(),
+          }}
           defaultToggleValue={getDefaultToggleValue('normalizer', field.source)}
         >
           {isOn =>
@@ -96,6 +103,12 @@ export const KeywordType = ({ field }: Props) => {
                 defaultMessage: 'Do not index any string longer than this value.',
               }
             )}
+            docLink={{
+              text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveDocLinkText', {
+                defaultMessage: 'Ignore above documentation',
+              }),
+              href: documentationService.getIgnoreAboveLink(),
+            }}
             defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
           >
             <UseField

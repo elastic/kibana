@@ -59,6 +59,82 @@ class DocumentationService {
   public getNullValueLink() {
     return `${this.esDocsBase}/null-value.html`;
   }
+
+  public getTermVectorLink() {
+    return `${this.esDocsBase}/term-vector.html`;
+  }
+
+  public getStoreLink() {
+    return `${this.esDocsBase}/mapping-store.html`;
+  }
+
+  public getSimilarityLink() {
+    return `${this.esDocsBase}/similarity.html`;
+  }
+
+  public getNormsLink() {
+    return `${this.esDocsBase}/norms.html`;
+  }
+
+  public getIndexLink() {
+    return `${this.esDocsBase}/mapping-index.html`;
+  }
+
+  public getIgnoreMalformedLink() {
+    return `${this.esDocsBase}/ignore-malformed.html`;
+  }
+
+  public getFormatLink() {
+    return `${this.esDocsBase}/mapping-date-format.html`;
+  }
+
+  public getEagerGlobalOrdinalsLink() {
+    return `${this.esDocsBase}/eager-global-ordinals.html`;
+  }
+
+  public getDocValuesLink() {
+    return `${this.esDocsBase}/doc-values.html`;
+  }
+
+  public getCopyToLink() {
+    return `${this.esDocsBase}/copy-to.html`;
+  }
+
+  public getCoerceLink() {
+    return `${this.esDocsBase}/coerce.html`;
+  }
+
+  public getBoostLink() {
+    return `${this.esDocsBase}/mapping-boost.html`;
+  }
+
+  public getNormalizerLink() {
+    return `${this.esDocsBase}/normalizer.html`;
+  }
+
+  public getIgnoreAboveLink() {
+    return `${this.esDocsBase}/ignore_above.html`;
+  }
+
+  public getFielddataLink() {
+    return `${this.esDocsBase}/fielddata.html`;
+  }
+
+  public getIndexPhrasesLink() {
+    return `${this.esDocsBase}/index-phrases.html`;
+  }
+
+  public getIndexPrefixesLink() {
+    return `${this.esDocsBase}/index-prefixes.html`;
+  }
+
+  public getPositionIncrementGapLink() {
+    return `${this.esDocsBase}/position-increment-gap.html`;
+  }
+
+  public getAnalyzersLink() {
+    return `${this.esDocsBase}/analysis-analyzers.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();

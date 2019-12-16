@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 
 export const CoerceParameter = () => (
   <EditFieldFormRow
@@ -19,6 +20,12 @@ export const CoerceParameter = () => (
       defaultMessage:
         'Whether to try to convert strings to numbers and truncate fractions for integers.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDocLinkText', {
+        defaultMessage: 'Coerce documentation',
+      }),
+      href: documentationService.getCoerceLink(),
+    }}
     formFieldPath="coerce"
   />
 );

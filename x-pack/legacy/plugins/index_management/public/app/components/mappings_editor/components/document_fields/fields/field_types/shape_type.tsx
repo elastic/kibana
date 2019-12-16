@@ -6,6 +6,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
@@ -79,6 +80,12 @@ export const ShapeType = ({ field }: Props) => {
             defaultMessage: 'If true, malformed GeoJSON or WKT shapes are ignored.',
           }
         )}
+        docLink={{
+          text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedDocLinkText', {
+            defaultMessage: 'Ignore malformed documentation',
+          }),
+          href: documentationService.getIgnoreMalformedLink(),
+        }}
         formFieldPath="ignore_malformed"
       />
 
@@ -108,6 +115,12 @@ export const ShapeType = ({ field }: Props) => {
             'If enabled, unclosed linear rings in polygons will be automatically closed',
         })}
         formFieldPath="coerce"
+        docLink={{
+          text: i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDocLinkText', {
+            defaultMessage: 'Coerce documentation',
+          }),
+          href: documentationService.getCoerceLink(),
+        }}
         defaultToggleValue={getDefaultToggleValue('coerce', field.source)}
       />
     </EditFieldSection>

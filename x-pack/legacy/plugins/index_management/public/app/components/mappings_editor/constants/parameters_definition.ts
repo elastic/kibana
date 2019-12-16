@@ -141,7 +141,6 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-store.html',
   },
   index: {
     fieldConfig: {
@@ -153,14 +152,12 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: true,
     },
-    docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
   fielddata: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
   fielddata_frequency_filter: {
     fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing

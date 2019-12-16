@@ -8,6 +8,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const NormsParameter = () => (
@@ -18,6 +19,12 @@ export const NormsParameter = () => (
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldDescription', {
       defaultMessage: 'Whether field-length should be taken into account when scoring queries.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.normsDocLinkText', {
+        defaultMessage: 'Norms documentation',
+      }),
+      href: documentationService.getNormsLink(),
+    }}
     formFieldPath="norms"
   />
 );

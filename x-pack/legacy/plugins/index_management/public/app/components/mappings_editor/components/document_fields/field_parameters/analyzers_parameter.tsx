@@ -14,6 +14,7 @@ import { NormalizedField } from '../../../types';
 import { getFieldConfig } from '../../../lib';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { AnalyzerParameter } from './analyzer_parameter';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   field: NormalizedField;
@@ -26,6 +27,12 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
         defaultMessage: 'Analyzers',
       })}
+      docLink={{
+        text: i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersDocLinkText', {
+          defaultMessage: 'Analyzers documentation',
+        }),
+        href: documentationService.getAnalyzersLink(),
+      }}
       withToggle={false}
     >
       <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
