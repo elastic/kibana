@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { readdirSync } from 'fs';
+import { resolve } from 'path';
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
@@ -43,6 +45,12 @@ interface InstructionsResponse {
   channels: ChannelResponse[];
 }
 
+const channelNames = readdirSync(resolve(__dirname, 'collectors'))
+  .filter((fileName: string) => !fileName.startsWith('.'))
+  .map((fileName: string) => {
+    return fileName.slice(0, -3);
+  });
+
 export class PulseService {
   private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
@@ -51,7 +59,7 @@ export class PulseService {
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('pulse-service');
     this.channels = new Map(
-      ['default'].map((id): [string, PulseChannel] => {
+      channelNames.map((id): [string, PulseChannel] => {
         const instructions$ = new Subject<PulseInstruction>();
         this.instructions.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$ });
@@ -59,6 +67,7 @@ export class PulseService {
       })
     );
   }
+
   public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
     this.log.debug('Setting up pulse service');
 
