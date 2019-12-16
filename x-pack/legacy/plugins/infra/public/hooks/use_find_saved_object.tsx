@@ -7,8 +7,7 @@
 import { useState, useCallback } from 'react';
 
 import { npStart } from 'ui/new_platform';
-import { SavedObjectsBatchResponse } from 'src/core/public';
-import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
 
 export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
   const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectType> | null>(null);

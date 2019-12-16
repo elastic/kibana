@@ -40,14 +40,14 @@ export default function GeoHashGridAggResponseFixture() {
     _.range(97, 122) // a-z
   );
 
-  const tags = _.times(_.random(4, 20), function (i) {
+  const tags = _.times(_.random(4, 20), function(i) {
     // random number of tags
     let docCount = 0;
-    const buckets = _.times(_.random(40, 200), function () {
+    const buckets = _.times(_.random(40, 200), function() {
       return _.sample(geoHashCharts, 3).join('');
     })
       .sort()
-      .map(function (geoHash) {
+      .map(function(geoHash) {
         const count = _.random(1, 5000);
 
         docCount += count;
@@ -56,8 +56,8 @@ export default function GeoHashGridAggResponseFixture() {
           key: geoHash,
           doc_count: count,
           1: {
-            value: 2048 + i
-          }
+            value: 2048 + i,
+          },
         };
       });
 
@@ -65,11 +65,11 @@ export default function GeoHashGridAggResponseFixture() {
       key: 'tag ' + (i + 1),
       doc_count: docCount,
       3: {
-        buckets: buckets
+        buckets: buckets,
       },
       1: {
-        value: 1000 + i
-      }
+        value: 1000 + i,
+      },
     };
   });
 
@@ -79,17 +79,17 @@ export default function GeoHashGridAggResponseFixture() {
     _shards: {
       total: 4,
       successful: 4,
-      failed: 0
+      failed: 0,
     },
     hits: {
       total: 298,
       max_score: 0.0,
-      hits: []
+      hits: [],
     },
     aggregations: {
       2: {
-        buckets: tags
-      }
-    }
+        buckets: tags,
+      },
+    },
   };
 }

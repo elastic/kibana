@@ -7,9 +7,9 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import {
   SuricataSignature,
   Tokens,
@@ -18,6 +18,8 @@ import {
 } from './suricata_signature';
 
 describe('SuricataSignature', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = shallow(
@@ -39,7 +41,7 @@ describe('SuricataSignature', () => {
     });
 
     test('should render a single if it is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <div>
           <Tokens tokens={['ET']} />
         </div>
@@ -48,7 +50,7 @@ describe('SuricataSignature', () => {
     });
 
     test('should render the multiple tokens if they are present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <div>
           <Tokens tokens={['ET', 'SCAN']} />
         </div>
@@ -59,7 +61,7 @@ describe('SuricataSignature', () => {
 
   describe('DraggableSignatureId', () => {
     test('it renders the default SuricataSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableSignatureId id="id-123" signatureId={123} />
         </TestProviders>
@@ -68,7 +70,7 @@ describe('SuricataSignature', () => {
     });
 
     test('it renders a tooltip for the signature field', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableSignatureId id="id-123" signatureId={123} />
         </TestProviders>

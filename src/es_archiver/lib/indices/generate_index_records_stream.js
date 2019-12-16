@@ -35,11 +35,13 @@ export function createGenerateIndexRecordsStream(client, stats) {
             '-*.settings.index.uuid',
             '-*.settings.index.version',
             '-*.settings.index.provided_name',
-          ]
+          ],
         });
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
-          const { [index]: { aliases } } = await client.indices.getAlias({ index });
+          const {
+            [index]: { aliases },
+          } = await client.indices.getAlias({ index });
 
           stats.archivedIndex(index, { settings, mappings });
           this.push({
@@ -50,8 +52,8 @@ export function createGenerateIndexRecordsStream(client, stats) {
               index: index.startsWith('.kibana') ? '.kibana_1' : index,
               settings,
               mappings,
-              aliases
-            }
+              aliases,
+            },
           });
         }
 
@@ -59,6 +61,6 @@ export function createGenerateIndexRecordsStream(client, stats) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

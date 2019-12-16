@@ -13,7 +13,6 @@ import { getValuesForSeriesIndex, getValuesByX } from './get_values_for_legend';
 import { DEBOUNCE_SLOW_MS } from '../../../common/constants';
 
 export class TimeseriesVisualization extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -27,7 +26,7 @@ export class TimeseriesVisualization extends React.Component {
     this.state = {
       values: {},
       seriesToShow: _.keys(values),
-      ignoreVisibilityUpdates: false
+      ignoreVisibilityUpdates: false,
     };
   }
 
@@ -43,13 +42,13 @@ export class TimeseriesVisualization extends React.Component {
     if (notAllShown && isCurrentlyShown) {
       this.setState({
         ignoreVisibilityUpdates: false,
-        seriesToShow: Object.keys(this.state.values)
+        seriesToShow: Object.keys(this.state.values),
       });
     } else {
       seriesToShow.push(id);
       this.setState({
         ignoreVisibilityUpdates: true,
-        seriesToShow: [id]
+        seriesToShow: [id],
       });
     }
 
@@ -68,7 +67,7 @@ export class TimeseriesVisualization extends React.Component {
     props = props || this.props;
     const values = {};
 
-    props.series.forEach((row) => {
+    props.series.forEach(row => {
       // we need a valid identifier
       if (!row.id) {
         row.id = row.label;
@@ -100,7 +99,6 @@ export class TimeseriesVisualization extends React.Component {
     this.setState({ values });
   }
 
-
   UNSAFE_componentWillReceiveProps(props) {
     const values = this.getLastValues(props);
     const currentKeys = _.keys(this.state.values);
@@ -118,19 +116,17 @@ export class TimeseriesVisualization extends React.Component {
   render() {
     const className = 'monRhythmChart';
     const style = {
-      flexDirection: 'column' // for legend position = bottom
+      flexDirection: 'column', // for legend position = bottom
     };
 
-    const legend = this.props.hasLegend
-      ? (
-        <HorizontalLegend
-          seriesFilter={this.state.seriesToShow}
-          seriesValues={this.state.values}
-          onToggle={this.toggleFilter}
-          {...this.props}
-        />
-      )
-      : null;
+    const legend = this.props.hasLegend ? (
+      <HorizontalLegend
+        seriesFilter={this.state.seriesToShow}
+        seriesValues={this.state.values}
+        onToggle={this.toggleFilter}
+        {...this.props}
+      />
+    ) : null;
 
     return (
       <div className={className}>
@@ -142,7 +138,7 @@ export class TimeseriesVisualization extends React.Component {
               {...this.props}
             />
           </div>
-          { legend }
+          {legend}
         </div>
       </div>
     );
@@ -150,5 +146,5 @@ export class TimeseriesVisualization extends React.Component {
 }
 
 TimeseriesVisualization.defaultProps = {
-  hasLegend: true
+  hasLegend: true,
 };

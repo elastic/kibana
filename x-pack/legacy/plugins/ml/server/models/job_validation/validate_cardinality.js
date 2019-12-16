@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 
 import { DataVisualizer } from '../data_visualizer';
@@ -36,7 +34,8 @@ const validateFactory = (callWithRequest, job) => {
   const dv = new DataVisualizer(callWithRequest);
 
   const modelPlotConfigTerms = _.get(job, ['model_plot_config', 'terms'], '');
-  const modelPlotConfigFieldCount = (modelPlotConfigTerms.length > 0) ? modelPlotConfigTerms.split(',').length : 0;
+  const modelPlotConfigFieldCount =
+    modelPlotConfigTerms.length > 0 ? modelPlotConfigTerms.split(',').length : 0;
 
   return async ({ type, isInvalid, messageId }) => {
     // modelPlotCardinality counts the cardinality of fields used within detectors.
@@ -47,7 +46,7 @@ const validateFactory = (callWithRequest, job) => {
     const fieldName = `${type}_field_name`;
 
     const detectors = job.analysis_config.detectors;
-    const relevantDetectors = detectors.filter((detector) => {
+    const relevantDetectors = detectors.filter(detector => {
       return typeof detector[fieldName] !== 'undefined';
     });
 
@@ -58,13 +57,13 @@ const validateFactory = (callWithRequest, job) => {
         // use fieldCaps endpoint to get data about whether fields are aggregatable
         const fieldCaps = await callWithRequest('fieldCaps', {
           index: job.datafeed_config.indices.join(','),
-          fields: uniqueFieldNames
+          fields: uniqueFieldNames,
         });
 
         let aggregatableFieldNames = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
         if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
-          aggregatableFieldNames = uniqueFieldNames.filter((field) => {
+          aggregatableFieldNames = uniqueFieldNames.filter(field => {
             if (typeof fieldCaps.fields[field] !== 'undefined') {
               const fieldType = Object.keys(fieldCaps.fields[field])[0];
               return fieldCaps.fields[field][fieldType].aggregatable;
@@ -81,18 +80,16 @@ const validateFactory = (callWithRequest, job) => {
           job.data_description.time_field
         );
 
-        uniqueFieldNames.forEach((uniqueFieldName) => {
+        uniqueFieldNames.forEach(uniqueFieldName => {
           const field = _.find(stats.aggregatableExistsFields, { fieldName: uniqueFieldName });
           if (typeof field === 'object') {
-
-            modelPlotCardinality += (modelPlotConfigFieldCount > 0)
-              ? modelPlotConfigFieldCount
-              : field.stats.cardinality;
+            modelPlotCardinality +=
+              modelPlotConfigFieldCount > 0 ? modelPlotConfigFieldCount : field.stats.cardinality;
 
             if (isInvalid(field.stats.cardinality)) {
               messages.push({
                 id: messageId || `cardinality_${type}_field`,
-                fieldName: uniqueFieldName
+                fieldName: uniqueFieldName,
               });
             }
           } else {
@@ -104,7 +101,7 @@ const validateFactory = (callWithRequest, job) => {
             ) {
               messages.push({
                 id: 'field_not_aggregatable',
-                fieldName: uniqueFieldName
+                fieldName: uniqueFieldName,
               });
             }
           }
@@ -118,7 +115,7 @@ const validateFactory = (callWithRequest, job) => {
         if (relevantDetectors.length === 1) {
           messages.push({
             id: 'field_not_aggregatable',
-            fieldName: relevantDetectors[0][fieldName]
+            fieldName: relevantDetectors[0][fieldName],
           });
         } else {
           messages.push({ id: 'fields_not_aggregatable' });
@@ -139,8 +136,8 @@ export async function validateCardinality(callWithRequest, job) {
 
   // find out if there are any relevant detector field names
   // where cardinality checks could be run against.
-  const numDetectorsWithFieldNames = job.analysis_config.detectors.filter((d) => {
-    return (d.by_field_name || d.over_field_name || d.partition_field_name);
+  const numDetectorsWithFieldNames = job.analysis_config.detectors.filter(d => {
+    return d.by_field_name || d.over_field_name || d.partition_field_name;
   });
   if (numDetectorsWithFieldNames.length === 0) {
     return Promise.resolve([]);
@@ -149,28 +146,29 @@ export async function validateCardinality(callWithRequest, job) {
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
   const validate = validateFactory(callWithRequest, job);
 
-  const modelPlotEnabled = job.model_plot_config && job.model_plot_config.enabled === true || false;
+  const modelPlotEnabled =
+    (job.model_plot_config && job.model_plot_config.enabled === true) || false;
 
   // check over fields (population analysis)
   const validateOverFieldsLow = validate({
     type: 'over',
     isInvalid: cardinality => cardinality < OVER_FIELD_CARDINALITY_THRESHOLD_LOW,
-    messageId: 'cardinality_over_field_low'
+    messageId: 'cardinality_over_field_low',
   });
   const validateOverFieldsHigh = validate({
     type: 'over',
     isInvalid: cardinality => cardinality > OVER_FIELD_CARDINALITY_THRESHOLD_HIGH,
-    messageId: 'cardinality_over_field_high'
+    messageId: 'cardinality_over_field_high',
   });
 
   // check partition/by fields (multi-metric analysis)
   const validatePartitionFields = validate({
     type: 'partition',
-    isInvalid: cardinality => cardinality > PARTITION_FIELD_CARDINALITY_THRESHOLD
+    isInvalid: cardinality => cardinality > PARTITION_FIELD_CARDINALITY_THRESHOLD,
   });
   const validateByFields = validate({
     type: 'by',
-    isInvalid: cardinality => cardinality > BY_FIELD_CARDINALITY_THRESHOLD
+    isInvalid: cardinality => cardinality > BY_FIELD_CARDINALITY_THRESHOLD,
   });
 
   // we already called the validation functions above,
@@ -179,7 +177,7 @@ export async function validateCardinality(callWithRequest, job) {
     await validateByFields,
     await validateOverFieldsLow,
     await validateOverFieldsHigh,
-    await validatePartitionFields
+    await validatePartitionFields,
   ];
 
   // if model plot is enabled, check against the
@@ -191,7 +189,7 @@ export async function validateCardinality(callWithRequest, job) {
   if (modelPlotEnabled && modelPlotCardinality > MODEL_PLOT_THRESHOLD_HIGH) {
     messages.push({
       id: 'cardinality_model_plot_high',
-      modelPlotCardinality
+      modelPlotCardinality,
     });
   }
 

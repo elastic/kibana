@@ -52,10 +52,6 @@ describe('Security Plugin', () => {
                     "cookieName": "sid",
                     "loginAssistanceMessage": undefined,
                     "secureCookies": true,
-                    "session": Object {
-                      "idleTimeout": 1500,
-                      "lifespan": null,
-                    },
                   },
                   "license": Object {
                     "getFeatures": [Function],
