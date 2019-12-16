@@ -124,12 +124,12 @@ function createRuleForType(
       const values = Array.isArray(value) ? value : [value];
       values.forEach(fieldValue => {
         const valueType = typeof fieldValue;
-        if (fieldValue !== null && !['string', 'number'].includes(valueType)) {
+        if (fieldValue !== null && !['string', 'number', 'boolean'].includes(valueType)) {
           throw new RuleBuilderError(
             i18n.translate(
               'xpack.security.management.editRoleMapping.ruleBuilder.invalidFieldValueType',
               {
-                defaultMessage: `Invalid value type for field. Expected one of null, string, or number, but found {valueType} ({value}).`,
+                defaultMessage: `Invalid value type for field. Expected one of null, string, number, or boolean, but found {valueType} ({value}).`,
                 values: { valueType, value: JSON.stringify(value) },
               }
             ),

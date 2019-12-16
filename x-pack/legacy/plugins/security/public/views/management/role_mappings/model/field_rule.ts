@@ -8,7 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { Rule } from './rule';
 
 /** The allowed types for field rule values */
-export type FieldRuleValue = string | number | null | Array<string | number | null>;
+export type FieldRuleValue =
+  | string
+  | number
+  | null
+  | boolean
+  | Array<string | number | null | boolean>;
 
 /**
  * Represents a single field rule.

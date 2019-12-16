@@ -120,7 +120,7 @@ describe('AdvancedRuleEditor', () => {
       all: [
         {
           field: {
-            foo: true,
+            foo: {},
           },
         },
       ],

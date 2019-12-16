@@ -201,16 +201,16 @@ describe('generateRulesFromRaw', () => {
     it('accepts an array of possible values', () => {
       const { rules } = generateRulesFromRaw({
         field: {
-          username: [0, '*', null, 'foo'],
+          username: [0, '*', null, 'foo', true, false],
         },
       });
 
       expect(rules).toBeInstanceOf(FieldRule);
       expect((rules as FieldRule).field).toEqual('username');
-      expect((rules as FieldRule).value).toEqual([0, '*', null, 'foo']);
+      expect((rules as FieldRule).value).toEqual([0, '*', null, 'foo', true, false]);
     });
 
-    [true, false, undefined, [true, false, undefined]].forEach(invalidValue => {
+    [{}, () => null, undefined, [{}, undefined, [], () => null]].forEach(invalidValue => {
       it(`does not support a value of ${invalidValue}`, () => {
         expect(() => {
           generateRulesFromRaw({

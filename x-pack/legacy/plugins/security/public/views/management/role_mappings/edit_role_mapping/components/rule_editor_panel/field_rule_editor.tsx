@@ -49,8 +49,11 @@ const userFields = [
 
 const fieldOptions = userFields.map(f => ({ label: f.name }));
 
-type ComparisonOption = 'text' | 'number' | 'null';
-const comparisonOptions: Record<ComparisonOption, { id: string; defaultValue: FieldRuleValue }> = {
+type ComparisonOption = 'text' | 'number' | 'null' | 'boolean';
+const comparisonOptions: Record<
+  ComparisonOption,
+  { id: ComparisonOption; defaultValue: FieldRuleValue }
+> = {
   text: {
     id: 'text',
     defaultValue: '*',
@@ -62,6 +65,10 @@ const comparisonOptions: Record<ComparisonOption, { id: string; defaultValue: Fi
   null: {
     id: 'null',
     defaultValue: null,
+  },
+  boolean: {
+    id: 'boolean',
+    defaultValue: true,
   },
 };
 
@@ -95,8 +102,6 @@ export class FieldRuleEditor extends Component<Props, {}> {
     }
 
     const comparisonType = this.getComparisonType(rowRuleValue);
-
-    const type = comparisonType.id === 'number' ? 'number' : 'text';
 
     return (
       <EuiFlexGroup gutterSize="s">
@@ -135,7 +140,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
           {this.renderFieldTypeInput(comparisonType.id, valueIndex)}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          {this.renderFieldValueInput(type, rowRuleValue, valueIndex)}
+          {this.renderFieldValueInput(comparisonType.id, rowRuleValue, valueIndex)}
         </EuiFlexItem>
         {renderDeleteButton && (
           <EuiFlexItem grow={false}>
@@ -179,7 +184,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
     );
   };
 
-  private renderFieldTypeInput = (inputType: string, valueIndex: number) => {
+  private renderFieldTypeInput = (inputType: ComparisonOption, valueIndex: number) => {
     return (
       <EuiFormRow
         label={i18n.translate(
@@ -195,6 +200,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
             { value: 'text', text: 'text' },
             { value: 'number', text: 'number' },
             { value: 'null', text: 'is null' },
+            { value: 'boolean', text: 'boolean' },
           ]}
           data-test-subj={`fieldRuleEditorValueType-${valueIndex}`}
           value={inputType}
@@ -207,27 +213,12 @@ export class FieldRuleEditor extends Component<Props, {}> {
   };
 
   private renderFieldValueInput = (
-    fieldType: 'number' | 'text',
+    fieldType: ComparisonOption,
     rowRuleValue: FieldRuleValue,
     valueIndex: number
   ) => {
-    const isNullValue = rowRuleValue === null;
+    const inputField = this.getInputFieldForType(fieldType, rowRuleValue, valueIndex);
 
-    const inputField =
-      fieldType === 'text' ? (
-        <EuiFieldText
-          data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
-          value={isNullValue ? '-- null --' : (rowRuleValue as string)}
-          onChange={this.onValueChange(valueIndex)}
-          disabled={isNullValue}
-        />
-      ) : (
-        <EuiFieldNumber
-          data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
-          value={rowRuleValue as string}
-          onChange={this.onNumericValueChange(valueIndex)}
-        />
-      );
     return (
       <EuiFormRow
         label={i18n.translate(
@@ -254,6 +245,53 @@ export class FieldRuleEditor extends Component<Props, {}> {
         {inputField}
       </EuiFormRow>
     );
+  };
+
+  private getInputFieldForType = (
+    fieldType: ComparisonOption,
+    rowRuleValue: FieldRuleValue,
+    valueIndex: number
+  ) => {
+    const isNullValue = rowRuleValue === null;
+
+    const commonProps = {
+      'data-test-subj': `fieldRuleEditorValue-${valueIndex}`,
+    };
+
+    switch (fieldType) {
+      case 'boolean':
+        return (
+          <EuiSelect
+            {...commonProps}
+            value={rowRuleValue?.toString()}
+            onChange={this.onBooleanValueChange(valueIndex)}
+            options={[
+              { value: 'true', text: 'true' },
+              { value: 'false', text: 'false' },
+            ]}
+          />
+        );
+      case 'text':
+      case 'null':
+        return (
+          <EuiFieldText
+            {...commonProps}
+            value={isNullValue ? '-- null --' : (rowRuleValue as string)}
+            onChange={this.onValueChange(valueIndex)}
+            disabled={isNullValue}
+          />
+        );
+      case 'number':
+        return (
+          <EuiFieldNumber
+            data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
+            value={rowRuleValue as string}
+            onChange={this.onNumericValueChange(valueIndex)}
+          />
+        );
+      default:
+        throw new Error(`Unsupported input field type: ${fieldType}`);
+    }
   };
 
   private onAddAlternateValue = () => {
@@ -314,6 +352,20 @@ export class FieldRuleEditor extends Component<Props, {}> {
     this.props.onChange(new FieldRule(field, nextValue));
   };
 
+  private onBooleanValueChange = (index: number) => (e: ChangeEvent<HTMLSelectElement>) => {
+    const boolValue = e.target.value === 'true';
+
+    const { field, value } = this.props.rule;
+    let nextValue;
+    if (Array.isArray(value)) {
+      nextValue = [...value];
+      nextValue.splice(index, 1, boolValue);
+    } else {
+      nextValue = boolValue;
+    }
+    this.props.onChange(new FieldRule(field, nextValue));
+  };
+
   private onComparisonTypeChange = (index: number, newType: ComparisonOption) => {
     const comparison = comparisonOptions[newType];
     if (!comparison) {
@@ -337,6 +389,9 @@ export class FieldRuleEditor extends Component<Props, {}> {
     }
     if (valueType === 'number') {
       return comparisonOptions.number;
+    }
+    if (valueType === 'boolean') {
+      return comparisonOptions.boolean;
     }
     if (ruleValue === null) {
       return comparisonOptions.null;

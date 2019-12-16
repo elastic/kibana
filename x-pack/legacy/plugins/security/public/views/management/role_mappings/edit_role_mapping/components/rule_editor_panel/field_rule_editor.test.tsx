@@ -87,9 +87,37 @@ describe('FieldRuleEditor', () => {
     assertValue(wrapper, 0, '-- null --');
   });
 
+  it('can render a boolean-based field rule (true)', () => {
+    const props = {
+      rule: new FieldRule('username', true),
+      allowDelete: true,
+      onChange: jest.fn(),
+      onDelete: jest.fn(),
+    };
+
+    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
+    assertField(wrapper, 0, 'username');
+    assertValueType(wrapper, 0, 'boolean');
+    assertValue(wrapper, 0, 'true');
+  });
+
+  it('can render a boolean-based field rule (false)', () => {
+    const props = {
+      rule: new FieldRule('username', false),
+      allowDelete: true,
+      onChange: jest.fn(),
+      onDelete: jest.fn(),
+    };
+
+    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
+    assertField(wrapper, 0, 'username');
+    assertValueType(wrapper, 0, 'boolean');
+    assertValue(wrapper, 0, 'false');
+  });
+
   it('can render with alternate values specified', () => {
     const props = {
-      rule: new FieldRule('username', ['*', 12, null]),
+      rule: new FieldRule('username', ['*', 12, null, true, false]),
       allowDelete: true,
       onChange: jest.fn(),
       onDelete: jest.fn(),
@@ -109,6 +137,14 @@ describe('FieldRuleEditor', () => {
     assertField(wrapper, 2, 'username');
     assertValueType(wrapper, 2, 'null');
     assertValue(wrapper, 2, '-- null --');
+
+    assertField(wrapper, 3, 'username');
+    assertValueType(wrapper, 3, 'boolean');
+    assertValue(wrapper, 3, 'true');
+
+    assertField(wrapper, 4, 'username');
+    assertValueType(wrapper, 4, 'boolean');
+    assertValue(wrapper, 4, 'false');
   });
 
   it('allows alternate values to be added when "allowAdd" is set to true', () => {
