@@ -19,6 +19,7 @@ export interface HttpServiceSetup
 |  [basePath](./kibana-plugin-server.httpservicesetup.basepath.md) | <code>IBasePath</code> | Access or manipulate the Kibana base path See [IBasePath](./kibana-plugin-server.ibasepath.md)<!-- -->. |
 |  [createCookieSessionStorageFactory](./kibana-plugin-server.httpservicesetup.createcookiesessionstoragefactory.md) | <code>&lt;T&gt;(cookieOptions: SessionStorageCookieOptions&lt;T&gt;) =&gt; Promise&lt;SessionStorageFactory&lt;T&gt;&gt;</code> | Creates cookie based session storage factory [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) |
 |  [createRouter](./kibana-plugin-server.httpservicesetup.createrouter.md) | <code>() =&gt; IRouter</code> | Provides ability to declare a handler function for a particular path and HTTP request method. |
+|  [csp](./kibana-plugin-server.httpservicesetup.csp.md) | <code>ICspConfig</code> | The CSP config used for Kibana. |
 |  [isTlsEnabled](./kibana-plugin-server.httpservicesetup.istlsenabled.md) | <code>boolean</code> | Flag showing whether a server was configured to use TLS connection. |
 |  [registerAuth](./kibana-plugin-server.httpservicesetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. |
 |  [registerOnPostAuth](./kibana-plugin-server.httpservicesetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |

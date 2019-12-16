@@ -19,7 +19,7 @@
 
 export function versionSatisfies(cleanActual, cleanExpected) {
   try {
-    return (cleanActual === cleanExpected);
+    return cleanActual === cleanExpected;
   } catch (err) {
     return false;
   }

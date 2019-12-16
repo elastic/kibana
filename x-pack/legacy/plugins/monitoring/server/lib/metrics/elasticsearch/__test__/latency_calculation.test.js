@@ -7,7 +7,6 @@
 import { LatencyMetric } from '../classes';
 
 describe('LatencyMetric for Query/Index Metric derivatives', () => {
-
   const getLatencyMetric = metricType => {
     return new LatencyMetric({
       metric: metricType,
@@ -22,7 +21,7 @@ describe('LatencyMetric for Query/Index Metric derivatives', () => {
   it(`LatencyMetrics return null if time and total are both negative`, () => {
     const bucket = {
       event_time_in_millis_deriv: { value: -42 },
-      event_total_deriv: { value: -6 }
+      event_total_deriv: { value: -6 },
     };
     expect(getLatencyMetric('query').calculation(bucket)).toEqual(null);
     expect(getLatencyMetric('index').calculation(bucket)).toEqual(null);
@@ -31,7 +30,7 @@ describe('LatencyMetric for Query/Index Metric derivatives', () => {
   it(`LatencyMetrics return null if total is negative`, () => {
     const bucket = {
       event_time_in_millis_deriv: { value: 42 },
-      event_total_deriv: { value: -6 }
+      event_total_deriv: { value: -6 },
     };
     expect(getLatencyMetric('query').calculation(bucket)).toEqual(null);
     expect(getLatencyMetric('index').calculation(bucket)).toEqual(null);
@@ -40,10 +39,9 @@ describe('LatencyMetric for Query/Index Metric derivatives', () => {
   it(`LatencyMetrics return null if time is negative`, () => {
     const bucket = {
       event_time_in_millis_deriv: { value: -42 },
-      event_total_deriv: { value: 6 }
+      event_total_deriv: { value: 6 },
     };
     expect(getLatencyMetric('query').calculation(bucket)).toEqual(null);
     expect(getLatencyMetric('index').calculation(bucket)).toEqual(null);
   });
-
 });

@@ -20,19 +20,16 @@
 import _ from 'lodash';
 
 function isSortable(field, indexPattern) {
-  return (indexPattern.fields.getByName(field) && indexPattern.fields.getByName(field).sortable);
+  return indexPattern.fields.getByName(field) && indexPattern.fields.getByName(field).sortable;
 }
 
 function createSortObject(sortPair, indexPattern) {
-
   if (Array.isArray(sortPair) && sortPair.length === 2 && isSortable(sortPair[0], indexPattern)) {
-    const [ field, direction ] = sortPair;
+    const [field, direction] = sortPair;
     return { [field]: direction };
-  }
-  else if (_.isPlainObject(sortPair) && isSortable(Object.keys(sortPair)[0], indexPattern)) {
+  } else if (_.isPlainObject(sortPair) && isSortable(Object.keys(sortPair)[0], indexPattern)) {
     return sortPair;
-  }
-  else {
+  } else {
     return undefined;
   }
 }
@@ -45,24 +42,24 @@ function createSortObject(sortPair, indexPattern) {
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
 export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
-
   let sortObjects;
   if (Array.isArray(sort)) {
-    sortObjects = _.compact(sort.map((sortPair) => createSortObject(sortPair, indexPattern)));
+    sortObjects = _.compact(sort.map(sortPair => createSortObject(sortPair, indexPattern)));
   }
 
   if (!_.isEmpty(sortObjects)) {
     return sortObjects;
-  }
-  else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+  } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
     return [{ [indexPattern.timeFieldName]: defaultSortOrder }];
-  }
-  else {
+  } else {
     return [{ _score: 'desc' }];
   }
 }
 
-getSort.array = function (sort, indexPattern, defaultSortOrder) {
-  return getSort(sort, indexPattern, defaultSortOrder).map((sortPair) => _(sortPair).pairs().pop());
+getSort.array = function(sort, indexPattern, defaultSortOrder) {
+  return getSort(sort, indexPattern, defaultSortOrder).map(sortPair =>
+    _(sortPair)
+      .pairs()
+      .pop()
+  );
 };
-

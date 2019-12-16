@@ -17,17 +17,13 @@
  * under the License.
  */
 
-import {
-  createListStream,
-  createPromiseFromStreams,
-  createConcatStream
-} from './';
+import { createListStream, createPromiseFromStreams, createConcatStream } from './';
 
 describe('concatStream', () => {
   test('accepts an initial value', async () => {
     const output = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createConcatStream([0])
+      createConcatStream([0]),
     ]);
 
     expect(output).toEqual([0, 1, 2, 3]);
@@ -36,39 +32,24 @@ describe('concatStream', () => {
   describe(`combines using the previous value's concat method`, () => {
     test('works with strings', async () => {
       const output = await createPromiseFromStreams([
-        createListStream([
-          'a',
-          'b',
-          'c'
-        ]),
-        createConcatStream()
+        createListStream(['a', 'b', 'c']),
+        createConcatStream(),
       ]);
       expect(output).toEqual('abc');
     });
 
     test('works with arrays', async () => {
       const output = await createPromiseFromStreams([
-        createListStream([
-          [1],
-          [2, 3, 4],
-          [10]
-        ]),
-        createConcatStream()
+        createListStream([[1], [2, 3, 4], [10]]),
+        createConcatStream(),
       ]);
       expect(output).toEqual([1, 2, 3, 4, 10]);
     });
 
     test('works with a mixture, starting with array', async () => {
       const output = await createPromiseFromStreams([
-        createListStream([
-          [],
-          1,
-          2,
-          3,
-          4,
-          [5, 6, 7]
-        ]),
-        createConcatStream()
+        createListStream([[], 1, 2, 3, 4, [5, 6, 7]]),
+        createConcatStream(),
       ]);
       expect(output).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
@@ -76,10 +57,7 @@ describe('concatStream', () => {
     test('fails when the value does not have a concat method', async () => {
       let promise;
       try {
-        promise = createPromiseFromStreams([
-          createListStream([1, '1']),
-          createConcatStream()
-        ]);
+        promise = createPromiseFromStreams([createListStream([1, '1']), createConcatStream()]);
       } catch (err) {
         throw new Error('createPromiseFromStreams() should not fail synchronously');
       }

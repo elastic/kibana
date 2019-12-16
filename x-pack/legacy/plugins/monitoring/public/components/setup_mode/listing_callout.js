@@ -6,10 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { get } from 'lodash';
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatProductName, getIdentifier } from './formatting';
 
@@ -37,8 +34,8 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
               defaultMessage: '{product} {identifier} detected',
               values: {
                 product: formatProductName(productName),
-                identifier: getIdentifier(productName)
-              }
+                identifier: getIdentifier(productName),
+              },
             })}
             color="warning"
             iconType="flag"
@@ -47,12 +44,12 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
               {i18n.translate('xpack.monitoring.setupMode.detectedNodeDescription', {
                 defaultMessage: `Click 'Set up monitoring' below to start monitoring this {identifier}.`,
                 values: {
-                  identifier: getIdentifier(productName)
-                }
+                  identifier: getIdentifier(productName),
+                },
               })}
             </p>
           </EuiCallOut>
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
         </Fragment>
       );
     }
@@ -63,8 +60,8 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
             defaultMessage: 'No {product} {identifier} detected',
             values: {
               product: formatProductName(productName),
-              identifier: getIdentifier(productName, true)
-            }
+              identifier: getIdentifier(productName, true),
+            },
           })}
           iconType="flag"
         >
@@ -74,7 +71,7 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
             })}
           </p>
         </EuiCallOut>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
       </Fragment>
     );
   }
@@ -86,13 +83,13 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
           title={i18n.translate('xpack.monitoring.setupMode.metricbeatAllNodes', {
             defaultMessage: 'Metricbeat is monitoring all {identifier}.',
             values: {
-              identifier: getIdentifier(productName, true)
-            }
+              identifier: getIdentifier(productName, true),
+            },
           })}
           color="success"
           iconType="flag"
         />
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
       </Fragment>
     );
   }
@@ -112,59 +109,54 @@ export function ListingCallOut({ setupModeData, productName, customRenderer = nu
               defaultMessage: `Metricbeat is now monitoring your {product} {identifier}. Disable self monitoring to finish the migration.`,
               values: {
                 product: formatProductName(productName),
-                identifier: getIdentifier(productName, true)
-              }
+                identifier: getIdentifier(productName, true),
+              },
             })}
           </p>
         </EuiCallOut>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
       </Fragment>
     );
   }
 
   if (setupModeData.totalUniqueInstanceCount > 0) {
-    if (setupModeData.totalUniqueFullyMigratedCount === 0 && setupModeData.totalUniquePartiallyMigratedCount === 0) {
+    if (
+      setupModeData.totalUniqueFullyMigratedCount === 0 &&
+      setupModeData.totalUniquePartiallyMigratedCount === 0
+    ) {
       return (
         <Fragment>
-          <EuiCallOut
-            title={MIGRATE_TO_MB_LABEL}
-            color="danger"
-            iconType="flag"
-          >
+          <EuiCallOut title={MIGRATE_TO_MB_LABEL} color="danger" iconType="flag">
             <p>
               {i18n.translate('xpack.monitoring.setupMode.migrateToMetricbeatDescription', {
                 defaultMessage: `These {product} {identifier} are self monitored.
                 Click 'Monitor with Metricbeat' to migrate.`,
                 values: {
                   product: formatProductName(productName),
-                  identifier: getIdentifier(productName, true)
-                }
+                  identifier: getIdentifier(productName, true),
+                },
               })}
             </p>
           </EuiCallOut>
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
         </Fragment>
       );
     }
 
     return (
       <Fragment>
-        <EuiCallOut
-          title={MIGRATE_TO_MB_LABEL}
-          color="danger"
-          iconType="flag"
-        >
+        <EuiCallOut title={MIGRATE_TO_MB_LABEL} color="danger" iconType="flag">
           <p>
             {i18n.translate('xpack.monitoring.setupMode.migrateSomeToMetricbeatDescription', {
               defaultMessage: `Some {product} {identifier} are monitored through self monitoring. Migrate to monitor with Metricbeat.`,
               values: {
                 product: formatProductName(productName),
-                identifier: getIdentifier(productName, true)
-              }
+                identifier: getIdentifier(productName, true),
+              },
             })}
           </p>
         </EuiCallOut>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
       </Fragment>
     );
   }

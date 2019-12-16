@@ -27,7 +27,9 @@ import { getServices } from '../kibana_services';
 import { wrapInI18nContext } from '../legacy_imports';
 
 export function initListingDirective(app) {
-  app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+  app.directive('visualizeListingTable', reactDirective =>
+    reactDirective(wrapInI18nContext(VisualizeListingTable))
+  );
   app.directive('newVisModal', reactDirective =>
     reactDirective(wrapInI18nContext(NewVisModal), [
       ['visTypesRegistry', { watchDepth: 'collection' }],

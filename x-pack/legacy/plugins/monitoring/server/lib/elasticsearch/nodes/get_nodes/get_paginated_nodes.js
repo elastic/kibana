@@ -28,7 +28,13 @@ import { getMetrics } from '../../../details/get_metrics';
  * @param {*} queryText - Text that will be used to filter out pipelines
  */
 export async function getPaginatedNodes(
-  req, esIndexPattern, { clusterUuid }, metricSet, pagination, sort, queryText,
+  req,
+  esIndexPattern,
+  { clusterUuid },
+  metricSet,
+  pagination,
+  sort,
+  queryText,
   { clusterStats, shardStats }
 ) {
   const config = req.server.config();
@@ -38,7 +44,7 @@ export async function getPaginatedNodes(
   // Add `isOnline` and shards from the cluster state and shard stats
   const clusterState = get(clusterStats, 'cluster_state', { nodes: {} });
   for (const node of nodes) {
-    node.isOnline = !isUndefined(get(clusterState, [ 'nodes', node.uuid ]));
+    node.isOnline = !isUndefined(get(clusterState, ['nodes', node.uuid]));
     node.shardCount = get(shardStats, `nodes[${node.uuid}].shardCount`, 0);
   }
 
@@ -50,16 +56,24 @@ export async function getPaginatedNodes(
   const filters = [
     {
       terms: {
-        'source_node.name': nodes.map(node => node.name)
-      }
-    }
+        'source_node.name': nodes.map(node => node.name),
+      },
+    },
   ];
   const groupBy = {
     field: `source_node.uuid`,
     include: nodes.map(node => node.uuid),
-    size: config.get('xpack.monitoring.max_bucket_size')
+    size: config.get('xpack.monitoring.max_bucket_size'),
   };
-  const metricSeriesData = await getMetrics(req, esIndexPattern, metricSet, filters, { nodes }, 4, groupBy);
+  const metricSeriesData = await getMetrics(
+    req,
+    esIndexPattern,
+    metricSet,
+    filters,
+    { nodes },
+    4,
+    groupBy
+  );
   for (const metricName in metricSeriesData) {
     if (!metricSeriesData.hasOwnProperty(metricName)) {
       continue;
@@ -95,6 +109,6 @@ export async function getPaginatedNodes(
 
   return {
     pageOfNodes,
-    totalNodeCount: filteredNodes.length
+    totalNodeCount: filteredNodes.length,
   };
 }
