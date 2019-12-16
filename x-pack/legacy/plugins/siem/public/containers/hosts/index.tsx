@@ -7,7 +7,6 @@
 import { get, getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
@@ -15,6 +14,7 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   Direction,
   GetHostsTableQuery,
+  GetHostsTableQueryComponent,
   HostsEdges,
   HostsFields,
   PageInfoPaginated,
@@ -23,7 +23,6 @@ import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from 
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
-import { HostsTableQuery } from './hosts_table.gql_query';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
 const ID = 'hostsQuery';
@@ -43,7 +42,7 @@ export interface HostsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: HostsArgs) => React.ReactNode;
+  children: (args: HostsArgs) => React.ReactElement;
   type: hostsModel.HostsType;
   startDate: number;
   endDate: number;
@@ -107,8 +106,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
       inspect: isInspected,
     };
     return (
-      <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
-        query={HostsTableQuery}
+      <GetHostsTableQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={variables}
@@ -151,7 +149,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
             totalCount: getOr(-1, 'source.Hosts.totalCount', data),
           });
         }}
-      </Query>
+      </GetHostsTableQueryComponent>
     );
   }
 

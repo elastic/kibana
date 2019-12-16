@@ -6,13 +6,13 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUncommonProcessesQuery,
+  GetUncommonProcessesQueryComponent,
   PageInfoPaginated,
   UncommonProcessesEdges,
 } from '../../graphql/types';
@@ -20,8 +20,6 @@ import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from 
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-
-import { uncommonProcessesQuery } from './index.gql_query';
 
 const ID = 'uncommonProcessesQuery';
 
@@ -38,7 +36,7 @@ export interface UncommonProcessesArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UncommonProcessesArgs) => React.ReactNode;
+  children: (args: UncommonProcessesArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 
@@ -81,8 +79,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
-        query={uncommonProcessesQuery}
+      <GetUncommonProcessesQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -124,7 +121,7 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
             uncommonProcesses,
           });
         }}
-      </Query>
+      </GetUncommonProcessesQueryComponent>
     );
   }
 }

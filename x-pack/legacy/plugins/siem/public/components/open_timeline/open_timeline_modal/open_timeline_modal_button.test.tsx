@@ -7,8 +7,9 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
 import { ThemeProvider } from 'styled-components';
+import { act } from '@testing-library/react';
 
 import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
@@ -31,7 +32,7 @@ describe('OpenTimelineModalButton', () => {
       </TestProviderWithoutDragAndDrop>
     );
 
-    await wait();
+    await act(() => wait());
 
     wrapper.update();
 
@@ -56,7 +57,7 @@ describe('OpenTimelineModalButton', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await act(() => wait());
 
       wrapper
         .find('[data-test-subj="open-timeline-button"]')

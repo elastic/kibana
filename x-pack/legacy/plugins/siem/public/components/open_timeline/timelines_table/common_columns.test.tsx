@@ -11,7 +11,7 @@ import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines';
 import { getEmptyValue } from '../../empty_value';
 import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../mock/timeline_results';

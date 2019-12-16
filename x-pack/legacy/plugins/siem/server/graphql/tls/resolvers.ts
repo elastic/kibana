@@ -5,15 +5,8 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { TLS, TlsRequestOptions } from '../../lib/tls';
 import { createOptionsPaginated } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
-
-export type QueryTlsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.TlsResolver>,
-  QuerySourceResolver
->;
 
 export interface TlsResolversDeps {
   tls: TLS;
@@ -23,7 +16,7 @@ export const createTlsResolvers = (
   libs: TlsResolversDeps
 ): {
   Source: {
-    Tls: QueryTlsResolver;
+    Tls: SourceResolvers['Tls'];
   };
 } => ({
   Source: {

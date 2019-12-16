@@ -21,6 +21,10 @@ jest.mock('../search_bar', () => ({
   },
 }));
 
+jest.mock('@apollo/client', () => ({
+  useApolloClient: jest.fn(() => {}),
+}));
+
 let mockProps: UrlStateContainerPropTypes;
 
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {

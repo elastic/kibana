@@ -7,6 +7,7 @@
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { RequestAuth } from 'hapi';
+import * as runtimeTypes from 'io-ts';
 
 import { RequestHandlerContext } from 'src/core/server';
 import { ESQuery } from '../../../common/typed_json';
@@ -18,8 +19,6 @@ import {
   TimerangeInput,
 } from '../../graphql/types';
 import { RequestFacade } from '../../types';
-
-export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
@@ -139,3 +138,6 @@ export interface RequestOptionsPaginated extends RequestBasicOptions {
   fields: readonly string[];
   sortField?: SortField;
 }
+
+export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
+  runtimeTypes.union([type, runtimeTypes.null]);

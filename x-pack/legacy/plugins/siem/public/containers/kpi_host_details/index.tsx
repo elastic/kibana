@@ -6,17 +6,14 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { KpiHostDetailsData, GetKpiHostDetailsQuery } from '../../graphql/types';
+import { KpiHostDetailsData, GetKpiHostDetailsQueryComponent } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
-
-import { kpiHostDetailsQuery } from './index.gql_query';
 
 const ID = 'kpiHostDetailsQuery';
 
@@ -29,7 +26,7 @@ export interface KpiHostDetailsArgs {
 }
 
 export interface QueryKpiHostDetailsProps extends QueryTemplateProps {
-  children: (args: KpiHostDetailsArgs) => React.ReactNode;
+  children: (args: KpiHostDetailsArgs) => React.ReactElement;
 }
 
 export interface KpiHostDetailsReducer {
@@ -38,8 +35,7 @@ export interface KpiHostDetailsReducer {
 
 const KpiHostDetailsComponentQuery = React.memo<QueryKpiHostDetailsProps & KpiHostDetailsReducer>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
-    <Query<GetKpiHostDetailsQuery.Query, GetKpiHostDetailsQuery.Variables>
-      query={kpiHostDetailsQuery}
+    <GetKpiHostDetailsQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
@@ -65,7 +61,7 @@ const KpiHostDetailsComponentQuery = React.memo<QueryKpiHostDetailsProps & KpiHo
           refetch,
         });
       }}
-    </Query>
+    </GetKpiHostDetailsQueryComponent>
   )
 );
 

@@ -8,16 +8,14 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import memoizeOne from 'memoize-one';
 
-import { Query } from 'react-apollo';
-
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
 import {
   GetAllTimeline,
+  GetAllTimelineComponent,
   PageInfoTimeline,
   SortTimeline,
   TimelineResult,
 } from '../../../graphql/types';
-import { allTimelinesQuery } from './index.gql_query';
 
 export interface AllTimelinesArgs {
   timelines: OpenTimelineResult[];
@@ -33,7 +31,7 @@ export interface AllTimelinesVariables {
 }
 
 interface OwnProps extends AllTimelinesVariables {
-  children?: (args: AllTimelinesArgs) => React.ReactNode;
+  children?: (args: AllTimelinesArgs) => React.ReactElement;
 }
 
 const getAllTimeline = memoizeOne(
@@ -80,8 +78,7 @@ export const AllTimelinesQuery = React.memo<OwnProps>(
       sort,
     };
     return (
-      <Query<GetAllTimeline.Query, GetAllTimeline.Variables>
-        query={allTimelinesQuery}
+      <GetAllTimelineComponent
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         variables={variables}
@@ -96,7 +93,7 @@ export const AllTimelinesQuery = React.memo<OwnProps>(
             ),
           });
         }}
-      </Query>
+      </GetAllTimelineComponent>
     );
   }
 );

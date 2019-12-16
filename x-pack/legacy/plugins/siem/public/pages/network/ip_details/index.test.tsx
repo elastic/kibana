@@ -9,7 +9,8 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { GraphQLRequest } from '@apollo/client';
+import { MockedProvider } from '@apollo/client/testing';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../../mock/match_media';
@@ -48,7 +49,7 @@ jest.mock('../../../components/query_bar', () => ({
 }));
 
 let localSource: Array<{
-  request: {};
+  request: GraphQLRequest;
   result: {
     data: {
       source: {

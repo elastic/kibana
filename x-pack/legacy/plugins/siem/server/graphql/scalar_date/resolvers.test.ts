@@ -38,7 +38,7 @@ describe('Test ScalarDate Resolver', () => {
         kind: 'IntValue',
         value: '1514782800000',
       };
-      const date = dateScalar.parseLiteral(valueNode);
+      const date = dateScalar.parseLiteral(valueNode, {});
       expect(date).toEqual(1514782800000);
     });
 
@@ -47,7 +47,7 @@ describe('Test ScalarDate Resolver', () => {
         kind: 'StringValue',
         value: '2018-01-01T05:00:00.000Z',
       };
-      const date = dateScalar.parseLiteral(valueNode);
+      const date = dateScalar.parseLiteral(valueNode, {});
       expect(date).toEqual('2018-01-01T05:00:00.000Z');
     });
   });

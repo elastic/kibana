@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
+import { act } from '@testing-library/react';
 
 import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { wait } from '../../lib/helpers';
@@ -56,7 +57,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -81,7 +82,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -106,7 +107,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     wrapper.simulate('mouseenter');

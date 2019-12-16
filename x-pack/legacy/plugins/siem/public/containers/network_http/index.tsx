@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import chrome from 'ui/chrome';
@@ -14,6 +13,7 @@ import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetNetworkHttpQuery,
+  GetNetworkHttpQueryComponent,
   NetworkHttpEdges,
   NetworkHttpSortField,
   PageInfoPaginated,
@@ -22,7 +22,6 @@ import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } f
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-import { networkHttpQuery } from './index.gql_query';
 
 const ID = 'networkHttpQuery';
 
@@ -40,7 +39,7 @@ export interface NetworkHttpArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkHttpArgs) => React.ReactNode;
+  children: (args: NetworkHttpArgs) => React.ReactElement;
   ip?: string;
   type: networkModel.NetworkType;
 }
@@ -89,10 +88,9 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetNetworkHttpQuery.Query, GetNetworkHttpQuery.Variables>
+      <GetNetworkHttpQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        query={networkHttpQuery}
         skip={skip}
         variables={variables}
       >
@@ -132,7 +130,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
             totalCount: getOr(-1, 'source.NetworkHttp.totalCount', data),
           });
         }}
-      </Query>
+      </GetNetworkHttpQueryComponent>
     );
   }
 }

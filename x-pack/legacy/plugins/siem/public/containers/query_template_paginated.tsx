@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApolloQueryResult, NetworkStatus } from 'apollo-client';
+import {
+  ApolloQueryResult,
+  NetworkStatus,
+  FetchMoreOptions,
+  FetchMoreQueryOptions,
+  OperationVariables,
+} from '@apollo/client';
 import { isEqual } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
 import { ESQuery } from '../../common/typed_json';
 import { inputsModel } from '../store/model';

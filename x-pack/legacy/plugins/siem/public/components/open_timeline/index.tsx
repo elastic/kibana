@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
+import { useApolloClient } from '@apollo/client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 
@@ -45,7 +45,6 @@ import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { timelineDefaults } from '../../store/timeline/model';
 
 interface OwnProps<TCache = object> {
-  apolloClient: ApolloClient<TCache>;
   /** Displays open timeline in modal */
   isModal: boolean;
   closeModalTimeline?: () => void;
@@ -72,13 +71,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     defaultPageSize,
     isModal = false,
     title,
-    apolloClient,
     closeModalTimeline,
     updateTimeline,
     updateIsLoading,
     timeline,
     createNewTimeline,
   }) => {
+    const apolloClient = useApolloClient();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>

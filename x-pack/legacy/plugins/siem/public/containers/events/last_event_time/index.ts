@@ -6,6 +6,7 @@
 
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { useApolloClient } from '@apollo/client';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
@@ -14,7 +15,6 @@ import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
-import { useApolloClient } from '../../../utils/apollo_context';
 
 export interface LastEventTimeArgs {
   id: string;
@@ -25,7 +25,7 @@ export interface LastEventTimeArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: LastEventTimeArgs) => React.ReactNode;
+  children: (args: LastEventTimeArgs) => React.ReactElement;
   indexKey: LastEventIndexKey;
 }
 

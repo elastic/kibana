@@ -6,13 +6,13 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetNetworkDnsQuery,
+  GetNetworkDnsQueryComponent,
   NetworkDnsEdges,
   NetworkDnsSortField,
   PageInfoPaginated,
@@ -22,7 +22,6 @@ import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } f
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-import { networkDnsQuery } from './index.gql_query';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
 
 const ID = 'networkDnsQuery';
@@ -41,7 +40,7 @@ export interface NetworkDnsArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkDnsArgs) => React.ReactNode;
+  children: (args: NetworkDnsArgs) => React.ReactElement;
   type: networkModel.NetworkType;
 }
 
@@ -91,10 +90,9 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     };
 
     return (
-      <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
+      <GetNetworkDnsQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        query={networkDnsQuery}
         skip={skip}
         variables={variables}
       >
@@ -135,7 +133,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
             histogram: getOr(null, 'source.NetworkDns.histogram', data),
           });
         }}
-      </Query>
+      </GetNetworkDnsQueryComponent>
     );
   }
 }

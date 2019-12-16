@@ -6,17 +6,14 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
+import { GetIpOverviewQueryComponent, IpOverviewData } from '../../graphql/types';
 import { networkModel, inputsModel, inputsSelectors, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
-
-import { ipOverviewQuery } from './index.gql_query';
 
 const ID = 'ipOverviewQuery';
 
@@ -33,15 +30,14 @@ export interface IpOverviewReduxProps {
 }
 
 export interface IpOverviewProps extends QueryTemplateProps {
-  children: (args: IpOverviewArgs) => React.ReactNode;
+  children: (args: IpOverviewArgs) => React.ReactElement;
   type: networkModel.NetworkType;
   ip: string;
 }
 
 const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxProps>(
   ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
-    <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
-      query={ipOverviewQuery}
+    <GetIpOverviewQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
@@ -64,7 +60,7 @@ const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxPro
           refetch,
         });
       }}
-    </Query>
+    </GetIpOverviewQueryComponent>
   )
 );
 

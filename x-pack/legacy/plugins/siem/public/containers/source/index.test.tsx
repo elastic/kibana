@@ -7,7 +7,7 @@
 import { isEqual } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
 
 import { wait } from '../../lib/helpers';
 
@@ -26,7 +26,7 @@ describe('Index Fields & Browser Fields', () => {
               expect(indexPattern.fields).toEqual(mockIndexFields);
             }
 
-            return null;
+            return <div />;
           }}
         </WithSource>
       </MockedProvider>
@@ -45,7 +45,7 @@ describe('Index Fields & Browser Fields', () => {
               expect(browserFields).toEqual(mockBrowserFields);
             }
 
-            return null;
+            return <div />;
           }}
         </WithSource>
       </MockedProvider>

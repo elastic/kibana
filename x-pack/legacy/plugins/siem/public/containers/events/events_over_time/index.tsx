@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
@@ -15,8 +14,11 @@ import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store'
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
-import { EventsOverTimeGqlQuery } from './events_over_time.gql_query';
-import { GetEventsOverTimeQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
+import {
+  GetEventsOverTimeQuery,
+  GetEventsOverTimeQueryComponent,
+  MatrixOverTimeHistogramData,
+} from '../../../graphql/types';
 
 const ID = 'eventsOverTimeQuery';
 
@@ -32,7 +34,7 @@ export interface EventsArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: EventsArgs) => React.ReactNode;
+  children?: (args: EventsArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 
@@ -58,8 +60,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
       startDate,
     } = this.props;
     return (
-      <Query<GetEventsOverTimeQuery.Query, GetEventsOverTimeQuery.Variables>
-        query={EventsOverTimeGqlQuery}
+      <GetEventsOverTimeQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={{
@@ -89,7 +90,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
             totalCount,
           });
         }}
-      </Query>
+      </GetEventsOverTimeQueryComponent>
     );
   }
 }

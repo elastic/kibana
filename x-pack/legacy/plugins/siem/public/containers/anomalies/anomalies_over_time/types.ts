@@ -21,7 +21,7 @@ export interface AnomaliesArgs {
 
 export interface OwnProps extends Omit<QueryTemplateProps, 'filterQuery'> {
   filterQuery?: string;
-  children?: (args: AnomaliesArgs) => React.ReactNode;
+  children?: (args: AnomaliesArgs) => React.ReactElement;
   type: hostsModel.HostsType | networkModel.NetworkType;
 }
 

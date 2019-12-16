@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
+import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
@@ -16,17 +14,10 @@ import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
 export function compose(): AppFrontendLibs {
-  const cache = new InMemoryCache({
-    dataIdFromObject: () => null,
-    fragmentMatcher: new IntrospectionFragmentMatcher({
-      introspectionQueryResultData,
-    }),
-  });
-
   const graphQLOptions = {
     connectToDevTools: process.env.NODE_ENV !== 'production',
-    cache,
-    link: ApolloLink.from(getLinks(cache)),
+    cache: new InMemoryCache(),
+    link: ApolloLink.from(getLinks()),
   };
 
   const apolloClient = new ApolloClient(graphQLOptions);

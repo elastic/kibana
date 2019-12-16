@@ -6,13 +6,13 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUsersQuery,
+  GetUsersQueryComponent,
   FlowTarget,
   PageInfoPaginated,
   UsersEdges,
@@ -22,8 +22,6 @@ import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } f
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-
-import { usersQuery } from './index.gql_query';
 
 const ID = 'usersQuery';
 
@@ -40,7 +38,7 @@ export interface UsersArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: UsersArgs) => React.ReactNode;
+  children: (args: UsersArgs) => React.ReactElement;
   flowTarget: FlowTarget;
   ip: string;
   type: networkModel.NetworkType;
@@ -92,8 +90,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
-        query={usersQuery}
+      <GetUsersQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
@@ -135,7 +132,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
             users,
           });
         }}
-      </Query>
+      </GetUsersQueryComponent>
     );
   }
 }

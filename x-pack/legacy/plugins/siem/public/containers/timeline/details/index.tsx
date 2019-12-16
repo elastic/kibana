@@ -7,13 +7,14 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import { Query } from 'react-apollo';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
-
-import { timelineDetailsQuery } from './index.gql_query';
+import {
+  DetailItem,
+  GetTimelineDetailsQuery,
+  GetTimelineDetailsQueryComponent,
+} from '../../../graphql/types';
 
 export interface EventsArgs {
   detailsData: DetailItem[] | null;
@@ -41,8 +42,7 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
       defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
     };
     return executeQuery ? (
-      <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
-        query={timelineDetailsQuery}
+      <GetTimelineDetailsQueryComponent
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         variables={variables}
@@ -56,7 +56,7 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
             ),
           });
         }}
-      </Query>
+      </GetTimelineDetailsQueryComponent>
     ) : (
       children!({ loading: false, detailsData: null })
     );

@@ -5,8 +5,8 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import React from 'react';
+import { MockedProvider } from '@apollo/client/testing';
 import { render, act } from '@testing-library/react';
 
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
@@ -17,16 +17,6 @@ import '../../../../mock/ui_settings';
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
-
-// Suppress warnings about "react-apollo" until we migrate to apollo@3
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
 
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';

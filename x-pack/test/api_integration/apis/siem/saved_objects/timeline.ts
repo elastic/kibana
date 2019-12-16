@@ -11,7 +11,7 @@
  */
 
 import expect from '@kbn/expect';
-import ApolloClient from 'apollo-client';
+import { ApolloClient } from '@apollo/client';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
+import { useApolloClient } from '@apollo/client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
@@ -26,19 +26,16 @@ export interface FirstLastSeenHostArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children: (args: FirstLastSeenHostArgs) => React.ReactNode;
+  children: (args: FirstLastSeenHostArgs) => React.ReactElement;
   hostName: string;
 }
 
-export function useFirstLastSeenHostQuery<TCache = object>(
-  hostName: string,
-  sourceId: string,
-  apolloClient: ApolloClient<TCache>
-) {
+export function useFirstLastSeenHostQuery(hostName: string, sourceId: string) {
   const [loading, updateLoading] = useState(false);
   const [firstSeen, updateFirstSeen] = useState<Date | null>(null);
   const [lastSeen, updateLastSeen] = useState<Date | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
+  const apolloClient = useApolloClient();
 
   async function fetchFirstLastSeenHost(signal: AbortSignal) {
     updateLoading(true);

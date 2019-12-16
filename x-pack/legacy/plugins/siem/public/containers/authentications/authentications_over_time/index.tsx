@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import chrome from 'ui/chrome';
@@ -15,9 +14,9 @@ import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store'
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
-import { AuthenticationsOverTimeGqlQuery } from './authentications_over_time.gql_query';
 import {
   GetAuthenticationsOverTimeQuery,
+  GetAuthenticationsOverTimeQueryComponent,
   MatrixOverTimeHistogramData,
 } from '../../../graphql/types';
 
@@ -35,7 +34,7 @@ export interface AuthenticationsArgs {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: AuthenticationsArgs) => React.ReactNode;
+  children?: (args: AuthenticationsArgs) => React.ReactElement;
   type: hostsModel.HostsType;
 }
 
@@ -61,8 +60,7 @@ class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
       endDate,
     } = this.props;
     return (
-      <Query<GetAuthenticationsOverTimeQuery.Query, GetAuthenticationsOverTimeQuery.Variables>
-        query={AuthenticationsOverTimeGqlQuery}
+      <GetAuthenticationsOverTimeQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={{
@@ -92,7 +90,7 @@ class AuthenticationsOverTimeComponentQuery extends QueryTemplate<
             totalCount,
           });
         }}
-      </Query>
+      </GetAuthenticationsOverTimeQueryComponent>
     );
   }
 }

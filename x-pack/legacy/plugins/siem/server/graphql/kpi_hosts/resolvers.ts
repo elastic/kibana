@@ -5,20 +5,8 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { KpiHosts } from '../../lib/kpi_hosts';
 import { createOptions } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
-
-export type QueryKpiHostsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.KpiHostsResolver>,
-  QuerySourceResolver
->;
-
-export type QueryKpiHostDetailsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.KpiHostDetailsResolver>,
-  QuerySourceResolver
->;
 
 export interface KpiHostsResolversDeps {
   kpiHosts: KpiHosts;
@@ -28,8 +16,8 @@ export const createKpiHostsResolvers = (
   libs: KpiHostsResolversDeps
 ): {
   Source: {
-    KpiHosts: QueryKpiHostsResolver;
-    KpiHostDetails: QueryKpiHostDetailsResolver;
+    KpiHosts: SourceResolvers['KpiHosts'];
+    KpiHostDetails: SourceResolvers['KpiHostDetails'];
   };
 } => ({
   Source: {

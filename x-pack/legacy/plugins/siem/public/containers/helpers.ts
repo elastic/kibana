@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FetchPolicy } from 'apollo-client';
+import { FetchPolicy } from '@apollo/client';
 import { isString } from 'lodash/fp';
 
 import { ESQuery } from '../../common/typed_json';
@@ -12,4 +12,4 @@ import { ESQuery } from '../../common/typed_json';
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);
 
-export const getDefaultFetchPolicy = (): FetchPolicy => 'cache-and-network';
+export const getDefaultFetchPolicy = (): FetchPolicy => 'cache-first';

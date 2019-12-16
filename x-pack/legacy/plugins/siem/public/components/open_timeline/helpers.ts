@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
+import { ApolloClient } from '@apollo/client';
 import { getOr, set } from 'lodash/fp';
 import { ActionCreator } from 'typescript-fsa';
 

@@ -6,15 +6,17 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import { State, inputsSelectors } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate } from '../../query_template';
 
-import { AnomaliesOverTimeGqlQuery } from './anomalies_over_time.gql_query';
-import { GetAnomaliesOverTimeQuery } from '../../../graphql/types';
+import {
+  GetAnomaliesOverTimeQuery,
+  GetAnomaliesOverTimeQueryComponent,
+} from '../../../graphql/types';
+
 import { AnomaliesOverTimeProps, OwnProps } from './types';
 
 const ID = 'anomaliesOverTimeQuery';
@@ -36,8 +38,7 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
     } = this.props;
 
     return (
-      <Query<GetAnomaliesOverTimeQuery.Query, GetAnomaliesOverTimeQuery.Variables>
-        query={AnomaliesOverTimeGqlQuery}
+      <GetAnomaliesOverTimeQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         variables={{
@@ -67,7 +68,7 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
             totalCount,
           });
         }}
-      </Query>
+      </GetAnomaliesOverTimeQueryComponent>
     );
   }
 }

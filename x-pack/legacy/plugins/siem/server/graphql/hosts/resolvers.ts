@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 
 import { SourceResolvers } from '../../graphql/types';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import {
   Hosts,
   HostOverviewRequestOptions,
@@ -16,22 +15,6 @@ import {
 } from '../../lib/hosts';
 import { getFields } from '../../utils/build_query';
 import { createOptionsPaginated } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
-
-type QueryHostsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.HostsResolver>,
-  QuerySourceResolver
->;
-
-type QueryHostOverviewResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.HostOverviewResolver>,
-  QuerySourceResolver
->;
-
-type QueryHostFirstLastSeenResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.HostFirstLastSeenResolver>,
-  QuerySourceResolver
->;
 
 export interface HostsResolversDeps {
   hosts: Hosts;
@@ -41,9 +24,9 @@ export const createHostsResolvers = (
   libs: HostsResolversDeps
 ): {
   Source: {
-    Hosts: QueryHostsResolver;
-    HostOverview: QueryHostOverviewResolver;
-    HostFirstLastSeen: QueryHostFirstLastSeenResolver;
+    Hosts: SourceResolvers['Hosts'];
+    HostOverview: SourceResolvers['HostOverview'];
+    HostFirstLastSeen: SourceResolvers['HostFirstLastSeen'];
   };
 } => ({
   Source: {

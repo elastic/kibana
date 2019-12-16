@@ -6,18 +6,15 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
+import { GetOverviewHostQueryComponent, OverviewHostData } from '../../../graphql/types';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { State } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
-
-import { overviewHostQuery } from './index.gql_query';
 
 export const ID = 'overviewHostQuery';
 
@@ -34,7 +31,7 @@ export interface OverviewHostReducer {
 }
 
 export interface OverviewHostProps extends QueryTemplateProps {
-  children: (args: OverviewHostArgs) => React.ReactNode;
+  children: (args: OverviewHostArgs) => React.ReactElement;
   sourceId: string;
   endDate: number;
   startDate: number;
@@ -42,8 +39,7 @@ export interface OverviewHostProps extends QueryTemplateProps {
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostReducer>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
-      query={overviewHostQuery}
+    <GetOverviewHostQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       variables={{
         sourceId,
@@ -67,7 +63,7 @@ const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostRe
           refetch,
         });
       }}
-    </Query>
+    </GetOverviewHostQueryComponent>
   )
 );
 

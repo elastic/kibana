@@ -5,25 +5,18 @@
  */
 
 import { Anomalies } from '../../lib/anomalies';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 
 export interface AnomaliesResolversDeps {
   anomalies: Anomalies;
 }
 
-type QueryAnomaliesOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AnomaliesOverTimeResolver>,
-  QuerySourceResolver
->;
-
 export const createAnomaliesResolvers = (
   libs: AnomaliesResolversDeps
 ): {
   Source: {
-    AnomaliesOverTime: QueryAnomaliesOverTimeResolver;
+    AnomaliesOverTime: SourceResolvers['AnomaliesOverTime'];
   };
 } => ({
   Source: {

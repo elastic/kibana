@@ -6,17 +6,16 @@
 
 import { isUndefined } from 'lodash';
 import { get, keyBy, pick, set } from 'lodash/fp';
-import { Query } from 'react-apollo';
+import { useApolloClient } from '@apollo/client';
 import React, { useEffect, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { IndexField, SourceQuery } from '../../graphql/types';
+import { IndexField, SourceQuery, SourceQueryComponent } from '../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';
-import { useApolloClient } from '../../utils/apollo_context';
 
 export { sourceQuery };
 
@@ -56,7 +55,7 @@ interface WithSourceArgs {
 }
 
 interface WithSourceProps {
-  children: (args: WithSourceArgs) => React.ReactNode;
+  children: (args: WithSourceArgs) => React.ReactElement;
   sourceId: string;
 }
 
@@ -83,8 +82,7 @@ export const getBrowserFields = memoizeOne(
 
 export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) => {
   return (
-    <Query<SourceQuery.Query, SourceQuery.Variables>
-      query={sourceQuery}
+    <SourceQueryComponent
       fetchPolicy="cache-first"
       notifyOnNetworkStatusChange
       variables={{
@@ -105,7 +103,7 @@ export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) =
           ),
         })
       }
-    </Query>
+    </SourceQueryComponent>
   );
 });
 

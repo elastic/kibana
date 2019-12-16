@@ -7,44 +7,22 @@
 import { GraphQLScalarType, Kind } from 'graphql';
 
 import { Events } from '../../lib/events';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
-import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 import { LastEventTimeRequestOptions } from '../../lib/events/types';
-
-type QueryTimelineResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.TimelineResolver>,
-  QuerySourceResolver
->;
-
-type QueryTimelineDetailsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.TimelineDetailsResolver>,
-  QuerySourceResolver
->;
-
-type QueryLastEventTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.LastEventTimeResolver>,
-  QuerySourceResolver
->;
 
 export interface EventsResolversDeps {
   events: Events;
 }
 
-type QueryEventsOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.EventsOverTimeResolver>,
-  QuerySourceResolver
->;
-
 export const createEventsResolvers = (
   libs: EventsResolversDeps
 ): {
   Source: {
-    Timeline: QueryTimelineResolver;
-    TimelineDetails: QueryTimelineDetailsResolver;
-    LastEventTime: QueryLastEventTimeResolver;
-    EventsOverTime: QueryEventsOverTimeResolver;
+    Timeline: SourceResolvers['Timeline'];
+    TimelineDetails: SourceResolvers['TimelineDetails'];
+    LastEventTime: SourceResolvers['LastEventTime'];
+    EventsOverTime: SourceResolvers['EventsOverTime'];
   };
 } => ({
   Source: {

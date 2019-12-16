@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
+import { act } from '@testing-library/react';
 
 import { mockIndexPattern, TestProviders } from '../../mock';
 import { mockUiSettings } from '../../mock/ui_settings';
@@ -57,7 +58,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -82,7 +83,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -107,7 +108,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -133,7 +134,7 @@ describe('EventsViewer', () => {
         </TestProviders>
       );
 
-      await wait();
+      await act(() => wait());
       wrapper.update();
 
       defaultHeaders.forEach(h =>

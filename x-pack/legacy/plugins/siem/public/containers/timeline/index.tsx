@@ -7,13 +7,13 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import { Query } from 'react-apollo';
 
 import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
+  GetTimelineQueryComponent,
   PageInfo,
   SortField,
   TimelineEdges,
@@ -23,7 +23,6 @@ import { inputsModel, inputsSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
-import { timelineQuery } from './index.gql_query';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 
 export interface TimelineArgs {
@@ -43,7 +42,7 @@ export interface TimelineQueryReduxProps {
 }
 
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: TimelineArgs) => React.ReactNode;
+  children?: (args: TimelineArgs) => React.ReactElement;
   id: string;
   indexPattern?: IIndexPattern;
   limit: number;
@@ -88,8 +87,7 @@ class TimelineQueryComponent extends QueryTemplate<
       inspect: isInspected,
     };
     return (
-      <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
-        query={timelineQuery}
+      <GetTimelineQueryComponent
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         variables={variables}
@@ -137,7 +135,7 @@ class TimelineQueryComponent extends QueryTemplate<
             getUpdatedAt: this.getUpdatedAt,
           });
         }}
-      </Query>
+      </GetTimelineQueryComponent>
     );
   }
 

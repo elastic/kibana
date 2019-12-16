@@ -5,8 +5,8 @@
  */
 
 import { createHashHistory } from 'history';
-import React, { memo, FC } from 'react';
-import { ApolloProvider } from 'react-apollo';
+import React, { memo, useMemo, FC } from 'react';
+import { ApolloProvider } from '@apollo/client';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { LegacyCoreStart } from 'kibana/public';
@@ -34,8 +34,6 @@ import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
-import { ApolloClientContext } from '../utils/apollo_context';
-
 const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const history = createHashHistory();
 
@@ -45,26 +43,26 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
 
   const AppPluginRoot = memo(() => {
     const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+    const theme = useMemo(
+      () => ({
+        eui: darkMode ? euiDarkVars : euiLightVars,
+        darkMode,
+      }),
+      [darkMode]
+    );
     return (
       <EuiErrorBoundary>
         <I18nContext>
           <ManageGlobalToaster>
             <ReduxStoreProvider store={store}>
               <ApolloProvider client={libs.apolloClient}>
-                <ApolloClientContext.Provider value={libs.apolloClient}>
-                  <ThemeProvider
-                    theme={() => ({
-                      eui: darkMode ? euiDarkVars : euiLightVars,
-                      darkMode,
-                    })}
-                  >
-                    <MlCapabilitiesProvider>
-                      <PageRouter history={history} />
-                    </MlCapabilitiesProvider>
-                  </ThemeProvider>
-                  <ErrorToastDispatcher />
-                  <GlobalToaster />
-                </ApolloClientContext.Provider>
+                <ThemeProvider theme={theme}>
+                  <MlCapabilitiesProvider>
+                    <PageRouter history={history} />
+                  </MlCapabilitiesProvider>
+                </ThemeProvider>
+                <ErrorToastDispatcher />
+                <GlobalToaster />
               </ApolloProvider>
             </ReduxStoreProvider>
           </ManageGlobalToaster>

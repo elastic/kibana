@@ -8,9 +8,9 @@ import { Location } from 'history';
 import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 import { Query, esFilters } from 'src/plugins/data/public';
+import { useApolloClient } from '@apollo/client';
 
 import { UrlInputsModel } from '../../store/inputs/model';
-import { useApolloClient } from '../../utils/apollo_context';
 
 import { CONSTANTS, UrlStateType } from './constants';
 import {
