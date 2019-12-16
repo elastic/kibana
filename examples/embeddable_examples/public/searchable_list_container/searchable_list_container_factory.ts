@@ -18,28 +18,32 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IContainer, EmbeddableInput, EmbeddableFactory } from '../../..';
-import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE_TYPE } from './hello_world_embeddable';
+import { EmbeddableFactory, GetEmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import {
+  SEARCHABLE_LIST_CONTAINER,
+  SearchableListContainer,
+  SearchableContainerInput,
+} from './searchable_list_container';
 
-export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
-  public readonly type = HELLO_WORLD_EMBEDDABLE_TYPE;
+export class SearchableListContainerFactory extends EmbeddableFactory {
+  public readonly type = SEARCHABLE_LIST_CONTAINER;
+  public readonly isContainerType = true;
 
-  /**
-   * In our simple example, we let everyone have permissions to edit this. Most
-   * embeddables should check the UI Capabilities service to be sure of
-   * the right permissions.
-   */
+  constructor(private getEmbeddableFactory: GetEmbeddableFactory) {
+    super();
+  }
+
   public isEditable() {
     return true;
   }
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    return new HelloWorldEmbeddable(initialInput, parent);
+  public async create(initialInput: SearchableContainerInput) {
+    return new SearchableListContainer(initialInput, this.getEmbeddableFactory);
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.samples.helloworld.displayName', {
-      defaultMessage: 'hello world',
+    return i18n.translate('embeddableExamples.searchableListContainer.displayName', {
+      defaultMessage: 'Searchable list container',
     });
   }
 }
