@@ -73,10 +73,6 @@ export interface PluginSetupContract {
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
     config: RecursiveReadonly<{
-      session: {
-        idleTimeout: number | null;
-        lifespan: number | null;
-      };
       secureCookies: boolean;
       cookieName: string;
       loginAssistanceMessage: string;
@@ -210,10 +206,6 @@ export class Plugin {
         // exception may be `sessionTimeout` as other parts of the app may want to know it.
         config: {
           loginAssistanceMessage: config.loginAssistanceMessage,
-          session: {
-            idleTimeout: config.session.idleTimeout,
-            lifespan: config.session.lifespan,
-          },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
         },

@@ -36,13 +36,13 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
-const BABEL_EXCLUDE_RE = [
-  /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
-];
-const STATS_WARNINGS_FILTER = new RegExp([
-  '(export .* was not found in)',
-  '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
-].join(''));
+const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
+const STATS_WARNINGS_FILTER = new RegExp(
+  [
+    '(export .* was not found in)',
+    '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)',
+  ].join('')
+);
 
 function recursiveIssuer(m) {
   if (m.issuer) {
@@ -112,17 +112,14 @@ export default class BaseOptimizer {
 
       const path = this.uiBundles.resolvePath('stats.json');
       const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function (err) {
+      writeFile(path, content, function(err) {
         if (err) throw err;
       });
     });
   }
 
   warmupThreadLoaderPool() {
-    const baseModules = [
-      'babel-loader',
-      BABEL_PRESET_PATH
-    ];
+    const baseModules = ['babel-loader', BABEL_PRESET_PATH];
 
     threadLoader.warmup(
       // pool options, like passed to loader options
@@ -146,21 +143,15 @@ export default class BaseOptimizer {
       return 1;
     }
 
-    return Math.max(
-      1,
-      Math.min(
-        cpus.length - 1,
-        7
-      )
-    );
+    return Math.max(1, Math.min(cpus.length - 1, 7));
   }
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
     const parsedNodeOptions = process.env.NODE_OPTIONS
-      // thread-loader could not receive empty string as options
-      // or it would break that's why we need to filter here
-      ? process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
+      ? // thread-loader could not receive empty string as options
+        // or it would break that's why we need to filter here
+        process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
       : [];
 
     return {
@@ -174,15 +165,13 @@ export default class BaseOptimizer {
       // are used to, into NODE_OPTIONS, it won't affect the workers.
       workerNodeArgs: parsedNodeOptions,
       poolParallelJobs: this.getThreadPoolCpuCount() * 20,
-      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000
+      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000,
     };
   }
 
   getConfig() {
     function getStyleLoaderExtractor() {
-      return [
-        MiniCssExtractPlugin.loader
-      ];
+      return [MiniCssExtractPlugin.loader];
     }
 
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
@@ -222,10 +211,10 @@ export default class BaseOptimizer {
           options: {
             cacheContext: fromRoot('.'),
             cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
-            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
-          }
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE,
+          },
         },
-        ...loaders
+        ...loaders,
       ];
     };
 
@@ -233,7 +222,7 @@ export default class BaseOptimizer {
      * Creates the selection rules for a loader that will only pass for
      * source files that are eligible for automatic transpilation.
      */
-    const createSourceFileResourceSelector = (test) => {
+    const createSourceFileResourceSelector = test => {
       return [
         {
           test,
@@ -243,7 +232,7 @@ export default class BaseOptimizer {
           test,
           include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
           exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
-        }
+        },
       ];
     };
 
@@ -255,12 +244,8 @@ export default class BaseOptimizer {
       entry: {
         ...this.uiBundles.toWebpackEntries(),
         ...this._getDiscoveredPluginEntryPoints(),
-        light_theme: [
-          require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
-        ],
-        dark_theme: [
-          require.resolve('../legacy/ui/public/styles/bootstrap_dark.less'),
-        ],
+        light_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_light.less')],
+        dark_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_dark.less')],
       },
 
       devtool: this.sourceMaps,
@@ -285,32 +270,33 @@ export default class BaseOptimizer {
           cacheGroups: {
             commons: {
               name: 'commons',
-              chunks: chunk => chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
+              chunks: chunk =>
+                chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
               minChunks: 2,
-              reuseExistingChunk: true
+              reuseExistingChunk: true,
             },
             light_theme: {
               name: 'light_theme',
               test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
               chunks: 'all',
-              enforce: true
+              enforce: true,
             },
             dark_theme: {
               name: 'dark_theme',
               test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
               chunks: 'all',
-              enforce: true
-            }
-          }
+              enforce: true,
+            },
+          },
         },
-        noEmitOnErrors: true
+        noEmitOnErrors: true,
       },
 
       plugins: [
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
-          logWithMetadata: this.logWithMetadata
+          logWithMetadata: this.logWithMetadata,
         }),
 
         new MiniCssExtractPlugin({
@@ -319,7 +305,7 @@ export default class BaseOptimizer {
 
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
-        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
           // the map of uiExport types to module ids
           const extensions = this.uiBundles.getAppExtensions();
 
@@ -337,12 +323,11 @@ export default class BaseOptimizer {
             '?',
             // this JSON is parsed by create_ui_exports_module and determines
             // what require() calls it will execute within the bundle
-            JSON.stringify({ type, modules: extensions[type] || [] })
+            JSON.stringify({ type, modules: extensions[type] || [] }),
           ].join('');
         }),
 
-        ...this.uiBundles.getWebpackPluginProviders()
-          .map(provider => provider(webpack)),
+        ...this.uiBundles.getWebpackPluginProviders().map(provider => provider(webpack)),
       ],
 
       module: {
@@ -351,48 +336,46 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: [
               ...getStyleLoaderExtractor(),
-              ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', []))
+              ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', [])),
             ],
           },
           {
             test: /\.css$/,
             use: [
               ...getStyleLoaderExtractor(),
-              ...getStyleLoaders([], maybeAddCacheLoader('css', []))
+              ...getStyleLoaders([], maybeAddCacheLoader('css', [])),
             ],
           },
           {
             test: /\.(html|tmpl)$/,
-            loader: 'raw-loader'
+            loader: 'raw-loader',
           },
           {
             test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
             loader: 'url-loader',
             options: {
-              limit: 8192
-            }
+              limit: 8192,
+            },
           },
           {
             resource: createSourceFileResourceSelector(/\.(js|tsx?)$/),
             use: maybeAddCacheLoader('babel', [
               {
                 loader: 'thread-loader',
-                options: this.getThreadLoaderPoolConfig()
+                options: this.getThreadLoaderPoolConfig(),
               },
               {
                 loader: 'babel-loader',
                 options: {
                   babelrc: false,
-                  presets: [
-                    BABEL_PRESET_PATH,
-                  ],
+                  presets: [BABEL_PRESET_PATH],
                 },
-              }
+              },
             ]),
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
-            ...loader
+            ...loader,
           })),
         ],
         noParse: this.uiBundles.getWebpackNoParseRules(),
@@ -415,8 +398,8 @@ export default class BaseOptimizer {
         // NOTE: we are disabling this as those hints
         // are more tailored for the final bundles result
         // and not for the webpack compilations performance itself
-        hints: false
-      }
+        hints: false,
+      },
     };
 
     // when running from the distributable define an environment variable we can use
@@ -425,21 +408,21 @@ export default class BaseOptimizer {
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
-            'IS_KIBANA_DISTRIBUTABLE': `"true"`
-          }
+            IS_KIBANA_DISTRIBUTABLE: `"true"`,
+          },
         }),
-      ]
+      ],
     };
 
     // We need to add react-addons (and a few other bits) for enzyme to work.
     // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
     const supportEnzymeConfig = {
       externals: {
-        'mocha': 'mocha',
+        mocha: 'mocha',
         'react/lib/ExecutionEnvironment': true,
         'react/addons': true,
         'react/lib/ReactContext': true,
-      }
+      },
     };
 
     const watchingConfig = {
@@ -451,8 +434,8 @@ export default class BaseOptimizer {
           // Since we can't reliably update these files anyway, we can
           // just ignore them in the watcher and prevent the extra compilation
           /bundles[\/\\].+\.entry\.js/,
-        ])
-      ]
+        ]),
+      ],
     };
 
     // in production we set the process.env.NODE_ENV and run
@@ -468,19 +451,17 @@ export default class BaseOptimizer {
             extractComments: false,
             terserOptions: {
               compress: false,
-              mangle: false
-            }
+              mangle: false,
+            },
           }),
-        ]
-      }
+        ],
+      },
     };
 
     return this.uiBundles.getExtendedConfig(
       webpackMerge(
         commonConfig,
-        IS_KIBANA_DISTRIBUTABLE
-          ? isDistributableConfig
-          : {},
+        IS_KIBANA_DISTRIBUTABLE ? isDistributableConfig : {},
         this.uiBundles.isDevMode()
           ? webpackMerge(watchingConfig, supportEnzymeConfig)
           : productionConfig
@@ -514,26 +495,32 @@ export default class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    const details = stats.toString(defaults(
-      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
-      Stats.presetToOptions('minimal')
-    ));
+    const details = stats.toString(
+      defaults(
+        { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
+        Stats.presetToOptions('minimal')
+      )
+    );
 
     return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(defaults({
-        warningsFilter: STATS_WARNINGS_FILTER,
-        ...Stats.presetToOptions('detailed')
-      }))
+      stats.toJson(
+        defaults({
+          warningsFilter: STATS_WARNINGS_FILTER,
+          ...Stats.presetToOptions('detailed'),
+        })
+      )
     );
   }
 
   _getDiscoveredPluginEntryPoints() {
     // New platform plugin entry points
-    return [...this.newPlatformPluginInfo.entries()]
-      .reduce((entryPoints, [pluginId, pluginInfo]) => {
+    return [...this.newPlatformPluginInfo.entries()].reduce(
+      (entryPoints, [pluginId, pluginInfo]) => {
         entryPoints[`plugin/${pluginId}`] = pluginInfo.entryPointPath;
         return entryPoints;
-      }, {});
+      },
+      {}
+    );
   }
 }

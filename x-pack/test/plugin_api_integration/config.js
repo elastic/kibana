@@ -8,12 +8,14 @@ import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
+  const plugins = allFiles.filter(file =>
+    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
+  );
 
   return {
     testFiles: [
@@ -25,7 +27,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: integrationConfig.get('esTestCluster'),
     apps: integrationConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../functional/es_archives')
+      directory: path.resolve(__dirname, '../functional/es_archives'),
     },
     screenshots: integrationConfig.get('screenshots'),
     junit: {
@@ -35,9 +37,10 @@ export default async function ({ readConfigFile }) {
       ...integrationConfig.get('kbnTestServer'),
       serverArgs: [
         ...integrationConfig.get('kbnTestServer.serverArgs'),
-        ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
+        ...plugins.map(
+          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+        ),
       ],
     },
   };
 }
-

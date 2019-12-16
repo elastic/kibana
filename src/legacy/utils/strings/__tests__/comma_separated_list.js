@@ -36,11 +36,7 @@ describe('utils parseCommaSeparatedList()', () => {
   });
 
   it('returns argument untouched if it is an array', () => {
-    const inputs = [
-      [],
-      [1],
-      ['foo,bar']
-    ];
+    const inputs = [[], [1], ['foo,bar']];
     for (const input of inputs) {
       const json = JSON.stringify(input);
       expect(parseCommaSeparatedList(input)).to.be(input);

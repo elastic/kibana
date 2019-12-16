@@ -17,11 +17,6 @@
  * under the License.
  */
 
-export {
-  createAutoJUnitReporter,
-  setupJUnitReportGeneration,
-} from './mocha';
+export { createAutoJUnitReporter, setupJUnitReportGeneration } from './mocha';
 
-export {
-  generateNoticeFromSource,
-} from './notice';
+export { generateNoticeFromSource } from './notice';

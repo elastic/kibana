@@ -28,21 +28,23 @@ import 'elasticsearch-browser';
 import _ from 'lodash';
 import { uiModules } from './modules';
 
-const plugins = [function (Client, config) {
-  // esFactory automatically injects the AngularConnector to the config
-  // https://github.com/elastic/elasticsearch-js/blob/master/src/lib/connectors/angular.js
-  class CustomAngularConnector extends config.connectionClass {
-    request = _.wrap(this.request, function (request, params, cb) {
-      if (String(params.method).toUpperCase() === 'GET') {
-        params.query = _.defaults({ _: Date.now() }, params.query);
-      }
+const plugins = [
+  function(Client, config) {
+    // esFactory automatically injects the AngularConnector to the config
+    // https://github.com/elastic/elasticsearch-js/blob/master/src/lib/connectors/angular.js
+    class CustomAngularConnector extends config.connectionClass {
+      request = _.wrap(this.request, function(request, params, cb) {
+        if (String(params.method).toUpperCase() === 'GET') {
+          params.query = _.defaults({ _: Date.now() }, params.query);
+        }
 
-      return request.call(this, params, cb);
-    });
-  }
+        return request.call(this, params, cb);
+      });
+    }
 
-  config.connectionClass = CustomAngularConnector;
-}];
+    config.connectionClass = CustomAngularConnector;
+  },
+];
 
 export function createEsService(esFactory, esUrl, esApiVersion, esRequestTimeout) {
   return esFactory({
@@ -50,7 +52,7 @@ export function createEsService(esFactory, esUrl, esApiVersion, esRequestTimeout
     log: 'info',
     requestTimeout: esRequestTimeout,
     apiVersion: esApiVersion,
-    plugins
+    plugins,
   });
 }
 

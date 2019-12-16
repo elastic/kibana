@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  KuiButtonIcon,
-  KuiButton,
-} from '../../../../components';
+import { KuiButtonIcon, KuiButton } from '../../../../components';
 
 export default class LoadingButton extends Component {
   constructor(props) {

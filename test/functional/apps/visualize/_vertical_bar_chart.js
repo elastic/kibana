@@ -19,14 +19,14 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
-  describe('vertical bar chart', function () {
+  describe('vertical bar chart', function() {
     const vizName1 = 'Visualization VerticalBarChart';
 
     const initBarChart = async () => {
@@ -46,23 +46,45 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     };
 
-
     before(initBarChart);
 
-    it('should save and load', async function () {
+    it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function () {
-      const expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
-        1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
+    it('should show correct chart', async function() {
+      const expectedChartValues = [
+        37,
+        202,
+        740,
+        1437,
+        1371,
+        751,
+        188,
+        31,
+        42,
+        202,
+        683,
+        1361,
+        1415,
+        707,
+        177,
+        27,
+        32,
+        175,
+        707,
+        1408,
+        1355,
+        726,
+        201,
+        29,
       ];
 
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
@@ -76,9 +98,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct data', async function () {
+    it('should show correct data', async function() {
       // this is only the first page of the tabular data.
-      const expectedChartData =  [
+      const expectedChartData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
         ['2015-09-20 06:00', '740'],
@@ -89,16 +111,16 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-20 21:00', '31'],
         ['2015-09-21 00:00', '42'],
         ['2015-09-21 03:00', '202'],
-        [ '2015-09-21 06:00', '683' ],
-        [ '2015-09-21 09:00', '1,361' ],
-        [ '2015-09-21 12:00', '1,415' ],
-        [ '2015-09-21 15:00', '707' ],
-        [ '2015-09-21 18:00', '177' ],
-        [ '2015-09-21 21:00', '27' ],
-        [ '2015-09-22 00:00', '32' ],
-        [ '2015-09-22 03:00', '175' ],
-        [ '2015-09-22 06:00', '707' ],
-        [ '2015-09-22 09:00', '1,408' ],
+        ['2015-09-21 06:00', '683'],
+        ['2015-09-21 09:00', '1,361'],
+        ['2015-09-21 12:00', '1,415'],
+        ['2015-09-21 15:00', '707'],
+        ['2015-09-21 18:00', '177'],
+        ['2015-09-21 21:00', '27'],
+        ['2015-09-22 00:00', '32'],
+        ['2015-09-22 03:00', '175'],
+        ['2015-09-22 06:00', '707'],
+        ['2015-09-22 09:00', '1,408'],
       ];
 
       await inspector.open();
@@ -113,10 +135,67 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       let expectedChartValues = [
-        82, 218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
-        11, 14, 17, 38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230,
-        170, 99, 48, 30, 15, 10, 2, 8, 7, 17, 34, 37, 104, 153, 241, 313, 404, 492, 512,
-        503, 473, 379, 293, 277, 156, 56
+        82,
+        218,
+        341,
+        440,
+        480,
+        517,
+        522,
+        446,
+        403,
+        321,
+        258,
+        172,
+        95,
+        55,
+        38,
+        24,
+        3,
+        4,
+        11,
+        14,
+        17,
+        38,
+        49,
+        115,
+        152,
+        216,
+        315,
+        402,
+        446,
+        513,
+        520,
+        474,
+        421,
+        307,
+        230,
+        170,
+        99,
+        48,
+        30,
+        15,
+        10,
+        2,
+        8,
+        7,
+        17,
+        34,
+        37,
+        104,
+        153,
+        241,
+        313,
+        404,
+        492,
+        512,
+        503,
+        473,
+        379,
+        293,
+        277,
+        156,
+        56,
       ];
 
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
@@ -134,10 +213,65 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
 
       expectedChartValues = [
-        218, 341, 440, 480, 517, 522, 446, 403, 321, 258, 172, 95, 55, 38, 24, 3, 4,
-        11, 14, 17, 38, 49, 115, 152, 216, 315, 402, 446, 513, 520, 474, 421, 307, 230,
-        170, 99, 48, 30, 15, 10, 2, 8, 7, 17, 34, 37, 104, 153, 241, 313, 404, 492, 512,
-        503, 473, 379, 293, 277, 156
+        218,
+        341,
+        440,
+        480,
+        517,
+        522,
+        446,
+        403,
+        321,
+        258,
+        172,
+        95,
+        55,
+        38,
+        24,
+        3,
+        4,
+        11,
+        14,
+        17,
+        38,
+        49,
+        115,
+        152,
+        216,
+        315,
+        402,
+        446,
+        513,
+        520,
+        474,
+        421,
+        307,
+        230,
+        170,
+        99,
+        48,
+        30,
+        15,
+        10,
+        2,
+        8,
+        7,
+        17,
+        34,
+        37,
+        104,
+        153,
+        241,
+        313,
+        404,
+        492,
+        512,
+        503,
+        473,
+        379,
+        293,
+        277,
+        156,
       ];
 
       // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
@@ -164,8 +298,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
-          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
-          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+          '2',
+          '3',
+          '5',
+          '7',
+          '10',
+          '20',
+          '30',
+          '50',
+          '70',
+          '100',
+          '200',
+          '300',
+          '500',
+          '700',
+          '1,000',
+          '2,000',
+          '3,000',
+          '5,000',
+          '7,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -175,8 +326,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
-          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
-          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+          '2',
+          '3',
+          '5',
+          '7',
+          '10',
+          '20',
+          '30',
+          '50',
+          '70',
+          '100',
+          '200',
+          '300',
+          '500',
+          '700',
+          '1,000',
+          '2,000',
+          '3,000',
+          '5,000',
+          '7,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -187,7 +355,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
-          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+          '0',
+          '200',
+          '400',
+          '600',
+          '800',
+          '1,000',
+          '1,200',
+          '1,400',
+          '1,600',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -196,9 +372,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
-        const expectedLabels = [
-          '200', '400', '600', '800', '1,000', '1,200', '1,400',
-        ];
+        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -209,7 +383,15 @@ export default function ({ getService, getPageObjects }) {
         const labels = await PageObjects.visualize.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = [
-          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+          '0',
+          '200',
+          '400',
+          '600',
+          '800',
+          '1,000',
+          '1,200',
+          '1,400',
+          '1,600',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -218,15 +400,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
-        const expectedLabels = [
-          '200', '400', '600', '800', '1,000', '1,200', '1,400',
-        ];
+        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
     });
 
     describe('vertical bar in percent mode', async () => {
-      it('should show ticks with percentage values', async function () {
+      it('should show ticks with percentage values', async function() {
         const axisId = 'ValueAxis-1';
         await PageObjects.visualize.clickMetricsAndAxes();
         await PageObjects.visualize.clickYAxisOptions(axisId);
@@ -238,10 +418,10 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with Split series', function () {
+    describe('vertical bar with Split series', function() {
       before(initBarChart);
 
-      it('should show correct series', async function () {
+      it('should show correct series', async function() {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
@@ -264,7 +444,7 @@ export default function ({ getService, getPageObjects }) {
         expect(legendEntries).to.eql(expectedEntries);
       });
 
-      it ('should correctly filter by legend', async () => {
+      it('should correctly filter by legend', async () => {
         await PageObjects.visualize.filterLegend('200');
         await PageObjects.visualize.waitForVisualization();
         const legendEntries = await PageObjects.visualize.getLegendEntries();
@@ -275,10 +455,10 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with multiple splits', function () {
+    describe('vertical bar with multiple splits', function() {
       before(initBarChart);
 
-      it('should show correct series', async function () {
+      it('should show correct series', async function() {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.clickBucket('Split series');
         await PageObjects.visualize.selectAggregation('Terms');
@@ -293,39 +473,49 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
 
         const expectedEntries = [
-          '200 - win 8', '200 - win xp', '200 - ios', '200 - osx', '200 - win 7',
-          '404 - ios', '503 - ios', '503 - osx', '503 - win 7', '503 - win 8',
-          '503 - win xp', '404 - osx', '404 - win 7', '404 - win 8', '404 - win xp'
+          '200 - win 8',
+          '200 - win xp',
+          '200 - ios',
+          '200 - osx',
+          '200 - win 7',
+          '404 - ios',
+          '503 - ios',
+          '503 - osx',
+          '503 - win 7',
+          '503 - win 8',
+          '503 - win xp',
+          '404 - osx',
+          '404 - win 7',
+          '404 - win 8',
+          '404 - win xp',
         ];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
 
-      it('should show correct series when disabling first agg', async function () {
+      it('should show correct series when disabling first agg', async function() {
         // this will avoid issues with the play tooltip covering the disable agg button
         await PageObjects.visualize.scrollSubjectIntoView('metricsAggGroup');
         await PageObjects.visualize.toggleDisabledAgg(3);
         await PageObjects.visualize.clickGo();
 
-        const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
+        const expectedEntries = ['win 8', 'win xp', 'ios', 'osx', 'win 7'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
     });
 
-    describe('vertical bar with derivative', function () {
+    describe('vertical bar with derivative', function() {
       before(initBarChart);
 
-      it('should show correct series', async function () {
+      it('should show correct series', async function() {
         await PageObjects.visualize.toggleOpenEditor(2, 'false');
         await PageObjects.visualize.toggleOpenEditor(1);
         await PageObjects.visualize.selectAggregation('Derivative', 'metrics');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         await PageObjects.visualize.clickGo();
 
-        const expectedEntries = [
-          'Derivative of Count'
-        ];
+        const expectedEntries = ['Derivative of Count'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
       });
@@ -339,7 +529,6 @@ export default function ({ getService, getPageObjects }) {
         const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
         expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
       });
-
     });
   });
 }

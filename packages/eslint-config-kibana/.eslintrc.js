@@ -5,7 +5,11 @@ module.exports = {
     './jest.js',
     './react.js',
   ],
-  plugins: ['@kbn/eslint-plugin-eslint'],
+
+  plugins: [
+    '@kbn/eslint-plugin-eslint',
+    'prettier',
+  ],
 
   parserOptions: {
     ecmaVersion: 6
@@ -16,6 +20,13 @@ module.exports = {
   },
 
   rules: {
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
+
     '@kbn/eslint/module_migration': [
       'error',
       [
@@ -43,5 +54,5 @@ module.exports = {
         },
       ],
     ],
-  }
+  },
 };

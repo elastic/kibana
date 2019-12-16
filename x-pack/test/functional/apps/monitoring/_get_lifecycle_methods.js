@@ -38,6 +38,6 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await PageObjects.security.forceLogout();
       await security.user.delete('basic_monitoring_user');
       return esArchiver.unload(_archive);
-    }
+    },
   };
 };

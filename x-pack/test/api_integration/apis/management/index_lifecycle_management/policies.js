@@ -12,15 +12,12 @@ import { getPolicyPayload } from './fixtures';
 import { initElasticsearchHelpers, getPolicyNames } from './lib';
 import { DEFAULT_POLICY_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
   const es = getService('legacyEs');
 
-  const {
-    createIndex,
-    cleanUp: cleanUpEsResources
-  } = initElasticsearchHelpers(es);
+  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
   const {
     loadPolicies,
@@ -51,12 +48,12 @@ export default function ({ getService }) {
               delete: {
                 min_age: '7d',
                 actions: {
-                  delete: {}
-                }
-              }
-            }
+                  delete: {},
+                },
+              },
+            },
           },
-          name: DEFAULT_POLICY_NAME
+          name: DEFAULT_POLICY_NAME,
         });
       });
 

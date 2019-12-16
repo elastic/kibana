@@ -36,7 +36,7 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 import assert from 'assert';
 
@@ -61,10 +61,17 @@ function resizeImage(image, { width, height }, channels) {
 
   const newImage = createImage({}, { width, height }, channels);
 
-  copyImage(image, newImage, { x: 0, y: 0 }, { x: 0, y: 0 }, {
-    width: Math.min(image.width, width),
-    height: Math.min(image.height, height)
-  }, channels);
+  copyImage(
+    image,
+    newImage,
+    { x: 0, y: 0 },
+    { x: 0, y: 0 },
+    {
+      width: Math.min(image.width, width),
+      height: Math.min(image.height, height),
+    },
+    channels
+  );
 
   image.width = width;
   image.height = height;
@@ -76,17 +83,21 @@ function copyImage(srcImg, dstImg, srcPt, dstPt, size, channels) {
     return dstImg;
   }
 
-  if (size.width > srcImg.width ||
-        size.height > srcImg.height ||
-        srcPt.x > srcImg.width - size.width ||
-        srcPt.y > srcImg.height - size.height) {
+  if (
+    size.width > srcImg.width ||
+    size.height > srcImg.height ||
+    srcPt.x > srcImg.width - size.width ||
+    srcPt.y > srcImg.height - size.height
+  ) {
     throw new RangeError('out of range source coordinates for image copy');
   }
 
-  if (size.width > dstImg.width ||
-        size.height > dstImg.height ||
-        dstPt.x > dstImg.width - size.width ||
-        dstPt.y > dstImg.height - size.height) {
+  if (
+    size.width > dstImg.width ||
+    size.height > dstImg.height ||
+    dstPt.x > dstImg.width - size.width ||
+    dstPt.y > dstImg.height - size.height
+  ) {
     throw new RangeError('out of range destination coordinates for image copy');
   }
 
@@ -107,7 +118,6 @@ function copyImage(srcImg, dstImg, srcPt, dstPt, size, channels) {
 }
 
 export class AlphaImage {
-
   constructor(size, data) {
     createImage(this, size, 1, data);
   }
@@ -128,7 +138,6 @@ export class AlphaImage {
 // Not premultiplied, because ImageData is not premultiplied.
 // UNPACK_PREMULTIPLY_ALPHA_WEBGL must be used when uploading to a texture.
 export class RGBAImage {
-
   // data must be a Uint8Array instead of Uint8ClampedArray because texImage2D does not
   // support Uint8ClampedArray in all browsers
 
