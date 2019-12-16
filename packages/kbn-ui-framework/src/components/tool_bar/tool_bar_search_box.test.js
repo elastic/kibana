@@ -22,9 +22,7 @@ import { render, mount } from 'enzyme';
 import sinon from 'sinon';
 import { requiredProps } from '../../test/required_props';
 
-import {
-  KuiToolBarSearchBox,
-} from './tool_bar_search_box';
+import { KuiToolBarSearchBox } from './tool_bar_search_box';
 
 const onFilter = sinon.stub();
 
@@ -56,4 +54,3 @@ describe('placeholder', () => {
     expect(render(component)).toMatchSnapshot();
   });
 });
-

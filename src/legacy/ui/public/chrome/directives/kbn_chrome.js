@@ -26,66 +26,65 @@ import template from './kbn_chrome.html';
 
 import { I18nContext } from '../../i18n';
 import { npStart } from '../../new_platform';
-import { chromeHeaderNavControlsRegistry, NavControlSide } from '../../registry/chrome_header_nav_controls';
+import {
+  chromeHeaderNavControlsRegistry,
+  NavControlSide,
+} from '../../registry/chrome_header_nav_controls';
 
 export function kbnChromeProvider(chrome, internals) {
+  uiModules.get('kibana').directive('kbnChrome', () => {
+    return {
+      template() {
+        const $content = $(template);
+        const $app = $content.find('.application');
 
-  uiModules
-    .get('kibana')
-    .directive('kbnChrome', () => {
-      return {
-        template() {
-          const $content = $(template);
-          const $app = $content.find('.application');
-
-          if (internals.rootController) {
-            $app.attr('ng-controller', internals.rootController);
-          }
-
-          if (internals.rootTemplate) {
-            $app.removeAttr('ng-view');
-            $app.html(internals.rootTemplate);
-          }
-
-          return $content;
-        },
-
-        controllerAs: 'chrome',
-        controller($scope, $location, Private) {
-          $scope.getFirstPathSegment = () => {
-            return $location.path().split('/')[1];
-          };
-
-          // Continue to support legacy nav controls not registered with the NP.
-          const navControls = Private(chromeHeaderNavControlsRegistry);
-          (navControls.bySide[NavControlSide.Left] || [])
-            .forEach(navControl => npStart.core.chrome.navControls.registerLeft({
-              order: navControl.order,
-              mount: navControl.render,
-            }));
-          (navControls.bySide[NavControlSide.Right] || [])
-            .forEach(navControl => npStart.core.chrome.navControls.registerRight({
-              order: navControl.order,
-              mount: navControl.render,
-            }));
-
-          // Non-scope based code (e.g., React)
-
-          // Banners
-          const bannerListContainer = document.getElementById('globalBannerList');
-          if (bannerListContainer) {
-            // This gets rendered manually by the legacy platform because this component must be inside the .app-wrapper
-            ReactDOM.render(
-              <I18nContext>
-                {npStart.core.overlays.banners.getComponent()}
-              </I18nContext>,
-              bannerListContainer
-            );
-          }
-
-          return chrome;
+        if (internals.rootController) {
+          $app.attr('ng-controller', internals.rootController);
         }
-      };
-    });
 
+        if (internals.rootTemplate) {
+          $app.removeAttr('ng-view');
+          $app.html(internals.rootTemplate);
+        }
+
+        return $content;
+      },
+
+      controllerAs: 'chrome',
+      controller($scope, $location, Private) {
+        $scope.getFirstPathSegment = () => {
+          return $location.path().split('/')[1];
+        };
+
+        // Continue to support legacy nav controls not registered with the NP.
+        const navControls = Private(chromeHeaderNavControlsRegistry);
+        (navControls.bySide[NavControlSide.Left] || []).forEach(navControl =>
+          npStart.core.chrome.navControls.registerLeft({
+            order: navControl.order,
+            mount: navControl.render,
+          })
+        );
+        (navControls.bySide[NavControlSide.Right] || []).forEach(navControl =>
+          npStart.core.chrome.navControls.registerRight({
+            order: navControl.order,
+            mount: navControl.render,
+          })
+        );
+
+        // Non-scope based code (e.g., React)
+
+        // Banners
+        const bannerListContainer = document.getElementById('globalBannerList');
+        if (bannerListContainer) {
+          // This gets rendered manually by the legacy platform because this component must be inside the .app-wrapper
+          ReactDOM.render(
+            <I18nContext>{npStart.core.overlays.banners.getComponent()}</I18nContext>,
+            bannerListContainer
+          );
+        }
+
+        return chrome;
+      },
+    };
+  });
 }

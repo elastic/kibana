@@ -4,43 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditDescriptionPopover } from './edit_description_popover';
 
 function prepareTest(updateDescriptionFn) {
-
   const props = {
     description: 'A list of known safe domains',
     updateDescription: updateDescriptionFn,
-    canCreateFilter: true
+    canCreateFilter: true,
   };
 
-  const wrapper = shallowWithIntl(
-    <EditDescriptionPopover.WrappedComponent {...props} />
-  );
+  const wrapper = shallowWithIntl(<EditDescriptionPopover.WrappedComponent {...props} />);
 
   return wrapper;
 }
 
 describe('FilterListUsagePopover', () => {
-
   test('renders the popover with no description', () => {
     const updateDescription = jest.fn(() => {});
 
     const props = {
       updateDescription,
-      canCreateFilter: true
+      canCreateFilter: true,
     };
 
-    const component = shallowWithIntl(
-      <EditDescriptionPopover.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<EditDescriptionPopover.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders the popover with a description', () => {
@@ -67,5 +59,4 @@ describe('FilterListUsagePopover', () => {
     wrapper.update();
     expect(updateDescription).toHaveBeenCalled();
   });
-
 });
