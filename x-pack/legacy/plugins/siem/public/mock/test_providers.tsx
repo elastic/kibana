@@ -26,6 +26,7 @@ import { mockUiSettings } from './ui_settings';
 import { createKibanaContextProviderMock } from './kibana_react';
 
 jest.mock('ui/new_platform');
+jest.mock('../lib/kibana');
 
 const state: State = mockGlobalState;
 

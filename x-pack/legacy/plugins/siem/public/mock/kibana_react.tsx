@@ -20,6 +20,7 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
+  DEFAULT_TIMEZONE_BROWSER,
 } from '../../common/constants';
 import { defaultIndexPattern } from '../../default_index_pattern';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
@@ -41,7 +42,8 @@ export const createUseUiSetting$Mock = () => <T extends unknown = string>(
       value: DEFAULT_INTERVAL_VALUE,
     },
     [DEFAULT_INDEX_KEY]: defaultIndexPattern,
-    [DEFAULT_DATE_FORMAT_TZ]: 'Asia/Taipei',
+    [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
+    [DEFAULT_TIMEZONE_BROWSER]: 'America/New_York',
     [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
     [DEFAULT_DARK_MODE]: false,
   };
