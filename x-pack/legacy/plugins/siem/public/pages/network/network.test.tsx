@@ -12,14 +12,13 @@ import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
 
-import { mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { Network } from './network';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+// jest.mock('../../lib/settings/use_kibana_ui_setting');
 
-jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
+jest.mock('../../lib/kibana');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

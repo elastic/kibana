@@ -28,7 +28,7 @@ import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
 import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useKibana } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
@@ -63,14 +63,14 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
       setHostDetailsTablesActivePageToZero(null);
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
-    const core = useKibanaCore();
+    const kibana = useKibana();
 
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings!),
               indexPattern,
               queries: [query],
               filters: [

@@ -9,7 +9,6 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../mock';
-import { mockKibanaCoreFactory } from '../../../mock/kibana_core';
 import { flyoutHeaderHeight } from '..';
 import { Pane } from '.';
 
@@ -17,7 +16,7 @@ const testFlyoutHeight = 980;
 const testWidth = 640;
 const usersViewing = ['elastic'];
 
-jest.mock('../../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
+jest.mock('../../../lib/kibana');
 
 jest.mock('ui/vis/lib/timezone', () => ({
   timezoneProvider: () => () => 'America/New_York',

@@ -24,7 +24,7 @@ import { WrapperPage } from '../../../components/wrapper_page';
 import { IpOverviewQuery } from '../../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useKibana } from '../../../lib/kibana';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { ConditionalFlexGroup } from '../../../pages/network/navigation/conditional_flex_group';
@@ -70,7 +70,7 @@ export const IPDetailsComponent = ({
     },
     [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
   );
-  const core = useKibanaCore();
+  const kibana = useKibana();
 
   useEffect(() => {
     setIpDetailsTablesActivePageToZero(null);
@@ -82,7 +82,7 @@ export const IPDetailsComponent = ({
         {({ indicesExist, indexPattern }) => {
           const ip = decodeIpv6(detailName);
           const filterQuery = convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(core.uiSettings),
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings!),
             indexPattern,
             queries: [query],
             filters,

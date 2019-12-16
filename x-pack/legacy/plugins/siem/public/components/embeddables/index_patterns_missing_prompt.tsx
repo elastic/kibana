@@ -9,11 +9,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import chrome from 'ui/chrome';
 
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {
-  const { docLinks } = useKibanaCore();
+  const docLinks = useKibana().services.docLinks!;
 
   return (
     <EuiEmptyPrompt

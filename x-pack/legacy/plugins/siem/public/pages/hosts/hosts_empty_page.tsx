@@ -8,14 +8,14 @@ import React from 'react';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
 export const HostsEmptyPage = React.memo(() => {
-  const { docLinks } = useKibanaCore();
+  const docLinks = useKibana().services.docLinks!;
 
   return (
     <EmptyPage

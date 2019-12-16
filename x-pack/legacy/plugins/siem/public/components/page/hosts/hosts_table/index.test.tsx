@@ -17,13 +17,10 @@ import {
   TestProviders,
 } from '../../../../mock';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
-import { mockKibanaCoreFactory } from '../../../../mock/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
 import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
-
-jest.mock('../../../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

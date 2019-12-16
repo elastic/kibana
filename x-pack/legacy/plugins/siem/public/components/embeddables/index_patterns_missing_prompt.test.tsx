@@ -8,10 +8,9 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
 
-jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
+jest.mock('../../lib/kibana');
 
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {

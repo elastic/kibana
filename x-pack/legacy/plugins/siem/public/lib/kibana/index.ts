@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useKibana, useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  useKibana,
+  useUiSetting$,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
-export { useKibana, useUiSetting$ };
+export { KibanaContextProvider, useKibana, useUiSetting$ };

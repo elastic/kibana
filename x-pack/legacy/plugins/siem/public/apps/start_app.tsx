@@ -19,10 +19,7 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import {
-  KibanaContextProvider,
-  useUiSetting$,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, useUiSetting$ } from '../lib/kibana';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';

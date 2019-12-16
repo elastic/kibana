@@ -22,9 +22,7 @@ jest.mock('../loader', () => {
   };
 });
 
-jest.mock('../../lib/settings/use_kibana_ui_setting', () => {
-  return { useKibanaUiSetting: () => [false] };
-});
+jest.mock('../../lib/kibana');
 
 jest.mock('../header_section', () => {
   return {

@@ -22,7 +22,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
 import { defaultIndexPattern } from '../../default_index_pattern';
-import { createKibanaCoreStartMock } from './kibana_core';
+import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 
 export const createUseUiSetting$Mock = () => <T extends unknown = string>(
   key: string,
@@ -60,21 +60,18 @@ export const createUseUiSetting$Mock = () => <T extends unknown = string>(
 };
 
 export const createUseKibanaMock = () => () => ({
-  services: createKibanaCoreStartMock(),
+  services: { ...createKibanaCoreStartMock(), ...createKibanaPluginsStartMock() },
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createWithKibanaMock = () => (Component: any) => (props: any) => {
-  const kibana = createKibanaCoreStartMock();
-  return React.createElement(Component, { ...props, kibana });
+  return <Component {...props} kibana={createUseKibanaMock()()} />;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const MockKibanaContextProvider = ({ children, services }: any) => {
-  const mockCore = createKibanaCoreStartMock();
-  return (
-    <KibanaContextProvider services={{ ...mockCore, ...services }}>
-      {children}
-    </KibanaContextProvider>
-  );
-};
+export const createKibanaContextProviderMock = () => ({ services, ...rest }: any) => (
+  <KibanaContextProvider
+    {...rest}
+    services={{ ...createUseKibanaMock()().services, ...services }}
+  />
+);

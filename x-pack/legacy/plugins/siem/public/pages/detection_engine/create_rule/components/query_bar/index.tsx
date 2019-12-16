@@ -20,7 +20,7 @@ import {
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { QueryBar } from '../../../../../components/query_bar';
-import { useKibanaCore } from '../../../../../lib/compose/kibana_core';
+import { useKibana } from '../../../../../lib/kibana';
 import { useSavedQueryServices } from '../../../../../utils/saved_query_services';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -68,8 +68,8 @@ export const QueryBarDefineRule = ({
   const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const core = useKibanaCore();
-  const [filterManager] = useState<FilterManager>(new FilterManager(core.uiSettings));
+  const kibana = useKibana();
+  const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings!));
 
   const savedQueryServices = useSavedQueryServices();
 

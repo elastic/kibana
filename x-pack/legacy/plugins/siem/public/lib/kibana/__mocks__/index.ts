@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUseUiSetting$Mock, createUseKibanaMock } from '../../../mock/kibana_react';
+import {
+  createKibanaContextProviderMock,
+  createUseUiSetting$Mock,
+  createUseKibanaMock,
+  createWithKibanaMock,
+} from '../../../mock/kibana_react';
 
 export const useKibana = jest.fn(createUseKibanaMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const withKibana = jest.fn(createWithKibanaMock());
+export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());

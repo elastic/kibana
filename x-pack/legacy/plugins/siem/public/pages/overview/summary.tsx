@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+
+import { useKibana } from '../../lib/kibana';
 
 export const Summary = React.memo(() => {
-  const { docLinks } = useKibanaCore();
+  const docLinks = useKibana().services.docLinks!;
 
   return (
     <EuiFlexItem>

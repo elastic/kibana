@@ -9,15 +9,15 @@ import React from 'react';
 
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { getKibanaCoreMock, mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { QueryBar, QueryBarComponentProps } from '.';
+import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
 
 jest.mock('ui/new_platform');
 
-jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
+jest.mock('../../lib/kibana');
 
-const mockUiSettingsForFilterManager = getKibanaCoreMock().uiSettings;
+const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
 describe('QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux

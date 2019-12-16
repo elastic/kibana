@@ -14,7 +14,6 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
-import { mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { flyoutHeaderHeight } from '../flyout';
 
 import {
@@ -29,7 +28,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 const testFlyoutHeight = 980;
 
-jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
+jest.mock('../../lib/kibana');
 
 describe('Timeline', () => {
   const sort: Sort = {

@@ -10,15 +10,17 @@ import React from 'react';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
+import { useKibana } from '../../../lib/kibana';
 import { mockIndexPattern, TestProviders } from '../../../mock';
-import { mockKibanaCoreFactory } from '../../../mock/kibana_core';
+import { createUseKibanaMock } from '../../../mock/kibana_react';
 import { QueryBar } from '../../query_bar';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
 import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
 
-jest.mock('../../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
+jest.mock('../../../lib/kibana');
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('Timeline QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux
@@ -49,6 +51,10 @@ describe('Timeline QueryBar ', () => {
     mockSetKqlFilterQueryDraft.mockClear();
     mockSetSavedQueryId.mockClear();
     mockUpdateReduxTime.mockClear();
+
+    // TODO(rylnd): fix these mocks so the factory binds a copy.
+    const kibanaMock = createUseKibanaMock()();
+    useKibanaMock.mockImplementation(() => kibanaMock);
   });
 
   test('check if we format the appropriate props to QueryBar', () => {

@@ -23,6 +23,7 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import { mockUiSettings } from './ui_settings';
+import { createKibanaContextProviderMock } from './kibana_react';
 
 jest.mock('ui/new_platform');
 
@@ -41,28 +42,28 @@ export const apolloClient = new ApolloClient({
 
 export const apolloClientObservable = new BehaviorSubject(apolloClient);
 
-const services = {
-  uiSettings: mockUiSettings,
-  savedObjects: {} as CoreStart['savedObjects'],
-  notifications: {} as CoreStart['notifications'],
-  docLinks: {
-    links: {
-      query: {
-        kueryQuerySyntax: '',
-      },
-    },
-  } as CoreStart['docLinks'],
-  http: {} as CoreStart['http'],
-  overlays: {} as CoreStart['overlays'],
-  storage: {
-    get: () => {},
-  },
-  data: {
-    query: {
-      savedQueries: {},
-    },
-  },
-};
+// const services = {
+//   uiSettings: mockUiSettings as CoreStart['uiSettings'],
+//   savedObjects: {} as CoreStart['savedObjects'],
+//   notifications: {} as CoreStart['notifications'],
+//   docLinks: {
+//     links: {
+//       query: {
+//         kueryQuerySyntax: '',
+//       },
+//     },
+//   } as CoreStart['docLinks'],
+//   http: {} as CoreStart['http'],
+//   overlays: {} as CoreStart['overlays'],
+//   storage: {
+//     get: () => {},
+//   },
+//   data: {
+//     query: {
+//       savedQueries: {},
+//     },
+//   },
+// };
 
 const localStorageMock = () => {
   let store: Record<string, unknown> = {};
@@ -84,11 +85,13 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
 
+const MockKibanaContextProvider = createKibanaContextProviderMock();
+
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProviders = React.memo<Props>(
   ({ children, store = createStore(state, apolloClientObservable), onDragEnd = jest.fn() }) => (
     <I18nProvider>
-      <KibanaContextProvider services={services}>
+      <MockKibanaContextProvider>
         <ApolloProvider client={apolloClient}>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -96,7 +99,7 @@ export const TestProviders = React.memo<Props>(
             </ThemeProvider>
           </ReduxStoreProvider>
         </ApolloProvider>
-      </KibanaContextProvider>
+      </MockKibanaContextProvider>
     </I18nProvider>
   )
 );
