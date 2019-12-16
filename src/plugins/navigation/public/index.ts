@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from '.';
+import { PluginInitializerContext } from '../../../core/public';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new NavigationPublicPlugin(initializerContext);
+}
 
-const navPlugin = plugin();
+export { TopNavMenuData, TopNavMenu } from './top_nav_menu';
 
-export const setup = navPlugin.setup(npSetup.core);
+export { NavigationPublicPluginSetup, NavigationPublicPluginStart } from './types';
 
-export const start = navPlugin.start(npStart.core, {
-  data: npStart.plugins.data,
-});
+// Export plugin after all other imports
+import { NavigationPublicPlugin } from './plugin';
+export { NavigationPublicPlugin as Plugin };
