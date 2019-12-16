@@ -9,31 +9,31 @@ import { i18n } from '@kbn/i18n';
 
 const layerList = [
   {
-    'id': '0hmz5',
-    'alpha': 1,
-    'sourceDescriptor': {
-      'type': 'EMS_TMS',
-      'isAutoSelect': true
+    id: '0hmz5',
+    alpha: 1,
+    sourceDescriptor: {
+      type: 'EMS_TMS',
+      isAutoSelect: true,
     },
-    'visible': true,
-    'style': {},
-    'type': 'VECTOR_TILE',
-    'minZoom': 0,
-    'maxZoom': 24
+    visible: true,
+    style: {},
+    type: 'VECTOR_TILE',
+    minZoom: 0,
+    maxZoom: 24,
   },
   {
-    'id': 'jzppx',
-    'label': 'Flights',
-    'minZoom': 9,
-    'maxZoom': 24,
-    'alpha': 1,
-    'sourceDescriptor': {
-      'id': '040e0f25-9687-4569-a1e0-76f1a108da56',
-      'type': 'ES_SEARCH',
-      'geoField': 'DestLocation',
-      'limit': 2048,
-      'filterByMapBounds': true,
-      'tooltipProperties': [
+    id: 'jzppx',
+    label: 'Flights',
+    minZoom: 9,
+    maxZoom: 24,
+    alpha: 1,
+    sourceDescriptor: {
+      id: '040e0f25-9687-4569-a1e0-76f1a108da56',
+      type: 'ES_SEARCH',
+      geoField: 'DestLocation',
+      limit: 2048,
+      filterByMapBounds: true,
+      tooltipProperties: [
         'Carrier',
         'DestCityName',
         'DestCountry',
@@ -43,229 +43,235 @@ const layerList = [
         'FlightTimeMin',
         'DistanceMiles',
         'AvgTicketPrice',
-        'FlightDelay'
+        'FlightDelay',
       ],
-      'indexPatternRefName': 'layer_1_source_index_pattern'
+      indexPatternRefName: 'layer_1_source_index_pattern',
     },
-    'visible': true,
-    'style': {
-      'type': 'VECTOR',
-      'properties': {
-        'fillColor': {
-          'type': 'DYNAMIC',
-          'options': {
-            'field': {
-              'label': 'FlightTimeMin',
-              'name': 'FlightTimeMin',
-              'origin': 'source'
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'FlightTimeMin',
+              name: 'FlightTimeMin',
+              origin: 'source',
             },
-            'color': 'Greens'
-          }
+            color: 'Greens',
+          },
         },
-        'lineColor': {
-          'type': 'STATIC',
-          'options': {
-            'color': '#FFFFFF'
-          }
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#FFFFFF',
+          },
         },
-        'lineWidth': {
-          'type': 'STATIC',
-          'options': {
-            'size': 1
-          }
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 1,
+          },
         },
-        'iconSize': {
-          'type': 'DYNAMIC',
-          'options': {
-            'field': {
-              'label': 'DistanceMiles',
-              'name': 'DistanceMiles',
-              'origin': 'source'
+        iconSize: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'DistanceMiles',
+              name: 'DistanceMiles',
+              origin: 'source',
             },
-            'minSize': 1,
-            'maxSize': 32
-          }
-        }
-      }
+            minSize: 1,
+            maxSize: 32,
+          },
+        },
+      },
     },
-    'type': 'VECTOR'
+    type: 'VECTOR',
   },
   {
-    'id': 'y4jsz',
-    'label': 'Flight Origin Location',
-    'minZoom': 0,
-    'maxZoom': 9,
-    'alpha': 1,
-    'sourceDescriptor': {
-      'type': 'ES_GEO_GRID',
-      'resolution': 'COARSE',
-      'id': 'fe893f84-388e-4865-8df4-650748533a77',
-      'geoField': 'OriginLocation',
-      'requestType': 'point',
-      'metrics': [
+    id: 'y4jsz',
+    label: 'Flight Origin Location',
+    minZoom: 0,
+    maxZoom: 9,
+    alpha: 1,
+    sourceDescriptor: {
+      type: 'ES_GEO_GRID',
+      resolution: 'COARSE',
+      id: 'fe893f84-388e-4865-8df4-650748533a77',
+      geoField: 'OriginLocation',
+      requestType: 'point',
+      metrics: [
         {
-          'type': 'count',
-          'label': 'flight count'
+          type: 'count',
+          label: 'flight count',
         },
         {
-          'type': 'avg',
-          'field': 'FlightTimeMin',
-          'label': 'minimum flight time'
-        }
+          type: 'avg',
+          field: 'FlightTimeMin',
+          label: 'minimum flight time',
+        },
       ],
-      'indexPatternRefName': 'layer_2_source_index_pattern'
+      indexPatternRefName: 'layer_2_source_index_pattern',
     },
-    'visible': true,
-    'style': {
-      'type': 'VECTOR',
-      'properties': {
-        'fillColor': {
-          'type': 'DYNAMIC',
-          'options': {
-            'field': {
-              'label': 'Count',
-              'name': 'doc_count',
-              'origin': 'source'
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'Count',
+              name: 'doc_count',
+              origin: 'source',
             },
-            'color': 'Blues'
-          }
+            color: 'Blues',
+          },
         },
-        'lineColor': {
-          'type': 'STATIC',
-          'options': {
-            'color': '#110081'
-          }
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#110081',
+          },
         },
-        'lineWidth': {
-          'type': 'STATIC',
-          'options': {
-            'size': 1
-          }
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 1,
+          },
         },
-        'iconSize': {
-          'type': 'DYNAMIC',
-          'options': {
-            'field': {
-              'label': 'avg of FlightTimeMin',
-              'name': 'avg_of_FlightTimeMin',
-              'origin': 'source'
+        iconSize: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'avg of FlightTimeMin',
+              name: 'avg_of_FlightTimeMin',
+              origin: 'source',
             },
-            'minSize': 1,
-            'maxSize': 32
-          }
-        }
-      }
+            minSize: 1,
+            maxSize: 32,
+          },
+        },
+      },
     },
-    'type': 'VECTOR'
+    type: 'VECTOR',
   },
   {
-    'id': 'x8xpo',
-    'label': 'Flight Destination Location',
-    'minZoom': 0,
-    'maxZoom': 9,
-    'alpha': 1,
-    'sourceDescriptor': {
-      'type': 'ES_GEO_GRID',
-      'resolution': 'COARSE',
-      'id': '60a7346a-8c5f-4c03-b7d1-e8b36e847551',
-      'geoField': 'DestLocation',
-      'requestType': 'point',
-      'metrics': [
+    id: 'x8xpo',
+    label: 'Flight Destination Location',
+    minZoom: 0,
+    maxZoom: 9,
+    alpha: 1,
+    sourceDescriptor: {
+      type: 'ES_GEO_GRID',
+      resolution: 'COARSE',
+      id: '60a7346a-8c5f-4c03-b7d1-e8b36e847551',
+      geoField: 'DestLocation',
+      requestType: 'point',
+      metrics: [
         {
-          'type': 'count',
-          'label': 'flight count'
+          type: 'count',
+          label: 'flight count',
         },
         {
-          'type': 'avg',
-          'field': 'FlightDelayMin',
-          'label': 'average delay'
-        }
+          type: 'avg',
+          field: 'FlightDelayMin',
+          label: 'average delay',
+        },
       ],
-      'indexPatternRefName': 'layer_3_source_index_pattern'
+      indexPatternRefName: 'layer_3_source_index_pattern',
     },
-    'visible': true,
-    'style': {
-      'type': 'VECTOR',
-      'properties': {
-        'fillColor': {
-          'type': 'DYNAMIC',
-          'options': {
-            'field': {
-              'label': 'Count',
-              'name': 'doc_count',
-              'origin': 'source'
+    visible: true,
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'Count',
+              name: 'doc_count',
+              origin: 'source',
             },
-            'color': 'Reds'
-          }
+            color: 'Reds',
+          },
         },
-        'lineColor': {
-          'type': 'STATIC',
-          'options': {
-            'color': '#af0303'
-          }
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#af0303',
+          },
         },
-        'lineWidth': {
-          'type': 'STATIC',
-          'options': {
-            'size': 1
-          }
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 1,
+          },
         },
-        'iconSize': {
-          'type': 'DYNAMIC',
-          'options': {
-            'field': {
-              'label': 'avg of FlightDelayMin',
-              'name': 'avg_of_FlightDelayMin',
-              'origin': 'source'
+        iconSize: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'avg of FlightDelayMin',
+              name: 'avg_of_FlightDelayMin',
+              origin: 'source',
             },
-            'minSize': 1,
-            'maxSize': 32
-          }
-        }
-      }
+            minSize: 1,
+            maxSize: 32,
+          },
+        },
+      },
     },
-    'type': 'VECTOR'
-  }
+    type: 'VECTOR',
+  },
 ];
 
 export const getFlightsSavedObjects = () => {
   return [
     {
-      'id': '5dd88580-1906-11e9-919b-ffe5949a18d2',
-      'type': 'map',
-      'updated_at': '2019-01-15T20:44:54.767Z',
-      'version': 2,
-      'references': [
+      id: '5dd88580-1906-11e9-919b-ffe5949a18d2',
+      type: 'map',
+      updated_at: '2019-01-15T20:44:54.767Z',
+      version: 2,
+      references: [
         {
-          'name': 'layer_1_source_index_pattern',
-          'type': 'index-pattern',
-          'id': 'd3d7af60-4c81-11e8-b3d7-01146121b73d'
+          name: 'layer_1_source_index_pattern',
+          type: 'index-pattern',
+          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
         },
         {
-          'name': 'layer_2_source_index_pattern',
-          'type': 'index-pattern',
-          'id': 'd3d7af60-4c81-11e8-b3d7-01146121b73d'
+          name: 'layer_2_source_index_pattern',
+          type: 'index-pattern',
+          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
         },
         {
-          'name': 'layer_3_source_index_pattern',
-          'type': 'index-pattern',
-          'id': 'd3d7af60-4c81-11e8-b3d7-01146121b73d'
-        }
+          name: 'layer_3_source_index_pattern',
+          type: 'index-pattern',
+          id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+        },
       ],
-      'migrationVersion': {
-        'map': '7.4.0'
+      migrationVersion: {
+        map: '7.4.0',
       },
-      'attributes': {
-        'title': i18n.translate('xpack.maps.sampleData.flightaSpec.mapsTitle', {
-          defaultMessage: '[Flights] Origin and Destination Flight Time'
+      attributes: {
+        title: i18n.translate('xpack.maps.sampleData.flightaSpec.mapsTitle', {
+          defaultMessage: '[Flights] Origin and Destination Flight Time',
         }),
-        'description': '',
-        'mapStateJSON': '{"zoom":3.14,"center":{"lon":-89.58746,"lat":38.38637},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"}}',
-        'layerListJSON': JSON.stringify(layerList),
-        'uiStateJSON': '{"isDarkMode":false}',
-        'bounds': {
-          'type': 'envelope', 'coordinates': [[-139.83779, 56.64828], [-39.33713, 14.04811]] }
-      }
-    }
+        description: '',
+        mapStateJSON:
+          '{"zoom":3.14,"center":{"lon":-89.58746,"lat":38.38637},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"}}',
+        layerListJSON: JSON.stringify(layerList),
+        uiStateJSON: '{"isDarkMode":false}',
+        bounds: {
+          type: 'envelope',
+          coordinates: [
+            [-139.83779, 56.64828],
+            [-39.33713, 14.04811],
+          ],
+        },
+      },
+    },
   ];
 };

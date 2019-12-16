@@ -6,8 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
-
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
@@ -15,7 +14,6 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
 
   describe('map saved object management', () => {
-
     const MAP_NAME_PREFIX = 'saved_object_management_test_';
     const MAP1_NAME = `${MAP_NAME_PREFIX}map1`;
     const MAP2_NAME = `${MAP_NAME_PREFIX}map2`;
@@ -63,7 +61,9 @@ export default function ({ getPageObjects, getService }) {
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
-          expect(appState).to.equal('_a=(filters:!(),query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))');
+          expect(appState).to.equal(
+            '_a=(filters:!(),query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))'
+          );
         });
 
         it('should apply query stored with map', async () => {
@@ -109,7 +109,9 @@ export default function ({ getPageObjects, getService }) {
         it('should update app state with query stored with map', async () => {
           const currentUrl = await browser.getCurrentUrl();
           const appState = currentUrl.substring(currentUrl.indexOf('_a='));
-          expect(appState).to.equal('_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'); // eslint-disable-line max-len
+          expect(appState).to.equal(
+            '_a=(filters:!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,index:c698b940-e149-11e8-a35a-370a8516603a,key:machine.os.raw,negate:!f,params:(query:ios),type:phrase),query:(match:(machine.os.raw:(query:ios,type:phrase))))),query:(language:kuery,query:%27%27))'
+          ); // eslint-disable-line max-len
         });
 
         it('should apply query stored with map', async () => {
@@ -153,6 +155,5 @@ export default function ({ getPageObjects, getService }) {
         expect(map2Count).to.equal(0);
       });
     });
-
   });
 }

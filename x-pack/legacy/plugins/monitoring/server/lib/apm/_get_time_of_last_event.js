@@ -8,18 +8,27 @@ import { get } from 'lodash';
 import { createApmQuery } from './create_apm_query';
 import { ApmClusterMetric } from '../metrics';
 
-export async function getTimeOfLastEvent({ req, callWithRequest, apmIndexPattern, start, end, clusterUuid }) {
+export async function getTimeOfLastEvent({
+  req,
+  callWithRequest,
+  apmIndexPattern,
+  start,
+  end,
+  clusterUuid,
+}) {
   const params = {
     index: apmIndexPattern,
     size: 1,
     ignoreUnavailable: true,
     body: {
       _source: ['timestamp'],
-      sort: [{
-        timestamp: {
-          order: 'desc'
-        }
-      }],
+      sort: [
+        {
+          timestamp: {
+            order: 'desc',
+          },
+        },
+      ],
       query: createApmQuery({
         start,
         end,
@@ -30,12 +39,12 @@ export async function getTimeOfLastEvent({ req, callWithRequest, apmIndexPattern
             range: {
               'beats_stats.metrics.libbeat.output.events.acked': {
                 gt: 0,
-              }
-            }
-          }
+              },
+            },
+          },
         ],
       }),
-    }
+    },
   };
 
   const response = await callWithRequest(req, 'search', params);

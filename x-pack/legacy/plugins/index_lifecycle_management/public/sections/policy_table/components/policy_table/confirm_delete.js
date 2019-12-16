@@ -21,13 +21,13 @@ export class ConfirmDelete extends Component {
       await deletePolicy(policyName);
       const message = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.successMessage', {
         defaultMessage: 'Deleted policy {policyName}',
-        values: { policyName }
+        values: { policyName },
       });
       toastNotifications.addSuccess(message);
     } catch (e) {
       const title = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.errorMessage', {
         defaultMessage: 'Error deleting policy {policyName}',
-        values: { policyName }
+        values: { policyName },
       });
       showApiError(e, title);
     }
@@ -39,7 +39,7 @@ export class ConfirmDelete extends Component {
     const { policyToDelete, onCancel } = this.props;
     const title = i18n.translate('xpack.indexLifecycleMgmt.confirmDelete.title', {
       defaultMessage: 'Delete policy "{name}"',
-      values: { name: policyToDelete.name }
+      values: { name: policyToDelete.name },
     });
     return (
       <EuiOverlayMask>

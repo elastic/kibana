@@ -87,18 +87,28 @@ describe('PipelineEditor component', () => {
   });
 
   it('matches snapshot for create pipeline', () => {
-    expect(shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />)
+    ).toMatchSnapshot();
   });
 
   it('updates state for pipeline id when creating', () => {
-    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />);
-    wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: 'theNewPipelineId' } });
+    const wrapper = shallowWithIntl(
+      <PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />
+    );
+    wrapper
+      .find(`[data-test-subj="inputId"]`)
+      .simulate('change', { target: { value: 'theNewPipelineId' } });
     expect(wrapper.instance().state.pipeline.id).toBe('theNewPipelineId');
   });
 
   it('updates pipeline description', () => {
-    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />);
-    wrapper.find(`[data-test-subj="inputDescription"]`).simulate('change', { target: { value: 'the new description' } });
+    const wrapper = shallowWithIntl(
+      <PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />
+    );
+    wrapper
+      .find(`[data-test-subj="inputDescription"]`)
+      .simulate('change', { target: { value: 'the new description' } });
     expect(wrapper.instance().state.pipeline.description).toBe('the new description');
   });
 
@@ -110,17 +120,27 @@ describe('PipelineEditor component', () => {
 
   it('updates pipeline batch size', () => {
     const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
-    wrapper.find(`[data-test-subj="inputBatchSize"]`).simulate('change', { target: { value: '12' } });
+    wrapper
+      .find(`[data-test-subj="inputBatchSize"]`)
+      .simulate('change', { target: { value: '12' } });
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.size']).toBe(12);
   });
 
   it('updates pipeline settings', () => {
     const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} />);
     wrapper.find(`[data-test-subj="inputWorkers"]`).simulate('change', { target: { value: '10' } });
-    wrapper.find(`[data-test-subj="inputBatchSize"]`).simulate('change', { target: { value: '11' } });
-    wrapper.find(`[data-test-subj="inputBatchDelay"]`).simulate('change', { target: { value: '12' } });
-    wrapper.find(`[data-test-subj="inputQueueMaxBytesNumber"]`).simulate('change', { target: { value: '13' } });
-    wrapper.find(`[data-test-subj="inputQueueCheckpointWrites"]`).simulate('change', { target: { value: '14' } });
+    wrapper
+      .find(`[data-test-subj="inputBatchSize"]`)
+      .simulate('change', { target: { value: '11' } });
+    wrapper
+      .find(`[data-test-subj="inputBatchDelay"]`)
+      .simulate('change', { target: { value: '12' } });
+    wrapper
+      .find(`[data-test-subj="inputQueueMaxBytesNumber"]`)
+      .simulate('change', { target: { value: '13' } });
+    wrapper
+      .find(`[data-test-subj="inputQueueCheckpointWrites"]`)
+      .simulate('change', { target: { value: '14' } });
     expect(wrapper.instance().state.pipeline.settings['pipeline.workers']).toBe(10);
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.size']).toBe(11);
     expect(wrapper.instance().state.pipeline.settings['pipeline.batch.delay']).toBe(12);
@@ -153,19 +173,29 @@ describe('PipelineEditor component', () => {
   });
 
   it('invalidates form for invalid pipeline id input', () => {
-    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />);
-    wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: '$invalid-pipeline-name' } });
+    const wrapper = shallowWithIntl(
+      <PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />
+    );
+    wrapper
+      .find(`[data-test-subj="inputId"]`)
+      .simulate('change', { target: { value: '$invalid-pipeline-name' } });
     expect(wrapper).toMatchSnapshot();
   });
 
   it('invalidates form for pipeline id with spaces', () => {
-    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />);
-    wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: 'pipeline id with spaces' } });
+    const wrapper = shallowWithIntl(
+      <PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />
+    );
+    wrapper
+      .find(`[data-test-subj="inputId"]`)
+      .simulate('change', { target: { value: 'pipeline id with spaces' } });
     expect(wrapper).toMatchSnapshot();
   });
 
   it('includes required error message for falsy pipeline id', () => {
-    const wrapper = shallowWithIntl(<PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />);
+    const wrapper = shallowWithIntl(
+      <PipelineEditor.WrappedComponent {...props} isNewPipeline={true} />
+    );
     wrapper.find(`[data-test-subj="inputId"]`).simulate('change', { target: { value: '' } });
     expect(wrapper).toMatchSnapshot();
   });
