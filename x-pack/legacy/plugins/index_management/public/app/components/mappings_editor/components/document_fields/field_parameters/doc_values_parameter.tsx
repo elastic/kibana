@@ -11,7 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 
-export const DocValuesParameter = () => (
+type DocValuesParameterNames = 'doc_values' | 'doc_values_binary';
+
+export const DocValuesParameter = ({
+  configPath = 'doc_values',
+}: {
+  configPath?: DocValuesParameterNames;
+}) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldTitle', {
       defaultMessage: 'Save doc values',
@@ -27,5 +33,6 @@ export const DocValuesParameter = () => (
       href: documentationService.getDocValuesLink(),
     }}
     formFieldPath="doc_values"
+    configPath={configPath}
   />
 );

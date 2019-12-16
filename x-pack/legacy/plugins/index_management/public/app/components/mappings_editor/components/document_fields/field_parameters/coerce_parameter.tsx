@@ -11,7 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 
-export const CoerceParameter = () => (
+type CoerceParameterNames = 'coerce' | 'coerce_geo_shape' | 'coerce_shape';
+
+export const CoerceParameter = ({
+  configPath = 'coerce',
+}: {
+  configPath?: CoerceParameterNames;
+}) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceFieldTitle', {
       defaultMessage: 'Coerce to number',
@@ -27,5 +33,6 @@ export const CoerceParameter = () => (
       href: documentationService.getCoerceLink(),
     }}
     formFieldPath="coerce"
+    configPath={configPath}
   />
 );

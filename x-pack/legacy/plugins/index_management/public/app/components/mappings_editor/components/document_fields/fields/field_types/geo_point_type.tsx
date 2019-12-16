@@ -10,8 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, TextAreaField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import { IgnoreMalformedParameter, NullValueParameter } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow } from '../edit_field';
+import {
+  IgnoreMalformedParameter,
+  NullValueParameter,
+  IgnoreZValueParameter,
+} from '../../field_parameters';
+import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -29,49 +33,40 @@ interface Props {
 
 export const GeoPointType = ({ field }: Props) => {
   return (
-    <EditFieldSection>
-      {/* ignore_malformed */}
-      <IgnoreMalformedParameter
-        description={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
-          {
-            defaultMessage: 'Whether to ignore malformed geo-points.',
-          }
-        )}
-      />
-
-      {/* ignore_z_value */}
-      <EditFieldFormRow
-        title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldTitle', {
-          defaultMessage: 'Ignore Z value',
-        })}
-        description={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldDescription',
-          {
-            defaultMessage:
-              'If true, three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',
-          }
-        )}
-        formFieldPath="ignore_z_value"
-      />
-
-      {/* null_value */}
-      <NullValueParameter
-        defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-        description={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
-          {
-            defaultMessage:
-              'Accepts a geopoint value which is substituted for any explicit null values.',
-          }
-        )}
-      >
-        <UseField
-          path="null_value"
-          component={TextAreaField}
-          config={getFieldConfig('null_value_geo_point')}
+    <>
+      <EditFieldSection>
+        <IgnoreMalformedParameter
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
+            {
+              defaultMessage: 'Whether to ignore malformed geo-points.',
+            }
+          )}
         />
-      </NullValueParameter>
-    </EditFieldSection>
+      </EditFieldSection>
+
+      <AdvancedSettingsWrapper>
+        <EditFieldSection>
+          <IgnoreZValueParameter />
+
+          <NullValueParameter
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
+              {
+                defaultMessage:
+                  'Accepts a geopoint value which is substituted for any explicit null values.',
+              }
+            )}
+          >
+            <UseField
+              path="null_value"
+              component={TextAreaField}
+              config={getFieldConfig('null_value_geo_point')}
+            />
+          </NullValueParameter>
+        </EditFieldSection>
+      </AdvancedSettingsWrapper>
+    </>
   );
 };

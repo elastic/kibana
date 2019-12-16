@@ -43,24 +43,14 @@ export const FlattenedType = React.memo(({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        {/* index */}
         <IndexParameter
           config={getFieldConfig('index_options_flattened')}
           indexOptions={PARAMETERS_OPTIONS.index_options_flattened}
         />
-
-        {/* doc_values */}
-        <DocValuesParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-          />
-
-          {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
           {/* depth_limit */}
@@ -123,12 +113,17 @@ export const FlattenedType = React.memo(({ field }: Props) => {
             )}
             formFieldPath="split_queries_on_whitespace"
           />
-          {/* similarity */}
+
           <SimilarityParameter
             defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
 
-          {/* boost */}
+          <DocValuesParameter />
+
+          <NullValueParameter
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+          />
+
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

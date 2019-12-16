@@ -24,11 +24,11 @@ import { PARAMETERS_DEFINITION } from '../../../../constants';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
+    case 'copy_to':
     case 'boost':
     case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
-    case 'copy_to':
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
     }
@@ -45,7 +45,7 @@ export const NumericType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        {/* scaling_factor only applies to scaled_float numeric type*/}
+        {/* scaling_factor */}
         <FormDataProvider pathsToWatch="subType">
           {formData =>
             formData.subType === 'scaled_float' ? (
@@ -63,20 +63,20 @@ export const NumericType = ({ field }: Props) => {
             ) : null
           }
         </FormDataProvider>
-        <StoreParameter />
+
         <IndexParameter hasIndexOptions={false} />
-        <DocValuesParameter />
+
+        <IgnoreMalformedParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* coerce */}
           <CoerceParameter />
 
-          {/* ignore_malformed */}
-          <IgnoreMalformedParameter />
+          <DocValuesParameter />
 
-          {/* null_value */}
+          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
+
           <NullValueParameter
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription',
@@ -94,10 +94,8 @@ export const NumericType = ({ field }: Props) => {
             />
           </NullValueParameter>
 
-          {/* copy_to */}
-          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
+          <StoreParameter />
 
-          {/* boost */}
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

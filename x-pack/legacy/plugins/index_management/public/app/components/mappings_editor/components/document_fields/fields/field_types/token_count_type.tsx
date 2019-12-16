@@ -55,31 +55,12 @@ export const TokenCountType = ({ field }: Props) => {
             allowsIndexDefaultOption={false}
           />
         </EditFieldFormRow>
-        <StoreParameter />
+
         <IndexParameter hasIndexOptions={false} />
-        <DocValuesParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
-              {
-                defaultMessage:
-                  'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
-              }
-            )}
-          >
-            <UseField
-              path="null_value"
-              component={NumericField}
-              config={getFieldConfig('null_value_numeric')}
-            />
-          </NullValueParameter>
-
           {/* enable_position_increments */}
           <EditFieldFormRow
             title={i18n.translate(
@@ -97,7 +78,27 @@ export const TokenCountType = ({ field }: Props) => {
             formFieldPath="enable_position_increments"
           />
 
-          {/* boost */}
+          <DocValuesParameter />
+
+          <NullValueParameter
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
+              {
+                defaultMessage:
+                  'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
+              }
+            )}
+          >
+            <UseField
+              path="null_value"
+              component={NumericField}
+              config={getFieldConfig('null_value_numeric')}
+            />
+          </NullValueParameter>
+
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

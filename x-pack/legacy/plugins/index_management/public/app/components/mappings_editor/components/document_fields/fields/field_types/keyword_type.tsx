@@ -52,12 +52,11 @@ export const KeywordType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter
           config={{ ...getFieldConfig('index_options_keyword') }}
           indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
         />
-        <DocValuesParameter />
+
         {/* normalizer */}
         <EditFieldFormRow
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
@@ -84,12 +83,6 @@ export const KeywordType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-          />
-
-          {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
           {/* ignore_above */}
@@ -118,12 +111,10 @@ export const KeywordType = ({ field }: Props) => {
             />
           </EditFieldFormRow>
 
-          {/* norms */}
-          <NormsParameter />
+          <NormsParameter configPath="norms_keyword" />
         </EditFieldSection>
 
         <EditFieldSection>
-          {/* similarity */}
           <SimilarityParameter
             defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
@@ -146,10 +137,16 @@ export const KeywordType = ({ field }: Props) => {
             formFieldPath="split_queries_on_whitespace"
           />
 
-          {/* copy_to */}
+          <DocValuesParameter />
+
           <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
-          {/* boost */}
+          <NullValueParameter
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+          />
+
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

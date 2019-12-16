@@ -11,7 +11,7 @@ import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
 import { AnalyzersParameter } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow } from '../edit_field';
+import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -32,63 +32,67 @@ interface Props {
 
 export const CompletionType = ({ field }: Props) => {
   return (
-    <EditFieldSection>
-      {/* analyzers */}
-      <AnalyzersParameter field={field} />
+    <AdvancedSettingsWrapper hasBasicSettings={false}>
+      <EditFieldSection>
+        <AnalyzersParameter field={field} />
 
-      {/* max_input_length */}
-      <EditFieldFormRow
-        title={i18n.translate('xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle', {
-          defaultMessage: 'Set max input length',
-        })}
-        description={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldDescription',
-          {
-            defaultMessage: 'Limits the length of a single input.',
-          }
-        )}
-        defaultToggleValue={getDefaultToggleValue('max_input_length', field.source)}
-      >
-        <UseField
-          path="max_input_length"
-          config={getFieldConfig('max_input_length')}
-          component={Field}
+        {/* max_input_length */}
+        <EditFieldFormRow
+          title={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle',
+            {
+              defaultMessage: 'Set max input length',
+            }
+          )}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldDescription',
+            {
+              defaultMessage: 'Limits the length of a single input.',
+            }
+          )}
+          defaultToggleValue={getDefaultToggleValue('max_input_length', field.source)}
+        >
+          <UseField
+            path="max_input_length"
+            config={getFieldConfig('max_input_length')}
+            component={Field}
+          />
+        </EditFieldFormRow>
+
+        {/* preserve_separators */}
+        <EditFieldFormRow
+          title={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldTitle',
+            {
+              defaultMessage: 'Preserve separators',
+            }
+          )}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldDescription',
+            {
+              defaultMessage: 'Preserves the separators.',
+            }
+          )}
+          formFieldPath="preserve_separators"
         />
-      </EditFieldFormRow>
 
-      {/* preserve_separators */}
-      <EditFieldFormRow
-        title={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldTitle',
-          {
-            defaultMessage: 'Preserve separators',
-          }
-        )}
-        description={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldDescription',
-          {
-            defaultMessage: 'Preserves the separators.',
-          }
-        )}
-        formFieldPath="preserve_separators"
-      />
-
-      {/* preserve_position_increments */}
-      <EditFieldFormRow
-        title={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldTitle',
-          {
-            defaultMessage: 'Preserve position increments',
-          }
-        )}
-        description={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldDescription',
-          {
-            defaultMessage: 'Enables position increments.',
-          }
-        )}
-        formFieldPath="preserve_position_increments"
-      />
-    </EditFieldSection>
+        {/* preserve_position_increments */}
+        <EditFieldFormRow
+          title={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldTitle',
+            {
+              defaultMessage: 'Preserve position increments',
+            }
+          )}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldDescription',
+            {
+              defaultMessage: 'Enables position increments.',
+            }
+          )}
+          formFieldPath="preserve_position_increments"
+        />
+      </EditFieldSection>
+    </AdvancedSettingsWrapper>
   );
 };
