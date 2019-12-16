@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import './saved_sheets';
 
-// eslint-disable-next-line import/no-default-export
-export default function savedSearchObjectFn(savedSheets: any) {
+SavedObjectRegistryProvider.register((savedSheets: any) => {
   return savedSheets;
-}
+});
