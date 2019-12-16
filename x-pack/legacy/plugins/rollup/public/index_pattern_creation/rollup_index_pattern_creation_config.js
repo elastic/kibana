@@ -74,14 +74,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     await this.settingUp;
     return this.rollupIndices && this.rollupIndices.length
       ? {
-        text: rollupIndexPatternButtonText,
-        description: rollupIndexPatternButtonDescription,
-        testSubj: `createRollupIndexPatternButton`,
-        isBeta: this.isBeta,
-        onClick: () => {
-          urlHandler('/management/kibana/index_pattern?type=rollup');
-        },
-      }
+          text: rollupIndexPatternButtonText,
+          description: rollupIndexPatternButtonDescription,
+          testSubj: `createRollupIndexPatternButton`,
+          isBeta: this.isBeta,
+          onClick: () => {
+            urlHandler('/management/kibana/index_pattern?type=rollup');
+          },
+        }
       : null;
   }
 
@@ -92,11 +92,11 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   getIndexTags(indexName) {
     return this.isRollupIndex(indexName)
       ? [
-        {
-          key: this.type,
-          name: rollupIndexPatternIndexLabel,
-        },
-      ]
+          {
+            key: this.type,
+            name: rollupIndexPatternIndexLabel,
+          },
+        ]
       : [];
   }
 
@@ -137,14 +137,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   getIndexPatternMappings = () => {
     return this.rollupIndex
       ? {
-        type: this.type,
-        typeMeta: {
-          params: {
-            rollup_index: this.rollupIndex,
+          type: this.type,
+          typeMeta: {
+            params: {
+              rollup_index: this.rollupIndex,
+            },
+            aggs: this.rollupIndicesCapabilities[this.rollupIndex].aggs,
           },
-          aggs: this.rollupIndicesCapabilities[this.rollupIndex].aggs,
-        },
-      }
+        }
       : {};
   };
 

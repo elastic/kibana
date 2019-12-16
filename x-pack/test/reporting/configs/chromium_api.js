@@ -6,8 +6,7 @@
 
 import { getReportingApiConfig } from './api';
 
-export default async function ({ readConfigFile }) {
-
+export default async function({ readConfigFile }) {
   const reportingApiConfig = await getReportingApiConfig({ readConfigFile });
 
   return {

@@ -11,8 +11,10 @@ import {
   getIdError,
   transformFindAlertsOrError,
   transformOrError,
+  transformTags,
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
+import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 
 describe('utils', () => {
   describe('transformAlertToRule', () => {
@@ -335,6 +337,53 @@ describe('utils', () => {
         type: 'query',
       });
     });
+
+    test('should work with tags but filter out any internal tags', () => {
+      const fullRule = getResult();
+      fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
+      const rule = transformAlertToRule(fullRule);
+      expect(rule).toEqual({
+        created_by: 'elastic',
+        description: 'Detecting root and admin users',
+        enabled: true,
+        false_positives: [],
+        from: 'now-6m',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: '5m',
+        risk_score: 50,
+        rule_id: 'rule-1',
+        language: 'kuery',
+        max_signals: 100,
+        name: 'Detect Root/Admin Users',
+        output_index: '.siem-signals',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://www.example.com', 'https://ww.example.com'],
+        severity: 'high',
+        updated_by: 'elastic',
+        tags: ['tag 1', 'tag 2'],
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
+        to: 'now',
+        type: 'query',
+      });
+    });
   });
 
   describe('getIdError', () => {
@@ -491,6 +540,23 @@ describe('utils', () => {
     test('returns 500 if the data is not of type siem alert', () => {
       const output = transformOrError({ data: [{ random: 1 }] });
       expect((output as Boom).message).toEqual('Internal error transforming');
+    });
+  });
+
+  describe('transformTags', () => {
+    test('it returns tags that have no internal structures', () => {
+      expect(transformTags(['tag 1', 'tag 2'])).toEqual(['tag 1', 'tag 2']);
+    });
+
+    test('it returns empty tags given empty tags', () => {
+      expect(transformTags([])).toEqual([]);
+    });
+
+    test('it returns tags with internal tags stripped out', () => {
+      expect(transformTags(['tag 1', `${INTERNAL_IDENTIFIER}_some_value`, 'tag 2'])).toEqual([
+        'tag 1',
+        'tag 2',
+      ]);
     });
   });
 });

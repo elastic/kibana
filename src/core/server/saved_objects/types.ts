@@ -23,6 +23,16 @@ import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
 
+export {
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from './import/types';
+
 /**
  * Information about the migrations that have been applied to this SavedObject.
  * When Kibana starts up, KibanaMigrator detects outdated documents and

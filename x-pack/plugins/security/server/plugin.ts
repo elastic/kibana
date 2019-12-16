@@ -28,6 +28,7 @@ import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from './licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -42,7 +43,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  cspRules: string;
   savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
@@ -71,12 +71,9 @@ export interface PluginSetupContract {
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
     config: RecursiveReadonly<{
-      session: {
-        idleTimeout: number | null;
-        lifespan: number | null;
-      };
       secureCookies: boolean;
-      authc: { providers: string[] };
+      cookieName: string;
+      loginAssistanceMessage: string;
     }>;
   };
 }
@@ -128,7 +125,7 @@ export class Plugin {
       .toPromise();
 
     this.clusterClient = core.elasticsearch.createClient('security', {
-      plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+      plugins: [elasticsearchClientPlugin],
     });
 
     const { license, update: updateLicense } = new SecurityLicenseService().setup();
@@ -166,7 +163,7 @@ export class Plugin {
       config,
       authc,
       authz,
-      getLegacyAPI: this.getLegacyAPI,
+      csp: core.http.csp,
     });
 
     const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
@@ -207,13 +204,8 @@ export class Plugin {
         // exception may be `sessionTimeout` as other parts of the app may want to know it.
         config: {
           loginAssistanceMessage: config.loginAssistanceMessage,
-          session: {
-            idleTimeout: config.session.idleTimeout,
-            lifespan: config.session.lifespan,
-          },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
-          authc: { providers: config.authc.providers },
         },
       },
     });

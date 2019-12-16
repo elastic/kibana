@@ -132,8 +132,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
 
     if ('aliasUrl' in visType) {
-      window.location.href = this.props.addBasePath(visType.aliasUrl);
-
+      window.location.assign(this.props.addBasePath(visType.aliasUrl));
+      if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
+        this.props.onClose();
+      }
       return;
     }
 

@@ -19,6 +19,8 @@ import { querySignalsRoute } from './lib/detection_engine/routes/signals/query_s
 import { ServerFacade } from './types';
 import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
+import { readTagsRoute } from './lib/detection_engine/routes/tags/read_tags_route';
+import { readPrivilegesRoute } from './lib/detection_engine/routes/privileges/read_privileges_route';
 
 const APP_ID = 'siem';
 
@@ -52,4 +54,9 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   createIndexRoute(__legacy);
   readIndexRoute(__legacy);
   deleteIndexRoute(__legacy);
+
+  // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
+  readTagsRoute(__legacy);
+  // Privileges API to get the generic user privileges
+  readPrivilegesRoute(__legacy);
 };

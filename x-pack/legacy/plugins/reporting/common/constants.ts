@@ -50,3 +50,9 @@ export const PNG_JOB_TYPE = 'PNG';
 export const CSV_JOB_TYPE = 'csv';
 export const CSV_FROM_SAVEDOBJECT_JOB_TYPE = 'csv_from_savedobject';
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
+
+export const LICENSE_TYPE_TRIAL = 'trial';
+export const LICENSE_TYPE_BASIC = 'basic';
+export const LICENSE_TYPE_STANDARD = 'standard';
+export const LICENSE_TYPE_GOLD = 'gold';
+export const LICENSE_TYPE_PLATINUM = 'platinum';

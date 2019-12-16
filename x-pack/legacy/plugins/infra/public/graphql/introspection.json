@@ -2129,7 +2129,8 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "host", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "host", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "awsEC2", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },
@@ -2191,7 +2192,9 @@
           { "name": "memory", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "tx", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "rx", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "logRate", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "logRate", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "diskIOReadBytes", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "diskIOWriteBytes", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },
@@ -2581,6 +2584,24 @@
           },
           {
             "name": "awsDiskioOps",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsEC2CpuUtilization",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsEC2NetworkTraffic",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "awsEC2DiskIOBytes",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

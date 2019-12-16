@@ -28,7 +28,9 @@ const mockIndexPatternCreationType = {
   checkIndicesForErrors: () => false,
   getShowSystemIndices: () => false,
   renderPrompt: () => {},
-  getIndexPatternMappings: () => { return {}; }
+  getIndexPatternMappings: () => {
+    return {};
+  },
 };
 jest.mock('../components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('../components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
@@ -37,13 +39,11 @@ jest.mock('../components/loading_state', () => ({ LoadingState: 'LoadingState' }
 jest.mock('../components/empty_state', () => ({ EmptyState: 'EmptyState' }));
 jest.mock('../lib/get_indices', () => ({
   getIndices: () => {
-    return [
-      { name: 'kibana' },
-    ];
+    return [{ name: 'kibana' }];
   },
 }));
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => { },
+  addBasePath: () => {},
 }));
 
 const loadingDataDocUrl = '';
@@ -84,7 +84,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [],
-      remoteClustersExist: false
+      remoteClustersExist: false,
     });
 
     await component.update();
@@ -103,7 +103,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [],
-      remoteClustersExist: true
+      remoteClustersExist: true,
     });
 
     await component.update();
@@ -122,7 +122,7 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       isIncludingSystemIndices: true,
-      allIndices: [{ name: '.kibana ' }]
+      allIndices: [{ name: '.kibana ' }],
     });
 
     await component.update();
@@ -187,7 +187,7 @@ describe('CreateIndexPatternWizard', () => {
             clearCache: clear,
           },
           changeUrl,
-          indexPatternCreationType: mockIndexPatternCreationType
+          indexPatternCreationType: mockIndexPatternCreationType,
         }}
       />
     );

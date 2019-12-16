@@ -6,10 +6,29 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { TaskManager, claimAvailableTasks } from './task_manager';
+import { Subject } from 'rxjs';
+
+import {
+  asTaskMarkRunningEvent,
+  asTaskRunEvent,
+  asTaskClaimEvent,
+  asTaskRunRequestEvent,
+} from './task_events';
+import {
+  TaskManager,
+  claimAvailableTasks,
+  awaitTaskRunResult,
+  TaskLifecycleEvent,
+} from './task_manager';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { mockLogger } from './test_utils';
+import { asErr, asOk } from './lib/result_type';
+import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
@@ -273,6 +292,165 @@ describe('TaskManager', () => {
     );
   });
 
+  describe('runNow', () => {
+    describe('awaitTaskRunResult', () => {
+      test('resolves when the task run succeeds', () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn();
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        const task = { id } as ConcreteTaskInstance;
+        events$.next(asTaskRunEvent(id, asOk(task)));
+
+        return expect(result).resolves.toEqual({ id });
+      });
+
+      test('rejects when the task run fails', () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn();
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        const task = { id } as ConcreteTaskInstance;
+        events$.next(asTaskClaimEvent(id, asOk(task)));
+        events$.next(asTaskMarkRunningEvent(id, asOk(task)));
+        events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
+
+        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+      });
+
+      test('rejects when the task mark as running fails', () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn();
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        const task = { id } as ConcreteTaskInstance;
+        events$.next(asTaskClaimEvent(id, asOk(task)));
+        events$.next(asTaskMarkRunningEvent(id, asErr(new Error('some thing gone wrong'))));
+
+        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+      });
+
+      test('when a task claim fails we ensure the task exists', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskLifecycleResult.NotFound);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+
+        await expect(result).rejects.toEqual(
+          new Error(`Failed to run task "${id}" as it does not exist`)
+        );
+
+        expect(getLifecycle).toHaveBeenCalledWith(id);
+      });
+
+      test('when a task claim fails we ensure the task isnt already claimed', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskStatus.Claiming);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+
+        await expect(result).rejects.toEqual(
+          new Error(`Failed to run task "${id}" as it is currently running`)
+        );
+
+        expect(getLifecycle).toHaveBeenCalledWith(id);
+      });
+
+      test('when a task claim fails we ensure the task isnt already running', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskStatus.Running);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+
+        await expect(result).rejects.toEqual(
+          new Error(`Failed to run task "${id}" as it is currently running`)
+        );
+
+        expect(getLifecycle).toHaveBeenCalledWith(id);
+      });
+
+      test('rejects when the task run fails due to capacity', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskStatus.Idle);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskRunRequestEvent(id, asErr(new Error('failed to buffer request'))));
+
+        await expect(result).rejects.toEqual(
+          new Error(
+            `Failed to run task "${id}" as Task Manager is at capacity, please try again later`
+          )
+        );
+        expect(getLifecycle).not.toHaveBeenCalled();
+      });
+
+      test('when a task claim fails we return the underlying error if the task is idle', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskStatus.Idle);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+
+        await expect(result).rejects.toEqual(new Error('failed to claim'));
+
+        expect(getLifecycle).toHaveBeenCalledWith(id);
+      });
+
+      test('when a task claim fails we return the underlying error if the task is failed', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskStatus.Failed);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskClaimEvent(id, asErr(new Error('failed to claim'))));
+
+        await expect(result).rejects.toEqual(new Error('failed to claim'));
+
+        expect(getLifecycle).toHaveBeenCalledWith(id);
+      });
+
+      test('ignores task run success of other tasks', () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const differentTask = '4bebf429-181b-4518-bb7d-b4246d8a35f0';
+        const getLifecycle = jest.fn();
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        const task = { id } as ConcreteTaskInstance;
+        const otherTask = { id: differentTask } as ConcreteTaskInstance;
+        events$.next(asTaskClaimEvent(id, asOk(task)));
+        events$.next(asTaskClaimEvent(differentTask, asOk(otherTask)));
+
+        events$.next(asTaskRunEvent(differentTask, asOk(task)));
+
+        events$.next(asTaskRunEvent(id, asErr(new Error('some thing gone wrong'))));
+
+        return expect(result).rejects.toEqual(new Error('some thing gone wrong'));
+      });
+    });
+  });
+
   describe('claimAvailableTasks', () => {
     test('should claim Available Tasks when there are available workers', () => {
       const logger = mockLogger();
@@ -280,18 +458,18 @@ describe('TaskManager', () => {
 
       const availableWorkers = 1;
 
-      claimAvailableTasks(claim, availableWorkers, logger);
+      claimAvailableTasks([], claim, availableWorkers, logger);
 
       expect(claim).toHaveBeenCalledTimes(1);
     });
 
-    test('shouldnt claim Available Tasks when there are no available workers', () => {
+    test('should not claim Available Tasks when there are no available workers', () => {
       const logger = mockLogger();
       const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
 
       const availableWorkers = 0;
 
-      claimAvailableTasks(claim, availableWorkers, logger);
+      claimAvailableTasks([], claim, availableWorkers, logger);
 
       expect(claim).not.toHaveBeenCalled();
     });
@@ -320,7 +498,7 @@ describe('TaskManager', () => {
         });
       });
 
-      claimAvailableTasks(claim, 10, logger);
+      claimAvailableTasks([], claim, 10, logger);
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(

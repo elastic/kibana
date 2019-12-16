@@ -33,7 +33,15 @@ import {
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, iconType, isBeta, intl }) {
+function IntroductionUI({
+  description,
+  previewUrl,
+  title,
+  exportedFieldsUrl,
+  iconType,
+  isBeta,
+  intl,
+}) {
   let img;
   if (previewUrl) {
     img = (
@@ -44,7 +52,7 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
         fullScreenIconColor="dark"
         alt={intl.formatMessage({
           id: 'kbn.home.tutorial.introduction.imageAltDescription',
-          defaultMessage: 'screenshot of primary dashboard.'
+          defaultMessage: 'screenshot of primary dashboard.',
         })}
         url={previewUrl}
       />
@@ -55,12 +63,11 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
     exportedFields = (
       <div>
         <EuiSpacer />
-        <EuiButton
-          href={exportedFieldsUrl}
-          target="_blank"
-          rel="noopener"
-        >
-          <FormattedMessage id="kbn.home.tutorial.introduction.viewButtonLabel" defaultMessage="View exported fields"/>
+        <EuiButton href={exportedFieldsUrl} target="_blank" rel="noopener">
+          <FormattedMessage
+            id="kbn.home.tutorial.introduction.viewButtonLabel"
+            defaultMessage="View exported fields"
+          />
         </EuiButton>
       </div>
     );
@@ -69,10 +76,7 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
   if (iconType) {
     icon = (
       <EuiFlexItem grow={false}>
-        <EuiIcon
-          type={iconType}
-          size="xl"
-        />
+        <EuiIcon type={iconType} size="xl" />
       </EuiFlexItem>
     );
   }
@@ -82,16 +86,14 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
       <EuiBetaBadge
         label={intl.formatMessage({
           id: 'kbn.home.tutorial.introduction.betaLabel',
-          defaultMessage: 'Beta'
+          defaultMessage: 'Beta',
         })}
       />
     );
   }
   return (
     <EuiFlexGroup>
-
       <EuiFlexItem>
-
         <EuiFlexGroup gutterSize="l" alignItems="center">
           {icon}
           <EuiFlexItem grow={false}>
@@ -106,12 +108,9 @@ function IntroductionUI({ description, previewUrl, title, exportedFieldsUrl, ico
 
         <Content text={description} />
         {exportedFields}
-
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        {img}
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{img}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -126,7 +125,7 @@ IntroductionUI.propTypes = {
 };
 
 IntroductionUI.defaultProps = {
-  isBeta: false
+  isBeta: false,
 };
 
 export const Introduction = injectI18n(IntroductionUI);

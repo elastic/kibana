@@ -33,6 +33,7 @@ export class License implements ILicense {
   public readonly status?: LicenseStatus;
   public readonly expiryDateInMillis?: number;
   public readonly type?: LicenseType;
+  public readonly mode?: LicenseType;
   public readonly signature: string;
 
   /**
@@ -65,6 +66,7 @@ export class License implements ILicense {
       this.status = license.status;
       this.expiryDateInMillis = license.expiryDateInMillis;
       this.type = license.type;
+      this.mode = license.mode;
     }
 
     this.isActive = this.status === 'active';

@@ -34,39 +34,57 @@ export const createNodeAgentInstructions = (apmServerUrl = '', secretToken = '')
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPre', {
-      defaultMessage: 'Agents are libraries that run inside of your application process. \
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `serviceName`. \
 This agent supports a vararity of frameworks but can also be used with your custom stack.',
     }),
-    commands: `// ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.addThisToTheFileTopComment', {
-      defaultMessage: 'Add this to the VERY top of the first file loaded in your app',
-    })}
+    commands: `// ${i18n.translate(
+      'kbn.server.tutorials.apm.nodeClient.configure.commands.addThisToTheFileTopComment',
+      {
+        defaultMessage: 'Add this to the VERY top of the first file loaded in your app',
+      }
+    )}
 var apm = require('elastic-apm-node').start({curlyOpen}
-  // ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.setRequiredServiceNameComment', {
-    defaultMessage: 'Override service name from package.json',
-  })}
-  // ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.allowedCharactersComment', {
-    defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
-  })}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.nodeClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Override service name from package.json',
+    }
+  )}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.nodeClient.configure.commands.allowedCharactersComment',
+    {
+      defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
+    }
+  )}
   serviceName: '',
 
-  // ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.useIfApmRequiresTokenComment', {
-    defaultMessage: 'Use if APM Server requires a token',
-  })}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.nodeClient.configure.commands.useIfApmRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a token',
+    }
+  )}
   secretToken: '${secretToken}',
 
-  // ${i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.commands.setCustomApmServerUrlComment', {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  })}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.nodeClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   serverUrl: '${apmServerUrl}'
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.nodeClient.configure.textPost', {
-      defaultMessage: 'See [the documentation]({documentationLink}) for advanced usage, including how to use with \
+      defaultMessage:
+        'See [the documentation]({documentationLink}) for advanced usage, including how to use with \
 [Babel/ES Modules]({babelEsModulesLink}).',
       values: {
         documentationLink: '{config.docs.base_url}guide/en/apm/agent/nodejs/current/index.html',
-        babelEsModulesLink: '{config.docs.base_url}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules',
+        babelEsModulesLink:
+          '{config.docs.base_url}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules',
       },
     }),
   },
@@ -87,48 +105,70 @@ export const createDjangoAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.textPre', {
-      defaultMessage: 'Agents are libraries that run inside of your application process. \
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `SERVICE_NAME`.',
     }),
-    commands: `# ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.addAgentComment', {
-      defaultMessage: 'Add the agent to the installed apps',
-    })}
+    commands: `# ${i18n.translate(
+      'kbn.server.tutorials.apm.djangoClient.configure.commands.addAgentComment',
+      {
+        defaultMessage: 'Add the agent to the installed apps',
+      }
+    )}
 INSTALLED_APPS = (
   'elasticapm.contrib.django',
   # ...
 )
 
 ELASTIC_APM = {curlyOpen}
-  # ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.setRequiredServiceNameComment', {
-    defaultMessage: 'Set required service name. Allowed characters:',
-  })}
-  # ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.allowedCharactersComment', {
-    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-  })}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.djangoClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Set required service name. Allowed characters:',
+    }
+  )}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.djangoClient.configure.commands.allowedCharactersComment',
+    {
+      defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+    }
+  )}
   'SERVICE_NAME': '',
 
-  # ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.useIfApmServerRequiresTokenComment', {
-    defaultMessage: 'Use if APM Server requires a token',
-  })}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a token',
+    }
+  )}
   'SECRET_TOKEN': '${secretToken}',
 
-  # ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.setCustomApmServerUrlComment', {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  })}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.djangoClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   'SERVER_URL': '${apmServerUrl}',
 {curlyClose}
 
-# ${i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.commands.addTracingMiddlewareComment', {
-    defaultMessage: 'To send performance metrics, add our tracing middleware:',
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.djangoClient.configure.commands.addTracingMiddlewareComment',
+      {
+        defaultMessage: 'To send performance metrics, add our tracing middleware:',
+      }
+    )}
 MIDDLEWARE = (
   'elasticapm.contrib.django.middleware.TracingMiddleware',
   #...
 )`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.djangoClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/python/current/django-support.html' },
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/agent/python/current/django-support.html',
+      },
     }),
   },
 ];
@@ -148,45 +188,67 @@ export const createFlaskAgentInstructions = (apmServerUrl = '', secretToken = ''
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.textPre', {
-      defaultMessage: 'Agents are libraries that run inside of your application process. \
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the `SERVICE_NAME`.',
     }),
-    commands: `# ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment', {
-      defaultMessage: 'initialize using environment variables',
-    })}
+    commands: `# ${i18n.translate(
+      'kbn.server.tutorials.apm.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment',
+      {
+        defaultMessage: 'initialize using environment variables',
+      }
+    )}
 from elasticapm.contrib.flask import ElasticAPM
 app = Flask(__name__)
 apm = ElasticAPM(app)
 
-# ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.configureElasticApmComment', {
-    defaultMessage: 'or configure to use ELASTIC_APM in your application\'s settings',
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.flaskClient.configure.commands.configureElasticApmComment',
+      {
+        defaultMessage: "or configure to use ELASTIC_APM in your application's settings",
+      }
+    )}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {curlyOpen}
-  # ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.setRequiredServiceNameComment', {
-    defaultMessage: 'Set required service name. Allowed characters:',
-  })}
-  # ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.allowedCharactersComment', {
-    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-  })}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.flaskClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Set required service name. Allowed characters:',
+    }
+  )}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.flaskClient.configure.commands.allowedCharactersComment',
+    {
+      defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+    }
+  )}
   'SERVICE_NAME': '',
 
-  # ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.useIfApmServerRequiresTokenComment', {
-    defaultMessage: 'Use if APM Server requires a token',
-  })}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a token',
+    }
+  )}
   'SECRET_TOKEN': '${secretToken}',
 
-  # ${i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.commands.setCustomApmServerUrlComment', {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  })}
+  # ${i18n.translate(
+    'kbn.server.tutorials.apm.flaskClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   'SERVER_URL': '${apmServerUrl}',
 {curlyClose}
 
 apm = ElasticAPM(app)`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.flaskClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/python/current/flask-support.html' },
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/agent/python/current/flask-support.html',
+      },
     }),
   },
 ];
@@ -206,7 +268,8 @@ export const createRailsAgentInstructions = (apmServerUrl = '', secretToken = ''
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.railsClient.configure.textPre', {
-      defaultMessage: 'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
+      defaultMessage:
+        'APM is automatically started when your app boots. Configure the agent, by creating the config file {configFile}',
       values: { configFile: '`config/elastic_apm.yml`' },
     }),
     commands: `# config/elastic_apm.yml:
@@ -221,8 +284,11 @@ export const createRailsAgentInstructions = (apmServerUrl = '', secretToken = ''
 # Set custom APM Server URL (default: http://localhost:8200)
 # server_url: '${apmServerUrl || 'http://localhost:8200'}'`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.railsClient.configure.textPost', {
-      defaultMessage: 'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/ruby/current/index.html' },
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/ruby/current/index.html',
+      },
     }),
   },
 ];
@@ -242,7 +308,8 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.rackClient.configure.textPre', {
-      defaultMessage: 'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
+      defaultMessage:
+        'For Rack or a compatible framework (e.g. Sinatra), include the middleware in your app and start the agent.',
     }),
     commands: `# config.ru
   require 'sinatra/base'
@@ -254,12 +321,18 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
   end
 
   ElasticAPM.start(
-    app: MySinatraApp, # ${i18n.translate('kbn.server.tutorials.apm.rackClient.configure.commands.requiredComment', {
-    defaultMessage: 'required',
-  })}
-    config_file: '' # ${i18n.translate('kbn.server.tutorials.apm.rackClient.configure.commands.optionalComment', {
-    defaultMessage: 'optional, defaults to config/elastic_apm.yml',
-  })}
+    app: MySinatraApp, # ${i18n.translate(
+      'kbn.server.tutorials.apm.rackClient.configure.commands.requiredComment',
+      {
+        defaultMessage: 'required',
+      }
+    )}
+    config_file: '' # ${i18n.translate(
+      'kbn.server.tutorials.apm.rackClient.configure.commands.optionalComment',
+      {
+        defaultMessage: 'optional, defaults to config/elastic_apm.yml',
+      }
+    )}
   )
 
   run MySinatraApp
@@ -276,27 +349,42 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
     }),
     commands: `# config/elastic_apm.yml:
 
-# ${i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.commands.setServiceNameComment', {
-    defaultMessage: 'Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space',
-  })}
-# ${i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment', {
-    defaultMessage: 'Defaults to the name of your Rack app\'s class.',
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.rackClient.createConfig.commands.setServiceNameComment',
+      {
+        defaultMessage: 'Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space',
+      }
+    )}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+      {
+        defaultMessage: "Defaults to the name of your Rack app's class.",
+      }
+    )}
 # service_name: 'my-service'
 
-# ${i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment', {
-    defaultMessage: 'Use if APM Server requires a token',
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment',
+      {
+        defaultMessage: 'Use if APM Server requires a token',
+      }
+    )}
 # secret_token: '${secretToken}'
 
-# ${i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.commands.setCustomApmServerComment', {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultServerUrl})',
-    values: { defaultServerUrl: 'http://localhost:8200' },
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.rackClient.createConfig.commands.setCustomApmServerComment',
+      {
+        defaultMessage: 'Set custom APM Server URL (default: {defaultServerUrl})',
+        values: { defaultServerUrl: 'http://localhost:8200' },
+      }
+    )}
 # server_url: '${apmServerUrl || 'http://localhost:8200'}'`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.rackClient.createConfig.textPost', {
-      defaultMessage: 'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/ruby/current/index.html' },
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/ruby/current/index.html',
+      },
     }),
   },
 ];
@@ -307,9 +395,13 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
       defaultMessage: 'Enable Real User Monitoring support in APM server',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.enableRealUserMonitoring.textPre', {
-      defaultMessage: 'APM Server disables RUM support by default. See the [documentation]({documentationLink}) \
+      defaultMessage:
+        'APM Server disables RUM support by default. See the [documentation]({documentationLink}) \
 for details on how to enable RUM support.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/server/{config.docs.version}/configuration-rum.html' },
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/server/{config.docs.version}/configuration-rum.html',
+      },
     }),
   },
   {
@@ -317,33 +409,48 @@ for details on how to enable RUM support.',
       defaultMessage: 'Set up the Agent as a dependency',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.textPre', {
-      defaultMessage: 'You can install the Agent as a dependency to your application with \
+      defaultMessage:
+        'You can install the Agent as a dependency to your application with \
 `npm install @elastic/apm-rum --save`.\n\n\
 The Agent can then be initialized and configured in your application like this:',
     }),
     commands: `import {curlyOpen} init as initApm {curlyClose} from '@elastic/apm-rum'
 var apm = initApm({curlyOpen}
 
-  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setRequiredServiceNameComment', {
-    defaultMessage: 'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
-  })}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.jsClient.installDependency.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage:
+        'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
+    }
+  )}
   serviceName: 'your-app-name',
 
-  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setCustomApmServerUrlComment', {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  })}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.jsClient.installDependency.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
   serverUrl: '${apmServerUrl}',
 
-  // ${i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.commands.setServiceVersionComment', {
-    defaultMessage: 'Set service version (required for source map feature)',
-  })}
+  // ${i18n.translate(
+    'kbn.server.tutorials.apm.jsClient.installDependency.commands.setServiceVersionComment',
+    {
+      defaultMessage: 'Set service version (required for source map feature)',
+    }
+  )}
   serviceVersion: ''
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.jsClient.installDependency.textPost', {
-      defaultMessage: 'Framework integrations, like React or Angular, have custom dependencies. \
+      defaultMessage:
+        'Framework integrations, like React or Angular, have custom dependencies. \
 See the [integration documentation]({docLink}) for more information.',
-      values: { docLink: '{config.docs.base_url}guide/en/apm/agent/rum-js/{config.docs.version}/framework-integrations.html' },
+      values: {
+        docLink:
+          '{config.docs.base_url}guide/en/apm/agent/rum-js/{config.docs.version}/framework-integrations.html',
+      },
     }),
   },
   {
@@ -351,13 +458,14 @@ See the [integration documentation]({docLink}) for more information.',
       defaultMessage: 'Set up the Agent with Script Tags',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.scriptTags.textPre', {
-      defaultMessage: 'Alternatively, you can use Script tags to set up and configure the Agent. \
+      defaultMessage:
+        "Alternatively, you can use Script tags to set up and configure the Agent. \
 Add a `<script>` tag to the HTML page and use the `elasticApm` global object to load and initialize the agent. \
-Don\'t forget to download the latest version of the RUM Agent from [GitHub]({GitHubLink}) or [UNPKG]({UnpkgLink}), \
-and host the file on your Server/CDN before deploying to production.',
+Don't forget to download the latest version of the RUM Agent from [GitHub]({GitHubLink}) or [UNPKG]({UnpkgLink}), \
+and host the file on your Server/CDN before deploying to production.",
       values: {
         GitHubLink: 'https://github.com/elastic/apm-agent-rum-js/releases/latest',
-        UnpkgLink: 'https://unpkg.com/@elastic/apm-rum/dist/bundles/elastic-apm-rum.umd.min.js'
+        UnpkgLink: 'https://unpkg.com/@elastic/apm-rum/dist/bundles/elastic-apm-rum.umd.min.js',
       },
     }),
     commands: `\
@@ -368,7 +476,7 @@ and host the file on your Server/CDN before deploying to production.',
     serverUrl: 'http://localhost:8200',
   {curlyClose})
 </script>
-`.split('\n')
+`.split('\n'),
   },
 ];
 
@@ -387,37 +495,52 @@ export const createGoAgentInstructions = (apmServerUrl = '', secretToken = '') =
       defaultMessage: 'Configure the agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.goClient.configure.textPre', {
-      defaultMessage: 'Agents are libraries that run inside of your application process. \
+      defaultMessage:
+        'Agents are libraries that run inside of your application process. \
 APM services are created programmatically based on the executable \
 file name, or the `ELASTIC_APM_SERVICE_NAME` environment variable.',
     }),
-    commands: `# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.initializeUsingEnvironmentVariablesComment', {
-      defaultMessage: 'Initialize using environment variables:',
-    })}
+    commands: `# ${i18n.translate(
+      'kbn.server.tutorials.apm.goClient.configure.commands.initializeUsingEnvironmentVariablesComment',
+      {
+        defaultMessage: 'Initialize using environment variables:',
+      }
+    )}
 
 # ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.setServiceNameComment', {
-    defaultMessage: 'Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.',
-  })}
-# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.usedExecutableNameComment', {
-    defaultMessage:
-        'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
-  })}
+      defaultMessage: 'Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.',
+    })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.goClient.configure.commands.usedExecutableNameComment',
+      {
+        defaultMessage:
+          'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
+      }
+    )}
 export ELASTIC_APM_SERVICE_NAME=
 
-# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.setCustomApmServerUrlComment', {
-    defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.goClient.configure.commands.setCustomApmServerUrlComment',
+      {
+        defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+        values: { defaultApmServerUrl: 'http://localhost:8200' },
+      }
+    )}
 export ELASTIC_APM_SERVER_URL=${apmServerUrl}
 
-# ${i18n.translate('kbn.server.tutorials.apm.goClient.configure.commands.useIfApmRequiresTokenComment', {
-    defaultMessage: 'Use if APM Server requires a token',
-  })}
+# ${i18n.translate(
+      'kbn.server.tutorials.apm.goClient.configure.commands.useIfApmRequiresTokenComment',
+      {
+        defaultMessage: 'Use if APM Server requires a token',
+      }
+    )}
 export ELASTIC_APM_SECRET_TOKEN=${secretToken}
 `.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.goClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for advanced configuration.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/go/current/configuration.html' },
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/go/current/configuration.html',
+      },
     }),
   },
   {
@@ -425,7 +548,8 @@ export ELASTIC_APM_SECRET_TOKEN=${secretToken}
       defaultMessage: 'Instrument your application',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.goClient.instrument.textPre', {
-      defaultMessage: 'Instrument your Go application by using one of the provided instrumentation modules or \
+      defaultMessage:
+        'Instrument your Go application by using one of the provided instrumentation modules or \
 by using the tracer API directly.',
     }),
     commands: `\
@@ -442,9 +566,13 @@ func main() {curlyOpen}
 {curlyClose}
 `.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.goClient.instrument.textPost', {
-      defaultMessage: 'See the [documentation]({documentationLink}) for a detailed \
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for a detailed \
 guide to instrumenting Go source code.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html' },
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/agent/go/current/instrumenting-source.html',
+      },
     }),
   },
 ];
@@ -455,9 +583,12 @@ export const createJavaAgentInstructions = (apmServerUrl = '', secretToken = '')
       defaultMessage: 'Download the APM agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.javaClient.download.textPre', {
-      defaultMessage: 'Download the agent jar from [Maven Central]({mavenCentralLink}). \
+      defaultMessage:
+        'Download the agent jar from [Maven Central]({mavenCentralLink}). \
 Do **not** add the agent as a dependency to your application.',
-      values: { mavenCentralLink: 'http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent' },
+      values: {
+        mavenCentralLink: 'http://search.maven.org/#search%7Cga%7C1%7Ca%3Aelastic-apm-agent',
+      },
     }),
   },
   {
@@ -465,7 +596,8 @@ Do **not** add the agent as a dependency to your application.',
       defaultMessage: 'Start your application with the javaagent flag',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPre', {
-      defaultMessage: 'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
+      defaultMessage:
+        'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
 * Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
 * Set custom APM Server URL (default: {customApmServerUrl})\n \
 * Set the base package of your application',
@@ -478,9 +610,12 @@ Do **not** add the agent as a dependency to your application.',
      -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPost', {
-      defaultMessage: 'See the [documentation]({documentationLink}) for configuration options and advanced \
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for configuration options and advanced \
 usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
+      values: {
+        documentationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html',
+      },
     }),
   },
 ];
@@ -491,7 +626,8 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Download the APM agent',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.textPre', {
-      defaultMessage: 'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
+      defaultMessage:
+        'Add the the agent package(s) from [NuGet]({allNuGetPackagesLink}) to your .NET application. There are multiple \
       NuGet packages available for different use cases. \n\nFor an ASP.NET Core application with Entity Framework \
       Core download the [Elastic.Apm.NetCoreAll]({netCoreAllApmPackageLink}) package. This package will automatically add every \
       agent component to your application. \n\n In case you would like to to minimize the dependencies, you can use the \
@@ -512,8 +648,9 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
       defaultMessage: 'Add the agent to the application',
     }),
     textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.textPre', {
-      defaultMessage: 'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
-      method in the `Configure` method within the `Startup.cs` file.'
+      defaultMessage:
+        'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
+      method in the `Configure` method within the `Startup.cs` file.',
     }),
     commands: `public class Startup
 {curlyOpen}
@@ -524,10 +661,14 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
   {curlyClose}
   //…rest of the class
 {curlyClose}`.split('\n'),
-    textPost: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureApplication.textPost', {
-      defaultMessage: 'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
+    textPost: i18n.translate(
+      'kbn.server.tutorials.apm.dotNetClient.configureApplication.textPost',
+      {
+        defaultMessage:
+          'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
       `IConfiguration` instance (e.g. from the `appsettings.json` file).',
-    }),
+      }
+    ),
   },
   {
     title: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureAgent.title', {
@@ -536,15 +677,20 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     commands: `{curlyOpen}
     "ElasticApm": {curlyOpen}
     "SecretToken": "${secretToken}",
-    "ServerUrls": "${apmServerUrl || 'http://localhost:8200'}", //Set custom APM Server URL (default: http://localhost:8200)
+    "ServerUrls": "${apmServerUrl ||
+      'http://localhost:8200'}", //Set custom APM Server URL (default: http://localhost:8200)
     "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
   {curlyClose}
 {curlyClose}`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.dotNetClient.configureAgent.textPost', {
-      defaultMessage: 'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
+      defaultMessage:
+        'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
       you can also configure the agent through environment variables. \n \
       See [the documentation]({documentationLink}) for advanced usage.',
-      values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/dotnet/current/configuration.html' },
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/agent/dotnet/current/configuration.html',
+      },
     }),
   },
 ];
