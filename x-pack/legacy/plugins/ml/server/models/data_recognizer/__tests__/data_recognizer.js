@@ -51,16 +51,14 @@ describe('ML - data recognizer', () => {
             config: {
               groups: ['nginx'],
               analysis_config: {
-                bucket_span: '1h'
+                bucket_span: '1h',
               },
               analysis_limits: {
                 model_memory_limit: '256mb',
-                influencers: [
-                  'region'
-                ]
+                influencers: ['region'],
               },
               calendars: ['calendar-1'],
-            }
+            },
           },
         ],
       };
@@ -69,7 +67,7 @@ describe('ML - data recognizer', () => {
           analysis_limits: {
             model_memory_limit: '512mb',
             influencers: [],
-          }
+          },
         },
         {
           job_id: testJobId,
@@ -83,7 +81,7 @@ describe('ML - data recognizer', () => {
         {
           config: {
             analysis_config: {
-              bucket_span: '1h'
+              bucket_span: '1h',
             },
             analysis_limits: {
               model_memory_limit: '512mb',
@@ -92,10 +90,9 @@ describe('ML - data recognizer', () => {
             groups: [],
             calendars: ['calendar-1'],
           },
-          id: 'pre-test-job'
-        }
+          id: 'pre-test-job',
+        },
       ]);
     });
   });
 });
-

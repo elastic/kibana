@@ -15,12 +15,12 @@
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5"
+    "@babel/cli": "^7.7.5"
   },
   "dependencies": {
     "@kbn/babel-preset": "1.0.0",
-    "@babel/parser": "^7.5.5",
-    "@babel/traverse": "^7.5.5",
+    "@babel/parser": "^7.7.5",
+    "@babel/traverse": "^7.7.4",
     "lodash": "^4.17.15"
   }
 }

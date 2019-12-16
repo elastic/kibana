@@ -14,9 +14,7 @@ import { ExplorerChartLabel } from './explorer_chart_label';
 const DetectorLabel = <React.Fragment>{seriesConfig.detectorLabel}</React.Fragment>;
 
 describe('ExplorerChartLabelBadge', () => {
-
   test('Render the chart label in one line.', () => {
-
     const wrapper = shallow(
       <ExplorerChartLabel
         detectorLabel={DetectorLabel}
@@ -26,11 +24,9 @@ describe('ExplorerChartLabelBadge', () => {
       />
     );
     expect(wrapper).toMatchSnapshot();
-
   });
 
   test('Render the chart label in two lines.', () => {
-
     const wrapper = shallow(
       <ExplorerChartLabel
         detectorLabel={DetectorLabel}
@@ -40,7 +36,5 @@ describe('ExplorerChartLabelBadge', () => {
       />
     );
     expect(wrapper).toMatchSnapshot();
-
   });
-
 });
