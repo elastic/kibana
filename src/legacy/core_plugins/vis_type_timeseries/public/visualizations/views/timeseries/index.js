@@ -104,12 +104,12 @@ export const TimeSeries = ({
           hasBarChart
             ? {}
             : {
-              crosshair: {
-                band: {
-                  fill: '#F00',
+                crosshair: {
+                  band: {
+                    fill: '#F00',
+                  },
                 },
-              },
-            }
+              }
         }
         baseTheme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         tooltip={{

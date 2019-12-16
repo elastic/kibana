@@ -23,8 +23,7 @@ import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 const module = uiModules.get('app/timelion');
 
 // Used only by the savedSheets service, usually no reason to change this
-module.factory('SavedSheet', function (Private, config) {
-
+module.factory('SavedSheet', function(Private, config) {
   // SavedSheet constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
   const SavedObject = Private(SavedObjectProvider);
@@ -49,7 +48,7 @@ module.factory('SavedSheet', function (Private, config) {
         timelion_columns: config.get('timelion:default_columns') || 2,
         timelion_rows: config.get('timelion:default_rows') || 2,
         version: 1,
-      }
+      },
     });
 
     this.showInRecentlyAccessed = true;
@@ -69,13 +68,13 @@ module.factory('SavedSheet', function (Private, config) {
     timelion_chart_height: 'integer',
     timelion_columns: 'integer',
     timelion_rows: 'integer',
-    version: 'integer'
+    version: 'integer',
   };
 
   // Order these fields to the top, the rest are alphabetical
   SavedSheet.fieldOrder = ['title', 'description'];
 
-  SavedSheet.prototype.getFullPath = function () {
+  SavedSheet.prototype.getFullPath = function() {
     return `/app/timelion#/${this.id}`;
   };
 

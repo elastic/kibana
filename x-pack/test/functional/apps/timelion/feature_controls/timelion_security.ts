@@ -41,7 +41,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_timelion_all_user',
@@ -53,7 +53,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_timelion_all_role');
         await security.user.delete('global_timelion_all_user');
       });
@@ -107,7 +107,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_timelion_read_role');
         await security.user.delete('global_timelion_read_user');
       });
@@ -151,7 +151,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'no_timelion_privileges_user',
@@ -163,7 +163,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('no_timelion_privileges_role');
         await security.user.delete('no_timelion_privileges_user');
       });

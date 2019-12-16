@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import {
+  createUiStatsReporter,
+  METRIC_TYPE,
+} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../../../common';
 
 export const trackUiMetric = createUiStatsReporter(UIM_APP_NAME);

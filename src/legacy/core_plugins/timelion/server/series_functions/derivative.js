@@ -26,21 +26,23 @@ export default new Chainable('derivative', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
-    }
+      types: ['seriesList'],
+    },
   ],
   help: i18n.translate('timelion.help.functions.derivativeHelpText', {
     defaultMessage: 'Plot the change in values over time.',
   }),
   fn: function derivativeFn(args) {
-    return alter(args, function (eachSeries) {
+    return alter(args, function(eachSeries) {
       const pairs = eachSeries.data;
-      eachSeries.data = _.map(pairs, function (point, i) {
-        if (i === 0 || pairs[i - 1][1] == null || point[1] == null) { return [point[0], null]; }
+      eachSeries.data = _.map(pairs, function(point, i) {
+        if (i === 0 || pairs[i - 1][1] == null || point[1] == null) {
+          return [point[0], null];
+        }
         return [point[0], point[1] - pairs[i - 1][1]];
       });
 
       return eachSeries;
     });
-  }
+  },
 });

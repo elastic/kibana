@@ -24,14 +24,14 @@ export class App extends Component {
       return (
         <EuiEmptyPrompt
           title={<EuiLoadingSpinner size="xl" />}
-          body={(
+          body={
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.licenseMgmt.app.loadingPermissionsDescription"
                 defaultMessage="Checking permissions…"
               />
             </EuiText>
-          )}
+          }
           data-test-subj="sectionLoading"
         />
       );
@@ -40,14 +40,18 @@ export class App extends Component {
     if (permissionsError) {
       return (
         <EuiCallOut
-          title={<FormattedMessage
-            id="xpack.licenseMgmt.app.checkingPermissionsErrorMessage"
-            defaultMessage="Error checking permissions"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.licenseMgmt.app.checkingPermissionsErrorMessage"
+              defaultMessage="Error checking permissions"
+            />
+          }
           color="danger"
           iconType="alert"
         >
-          {permissionsError.data && permissionsError.data.message ? <div>{permissionsError.data.message}</div> : null}
+          {permissionsError.data && permissionsError.data.message ? (
+            <div>{permissionsError.data.message}</div>
+          ) : null}
         </EuiCallOut>
       );
     }
@@ -71,7 +75,7 @@ export class App extends Component {
                   id="xpack.licenseMgmt.app.deniedPermissionDescription"
                   defaultMessage="To use License Management, you must have {permissionType} privileges."
                   values={{
-                    permissionType: <strong>{APP_PERMISSION}</strong>
+                    permissionType: <strong>{APP_PERMISSION}</strong>,
                   }}
                 />
               </p>
