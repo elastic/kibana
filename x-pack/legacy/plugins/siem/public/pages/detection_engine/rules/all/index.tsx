@@ -12,6 +12,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import uuid from 'uuid';
 import { HeaderSection } from '../../../../components/header_section';
@@ -23,7 +24,7 @@ import {
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
 import { getColumns } from './columns';
-import { useRules } from '../../../../containers/detection_engine/rules/use_rules';
+import { useRules } from '../../../../containers/detection_engine/rules';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
 import { getBatchItems } from './batch_actions';
@@ -74,7 +75,7 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
     },
     dispatch,
   ] = useReducer(allRulesReducer, initialState);
-
+  const history = useHistory();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
@@ -184,7 +185,7 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch, kbnVersion)}
+              columns={getColumns(dispatch, kbnVersion, history)}
               isSelectable
               itemId="rule_id"
               items={tableData}

@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
+import * as H from 'history';
 import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getEmptyTagValue } from '../../../../components/empty_value';
@@ -12,7 +13,6 @@ import {
   deleteRulesAction,
   duplicateRuleAction,
   editRuleAction,
-  enableRulesAction,
   exportRulesAction,
   runRuleAction,
 } from './actions';
@@ -21,15 +21,15 @@ import { Action } from './reducer';
 import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
-import { RuleSwitch } from '../../components/rule_switch';
+import { RuleSwitch } from '../components/rule_switch';
 
-const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
+const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, history: H.History) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'visControls',
     name: i18n.EDIT_RULE_SETTINGS,
-    onClick: editRuleAction,
-    enabled: () => false,
+    onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
+    enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
   },
   {
     description: i18n.RUN_RULE_MANUALLY,
@@ -59,7 +59,11 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
+export const getColumns = (
+  dispatch: React.Dispatch<Action>,
+  kbnVersion: string,
+  history: H.History
+) => [
   {
     field: 'rule',
     name: i18n.COLUMN_RULE,
@@ -149,19 +153,17 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     name: i18n.COLUMN_ACTIVATE,
     render: (value: TableData['activate'], item: TableData) => (
       <RuleSwitch
+        dispatch={dispatch}
         id={item.id}
         enabled={item.activate}
         isLoading={item.isLoading}
-        onRuleStateChange={async (enabled, id) => {
-          await enableRulesAction([id], enabled, dispatch, kbnVersion);
-        }}
       />
     ),
     sortable: true,
     width: '85px',
   },
   {
-    actions: getActions(dispatch, kbnVersion),
+    actions: getActions(dispatch, kbnVersion, history),
     width: '40px',
   },
 ];

@@ -8,7 +8,7 @@ import {
   FilterOptions,
   PaginationOptions,
   Rule,
-} from '../../../../containers/detection_engine/rules/types';
+} from '../../../../containers/detection_engine/rules';
 import { TableData } from '../types';
 import { formatRules } from './helpers';
 

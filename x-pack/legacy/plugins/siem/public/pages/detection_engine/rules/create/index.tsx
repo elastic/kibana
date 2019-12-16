@@ -16,7 +16,7 @@ import { AccordionTitle } from '../components/accordion_title';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
-import { usePersistRule } from '../../../../containers/detection_engine/rules/persist_rule';
+import { usePersistRule } from '../../../../containers/detection_engine/rules';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import * as RuleI18n from '../translations';
 import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
@@ -44,7 +44,7 @@ export const CreateRuleComponent = React.memo(() => {
     [RuleStep.aboutRule]: { isValid: false, data: {} },
     [RuleStep.scheduleRule]: { isValid: false, data: {} },
   });
-  const [isStepRuleInEditView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
+  const [isStepRuleInReadOnlyView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
     [RuleStep.defineRule]: false,
     [RuleStep.aboutRule]: false,
     [RuleStep.scheduleRule]: false,
@@ -57,7 +57,7 @@ export const CreateRuleComponent = React.memo(() => {
       const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
       if ([0, 1].includes(stepRuleIdx)) {
         setIsStepRuleInEditView({
-          ...isStepRuleInEditView,
+          ...isStepRuleInReadOnlyView,
           [step]: true,
         });
         if (openAccordionId !== stepsRuleOrder[stepRuleIdx + 1]) {
@@ -146,7 +146,7 @@ export const CreateRuleComponent = React.memo(() => {
           openAccordionId != null &&
           openAccordionId !== id &&
           !stepsData.current[openAccordionId].isValid &&
-          !isStepRuleInEditView[id] &&
+          !isStepRuleInReadOnlyView[id] &&
           isOpen
         ) {
           openCloseAccordion(id);
@@ -157,20 +157,20 @@ export const CreateRuleComponent = React.memo(() => {
         }
       }
     },
-    [isStepRuleInEditView, openAccordionId]
+    [isStepRuleInReadOnlyView, openAccordionId]
   );
 
   const manageIsEditable = useCallback(
     (id: RuleStep) => {
       setIsStepRuleInEditView({
-        ...isStepRuleInEditView,
+        ...isStepRuleInReadOnlyView,
         [id]: false,
       });
     },
-    [isStepRuleInEditView]
+    [isStepRuleInReadOnlyView]
   );
 
-  if (isSaved && stepsData.current[RuleStep.scheduleRule].isValid) {
+  if (isSaved) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
@@ -205,7 +205,7 @@ export const CreateRuleComponent = React.memo(() => {
           >
             <EuiHorizontalRule margin="xs" />
             <StepDefineRule
-              isEditView={isStepRuleInEditView[RuleStep.defineRule]}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading}
               setStepData={setStepData}
               resizeParentContainer={height => setHeightAccordion(height)}
@@ -235,7 +235,7 @@ export const CreateRuleComponent = React.memo(() => {
           >
             <EuiHorizontalRule margin="xs" />
             <StepAboutRule
-              isEditView={isStepRuleInEditView[RuleStep.aboutRule]}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading}
               setStepData={setStepData}
             />
@@ -264,7 +264,7 @@ export const CreateRuleComponent = React.memo(() => {
           >
             <EuiHorizontalRule margin="xs" />
             <StepScheduleRule
-              isEditView={isStepRuleInEditView[RuleStep.scheduleRule]}
+              isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading}
               setStepData={setStepData}
             />

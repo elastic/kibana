@@ -218,6 +218,18 @@ export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.sc
   defaultMessage: 'Schedule Rule',
 });
 
+export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
+  defaultMessage: 'Definition',
+});
+
+export const ABOUT = i18n.translate('xpack.siem.detectionEngine.rules.stepAboutTitle', {
+  defaultMessage: 'About',
+});
+
+export const SCHEDULE = i18n.translate('xpack.siem.detectionEngine.rules.stepScheduleTitle', {
+  defaultMessage: 'Schedule',
+});
+
 export const OPTIONAL_FIELD = i18n.translate(
   'xpack.siem.detectionEngine.rules.optionalFieldDescription',
   {

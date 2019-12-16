@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
-import { NewRule } from '../../../../containers/detection_engine/rules/types';
+import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
@@ -39,7 +39,7 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   return timeObj;
 };
 
-const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
+export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const { queryBar, useIndicesConfig, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
@@ -51,7 +51,7 @@ const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJso
   };
 };
 
-const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
+export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
   const formatScheduleData = scheduleData;
 
   if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
@@ -64,10 +64,15 @@ const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRul
     formatScheduleData.from = `now-${duration.asSeconds()}s`;
     formatScheduleData.to = 'now';
   }
-  return formatScheduleData;
+  return {
+    ...formatScheduleData,
+    meta: {
+      from: scheduleData.from,
+    },
+  };
 };
 
-const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
+export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
   const { falsePositives, references, riskScore, threats, ...rest } = aboutStepData;
 
   return {
@@ -99,9 +104,6 @@ export const formatRule = (
     ...formatDefineStepData(defineStepData),
     ...formatAboutStepData(aboutStepData),
     ...formatScheduleStepData(scheduleData),
-    meta: {
-      from: scheduleData.from,
-    },
   };
 
   return persistData;

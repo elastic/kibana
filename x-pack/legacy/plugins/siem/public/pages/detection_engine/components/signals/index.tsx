@@ -5,14 +5,17 @@
  */
 
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
-import { OpenSignals } from './components/open_signals';
-import { ClosedSignals } from './components/closed_signals';
-import { GlobalTime } from '../../../../containers/global_time';
-import { StatefulEventsViewer } from '../../../../components/events_viewer';
-import * as i18n from './translations';
+import React, { useCallback, useMemo, useState } from 'react';
+
+import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
+import { StatefulEventsViewer } from '../../../../components/events_viewer';
+import { GlobalTime } from '../../../../containers/global_time';
+
+import { OpenSignals } from './open_signals';
+import { ClosedSignals } from './closed_signals';
 import { signalsClosedFilters, signalsDefaultModel, signalsOpenFilters } from './default_config';
+import * as i18n from './translations';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 const FILTER_OPEN = 'open';
@@ -49,7 +52,11 @@ export const SignalsTableFilterGroup = React.memo(
   }
 );
 
-export const SignalsTable = React.memo(() => {
+interface SignalsTableProps {
+  defaultFilters?: esFilters.Filter[];
+}
+
+export const SignalsTable = React.memo<SignalsTableProps>(({ defaultFilters = [] }) => {
   const [filterGroup, setFilterGroup] = useState(FILTER_OPEN);
 
   const onFilterGroupChangedCallback = useCallback(
@@ -59,13 +66,34 @@ export const SignalsTable = React.memo(() => {
     [setFilterGroup]
   );
 
+  const getUtilityBar = useCallback(
+    (totalCount: number) =>
+      filterGroup === FILTER_OPEN ? (
+        <OpenSignals totalCount={totalCount} />
+      ) : (
+        <ClosedSignals totalCount={totalCount} />
+      ),
+    [filterGroup]
+  );
+
+  const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}-default`], [
+    DEFAULT_SIGNALS_INDEX,
+  ]);
+  const defaultFiltersMemo = useMemo(
+    () => [
+      ...defaultFilters,
+      ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
+    ],
+    [defaultFilters, filterGroup]
+  );
+
   return (
     <>
       <GlobalTime>
         {({ to, from, setQuery, deleteQuery, isInitializing }) => (
           <StatefulEventsViewer
-            defaultIndices={[`${DEFAULT_SIGNALS_INDEX}-default`]}
-            defaultFilters={filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters}
+            defaultIndices={defaultIndices}
+            defaultFilters={defaultFiltersMemo}
             defaultModel={signalsDefaultModel}
             end={to}
             headerFilterGroup={
@@ -80,13 +108,7 @@ export const SignalsTable = React.memo(() => {
               showRowRenderers: false,
               title: i18n.SIGNALS_TABLE_TITLE,
             }}
-            utilityBar={(totalCount: number) =>
-              filterGroup === FILTER_OPEN ? (
-                <OpenSignals totalCount={totalCount} />
-              ) : (
-                <ClosedSignals totalCount={totalCount} />
-              )
-            }
+            utilityBar={getUtilityBar}
           />
         )}
       </GlobalTime>

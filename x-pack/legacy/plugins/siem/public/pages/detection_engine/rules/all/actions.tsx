@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as H from 'history';
 import React from 'react';
+
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import {
   deleteRules,
   duplicateRules,
   enableRules,
-} from '../../../../containers/detection_engine/rules/api';
+  Rule,
+} from '../../../../containers/detection_engine/rules';
 import { Action } from './reducer';
-import { Rule } from '../../../../containers/detection_engine/rules/types';
 
-export const editRuleAction = () => {};
+export const editRuleAction = (rule: Rule, history: H.History) => {
+  history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/${rule.id}/edit`);
+};
 
 export const runRuleAction = () => {};
 

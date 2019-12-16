@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, get } from 'lodash/fp';
+import { isEmpty, isEqual, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 
@@ -33,7 +33,7 @@ type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();
-  const [indices, setIndices] = useState<string[]>(defaultIndices);
+  const [indices, setIndices] = useState<string[]>([]);
   const [indicesExists, setIndicesExists] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<IIndexPattern | null>(null);
   const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
@@ -41,11 +41,17 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
+    if (!isEqual(defaultIndices, indices)) {
+      setIndices(defaultIndices);
+    }
+  }, [defaultIndices, indices]);
+
+  useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
     async function fetchIndexPatterns() {
-      if (apolloClient && !isEmpty(indices)) {
+      if (apolloClient && !isEmpty(indices) && !isEqual(defaultIndices, indices)) {
         setIsLoading(true);
         apolloClient
           .query<SourceQuery.Query, SourceQuery.Variables>({

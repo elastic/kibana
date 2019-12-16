@@ -55,6 +55,26 @@ export const signalsClosedFilters: esFilters.Filter[] = [
   },
 ];
 
+export const buildSignalsRuleIdFilter = (ruleId: string): esFilters.Filter[] => [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'signal.rule.id',
+      params: {
+        query: ruleId,
+      },
+    },
+    query: {
+      match_phrase: {
+        'signal.rule.id': ruleId,
+      },
+    },
+  },
+];
+
 export const signalsHeaders: ColumnHeader[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
