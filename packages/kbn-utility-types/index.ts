@@ -18,7 +18,7 @@
  */
 
 import { PromiseType } from 'utility-types';
-export { $Values, Required, Optional } from 'utility-types';
+export { $Values, Required, Optional, Class } from 'utility-types';
 
 /**
  * Returns wrapped type of a promise.
