@@ -7,7 +7,7 @@
     "chalk": "^2.4.2",
     "dedent": "^0.7.0",
     "execa": "^3.4.0",
-    "getopts": "^2.2.4",
+    "getopts": "^2.2.5",
     "lodash.camelcase": "^4.3.0",
     "lodash.kebabcase": "^4.1.1",
     "lodash.snakecase": "^4.1.1",

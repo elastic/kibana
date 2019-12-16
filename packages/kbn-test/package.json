@@ -22,7 +22,7 @@
     "chalk": "^2.4.2",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
-    "getopts": "^2.2.4",
+    "getopts": "^2.2.5",
     "glob": "^7.1.2",
     "parse-link-header": "^1.0.1",
     "strip-ansi": "^5.2.0",
