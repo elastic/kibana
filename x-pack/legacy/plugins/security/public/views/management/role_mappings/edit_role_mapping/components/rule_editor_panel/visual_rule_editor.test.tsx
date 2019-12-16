@@ -28,6 +28,23 @@ describe('VisualRuleEditor', () => {
       onChange: jest.fn(),
     };
     const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+
+    findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
+    expect(props.onChange).toHaveBeenCalledTimes(1);
+    const [newRule] = props.onChange.mock.calls[0];
+    expect(newRule.toRaw()).toEqual({
+      all: [{ field: { username: '*' } }],
+    });
+  });
+
+  it('adds a rule group when the "Add rules" button is clicked', () => {
+    const props = {
+      rules: null,
+      maxDepth: 0,
+      onSwitchEditorMode: jest.fn(),
+      onChange: jest.fn(),
+    };
+    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
     expect(findTestSubject(wrapper, 'roleMappingsNoRulesDefined')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'roleMappingsRulesTooComplex')).toHaveLength(0);
   });

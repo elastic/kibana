@@ -5,13 +5,12 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldRuleEditor } from './field_rule_editor';
-import { AddRuleButton } from './add_rule_button';
 import { RuleGroupEditor } from './rule_group_editor';
 import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
-import { Rule, FieldRule, RuleGroup } from '../../../model';
+import { Rule, FieldRule, RuleGroup, AllRule } from '../../../model';
 import { isRuleGroup } from '../../services/is_rule_group';
 
 interface Props {
@@ -53,12 +52,18 @@ export class VisualRuleEditor extends Component<Props, {}> {
         }
         data-test-subj="roleMappingsNoRulesDefined"
         actions={
-          <AddRuleButton
-            autoAdd={true}
-            onClick={newRule => {
-              this.props.onChange(newRule);
+          <EuiButtonEmpty
+            iconType="plusInCircle"
+            data-test-subj="roleMappingsAddRuleButton"
+            onClick={() => {
+              this.props.onChange(new AllRule([new FieldRule('username', '*')]));
             }}
-          />
+          >
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.addFirstRuleButton"
+              defaultMessage="Add rules"
+            />
+          </EuiButtonEmpty>
         }
       />
     );

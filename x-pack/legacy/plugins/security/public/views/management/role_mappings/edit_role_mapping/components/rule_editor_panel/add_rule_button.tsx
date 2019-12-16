@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Rule, FieldRule, AllRule } from '../../../model';
 
 interface Props {
-  autoAdd?: boolean;
   onClick: (newRule: Rule) => void;
 }
 
@@ -22,11 +21,7 @@ export const AddRuleButton = (props: Props) => {
       iconType="plusInCircle"
       data-test-subj="roleMappingsAddRuleButton"
       onClick={() => {
-        if (props.autoAdd) {
-          props.onClick(new AllRule([new FieldRule('username', '*')]));
-        } else {
-          setIsMenuOpen(!isMenuOpen);
-        }
+        setIsMenuOpen(!isMenuOpen);
       }}
     >
       <FormattedMessage

@@ -52,22 +52,4 @@ describe('AddRuleButton', () => {
       all: [{ field: { username: '*' } }],
     });
   });
-
-  it('does not give an option, and automatically adds a rule group when "autoAdd" is set', () => {
-    const props = {
-      autoAdd: true,
-      onClick: jest.fn(),
-    };
-
-    const wrapper = mountWithIntl(<AddRuleButton {...props} />);
-    findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
-
-    expect(props.onClick).toHaveBeenCalledTimes(1);
-
-    const [newRule] = props.onClick.mock.calls[0];
-    expect(newRule).toBeInstanceOf(AllRule);
-    expect(newRule.toRaw()).toEqual({
-      all: [{ field: { username: '*' } }],
-    });
-  });
 });
