@@ -20,18 +20,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiCallOut,
-  EuiTextColor,
-  EuiLink,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiCallOut, EuiTextColor, EuiLink, EuiButton } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const EmptyState = ({
-  onRefresh,
-}) => (
+export const EmptyState = ({ onRefresh }) => (
   <div>
     <EuiCallOut
       color="warning"
@@ -70,7 +63,7 @@ export const EmptyState = ({
                   defaultMessage="get started with some sample data sets."
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </p>
@@ -87,7 +80,6 @@ export const EmptyState = ({
         />
       </EuiButton>
     </EuiCallOut>
-
   </div>
 );
 

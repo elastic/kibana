@@ -21,20 +21,20 @@ jest.mock('ui/chrome', () => ({
   // returns false for mlAnnotationsEnabled
   getInjected: () => false,
   getUiSettingsClient: () => ({
-    get: jest.fn()
+    get: jest.fn(),
   }),
 }));
 
 jest.mock('../../../util/time_buckets', () => ({
-  TimeBuckets: function () {
+  TimeBuckets: function() {
     this.setBounds = jest.fn();
     this.setInterval = jest.fn();
     this.getScaledDateFormat = jest.fn();
-  }
+  },
 }));
 
 jest.mock('../../../services/field_format_service', () => ({
-  mlFieldFormatService: {}
+  mlFieldFormatService: {},
 }));
 
 function getTimeseriesChartPropsMock() {
@@ -46,7 +46,7 @@ function getTimeseriesChartPropsMock() {
     showModelBounds: true,
     svgWidth: 1600,
     timefilter: {},
-    skipRefresh: false
+    skipRefresh: false,
   };
 }
 
@@ -65,11 +65,8 @@ describe('TimeseriesChart', () => {
   test('Minimal initialization', () => {
     const props = getTimeseriesChartPropsMock();
 
-    const wrapper = mountWithIntl(<TimeseriesChart {...props}/>);
+    const wrapper = mountWithIntl(<TimeseriesChart {...props} />);
 
-    expect(wrapper.html()).toBe(
-      `<div class="ml-timeseries-chart-react"></div>`
-    );
+    expect(wrapper.html()).toBe(`<div class="ml-timeseries-chart-react"></div>`);
   });
-
 });

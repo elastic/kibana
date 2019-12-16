@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import beatsClusterFixture from './fixtures/cluster';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/beats';
     const timeRange = {
       min: '2017-12-19T18:11:32.000Z',
-      max: '2017-12-19T18:14:38.000Z'
+      max: '2017-12-19T18:14:38.000Z',
     };
 
     before('load archive', () => {

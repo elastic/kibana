@@ -14,7 +14,12 @@ import { JobSelectorTable } from './job_selector_table';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 import { timefilter } from 'ui/timefilter';
-import { getGroupsFromJobs, normalizeTimes, setGlobalState, setGlobalStateSkipRefresh } from './job_select_service_utils';
+import {
+  getGroupsFromJobs,
+  normalizeTimes,
+  setGlobalState,
+  setGlobalStateSkipRefresh,
+} from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
@@ -26,11 +31,9 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSwitch,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-
 
 function mergeSelection(jobIds, groupObjs, singleSelection) {
   if (singleSelection) {
@@ -40,12 +43,12 @@ function mergeSelection(jobIds, groupObjs, singleSelection) {
   const selectedIds = [];
   const alreadySelected = [];
 
-  groupObjs.forEach((group) => {
+  groupObjs.forEach(group => {
     selectedIds.push(group.groupId);
     alreadySelected.push(...group.jobIds);
   });
 
-  jobIds.forEach((jobId) => {
+  jobIds.forEach(jobId => {
     // Add jobId if not already included in group selection
     if (alreadySelected.includes(jobId) === false) {
       selectedIds.push(jobId);
@@ -59,7 +62,7 @@ function getInitialGroupsMap(selectedGroups) {
   const map = {};
 
   if (selectedGroups.length) {
-    selectedGroups.forEach((group) => {
+    selectedGroups.forEach(group => {
       map[group.groupId] = group.jobIds;
     });
   }
@@ -82,8 +85,12 @@ export function JobSelector({
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
   const [maps, setMaps] = useState({ groupsMap: getInitialGroupsMap(selectedGroups), jobsMap: {} });
-  const [selectedIds, setSelectedIds] = useState(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
-  const [newSelection, setNewSelection] = useState(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+  const [selectedIds, setSelectedIds] = useState(
+    mergeSelection(selectedJobIds, selectedGroups, singleSelection)
+  );
+  const [newSelection, setNewSelection] = useState(
+    mergeSelection(selectedJobIds, selectedGroups, singleSelection)
+  );
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [showAllBarBadges, setShowAllBarBadges] = useState(false);
   const [applyTimeRange, setApplyTimeRange] = useState(true);
@@ -158,20 +165,21 @@ export function JobSelector({
   function handleJobSelectionClick() {
     showFlyout();
 
-    ml.jobs.jobsWithTimerange(dateFormatTz)
-      .then((resp) => {
+    ml.jobs
+      .jobsWithTimerange(dateFormatTz)
+      .then(resp => {
         const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz, DEFAULT_GANTT_BAR_WIDTH);
         const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
         setJobs(normalizedJobs);
         setGroups(groupsWithTimerange);
         setMaps({ groupsMap, jobsMap: resp.jobsMap });
       })
-      .catch((err) => {
+      .catch(err => {
         console.log('Error fetching jobs', err);
         toastNotifications.addDanger({
           title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {
             defaultMessage: 'An error occurred fetching jobs. Refresh and try again.',
-          })
+          }),
         });
       });
   }
@@ -185,7 +193,7 @@ export function JobSelector({
     const allNewSelection = [];
     const groupSelection = [];
 
-    newSelection.forEach((id) => {
+    newSelection.forEach(id => {
       if (maps.groupsMap[id] !== undefined) {
         // Push all jobs from selected groups into the newSelection list
         allNewSelection.push(...maps.groupsMap[id]);
@@ -224,7 +232,11 @@ export function JobSelector({
     // Set `skipRefresh` again to `false` here so after
     // both the time range and jobs have been updated
     // Single Metric Viewer should again update itself.
-    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection, skipRefresh: false });
+    setGlobalState(globalState, {
+      selectedIds: allNewSelectionUnique,
+      selectedGroups: groupSelection,
+      skipRefresh: false,
+    });
   }
 
   function applyTimeRangeFromSelection(selection) {
@@ -245,7 +257,7 @@ export function JobSelector({
         const max = Math.max(...times);
         timefilter.setTime({
           from: moment(min).toISOString(),
-          to: moment(max).toISOString()
+          to: moment(max).toISOString(),
         });
       }
     }
@@ -256,7 +268,7 @@ export function JobSelector({
   }
 
   function removeId(id) {
-    setNewSelection(newSelection.filter((item) => item !== id));
+    setNewSelection(newSelection.filter(item => item !== id));
   }
 
   function clearSelection() {
@@ -267,7 +279,13 @@ export function JobSelector({
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center" data-test-subj="mlJobSelectionBadges">
+          <EuiFlexGroup
+            wrap
+            responsive={false}
+            gutterSize="xs"
+            alignItems="center"
+            data-test-subj="mlJobSelectionBadges"
+          >
             <IdBadges
               limit={BADGE_LIMIT}
               maps={maps}
@@ -285,7 +303,7 @@ export function JobSelector({
             data-test-subj="mlButtonEditJobSelection"
           >
             {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
-              defaultMessage: 'Edit job selection'
+              defaultMessage: 'Edit job selection',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -307,7 +325,7 @@ export function JobSelector({
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
                 {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
-                  defaultMessage: 'Job selection'
+                  defaultMessage: 'Job selection',
                 })}
               </h2>
             </EuiTitle>
@@ -329,21 +347,22 @@ export function JobSelector({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    {!singleSelection && newSelection.length > 0 &&
-                    <EuiButtonEmpty
-                      onClick={clearSelection}
-                      size="xs"
-                      data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
-                    >
-                      {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
-                        defaultMessage: 'Clear all'
-                      })}
-                    </EuiButtonEmpty>}
+                    {!singleSelection && newSelection.length > 0 && (
+                      <EuiButtonEmpty
+                        onClick={clearSelection}
+                        size="xs"
+                        data-test-subj="mlFlyoutJobSelectorButtonClearSelection"
+                      >
+                        {i18n.translate('xpack.ml.jobSelector.clearAllFlyoutButton', {
+                          defaultMessage: 'Clear all',
+                        })}
+                      </EuiButtonEmpty>
+                    )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
                       label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
-                        defaultMessage: 'Apply timerange'
+                        defaultMessage: 'Apply timerange',
                       })}
                       checked={applyTimeRange}
                       onChange={toggleTimerangeSwitch}
@@ -373,7 +392,7 @@ export function JobSelector({
                   data-test-subj="mlFlyoutJobSelectorButtonApply"
                 >
                   {i18n.translate('xpack.ml.jobSelector.applyFlyoutButton', {
-                    defaultMessage: 'Apply'
+                    defaultMessage: 'Apply',
                   })}
                 </EuiButton>
               </EuiFlexItem>
@@ -384,7 +403,7 @@ export function JobSelector({
                   data-test-subj="mlFlyoutJobSelectorButtonClose"
                 >
                   {i18n.translate('xpack.ml.jobSelector.closeFlyoutButton', {
-                    defaultMessage: 'Close'
+                    defaultMessage: 'Close',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -408,5 +427,5 @@ JobSelector.propTypes = {
   jobSelectService$: PropTypes.object,
   selectedJobIds: PropTypes.array,
   singleSelection: PropTypes.bool,
-  timeseriesOnly: PropTypes.bool
+  timeseriesOnly: PropTypes.bool,
 };

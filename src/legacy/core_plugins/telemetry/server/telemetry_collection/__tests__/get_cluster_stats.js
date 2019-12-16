@@ -24,19 +24,20 @@ import { TIMEOUT } from '../constants';
 import { getClusterStats } from '../get_cluster_stats';
 
 export function mockGetClusterStats(callCluster, clusterStats, req) {
-  callCluster.withArgs(req, 'cluster.stats', {
-    timeout: TIMEOUT
-  })
+  callCluster
+    .withArgs(req, 'cluster.stats', {
+      timeout: TIMEOUT,
+    })
     .returns(clusterStats);
 
-  callCluster.withArgs('cluster.stats', {
-    timeout: TIMEOUT
-  })
+  callCluster
+    .withArgs('cluster.stats', {
+      timeout: TIMEOUT,
+    })
     .returns(clusterStats);
 }
 
 describe.skip('get_cluster_stats', () => {
-
   it('uses callCluster to get cluster.stats API', async () => {
     const callCluster = sinon.stub();
     const response = Promise.resolve({});
@@ -45,5 +46,4 @@ describe.skip('get_cluster_stats', () => {
 
     expect(getClusterStats(callCluster)).to.be(response);
   });
-
 });

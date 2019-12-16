@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component, Fragment
-} from 'react';
+import React, { Component, Fragment } from 'react';
 
-import {
-  EuiTabbedContent,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
 
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
@@ -52,11 +46,10 @@ class JobDetailsUI extends Component {
     if (job === undefined) {
       return (
         <div className="job-loading-spinner" data-test-subj="mlJobDetails loading">
-          <EuiLoadingSpinner size="l"/>
+          <EuiLoadingSpinner size="l" />
         </div>
       );
     } else {
-
       const {
         general,
         customUrl,
@@ -70,87 +63,112 @@ class JobDetailsUI extends Component {
         datafeed,
         counts,
         modelSizeStats,
-        datafeedTimingStats
+        datafeedTimingStats,
       } = extractJobDetails(job);
 
       const { intl, showFullDetails } = this.props;
 
-      const tabs = [{
-        id: 'job-settings',
-        'data-test-subj': 'mlJobListTab-job-settings',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
-          defaultMessage: 'Job settings'
-        }),
-        content: <JobDetailsPane data-test-subj="mlJobDetails-job-settings" sections={[general, customUrl, node, calendars]} />,
-        time: job.open_time
-      }, {
-        id: 'job-config',
-        'data-test-subj': 'mlJobListTab-job-config',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.jobConfigLabel',
-          defaultMessage: 'Job config'
-        }),
-        content: <JobDetailsPane
-          data-test-subj="mlJobDetails-job-config"
-          sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]}
-        />,
-      }, {
-        id: 'counts',
-        'data-test-subj': 'mlJobListTab-counts',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.countsLabel',
-          defaultMessage: 'Counts'
-        }),
-        content: <JobDetailsPane data-test-subj="mlJobDetails-counts" sections={[counts, modelSizeStats]} />,
-      }, {
-        id: 'json',
-        'data-test-subj': 'mlJobListTab-json',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.jsonLabel',
-          defaultMessage: 'JSON'
-        }),
-        content: <JsonPane  job={job} />,
-      }, {
-        id: 'job-messages',
-        'data-test-subj': 'mlJobListTab-job-messages',
-        name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel',
-          defaultMessage: 'Job messages'
-        }),
-        content: <JobMessagesPane jobId={job.job_id} />,
-      },
+      const tabs = [
+        {
+          id: 'job-settings',
+          'data-test-subj': 'mlJobListTab-job-settings',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
+            defaultMessage: 'Job settings',
+          }),
+          content: (
+            <JobDetailsPane
+              data-test-subj="mlJobDetails-job-settings"
+              sections={[general, customUrl, node, calendars]}
+            />
+          ),
+          time: job.open_time,
+        },
+        {
+          id: 'job-config',
+          'data-test-subj': 'mlJobListTab-job-config',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.jobConfigLabel',
+            defaultMessage: 'Job config',
+          }),
+          content: (
+            <JobDetailsPane
+              data-test-subj="mlJobDetails-job-config"
+              sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]}
+            />
+          ),
+        },
+        {
+          id: 'counts',
+          'data-test-subj': 'mlJobListTab-counts',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.countsLabel',
+            defaultMessage: 'Counts',
+          }),
+          content: (
+            <JobDetailsPane
+              data-test-subj="mlJobDetails-counts"
+              sections={[counts, modelSizeStats]}
+            />
+          ),
+        },
+        {
+          id: 'json',
+          'data-test-subj': 'mlJobListTab-json',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.jsonLabel',
+            defaultMessage: 'JSON',
+          }),
+          content: <JsonPane job={job} />,
+        },
+        {
+          id: 'job-messages',
+          'data-test-subj': 'mlJobListTab-job-messages',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel',
+            defaultMessage: 'Job messages',
+          }),
+          content: <JobMessagesPane jobId={job.job_id} />,
+        },
       ];
 
       if (showFullDetails) {
         // Datafeed should be at index 2 in tabs array for full details
-        tabs.splice(2, 0,  {
+        tabs.splice(2, 0, {
           id: 'datafeed',
           'data-test-subj': 'mlJobListTab-datafeed',
           name: intl.formatMessage({
             id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
-            defaultMessage: 'Datafeed'
+            defaultMessage: 'Datafeed',
           }),
-          content: <JobDetailsPane data-test-subj="mlJobDetails-datafeed" sections={[datafeed, datafeedTimingStats]} />,
+          content: (
+            <JobDetailsPane
+              data-test-subj="mlJobDetails-datafeed"
+              sections={[datafeed, datafeedTimingStats]}
+            />
+          ),
         });
 
-        tabs.push({
-          id: 'datafeed-preview',
-          'data-test-subj': 'mlJobListTab-datafeed-preview',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
-            defaultMessage: 'Datafeed preview'
-          }),
-          content: <DatafeedPreviewPane job={job} />,
-        }, {
-          id: 'forecasts',
-          'data-test-subj': 'mlJobListTab-forecasts',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
-            defaultMessage: 'Forecasts'
-          }),
-          content: <ForecastsTable job={job} />,
-        });
+        tabs.push(
+          {
+            id: 'datafeed-preview',
+            'data-test-subj': 'mlJobListTab-datafeed-preview',
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
+              defaultMessage: 'Datafeed preview',
+            }),
+            content: <DatafeedPreviewPane job={job} />,
+          },
+          {
+            id: 'forecasts',
+            'data-test-subj': 'mlJobListTab-forecasts',
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
+              defaultMessage: 'Forecasts',
+            }),
+            content: <ForecastsTable job={job} />,
+          }
+        );
       }
 
       if (mlAnnotationsEnabled && showFullDetails) {
@@ -159,7 +177,7 @@ class JobDetailsUI extends Component {
           'data-test-subj': 'mlJobListTab-annotations',
           name: intl.formatMessage({
             id: 'xpack.ml.jobsList.jobDetails.tabs.annotationsLabel',
-            defaultMessage: 'Annotations'
+            defaultMessage: 'Annotations',
           }),
           content: (
             <Fragment>
@@ -171,12 +189,8 @@ class JobDetailsUI extends Component {
       }
 
       return (
-        <div className="tab-contents"  data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
-          <EuiTabbedContent
-            tabs={tabs}
-            initialSelectedTab={tabs[0]}
-            onTabClick={() => { }}
-          />
+        <div className="tab-contents" data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
         </div>
       );
     }
@@ -187,7 +201,7 @@ JobDetailsUI.propTypes = {
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
-  showFullDetails: PropTypes.bool
+  showFullDetails: PropTypes.bool,
 };
 
 export const JobDetails = injectI18n(JobDetailsUI);

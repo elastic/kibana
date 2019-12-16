@@ -24,9 +24,9 @@ routes.when('/management/kibana/reporting', {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.reporting.breadcrumb', {
-        defaultMessage: 'Reporting'
-      })
-    }
+        defaultMessage: 'Reporting',
+      }),
+    },
   ],
   controllerAs: 'jobsCtrl',
   controller($scope, kbnUrl) {
@@ -45,7 +45,7 @@ routes.when('/management/kibana/reporting', {
             redirect={kbnUrl.redirect}
           />
         </I18nContext>,
-        node,
+        node
       );
     });
 
@@ -55,5 +55,5 @@ routes.when('/management/kibana/reporting', {
         unmountComponentAtNode(node);
       }
     });
-  }
+  },
 });

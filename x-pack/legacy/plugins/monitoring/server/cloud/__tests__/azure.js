@@ -35,8 +35,8 @@ describe('Azure', () => {
         vm_type: undefined,
         zone: undefined,
         metadata: {
-          availabilityZone: 'fakeus-2'
-        }
+          availabilityZone: 'fakeus-2',
+        },
       });
     });
 
@@ -83,43 +83,43 @@ describe('Azure', () => {
     // it's expected that most users use the resource manager UI (which has been out for years)
     it('parses object in expected format', () => {
       const body = {
-        'compute': {
-          'location': 'eastus',
-          'name': 'pickypg-ubuntu-rm',
-          'offer': 'UbuntuServer',
-          'osType': 'Linux',
-          'platformFaultDomain': '0',
-          'platformUpdateDomain': '0',
-          'publisher': 'Canonical',
-          'sku': '16.04-LTS',
-          'version': '16.04.201706191',
-          'vmId': 'd4c57456-2b3b-437a-9f1f-7082cf123456',
-          'vmSize': 'Standard_A1'
+        compute: {
+          location: 'eastus',
+          name: 'pickypg-ubuntu-rm',
+          offer: 'UbuntuServer',
+          osType: 'Linux',
+          platformFaultDomain: '0',
+          platformUpdateDomain: '0',
+          publisher: 'Canonical',
+          sku: '16.04-LTS',
+          version: '16.04.201706191',
+          vmId: 'd4c57456-2b3b-437a-9f1f-7082cf123456',
+          vmSize: 'Standard_A1',
         },
-        'network': {
-          'interface': [
+        network: {
+          interface: [
             {
-              'ipv4': {
-                'ipAddress': [
+              ipv4: {
+                ipAddress: [
                   {
-                    'privateIpAddress': '10.1.0.4',
-                    'publicIpAddress': '52.170.25.71'
-                  }
+                    privateIpAddress: '10.1.0.4',
+                    publicIpAddress: '52.170.25.71',
+                  },
                 ],
-                'subnet': [
+                subnet: [
                   {
-                    'address': '10.1.0.0',
-                    'prefix': '24'
-                  }
-                ]
+                    address: '10.1.0.0',
+                    prefix: '24',
+                  },
+                ],
               },
-              'ipv6': {
-                'ipAddress': [ ]
+              ipv6: {
+                ipAddress: [],
               },
-              'macAddress': '000D3A143CE3'
-            }
-          ]
-        }
+              macAddress: '000D3A143CE3',
+            },
+          ],
+        },
       };
 
       const response = AZURE._parseBody(body);
@@ -140,38 +140,38 @@ describe('Azure', () => {
           platformUpdateDomain: '0',
           publisher: 'Canonical',
           sku: '16.04-LTS',
-          version: '16.04.201706191'
-        }
+          version: '16.04.201706191',
+        },
       });
     });
 
     // classic represents the "old" way of launching things in Azure
     it('parses object in expected classic format', () => {
       const body = {
-        'network': {
-          'interface': [
+        network: {
+          interface: [
             {
-              'ipv4': {
-                'ipAddress': [
+              ipv4: {
+                ipAddress: [
                   {
-                    'privateIpAddress': '10.1.0.4',
-                    'publicIpAddress': '52.170.25.71'
-                  }
+                    privateIpAddress: '10.1.0.4',
+                    publicIpAddress: '52.170.25.71',
+                  },
                 ],
-                'subnet': [
+                subnet: [
                   {
-                    'address': '10.1.0.0',
-                    'prefix': '24'
-                  }
-                ]
+                    address: '10.1.0.0',
+                    prefix: '24',
+                  },
+                ],
               },
-              'ipv6': {
-                'ipAddress': [ ]
+              ipv6: {
+                ipAddress: [],
               },
-              'macAddress': '000D3A143CE3'
-            }
-          ]
-        }
+              macAddress: '000D3A143CE3',
+            },
+          ],
+        },
       };
 
       const response = AZURE._parseBody(body);
@@ -185,15 +185,15 @@ describe('Azure', () => {
         region: undefined,
         zone: undefined,
         metadata: {
-          classic: true
-        }
+          classic: true,
+        },
       });
     });
 
     it('ignores unexpected response body', () => {
       expect(AZURE._parseBody(undefined)).to.be(null);
       expect(AZURE._parseBody(null)).to.be(null);
-      expect(AZURE._parseBody({ })).to.be(null);
+      expect(AZURE._parseBody({})).to.be(null);
       expect(AZURE._parseBody({ privateIp: 'a.b.c.d' })).to.be(null);
     });
   });
