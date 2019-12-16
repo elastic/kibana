@@ -314,8 +314,8 @@ export class Table extends PureComponent {
                 this.props.canDelete
                   ? undefined
                   : i18n.translate('kbn.management.objects.objectsTable.table.deleteButtonTitle', {
-                    defaultMessage: 'Unable to delete saved objects',
-                  })
+                      defaultMessage: 'Unable to delete saved objects',
+                    })
               }
               data-test-subj="savedObjectsManagementDelete"
             >

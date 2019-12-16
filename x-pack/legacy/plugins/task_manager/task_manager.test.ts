@@ -20,7 +20,11 @@ import {
   awaitTaskRunResult,
   TaskLifecycleEvent,
 } from './task_manager';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSerializer, SavedObjectsSchema } from 'src/core/server';
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';

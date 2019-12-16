@@ -16,10 +16,9 @@ import { VectorStyle } from '../../vector_style';
 import { getColorRampCenterColor } from '../../../color_utils';
 
 export class VectorIcon extends Component {
-
   state = {
-    isInitialized: false
-  }
+    isInitialized: false,
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -52,9 +51,7 @@ export class VectorIcon extends Component {
         stroke: extractColorFromStyleProperty(this.props.lineColor, 'grey'),
         strokeWidth: '4px',
       };
-      return (
-        <LineIcon style={style}/>
-      );
+      return <LineIcon style={style} />;
     }
 
     const style = {
@@ -64,11 +61,11 @@ export class VectorIcon extends Component {
     };
 
     if (!this.state.isPointsOnly) {
-      return (<PolygonIcon style={style}/>);
+      return <PolygonIcon style={style} />;
     }
 
     if (!this.props.symbolId) {
-      return (<CircleIcon style={style}/>);
+      return <CircleIcon style={style} />;
     }
 
     return (
@@ -99,8 +96,10 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
   // return middle of gradient for dynamic style property
 
   if (colorStyleProperty.options.useCustomColorRamp) {
-    if (!colorStyleProperty.options.customColorRamp ||
-      !colorStyleProperty.options.customColorRamp.length) {
+    if (
+      !colorStyleProperty.options.customColorRamp ||
+      !colorStyleProperty.options.customColorRamp.length
+    ) {
       return defaultColor;
     }
     // favor the lowest color in even arrays
@@ -113,10 +112,7 @@ function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
 
 const colorStylePropertyShape = PropTypes.shape({
   type: PropTypes.string.isRequired,
-  options: PropTypes.oneOfType([
-    dynamicColorShape,
-    staticColorShape
-  ]).isRequired,
+  options: PropTypes.oneOfType([dynamicColorShape, staticColorShape]).isRequired,
 });
 
 VectorIcon.propTypes = {

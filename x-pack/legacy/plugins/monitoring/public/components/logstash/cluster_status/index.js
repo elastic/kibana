@@ -15,44 +15,39 @@ export function ClusterStatus({ stats }) {
     avg_memory_used: avgMemoryUsed,
     avg_memory: avgMemory,
     events_in_total: eventsInTotal,
-    events_out_total: eventsOutTotal
+    events_out_total: eventsOutTotal,
   } = stats;
 
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.logstash.clusterStatus.nodesLabel', {
-        defaultMessage: 'Nodes'
+        defaultMessage: 'Nodes',
       }),
       value: nodeCount,
-      'data-test-subj': 'node_count'
+      'data-test-subj': 'node_count',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.clusterStatus.memoryLabel', {
-        defaultMessage: 'Memory'
+        defaultMessage: 'Memory',
       }),
       value: formatMetric(avgMemoryUsed, 'byte') + ' / ' + formatMetric(avgMemory, 'byte'),
-      'data-test-subj': 'memory_used'
+      'data-test-subj': 'memory_used',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', {
-        defaultMessage: 'Events Received'
+        defaultMessage: 'Events Received',
       }),
       value: formatMetric(eventsInTotal, '0.[0]a'),
-      'data-test-subj': 'events_in_total'
+      'data-test-subj': 'events_in_total',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', {
-        defaultMessage: 'Events Emitted'
+        defaultMessage: 'Events Emitted',
       }),
       value: formatMetric(eventsOutTotal, '0.[0]a'),
-      'data-test-subj': 'events_out_total'
-    }
+      'data-test-subj': 'events_out_total',
+    },
   ];
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="logstashClusterStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} data-test-subj="logstashClusterStatus" />;
 }

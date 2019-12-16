@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
@@ -34,15 +34,17 @@ export default function ({ getService, getPageObjects }) {
     // order they are added.
     let aggIndex = 1;
 
-    before(async function () {
-      log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
-      + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
+    before(async function() {
+      log.debug(
+        'Load empty_kibana and Shakespeare Getting Started data\n' +
+          'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
+      );
       await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });
 
-    it('should create shakespeare index pattern', async function () {
+    it('should create shakespeare index pattern', async function() {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
@@ -56,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
     yet, you’ll see a single big bar that shows the total count of documents that
     match the default wildcard query.
     */
-    it('should create initial vertical bar chart', async function () {
+    it('should create initial vertical bar chart', async function() {
       log.debug('create shakespeare vertical bar chart');
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
@@ -79,10 +81,14 @@ export default function ({ getService, getPageObjects }) {
     and choose speaker from the field list. You can also give the axis a
     custom label, Speaking Parts.
     */
-    it('should configure metric Unique Count Speaking Parts', async function () {
+    it('should configure metric Unique Count Speaking Parts', async function() {
       log.debug('Metric = Unique Count, speaker, Speaking Parts');
       // this first change to the YAxis metric agg uses the default aggIndex of 1
-      await PageObjects.visualize.selectYAxisAggregation('Unique Count', 'speaker', 'Speaking Parts');
+      await PageObjects.visualize.selectYAxisAggregation(
+        'Unique Count',
+        'speaker',
+        'Speaking Parts'
+      );
       // then increment the aggIndex for the next one we create
       aggIndex = aggIndex + 1;
       await PageObjects.visualize.clickGo();
@@ -103,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
     also give the axis a custom label, Play Name.
     5. Click Apply changes images/apply-changes-button.png to view the results.
     */
-    it('should configure Terms aggregation on play_name', async function () {
+    it('should configure Terms aggregation on play_name', async function() {
       await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Terms');
       await PageObjects.visualize.selectAggregation('Terms');
@@ -112,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('play_name');
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
+      const expectedChartValues = [71, 65, 62, 55, 55];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         log.debug('data=' + data);
@@ -121,10 +127,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       const labels = await PageObjects.visualize.getXAxisLabels();
-      expect(labels).to.eql([ 'Richard III', 'Henry VI Part 2', 'Coriolanus',
-        'Antony and Cleopatra', 'Timon of Athens' ]);
+      expect(labels).to.eql([
+        'Richard III',
+        'Henry VI Part 2',
+        'Coriolanus',
+        'Antony and Cleopatra',
+        'Timon of Athens',
+      ]);
     });
-
 
     /* Now that you have a list of the smallest casts for Shakespeare plays, you
     might also be curious to see which of these plays makes the greatest demands
@@ -134,14 +144,19 @@ export default function ({ getService, getPageObjects }) {
     1. Click Add metrics to add a Y-axis aggregation.
     2. Choose the Max aggregation and select the speech_number field.
     */
-    it('should configure Max aggregation metric on speech_number', async function () {
+    it('should configure Max aggregation metric on speech_number', async function() {
       await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
       log.debug('Aggregation = Max');
-      await PageObjects.visualize.selectYAxisAggregation('Max', 'speech_number', 'Max Speaking Parts', aggIndex);
+      await PageObjects.visualize.selectYAxisAggregation(
+        'Max',
+        'speech_number',
+        'Max Speaking Parts',
+        aggIndex
+      );
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
-      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      const expectedChartValues = [71, 65, 62, 55, 55];
+      const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
@@ -154,8 +169,13 @@ export default function ({ getService, getPageObjects }) {
       });
 
       const labels = await PageObjects.visualize.getXAxisLabels();
-      expect(labels).to.eql([ 'Richard III', 'Henry VI Part 2', 'Coriolanus',
-        'Antony and Cleopatra', 'Timon of Athens' ]);
+      expect(labels).to.eql([
+        'Richard III',
+        'Henry VI Part 2',
+        'Coriolanus',
+        'Antony and Cleopatra',
+        'Timon of Athens',
+      ]);
     });
 
     /* Continued from above.
@@ -163,13 +183,13 @@ export default function ({ getService, getPageObjects }) {
     3. Click Options and change the Bar Mode to grouped.
     4. Click Apply changes images/apply-changes-button.png. Your chart should now look like this:
     */
-    it('should configure change options to normal bars', async function () {
+    it('should configure change options to normal bars', async function() {
       await PageObjects.visualize.clickMetricsAndAxes();
       await PageObjects.visualize.selectChartMode('normal');
       await PageObjects.visualize.clickGo();
 
-      const expectedChartValues = [ 71, 65, 62, 55, 55 ];
-      const expectedChartValues2 = [177, 106, 153, 132, 162 ];
+      const expectedChartValues = [71, 65, 62, 55, 55];
+      const expectedChartValues2 = [177, 106, 153, 132, 162];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
@@ -189,13 +209,13 @@ export default function ({ getService, getPageObjects }) {
 
     Save this chart with the name Bar Example.
     */
-    it('should change the Y-Axis extents', async function () {
+    it('should change the Y-Axis extents', async function() {
       await PageObjects.visualize.setAxisExtents('50', '250');
       await PageObjects.visualize.clickGo();
 
       // same values as previous test except scaled down by the 50 for Y-Axis min
-      const expectedChartValues = [ 21, 15, 12, 5, 5 ];
-      const expectedChartValues2 = [127, 56, 103, 82, 112 ];
+      const expectedChartValues = [21, 15, 12, 5, 5];
+      const expectedChartValues2 = [127, 56, 103, 82, 112];
       await retry.try(async () => {
         const data = await PageObjects.visualize.getBarChartData('Speaking Parts');
         const data2 = await PageObjects.visualize.getBarChartData('Max Speaking Parts');
@@ -207,6 +227,5 @@ export default function ({ getService, getPageObjects }) {
         expect(data2).to.eql(expectedChartValues2);
       });
     });
-
   });
 }

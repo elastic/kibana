@@ -41,9 +41,9 @@ export class UsageCollector extends Collector {
         type: KIBANA_STATS_TYPE,
         payload: {
           usage: {
-            [type]: result
-          }
-        }
+            [type]: result,
+          },
+        },
       };
     };
     this._formatForBulkUpload = formatForBulkUpload || defaultUsageFormatterForBulkUpload;

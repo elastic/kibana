@@ -8,7 +8,7 @@ export function MonitoringNoDataProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  return new class NoData {
+  return new (class NoData {
     async enableMonitoring() {
       await testSubjects.click('useInternalCollection');
       await testSubjects.click('enableCollectionEnabled');
@@ -22,5 +22,5 @@ export function MonitoringNoDataProvider({ getService }) {
       const pageId = await retry.try(() => testSubjects.find('noDataContainer'));
       return pageId !== null;
     }
-  }();
+  })();
 }

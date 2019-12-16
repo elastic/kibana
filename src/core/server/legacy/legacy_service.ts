@@ -25,8 +25,9 @@ import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { SavedObjectsLegacyUiExports } from '../types';
 import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
-import { DevConfig, DevConfigType } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
+import { CspConfigType, config as cspConfig } from '../csp';
+import { DevConfig, DevConfigType, config as devConfig } from '../dev';
+import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
@@ -112,13 +113,16 @@ export class LegacyService implements CoreService {
   private settings: Record<string, any> | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.log = coreContext.logger.get('legacy-service');
-    this.devConfig$ = coreContext.configService
-      .atPath<DevConfigType>('dev')
+    const { logger, configService, env } = coreContext;
+
+    this.log = logger.get('legacy-service');
+    this.devConfig$ = configService
+      .atPath<DevConfigType>(devConfig.path)
       .pipe(map(rawConfig => new DevConfig(rawConfig)));
-    this.httpConfig$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
+    this.httpConfig$ = combineLatest(
+      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<CspConfigType>(cspConfig.path)
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -240,8 +244,8 @@ export class LegacyService implements CoreService {
       ? combineLatest(this.devConfig$, this.httpConfig$).pipe(
           first(),
           map(
-            ([devConfig, httpConfig]) =>
-              new BasePathProxyServer(this.coreContext.logger.get('server'), httpConfig, devConfig)
+            ([dev, http]) =>
+              new BasePathProxyServer(this.coreContext.logger.get('server'), http, dev)
           )
         )
       : EMPTY;
@@ -284,6 +288,7 @@ export class LegacyService implements CoreService {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
       savedObjects: {
@@ -339,9 +344,9 @@ export class LegacyService implements CoreService {
       require('../../../cli/repl').startRepl(kbnServer);
     }
 
-    const httpConfig = await this.httpConfig$.pipe(first()).toPromise();
+    const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();
 
-    if (httpConfig.autoListen) {
+    if (autoListen) {
       try {
         await kbnServer.listen();
       } catch (err) {

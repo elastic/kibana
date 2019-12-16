@@ -45,18 +45,20 @@ export async function createPromiseFromStreams(streams) {
   }
   if (typeof last.read === 'function') {
     // We are pushing a writable stream to capture the last chunk
-    streams.push(new Writable({
-      // Use object mode even when "last" stream isn't. This allows to
-      // capture the last chunk as-is.
-      objectMode: true,
-      write(chunk, enc, done) {
-        finalChunk = chunk;
-        done();
-      }
-    }));
+    streams.push(
+      new Writable({
+        // Use object mode even when "last" stream isn't. This allows to
+        // capture the last chunk as-is.
+        objectMode: true,
+        write(chunk, enc, done) {
+          finalChunk = chunk;
+          done();
+        },
+      })
+    );
   }
   return new Promise((resolve, reject) => {
-    pipeline(...streams, (err) => {
+    pipeline(...streams, err => {
       if (err) return reject(err);
       resolve(finalChunk);
     });
