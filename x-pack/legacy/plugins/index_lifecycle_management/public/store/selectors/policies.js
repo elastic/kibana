@@ -30,7 +30,7 @@ import {
   PHASE_SHRINK_ENABLED,
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
-  PHASE_ROLLOVER_MAX_DOCUMENTS
+  PHASE_ROLLOVER_MAX_DOCUMENTS,
 } from '../../constants';
 
 import { filterItems, sortTable } from '../../services';
@@ -39,34 +39,28 @@ import {
   defaultEmptyDeletePhase,
   defaultEmptyColdPhase,
   defaultEmptyWarmPhase,
-  defaultEmptyHotPhase
+  defaultEmptyHotPhase,
 } from '../defaults';
 
 export const getPolicies = state => state.policies.policies;
-export const getPolicyByName = (state, name) => getPolicies(state).find((policy) => policy.name === name) || {};
+export const getPolicyByName = (state, name) =>
+  getPolicies(state).find(policy => policy.name === name) || {};
 export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
 export const getSelectedPolicy = state => state.policies.selectedPolicy;
 export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
 export const getSelectedOriginalPolicyName = state => state.policies.originalPolicyName;
-export const getPolicyFilter = (state) => state.policies.filter;
-export const getPolicySort = (state) => state.policies.sort;
-export const getPolicyCurrentPage = (state) => state.policies.currentPage;
-export const getPolicyPageSize = (state) => state.policies.pageSize;
-export const isPolicyListLoaded = (state) => state.policies.isLoaded;
+export const getPolicyFilter = state => state.policies.filter;
+export const getPolicySort = state => state.policies.sort;
+export const getPolicyCurrentPage = state => state.policies.currentPage;
+export const getPolicyPageSize = state => state.policies.pageSize;
+export const isPolicyListLoaded = state => state.policies.isLoaded;
 
-const getFilteredPolicies = createSelector(
-  getPolicies,
-  getPolicyFilter,
-  (policies, filter) => {
-    return filterItems(['name'], filter, policies);
-  }
-);
-export const getTotalPolicies = createSelector(
-  getFilteredPolicies,
-  (filteredPolicies) => {
-    return filteredPolicies.length;
-  }
-);
+const getFilteredPolicies = createSelector(getPolicies, getPolicyFilter, (policies, filter) => {
+  return filterItems(['name'], filter, policies);
+});
+export const getTotalPolicies = createSelector(getFilteredPolicies, filteredPolicies => {
+  return filteredPolicies.length;
+});
 export const getPolicyPager = createSelector(
   getPolicyCurrentPage,
   getPolicyPageSize,
@@ -86,8 +80,7 @@ export const getPageOfPolicies = createSelector(
     return pagedPolicies;
   }
 );
-export const getSaveAsNewPolicy = state =>
-  state.policies.selectedPolicy.saveAsNew;
+export const getSaveAsNewPolicy = state => state.policies.selectedPolicy.saveAsNew;
 
 export const getSelectedPolicyName = state => {
   if (!getSaveAsNewPolicy(state)) {
@@ -98,8 +91,7 @@ export const getSelectedPolicyName = state => {
 
 export const getPhases = state => state.policies.selectedPolicy.phases;
 
-export const getPhase = (state, phase) =>
-  getPhases(state)[phase];
+export const getPhase = (state, phase) => getPhases(state)[phase];
 
 export const getPhaseData = (state, phase, key) => {
   if (PHASE_ATTRIBUTES_THAT_ARE_NUMBERS.includes(key)) {
@@ -120,12 +112,12 @@ export const splitSizeAndUnits = field => {
 
   return {
     size,
-    units
+    units,
   };
 };
 
 export const isNumber = value => typeof value === 'number';
-export const isEmptyObject = (obj) => {
+export const isEmptyObject = obj => {
   return !obj || (Object.entries(obj).length === 0 && obj.constructor === Object);
 };
 
@@ -137,14 +129,11 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
 
   policy[PHASE_ENABLED] = true;
 
-
   if (phase.min_age) {
     if (phaseName === PHASE_WARM && phase.min_age === '0ms') {
       policy[WARM_PHASE_ON_ROLLOVER] = true;
     } else {
-      const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(
-        phase.min_age
-      );
+      const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(phase.min_age);
       policy[PHASE_ROLLOVER_MINIMUM_AGE] = minAge;
       policy[PHASE_ROLLOVER_MINIMUM_AGE_UNITS] = minAgeUnits;
     }
@@ -160,16 +149,12 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
       const rollover = actions.rollover;
       policy[PHASE_ROLLOVER_ENABLED] = true;
       if (rollover.max_age) {
-        const { size: maxAge, units: maxAgeUnits } = splitSizeAndUnits(
-          rollover.max_age
-        );
+        const { size: maxAge, units: maxAgeUnits } = splitSizeAndUnits(rollover.max_age);
         policy[PHASE_ROLLOVER_MAX_AGE] = maxAge;
         policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = maxAgeUnits;
       }
       if (rollover.max_size) {
-        const { size: maxSize, units: maxSizeUnits } = splitSizeAndUnits(
-          rollover.max_size
-        );
+        const { size: maxSize, units: maxSizeUnits } = splitSizeAndUnits(rollover.max_size);
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = maxSize;
         policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
       }
@@ -181,7 +166,7 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     if (actions.allocate) {
       const allocate = actions.allocate;
       if (allocate.require) {
-        Object.entries(allocate.require).forEach((entry) => {
+        Object.entries(allocate.require).forEach(entry => {
           policy[PHASE_NODE_ATTRS] = entry.join(':');
         });
         // checking for null or undefined here
@@ -213,8 +198,11 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
   return policy;
 };
 
-export const policyFromES = (policy) => {
-  const { name, policy: { phases } } = policy;
+export const policyFromES = policy => {
+  const {
+    name,
+    policy: { phases },
+  } = policy;
 
   return {
     name,
@@ -222,10 +210,10 @@ export const policyFromES = (policy) => {
       [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultEmptyHotPhase),
       [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultEmptyWarmPhase),
       [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultEmptyColdPhase),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultEmptyDeletePhase)
+      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultEmptyDeletePhase),
     },
     isNew: false,
-    saveAsNew: false
+    saveAsNew: false,
   };
 };
 
@@ -252,14 +240,10 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.rollover = {};
 
     if (isNumber(phase[PHASE_ROLLOVER_MAX_AGE])) {
-      esPhase.actions.rollover.max_age = `${phase[PHASE_ROLLOVER_MAX_AGE]}${
-        phase[PHASE_ROLLOVER_MAX_AGE_UNITS]
-      }`;
+      esPhase.actions.rollover.max_age = `${phase[PHASE_ROLLOVER_MAX_AGE]}${phase[PHASE_ROLLOVER_MAX_AGE_UNITS]}`;
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])) {
-      esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${
-        phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]
-      }`;
+      esPhase.actions.rollover.max_size = `${phase[PHASE_ROLLOVER_MAX_SIZE_STORED]}${phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}`;
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS])) {
       esPhase.actions.rollover.max_docs = phase[PHASE_ROLLOVER_MAX_DOCUMENTS];
@@ -268,10 +252,10 @@ export const phaseToES = (phase, originalEsPhase) => {
     delete esPhase.actions.rollover;
   }
   if (phase[PHASE_NODE_ATTRS]) {
-    const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
+    const [name, value] = phase[PHASE_NODE_ATTRS].split(':');
     esPhase.actions.allocate = esPhase.actions.allocate || {};
     esPhase.actions.allocate.require = {
-      [name]: value
+      [name]: value,
     };
   } else {
     if (esPhase.actions.allocate) {
@@ -286,11 +270,12 @@ export const phaseToES = (phase, originalEsPhase) => {
       delete esPhase.actions.allocate.number_of_replicas;
     }
   }
-  if (esPhase.actions.allocate
-      && !esPhase.actions.allocate.require
-      && !isNumber(esPhase.actions.allocate.number_of_replicas)
-      && isEmptyObject(esPhase.actions.allocate.include)
-      && isEmptyObject(esPhase.actions.allocate.exclude)
+  if (
+    esPhase.actions.allocate &&
+    !esPhase.actions.allocate.require &&
+    !isNumber(esPhase.actions.allocate.number_of_replicas) &&
+    isEmptyObject(esPhase.actions.allocate.include) &&
+    isEmptyObject(esPhase.actions.allocate.exclude)
   ) {
     // remove allocate action if it does not define require or number of nodes
     // and both include and exclude are empty objects (ES will fail to parse if we don't)
@@ -299,7 +284,7 @@ export const phaseToES = (phase, originalEsPhase) => {
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
     esPhase.actions.forcemerge = {
-      max_num_segments: phase[PHASE_FORCE_MERGE_SEGMENTS]
+      max_num_segments: phase[PHASE_FORCE_MERGE_SEGMENTS],
     };
   } else {
     delete esPhase.actions.forcemerge;
@@ -307,7 +292,7 @@ export const phaseToES = (phase, originalEsPhase) => {
 
   if (phase[PHASE_SHRINK_ENABLED] && isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
     esPhase.actions.shrink = {
-      number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
+      number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT],
     };
   } else {
     delete esPhase.actions.shrink;
@@ -320,7 +305,7 @@ export const phaseToES = (phase, originalEsPhase) => {
   }
   if (isNumber(phase[PHASE_INDEX_PRIORITY])) {
     esPhase.actions.set_priority = {
-      priority: phase[PHASE_INDEX_PRIORITY]
+      priority: phase[PHASE_INDEX_PRIORITY],
     };
   }
   return esPhase;

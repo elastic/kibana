@@ -6,7 +6,7 @@
 
 import * as GenerationUrls from './generation_urls';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 

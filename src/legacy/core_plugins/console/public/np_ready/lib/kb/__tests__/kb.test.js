@@ -58,15 +58,12 @@ describe('Knowledge base', () => {
 
   function testUrlContext(tokenPath, otherTokenValues, expectedContext) {
     if (expectedContext.autoCompleteSet) {
-      expectedContext.autoCompleteSet = _.map(
-        expectedContext.autoCompleteSet,
-        function (t) {
-          if (_.isString(t)) {
-            t = { name: t };
-          }
-          return t;
+      expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function(t) {
+        if (_.isString(t)) {
+          t = { name: t };
         }
-      );
+        return t;
+      });
     }
 
     const context = { otherTokenValues: otherTokenValues };
@@ -93,10 +90,7 @@ describe('Knowledge base', () => {
     }
 
     if (context.autoCompleteSet) {
-      context.autoCompleteSet = _.sortBy(
-        _.map(context.autoCompleteSet, norm),
-        'name'
-      );
+      context.autoCompleteSet = _.sortBy(_.map(context.autoCompleteSet, norm), 'name');
     }
     if (expectedContext.autoCompleteSet) {
       expectedContext.autoCompleteSet = _.sortBy(
@@ -117,7 +111,7 @@ describe('Knowledge base', () => {
   }
 
   function indexTest(name, tokenPath, otherTokenValues, expectedContext) {
-    test(name, function () {
+    test(name, function() {
       // eslint-disable-next-line new-cap
       const testApi = new kb._test.loadApisFromJson(
         {
@@ -167,7 +161,7 @@ describe('Knowledge base', () => {
   });
 
   function typeTest(name, tokenPath, otherTokenValues, expectedContext) {
-    test(name, function () {
+    test(name, function() {
       const testApi = kb._test.loadApisFromJson(
         {
           typeTest: {
@@ -213,7 +207,10 @@ describe('Knowledge base', () => {
 
   typeTest(
     'Type integration 5',
-    [['index1', 'index2'], ['type1.2', 'type1.1']],
+    [
+      ['index1', 'index2'],
+      ['type1.2', 'type1.1'],
+    ],
     [],
     {
       indices: ['index1', 'index2'],

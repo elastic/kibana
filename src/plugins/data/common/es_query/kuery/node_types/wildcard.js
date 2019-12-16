@@ -69,8 +69,5 @@ export function hasLeadingWildcard(node) {
   const { value } = node;
   // A lone wildcard turns into an `exists` query, so we're only concerned with
   // leading wildcards followed by additional characters.
-  return (
-    value.startsWith(wildcardSymbol) &&
-    value.replace(wildcardSymbol, '').length > 0
-  );
+  return value.startsWith(wildcardSymbol) && value.replace(wildcardSymbol, '').length > 0;
 }

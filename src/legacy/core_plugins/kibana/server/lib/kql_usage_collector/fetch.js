@@ -38,7 +38,10 @@ export function fetchProvider(index) {
       }),
     ]);
 
-    const queryLanguageConfigValue = get(config, 'hits.hits[0]._source.config.search:queryLanguage');
+    const queryLanguageConfigValue = get(
+      config,
+      'hits.hits[0]._source.config.search:queryLanguage'
+    );
 
     // search:queryLanguage can potentially be in four states in the .kibana index:
     // 1. undefined: this means the user has never touched this setting

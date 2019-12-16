@@ -20,7 +20,7 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
     const nodes = nodeStatsHits.map(hit => hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
     const sourceStats = get(response, 'hits.hits[0]._source.node_stats');
-    const clusterNode = get(clusterState, [ 'nodes', nodeUuid ]);
+    const clusterNode = get(clusterState, ['nodes', nodeUuid]);
     const stats = {
       resolver: nodeUuid,
       node_ids: nodes.map(node => node.uuid),
@@ -31,9 +31,12 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
     };
 
     if (clusterNode) {
-      const _shardStats = get(shardStats, [ 'nodes', nodeUuid ], {});
+      const _shardStats = get(shardStats, ['nodes', nodeUuid], {});
       const calculatedNodeType = calculateNodeType(stats, get(clusterState, 'master_node')); // set type for labeling / iconography
-      const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(node, calculatedNodeType);
+      const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(
+        node,
+        calculatedNodeType
+      );
 
       nodeSummary = {
         type: nodeType,
@@ -47,46 +50,57 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
         totalSpace: get(sourceStats, 'fs.total.total_in_bytes'),
         usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
         status: i18n.translate('xpack.monitoring.es.nodes.onlineStatusLabel', {
-          defaultMessage: 'Online' }),
+          defaultMessage: 'Online',
+        }),
         isOnline: true,
       };
     } else {
       nodeSummary = {
         nodeTypeLabel: i18n.translate('xpack.monitoring.es.nodes.offlineNodeStatusLabel', {
-          defaultMessage: 'Offline Node' }),
+          defaultMessage: 'Offline Node',
+        }),
         status: i18n.translate('xpack.monitoring.es.nodes.offlineStatusLabel', {
-          defaultMessage: 'Offline' }),
+          defaultMessage: 'Offline',
+        }),
         isOnline: false,
       };
     }
 
     return {
       ...stats,
-      ...nodeSummary
+      ...nodeSummary,
     };
   };
 }
 
-export function getNodeSummary(req, esIndexPattern, clusterState, shardStats, { clusterUuid, nodeUuid, start, end }) {
+export function getNodeSummary(
+  req,
+  esIndexPattern,
+  clusterState,
+  shardStats,
+  { clusterUuid, nodeUuid, start, end }
+) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getNodeSummary');
 
   // Build up the Elasticsearch request
   const metric = ElasticsearchMetric.getMetricFields();
-  const filters = [{
-    term: { 'source_node.uuid': nodeUuid }
-  }];
+  const filters = [
+    {
+      term: { 'source_node.uuid': nodeUuid },
+    },
+  ];
   const params = {
     index: esIndexPattern,
     size: 1,
     ignoreUnavailable: true,
     body: {
       sort: { timestamp: { order: 'desc' } },
-      query: createQuery({ type: 'node_stats', start, end, clusterUuid, metric, filters })
-    }
+      query: createQuery({ type: 'node_stats', start, end, clusterUuid, metric, filters }),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(handleResponse(clusterState, shardStats, nodeUuid));
+  return callWithRequest(req, 'search', params).then(
+    handleResponse(clusterState, shardStats, nodeUuid)
+  );
 }
-
