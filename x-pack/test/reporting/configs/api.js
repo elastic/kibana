@@ -9,7 +9,6 @@ const path = require('path');
 import { ReportingAPIProvider } from '../services';
 
 export async function getReportingApiConfig({ readConfigFile }) {
-
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
 
   return {
@@ -20,7 +19,7 @@ export async function getReportingApiConfig({ readConfigFile }) {
       reportingAPI: ReportingAPIProvider,
     },
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../es_archives'),
     },
     junit: {
       reportName: 'X-Pack Reporting API Tests',
@@ -33,7 +32,8 @@ export async function getReportingApiConfig({ readConfigFile }) {
         ...apiConfig.get('kbnTestServer.serverArgs'),
         '--xpack.reporting.csv.enablePanelActionDownload=true',
         `--optimize.enabled=true`,
-        '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
+        '--logging.events.log',
+        JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting']),
       ],
     },
   };

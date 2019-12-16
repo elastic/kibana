@@ -96,7 +96,10 @@ describe('bucketTransform', () => {
         id: 'test',
         type: 'percentile',
         field: 'cpu.pct',
-        percentiles: [{ value: 50, mode: 'line' }, { value: 10, mode: 'band', percentile: 90 }],
+        percentiles: [
+          { value: 50, mode: 'line' },
+          { value: 10, mode: 'band', percentile: 90 },
+        ],
       };
       const fn = bucketTransform.percentile;
       expect(fn(metric)).to.eql({

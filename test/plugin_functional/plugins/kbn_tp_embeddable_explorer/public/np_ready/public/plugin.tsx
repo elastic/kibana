@@ -34,7 +34,6 @@ const REACT_ROOT_ID = 'embeddableExplorerRoot';
 import {
   SayHelloAction,
   createSendMessageAction,
-  HelloWorldEmbeddableFactory,
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
@@ -42,6 +41,7 @@ import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
 } from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
+import { HelloWorldEmbeddableFactory } from '../../../../../../../examples/embeddable_examples/public';
 import {
   IEmbeddableStart,
   IEmbeddableSetup,

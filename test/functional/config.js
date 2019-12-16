@@ -20,7 +20,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
@@ -45,10 +45,7 @@ export default async function ({ readConfigFile }) {
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
-      ],
+      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs'), '--oss'],
     },
 
     uiSettings: {
@@ -103,36 +100,77 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'Chrome UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests',
     },
     browser: {
-      type: 'chrome'
+      type: 'chrome',
     },
     security: {
       roles: {
         test_logstash_reader: {
-          elasticsearch: { cluster: [], indices: [{ names: ['logstash*'],
-            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
-              except: [] } }], run_as: [] }, kibana: []
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
         },
         test_shakespeare_reader: {
-          elasticsearch: { cluster: [], indices: [{ names: ['shakes*'],
-            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
-              except: [] } }], run_as: [] }, kibana: []
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['shakes*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
         },
         test_testhuge_reader: {
-          elasticsearch: { cluster: [], indices: [{ names: ['testhuge*'],
-            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
-              except: [] } }], run_as: [] }, kibana: []
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['testhuge*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
         },
         test_alias_reader: {
-          elasticsearch: { cluster: [], indices: [{ names: ['alias*'],
-            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
-              except: [] } }], run_as: [] }, kibana: []
-        }
-
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['alias*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
       },
-      defaultRoles: ['test_logstash_reader', 'kibana_user', 'test_shakespeare_reader', 'test_testhuge_reader', 'test_alias_reader']
-    }
+      defaultRoles: [
+        'test_logstash_reader',
+        'kibana_user',
+        'test_shakespeare_reader',
+        'test_testhuge_reader',
+        'test_alias_reader',
+      ],
+    },
   };
 }

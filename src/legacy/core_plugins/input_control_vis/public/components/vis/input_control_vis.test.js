@@ -23,36 +23,42 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import {
-  InputControlVis,
-} from './input_control_vis';
+import { InputControlVis } from './input_control_vis';
 
 const mockListControl = {
   id: 'mock-list-control',
-  isEnabled: () => { return true; },
+  isEnabled: () => {
+    return true;
+  },
   options: {
     type: 'terms',
-    multiselect: true
+    multiselect: true,
   },
   type: 'list',
   label: 'list control',
   value: [],
   selectOptions: ['choice1', 'choice2'],
-  format: (value) => { return value; },
+  format: value => {
+    return value;
+  },
 };
 const mockRangeControl = {
   id: 'mock-range-control',
-  isEnabled: () => { return true; },
+  isEnabled: () => {
+    return true;
+  },
   options: {
     decimalPlaces: 0,
-    step: 1
+    step: 1,
   },
   type: 'range',
   label: 'range control',
   value: { min: 0, max: 0 },
   min: 0,
   max: 100,
-  format: (value) => { return value; }
+  format: value => {
+    return value;
+  },
 };
 const updateFiltersOnChange = false;
 
@@ -69,77 +75,107 @@ beforeEach(() => {
 });
 
 test('Renders list control', () => {
-  const component = shallow(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return false; }}
-    hasValues={() => { return false; }}
-    refreshControl={() => {}}
-  />);
+  const component = shallow(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockListControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return false;
+      }}
+      hasValues={() => {
+        return false;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('Renders range control', () => {
-  const component = shallow(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockRangeControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return false; }}
-    hasValues={() => { return false; }}
-    refreshControl={() => {}}
-  />);
+  const component = shallow(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockRangeControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return false;
+      }}
+      hasValues={() => {
+        return false;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('Apply and Cancel change btns enabled when there are changes', () => {
-  const component = shallow(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return true; }}
-    hasValues={() => { return false; }}
-    refreshControl={() => {}}
-  />);
+  const component = shallow(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockListControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return true;
+      }}
+      hasValues={() => {
+        return false;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('Clear btns enabled when there are values', () => {
-  const component = shallow(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return false; }}
-    hasValues={() => { return true; }}
-    refreshControl={() => {}}
-  />);
+  const component = shallow(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockListControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return false;
+      }}
+      hasValues={() => {
+        return true;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('clearControls', () => {
-  const component = mountWithIntl(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return true; }}
-    hasValues={() => { return true; }}
-    refreshControl={() => {}}
-  />);
+  const component = mountWithIntl(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockListControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return true;
+      }}
+      hasValues={() => {
+        return true;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   findTestSubject(component, 'inputControlClearBtn').simulate('click');
   sinon.assert.calledOnce(clearControls);
   sinon.assert.notCalled(submitFilters);
@@ -148,17 +184,23 @@ test('clearControls', () => {
 });
 
 test('submitFilters', () => {
-  const component = mountWithIntl(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return true; }}
-    hasValues={() => { return true; }}
-    refreshControl={() => {}}
-  />);
+  const component = mountWithIntl(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockListControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return true;
+      }}
+      hasValues={() => {
+        return true;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   findTestSubject(component, 'inputControlSubmitBtn').simulate('click');
   sinon.assert.calledOnce(submitFilters);
   sinon.assert.notCalled(clearControls);
@@ -167,17 +209,23 @@ test('submitFilters', () => {
 });
 
 test('resetControls', () => {
-  const component = mountWithIntl(<InputControlVis
-    stageFilter={stageFilter}
-    submitFilters={submitFilters}
-    resetControls={resetControls}
-    clearControls={clearControls}
-    controls={[mockListControl]}
-    updateFiltersOnChange={updateFiltersOnChange}
-    hasChanges={() => { return true; }}
-    hasValues={() => { return true; }}
-    refreshControl={() => {}}
-  />);
+  const component = mountWithIntl(
+    <InputControlVis
+      stageFilter={stageFilter}
+      submitFilters={submitFilters}
+      resetControls={resetControls}
+      clearControls={clearControls}
+      controls={[mockListControl]}
+      updateFiltersOnChange={updateFiltersOnChange}
+      hasChanges={() => {
+        return true;
+      }}
+      hasValues={() => {
+        return true;
+      }}
+      refreshControl={() => {}}
+    />
+  );
   findTestSubject(component, 'inputControlCancelBtn').simulate('click');
   sinon.assert.calledOnce(resetControls);
   sinon.assert.notCalled(clearControls);

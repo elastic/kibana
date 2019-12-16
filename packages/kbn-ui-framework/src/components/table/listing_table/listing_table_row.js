@@ -22,16 +22,9 @@ import PropTypes from 'prop-types';
 
 import _ from 'lodash';
 
-import {
-  KuiTableRow,
-  KuiTableRowCell,
-  KuiTableRowCheckBoxCell,
-} from '../';
+import { KuiTableRow, KuiTableRowCell, KuiTableRowCheckBoxCell } from '../';
 
-import {
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-} from '../../../services';
+import { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '../../../services';
 
 export class KuiListingTableRow extends React.PureComponent {
   onSelectionChanged = () => {
@@ -46,10 +39,7 @@ export class KuiListingTableRow extends React.PureComponent {
         content = cell;
       }
       return (
-        <KuiTableRowCell
-          key={index}
-          {...props}
-        >
+        <KuiTableRowCell key={index} {...props}>
           {content}
         </KuiTableRowCell>
       );
@@ -60,12 +50,9 @@ export class KuiListingTableRow extends React.PureComponent {
     const { enableSelection, isSelected } = this.props;
     return (
       <KuiTableRow>
-        {enableSelection &&
-          <KuiTableRowCheckBoxCell
-            isChecked={isSelected}
-            onChange={this.onSelectionChanged}
-          />
-        }
+        {enableSelection && (
+          <KuiTableRowCheckBoxCell isChecked={isSelected} onChange={this.onSelectionChanged} />
+        )}
         {this.renderCells()}
       </KuiTableRow>
     );
@@ -81,9 +68,9 @@ KuiListingTableRow.propTypes = {
         PropTypes.shape({
           content: PropTypes.node,
           align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
-        })
-      ],
-      )),
+        }),
+      ])
+    ),
   }).isRequired,
   enableSelection: PropTypes.bool,
   onSelectionChanged: PropTypes.func.isRequired,

@@ -352,6 +352,18 @@ all http requests to https over the port configured as `server.port`.
 `server.ssl.supportedProtocols:`:: *Default: TLSv1.1, TLSv1.2*  An array of
 supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
 
+`server.xsrf.whitelist:`:: It is not recommended to disable protections for
+arbitrary API endpoints. Instead, supply the `kbn-xsrf` header. There are some
+scenarios where whitelisting is required, however, such as
+<<kibana-authentication, SAML and OpenID Connect Single Sign-On setups>>.
+The `server.xsrf.whitelist` setting requires the following format:
+
+[source,text]
+
+----
+*Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
+----
+
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled,
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
@@ -377,6 +389,11 @@ disable the License Management user interface.
 Rollup user interface.
 
 `i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
+
+`xpack.actions.whitelistedHosts:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of host names which actions such as email, slack, pagerduty, and
+webhook can connect to.  An element of `*` indicates any host can be connected
+to.  An empty array indicates no hosts can be connected to.
 
 
 include::{docdir}/settings/apm-settings.asciidoc[]
