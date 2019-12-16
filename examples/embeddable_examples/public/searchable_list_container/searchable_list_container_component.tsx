@@ -29,9 +29,11 @@ import {
   EuiPanel,
   EuiCheckbox,
 } from '@elastic/eui';
+import * as Rx from 'rxjs';
 import {
   withEmbeddableSubscription,
   ContainerOutput,
+  EmbeddableOutput,
 } from '../../../../src/plugins/embeddable/public';
 import { EmbeddableListItem } from '../list_container/embeddable_list_item';
 import { SearchableListContainer, SearchableContainerInput } from './searchable_list_container';
@@ -44,27 +46,67 @@ interface Props {
 
 interface State {
   checked: { [key: string]: boolean };
+  hasMatch: { [key: string]: boolean };
+}
+
+interface HasMatchOutput {
+  hasMatch: boolean;
+}
+
+function hasHasMatchOutput(output: EmbeddableOutput | HasMatchOutput): output is HasMatchOutput {
+  return (output as HasMatchOutput).hasMatch !== undefined;
 }
 
 export class SearchableListContainerComponentInner extends Component<Props, State> {
+  private subscriptions: { [id: string]: Rx.Subscription } = {};
   constructor(props: Props) {
     super(props);
 
     const checked: { [id: string]: boolean } = {};
+    const hasMatch: { [id: string]: boolean } = {};
+    props.embeddable.getChildIds().forEach(id => {
+      checked[id] = false;
+      const output = props.embeddable.getChild(id).getOutput();
+      hasMatch[id] = hasHasMatchOutput(output) && output.hasMatch;
+    });
     props.embeddable.getChildIds().forEach(id => (checked[id] = false));
     this.state = {
       checked,
+      hasMatch,
     };
   }
 
-  private updateFilter = (filter: string) => {
-    this.props.embeddable.updateInput({ filter });
+  componentDidMount() {
+    this.props.embeddable.getChildIds().forEach(id => {
+      this.subscriptions[id] = this.props.embeddable
+        .getChild(id)
+        .getOutput$()
+        .subscribe(output => {
+          if (hasHasMatchOutput(output)) {
+            this.setState(prevState => ({
+              hasMatch: {
+                ...prevState.hasMatch,
+                [id]: output.hasMatch,
+              },
+            }));
+          }
+        });
+    });
+  }
+
+  componentWillUnmount() {
+    Object.values(this.subscriptions).forEach(sub => sub.unsubscribe());
+  }
+
+  private updateSearch = (search: string) => {
+    this.props.embeddable.updateInput({ search });
   };
 
   private deleteChecked = () => {
     Object.values(this.props.input.panels).map(panel => {
       if (this.state.checked[panel.explicitInput.id]) {
         this.props.embeddable.removeEmbeddable(panel.explicitInput.id);
+        this.subscriptions[panel.explicitInput.id].unsubscribe();
       }
     });
   };
@@ -87,8 +129,8 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
           <EuiFormRow label="Filter">
             <EuiFieldText
               data-test-subj="filterTodos"
-              value={this.props.input.filter || ''}
-              onChange={ev => this.updateFilter(ev.target.value)}
+              value={this.props.input.search || ''}
+              onChange={ev => this.updateSearch(ev.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -114,6 +156,7 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
     let id = 0;
     const list = Object.values(this.props.input.panels).map(panel => {
       const embeddable = this.props.embeddable.getChild(panel.explicitInput.id);
+      if (this.props.input.search && !this.state.hasMatch[panel.explicitInput.id]) return;
       id++;
       return embeddable ? (
         <EuiPanel key={embeddable.id}>

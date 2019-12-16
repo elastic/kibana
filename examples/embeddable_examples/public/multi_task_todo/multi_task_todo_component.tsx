@@ -40,30 +40,48 @@ interface Props {
   output: MultiTaskTodoOutput;
 }
 
-export function MultiTaskTodoEmbeddableComponentInner(props: Props) {
-  const renderTasks = (tasks: MultiTaskTodoOutput['tasks']) =>
-    tasks.map(task => (
-      <EuiListGroupItem key={task} data-test-subj="multiTaskTodoTask" label={task} />
-    ));
+function wrapSearchTerms(task: string, search?: string) {
+  if (!search) return task;
+  const parts = task.split(new RegExp(`(${search})`, 'g'));
+  return parts.map((part, i) =>
+    part === search ? (
+      <span key={i} style={{ backgroundColor: 'yellow' }}>
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+}
 
+function renderTasks(tasks: MultiTaskTodoOutput['tasks'], search?: string) {
+  return tasks.map(task => (
+    <EuiListGroupItem
+      key={task}
+      data-test-subj="multiTaskTodoTask"
+      label={wrapSearchTerms(task, search)}
+    />
+  ));
+}
+
+export function MultiTaskTodoEmbeddableComponentInner({
+  input: { title, icon, search },
+  output: { tasks },
+}: Props) {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        {props.input.icon ? (
-          <EuiIcon type={props.input.icon} size="l" />
-        ) : (
-          <EuiAvatar name={props.input.title} size="l" />
-        )}
+        {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title} size="l" />}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGrid columns={1}>
           <EuiFlexItem>
             <EuiText data-test-subj="multiTaskTodoTitle">
-              <h3>{props.input.title}</h3>
+              <h3>{wrapSearchTerms(title, search)}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiListGroup bordered={true}>{renderTasks(props.output.tasks)}</EuiListGroup>
+            <EuiListGroup bordered={true}>{renderTasks(tasks, search)}</EuiListGroup>
           </EuiFlexItem>
         </EuiFlexGrid>
       </EuiFlexItem>

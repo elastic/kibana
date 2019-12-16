@@ -40,21 +40,23 @@ export class EmbeddableRoot extends React.Component<Props> {
 
   public componentDidMount() {
     if (this.root && this.root.current && this.props.embeddable) {
+      this.alreadyMounted = true;
       this.props.embeddable.render(this.root.current);
     }
   }
 
-  public componentWillReceiveProps(newProps: Props) {
-    if (this.root && this.root.current && newProps.embeddable && !this.alreadyMounted) {
+  public componentDidUpdate() {
+    if (this.root && this.root.current && this.props.embeddable && !this.alreadyMounted) {
       this.alreadyMounted = true;
-      newProps.embeddable.render(this.root.current);
+      this.props.embeddable.render(this.root.current);
     }
   }
 
-  public componentWillUnmount() {
-    if (this.props.embeddable) {
-      this.props.embeddable.destroy();
-    }
+  public shouldComponentUpdate(newProps: Props) {
+    return !!(
+      !_.isEqual(newProps, this.props) ||
+      (this.root && this.root.current && newProps.embeddable && !this.alreadyMounted)
+    );
   }
 
   public render() {

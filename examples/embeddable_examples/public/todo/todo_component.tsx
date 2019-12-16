@@ -35,7 +35,21 @@ interface Props {
   output: EmbeddableOutput;
 }
 
-export function TodoEmbeddableComponentInner({ input: { icon, title, task } }: Props) {
+function wrapSearchTerms(task: string, search?: string) {
+  if (!search) return task;
+  const parts = task.split(new RegExp(`(${search})`, 'g'));
+  return parts.map((part, i) =>
+    part === search ? (
+      <span key={i} style={{ backgroundColor: 'yellow' }}>
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+}
+
+export function TodoEmbeddableComponentInner({ input: { icon, title, task, search } }: Props) {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
@@ -45,11 +59,11 @@ export function TodoEmbeddableComponentInner({ input: { icon, title, task } }: P
         <EuiFlexGrid columns={1}>
           <EuiFlexItem>
             <EuiText data-test-subj="todoEmbeddableTitle">
-              <h3>{title}</h3>
+              <h3>{wrapSearchTerms(title || '', search)}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText data-test-subj="todoEmbeddableTask">{task}</EuiText>
+            <EuiText data-test-subj="todoEmbeddableTask">{wrapSearchTerms(task, search)}</EuiText>
           </EuiFlexItem>
         </EuiFlexGrid>
       </EuiFlexItem>

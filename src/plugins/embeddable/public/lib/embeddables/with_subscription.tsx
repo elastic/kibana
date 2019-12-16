@@ -63,8 +63,6 @@ export const withEmbeddableSubscription = <
       if (this.subscription) {
         this.subscription.unsubscribe();
       }
-
-      this.props.embeddable.destroy();
     }
 
     render() {

@@ -32,7 +32,7 @@ export const MULTI_TASK_TODO_EMBEDDABLE = 'MULTI_TASK_TODO_EMBEDDABLE';
 export interface MultiTaskTodoInput extends EmbeddableInput {
   tasks: string[];
   icon?: string;
-  filter?: string;
+  search?: string;
   title: string;
 }
 
@@ -44,12 +44,12 @@ export interface MultiTaskTodoOutput extends EmbeddableOutput {
   tasks: string[];
 }
 
-function getFilteredTasks(tasks: string[], filter?: string) {
+function getFilteredTasks(tasks: string[], search?: string) {
   const filteredTasks: string[] = [];
-  if (filter === undefined) return tasks;
+  if (search === undefined) return tasks;
 
   tasks.forEach(task => {
-    if (task.match(filter)) {
+    if (task.match(search)) {
       filteredTasks.push(task);
     }
   });
@@ -57,34 +57,43 @@ function getFilteredTasks(tasks: string[], filter?: string) {
   return filteredTasks;
 }
 
+function getOutput(input: MultiTaskTodoInput) {
+  const tasks = getFilteredTasks(input.tasks, input.search);
+  return { tasks, hasMatch: tasks.length > 0 || (input.search && input.title.match(input.search)) };
+}
+
 export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, MultiTaskTodoOutput> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
   private subscription: Subscription;
+  private node?: HTMLElement;
 
   constructor(initialInput: MultiTaskTodoInput, parent?: IContainer) {
-    super(
-      initialInput,
-      { tasks: getFilteredTasks(initialInput.tasks, initialInput.filter) },
-      parent
-    );
+    super(initialInput, getOutput(initialInput), parent);
 
     // If you have any output state that changes as a result of input state changes, you
     // should use an subcription.  Here, any time input tasks list, or the input filter
-    // changes, we want to update the output tasks list.
+    // changes, we want to update the output tasks list as well as whether a match has
+    // been found.
     this.subscription = this.getInput$().subscribe(() => {
-      this.updateOutput({
-        tasks: getFilteredTasks(this.input.tasks, this.input.filter),
-      });
+      this.updateOutput(getOutput(this.input));
     });
   }
 
   public render(node: HTMLElement) {
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+    this.node = node;
     ReactDOM.render(<MultiTaskTodoEmbeddableComponent embeddable={this} />, node);
   }
 
   public reload() {}
 
   public destroy() {
+    super.destroy();
     this.subscription.unsubscribe();
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
   }
 }

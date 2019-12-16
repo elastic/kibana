@@ -48,12 +48,6 @@ export class EmbeddableListItem extends React.Component<Props> {
     }
   }
 
-  public componentWillUnmount() {
-    if (this.props.embeddable) {
-      this.props.embeddable.destroy();
-    }
-  }
-
   public render() {
     return (
       <EuiFlexItem>

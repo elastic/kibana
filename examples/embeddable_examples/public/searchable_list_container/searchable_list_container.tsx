@@ -29,15 +29,16 @@ import { SearchableListContainerComponent } from './searchable_list_container_co
 export const SEARCHABLE_LIST_CONTAINER = 'SEARCHABLE_LIST_CONTAINER';
 
 export interface SearchableContainerInput extends ContainerInput {
-  filter?: string;
+  search?: string;
 }
 
 interface ChildInput extends EmbeddableInput {
-  filter?: string;
+  search?: string;
 }
 
 export class SearchableListContainer extends Container<ChildInput, SearchableContainerInput> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
+  private node?: HTMLElement;
 
   constructor(input: SearchableContainerInput, getEmbeddableFactory: GetEmbeddableFactory) {
     super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
@@ -48,11 +49,22 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
   getInheritedInput(id: string) {
     return {
       id,
-      filter: this.getInput().filter,
+      search: this.getInput().search,
     };
   }
 
   public render(node: HTMLElement) {
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+    this.node = node;
     ReactDOM.render(<SearchableListContainerComponent embeddable={this} />, node);
+  }
+
+  public destroy() {
+    super.destroy();
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
   }
 }

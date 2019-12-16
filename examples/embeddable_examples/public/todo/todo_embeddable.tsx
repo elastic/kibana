@@ -18,7 +18,13 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableInput, IContainer } from '../../../../src/plugins/embeddable/public';
+import { Subscription } from 'rxjs';
+import {
+  Embeddable,
+  EmbeddableInput,
+  IContainer,
+  EmbeddableOutput,
+} from '../../../../src/plugins/embeddable/public';
 import { TodoEmbeddableComponent } from './todo_component';
 
 export const TODO_EMBEDDABLE = 'TODO_EMBEDDABLE';
@@ -26,18 +32,44 @@ export const TODO_EMBEDDABLE = 'TODO_EMBEDDABLE';
 export interface TodoInput extends EmbeddableInput {
   task: string;
   icon?: string;
+  search?: string;
 }
 
-export class TodoEmbeddable extends Embeddable<TodoInput> {
+export interface TodoOutput extends EmbeddableOutput {
+  hasMatch: boolean;
+}
+
+function getOutput(input: TodoInput): TodoOutput {
+  return {
+    hasMatch: input.search
+      ? Boolean(input.task.match(input.search) || (input.title && input.title.match(input.search)))
+      : true,
+  };
+}
+
+export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
   // The type of this embeddable. This will be used to find the appropriate factory
   // to instantiate this kind of embeddable.
   public readonly type = TODO_EMBEDDABLE;
+  private subscription: Subscription;
+  private node?: HTMLElement;
 
   constructor(initialInput: TodoInput, parent?: IContainer) {
-    super(initialInput, {}, parent);
+    super(initialInput, getOutput(initialInput), parent);
+
+    // If you have any output state that changes as a result of input state changes, you
+    // should use an subcription.  Here, we use output to indicate whether this task
+    // matches the search string.
+    this.subscription = this.getInput$().subscribe(() => {
+      this.updateOutput(getOutput(this.input));
+    });
   }
 
   public render(node: HTMLElement) {
+    this.node = node;
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
     ReactDOM.render(<TodoEmbeddableComponent embeddable={this} />, node);
   }
 
@@ -45,4 +77,12 @@ export class TodoEmbeddable extends Embeddable<TodoInput> {
    * Not relevant.
    */
   public reload() {}
+
+  public destroy() {
+    super.destroy();
+    this.subscription.unsubscribe();
+    if (this.node) {
+      ReactDOM.unmountComponentAtNode(this.node);
+    }
+  }
 }
