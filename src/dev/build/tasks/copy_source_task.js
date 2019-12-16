@@ -42,6 +42,7 @@ export const CopySourceTask = {
         '!src/es_archiver/**',
         '!src/functional_test_runner/**',
         '!src/dev/**',
+        'src/dev/apm.js',
         'bin/**',
         'typings/**',
         'webpackShims/**',
