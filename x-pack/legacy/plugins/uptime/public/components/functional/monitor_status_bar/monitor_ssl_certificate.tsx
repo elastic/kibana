@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import moment from 'moment';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,34 +25,31 @@ const TextContainer = styled.div`
 `;
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
-  const certificateValidity: string | undefined = get(
-    tls,
-    'certificate_not_valid_after',
-    undefined
-  );
+  const certValidityDate = new Date(tls?.certificate_not_valid_after ?? '');
 
-  const validExpiryDate = certificateValidity && !isNaN(new Date(certificateValidity).valueOf());
-
-  return validExpiryDate && certificateValidity ? (
+  return !isNaN(certValidityDate.valueOf()) ? (
     <>
       <EuiSpacer size="s" />
       <TextContainer>
         <EuiText
-          color="subdued"
+          color="secondary"
           grow={false}
           size="s"
           aria-label={i18n.translate(
             'xpack.uptime.monitorStatusBar.sslCertificateExpiry.ariaLabel',
             {
-              defaultMessage: 'SSL certificate expires',
+              defaultMessage: 'SSL certificate expires {validityDate}',
+              values: { validityDate: moment(new Date(certValidityDate).valueOf()).fromNow() },
             }
           )}
         >
           <FormattedMessage
             id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.content"
-            defaultMessage="SSL certificate expires {certificateValidity}"
+            defaultMessage="SSL certificate expires {emphasizedText}"
             values={{
-              certificateValidity: moment(new Date(certificateValidity).valueOf()).fromNow(),
+              emphasizedText: (
+                <strong>{moment(new Date(certValidityDate).valueOf()).fromNow()}</strong>
+              ),
             }}
           />
         </EuiText>
