@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
   EuiTextColor,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
@@ -64,10 +64,13 @@ export function NoData(props) {
             <EuiSpacer size="m" />
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
-            { !props.isCloudEnabled ? (
+            {!props.isCloudEnabled ? (
               <Fragment>
                 <EuiHorizontalRule size="half" />
-                <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>
+                <EuiButtonEmpty
+                  isDisabled={props.isCollectionEnabledUpdated}
+                  onClick={() => setUseInternalCollection(false)}
+                >
                   <EuiTextColor color="default">
                     <FormattedMessage
                       id="xpack.monitoring.noData.setupMetricbeatInstead"
@@ -76,7 +79,7 @@ export function NoData(props) {
                   </EuiTextColor>
                 </EuiButtonEmpty>
               </Fragment>
-            ) : null }
+            ) : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
@@ -112,11 +115,7 @@ export function NoData(props) {
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceAround"
-            gutterSize="s"
-          >
+          <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={true}
@@ -133,7 +132,10 @@ export function NoData(props) {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule size="half" />
-          <EuiButtonEmpty onClick={() => setUseInternalCollection(true)} data-test-subj="useInternalCollection">
+          <EuiButtonEmpty
+            onClick={() => setUseInternalCollection(true)}
+            data-test-subj="useInternalCollection"
+          >
             <EuiTextColor color="subdued">
               <FormattedMessage
                 id="xpack.monitoring.noData.setupInternalInstead"
@@ -151,5 +153,5 @@ NoData.propTypes = {
   changePath: PropTypes.func,
   isLoading: PropTypes.bool.isRequired,
   reason: PropTypes.object,
-  checkMessage: PropTypes.string
+  checkMessage: PropTypes.string,
 };

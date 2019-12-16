@@ -19,12 +19,8 @@
 
 import { createGunzip } from 'zlib';
 import { PassThrough } from 'stream';
-import { createFilterStream } from  '../../../legacy/utils/streams/filter_stream';
-import {
-  createSplitStream,
-  createReplaceStream,
-  createMapStream,
-} from '../../../legacy/utils';
+import { createFilterStream } from '../../../legacy/utils/streams/filter_stream';
+import { createSplitStream, createReplaceStream, createMapStream } from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 

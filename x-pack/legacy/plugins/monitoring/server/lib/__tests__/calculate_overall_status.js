@@ -9,23 +9,19 @@ import { calculateOverallStatus } from '../calculate_overall_status';
 
 describe('Calculate Kibana Cluster Helath', () => {
   it('health status combined from multiple instances', () => {
-    const greens = [
-      ['green', 'green', null],
-      ['green', 'green'],
-      ['green']
-    ];
+    const greens = [['green', 'green', null], ['green', 'green'], ['green']];
     const yellows = [
       ['yellow', 'green', null],
       ['yellow', 'green'],
       ['green', 'yellow'],
-      ['yellow']
+      ['yellow'],
     ];
     const reds = [
       ['green', 'red', 'green', null],
       ['green', 'red', 'green'],
       ['red', 'yellow', 'green'],
       ['yellow', 'red', 'yellow'],
-      ['red']
+      ['red'],
     ];
 
     greens.forEach(set => {

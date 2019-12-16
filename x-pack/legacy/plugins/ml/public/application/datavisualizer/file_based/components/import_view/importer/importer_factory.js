@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { CsvImporter } from './csv_importer';
 import { SstImporter } from './sst_importer';
 import { NdjsonImporter } from './ndjson_importer';
 
 export function importerFactory(format, results, settings) {
-
   switch (format) {
     case 'delimited':
       return new CsvImporter(results, settings);

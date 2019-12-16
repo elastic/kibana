@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
@@ -14,19 +14,21 @@ export default function ({ getService }) {
     after(async () => {
       // turn off collection
       const disableCollection = {
-        'persistent':
-        {
+        persistent: {
           xpack: {
             monitoring: {
               collection: {
-                enabled: false
-              }
-            }
-          }
-        }
+                enabled: false,
+              },
+            },
+          },
+        },
       };
 
-      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
+      await esSupertest
+        .put('/_cluster/settings')
+        .send(disableCollection)
+        .expect(200);
       await esSupertest.delete('/.monitoring-*').expect(200);
     });
 
@@ -36,12 +38,13 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body).to.eql({ // returns same response every run
+      expect(body).to.eql({
+        // returns same response every run
         acknowledged: true,
         persistent: {
-          xpack: { monitoring: { collection: { enabled: 'true' } } }
+          xpack: { monitoring: { collection: { enabled: 'true' } } },
         },
-        transient: {}
+        transient: {},
       });
     });
   });

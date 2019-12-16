@@ -8,16 +8,11 @@ import { connect } from 'react-redux';
 
 import { isUpdating } from '../../../store/selectors';
 
-import {
-  startJobs,
-  stopJobs,
-  deleteJobs,
-  cloneJob
-} from '../../../store/actions';
+import { startJobs, stopJobs, deleteJobs, cloneJob } from '../../../store/actions';
 
 import { JobActionMenu as JobActionMenuComponent } from './job_action_menu';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     isUpdating: isUpdating(state),
   };
@@ -35,7 +30,7 @@ const mapDispatchToProps = (dispatch, { jobs }) => {
     deleteJobs: () => {
       dispatch(deleteJobs(jobIds));
     },
-    cloneJob: (jobConfig) => {
+    cloneJob: jobConfig => {
       dispatch(cloneJob(jobConfig));
     },
   };

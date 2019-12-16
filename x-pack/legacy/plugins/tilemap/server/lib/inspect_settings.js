@@ -5,10 +5,10 @@
  */
 
 export function inspectSettings(xpackInfo) {
-
   if (!xpackInfo || !xpackInfo.isAvailable()) {
     return {
-      message: 'You cannot use the Tilemap Plugin because license information is not available at this time.'
+      message:
+        'You cannot use the Tilemap Plugin because license information is not available at this time.',
     };
   }
 
@@ -19,8 +19,7 @@ export function inspectSettings(xpackInfo) {
     license: {
       uid: xpackInfo.license.getUid(),
       active: xpackInfo.license.isActive(),
-      valid: xpackInfo.license.isOneOf(['trial', 'standard', 'basic', 'gold', 'platinum'])
-    }
+      valid: xpackInfo.license.isOneOf(['trial', 'standard', 'basic', 'gold', 'platinum']),
+    },
   };
-
 }

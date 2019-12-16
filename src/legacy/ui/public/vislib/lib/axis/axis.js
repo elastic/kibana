@@ -41,12 +41,16 @@ export class Axis extends ErrorHandler {
     this.axisTitle = new AxisTitle(this.axisConfig);
     this.axisLabels = new AxisLabels(this.axisConfig, this.axisScale);
 
-    this.stack = d3.layout.stack()
+    this.stack = d3.layout
+      .stack()
       .x(d => {
         return d.x;
       })
       .y(d => {
-        if (typeof this.axisConfig.get('scale.offset') === 'function' && this.axisConfig.get('scale.offset').name === 'expand') {
+        if (
+          typeof this.axisConfig.get('scale.offset') === 'function' &&
+          this.axisConfig.get('scale.offset').name === 'expand'
+        ) {
           return Math.abs(d.y);
         }
         return d.y;
@@ -74,13 +78,18 @@ export class Axis extends ErrorHandler {
   render() {
     const elSelector = this.axisConfig.get('elSelector');
     const rootEl = this.axisConfig.get('rootEl');
-    d3.select(rootEl).selectAll(elSelector).call(this.draw());
+    d3.select(rootEl)
+      .selectAll(elSelector)
+      .call(this.draw());
   }
 
   destroy() {
     const elSelector = this.axisConfig.get('elSelector');
     const rootEl = this.axisConfig.get('rootEl');
-    $(rootEl).find(elSelector).find('svg').remove();
+    $(rootEl)
+      .find(elSelector)
+      .find('svg')
+      .remove();
     this.axisTitle.destroy();
   }
 
@@ -119,7 +128,8 @@ export class Axis extends ErrorHandler {
   }
 
   tickScale(length) {
-    const yTickScale = d3.scale.linear()
+    const yTickScale = d3.scale
+      .linear()
       .clamp(true)
       .domain([20, 40, 1000])
       .range([0, 3, 11]);
@@ -142,18 +152,26 @@ export class Axis extends ErrorHandler {
     const position = config.get('position');
     const axisPadding = 5;
 
-    return function (selection) {
+    return function(selection) {
       const text = selection.selectAll('.tick text');
       const lengths = [];
 
       text.each(function textWidths() {
-        lengths.push((() => {
-          if (config.isHorizontal()) {
-            return d3.select(this.parentNode).node().getBBox().height;
-          } else {
-            return d3.select(this.parentNode).node().getBBox().width;
-          }
-        })());
+        lengths.push(
+          (() => {
+            if (config.isHorizontal()) {
+              return d3
+                .select(this.parentNode)
+                .node()
+                .getBBox().height;
+            } else {
+              return d3
+                .select(this.parentNode)
+                .node()
+                .getBBox().width;
+            }
+          })()
+        );
       });
       let length = lengths.length > 0 ? _.max(lengths) : 0;
       length += axisPadding;
@@ -161,22 +179,23 @@ export class Axis extends ErrorHandler {
       if (config.isHorizontal()) {
         selection.attr('height', Math.ceil(length));
         if (position === 'top') {
-          selection.select('g')
+          selection
+            .select('g')
             .attr('transform', `translate(0, ${length - parseInt(style.lineWidth)})`);
-          selection.select('path')
-            .attr('transform', 'translate(1,0)');
+          selection.select('path').attr('transform', 'translate(1,0)');
         }
         if (config.get('type') === 'value') {
           const spacerNodes = $(chartEl).find(`.visAxis__spacer--y-${position}`);
-          const elHeight = $(chartEl).find(`.visAxis__column--${position}`).height();
+          const elHeight = $(chartEl)
+            .find(`.visAxis__column--${position}`)
+            .height();
           spacerNodes.height(elHeight);
         }
       } else {
         const axisWidth = Math.ceil(length);
         selection.attr('width', axisWidth);
         if (position === 'left') {
-          selection.select('g')
-            .attr('transform', `translate(${axisWidth},0)`);
+          selection.select('g').attr('transform', `translate(${axisWidth},0)`);
         }
       }
     };
@@ -194,12 +213,16 @@ export class Axis extends ErrorHandler {
     const config = this.axisConfig;
     const style = config.get('style');
 
-    return function (selection) {
+    return function(selection) {
       const n = selection[0].length;
-      if (config.get('show') && self.axisTitle && ['left', 'top'].includes(config.get('position'))) {
+      if (
+        config.get('show') &&
+        self.axisTitle &&
+        ['left', 'top'].includes(config.get('position'))
+      ) {
         self.axisTitle.render(selection);
       }
-      selection.each(function () {
+      selection.each(function() {
         const el = this;
         const div = d3.select(el);
         const width = $(el).width();
@@ -211,7 +234,8 @@ export class Axis extends ErrorHandler {
         const axis = self.getAxis(length);
 
         if (config.get('show')) {
-          const svg = div.append('svg')
+          const svg = div
+            .append('svg')
             .attr('focusable', 'false')
             .attr('width', width)
             .attr('height', height);
@@ -219,17 +243,20 @@ export class Axis extends ErrorHandler {
           svgs.push(svg);
 
           const axisClass = self.axisConfig.isHorizontal() ? 'x' : 'y';
-          svg.append('g')
+          svg
+            .append('g')
             .attr('class', `${axisClass} axis ${config.get('id')}`)
             .call(axis);
 
           const container = svg.select('g.axis').node();
           if (container) {
-            svg.select('path')
+            svg
+              .select('path')
               .style('stroke', style.color)
               .style('stroke-width', style.lineWidth)
               .style('stroke-opacity', style.opacity);
-            svg.selectAll('line')
+            svg
+              .selectAll('line')
               .style('stroke', style.tickColor)
               .style('stroke-width', style.tickWidth)
               .style('stroke-opacity', style.opacity);

@@ -12,7 +12,7 @@ export class Settings {
   static fromUpstreamJson(json) {
     const actionTypes = json.action_types;
     const props = {
-      actionTypes
+      actionTypes,
     };
     return new Settings(props);
   }

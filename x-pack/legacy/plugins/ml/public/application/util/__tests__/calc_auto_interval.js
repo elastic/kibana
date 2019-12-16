@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import moment from 'moment';
 
 import { timeBucketsCalcAutoIntervalProvider } from '../calc_auto_interval';
 
-
 describe('ML - calc auto intervals', () => {
-
   const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
   describe('near interval', () => {
@@ -141,5 +137,4 @@ describe('ML - calc auto intervals', () => {
       expect(interval.asHours()).to.be(8);
     });
   });
-
 });
