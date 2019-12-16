@@ -4,6 +4,7 @@ library 'kibana-pipeline-library'
 // kibanaLibrary.load()
 
 def BRANCH = params.BRANCH ?: 'master' // TODO
+BRANCH = BRANCH != 'master' ? BRANCH : 'c1d075a7dab901bc3c80dec55ef74cc0e64b87b9'; // Last known working 8.0.0 version, TODO: Remove once a verified snapshot exists
 
 if (!BRANCH) {
   error "Parameter 'BRANCH' must be specified."
@@ -13,8 +14,7 @@ timeout(time: 120, unit: 'MINUTES') {
   timestamps {
     ansiColor('xterm') {
       node('linux && immutable') {
-        def scmVars = checkoutEs('master')
-        print scmVars
+        def scmVars = checkoutEs(BRANCH)
         def GIT_COMMIT = scmVars.GIT_COMMIT
         def GIT_COMMIT_SHORT = sh(script: "git rev-parse --short ${GIT_COMMIT}", returnStdout: true).trim()
 
@@ -73,27 +73,19 @@ timeout(time: 120, unit: 'MINUTES') {
 }
 
 def checkoutEs(branch) {
-  // TODO wrap in a new retryWithDelay(15, 8){}
-  return checkout([
-    $class: 'GitSCM',
-    branches: [[name: branch]],
-    doGenerateSubmoduleConfigurations: false,
-    extensions: [
-      [
-        $class: 'CloneOption',
-        noTags: false,
-        reference: '/var/lib/jenkins/.git-references/elasticsearch.git',
-        shallow: true
-      ]
-    ],
-    submoduleCfg: [],
-    userRemoteConfigs: [[
-      credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
-      name: 'origin',
-      refspec: '+refs/heads/master:refs/remotes/origin/master',
-      url: 'git@github.com:elastic/elasticsearch',
-    ]],
-  ])
+  retryWithDelay(8, 15) {
+    return checkout([
+      $class: 'GitSCM',
+      branches: [[name: branch]],
+      doGenerateSubmoduleConfigurations: false,
+      extensions: [],
+      submoduleCfg: [],
+      userRemoteConfigs: [[
+        credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
+        url: 'git@github.com:elastic/elasticsearch',
+      ]],
+    ])
+  }
 }
 
 def upload(destination, pattern) {
@@ -107,8 +99,16 @@ def upload(destination, pattern) {
 }
 
 def buildArchives(destination) {
+  def props = readProperties file: '.ci/java-versions.properties'
   withEnv([
-      "PATH=/var/lib/jenkins/.java/openjdk13/bin:${env.PATH}", // Probably won't even need this if this gets wrapped in runbld
+      "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}", // Probably won't even need this if this gets wrapped in runbld
+
+      // these jenkins env vars trigger some automation in ES that we don't want
+      "BUILD_NUMBER=",
+      "JENKINS_URL=",
+      "BUILD_URL=",
+      "JOB_NAME=",
+      "NODE_NAME=",
   ]) {
     sh """
       ./gradlew -p distribution/archives assemble --parallel
