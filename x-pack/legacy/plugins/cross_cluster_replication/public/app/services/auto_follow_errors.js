@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export const parseAutoFollowError = (error) => {
+export const parseAutoFollowError = error => {
   if (!error.leaderIndex) {
     return null;
   }
@@ -16,7 +15,7 @@ export const parseAutoFollowError = (error) => {
   return {
     id,
     leaderIndex,
-    autoFollowException
+    autoFollowException,
   };
 };
 
@@ -24,7 +23,7 @@ export const parseAutoFollowError = (error) => {
  * Parse an array of auto-follow pattern errors and returns
  * an object where each key is an auto-follow pattern id
  */
-export const parseAutoFollowErrors = (recentAutoFollowErrors, maxErrorsToShow = 5) => (
+export const parseAutoFollowErrors = (recentAutoFollowErrors, maxErrorsToShow = 5) =>
   recentAutoFollowErrors
     .map(parseAutoFollowError)
     .filter(error => error !== null)
@@ -39,5 +38,4 @@ export const parseAutoFollowErrors = (recentAutoFollowErrors, maxErrorsToShow = 
 
       byId[error.id].push(error);
       return byId;
-    }, {})
-);
+    }, {});

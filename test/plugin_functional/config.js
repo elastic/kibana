@@ -21,12 +21,14 @@ import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
+  const plugins = allFiles.filter(file =>
+    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
+  );
 
   return {
     testFiles: [
@@ -45,7 +47,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../es_archives'),
     },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
@@ -56,7 +58,9 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugins via `--plugin-path` flag.
-        ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
+        ...plugins.map(
+          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+        ),
         '--env.name=development',
       ],
     },

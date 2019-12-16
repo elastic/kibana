@@ -11,14 +11,9 @@ import React from 'react';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 
-
 describe('ExplorerChartLabelBadge', () => {
-
   test('Render entity label badge.', () => {
-
     const wrapper = shallow(<ExplorerChartLabelBadge entity={seriesConfig.entityFields[0]} />);
     expect(wrapper).toMatchSnapshot();
-
   });
-
 });
