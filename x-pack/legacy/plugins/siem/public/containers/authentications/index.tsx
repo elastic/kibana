@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -18,7 +19,7 @@ import {
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { useUiSetting } from '../../lib/kibana';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { authenticationsQuery } from './index.gql_query';
@@ -48,7 +49,7 @@ export interface AuthenticationsComponentReduxProps {
   limit: number;
 }
 
-type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
+type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps & WithKibanaProps;
 
 class AuthenticationsComponentQuery extends QueryTemplatePaginated<
   AuthenticationsProps,
@@ -63,6 +64,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       filterQuery,
       id = ID,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
@@ -77,7 +79,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       },
       pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
-      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     };
     return (
@@ -142,4 +144,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const AuthenticationsQuery = connect(makeMapStateToProps)(AuthenticationsComponentQuery);
+export const AuthenticationsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(AuthenticationsComponentQuery);

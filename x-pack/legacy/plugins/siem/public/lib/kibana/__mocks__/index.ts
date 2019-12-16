@@ -9,9 +9,11 @@ import {
   createUseUiSettingMock,
   createUseUiSetting$Mock,
   createUseKibanaMock,
+  createWithKibanaMock,
 } from '../../../mock/kibana_react';
 
 export const useKibana = jest.fn(createUseKibanaMock());
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());

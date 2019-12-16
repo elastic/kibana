@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -16,7 +17,7 @@ import {
   UncommonProcessesEdges,
 } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
-import { useUiSetting } from '../../lib/kibana';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -48,7 +49,7 @@ export interface UncommonProcessesComponentReduxProps {
   limit: number;
 }
 
-type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
+type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps & WithKibanaProps;
 
 class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
   UncommonProcessesProps,
@@ -63,13 +64,14 @@ class UncommonProcessesComponentQuery extends QueryTemplatePaginated<
       filterQuery,
       id = ID,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
       startDate,
     } = this.props;
     const variables: GetUncommonProcessesQuery.Variables = {
-      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       inspect: isInspected,
       pagination: generateTablePaginationOptions(activePage, limit),
@@ -142,4 +144,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const UncommonProcessesQuery = connect(makeMapStateToProps)(UncommonProcessesComponentQuery);
+export const UncommonProcessesQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(UncommonProcessesComponentQuery);

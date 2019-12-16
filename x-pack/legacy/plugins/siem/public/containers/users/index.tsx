@@ -8,6 +8,7 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -18,7 +19,7 @@ import {
   UsersSortField,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { useUiSetting } from '../../lib/kibana';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -53,7 +54,7 @@ export interface UsersComponentReduxProps {
   sort: UsersSortField;
 }
 
-type UsersProps = OwnProps & UsersComponentReduxProps;
+type UsersProps = OwnProps & UsersComponentReduxProps & WithKibanaProps;
 
 class UsersComponentQuery extends QueryTemplatePaginated<
   UsersProps,
@@ -70,6 +71,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       id = ID,
       ip,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
@@ -77,7 +79,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       sort,
     } = this.props;
     const variables: GetUsersQuery.Variables = {
-      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
@@ -154,4 +156,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const UsersQuery = connect(makeMapStateToProps)(UsersComponentQuery);
+export const UsersQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(UsersComponentQuery);

@@ -19,7 +19,7 @@ import {
   FlowTargetSourceDest,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { useUiSetting } from '../../lib/kibana';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -53,7 +53,7 @@ export interface TlsComponentReduxProps {
   sort: TlsSortField;
 }
 
-type TlsProps = OwnProps & TlsComponentReduxProps;
+type TlsProps = OwnProps & TlsComponentReduxProps & WithKibanaProps;
 
 class TlsComponentQuery extends QueryTemplatePaginated<
   TlsProps,
@@ -70,6 +70,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       id = ID,
       ip,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
@@ -77,7 +78,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       sort,
     } = this.props;
     const variables: GetTlsQuery.Variables = {
-      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
@@ -152,6 +153,7 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const TlsQuery = compose<React.ComponentClass<OwnProps>>(connect(makeMapStateToProps))(
-  TlsComponentQuery
-);
+export const TlsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(TlsComponentQuery);

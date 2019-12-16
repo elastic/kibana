@@ -7,11 +7,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { QueryBar, QueryBarComponentProps } from '.';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
+import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
+import { QueryBar, QueryBarComponentProps } from '.';
 
 jest.mock('../../lib/kibana');
 

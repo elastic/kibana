@@ -74,6 +74,15 @@ export const createUseKibanaMock = () => {
   return () => ({ services });
 };
 
+export const createWithKibanaMock = () => {
+  const kibana = createUseKibanaMock()();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (Component: any) => (props: any) => {
+    return <Component {...props} kibana={kibana} />;
+  };
+};
+
 export const createKibanaContextProviderMock = () => {
   const kibana = createUseKibanaMock()();
 

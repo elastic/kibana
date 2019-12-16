@@ -9,6 +9,7 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -21,7 +22,7 @@ import {
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-import { useUiSetting } from '../../lib/kibana';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 
 import { HostsTableQuery } from './hosts_table.gql_query';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
@@ -57,7 +58,7 @@ export interface HostsComponentReduxProps {
   direction: Direction;
 }
 
-type HostsProps = OwnProps & HostsComponentReduxProps;
+type HostsProps = OwnProps & HostsComponentReduxProps & WithKibanaProps;
 
 class HostsComponentQuery extends QueryTemplatePaginated<
   HostsProps,
@@ -83,12 +84,14 @@ class HostsComponentQuery extends QueryTemplatePaginated<
       direction,
       filterQuery,
       endDate,
+      kibana,
       limit,
       startDate,
       skip,
       sourceId,
       sortField,
     } = this.props;
+    const defaultIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
 
     const variables: GetHostsTableQuery.Variables = {
       sourceId,
@@ -103,7 +106,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
       },
       pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
-      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex,
       inspect: isInspected,
     };
     return (
@@ -174,4 +177,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsQuery = connect(makeMapStateToProps)(HostsComponentQuery);
+export const HostsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(HostsComponentQuery);

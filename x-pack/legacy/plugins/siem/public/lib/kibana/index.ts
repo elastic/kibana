@@ -9,6 +9,12 @@ import {
   useKibana,
   useUiSetting,
   useUiSetting$,
+  withKibana,
 } from '../../../../../../../src/plugins/kibana_react/public';
+import { StartCore, StartPlugins } from '../../apps/plugin';
 
-export { KibanaContextProvider, useKibana, useUiSetting, useUiSetting$ };
+export interface WithKibanaProps {
+  kibana: { services: StartCore & StartPlugins };
+}
+
+export { KibanaContextProvider, useKibana, useUiSetting, useUiSetting$, withKibana };
