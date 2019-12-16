@@ -98,19 +98,19 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       },
       label: {
         options: {
-          value: ''
+          value: '',
         },
         type: 'STATIC',
       },
       labelColor: {
         options: {
-          color: '#000000'
+          color: '#000000',
         },
         type: 'STATIC',
       },
       labelSize: {
         options: {
-          size: 14
+          size: 14,
         },
         type: 'STATIC',
       },

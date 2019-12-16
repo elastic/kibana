@@ -89,20 +89,20 @@ export function getDefaultStaticProperties(mapColors = []) {
     [VECTOR_STYLES.LABEL]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        value: ''
-      }
+        value: '',
+      },
     },
     [VECTOR_STYLES.LABEL_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        color: isDarkMode ? '#FFFFFF' : '#000000'
-      }
+        color: isDarkMode ? '#FFFFFF' : '#000000',
+      },
     },
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 14
-      }
+        size: 14,
+      },
     },
   };
 }
@@ -169,7 +169,7 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         field: undefined,
-      }
+      },
     },
     [VECTOR_STYLES.LABEL_COLOR]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
@@ -179,8 +179,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
@@ -191,8 +191,8 @@ export function getDefaultDynamicProperties() {
         fieldMetaOptions: {
           isEnabled: true,
           sigma: DEFAULT_SIGMA,
-        }
-      }
+        },
+      },
     },
   };
 }

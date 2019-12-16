@@ -43,7 +43,6 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
-
   supportsFeatureState() {
     return this.getStyleName() !== VECTOR_STYLES.LABEL_SIZE;
   }
@@ -112,7 +111,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
     const lookup = this.supportsFeatureState() ? 'feature-state' : 'get';
-    return   [
+    return [
       'interpolate',
       ['linear'],
       ['coalesce', [lookup, targetName], 0],

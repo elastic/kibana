@@ -32,15 +32,15 @@ export function getVectorStyleLabel(styleName) {
       });
     case VECTOR_STYLES.LABEL:
       return i18n.translate('xpack.maps.styles.vector.labelLabel', {
-        defaultMessage: 'Label'
+        defaultMessage: 'Label',
       });
     case VECTOR_STYLES.LABEL_COLOR:
       return i18n.translate('xpack.maps.styles.vector.labelColorLabel', {
-        defaultMessage: 'Label color'
+        defaultMessage: 'Label color',
       });
     case VECTOR_STYLES.LABEL_SIZE:
       return i18n.translate('xpack.maps.styles.vector.labelSizeLabel', {
-        defaultMessage: 'Label size'
+        defaultMessage: 'Label size',
       });
     default:
       return styleName;
