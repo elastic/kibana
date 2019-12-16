@@ -18,6 +18,7 @@
  */
 
 import { extractReferences, injectReferences } from './saved_visualization_references';
+import { VisSavedObject } from '../embeddable/visualize_embeddable';
 
 describe('extractReferences', () => {
   test('extracts nothing if savedSearchId is empty', () => {
@@ -26,6 +27,7 @@ describe('extractReferences', () => {
       attributes: {
         foo: true,
       },
+      references: [],
     };
     const updatedDoc = extractReferences(doc);
     expect(updatedDoc).toMatchInlineSnapshot(`
@@ -45,6 +47,7 @@ Object {
         foo: true,
         savedSearchId: '123',
       },
+      references: [],
     };
     const updatedDoc = extractReferences(doc);
     expect(updatedDoc).toMatchInlineSnapshot(`
@@ -83,6 +86,7 @@ Object {
           },
         }),
       },
+      references: [],
     };
     const updatedDoc = extractReferences(doc);
 
@@ -108,13 +112,13 @@ describe('injectReferences', () => {
   test('injects nothing when savedSearchRefName is null', () => {
     const context = {
       id: '1',
-      foo: true,
-    };
+      title: 'test',
+    } as VisSavedObject;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+  "title": "test,
 }
 `);
   });
@@ -122,7 +126,7 @@ Object {
   test('injects references into context', () => {
     const context = {
       id: '1',
-      foo: true,
+      title: 'test',
       savedSearchRefName: 'search_0',
       visState: {
         params: {
@@ -137,7 +141,7 @@ Object {
           ],
         },
       },
-    };
+    } as VisSavedObject;
     const references = [
       {
         name: 'search_0',
@@ -153,9 +157,9 @@ Object {
     injectReferences(context, references);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
   "savedSearchId": "123",
+  "title": "test",
   "visState": Object {
     "params": Object {
       "controls": Array [
@@ -176,9 +180,9 @@ Object {
   test(`fails when it can't find the saved search reference in the array`, () => {
     const context = {
       id: '1',
-      foo: true,
       savedSearchRefName: 'search_0',
-    };
+      title: 'test',
+    } as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find saved search reference \\"search_0\\""`
     );
@@ -187,6 +191,7 @@ Object {
   test(`fails when it can't find the index pattern reference in the array`, () => {
     const context = {
       id: '1',
+      title: 'test',
       visState: {
         params: {
           controls: [
@@ -197,7 +202,7 @@ Object {
           ],
         },
       },
-    };
+    } as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find index pattern reference \\"control_0_index_pattern\\""`
     );

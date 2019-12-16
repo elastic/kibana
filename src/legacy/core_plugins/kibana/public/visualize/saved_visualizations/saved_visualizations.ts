@@ -20,21 +20,13 @@ import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/saved_objects';
-// @ts-ignore
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 const app = uiModules.get('app/visualize');
-
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedVisualizations',
-  title: 'visualizations',
-});
 
 app.service('savedVisualizations', function() {
   const savedObjectsClient = npStart.core.savedObjects.client;
@@ -44,59 +36,51 @@ app.service('savedVisualizations', function() {
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
   };
-  const visTypes = visualizations.types;
-  const SavedVis = createSavedVisClass(services);
-  const urlFor = (id: string) => {
-    return `#/visualize/edit/${encodeURIComponent(id)}`;
-  };
-  const saveVisualizationLoader = new SavedObjectLoader(
-    SavedVis,
-    savedObjectsClient,
-    npStart.core.chrome
-  );
+  class SavedObjectLoaderVisualize extends SavedObjectLoader {
+    mapHitSource = (source: Record<string, any>, id: string) => {
+      const visTypes = visualizations.types;
+      source.id = id;
+      source.url = this.urlFor(id);
 
-  saveVisualizationLoader.mapHitSource = (source: any, id: string) => {
-    source.id = id;
-    source.url = urlFor(id);
+      let typeName = source.typeName;
+      if (source.visState) {
+        try {
+          typeName = JSON.parse(String(source.visState)).type;
+        } catch (e) {
+          /* missing typename handled below */
+        } // eslint-disable-line no-empty
+      }
 
-    let typeName = source.typeName;
-    if (source.visState) {
-      try {
-        typeName = JSON.parse(source.visState).type;
-      } catch (e) {
-        /* missing typename handled below */
-      } // eslint-disable-line no-empty
-    }
+      if (!typeName || !visTypes.get(typeName)) {
+        source.error = 'Unknown visualization type';
+        return source;
+      }
 
-    if (!typeName || !visTypes.get(typeName)) {
-      source.error = 'Unknown visualization type';
+      source.type = visTypes.get(typeName);
+      source.savedObjectType = 'visualization';
+      source.icon = source.type.icon;
+      source.image = source.type.image;
+      source.typeTitle = source.type.title;
+      source.editUrl = `#${createVisualizeEditUrl(id)}`;
+
       return source;
+    };
+    urlFor(id: string) {
+      return `#/visualize/edit/${encodeURIComponent(id)}`;
     }
+    // This behaves similarly to find, except it returns visualizations that are
+    // defined as appExtensions and which may not conform to type: visualization
+    findListItems(search: string = '', size: number = 100) {
+      return findListItems({
+        search,
+        size,
+        mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
+        savedObjectsClient,
+        visTypes: visualizations.types.getAliases(),
+      });
+    }
+  }
+  const SavedVis = createSavedVisClass(services);
 
-    source.type = visTypes.get(typeName);
-    source.savedObjectType = 'visualization';
-    source.icon = source.type.icon;
-    source.image = source.type.image;
-    source.typeTitle = source.type.title;
-    source.editUrl = `#${createVisualizeEditUrl(id)}`;
-
-    return source;
-  };
-
-  saveVisualizationLoader.urlFor = (id: string) => urlFor(id);
-
-  // This behaves similarly to find, except it returns visualizations that are
-  // defined as appExtensions and which may not conform to type: visualization
-  // @ts-ignore
-  saveVisualizationLoader.findListItems = function(search = '', size = 100) {
-    return findListItems({
-      search,
-      size,
-      mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
-      savedObjectsClient,
-      visTypes: visualizations.types.getAliases(),
-    });
-  };
-
-  return saveVisualizationLoader;
+  return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient, npStart.core.chrome);
 });

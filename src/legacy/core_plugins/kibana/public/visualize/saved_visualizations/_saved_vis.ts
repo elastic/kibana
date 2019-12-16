@@ -108,13 +108,6 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
     public static searchSource = true;
-    /**
-    public savedSearchId?: string;
-    public vis?: any;
-    public visState?: any;
-    public savedSearch?: SavedSearch;
-    public searchSource?: SearchSourceContract;
-     **/
 
     constructor(opts: Record<string, unknown> | string = {}) {
       if (typeof opts !== 'object') {
