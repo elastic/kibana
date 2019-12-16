@@ -8,13 +8,7 @@ import fetch from 'node-fetch';
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
-import {
-  AssetReference,
-  InstallationStatus,
-  RegistryPackage,
-  CreateFakeDatasource,
-  Dataset,
-} from '../../common/types';
+import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
@@ -114,6 +108,13 @@ async function getDatasource(options: {
     .catch(e => undefined);
 
   return datasource?.attributes;
+}
+
+interface CreateFakeDatasource {
+  pkg: RegistryPackage;
+  datasourceName: string;
+  datasets: Dataset[];
+  assets: Asset[] | undefined;
 }
 
 function createFakeDatasource({
