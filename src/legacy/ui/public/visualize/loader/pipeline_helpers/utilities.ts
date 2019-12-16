@@ -45,8 +45,13 @@ const getConfig = (key: string, defaultOverride?: any): any =>
   npStart.core.uiSettings.get(key, defaultOverride);
 const DefaultFieldFormat = FieldFormat.from(identity);
 
-const getFieldFormat = (id?: IFieldFormatId, params: object = {}): FieldFormat => {
+const getFieldFormat = (id?: IFieldFormatId, params: Record<string, any> = {}): FieldFormat => {
   const fieldFormats = npStart.plugins.data.fieldFormats;
+
+  params.parsedUrl = {
+    origin: window.location.origin,
+    pathname: window.location.pathname,
+  };
 
   if (id) {
     const Format = fieldFormats.getType(id);

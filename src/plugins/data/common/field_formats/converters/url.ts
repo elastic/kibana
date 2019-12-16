@@ -134,9 +134,10 @@ export class UrlFormat extends FieldFormat {
 
   textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, parsedUrl) => {
+  htmlConvert: HtmlContextTypeConvert = (rawValue, field, hit, rawUrl) => {
     const url = escape(this.formatUrl(rawValue));
     const label = escape(this.formatLabel(rawValue, url));
+    const parsedUrl = rawUrl || this.params().parsedUrl;
 
     switch (this.param('type')) {
       case 'audio':
