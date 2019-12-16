@@ -58,6 +58,8 @@ APM::
 * Fixes watcher integration {pull}51721[#51721]
 Canvas::
 * Fixes axisConfig position argument UI {pull}50717[#50717]
+Discover::
+* Fixes histogram min interval {pull}52758[#52758]
 Machine Learning::
 * Fixes escape special characters for Lucene query language   {pull}50494[#50494]
 * Fixes info content detector field selection {pull}51914[#51914]
@@ -78,7 +80,7 @@ Querying &amp; Filtering::
 * Fixes operator overflowing out popover {pull}50030[#50030]
 Uptime::
 * Removes react-router-dom warning in browse {pull}52008[#52008]
-Visualizations::
+Lens::
 * Shows keyword fields for pre-7.3 index patterns {pull}52410[#52410]
 
 [[release-notes-7.5.0]]
