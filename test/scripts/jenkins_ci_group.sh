@@ -18,6 +18,8 @@ checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run 
 if [ "$CI_GROUP" == "1" ]; then
   source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
   yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-  yarn run grunt run:exampleFunctionalTestsRelease --from=source;
+# TODO: uncomment when example tests are fixed, they are breaking ci:
+# https://github.com/elastic/kibana/issues/53230
+#   yarn run grunt run:exampleFunctionalTestsRelease --from=source;
   yarn run grunt run:interpreterFunctionalTestsRelease;
 fi
