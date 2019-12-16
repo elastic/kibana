@@ -159,8 +159,6 @@ elasticsearch.hosts:
 
 Related configurations include `elasticsearch.sniffInterval`, `elasticsearch.sniffOnStart`, and `elasticsearch.sniffOnConnectionFault`.
 These can be used to automatically update the list of hosts as a cluster is resized.  Parameters can be found on the {kibana-ref}/settings.html[settings page].
-<<<<<<< HEAD
-=======
 
 [float]
 [[memory]]
@@ -174,4 +172,3 @@ The option accepts a limit in MB:
 --------
 NODE_OPTIONS="--max-old-space-size=2048" bin/kibana
 --------
->>>>>>> master
