@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 import { isEmpty } from 'lodash';
-import { useKibanaCore } from '../../../../../../../observability/public';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../../../services/rest/ml';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
@@ -30,6 +29,7 @@ import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../../../hooks/useServiceTransactionTypes';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
 interface Props {
   isCreatingJob: boolean;
@@ -51,7 +51,7 @@ export function MachineLearningFlyoutView({
     string | undefined
   >(undefined);
 
-  const { http } = useKibanaCore();
+  const { http } = useApmPluginContext().core;
 
   const { data: hasMLJob = false, status } = useFetcher(() => {
     if (serviceName && selectedTransactionType) {

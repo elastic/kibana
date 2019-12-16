@@ -20,11 +20,7 @@ import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from '../breadcrumbs
 const renderReact = (elem, changeUrl, username) => {
   render(
     <I18nContext>
-      <EditUserPage
-        changeUrl={changeUrl}
-        username={username}
-        apiClient={new UserAPIClient()}
-      />
+      <EditUserPage changeUrl={changeUrl} username={username} apiClient={new UserAPIClient()} />
     </I18nContext>,
     elem
   );
@@ -32,11 +28,10 @@ const renderReact = (elem, changeUrl, username) => {
 
 routes.when(`${EDIT_USERS_PATH}/:username?`, {
   template,
-  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    $route.current.params.username
-      ? getEditUserBreadcrumbs
-      : getCreateUserBreadcrumbs
-  ),
+  k7Breadcrumbs: ($injector, $route) =>
+    $injector.invoke(
+      $route.current.params.username ? getEditUserBreadcrumbs : getCreateUserBreadcrumbs
+    ),
   controllerAs: 'editUser',
   controller($scope, $route, kbnUrl) {
     $scope.$on('$destroy', () => {
@@ -48,7 +43,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
     $scope.$$postDigest(() => {
       const elem = document.getElementById('editUserReactRoot');
       const username = $route.current.params.username;
-      const changeUrl = (url) => {
+      const changeUrl = url => {
         kbnUrl.change(url);
         $scope.$apply();
       };

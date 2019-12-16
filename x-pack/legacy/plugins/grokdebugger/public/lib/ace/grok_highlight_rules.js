@@ -14,14 +14,8 @@ export class GrokHighlightRules extends TextHighlightRules {
     this.$rules = {
       start: [
         {
-          token: [
-            'grokStart',
-            'grokPatternName',
-            'grokSeparator',
-            'grokFieldName',
-            'grokEnd'
-          ],
-          regex: '(%{)([^:]+)(:)([^:]+)(})'
+          token: ['grokStart', 'grokPatternName', 'grokSeparator', 'grokFieldName', 'grokEnd'],
+          regex: '(%{)([^:]+)(:)([^:]+)(})',
         },
         {
           token: [
@@ -31,20 +25,20 @@ export class GrokHighlightRules extends TextHighlightRules {
             'grokFieldName',
             'grokSeparator',
             'grokFieldType',
-            'grokEnd'
+            'grokEnd',
           ],
-          regex: '(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})'
+          regex: '(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})',
         },
         {
-          token: (escapeToken, /* regexToken */) => {
+          token: (escapeToken /* regexToken */) => {
             if (escapeToken) {
-              return [ 'grokEscape', 'grokEscaped' ];
+              return ['grokEscape', 'grokEscaped'];
             }
             return 'grokRegex';
           },
-          regex: '(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])'
+          regex: '(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])',
         },
-      ]
+      ],
     };
   }
 }

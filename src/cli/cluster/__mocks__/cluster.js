@@ -46,7 +46,7 @@ class MockClusterFork extends EventEmitter {
         }),
       },
       isDead: jest.fn(() => dead),
-      send: jest.fn()
+      send: jest.fn(),
     });
 
     jest.spyOn(this, 'on');

@@ -5,7 +5,7 @@
  */
 
 export const PLUGIN = {
-  ID: 'rollup'
+  ID: 'rollup',
 };
 
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';

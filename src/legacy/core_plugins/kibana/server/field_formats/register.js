@@ -32,7 +32,7 @@ import {
   ColorFormat,
   BoolFormat,
   SourceFormat,
-  StaticLookupFormat
+  StaticLookupFormat,
 } from '../../../../../plugins/data/server';
 
 export function registerFieldFormats(server) {

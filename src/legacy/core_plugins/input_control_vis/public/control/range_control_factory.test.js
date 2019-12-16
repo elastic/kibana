@@ -40,24 +40,28 @@ jest.mock('ui/new_platform', () => ({
           filterManager: {
             fieldName: 'myNumberField',
             getIndexPattern: () => ({
-              fields: { getByName: name => {
-                const fields = { myNumberField: { name: 'myNumberField' } };
-                return fields[name];
-              }
-              } }),
-            getAppFilters: jest.fn().mockImplementation(() => ([])),
-            getGlobalFilters: jest.fn().mockImplementation(() => ([])),
-          }
+              fields: {
+                getByName: name => {
+                  const fields = { myNumberField: { name: 'myNumberField' } };
+                  return fields[name];
+                },
+              },
+            }),
+            getAppFilters: jest.fn().mockImplementation(() => []),
+            getGlobalFilters: jest.fn().mockImplementation(() => []),
+          },
         },
         indexPatterns: {
           get: () => ({
-            fields: { getByName: name => {
-              const fields = { myNumberField: { name: 'myNumberField' } };
-              return fields[name];
-            }
-            } }),
-        }
-      }
+            fields: {
+              getByName: name => {
+                const fields = { myNumberField: { name: 'myNumberField' } };
+                return fields[name];
+              },
+            },
+          }),
+        },
+      },
     },
   },
 }));
@@ -66,7 +70,7 @@ describe('fetch', () => {
   const controlParams = {
     id: '1',
     fieldName: 'myNumberField',
-    options: {}
+    options: {},
   };
   const useTimeFilter = false;
 
@@ -77,10 +81,10 @@ describe('fetch', () => {
 
   test('should set min and max from aggregation results', async () => {
     esSearchResponse = {
-      'aggregations': {
-        'maxAgg': { 'value': 100 },
-        'minAgg': { 'value': 10 }
-      }
+      aggregations: {
+        maxAgg: { value: 100 },
+        minAgg: { value: 10 },
+      },
     };
     await rangeControl.fetch();
 
@@ -92,10 +96,10 @@ describe('fetch', () => {
   test('should disable control when there are 0 hits', async () => {
     // ES response when the query does not match any documents
     esSearchResponse = {
-      'aggregations': {
-        'maxAgg': { 'value': null },
-        'minAgg': { 'value': null }
-      }
+      aggregations: {
+        maxAgg: { value: null },
+        minAgg: { value: null },
+      },
     };
     await rangeControl.fetch();
 
