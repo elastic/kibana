@@ -14,8 +14,35 @@ interface Props extends EuiInMemoryTableProps {
   datasources?: Datasource[];
 }
 
-export const DatasourcesTable: React.FC<Props> = ({ datasources, ...rest }) => {
+export const DatasourcesTable: React.FC<Props> = ({
+  datasources: originalDatasources,
+  ...rest
+}) => {
   const { framework } = useLibs();
+
+  // Flatten some values so that they can be searched via in-memory table search
+  const datasources = originalDatasources?.map(
+    ({
+      id,
+      name,
+      streams,
+      package: {
+        name: packageName,
+        title: packageTitle,
+        version: packageVersion,
+        description: packageDescription,
+      },
+    }) => ({
+      id,
+      name,
+      streams: streams.length || 0,
+      packageName,
+      packageTitle,
+      packageVersion,
+      packageDescription,
+    })
+  );
+
   return (
     <EuiInMemoryTable
       itemId="id"
@@ -28,7 +55,7 @@ export const DatasourcesTable: React.FC<Props> = ({ datasources, ...rest }) => {
           }),
         },
         {
-          field: 'package.title',
+          field: 'packageTitle',
           name: i18n.translate(
             'xpack.fleet.policyDetails.datasourcesTable.packageNameColumnTitle',
             {
@@ -37,7 +64,7 @@ export const DatasourcesTable: React.FC<Props> = ({ datasources, ...rest }) => {
           ),
         },
         {
-          field: 'package.version',
+          field: 'packageVersion',
           name: i18n.translate(
             'xpack.fleet.policyDetails.datasourcesTable.packageVersionColumnTitle',
             {
@@ -53,7 +80,6 @@ export const DatasourcesTable: React.FC<Props> = ({ datasources, ...rest }) => {
               defaultMessage: 'Streams',
             }
           ),
-          render: (streams: Datasource['streams']) => (streams ? streams.length : 0),
         },
         {
           name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.actionsColumnTitle', {
@@ -61,13 +87,13 @@ export const DatasourcesTable: React.FC<Props> = ({ datasources, ...rest }) => {
           }),
           actions: [
             {
-              render: (ds: Datasource) => {
+              render: ({ packageName, packageVersion }: any) => {
                 return (
                   <EuiLink
                     color="primary"
                     external
                     target="_blank"
-                    href={`${window.location.origin}${framework.info.basePath}/app/epm#/detail/${ds.package.name}-${ds.package.version}`}
+                    href={`${window.location.origin}${framework.info.basePath}/app/epm#/detail/${packageName}-${packageVersion}`}
                   >
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.datasourcesTable.viewActionLinkText"
