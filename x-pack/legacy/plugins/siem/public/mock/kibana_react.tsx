@@ -25,55 +25,53 @@ import {
 import { defaultIndexPattern } from '../../default_index_pattern';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 
-export const createUseUiSetting$Mock = () => <T extends unknown = string>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockUiSettings: Record<string, any> = {
+  [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
+  [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
+  [DEFAULT_SIEM_TIME_RANGE]: {
+    from: DEFAULT_FROM,
+    to: DEFAULT_TO,
+  },
+  [DEFAULT_SIEM_REFRESH_INTERVAL]: {
+    pause: DEFAULT_INTERVAL_PAUSE,
+    value: DEFAULT_INTERVAL_VALUE,
+  },
+  [DEFAULT_INDEX_KEY]: defaultIndexPattern,
+  [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
+  [DEFAULT_TIMEZONE_BROWSER]: 'America/New_York',
+  [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
+  [DEFAULT_DARK_MODE]: false,
+};
+
+export const createUseUiSettingMock = () => <T extends unknown = string>(
   key: string,
   defaultValue?: T
-): [T, () => void] | undefined => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mock: Record<string, any> = {
-    [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
-    [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
-    [DEFAULT_SIEM_TIME_RANGE]: {
-      from: DEFAULT_FROM,
-      to: DEFAULT_TO,
-    },
-    [DEFAULT_SIEM_REFRESH_INTERVAL]: {
-      pause: DEFAULT_INTERVAL_PAUSE,
-      value: DEFAULT_INTERVAL_VALUE,
-    },
-    [DEFAULT_INDEX_KEY]: defaultIndexPattern,
-    [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-    [DEFAULT_TIMEZONE_BROWSER]: 'America/New_York',
-    [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
-    [DEFAULT_DARK_MODE]: false,
-  };
+): T => {
+  const result = mockUiSettings[key];
 
-  const result = mock[key];
-
-  if (typeof result != null) {
-    return [result, jest.fn()];
-  }
+  if (typeof result != null) return result;
 
   if (defaultValue != null) {
-    return [defaultValue, jest.fn()];
+    return defaultValue;
   }
 
   throw new Error(`Unexpected config key: ${key}`);
+};
+
+export const createUseUiSetting$Mock = () => {
+  const useUiSettingMock = createUseUiSettingMock();
+
+  return <T extends unknown = string>(
+    key: string,
+    defaultValue?: T
+  ): [T, () => void] | undefined => [useUiSettingMock(key, defaultValue), jest.fn];
 };
 
 export const createUseKibanaMock = () => {
   const services = { ...createKibanaCoreStartMock(), ...createKibanaPluginsStartMock() };
 
   return () => ({ services });
-};
-
-export const createWithKibanaMock = () => {
-  const kibana = createUseKibanaMock()();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (Component: any) => (props: any) => {
-    return <Component {...props} kibana={kibana} />;
-  };
 };
 
 export const createKibanaContextProviderMock = () => {
