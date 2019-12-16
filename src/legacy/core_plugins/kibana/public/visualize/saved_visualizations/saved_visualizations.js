@@ -35,7 +35,7 @@ savedObjectManagementRegistry.register({
   title: 'visualizations',
 });
 
-app.service('savedVisualizations', function (SavedVis, Private) {
+app.service('savedVisualizations', function(SavedVis, Private) {
   const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
@@ -44,7 +44,7 @@ app.service('savedVisualizations', function (SavedVis, Private) {
     npStart.core.chrome
   );
 
-  saveVisualizationLoader.mapHitSource = function (source, id) {
+  saveVisualizationLoader.mapHitSource = function(source, id) {
     source.id = id;
     source.url = this.urlFor(id);
 
@@ -72,13 +72,13 @@ app.service('savedVisualizations', function (SavedVis, Private) {
     return source;
   };
 
-  saveVisualizationLoader.urlFor = function (id) {
+  saveVisualizationLoader.urlFor = function(id) {
     return `#/visualize/edit/${encodeURIComponent(id)}`;
   };
 
   // This behaves similarly to find, except it returns visualizations that are
   // defined as appExtensions and which may not conform to type: visualization
-  saveVisualizationLoader.findListItems = function (search = '', size = 100) {
+  saveVisualizationLoader.findListItems = function(search = '', size = 100) {
     return findListItems({
       search,
       size,

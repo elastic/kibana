@@ -22,14 +22,16 @@ const initialState = {
 
 // Convert an  Array of clusters to an object where
 // each key is the cluster name
-const mapClustersToNames = (clusters) => (
-  clusters.reduce((byName, cluster) => ({
-    ...byName,
-    [cluster.name]: cluster
-  }), {})
-);
+const mapClustersToNames = clusters =>
+  clusters.reduce(
+    (byName, cluster) => ({
+      ...byName,
+      [cluster.name]: cluster,
+    }),
+    {}
+  );
 
-const getClustersNames = (clusters) => clusters.map(cluster => cluster.name);
+const getClustersNames = clusters => clusters.map(cluster => cluster.name);
 
 export function clusters(state = initialState, action) {
   const { type, payload } = action;
@@ -60,7 +62,7 @@ export function clusters(state = initialState, action) {
       return {
         ...state,
         isLoading: false,
-        clusterLoadError: payload.error
+        clusterLoadError: payload.error,
       };
 
     case REMOVE_CLUSTERS_FINISH:
@@ -74,7 +76,7 @@ export function clusters(state = initialState, action) {
         ...state,
         asList: updatedList,
         byName: mapClustersToNames(updatedList),
-        allNames: getClustersNames(updatedList)
+        allNames: getClustersNames(updatedList),
       };
 
     default:

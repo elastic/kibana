@@ -90,7 +90,6 @@
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
-/src/legacy/server/csp/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
 /src/legacy/server/i18n/ @elastic/kibana-platform
 /src/legacy/server/logging/ @elastic/kibana-platform
@@ -98,12 +97,12 @@
 /src/legacy/server/status/ @elastic/kibana-platform
 
 # Security
+/src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
-/src/legacy/server/csp/ @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 

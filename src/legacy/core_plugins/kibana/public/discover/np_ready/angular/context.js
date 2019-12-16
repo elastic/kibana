@@ -68,7 +68,15 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, AppState, config, $route, getAppState, globalState) {
+function ContextAppRouteController(
+  $routeParams,
+  $scope,
+  AppState,
+  config,
+  $route,
+  getAppState,
+  globalState
+) {
   const filterManager = getServices().filterManager;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
   const indexPattern = $route.current.locals.indexPattern.ip;

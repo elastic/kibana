@@ -25,7 +25,7 @@ export default new Chainable('sum', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'term',
@@ -34,7 +34,7 @@ export default new Chainable('sum', {
         defaultMessage:
           'Number or series to sum with the input series. SeriesList with multiple series will be applied label-wise.',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.sumHelpText', {
     defaultMessage:
@@ -42,8 +42,8 @@ export default new Chainable('sum', {
   }),
   aliases: ['add', 'plus'],
   fn: function sumFn(args) {
-    return reduce(args, function (a, b) {
+    return reduce(args, function(a, b) {
       return a + b;
     });
-  }
+  },
 });

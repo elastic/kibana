@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -71,14 +71,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
    */
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => void;
-  constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,
       euiIconType: 'discoverApp',
-      mount: async (context, params) => {
+      mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }

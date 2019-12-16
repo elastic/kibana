@@ -60,20 +60,20 @@ export function gaugeLayout(el, data) {
             {
               type: 'div',
               class: 'visWrapper__chart',
-              splits: chartSplit
+              splits: chartSplit,
             },
             {
               type: 'div',
-              class: 'visWrapper__alerts'
+              class: 'visWrapper__alerts',
             },
             {
               type: 'div',
               class: 'visAxis__splitTitles--x',
               //splits: chartTitleSplit
-            }
-          ]
-        }
-      ]
-    }
+            },
+          ],
+        },
+      ],
+    },
   ];
 }

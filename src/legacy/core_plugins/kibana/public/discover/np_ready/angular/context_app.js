@@ -68,49 +68,55 @@ function ContextAppController($scope, config, Private) {
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
     getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
-    this.discoverUrl,
+    this.discoverUrl
   );
 
-  this.actions = _.mapValues({
-    ...queryParameterActions,
-    ...queryActions,
-  }, (action) => (...args) => action(this.state)(...args));
+  this.actions = _.mapValues(
+    {
+      ...queryParameterActions,
+      ...queryActions,
+    },
+    action => (...args) => action(this.state)(...args)
+  );
 
   this.constants = {
     FAILURE_REASONS,
     LOADING_STATUS,
   };
 
-  $scope.$watchGroup([
-    () => this.state.rows.predecessors,
-    () => this.state.rows.anchor,
-    () => this.state.rows.successors,
-  ], (newValues) => this.actions.setAllRows(...newValues));
+  $scope.$watchGroup(
+    [
+      () => this.state.rows.predecessors,
+      () => this.state.rows.anchor,
+      () => this.state.rows.successors,
+    ],
+    newValues => this.actions.setAllRows(...newValues)
+  );
 
   /**
    * Sync properties to state
    */
   $scope.$watchCollection(
     () => ({
-      ...(_.pick(this, QUERY_PARAMETER_KEYS)),
+      ..._.pick(this, QUERY_PARAMETER_KEYS),
       indexPatternId: this.indexPattern.id,
     }),
-    (newQueryParameters) => {
+    newQueryParameters => {
       const { queryParameters } = this.state;
       if (
-        (newQueryParameters.indexPatternId !== queryParameters.indexPatternId)
-        || (newQueryParameters.anchorId !== queryParameters.anchorId)
-        || (!_.isEqual(newQueryParameters.sort, queryParameters.sort))
+        newQueryParameters.indexPatternId !== queryParameters.indexPatternId ||
+        newQueryParameters.anchorId !== queryParameters.anchorId ||
+        !_.isEqual(newQueryParameters.sort, queryParameters.sort)
       ) {
         this.actions.fetchAllRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       } else if (
-        (newQueryParameters.predecessorCount !== queryParameters.predecessorCount)
-        || (newQueryParameters.successorCount !== queryParameters.successorCount)
-        || (!_.isEqual(newQueryParameters.filters, queryParameters.filters))
+        newQueryParameters.predecessorCount !== queryParameters.predecessorCount ||
+        newQueryParameters.successorCount !== queryParameters.successorCount ||
+        !_.isEqual(newQueryParameters.filters, queryParameters.filters)
       ) {
         this.actions.fetchContextRowsWithNewQueryParameters(_.cloneDeep(newQueryParameters));
       }
-    },
+    }
   );
 
   /**
@@ -121,12 +127,11 @@ function ContextAppController($scope, config, Private) {
       predecessorCount: this.state.queryParameters.predecessorCount,
       successorCount: this.state.queryParameters.successorCount,
     }),
-    (newParameters) => {
+    newParameters => {
       _.assign(this, newParameters);
-    },
+    }
   );
 }
-
 
 function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
   return {

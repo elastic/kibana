@@ -22,15 +22,12 @@ import { uiModules } from 'ui/modules';
 import { createDashboardEditUrl } from '../np_ready/dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
-import {
-  extractReferences,
-  injectReferences,
-} from './saved_dashboard_references';
+import { extractReferences, injectReferences } from './saved_dashboard_references';
 
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function (Private) {
+module.factory('SavedDashboard', function(Private) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
   const SavedObject = Private(SavedObjectProvider);
@@ -62,12 +59,12 @@ module.factory('SavedDashboard', function (Private) {
         timeRestore: false,
         timeTo: undefined,
         timeFrom: undefined,
-        refreshInterval: undefined
+        refreshInterval: undefined,
       },
 
       // if an indexPattern was saved with the searchsource of a SavedDashboard
       // object, clear it. It was a mistake
-      clearSavedIndexPattern: true
+      clearSavedIndexPattern: true,
     });
 
     this.showInRecentlyAccessed = true;
@@ -93,9 +90,9 @@ module.factory('SavedDashboard', function (Private) {
         display: { type: 'keyword' },
         pause: { type: 'boolean' },
         section: { type: 'integer' },
-        value: { type: 'integer' }
-      }
-    }
+        value: { type: 'integer' },
+      },
+    },
   };
 
   // Order these fields to the top, the rest are alphabetical
@@ -103,19 +100,17 @@ module.factory('SavedDashboard', function (Private) {
 
   SavedDashboard.searchsource = true;
 
-  SavedDashboard.prototype.getFullPath = function () {
+  SavedDashboard.prototype.getFullPath = function() {
     return `/app/kibana#${createDashboardEditUrl(this.id)}`;
   };
 
-  SavedDashboard.prototype.getQuery = function () {
-    return this.searchSource.getOwnField('query') ||
-      { query: '', language: 'kuery' };
+  SavedDashboard.prototype.getQuery = function() {
+    return this.searchSource.getOwnField('query') || { query: '', language: 'kuery' };
   };
 
-  SavedDashboard.prototype.getFilters = function () {
+  SavedDashboard.prototype.getFilters = function() {
     return this.searchSource.getOwnField('filter') || [];
   };
-
 
   return SavedDashboard;
 });

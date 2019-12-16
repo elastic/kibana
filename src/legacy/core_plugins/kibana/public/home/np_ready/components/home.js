@@ -51,7 +51,9 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const showTelemetryDisclaimer = getServices().getInjected('telemetryNotifyUserAboutOptInDefault');
+    const showTelemetryDisclaimer = getServices().getInjected(
+      'telemetryNotifyUserAboutOptInDefault'
+    );
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -140,13 +142,9 @@ export class Home extends Component {
     return (
       <EuiPage restrictWidth={1200} data-test-subj="homeApp">
         <EuiPageBody className="eui-displayBlock">
-
           <EuiScreenReaderOnly>
             <h1>
-              <FormattedMessage
-                id="kbn.home.welcomeHomePageHeader"
-                defaultMessage="Kibana home"
-              />
+              <FormattedMessage id="kbn.home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
 

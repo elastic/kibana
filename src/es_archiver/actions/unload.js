@@ -20,9 +20,7 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 
-import {
-  createPromiseFromStreams
-} from '../../legacy/utils';
+import { createPromiseFromStreams } from '../../legacy/utils';
 
 import {
   isGzip,
@@ -47,7 +45,7 @@ export async function unloadAction({ name, client, dataDir, log, kbnClient }) {
       createReadStream(resolve(inputDir, filename)),
       ...createParseArchiveStreams({ gzip: isGzip(filename) }),
       createFilterRecordsStream('index'),
-      createDeleteIndexStream(client, stats, log, kibanaPluginIds)
+      createDeleteIndexStream(client, stats, log, kibanaPluginIds),
     ]);
   }
 

@@ -17,9 +17,8 @@
  * under the License.
  */
 
-
 module.exports = () => {
   return {
-    plugins: ['istanbul']
+    plugins: ['istanbul'],
   };
 };

@@ -8,12 +8,7 @@ import chrome from 'ui/chrome';
 
 const settings = chrome.getUiSettingsClient();
 
-export function getInitialQuery({
-  mapStateJSON,
-  appState = {},
-  userQueryLanguage,
-}) {
-
+export function getInitialQuery({ mapStateJSON, appState = {}, userQueryLanguage }) {
   if (appState.query) {
     return appState.query;
   }
@@ -27,6 +22,6 @@ export function getInitialQuery({
 
   return {
     query: '',
-    language: userQueryLanguage || settings.get('search:queryLanguage')
+    language: userQueryLanguage || settings.get('search:queryLanguage'),
   };
 }

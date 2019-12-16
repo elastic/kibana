@@ -30,12 +30,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  return new class DashboardPanelActions {
-
+  return new (class DashboardPanelActions {
     async findContextMenu(parent) {
-      return parent ?
-        await testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent) :
-        await testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
+      return parent
+        ? await testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent)
+        : await testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
     }
 
     async isContextMenuIconVisible() {
@@ -186,5 +185,5 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click('saveNewTitleButton');
       await this.toggleContextMenu(panel);
     }
-  };
+  })();
 }

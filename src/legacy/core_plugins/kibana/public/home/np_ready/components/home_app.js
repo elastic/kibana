@@ -38,9 +38,7 @@ export function HomeApp({ directories }) {
     savedObjectsClient,
     getBasePath,
     addBasePath,
-    telemetryOptInProvider: {
-      setOptInNoticeSeen,
-    },
+    telemetryOptInProvider: { setOptInNoticeSeen },
   } = getServices();
   const { cloud } = npSetup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);

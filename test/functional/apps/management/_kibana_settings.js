@@ -19,13 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker']);
 
   describe('kibana settings', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern();
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
-    it('should allow setting advanced settings', async function () {
+    it('should allow setting advanced settings', async function() {
       await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
       const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
@@ -46,13 +46,15 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('state:storeInSessionStorage', () => {
-      it ('defaults to null', async () => {
+      it('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
+          'state:storeInSessionStorage'
+        );
         expect(storeInSessionStorage).to.be(null);
       });
 
-      it('when false, dashboard state is unhashed', async function () {
+      it('when false, dashboard state is unhashed', async function() {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -67,15 +69,17 @@ export default function ({ getService, getPageObjects }) {
         expect(appState.length).to.be.greaterThan(20);
       });
 
-      it('setting to true change is preserved', async function () {
+      it('setting to true change is preserved', async function() {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
+          'state:storeInSessionStorage'
+        );
         expect(storeInSessionStorage).to.be('true');
       });
 
-      it('when true, dashboard state is hashed', async function () {
+      it('when true, dashboard state is hashed', async function() {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -90,14 +94,17 @@ export default function ({ getService, getPageObjects }) {
         expect(appState.length).to.be.lessThan(20);
       });
 
-      after('navigate to settings page and turn state:storeInSessionStorage back to false', async () => {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSettings();
-        await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-      });
+      after(
+        'navigate to settings page and turn state:storeInSessionStorage back to false',
+        async () => {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaSettings();
+          await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
+        }
+      );
     });
 
-    after(async function () {
+    after(async function() {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await browser.refresh();
     });

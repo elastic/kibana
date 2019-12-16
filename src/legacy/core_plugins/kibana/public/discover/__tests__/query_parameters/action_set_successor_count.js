@@ -24,20 +24,21 @@ import { pluginInstance } from 'plugins/kibana/discover/index';
 import { createStateStub } from './_utils';
 import { getQueryParameterActions } from '../../np_ready/angular/context/query_parameters/actions';
 
-
-describe('context app', function () {
+describe('context app', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
 
-  describe('action setSuccessorCount', function () {
+  describe('action setSuccessorCount', function() {
     let setSuccessorCount;
 
-    beforeEach(ngMock.inject(function createPrivateStubs() {
-      setSuccessorCount = getQueryParameterActions().setSuccessorCount;
-    }));
+    beforeEach(
+      ngMock.inject(function createPrivateStubs() {
+        setSuccessorCount = getQueryParameterActions().setSuccessorCount;
+      })
+    );
 
-    it('should set the successorCount to the given value', function () {
+    it('should set the successorCount to the given value', function() {
       const state = createStateStub();
 
       setSuccessorCount(state)(20);
@@ -45,7 +46,7 @@ describe('context app', function () {
       expect(state.queryParameters.successorCount).to.equal(20);
     });
 
-    it('should limit the successorCount to 0 as a lower bound', function () {
+    it('should limit the successorCount to 0 as a lower bound', function() {
       const state = createStateStub();
 
       setSuccessorCount(state)(-1);
@@ -53,7 +54,7 @@ describe('context app', function () {
       expect(state.queryParameters.successorCount).to.equal(0);
     });
 
-    it('should limit the successorCount to 10000 as an upper bound', function () {
+    it('should limit the successorCount to 10000 as an upper bound', function() {
       const state = createStateStub();
 
       setSuccessorCount(state)(20000);

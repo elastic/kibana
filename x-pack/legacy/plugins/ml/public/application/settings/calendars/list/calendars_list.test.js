@@ -11,20 +11,20 @@ import { ml } from '../../../services/ml_api_service';
 import { CalendarsList } from './calendars_list';
 
 jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />
+  NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 jest.mock('../../../privilege/check_privilege', () => ({
-  checkPermission: () => true
+  checkPermission: () => true,
 }));
 jest.mock('../../../license/check_license', () => ({
   hasLicenseExpired: () => false,
-  isFullLicense: () => false
+  isFullLicense: () => false,
 }));
 jest.mock('../../../privilege/get_privileges', () => ({
-  getPrivileges: () => {}
+  getPrivileges: () => {},
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
-  mlNodesAvailable: () => true
+  mlNodesAvailable: () => true,
 }));
 jest.mock('../../../services/ml_api_service', () => ({
   ml: {
@@ -32,36 +32,41 @@ jest.mock('../../../services/ml_api_service', () => ({
       return Promise.resolve([]);
     },
     delete: jest.fn(),
-  }
+  },
 }));
 
 const testingState = {
   loading: false,
   calendars: [
     {
-      'calendar_id': 'farequote-calendar',
-      'job_ids': ['farequote'],
-      'description': 'test ',
-      'events': [{
-        'description': 'Downtime feb 9 2017 10:10 to 10:30',
-        'start_time': 1486656600000,
-        'end_time': 1486657800000,
-        'calendar_id': 'farequote-calendar',
-        'event_id': 'Ee-YgGcBxHgQWEhCO_xj'
-      }]
+      calendar_id: 'farequote-calendar',
+      job_ids: ['farequote'],
+      description: 'test ',
+      events: [
+        {
+          description: 'Downtime feb 9 2017 10:10 to 10:30',
+          start_time: 1486656600000,
+          end_time: 1486657800000,
+          calendar_id: 'farequote-calendar',
+          event_id: 'Ee-YgGcBxHgQWEhCO_xj',
+        },
+      ],
     },
     {
-      'calendar_id': 'this-is-a-new-calendar',
-      'job_ids': ['test'],
-      'description': 'new calendar',
-      'events': [{
-        'description': 'New event!',
-        'start_time': 1544076000000,
-        'end_time': 1544162400000,
-        'calendar_id': 'this-is-a-new-calendar',
-        'event_id': 'ehWKhGcBqHkXuWNrIrSV'
-      }]
-    }],
+      calendar_id: 'this-is-a-new-calendar',
+      job_ids: ['test'],
+      description: 'new calendar',
+      events: [
+        {
+          description: 'New event!',
+          start_time: 1544076000000,
+          end_time: 1544162400000,
+          calendar_id: 'this-is-a-new-calendar',
+          event_id: 'ehWKhGcBqHkXuWNrIrSV',
+        },
+      ],
+    },
+  ],
   isDestroyModalVisible: false,
   calendarId: null,
   selectedForDeletion: [],
@@ -70,24 +75,19 @@ const testingState = {
 
 const props = {
   canCreateCalendar: true,
-  canDeleteCalendar: true
+  canDeleteCalendar: true,
 };
 
 describe('CalendarsList', () => {
-
   test('loads calendars on mount', () => {
     ml.calendars = jest.fn(() => []);
-    shallowWithIntl(
-      <CalendarsList.WrappedComponent {...props}/>
-    );
+    shallowWithIntl(<CalendarsList.WrappedComponent {...props} />);
 
     expect(ml.calendars).toHaveBeenCalled();
   });
 
   test('Renders calendar list with calendars', () => {
-    const wrapper = shallowWithIntl(
-      <CalendarsList.WrappedComponent {...props}/>
-    );
+    const wrapper = shallowWithIntl(<CalendarsList.WrappedComponent {...props} />);
 
     wrapper.instance().setState(testingState);
     wrapper.update();
@@ -95,9 +95,7 @@ describe('CalendarsList', () => {
   });
 
   test('Sets selected calendars list on checkbox change', () => {
-    const wrapper = mountWithIntl(
-      <CalendarsList.WrappedComponent {...props}/>
-    );
+    const wrapper = mountWithIntl(<CalendarsList.WrappedComponent {...props} />);
 
     const instance = wrapper.instance();
     const spy = jest.spyOn(instance, 'setSelectedCalendarList');
@@ -108,5 +106,4 @@ describe('CalendarsList', () => {
     checkbox.simulate('change');
     expect(spy).toHaveBeenCalled();
   });
-
 });

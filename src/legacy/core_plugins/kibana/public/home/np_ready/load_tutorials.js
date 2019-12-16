@@ -41,9 +41,12 @@ async function loadTutorials() {
       headers: headers,
     });
     if (responseLegacyPlatform.status >= 300) {
-      throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}', values: { status: responseLegacyPlatform.status } }
-      ));
+      throw new Error(
+        i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
+          defaultMessage: 'Request failed with status code: {status}',
+          values: { status: responseLegacyPlatform.status },
+        })
+      );
     }
     const responseNewPlatform = await fetch(baseUrl, {
       method: 'get',
@@ -51,20 +54,23 @@ async function loadTutorials() {
       headers: headers,
     });
     if (responseNewPlatform.status >= 300) {
-      throw new Error(i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
-        defaultMessage: 'Request failed with status code: {status}', values: { status: responseNewPlatform.status } }
-      ));
+      throw new Error(
+        i18n.translate('kbn.home.loadTutorials.requestFailedErrorMessage', {
+          defaultMessage: 'Request failed with status code: {status}',
+          values: { status: responseNewPlatform.status },
+        })
+      );
     }
 
     tutorialsLegacyPlatform = await responseLegacyPlatform.json();
     tutorialsNewPlatform = await responseNewPlatform.json();
     tutorials = tutorialsLegacyPlatform.concat(tutorialsNewPlatform);
     tutorialsLoaded = true;
-  } catch(err) {
+  } catch (err) {
     getServices().toastNotifications.addDanger({
       title: i18n.translate('kbn.home.loadTutorials.unableToLoadErrorMessage', {
-        defaultMessage: 'Unable to load tutorials' }
-      ),
+        defaultMessage: 'Unable to load tutorials',
+      }),
       text: err.message,
     });
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -36,6 +36,7 @@ import {
   mockEndgameUserLogoff,
   mockEndgameUserLogon,
 } from '../../../../../mock/mock_endgame_ecs_data';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { RowRenderer } from '../row_renderer';
 import {
   createDnsRowRenderer,
@@ -51,6 +52,8 @@ import * as i18n from './translations';
 jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
 
 describe('GenericRowRenderer', () => {
+  const mount = useMountAppended();
+
   describe('#createGenericSystemRowRenderer', () => {
     let nonSystem: Ecs;
     let system: Ecs;
