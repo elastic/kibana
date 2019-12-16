@@ -161,6 +161,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      csp: deps.http.csp,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
     savedObjects: {

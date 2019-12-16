@@ -44,7 +44,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
 export interface LegacyAPI {
   serverConfig: { protocol: string; hostname: string; port: number };
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  cspRules: string;
   savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
@@ -165,7 +164,7 @@ export class Plugin {
       config,
       authc,
       authz,
-      getLegacyAPI: this.getLegacyAPI,
+      csp: core.http.csp,
     });
 
     const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
