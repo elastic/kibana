@@ -18,4 +18,3 @@ if (chrome.getInjected('ilmUiEnabled')) {
     url: `#${BASE_PATH}policies`,
   });
 }
-

@@ -112,7 +112,7 @@ const INITIAL_STATE = {
     drawState: null,
     disableInteractive: false,
     disableTooltipControl: false,
-    hideToolbarOverlay: false
+    hideToolbarOverlay: false,
   },
   selectedLayerId: null,
   __transientLayerId: null,

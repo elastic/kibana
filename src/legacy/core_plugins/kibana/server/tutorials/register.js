@@ -113,7 +113,9 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(aerospikeMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchbaseMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(dropwizardMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(elasticsearchMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(
+    elasticsearchMetricsSpecProvider
+  );
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(etcdMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(haproxyMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kafkaMetricsSpecProvider);

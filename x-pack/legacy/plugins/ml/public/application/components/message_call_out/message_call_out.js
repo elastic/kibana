@@ -18,7 +18,6 @@ import { EuiCallOut } from '@elastic/eui';
 // because it won't work with the jest tests
 import { MESSAGE_LEVEL } from '../../../../common/constants/message_levels';
 
-
 function getCallOutAttributes(message, status) {
   switch (status) {
     case MESSAGE_LEVEL.ERROR:
@@ -32,21 +31,16 @@ function getCallOutAttributes(message, status) {
   }
 }
 
-export function MessageCallOut({
-  message,
-  status,
-  ...rest
-}) {
-  return (
-    <EuiCallOut
-      size="s"
-      {...getCallOutAttributes(message, status)}
-      {...rest}
-    />
-  );
+export function MessageCallOut({ message, status, ...rest }) {
+  return <EuiCallOut size="s" {...getCallOutAttributes(message, status)} {...rest} />;
 }
 
 MessageCallOut.propTypes = {
   message: PropTypes.string,
-  status: PropTypes.oneOf([MESSAGE_LEVEL.ERROR, MESSAGE_LEVEL.WARNING, MESSAGE_LEVEL.SUCCESS, MESSAGE_LEVEL.INFO])
+  status: PropTypes.oneOf([
+    MESSAGE_LEVEL.ERROR,
+    MESSAGE_LEVEL.WARNING,
+    MESSAGE_LEVEL.SUCCESS,
+    MESSAGE_LEVEL.INFO,
+  ]),
 };

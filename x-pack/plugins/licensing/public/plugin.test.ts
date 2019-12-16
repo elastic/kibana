@@ -11,11 +11,9 @@ import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';
-import { licenseMock } from '../common/license.mock';
+import { licenseMock } from '../common/licensing.mocks';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
-
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
@@ -34,15 +32,7 @@ describe('licensing plugin', () => {
         const coreSetup = coreMock.createSetup();
         const firstLicense = licenseMock.create({ license: { uid: 'first', type: 'basic' } });
         const secondLicense = licenseMock.create({ license: { uid: 'second', type: 'gold' } });
-        coreSetup.http.get
-          .mockImplementationOnce(async () => {
-            await delay(100);
-            return firstLicense;
-          })
-          .mockImplementationOnce(async () => {
-            await delay(100);
-            return secondLicense;
-          });
+        coreSetup.http.get.mockResolvedValueOnce(firstLicense).mockResolvedValueOnce(secondLicense);
 
         const { license$, refresh } = await plugin.setup(coreSetup);
 
@@ -147,7 +137,7 @@ describe('licensing plugin', () => {
 
         expect(sessionStorage.setItem.mock.calls[0][0]).toBe(licensingSessionStorageKey);
         expect(sessionStorage.setItem.mock.calls[0][1]).toMatchInlineSnapshot(
-          `"{\\"license\\":{\\"uid\\":\\"fresh\\",\\"status\\":\\"active\\",\\"type\\":\\"basic\\",\\"expiryDateInMillis\\":5000},\\"features\\":{\\"ccr\\":{\\"isEnabled\\":true,\\"isAvailable\\":true},\\"ml\\":{\\"isEnabled\\":false,\\"isAvailable\\":true}},\\"signature\\":\\"xxxxxxxxx\\"}"`
+          `"{\\"license\\":{\\"uid\\":\\"fresh\\",\\"status\\":\\"active\\",\\"type\\":\\"basic\\",\\"mode\\":\\"basic\\",\\"expiryDateInMillis\\":5000},\\"features\\":{\\"ccr\\":{\\"isEnabled\\":true,\\"isAvailable\\":true},\\"ml\\":{\\"isEnabled\\":false,\\"isAvailable\\":true}},\\"signature\\":\\"xxxxxxxxx\\"}"`
         );
 
         const saved = JSON.parse(sessionStorage.setItem.mock.calls[0][1]);

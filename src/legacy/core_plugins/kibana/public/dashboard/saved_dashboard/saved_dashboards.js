@@ -36,7 +36,7 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function (Private, SavedDashboard) {
+module.service('savedDashboards', function(Private, SavedDashboard) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   return new SavedObjectLoader(SavedDashboard, savedObjectClient, npStart.core.chrome);
 });

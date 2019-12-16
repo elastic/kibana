@@ -11,7 +11,7 @@ export const getChartTooltipDefaultState = () => ({
   tooltipData: [],
   offset: { x: 0, y: 0 },
   targetPosition: { left: 0, top: 0 },
-  tooltipPosition: { left: 0, top: 0 }
+  tooltipPosition: { left: 0, top: 0 },
 });
 
 export const chartTooltip$ = new BehaviorSubject(getChartTooltipDefaultState());
@@ -31,7 +31,7 @@ export const mlChartTooltipService = {
   hide: () => {
     chartTooltip$.next({
       ...getChartTooltipDefaultState(),
-      isTooltipVisible: false
+      isTooltipVisible: false,
     });
-  }
+  },
 };

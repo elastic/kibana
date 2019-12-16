@@ -6,15 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiSelect,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 
 export function CreateSourceEditor({ onSourceConfigChange }) {
-
   const onChange = ({ target }) => {
     const selectedName = target.options[target.selectedIndex].text;
     onSourceConfigChange({ name: selectedName });
@@ -23,23 +19,22 @@ export function CreateSourceEditor({ onSourceConfigChange }) {
   const regionmapOptions = getKibanaRegionList().map(({ name, url }) => {
     return {
       value: url,
-      text: name
+      text: name,
     };
   });
 
-  const helpText = regionmapOptions.length === 0
-    ? i18n.translate('xpack.maps.source.kbnRegionMap.noLayerAvailableHelptext', {
-      defaultMessage: `No vector layers are available. Ask your system administrator to set "map.regionmap" in kibana.yml.`
-    })
-    : null;
+  const helpText =
+    regionmapOptions.length === 0
+      ? i18n.translate('xpack.maps.source.kbnRegionMap.noLayerAvailableHelptext', {
+          defaultMessage: `No vector layers are available. Ask your system administrator to set "map.regionmap" in kibana.yml.`,
+        })
+      : null;
 
   return (
     <EuiFormRow
-      label={
-        i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
-          defaultMessage: 'Vector layer'
-        })
-      }
+      label={i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
+        defaultMessage: 'Vector layer',
+      })}
       helpText={helpText}
     >
       <EuiSelect
@@ -53,5 +48,5 @@ export function CreateSourceEditor({ onSourceConfigChange }) {
 }
 
 CreateSourceEditor.propTypes = {
-  onSourceConfigChange: PropTypes.func.isRequired
+  onSourceConfigChange: PropTypes.func.isRequired,
 };
