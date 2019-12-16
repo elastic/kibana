@@ -19,10 +19,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
-// @ts-ignore
 import { toastNotifications } from 'ui/notify';
+import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../../../plugins/features/server';
 import { isReservedSpace } from '../../../../common';
 import { DEFAULT_SPACE_ID } from '../../../../common/constants';
@@ -30,7 +29,6 @@ import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
 import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
-import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
@@ -38,8 +36,8 @@ import { getEnabledFeatures } from '../lib/feature_utils';
 
 interface Props {
   spacesManager: SpacesManager;
-  spacesNavState: SpacesNavState;
   intl: InjectedIntl;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -65,7 +63,7 @@ class SpacesGridPageUI extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    if (capabilities.get().spaces.manage) {
+    if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
   }
@@ -83,7 +81,7 @@ class SpacesGridPageUI extends Component<Props, State> {
   public getPageContent() {
     const { intl } = this.props;
 
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -159,12 +157,11 @@ class SpacesGridPageUI extends Component<Props, State> {
       return null;
     }
 
-    const { spacesNavState, spacesManager } = this.props;
+    const { spacesManager } = this.props;
 
     return (
       <ConfirmDeleteModal
         space={this.state.selectedSpace}
-        spacesNavState={spacesNavState}
         spacesManager={spacesManager}
         onCancel={() => {
           this.setState({
@@ -178,7 +175,7 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public deleteSpace = async () => {
     const { intl } = this.props;
-    const { spacesManager, spacesNavState } = this.props;
+    const { spacesManager } = this.props;
 
     const space = this.state.selectedSpace;
 
@@ -221,8 +218,6 @@ class SpacesGridPageUI extends Component<Props, State> {
     );
 
     toastNotifications.addSuccess(message);
-
-    spacesNavState.refreshSpacesList();
   };
 
   public loadGrid = async () => {
