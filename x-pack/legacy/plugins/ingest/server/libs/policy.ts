@@ -205,6 +205,7 @@ export class PolicyLib {
 
     for (const id of ids) {
       await this.adapter.delete(user, id);
+      await this._triggerPolicyUpdatedEvent(user, 'deleted', id);
     }
 
     return {
