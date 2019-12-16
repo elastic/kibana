@@ -19,6 +19,6 @@
 
 export const mockGetConfigFromFiles = jest.fn();
 
-jest.mock('./read_config', () => ({
+jest.mock('src/core/server/config/read_config', () => ({
   getConfigFromFiles: mockGetConfigFromFiles,
 }));

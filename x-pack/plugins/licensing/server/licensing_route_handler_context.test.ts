@@ -5,7 +5,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { licenseMock } from '../common/licensing.mock';
+// eslint-disable-next-line
+import { licenseMock } from 'x-pack/plugins/licensing/common/licensing.mock';
 
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 

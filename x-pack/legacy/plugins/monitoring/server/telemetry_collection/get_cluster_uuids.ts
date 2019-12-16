@@ -5,16 +5,16 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore
-import { createQuery } from './create_query';
-// @ts-ignore
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 import {
   ClusterDetailsGetter,
   StatsCollectionConfig,
   ClusterDetails,
-} from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
+} from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+// @ts-ignore
+import { createQuery } from './create_query';
+// @ts-ignore
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.

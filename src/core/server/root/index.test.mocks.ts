@@ -25,7 +25,7 @@ jest.doMock('../logging/logging_service', () => ({
 
 import { configServiceMock } from '../config/config_service.mock';
 export const configService = configServiceMock.create();
-jest.doMock('../config/config_service', () => ({
+jest.doMock('src/core/server/config/config_service', () => ({
   ConfigService: jest.fn(() => configService),
 }));
 
