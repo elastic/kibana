@@ -141,7 +141,7 @@ describe('Events Viewer', () => {
   });
 
   it('loads more events when the load more button is clicked', () => {
-    cy.get(LOCAL_EVENTS_COUNT)
+    cy.get(LOCAL_EVENTS_COUNT, { timeout: DEFAULT_TIMEOUT })
       .invoke('text')
       .then(text1 => {
         cy.get(LOCAL_EVENTS_COUNT)
