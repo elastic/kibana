@@ -47,6 +47,7 @@ const DEFAULT_FILE_UUID = 'FILE_UUID';
 const DEFAULT_CONFIG_UUID = 'CONFIG_UUID';
 const fileNotFoundError = { code: 'ENOENT' };
 const permissionError = { code: 'EACCES' };
+const isDirectoryError = { code: 'EISDIR' };
 
 const mockReadFile = ({
   uuid = DEFAULT_FILE_UUID,
@@ -55,7 +56,7 @@ const mockReadFile = ({
   uuid: string;
   error: any;
 }>) => {
-  ((readFile as unknown) as jest.Mock).mockImplementation((path, callback) => {
+  ((readFile as unknown) as jest.Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -65,7 +66,7 @@ const mockReadFile = ({
 };
 
 const mockWriteFile = (error?: object) => {
-  ((writeFile as unknown) as jest.Mock).mockImplementation((path, callback) => {
+  ((writeFile as unknown) as jest.Mock).mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     } else {
@@ -194,15 +195,15 @@ describe('resolveInstanceUuid', () => {
       await expect(
         resolveInstanceUuid(configService, logger)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to read Kibana UUID file, please check the uuid.server configurationvalue in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
+        `"Unable to read Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
       );
     });
     it('throws an explicit error for file write errors', async () => {
-      mockWriteFile({ error: permissionError });
+      mockWriteFile(isDirectoryError);
       await expect(
         resolveInstanceUuid(configService, logger)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to write Kibana UUID file, please check the uuid.server configurationvalue in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: undefined"`
+        `"Unable to write Kibana UUID file, please check the uuid.server configuration value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EISDIR"`
       );
     });
   });
