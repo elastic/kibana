@@ -24,7 +24,6 @@ const __LEGACY = {
   uiRoutes,
   timezoneProvider,
 };
-
 // This will be moved to core.application.register when the new platform
 // migration is complete.
 // @ts-ignore

@@ -8,8 +8,7 @@ import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } f
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import url from 'url';
-
-import chrome from 'ui/chrome';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { InfraLogItem } from '../../../graphql/types';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
 
@@ -18,11 +17,19 @@ const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 export const LogEntryActionsMenu: React.FunctionComponent<{
   logItem: InfraLogItem;
 }> = ({ logItem }) => {
+  const prependBasePath = useKibana().services.http?.basePath?.prepend;
+
   const { hide, isVisible, show } = useVisibilityState(false);
 
-  const uptimeLink = useMemo(() => getUptimeLink(logItem), [logItem]);
+  const uptimeLink = useMemo(() => {
+    const link = getUptimeLink(logItem);
+    return prependBasePath && link ? prependBasePath(link) : undefined;
+  }, [logItem, prependBasePath]);
 
-  const apmLink = useMemo(() => getAPMLink(logItem), [logItem]);
+  const apmLink = useMemo(() => {
+    const link = getAPMLink(logItem);
+    return prependBasePath && link ? prependBasePath(link) : undefined;
+  }, [logItem, prependBasePath]);
 
   const menuItems = useMemo(
     () => [
@@ -93,7 +100,7 @@ const getUptimeLink = (logItem: InfraLogItem) => {
   }
 
   return url.format({
-    pathname: chrome.addBasePath('/app/uptime'),
+    pathname: '/app/uptime',
     hash: `/?search=(${searchExpressions.join(' OR ')})`,
   });
 };
@@ -122,7 +129,7 @@ const getAPMLink = (logItem: InfraLogItem) => {
     : { rangeFrom: 'now-1y', rangeTo: 'now' };
 
   return url.format({
-    pathname: chrome.addBasePath('/app/apm'),
+    pathname: '/app/apm',
     hash: `/traces?kuery=${encodeURIComponent(
       `trace.id:${traceIdEntry.value}`
     )}&rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,

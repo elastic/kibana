@@ -54,10 +54,6 @@ export class Plugin {
 
     const apolloClient = new ApolloClient(graphQLOptions);
 
-    // const infraModule = legacy.uiModules.get('app/infa');
-
-    // const framework = new KibanaFramework(infraModule, legacy.uiRoutes, legacy.timezoneProvider);
-
     const libs: InfraFrontendLibs = {
       apolloClient,
       observableApi,

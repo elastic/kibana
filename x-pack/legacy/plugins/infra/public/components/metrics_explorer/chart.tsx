@@ -35,7 +35,7 @@ import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   title?: string | null;
@@ -63,6 +63,7 @@ export const MetricsExplorerChart = ({
   onTimeChange,
 }: Props) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const handleTimeChange = (from: number, to: number) => {
@@ -152,7 +153,7 @@ export const MetricsExplorerChart = ({
             <Settings
               tooltip={tooltipProps}
               onBrushEnd={handleTimeChange}
-              theme={getChartTheme()}
+              theme={getChartTheme(isDarkMode)}
             />
           </Chart>
         ) : options.metrics.length > 0 ? (
