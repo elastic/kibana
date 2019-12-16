@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { postPagerduty } from './lib/post_pagerduty';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
@@ -19,10 +20,10 @@ const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
 
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
-const ConfigSchema = schema.object({
+const configSchemaProps = {
   apiUrl: schema.nullable(schema.string()),
-});
-
+};
+const ConfigSchema = schema.object(configSchemaProps);
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -86,19 +87,47 @@ function validateParams(paramsObject: any): string | void {
 }
 
 // action type definition
-export function getActionType({ logger }: { logger: Logger }): ActionType {
+export function getActionType({
+  logger,
+  configurationUtilities,
+}: {
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+}): ActionType {
   return {
     id: '.pagerduty',
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',
     }),
     validate: {
-      config: ConfigSchema,
+      config: schema.object(configSchemaProps, {
+        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+      }),
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
     executor: curry(executor)({ logger }),
   };
+}
+
+function valdiateActionTypeConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: ActionTypeConfigType
+) {
+  try {
+    configurationUtilities.ensureWhitelistedUri(getPagerDutyApiUrl(configObject));
+  } catch (whitelistError) {
+    return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
+      defaultMessage: 'error configuring pagerduty action: {message}',
+      values: {
+        message: whitelistError.message,
+      },
+    });
+  }
+}
+
+function getPagerDutyApiUrl(config: ActionTypeConfigType): string {
+  return config.apiUrl || PAGER_DUTY_API_URL;
 }
 
 // action executor
@@ -113,7 +142,7 @@ async function executor(
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
-  const apiUrl = config.apiUrl || PAGER_DUTY_API_URL;
+  const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
     'Content-Type': 'application/json',
     'X-Routing-Key': secrets.routingKey,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -17,14 +18,16 @@ import {
   ActionTypeExecutorResult,
   ExecutorType,
 } from '../types';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 
-const SecretsSchema = schema.object({
+const secretsSchemaProps = {
   webhookUrl: schema.string(),
-});
+};
+const SecretsSchema = schema.object(secretsSchemaProps);
 
 // params definition
 
@@ -37,20 +40,42 @@ const ParamsSchema = schema.object({
 // action type definition
 
 // customizing executor is only used for tests
-export function getActionType(
-  { executor }: { executor: ExecutorType } = { executor: slackExecutor }
-): ActionType {
+export function getActionType({
+  configurationUtilities,
+  executor = slackExecutor,
+}: {
+  configurationUtilities: ActionsConfigurationUtilities;
+  executor?: ExecutorType;
+}): ActionType {
   return {
     id: '.slack',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
     validate: {
-      secrets: SecretsSchema,
+      secrets: schema.object(secretsSchemaProps, {
+        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+      }),
       params: ParamsSchema,
     },
     executor,
   };
+}
+
+function valdiateActionTypeConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  secretsObject: ActionTypeSecretsType
+) {
+  try {
+    configurationUtilities.ensureWhitelistedUri(secretsObject.webhookUrl);
+  } catch (whitelistError) {
+    return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
+      defaultMessage: 'error configuring slack action: {message}',
+      values: {
+        message: whitelistError.message,
+      },
+    });
+  }
 }
 
 // action executor
