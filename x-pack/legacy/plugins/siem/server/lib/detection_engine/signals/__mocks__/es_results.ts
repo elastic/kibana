@@ -32,6 +32,8 @@ export const sampleRuleAlertParams = (
   savedId: undefined,
   meta: undefined,
   threats: undefined,
+  updatedAt: undefined,
+  createdAt: undefined,
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({

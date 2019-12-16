@@ -55,5 +55,7 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threats: ruleParams.threats,
+    created_at: undefined,
+    updated_at: undefined,
   });
 };
