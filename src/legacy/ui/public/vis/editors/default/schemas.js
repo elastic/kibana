@@ -25,17 +25,16 @@ import { AggGroupNames } from './agg_groups';
 
 class Schemas {
   constructor(schemas) {
-
     _(schemas || [])
-      .map((schema) => {
+      .map(schema => {
         if (!schema.name) throw new Error('all schema must have a unique name');
 
         if (schema.name === 'split') {
           schema.params = [
             {
               name: 'row',
-              default: true
-            }
+              default: true,
+            },
           ];
           schema.editorComponent = RowsOrColumnsControl;
         } else if (schema.name === 'radius') {
@@ -54,12 +53,12 @@ class Schemas {
 
         return schema;
       })
-      .tap((schemas) => {
+      .tap(schemas => {
         this.all = new IndexedArray({
           index: ['name'],
           group: ['group'],
           immutable: true,
-          initialSet: schemas
+          initialSet: schemas,
         });
       })
       .groupBy('group')
@@ -67,7 +66,7 @@ class Schemas {
         this[groupName] = new IndexedArray({
           index: ['name'],
           immutable: true,
-          initialSet: group
+          initialSet: group,
         });
       })
       .commit();
@@ -75,4 +74,3 @@ class Schemas {
 }
 
 export { Schemas };
-

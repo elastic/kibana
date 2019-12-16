@@ -60,7 +60,6 @@ function buildInline(aggType, thresholdComparator, hasTermsAgg) {
       return result;
     `;
     }
-
   }
 
   if (aggType !== 'count' && !hasTermsAgg) {
@@ -110,7 +109,6 @@ function buildInline(aggType, thresholdComparator, hasTermsAgg) {
       return result;
     `;
     }
-
   }
 
   return singleLineScript(script);
@@ -121,7 +119,7 @@ watch.transform.script.params
  */
 function buildParams(threshold) {
   return {
-    threshold
+    threshold,
   };
 }
 
@@ -132,7 +130,7 @@ export function buildTransform({ aggType, thresholdComparator, hasTermsAgg, thre
   return {
     script: {
       source: buildInline(aggType, thresholdComparator, hasTermsAgg),
-      params: buildParams(threshold)
-    }
+      params: buildParams(threshold),
+    },
   };
 }

@@ -39,9 +39,9 @@ export class SlackAction extends BaseAction {
     const message =
       this.text || to
         ? {
-          text: this.text,
-          to,
-        }
+            text: this.text,
+            to,
+          }
         : {};
     Object.assign(result, {
       to,
@@ -83,7 +83,7 @@ export class SlackAction extends BaseAction {
   });
   static iconClass = 'logoSlack';
   static selectMessage = i18n.translate('xpack.watcher.models.slackAction.selectMessageText', {
-    defaultMessage: 'Send a message to a Slack user or channel',
+    defaultMessage: 'Send a message to a Slack user or channel.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.slackAction.simulateButtonLabel', {
     defaultMessage: 'Send a sample message',

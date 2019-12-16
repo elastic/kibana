@@ -95,7 +95,10 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
       color: 'rgb(255, 0, 0)',
       lines: { show: true, fill: false, lineWidth: 0 },
       points: { show: false },
-      data: [[1, 0.01], [2, 0.01]],
+      data: [
+        [1, 0.01],
+        [2, 0.01],
+      ],
     });
 
     expect(results[1]).to.eql({
@@ -105,7 +108,10 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
       fillBetween: 'test:lower',
       lines: { show: true, fill: 0.5, lineWidth: 0 },
       points: { show: false },
-      data: [[1, 0.7], [2, 0.7]],
+      data: [
+        [1, 0.7],
+        [2, 0.7],
+      ],
     });
   });
 });

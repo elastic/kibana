@@ -44,7 +44,7 @@ import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
-module.exports = function (kibana) {
+module.exports = function(kibana) {
   return [
     xpackMain(kibana),
     graph(kibana),

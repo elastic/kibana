@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const visualTesting = getService('visualTesting');
   const testSubjects = getService('testSubjects');
@@ -29,9 +29,10 @@ export default function ({ getService, getPageObjects }) {
       it('renders login page', async () => {
         await PageObjects.common.navigateToApp('login');
 
-        await retry.waitFor('login page visible', async () => (
-          await testSubjects.exists('loginSubmit')
-        ));
+        await retry.waitFor(
+          'login page visible',
+          async () => await testSubjects.exists('loginSubmit')
+        );
 
         await visualTesting.snapshot();
       });
@@ -41,9 +42,10 @@ export default function ({ getService, getPageObjects }) {
           expectSuccess: false,
         });
 
-        await retry.waitFor('login error visible', async () => (
-          await testSubjects.exists('loginErrorMessage')
-        ));
+        await retry.waitFor(
+          'login error visible',
+          async () => await testSubjects.exists('loginErrorMessage')
+        );
 
         await visualTesting.snapshot();
       });

@@ -8,8 +8,7 @@ import sinon from 'sinon';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = server => {
-
-  const setIndexPatternValidityResponse = (response) => {
+  const setIndexPatternValidityResponse = response => {
     const defaultResponse = {
       doesMatchIndices: true,
       doesMatchRollupIndices: false,
@@ -40,7 +39,7 @@ const registerHttpRequestMockHelpers = server => {
     ]);
   };
 
-  const setLoadJobsResponse = (response) => {
+  const setLoadJobsResponse = response => {
     server.respondWith('GET', '/api/rollup/jobs', [
       200,
       { 'Content-Type': 'application/json' },
@@ -52,7 +51,7 @@ const registerHttpRequestMockHelpers = server => {
     setIndexPatternValidityResponse,
     setCreateJobResponse,
     setLoadJobsResponse,
-    setStartJobResponse
+    setStartJobResponse,
   };
 };
 
@@ -66,6 +65,6 @@ export const init = () => {
 
   return {
     server,
-    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server)
+    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server),
   };
 };

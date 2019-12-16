@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 

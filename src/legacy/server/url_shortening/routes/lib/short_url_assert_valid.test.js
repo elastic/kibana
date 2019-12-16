@@ -19,7 +19,6 @@
 
 import { shortUrlAssertValid } from './short_url_assert_valid';
 
-
 describe('shortUrlAssertValid()', () => {
   const invalid = [
     ['protocol', 'http://localhost:5601/app/kibana'],
@@ -61,5 +60,4 @@ describe('shortUrlAssertValid()', () => {
       shortUrlAssertValid(url);
     });
   });
-
 });

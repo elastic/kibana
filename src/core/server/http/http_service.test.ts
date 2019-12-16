@@ -28,6 +28,7 @@ import { ConfigService, Env } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { config as cspConfig } from '../csp';
 
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
@@ -45,6 +46,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
     logger
   );
   configService.setSchema(config.path, config.schema);
+  configService.setSchema(cspConfig.path, cspConfig.schema);
   return configService;
 };
 const contextSetup = contextServiceMock.createSetupContract();

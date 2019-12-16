@@ -8,8 +8,8 @@
 import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { LegacyAngularInjectedDependencies } from './render_app';
-import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
-import { LicensingPluginSetup } from '../../../../plugins/licensing/common/types';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
 
 export interface GraphPluginStartDependencies {
   npData: ReturnType<DataPlugin['start']>;
