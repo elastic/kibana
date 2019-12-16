@@ -3,5 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SpacesPlugin } from './plugin';
 
-export { initSpacesNavControl } from './nav_control';
+export const plugin = () => {
+  return new SpacesPlugin();
+};
