@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -25,7 +25,7 @@ import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './helpers/build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -69,14 +69,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
    */
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => void;
-  constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,
       euiIconType: 'discoverApp',
-      mount: async (context, params) => {
+      mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }

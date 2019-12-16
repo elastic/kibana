@@ -35,7 +35,7 @@ export class TestScript extends Component {
   state = {
     isLoading: false,
     additionalFields: [],
-  }
+  };
 
   componentDidMount() {
     if (this.props.script) {
@@ -44,13 +44,7 @@ export class TestScript extends Component {
   }
 
   previewScript = async () => {
-    const {
-      indexPattern,
-      lang,
-      name,
-      script,
-      executeScript,
-    } = this.props;
+    const { indexPattern, lang, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
       return;
@@ -67,13 +61,13 @@ export class TestScript extends Component {
       indexPatternTitle: indexPattern.title,
       additionalFields: this.state.additionalFields.map(option => {
         return option.value;
-      })
+      }),
     });
 
     if (scriptResponse.status !== 200) {
       this.setState({
         isLoading: false,
-        previewData: scriptResponse
+        previewData: scriptResponse,
       });
       return;
     }
@@ -86,13 +80,13 @@ export class TestScript extends Component {
         ...hit.fields,
       })),
     });
-  }
+  };
 
-  onAdditionalFieldsChange = (selectedOptions) => {
+  onAdditionalFieldsChange = selectedOptions => {
     this.setState({
-      additionalFields: selectedOptions
+      additionalFields: selectedOptions,
     });
-  }
+  };
 
   renderPreview() {
     const { previewData } = this.state;
@@ -103,11 +97,7 @@ export class TestScript extends Component {
 
     if (previewData.error) {
       return (
-        <EuiCallOut
-          title="There's an error in your script"
-          color="danger"
-          iconType="cross"
-        >
+        <EuiCallOut title="There's an error in your script" color="danger" iconType="cross">
           <EuiCodeBlock
             language="json"
             className="scriptPreviewCodeBlock"
@@ -121,7 +111,9 @@ export class TestScript extends Component {
 
     return (
       <Fragment>
-        <EuiTitle size="xs"><p>First 10 results</p></EuiTitle>
+        <EuiTitle size="xs">
+          <p>First 10 results</p>
+        </EuiTitle>
         <EuiSpacer size="s" />
         <EuiCodeBlock
           language="json"
@@ -157,7 +149,7 @@ export class TestScript extends Component {
         label: fieldType,
         options: fieldsList.sort().map(fieldName => {
           return { value: fieldName, label: fieldName };
-        })
+        }),
       });
     });
 
@@ -169,9 +161,7 @@ export class TestScript extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow
-          label="Additional fields"
-        >
+        <EuiFormRow label="Additional fields">
           <EuiComboBox
             placeholder="Select..."
             options={fields}
@@ -200,8 +190,8 @@ export class TestScript extends Component {
         <EuiText>
           <h3>Preview results</h3>
           <p>
-            Run your script to preview the first 10 results. You can also select some
-            additional fields to include in your results to gain more context.
+            Run your script to preview the first 10 results. You can also select some additional
+            fields to include in your results to gain more context.
           </p>
         </EuiText>
         <EuiSpacer />

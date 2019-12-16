@@ -38,17 +38,17 @@ export const KuiSelect = ({
   children,
   ...rest
 }) => {
-  const classes = classNames('kuiSelect', className, {
-    'kuiSelect-isInvalid': isInvalid
-  }, sizeToClassNameMap[size]);
+  const classes = classNames(
+    'kuiSelect',
+    className,
+    {
+      'kuiSelect-isInvalid': isInvalid,
+    },
+    sizeToClassNameMap[size]
+  );
 
   return (
-    <select
-      className={classes}
-      onChange={onChange}
-      disabled={isDisabled}
-      {...rest}
-    >
+    <select className={classes} onChange={onChange} disabled={isDisabled} {...rest}>
       {children}
     </select>
   );
@@ -57,7 +57,7 @@ export const KuiSelect = ({
 KuiSelect.defaultProps = {
   isInvalid: false,
   isDisabled: false,
-  size: 'medium'
+  size: 'medium',
 };
 
 KuiSelect.propTypes = {
@@ -66,5 +66,5 @@ KuiSelect.propTypes = {
   isInvalid: PropTypes.bool,
   isDisabled: PropTypes.bool,
   size: PropTypes.oneOf(SELECT_SIZE),
-  children: PropTypes.node
+  children: PropTypes.node,
 };
