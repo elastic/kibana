@@ -10,6 +10,7 @@ import { MappingInfoPanel } from '.';
 import { RoleMapping } from '../../../../../../../common/model';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { RoleSelector } from '../role_selector';
+import { RoleTemplateEditor } from '../role_selector/role_template_editor';
 
 jest.mock('../../../../../../lib/roles_api', () => {
   return {
@@ -83,6 +84,111 @@ describe('MappingInfoPanel', () => {
     expect(wrapper.find(RoleSelector).props()).toMatchObject({
       mode: 'templates',
     });
+  });
+
+  it('renders a blank inline template by default when switching from roles to role templates', () => {
+    const props = {
+      roleMapping: {
+        name: 'my role mapping',
+        enabled: true,
+        roles: ['foo_role'],
+        role_templates: [],
+        rules: {},
+        metadata: {},
+      } as RoleMapping,
+      mode: 'create' as any,
+      onChange: jest.fn(),
+      canUseInlineScripts: true,
+      canUseStoredScripts: false,
+      validateForm: false,
+    };
+
+    const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
+
+    findTestSubject(wrapper, 'switchToRoleTemplatesButton').simulate('click');
+
+    expect(props.onChange).toHaveBeenCalledWith({
+      name: 'my role mapping',
+      enabled: true,
+      roles: [],
+      role_templates: [
+        {
+          template: { source: '' },
+        },
+      ],
+      rules: {},
+      metadata: {},
+    });
+
+    wrapper.setProps({ roleMapping: props.onChange.mock.calls[0][0] });
+
+    expect(wrapper.find(RoleTemplateEditor)).toHaveLength(1);
+  });
+
+  it('renders a blank stored template by default when switching from roles to role templates and inline scripts are disabled', () => {
+    const props = {
+      roleMapping: {
+        name: 'my role mapping',
+        enabled: true,
+        roles: ['foo_role'],
+        role_templates: [],
+        rules: {},
+        metadata: {},
+      } as RoleMapping,
+      mode: 'create' as any,
+      onChange: jest.fn(),
+      canUseInlineScripts: false,
+      canUseStoredScripts: true,
+      validateForm: false,
+    };
+
+    const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
+
+    findTestSubject(wrapper, 'switchToRoleTemplatesButton').simulate('click');
+
+    expect(props.onChange).toHaveBeenCalledWith({
+      name: 'my role mapping',
+      enabled: true,
+      roles: [],
+      role_templates: [
+        {
+          template: { id: '' },
+        },
+      ],
+      rules: {},
+      metadata: {},
+    });
+
+    wrapper.setProps({ roleMapping: props.onChange.mock.calls[0][0] });
+
+    expect(wrapper.find(RoleTemplateEditor)).toHaveLength(1);
+  });
+
+  it('does not create a blank role template if no script types are enabled', () => {
+    const props = {
+      roleMapping: {
+        name: 'my role mapping',
+        enabled: true,
+        roles: ['foo_role'],
+        role_templates: [],
+        rules: {},
+        metadata: {},
+      } as RoleMapping,
+      mode: 'create' as any,
+      onChange: jest.fn(),
+      canUseInlineScripts: false,
+      canUseStoredScripts: false,
+      validateForm: false,
+    };
+
+    const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
+
+    findTestSubject(wrapper, 'switchToRoleTemplatesButton').simulate('click');
+
+    wrapper.update();
+
+    expect(props.onChange).not.toHaveBeenCalled();
+    expect(wrapper.find(RoleTemplateEditor)).toHaveLength(0);
   });
 
   it('renders the name input as readonly when editing an existing role mapping', () => {

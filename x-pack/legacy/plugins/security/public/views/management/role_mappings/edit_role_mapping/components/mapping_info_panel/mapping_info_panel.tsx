@@ -145,8 +145,9 @@ export class MappingInfoPanel extends Component<Props, State> {
             </span>
             <EuiSpacer size="xs" />
             <EuiLink
+              data-test-subj="switchToRoleTemplatesButton"
               onClick={() => {
-                this.setState({ rolesMode: 'templates' });
+                this.onRolesModeChange('templates');
               }}
             >
               <Fragment>
@@ -211,7 +212,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             <EuiSpacer size="xs" />
             <EuiLink
               onClick={() => {
-                this.setState({ rolesMode: 'roles' });
+                this.onRolesModeChange('roles');
               }}
             >
               <Fragment>
@@ -282,5 +283,25 @@ export class MappingInfoPanel extends Component<Props, State> {
       ...this.props.roleMapping,
       name,
     });
+  };
+
+  private onRolesModeChange = (rolesMode: State['rolesMode']) => {
+    const canUseTemplates = this.props.canUseInlineScripts || this.props.canUseStoredScripts;
+    if (rolesMode === 'templates' && canUseTemplates) {
+      // Create blank template as a starting point
+      const defaultTemplate = this.props.canUseInlineScripts
+        ? {
+            template: { source: '' },
+          }
+        : {
+            template: { id: '' },
+          };
+      this.props.onChange({
+        ...this.props.roleMapping,
+        roles: [],
+        role_templates: [defaultTemplate],
+      });
+    }
+    this.setState({ rolesMode });
   };
 }
