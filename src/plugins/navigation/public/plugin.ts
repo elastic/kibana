@@ -17,40 +17,21 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { TopNavMenuExtensionsRegistry, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
-import { createTopNav } from './top_nav_menu/create_top_nav_menu';
-import { TopNavMenuProps } from './top_nav_menu/top_nav_menu';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart,
+  NavigationPluginStartDependencies,
+} from './types';
+import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 
-/**
- * Interface for this plugin's returned `setup` contract.
- *
- * @public
- */
-export interface NavigationSetup {
-  registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
-}
-
-/**
- * Interface for this plugin's returned `start` contract.
- *
- * @public
- */
-export interface NavigationStart {
-  ui: {
-    TopNavMenu: React.ComponentType<TopNavMenuProps>;
-  };
-}
-
-export interface NavigationPluginStartDependencies {
-  data: DataPublicPluginStart;
-}
-
-export class NavigationPlugin implements Plugin<NavigationSetup, NavigationStart> {
+export class NavigationPublicPlugin
+  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry = new TopNavMenuExtensionsRegistry();
 
-  public setup(core: CoreSetup): NavigationSetup {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup): NavigationPublicPluginSetup {
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -58,7 +39,10 @@ export class NavigationPlugin implements Plugin<NavigationSetup, NavigationStart
     };
   }
 
-  public start(core: CoreStart, { data }: NavigationPluginStartDependencies): NavigationStart {
+  public start(
+    core: CoreStart,
+    { data }: NavigationPluginStartDependencies
+  ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     return {
@@ -68,7 +52,5 @@ export class NavigationPlugin implements Plugin<NavigationSetup, NavigationStart
     };
   }
 
-  public stop() {
-    this.topNavMenuExtensionsRegistry.clear();
-  }
+  public stop() {}
 }
