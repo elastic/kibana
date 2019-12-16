@@ -25,6 +25,7 @@ export class CanvasPlugin implements Plugin {
 
     initRoutes({ router: canvasRouter, logger: this.logger });
 
+    // we need the kibana index provided by global config for the Canvas usage collector
     const globalConfig = await this.initializerContext.config.legacy.globalConfig$
       .pipe(first())
       .toPromise();
