@@ -20,13 +20,13 @@ const config = yaml.safeLoad(
   )
 );
 
-const GITHUB_USERNAME = argv.username as string;
 const KIBANA_INDEX = config['kibana.index'] as string;
 const TASK_MANAGER_INDEX = config['xpack.task_manager.index'] as string;
-const ELASTICSEARCH_USERNAME = (argv.esUsername as string) || 'elastic';
-const ELASTICSEARCH_PASSWORD = (argv.esPassword ||
+const KIBANA_ROLE_SUFFIX = argv.roleSuffix as string;
+const ELASTICSEARCH_USERNAME = (argv.username as string) || 'elastic';
+const ELASTICSEARCH_PASSWORD = (argv.password ||
   config['elasticsearch.password']) as string;
-const KIBANA_BASE_URL = (argv.baseUrl as string) || 'http://localhost:5601';
+const KIBANA_BASE_URL = (argv.kibanaUrl as string) || 'http://localhost:5601';
 
 interface User {
   username: string;
@@ -41,7 +41,7 @@ const getKibanaBasePath = once(async () => {
     await axios.request({ url: KIBANA_BASE_URL, maxRedirects: 0 });
   } catch (e) {
     const err = e as AxiosError;
-    const { location } = err.response?.headers;
+    const location = err.response?.headers?.location;
     const isBasePath = RegExp(/^\/\w{3}$/).test(location);
     return isBasePath ? location : '';
   }
@@ -49,42 +49,41 @@ const getKibanaBasePath = once(async () => {
 });
 
 init().catch(e => {
-  if (e.response) {
-    console.log(
-      JSON.stringify({ request: e.config, response: e.response.data }, null, 2)
-    );
-    return;
-  }
-
   console.log(e);
 });
 
 async function init() {
+  const isLocally = KIBANA_BASE_URL.includes('localhost');
+
   // kibana.index must be different from `.kibana`
-  if (KIBANA_INDEX === '.kibana') {
+  if (isLocally && KIBANA_INDEX === '.kibana') {
     console.log(
       'kibana.dev.yml: Please use a custom "kibana.index". Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
-  if (!KIBANA_INDEX.startsWith('.kibana')) {
+  if (isLocally && !KIBANA_INDEX.startsWith('.kibana')) {
     console.log(
       'kibana.dev.yml: "kibana.index" must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
-  if (TASK_MANAGER_INDEX && !TASK_MANAGER_INDEX.startsWith('.kibana')) {
+  if (
+    isLocally &&
+    TASK_MANAGER_INDEX &&
+    !TASK_MANAGER_INDEX.startsWith('.kibana')
+  ) {
     console.log(
       'kibana.dev.yml: "xpack.task_manager.index" must be prefixed with `.kibana`. Example: "xpack.task_manager.index: .kibana-task-manager-john"'
     );
     return;
   }
 
-  if (!GITHUB_USERNAME) {
+  if (!KIBANA_ROLE_SUFFIX) {
     console.log(
-      'Please specify your github username with `--username <username>` '
+      'Please specify a unique suffix that will be added to your roles with `--role-suffix <suffix>` '
     );
     return;
   }
@@ -95,8 +94,8 @@ async function init() {
     return;
   }
 
-  const KIBANA_READ_ROLE = `kibana_read_${GITHUB_USERNAME}`;
-  const KIBANA_WRITE_ROLE = `kibana_write_${GITHUB_USERNAME}`;
+  const KIBANA_READ_ROLE = `kibana_read_${KIBANA_ROLE_SUFFIX}`;
+  const KIBANA_WRITE_ROLE = `kibana_write_${KIBANA_ROLE_SUFFIX}`;
 
   // create roles
   await createRole({ roleName: KIBANA_READ_ROLE, privilege: 'read' });
@@ -132,17 +131,36 @@ async function isSecurityEnabled() {
 }
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
-  const basePath = await getKibanaBasePath();
-  const { data } = await axios.request({
-    ...options,
-    baseURL: KIBANA_BASE_URL + basePath,
-    auth: {
-      username: ELASTICSEARCH_USERNAME,
-      password: ELASTICSEARCH_PASSWORD
-    },
-    headers: { 'kbn-xsrf': 'true', ...options.headers }
-  });
-  return data;
+  const kibanaBasePath = await getKibanaBasePath();
+  const baseURL = KIBANA_BASE_URL + kibanaBasePath;
+  try {
+    const { data } = await axios.request({
+      ...options,
+      baseURL,
+      auth: {
+        username: ELASTICSEARCH_USERNAME,
+        password: ELASTICSEARCH_PASSWORD
+      },
+      headers: { 'kbn-xsrf': 'true', ...options.headers }
+    });
+    return data;
+  } catch (e) {
+    if (e.response) {
+      throw new Error(
+        JSON.stringify(
+          { request: e.config, response: e.response.data },
+          null,
+          2
+        )
+      );
+    }
+
+    if (e.errno === 'ECONNREFUSED') {
+      throw new Error(`Could not make request to: ${baseURL}/${options.url}`);
+    }
+
+    throw e;
+  }
 }
 
 async function createRole({
