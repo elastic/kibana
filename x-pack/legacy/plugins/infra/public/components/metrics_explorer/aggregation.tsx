@@ -10,23 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  metricsExplorerAggregationRT,
+  METRIC_EXPLORER_AGGREGATIONS,
+} from '../../../common/http_api/metrics_explorer';
 
 interface Props {
   options: MetricsExplorerOptions;
   fullWidth: boolean;
   onChange: (aggregation: MetricsExplorerAggregation) => void;
 }
-
-const isMetricsExplorerAggregation = (subject: any): subject is MetricsExplorerAggregation => {
-  return (
-    subject === 'avg' ||
-    subject === 'max' ||
-    subject === 'min' ||
-    subject === 'cardinality' ||
-    subject === 'rate' ||
-    subject === 'count'
-  );
-};
 
 export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) => {
   const AGGREGATION_LABELS = {
@@ -52,7 +45,8 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
 
   const handleChange = useCallback(
     e => {
-      const aggregation = (isMetricsExplorerAggregation(e.target.value) && e.target.value) || 'avg';
+      const aggregation =
+        (metricsExplorerAggregationRT.is(e.target.value) && e.target.value) || 'avg';
       onChange(aggregation);
     },
     [onChange]
@@ -65,7 +59,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
       })}
       fullWidth
       value={options.aggregation}
-      options={['avg', 'max', 'min', 'cardinality', 'rate', 'count'].map(k => ({
+      options={METRIC_EXPLORER_AGGREGATIONS.map(k => ({
         text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
         value: k,
       }))}
