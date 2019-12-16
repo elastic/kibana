@@ -19,9 +19,9 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from ‘../../ftr_provider_context’;
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }): FtrProviderContext {
+export default function({ getService, getPageObjects }): FtrProviderContext {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
@@ -29,29 +29,26 @@ export default function ({ getService, getPageObjects }): FtrProviderContext {
 
   describe('import saved objects from 6.x to 7.x/8.0.0', function describeIndexTests() {
     describe('.json file', () => {
-      beforeEach(async function () {
+      beforeEach(async function() {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
       });
 
-      afterEach(async function () {
+      afterEach(async function() {
         await esArchiver.unload('management');
       });
-       
-      it('should import saved objects', async function () {
+
+      it('should import saved objects', async function() {
         await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'saved_objects_7X_800_indexpattern.ndjson'));
+        await PageObjects.settings.importFile(
+          path.join(__dirname, 'exports', '_import_logstash_700.json')
+        );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
         await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
-       
-  
       });
-
-
     });
-      
   });
 }
