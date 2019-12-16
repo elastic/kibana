@@ -53,7 +53,7 @@ const logs = {
       type: 'server',
       node: 'foobar2',
       message:
-        'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.5gb[6.3%], shards will be relocated away from this node', // eslint-disable-line max-len
+        'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.5gb[6.3%], shards will be relocated away from this node',
     },
     {
       timestamp: '2019-03-18T12:49:24.414Z',
@@ -88,7 +88,7 @@ const logs = {
       type: 'server',
       node: 'foobar',
       message:
-        'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.3gb[6.2%], shards will be relocated away from this node', // eslint-disable-line max-len
+        'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.3gb[6.2%], shards will be relocated away from this node',
     },
     {
       timestamp: '2019-03-18T12:48:53.753Z',

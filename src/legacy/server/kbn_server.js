@@ -30,8 +30,6 @@ import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { statusMixin } from './status';
 import pidMixin from './pid';
-import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
-import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
@@ -89,7 +87,6 @@ export default class KbnServer {
         // adds methods for extending this.server
         serverExtensionsMixin,
         loggingMixin,
-        configDeprecationWarningsMixin,
         warningsMixin,
         statusMixin,
 
@@ -198,7 +195,7 @@ export default class KbnServer {
   }
 
   applyLoggingConfiguration(settings) {
-    const config = new Config(this.config.getSchema(), transformDeprecations(settings));
+    const config = new Config(this.config.getSchema(), settings);
 
     const loggingOptions = loggingConfiguration(config);
     const subset = {

@@ -25,7 +25,7 @@ import { getQueryParameterActions } from '../actions';
 
 describe('context app', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
 
   describe('action setPredecessorCount', function() {

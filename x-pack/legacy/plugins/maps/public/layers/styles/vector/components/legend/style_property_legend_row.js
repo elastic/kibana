@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { rangeShape } from '../style_option_shapes';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { StyleLegendRow } from '../../../components/style_legend_row';
 
@@ -24,7 +23,7 @@ export class StylePropertyLegendRow extends Component {
   };
 
   render() {
-    const { range, style } = this.props;
+    const { meta: range, style } = this.props;
 
     const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
     const minLabel =
@@ -53,6 +52,6 @@ export class StylePropertyLegendRow extends Component {
 StylePropertyLegendRow.propTypes = {
   label: PropTypes.string,
   fieldFormatter: PropTypes.func,
-  range: rangeShape,
+  meta: PropTypes.object,
   style: PropTypes.object,
 };

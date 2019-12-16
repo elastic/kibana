@@ -20,7 +20,7 @@
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
-import 'ui/index_patterns';
+import { npStart } from 'ui/new_platform';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 
@@ -41,7 +41,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
       const services = {
         config: $injector.get('config'),
         es: $injector.get('es'),
-        indexPatterns: $injector.get('indexPatterns'),
+        indexPatterns: npStart.plugins.data.indexPatterns,
         $http: $injector.get('$http'),
         savedObjectsClient: Private(SavedObjectsClientProvider),
         indexPatternCreationType,

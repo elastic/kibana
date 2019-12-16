@@ -28,12 +28,10 @@ module.exports = function(serviceName = name) {
     serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
   };
 
-  if (configFileExists()) conf.configFile = 'config/apm.js';
+  const configFile = join(__dirname, '..', 'config', 'apm.js');
+
+  if (existsSync(configFile)) conf.configFile = configFile;
   else conf.active = false;
 
   require('elastic-apm-node').start(conf);
 };
-
-function configFileExists() {
-  return existsSync(join(__dirname, '..', 'config', 'apm.js'));
-}

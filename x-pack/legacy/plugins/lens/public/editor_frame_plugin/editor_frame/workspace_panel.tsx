@@ -162,7 +162,7 @@ export function InnerWorkspacePanel({
             <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
           </p>
           <EuiButtonEmpty
-            href="https://discuss.elastic.co/c/kibana"
+            href="https://www.elastic.co/products/kibana/feedback"
             iconType="popout"
             iconSide="right"
             size="xs"

@@ -50,7 +50,16 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
-export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
+export {
+  ConfigPath,
+  ConfigService,
+  ConfigDeprecation,
+  ConfigDeprecationProvider,
+  ConfigDeprecationLogger,
+  ConfigDeprecationFactory,
+  EnvironmentMode,
+  PackageInfo,
+} from './config';
 export {
   IContextContainer,
   IContextProvider,
@@ -59,6 +68,7 @@ export {
   HandlerParameters,
 } from './context';
 export { CoreId } from './core_context';
+export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,

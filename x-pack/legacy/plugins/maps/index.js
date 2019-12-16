@@ -27,7 +27,7 @@ export function maps(kibana) {
         description: i18n.translate('xpack.maps.appDescription', {
           defaultMessage: 'Map application',
         }),
-        main: 'plugins/maps/index',
+        main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
       },

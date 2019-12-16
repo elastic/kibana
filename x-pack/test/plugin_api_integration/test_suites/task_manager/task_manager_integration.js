@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
-import url from 'url';
+import _ from 'lodash';
 import supertestAsPromised from 'supertest-as-promised';
+import url from 'url';
 
 const {
   task: { properties: taskManagerIndexMapping },
@@ -74,6 +74,15 @@ export default function({ getService }) {
         .then(response => response.body);
     }
 
+    function runTaskNow(task) {
+      return supertest
+        .post('/api/sample_tasks/run_now')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then(response => response.body);
+    }
+
     function scheduleTaskIfNotExists(task) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
@@ -88,6 +97,24 @@ export default function({ getService }) {
         .post('/api/sample_tasks/event')
         .set('kbn-xsrf', 'xxx')
         .send({ event })
+        .expect(200);
+    }
+
+    function getTaskById(tasks, id) {
+      return tasks.filter(task => task.id === id)[0];
+    }
+
+    async function provideParamsToTasksWaitingForParams(taskId, data = {}) {
+      // wait for task to start running and stall on waitForParams
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskId).status).to.eql('running');
+      });
+
+      return supertest
+        .post('/api/sample_tasks/event')
+        .set('kbn-xsrf', 'xxx')
+        .send({ event: taskId, data })
         .expect(200);
     }
 
@@ -193,7 +220,7 @@ export default function({ getService }) {
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(count + 1);
 
-        expectReschedule(originalTask, task, nextRunMilliseconds);
+        expectReschedule(Date.parse(originalTask.runAt), task, nextRunMilliseconds);
       });
     });
 
@@ -214,12 +241,196 @@ export default function({ getService }) {
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
-        expectReschedule(originalTask, task, intervalMilliseconds);
+        expectReschedule(Date.parse(originalTask.runAt), task, intervalMilliseconds);
       });
     });
 
-    async function expectReschedule(originalTask, currentTask, expectedDiff) {
-      const originalRunAt = Date.parse(originalTask.runAt);
+    it('should return a task run result when asked to run a task now', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `30m`,
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(docs.filter(taskDoc => taskDoc._source.taskId === originalTask.id).length).to.eql(1);
+
+        const [task] = (await currentTasks()).docs.filter(
+          taskDoc => taskDoc.id === originalTask.id
+        );
+
+        expect(task.state.count).to.eql(1);
+
+        // ensure this task shouldnt run for another half hour
+        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
+      });
+
+      const now = Date.now();
+      const runNowResult = await runTaskNow({
+        id: originalTask.id,
+      });
+
+      expect(runNowResult).to.eql({ id: originalTask.id });
+
+      await retry.try(async () => {
+        expect(
+          (await historyDocs()).filter(taskDoc => taskDoc._source.taskId === originalTask.id).length
+        ).to.eql(2);
+
+        const [task] = (await currentTasks()).docs.filter(
+          taskDoc => taskDoc.id === originalTask.id
+        );
+        expect(task.state.count).to.eql(2);
+
+        // ensure this task shouldnt run for another half hour
+        expectReschedule(now, task, 30 * 60000);
+      });
+    });
+
+    it('should return a task run error result when running a task now fails', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `30m`,
+        params: { failWith: 'error on run now', failOn: 3 },
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(docs.filter(taskDoc => taskDoc._source.taskId === originalTask.id).length).to.eql(1);
+
+        const [task] = (await currentTasks()).docs.filter(
+          taskDoc => taskDoc.id === originalTask.id
+        );
+
+        expect(task.state.count).to.eql(1);
+
+        // ensure this task shouldnt run for another half hour
+        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
+      });
+
+      // second run should still be successful
+      const successfulRunNowResult = await runTaskNow({
+        id: originalTask.id,
+      });
+      expect(successfulRunNowResult).to.eql({ id: originalTask.id });
+
+      await retry.try(async () => {
+        const [task] = (await currentTasks()).docs.filter(
+          taskDoc => taskDoc.id === originalTask.id
+        );
+        expect(task.state.count).to.eql(2);
+      });
+
+      // third run should fail
+      const failedRunNowResult = await runTaskNow({
+        id: originalTask.id,
+      });
+
+      expect(failedRunNowResult).to.eql({ id: originalTask.id, error: `Error: error on run now` });
+
+      await retry.try(async () => {
+        expect(
+          (await historyDocs()).filter(taskDoc => taskDoc._source.taskId === originalTask.id).length
+        ).to.eql(2);
+
+        const [task] = (await currentTasks()).docs.filter(
+          taskDoc => taskDoc.id === originalTask.id
+        );
+        expect(task.attempts).to.eql(1);
+      });
+    });
+
+    it('should return a task run error result when trying to run a non-existent task', async () => {
+      // runNow should fail
+      const failedRunNowResult = await runTaskNow({
+        id: 'i-dont-exist',
+      });
+      expect(failedRunNowResult).to.eql({
+        error: `Error: Failed to run task "i-dont-exist" as it does not exist`,
+        id: 'i-dont-exist',
+      });
+    });
+
+    it('should return a task run error result when trying to run a task now which is already running', async () => {
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: '30m',
+        params: {
+          waitForParams: true,
+        },
+      });
+
+      // tell the task to wait for the 'runNowHasBeenAttempted' event
+      await provideParamsToTasksWaitingForParams(longRunningTask.id, {
+        waitForEvent: 'runNowHasBeenAttempted',
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(docs.filter(taskDoc => taskDoc._source.taskId === longRunningTask.id).length).to.eql(
+          1
+        );
+      });
+
+      // first runNow should fail
+      const failedRunNowResult = await runTaskNow({
+        id: longRunningTask.id,
+      });
+
+      expect(failedRunNowResult).to.eql({
+        error: `Error: Failed to run task "${longRunningTask.id}" as it is currently running`,
+        id: longRunningTask.id,
+      });
+
+      // finish first run by emitting 'runNowHasBeenAttempted' event
+      await releaseTasksWaitingForEventToComplete('runNowHasBeenAttempted');
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
+      });
+
+      // second runNow should be successful
+      const successfulRunNowResult = runTaskNow({
+        id: longRunningTask.id,
+      });
+
+      await provideParamsToTasksWaitingForParams(longRunningTask.id);
+
+      expect(await successfulRunNowResult).to.eql({ id: longRunningTask.id });
+    });
+
+    it('should allow a failed task to be rerun using runNow', async () => {
+      const taskThatFailsBeforeRunNow = await scheduleTask({
+        taskType: 'singleAttemptSampleTask',
+        params: {
+          waitForParams: true,
+        },
+      });
+
+      // tell the task to fail on its next run
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
+        failWith: 'error on first run',
+      });
+
+      // wait for task to fail
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+      });
+
+      // runNow should be successfully run the failing task
+      const runNowResultWithExpectedFailure = runTaskNow({
+        id: taskThatFailsBeforeRunNow.id,
+      });
+
+      // release the task without failing this time
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id);
+
+      expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
+    });
+
+    async function expectReschedule(originalRunAt, currentTask, expectedDiff) {
       const buffer = 10000;
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(
         expectedDiff - buffer
@@ -247,10 +458,6 @@ export default function({ getService }) {
           waitForEvent: 'rescheduleHasHappened',
         },
       });
-
-      function getTaskById(tasks, id) {
-        return tasks.filter(task => task.id === id)[0];
-      }
 
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;

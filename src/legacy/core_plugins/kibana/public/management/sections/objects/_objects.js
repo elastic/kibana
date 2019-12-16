@@ -36,7 +36,7 @@ const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
 function updateObjectsTable($scope, $injector) {
   const Private = $injector.get('Private');
-  const indexPatterns = $injector.get('indexPatterns');
+  const indexPatterns = npStart.plugins.data.indexPatterns;
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');

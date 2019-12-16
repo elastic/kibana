@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { Storage } from '../../kibana_utils/public';
+import { Storage, IStorageWrapper } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -35,24 +35,26 @@ import { IndexPatterns } from './index_patterns';
 import { setNotifications, setFieldFormats, setOverlays, setIndexPatterns } from './services';
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
+import { createSearchBar } from './ui/search_bar/create_search_bar';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
   private readonly autocomplete = new AutocompleteProviderRegister();
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
+  private readonly storage: IStorageWrapper;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
+    this.storage = new Storage(window.localStorage);
   }
 
   public setup(core: CoreSetup, { uiActions }: DataSetupDependencies): DataPublicPluginSetup {
-    const storage = new Storage(window.localStorage);
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
-      storage,
+      storage: this.storage,
     });
 
     uiActions.registerAction(
@@ -79,14 +81,26 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
-    return {
+    const dataServices = {
       autocomplete: this.autocomplete,
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
       fieldFormats,
       query: this.queryService.start(core.savedObjects),
+      indexPatterns: indexPatternsService,
+    };
+
+    const SearchBar = createSearchBar({
+      core,
+      data: dataServices,
+      storage: this.storage,
+    });
+
+    return {
+      ...dataServices,
       ui: {
         IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        SearchBar,
       },
       indexPatterns: indexPatternsService,
     };

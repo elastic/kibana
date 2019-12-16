@@ -24,6 +24,7 @@ import { savedObjectManagementRegistry } from '../../management/saved_object_reg
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
+import { npStart } from '../../../../../ui/public/new_platform';
 
 const app = uiModules.get('app/visualize');
 
@@ -34,14 +35,13 @@ savedObjectManagementRegistry.register({
   title: 'visualizations',
 });
 
-app.service('savedVisualizations', function(SavedVis, Private, kbnUrl, chrome) {
+app.service('savedVisualizations', function(SavedVis, Private) {
   const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
-    kbnUrl,
-    chrome,
-    savedObjectClient
+    savedObjectClient,
+    npStart.core.chrome
   );
 
   saveVisualizationLoader.mapHitSource = function(source, id) {
@@ -73,7 +73,7 @@ app.service('savedVisualizations', function(SavedVis, Private, kbnUrl, chrome) {
   };
 
   saveVisualizationLoader.urlFor = function(id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
+    return `#/visualize/edit/${encodeURIComponent(id)}`;
   };
 
   // This behaves similarly to find, except it returns visualizations that are

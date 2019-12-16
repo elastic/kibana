@@ -27,7 +27,7 @@ import { npStart } from 'ui/new_platform';
 
 describe('context app', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(
     ngMock.module(function createServiceStubs($provide) {

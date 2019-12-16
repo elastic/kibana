@@ -13,7 +13,6 @@ import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -33,10 +32,10 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
+import { checkLicense } from '../../../../plugins/graph/common/check_license';
 
 export function initGraphApp(angularModule, deps) {
   const {
-    xpackInfo,
     chrome,
     savedGraphWorkspaces,
     toastNotifications,
@@ -56,17 +55,6 @@ export function initGraphApp(angularModule, deps) {
   } = deps;
 
   const app = angularModule;
-
-  function checkLicense(kbnBaseUrl) {
-    const licenseAllowsToShowThisPage =
-      xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
-    if (!licenseAllowsToShowThisPage) {
-      const message = xpackInfo.get('features.graph.message');
-      const newUrl = addAppRedirectMessageToUrl(addBasePath(kbnBaseUrl), message);
-      window.location.href = newUrl;
-      throw new Error('Graph license error');
-    }
-  }
 
   app.directive('vennDiagram', function(reactDirective) {
     return reactDirective(VennDiagram);
@@ -122,7 +110,6 @@ export function initGraphApp(angularModule, deps) {
         template: listingTemplate,
         badge: getReadonlyBadge,
         controller($location, $scope) {
-          checkLicense(kbnBaseUrl);
           const services = savedObjectRegistry.byLoaderPropertiesName;
           const graphService = services['Graph workspace'];
 
@@ -161,7 +148,6 @@ export function initGraphApp(angularModule, deps) {
                 })
               : savedGraphWorkspaces.get();
           },
-          //Copied from example found in wizard.js ( Kibana TODO - can't
           indexPatterns: function() {
             return savedObjectsClient
               .find({
@@ -183,10 +169,7 @@ export function initGraphApp(angularModule, deps) {
 
   //========  Controller for basic UI ==================
   app.controller('graphuiPlugin', function($scope, $route, $location, confirmModal) {
-    checkLicense(kbnBaseUrl);
-
     function handleError(err) {
-      checkLicense(kbnBaseUrl);
       const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
         defaultMessage: 'Graph Error',
         description: '"Graph" is a product name and should not be translated.',
@@ -204,7 +187,6 @@ export function initGraphApp(angularModule, deps) {
     }
 
     async function handleHttpError(error) {
-      checkLicense(kbnBaseUrl);
       toastNotifications.addDanger(formatHttpError(error));
     }
 

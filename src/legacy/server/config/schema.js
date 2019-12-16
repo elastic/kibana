@@ -22,7 +22,6 @@ import os from 'os';
 import { join } from 'path';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
-import { DEFAULT_CSP_RULES, DEFAULT_CSP_STRICT, DEFAULT_CSP_WARN_LEGACY_BROWSERS } from '../csp';
 
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
@@ -51,13 +50,7 @@ export default () =>
       exclusive: Joi.boolean().default(false),
     }).default(),
 
-    csp: Joi.object({
-      rules: Joi.array()
-        .items(Joi.string())
-        .default(DEFAULT_CSP_RULES),
-      strict: Joi.boolean().default(DEFAULT_CSP_STRICT),
-      warnLegacyBrowsers: Joi.boolean().default(DEFAULT_CSP_WARN_LEGACY_BROWSERS),
-    }).default(),
+    csp: HANDLED_IN_NEW_PLATFORM,
 
     cpu: Joi.object({
       cgroup: Joi.object({

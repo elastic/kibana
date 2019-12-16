@@ -33,6 +33,8 @@ import {
   maximumDocumentsRequiredMessage,
 } from '../../public/store/selectors/lifecycle';
 
+jest.mock('ui/new_platform');
+
 let server;
 let store;
 const policy = {

@@ -70,7 +70,7 @@ export default function({ getService, getPageObjects }) {
       expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_user']);
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login('Rashmi', 'changeme');
     });
 
@@ -93,7 +93,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async function() {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
   });
 }

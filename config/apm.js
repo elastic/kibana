@@ -69,7 +69,10 @@ try {
 
 function gitRev() {
   try {
-    return execSync('git rev-parse --short HEAD', { encoding: 'utf-8' }).trim();
+    return execSync('git rev-parse --short HEAD', {
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
   } catch (e) {
     return null;
   }

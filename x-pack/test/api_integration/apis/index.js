@@ -27,8 +27,6 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./siem'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
-    loadTestFile(require.resolve('./fleet'));
-    loadTestFile(require.resolve('./ingest'));
     loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./ml'));
   });

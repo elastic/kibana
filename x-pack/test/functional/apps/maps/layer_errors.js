@@ -64,7 +64,8 @@ export default function({ getPageObjects }) {
       });
     });
 
-    describe('EMSFileSource with missing EMS id', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/36011
+    describe.skip('EMSFileSource with missing EMS id', () => {
       const MISSING_EMS_ID = 'idThatDoesNotExitForEMSFileSource';
       const LAYER_NAME = 'EMS_vector_shapes';
 

@@ -126,7 +126,6 @@ export class StartTrial extends React.PureComponent {
                         securityDocumentationLinkText: (
                           <EuiLink href={getDocLinks().securityDocumentationLink} target="_blank">
                             <FormattedMessage
-                              // eslint-disable-next-line max-len
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
                               defaultMessage="documentation"
                             />
@@ -143,7 +142,6 @@ export class StartTrial extends React.PureComponent {
                         termsAndConditionsLinkText: (
                           <EuiLink href={EXTERNAL_LINKS.TRIAL_LICENSE} target="_blank">
                             <FormattedMessage
-                              // eslint-disable-next-line max-len
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
                               defaultMessage="terms and conditions"
                             />

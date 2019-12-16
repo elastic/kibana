@@ -33,7 +33,6 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode',
-        'xpack.security.authc.api_key.enabled=true',
       ],
     },
   };

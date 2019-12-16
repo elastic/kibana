@@ -92,7 +92,6 @@ describe('getLinearGradient', () => {
       'rgb(32,112,180)',
       'rgb(7,47,107)',
     ];
-    // eslint-disable-next-line max-len
     expect(getLinearGradient(colorRamp)).toBe(
       'linear-gradient(to right, rgb(247,250,255) 0%, rgb(221,234,247)       14%, rgb(197,218,238)       28%, rgb(157,201,224)       42%, rgb(106,173,213)       57%, rgb(65,145,197)       71%, rgb(32,112,180)       85%, rgb(7,47,107) 100%)'
     );

@@ -61,6 +61,7 @@ export default function({ getPageObjects }) {
         waitDialogIsClosed: false,
       });
 
+      await PageObjects.dashboard.ensureDuplicateTitleCallout();
       await PageObjects.dashboard.clickSave();
 
       // This is important since saving a new dashboard will cause a refresh of the page. We have to

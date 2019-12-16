@@ -14,6 +14,8 @@ import {
   ilmFilterExtension,
   ilmSummaryExtension,
 } from '../public/extend_index_management';
+
+jest.mock('ui/new_platform');
 const indexWithoutLifecyclePolicy = {
   health: 'yellow',
   status: 'open',

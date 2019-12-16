@@ -18,6 +18,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [BasePath](./kibana-plugin-server.basepath.md) | Access or manipulate the Kibana base path |
 |  [ClusterClient](./kibana-plugin-server.clusterclient.md) | Represents an Elasticsearch cluster API client and allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
+|  [CspConfig](./kibana-plugin-server.cspconfig.md) | CSP configuration for use in Kibana. |
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) |  |
@@ -46,6 +47,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-server.capabilities.md) that will be used by the application.<!-- -->Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the <code>registerProvider</code> method.<!-- -->Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the <code>registerSwitcher</code> method.<!-- -->Refers to the methods documentation for complete description and examples. |
 |  [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-server.capabilities.md)<!-- -->. |
+|  [ConfigDeprecationFactory](./kibana-plugin-server.configdeprecationfactory.md) | Provides helpers to generates the most commonly used [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) when invoking a [ConfigDeprecationProvider](./kibana-plugin-server.configdeprecationprovider.md)<!-- -->.<!-- -->See methods documentation for more detailed examples. |
 |  [ContextSetup](./kibana-plugin-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
@@ -63,6 +65,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-server.httpservicestart.md) |  |
 |  [IContextContainer](./kibana-plugin-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
+|  [ICspConfig](./kibana-plugin-server.icspconfig.md) | CSP configuration for use in Kibana. |
 |  [IKibanaResponse](./kibana-plugin-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
@@ -82,7 +85,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreResponseToolkit](./kibana-plugin-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
-|  [PluginConfigDescriptor](./kibana-plugin-server.pluginconfigdescriptor.md) | Describes a plugin configuration schema and capabilities. |
+|  [PluginConfigDescriptor](./kibana-plugin-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
@@ -152,6 +155,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResult](./kibana-plugin-server.authresult.md) |  |
 |  [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
 |  [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
+|  [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) | Configuration deprecation returned from [ConfigDeprecationProvider](./kibana-plugin-server.configdeprecationprovider.md) that handles a single deprecation from the configuration. |
+|  [ConfigDeprecationLogger](./kibana-plugin-server.configdeprecationlogger.md) | Logger interface used when invoking a [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) |
+|  [ConfigDeprecationProvider](./kibana-plugin-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-server.configdeprecationfactory.md) for more usage examples. |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |

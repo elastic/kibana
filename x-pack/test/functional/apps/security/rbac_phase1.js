@@ -88,7 +88,7 @@ export default function({ getService, getPageObjects }) {
       expect(user.roles).to.eql(['rbac_read']);
       expect(user.fullname).to.eql('kibanareadonlyFirst kibanareadonlyLast');
       expect(user.reserved).to.be(false);
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     //   this is to acertain that all role assigned to the user can perform actions like creating a Visualization
@@ -112,11 +112,11 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async function() {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
   });
 }

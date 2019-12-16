@@ -380,6 +380,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async ensureDuplicateTitleCallout() {
+      await testSubjects.existOrFail('titleDupicateWarnMsg');
+    }
+
     /**
      * @param dashboardTitle {String}
      */

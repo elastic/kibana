@@ -8,6 +8,7 @@ import { reducer, initialState } from './api';
 import { API_STATUS } from '../../constants';
 import { apiRequestStart, apiRequestEnd, setApiError } from '../actions';
 
+jest.mock('ui/new_platform');
 jest.mock('../../constants', () => ({
   API_STATUS: {
     IDLE: 'idle',

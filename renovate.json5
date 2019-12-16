@@ -978,5 +978,6 @@
     enabled: false,
   },
   rebaseStalePrs: false,
+  rebaseConflictedPrs: false,
   semanticCommits: false,
 }

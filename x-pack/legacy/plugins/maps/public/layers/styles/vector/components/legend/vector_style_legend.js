@@ -34,7 +34,7 @@ export class VectorStyleLegend extends Component {
     const rowDescriptors = rows.map(row => {
       return {
         label: row.label,
-        range: row.range,
+        range: row.meta,
         styleOptions: row.style.getOptions(),
       };
     });

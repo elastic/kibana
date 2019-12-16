@@ -31,7 +31,7 @@ import {
 } from 'rxjs/operators';
 import { realpathSync } from 'fs';
 
-import { transformDeprecations, Config } from '../server/config';
+import { Config } from '../server/config';
 
 import { extendConfigService, disableConfigExtension } from './plugin_config';
 
@@ -44,7 +44,7 @@ import {
 import { isInvalidDirectoryError, isInvalidPackError } from './errors';
 
 export function defaultConfig(settings) {
-  return Config.withDefaultSchema(transformDeprecations(settings));
+  return Config.withDefaultSchema(settings);
 }
 
 function bufferAllResults(observable) {

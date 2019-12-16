@@ -70,7 +70,7 @@ describe('discover field chooser directives', function() {
       on-remove-field="removeField"
     ></disc-field-chooser>
   `);
-  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeServices());
   beforeEach(() => pluginInstance.initializeInnerAngular());
 
   beforeEach(
