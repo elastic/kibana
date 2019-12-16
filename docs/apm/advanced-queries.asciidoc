@@ -33,6 +33,8 @@ and all of the example queries listed above can also be used in the Discover app
 One example where you may want to make use of the Discover app,
 is for viewing  _all_ transactions for an endpoint, instead of just a sample.
 
+TIP: Starting in v7.6, you can view 10 samples per bucket in the APM app, instead of just one.
+
 Use the APM app to find a transaction name and time bucket that you're interested in learning more about.
 Then, switch to the Discover app and make a search:
 
