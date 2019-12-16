@@ -76,7 +76,7 @@ timeout(time: 120, unit: 'MINUTES') {
             wait: false,
             job: 'es-snapshot-verification',
             parameters: [
-              string(name: 'BRANCH', value: 'master'), // TODO
+              string(name: 'branch_specifier', value: 'es-snapshots-automation'), // TODO
               string(name: 'SNAPSHOT_VERSION', value: VERSION),
               string(name: 'SNAPSHOT_ID', value: SNAPSHOT_ID),
             ]
