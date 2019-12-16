@@ -59,6 +59,7 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
           }
         }
         await installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex);
+        // TODO: Test the updated package rules and only update them if we really need them updated
         await updatePrepackagedRules(alertsClient, actionsClient, rulesToUpdate, spaceIndex);
         return {
           rules_installed: rulesToInstall.length,

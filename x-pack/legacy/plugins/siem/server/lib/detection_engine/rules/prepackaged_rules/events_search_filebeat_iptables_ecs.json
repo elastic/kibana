@@ -1,5 +1,5 @@
 {
-  "rule_id": "79f571d4-f6d5-42ea-ac6a-6958dbe99c01",
+  "rule_id": "c0cfe4e1-9094-43f7-972a-92f0d2b24c3c",
   "risk_score": 50,
   "description": "Events Search [Filebeat Iptables] ECS",
   "immutable": true,

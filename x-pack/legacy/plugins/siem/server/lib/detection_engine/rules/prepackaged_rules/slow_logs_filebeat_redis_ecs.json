@@ -1,5 +1,5 @@
 {
-  "rule_id": "673cc902-a654-40bb-bec6-1250cb9163ca",
+  "rule_id": "8278e750-62c7-4e0b-9f56-80840f809642",
   "risk_score": 50,
   "description": "Slow logs [Filebeat Redis] ECS",
   "immutable": true,

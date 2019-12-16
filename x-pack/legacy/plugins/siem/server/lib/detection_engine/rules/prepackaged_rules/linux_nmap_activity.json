@@ -1,5 +1,5 @@
 {
-  "rule_id": "886352a5-936d-443a-b0e2-91cc64cb7997",
+  "rule_id": "56bd706a-b9f7-413e-a464-216fd6c74f5e",
   "risk_score": 50,
   "description": "Linux: Nmap Activity",
   "immutable": true,

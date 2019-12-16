@@ -1,5 +1,5 @@
 {
-  "rule_id": "db438892-1781-4edc-bf9e-f7d229c8f3d8",
+  "rule_id": "59338a97-556c-4d92-b023-06072aee61f2",
   "risk_score": 50,
   "description": "Nginx logs [Filebeat Nginx] ECS",
   "immutable": true,

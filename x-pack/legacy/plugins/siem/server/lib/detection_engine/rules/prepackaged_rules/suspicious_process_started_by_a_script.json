@@ -1,5 +1,5 @@
 {
-  "rule_id": "d057218d-f089-42ef-b946-9a2951be1d46",
+  "rule_id": "066279d3-e1b3-4510-ba9c-8c63a46d98ba",
   "risk_score": 50,
   "description": "Suspicious process started by a script",
   "immutable": true,

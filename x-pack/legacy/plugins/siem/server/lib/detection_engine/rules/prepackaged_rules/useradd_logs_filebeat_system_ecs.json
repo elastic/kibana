@@ -1,5 +1,5 @@
 {
-  "rule_id": "dacd6c8b-6ec4-4156-947a-b30dc68364ba",
+  "rule_id": "fb6f1c42-e0fe-41bf-aacc-db652a474db9",
   "risk_score": 50,
   "description": "useradd logs [Filebeat System] ECS",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "b8e756f9-07f1-44a0-ac23-a1ee74454d55",
+  "rule_id": "4c9cef90-635d-410f-9890-971b42d72512",
   "risk_score": 50,
   "description": "All logs [Filebeat Kafka] ECS",
   "immutable": true,

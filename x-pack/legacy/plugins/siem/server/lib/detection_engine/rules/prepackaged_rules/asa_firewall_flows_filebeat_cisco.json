@@ -1,5 +1,5 @@
 {
-  "rule_id": "85e7b388-f936-461e-bd8d-feff3696504b",
+  "rule_id": "e5674d54-f23a-4587-afb2-b5d841a8f8c8",
   "risk_score": 50,
   "description": "ASA Firewall flows [Filebeat Cisco]",
   "immutable": true,

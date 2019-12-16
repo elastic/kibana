@@ -1,5 +1,5 @@
 {
-  "rule_id": "7fd04369-a7f2-471a-9ae6-ff72e391ee66",
+  "rule_id": "5264cea8-05be-4a2e-8d2b-a9624bb60972",
   "risk_score": 50,
   "description": "Linux: Kernel Module Activity",
   "immutable": true,

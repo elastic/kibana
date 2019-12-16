@@ -1,5 +1,5 @@
 {
-  "rule_id": "041e2e32-976c-49f0-a85d-c1d03a8b2c29",
+  "rule_id": "7a72d6c8-50f9-4813-a3ac-42538cf9f061",
   "risk_score": 50,
   "description": "Linux: Nping Activity",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "dc450707-de8a-4ae9-97ef-1c483149eb04",
+  "rule_id": "4a6af52e-3d91-4aa2-9804-10db14bb9528",
   "risk_score": 50,
   "description": "Windows Wireshark activity",
   "immutable": true,

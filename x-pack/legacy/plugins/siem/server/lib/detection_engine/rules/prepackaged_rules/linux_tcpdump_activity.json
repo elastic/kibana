@@ -1,5 +1,5 @@
 {
-  "rule_id": "27b5259e-687f-47b3-8e94-eaa5129511b9",
+  "rule_id": "36afa493-c6d1-402f-937d-5d74bfae74c8",
   "risk_score": 50,
   "description": "Linux: Tcpdump Activity",
   "immutable": true,

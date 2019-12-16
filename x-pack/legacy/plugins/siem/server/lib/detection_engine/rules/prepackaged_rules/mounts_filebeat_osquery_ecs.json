@@ -1,5 +1,5 @@
 {
-  "rule_id": "c758c828-24af-4dee-a2bb-c90360fb138d",
+  "rule_id": "2e2fbdb3-5e30-4515-8f69-5d4e13846172",
   "risk_score": 50,
   "description": "Mounts [Filebeat Osquery] ECS",
   "immutable": true,

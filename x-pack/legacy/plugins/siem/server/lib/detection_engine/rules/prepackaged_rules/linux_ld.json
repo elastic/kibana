@@ -1,5 +1,5 @@
 {
-  "rule_id": "738f771f-2d9b-4409-adc2-82159e24cf6d",
+  "rule_id": "c6b6ac2e-d3c8-435f-b6b2-208dbd7c4fb9",
   "risk_score": 50,
   "description": "Linux ld.so process activity",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "8361da33-88ab-468e-84b7-c179efd41135",
+  "rule_id": "d57104e0-c866-4ead-94a8-6b366347927a",
   "risk_score": 50,
   "description": "Network Flow Search [Filebeat]",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "ac466f69-1dbc-4d72-b38e-4c89e19baab1",
+  "rule_id": "b4ecf07b-afd5-4dad-9952-a1c83cd4257f",
   "risk_score": 50,
   "description": "Slow logs [Filebeat Logstash] ECS",
   "immutable": true,

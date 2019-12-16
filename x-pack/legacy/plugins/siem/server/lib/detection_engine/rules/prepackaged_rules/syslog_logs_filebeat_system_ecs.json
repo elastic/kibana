@@ -1,5 +1,5 @@
 {
-  "rule_id": "bc320455-c1ca-4a74-a5bc-c0e99c6924f7",
+  "rule_id": "02c24939-9391-45e0-a992-17a4f5ffc3ee",
   "risk_score": 50,
   "description": "Syslog logs [Filebeat System] ECS",
   "immutable": true,

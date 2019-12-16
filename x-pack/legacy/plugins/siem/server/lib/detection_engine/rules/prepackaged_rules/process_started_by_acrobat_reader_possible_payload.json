@@ -1,5 +1,5 @@
 {
-  "rule_id": "5d68e777-a02f-40f7-b8e4-7ea63f3e5bd1",
+  "rule_id": "c38268aa-98d3-4ad5-8fc7-e423683d186f",
   "risk_score": 50,
   "description": "Process started by Acrobat reader - possible payload",
   "immutable": true,

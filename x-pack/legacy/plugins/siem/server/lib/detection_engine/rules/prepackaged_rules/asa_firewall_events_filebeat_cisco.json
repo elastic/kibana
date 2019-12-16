@@ -1,5 +1,5 @@
 {
-  "rule_id": "baf1200b-c901-4260-baa8-769eeb2813ec",
+  "rule_id": "51816ad4-44e4-474b-99ab-4a3844758ad3",
   "risk_score": 50,
   "description": "ASA Firewall Events [Filebeat Cisco]",
   "immutable": true,

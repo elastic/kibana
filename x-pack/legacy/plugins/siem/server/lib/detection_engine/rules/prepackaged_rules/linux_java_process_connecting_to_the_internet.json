@@ -1,5 +1,5 @@
 {
-  "rule_id": "854f58c7-a516-4b01-9c96-a467f8c54ce5",
+  "rule_id": "4c77df79-e474-4c3e-8235-dd2ebf4b8f62",
   "risk_score": 50,
   "description": "Linux: Java Process Connecting to the Internet",
   "immutable": true,

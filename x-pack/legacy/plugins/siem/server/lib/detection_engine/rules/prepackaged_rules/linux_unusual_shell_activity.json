@@ -1,5 +1,5 @@
 {
-  "rule_id": "3b98cacf-9ab0-4989-8fe9-d61a1f623d43",
+  "rule_id": "d6521466-ed82-45b4-af7f-0fb2611eb632",
   "risk_score": 50,
   "description": "Linux unusual shell activity",
   "immutable": true,

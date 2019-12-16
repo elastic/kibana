@@ -1,5 +1,5 @@
 {
-  "rule_id": "fb0de6bf-3872-4ff2-a07b-ef385acd14fb",
+  "rule_id": "c39df6ce-8df4-440a-a261-34962e7a5ab2",
   "risk_score": 50,
   "description": "logs [Filebeat Logstash] ECS",
   "immutable": true,

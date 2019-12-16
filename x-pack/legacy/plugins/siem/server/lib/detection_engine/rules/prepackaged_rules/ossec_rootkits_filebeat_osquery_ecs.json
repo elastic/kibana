@@ -1,5 +1,5 @@
 {
-  "rule_id": "8dbe9de0-8773-4dc9-a36b-35c6a827721a",
+  "rule_id": "e99d9804-fcb4-4ee7-a3c9-8a594a486400",
   "risk_score": 50,
   "description": "OSSEC Rootkits [Filebeat Osquery] ECS",
   "immutable": true,

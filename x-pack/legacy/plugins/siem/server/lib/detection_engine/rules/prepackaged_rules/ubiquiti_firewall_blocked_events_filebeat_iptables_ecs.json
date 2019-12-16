@@ -1,5 +1,5 @@
 {
-  "rule_id": "59a32888-c495-40a5-82ca-f69792e4dfc0",
+  "rule_id": "3e8091f6-cfb4-4396-8e41-7eaf8cfc28bf",
   "risk_score": 50,
   "description": "Ubiquiti Firewall Blocked Events [Filebeat Iptables] ECS",
   "immutable": true,

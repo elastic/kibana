@@ -1,5 +1,5 @@
 {
-  "rule_id": "0cfd7e8e-3c3e-401c-b47a-85c7dd2ca804",
+  "rule_id": "8f107b14-2f03-4c00-b18f-4a7e1835965e",
   "risk_score": 50,
   "description": "Apache access logs [Filebeat Apache] ECS",
   "immutable": true,

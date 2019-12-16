@@ -1,5 +1,5 @@
 {
-  "rule_id": "f637c3b4-d628-479f-9536-f7b01fadf2e3",
+  "rule_id": "9980053d-7920-4454-8a40-4046838c325b",
   "risk_score": 50,
   "description": "Events [Filebeat Suricata] ECS",
   "immutable": true,

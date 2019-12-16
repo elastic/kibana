@@ -1,5 +1,5 @@
 {
-  "rule_id": "8fd978ce-ca2c-488e-b171-a62b3be82ca5",
+  "rule_id": "029370cb-94a4-45bb-87de-42cce5313a60",
   "risk_score": 50,
   "description": "groupadd logs [Filebeat System] ECS",
   "immutable": true,

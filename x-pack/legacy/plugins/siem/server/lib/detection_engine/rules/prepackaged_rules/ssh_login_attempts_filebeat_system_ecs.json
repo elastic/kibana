@@ -1,5 +1,5 @@
 {
-  "rule_id": "9d38c2ac-2c6e-45e3-9c32-879fb348f67b",
+  "rule_id": "113630a4-9df1-4486-b54b-ed6856d565ce",
   "risk_score": 50,
   "description": "SSH login attempts [Filebeat System] ECS",
   "immutable": true,

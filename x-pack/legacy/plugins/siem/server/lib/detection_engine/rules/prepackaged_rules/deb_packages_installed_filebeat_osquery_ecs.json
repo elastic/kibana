@@ -1,5 +1,5 @@
 {
-  "rule_id": "0c9f86a1-641b-45f3-a71c-df4425154c78",
+  "rule_id": "5af2c140-7787-4b09-a445-845873820740",
   "risk_score": 50,
   "description": "DEB packages installed [Filebeat Osquery] ECS",
   "immutable": true,

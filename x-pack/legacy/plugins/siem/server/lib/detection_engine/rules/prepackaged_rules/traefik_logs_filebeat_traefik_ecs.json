@@ -1,5 +1,5 @@
 {
-  "rule_id": "93429d51-fd91-49eb-a21f-cf4e67f8fb98",
+  "rule_id": "87e4309d-5cc5-4f11-a13e-a66bde5d1d2e",
   "risk_score": 50,
   "description": "Traefik logs [Filebeat Traefik] ECS",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "963d4417-4cae-4269-9d5c-8135cae31831",
+  "rule_id": "06af1081-c898-46eb-8185-9c9aa7cee3aa",
   "risk_score": 50,
   "description": "Linux: Rawshark Activity",
   "immutable": true,

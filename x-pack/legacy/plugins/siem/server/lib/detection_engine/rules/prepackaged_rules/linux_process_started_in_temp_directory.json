@@ -1,5 +1,5 @@
 {
-  "rule_id": "b3c1c647-72db-4c45-ba96-4cd7b0fc2e81",
+  "rule_id": "75732b93-5b45-47e9-8fa9-78e53d2cb689",
   "risk_score": 50,
   "description": "Linux: Process Started in Temp Directory",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "e684f74b-0c51-4b09-8e53-b0ac35f1c02d",
+  "rule_id": "41b705a3-9f81-4366-8409-b499420d6f69",
   "risk_score": 50,
   "description": "WinDump activity",
   "immutable": true,

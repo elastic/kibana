@@ -1,5 +1,5 @@
 {
-  "rule_id": "d7cb3446-6ce3-435a-b9d8-380fc91af7e7",
+  "rule_id": "3ec480a1-cdaf-4c86-b466-37585b6381d4",
   "risk_score": 50,
   "description": "Query Durations [Filebeat PostgreSQL] ECS",
   "immutable": true,

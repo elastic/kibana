@@ -1,5 +1,5 @@
 {
-  "rule_id": "9d198a40-9214-422c-acb2-679be68ae6b0",
+  "rule_id": "730f700d-3940-404e-8701-0e2f337fa169",
   "risk_score": 50,
   "description": "Powershell network connection",
   "immutable": true,

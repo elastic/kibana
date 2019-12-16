@@ -1,5 +1,5 @@
 {
-  "rule_id": "edfe5e7b-3ed8-4825-a9af-8da44fe94e43",
+  "rule_id": "20d61d3d-5b4d-49ec-9042-6bff836b0f18",
   "risk_score": 50,
   "description": "PAN-OS Threats [Filebeat PANW] ECS",
   "immutable": true,

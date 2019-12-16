@@ -1,5 +1,5 @@
 {
-  "rule_id": "596b1c01-8456-4a96-8f22-71d078b2c9ff",
+  "rule_id": "138e95fa-0541-41d7-838d-9570050c3e35",
   "risk_score": 50,
   "description": "Windows Mimikatz activity",
   "immutable": true,

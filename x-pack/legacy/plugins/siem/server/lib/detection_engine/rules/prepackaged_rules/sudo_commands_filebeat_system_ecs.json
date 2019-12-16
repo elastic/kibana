@@ -1,5 +1,5 @@
 {
-  "rule_id": "a1be2120-c4fa-40df-84de-4bb3b50c31e0",
+  "rule_id": "fc2a4b2b-73de-4d03-837d-1d003fc6d219",
   "risk_score": 50,
   "description": "Sudo commands [Filebeat System] ECS",
   "immutable": true,

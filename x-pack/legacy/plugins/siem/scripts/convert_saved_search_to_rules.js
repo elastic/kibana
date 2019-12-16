@@ -166,7 +166,10 @@ async function main() {
         // output_index: OUTPUT_INDEX,
       };
 
-      fs.writeFileSync(`${outputDir}/${fileToWrite}.json`, JSON.stringify(outputMessage, null, 2));
+      fs.writeFileSync(
+        `${outputDir}/${fileToWrite}.json`,
+        `${JSON.stringify(outputMessage, null, 2)}\n`
+      );
       allRules += `import rule${index + 1} from './${fileToWrite}.json';\n`;
     }
   );

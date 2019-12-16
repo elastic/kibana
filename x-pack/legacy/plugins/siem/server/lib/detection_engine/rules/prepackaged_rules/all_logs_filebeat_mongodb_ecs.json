@@ -1,5 +1,5 @@
 {
-  "rule_id": "3fcc1d14-bd82-459d-8ccb-9bc52fe46048",
+  "rule_id": "15dbb758-e607-4c56-b5c2-01338007117c",
   "risk_score": 50,
   "description": "All logs [Filebeat MongoDB] ECS",
   "immutable": true,

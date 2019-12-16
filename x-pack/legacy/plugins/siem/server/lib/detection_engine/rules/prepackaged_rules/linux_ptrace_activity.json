@@ -1,5 +1,5 @@
 {
-  "rule_id": "26f47392-c717-4c88-8296-72ac92de45c3",
+  "rule_id": "a4996fb1-044a-45db-bcbc-fda6b3557a47",
   "risk_score": 50,
   "description": "Linux: Ptrace Activity",
   "immutable": true,

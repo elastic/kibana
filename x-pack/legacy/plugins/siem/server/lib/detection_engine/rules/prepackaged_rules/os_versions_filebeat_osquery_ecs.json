@@ -1,5 +1,5 @@
 {
-  "rule_id": "2d922dcf-6eb7-4f80-8388-fc3ea69c6146",
+  "rule_id": "ef52dd22-2293-4b1f-883a-fec651b0cfe0",
   "risk_score": 50,
   "description": "OS versions [Filebeat Osquery] ECS",
   "immutable": true,

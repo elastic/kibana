@@ -1,5 +1,5 @@
 {
-  "rule_id": "68da10da-1b6a-45ec-b92b-2d10c6c2e26e",
+  "rule_id": "da1684ea-6fd1-4503-91cf-164dae63f258",
   "risk_score": 50,
   "description": "Command shell started by Internet Explorer",
   "immutable": true,

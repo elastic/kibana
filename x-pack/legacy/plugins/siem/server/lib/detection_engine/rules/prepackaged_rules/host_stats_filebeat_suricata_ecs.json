@@ -1,5 +1,5 @@
 {
-  "rule_id": "edd287d7-1626-4aaf-8c1d-a15603033e0a",
+  "rule_id": "431d0256-2088-47c1-b5c3-938dd329b584",
   "risk_score": 50,
   "description": "Host Stats [Filebeat Suricata] ECS",
   "immutable": true,

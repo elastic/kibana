@@ -1,5 +1,5 @@
 {
-  "rule_id": "e8a57c29-4513-440b-b092-7a69c50172cd",
+  "rule_id": "9915e1b9-5caf-4c08-875b-3ea2fa692d2e",
   "risk_score": 50,
   "description": "All ASA Logs [Filebeat Cisco]",
   "immutable": true,

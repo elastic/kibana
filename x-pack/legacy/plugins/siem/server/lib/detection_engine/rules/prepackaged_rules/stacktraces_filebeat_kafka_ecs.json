@@ -1,5 +1,5 @@
 {
-  "rule_id": "347e2159-eb21-4d50-a894-c7cfa5044dde",
+  "rule_id": "0c46ece9-0759-4989-9b9f-c0a97a70f7f2",
   "risk_score": 50,
   "description": "Stacktraces [Filebeat Kafka] ECS",
   "immutable": true,

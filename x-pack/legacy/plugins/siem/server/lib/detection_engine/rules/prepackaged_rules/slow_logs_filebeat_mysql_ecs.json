@@ -1,5 +1,5 @@
 {
-  "rule_id": "b2bb403a-5290-43f0-9178-4f8baf4f0d0a",
+  "rule_id": "f06cd999-2b35-4edf-ae10-724fbfa356aa",
   "risk_score": 50,
   "description": "Slow logs [Filebeat MySQL] ECS",
   "immutable": true,

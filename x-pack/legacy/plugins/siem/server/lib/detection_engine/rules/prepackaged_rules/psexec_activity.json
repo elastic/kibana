@@ -1,5 +1,5 @@
 {
-  "rule_id": "41dd4b11-11cd-4a5e-9a53-71cf3953d78a",
+  "rule_id": "cb23119f-f151-4bad-b232-c3f743ffb169",
   "risk_score": 50,
   "description": "PSexec activity",
   "immutable": true,

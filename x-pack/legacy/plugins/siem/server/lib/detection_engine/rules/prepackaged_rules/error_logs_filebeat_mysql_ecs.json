@@ -1,5 +1,5 @@
 {
-  "rule_id": "dfadc5b7-c7e2-4ae0-b60e-7ae52a10967a",
+  "rule_id": "80baf879-ddbf-44c0-a210-8521802d38bf",
   "risk_score": 50,
   "description": "Error logs [Filebeat MySQL] ECS",
   "immutable": true,

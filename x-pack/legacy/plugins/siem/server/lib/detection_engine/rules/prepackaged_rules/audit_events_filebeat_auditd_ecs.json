@@ -1,5 +1,5 @@
 {
-  "rule_id": "d4d671cf-80b4-4a73-bd43-70c2e634fe10",
+  "rule_id": "f9486a5d-86ed-46d3-9121-232ba8cd436e",
   "risk_score": 50,
   "description": "Audit Events [Filebeat Auditd] ECS",
   "immutable": true,

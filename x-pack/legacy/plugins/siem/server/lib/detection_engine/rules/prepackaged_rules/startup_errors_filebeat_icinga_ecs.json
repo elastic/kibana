@@ -1,5 +1,5 @@
 {
-  "rule_id": "3a6e3d49-879c-4ba3-9f8b-930a3697f22c",
+  "rule_id": "2f4f407c-f1c3-409f-a3a1-b06438595c84",
   "risk_score": 50,
   "description": "Startup Errors [Filebeat Icinga] ECS",
   "immutable": true,

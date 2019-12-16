@@ -1,5 +1,5 @@
 {
-  "rule_id": "cbd6005c-9976-41a0-afd1-8bdfd14933bd",
+  "rule_id": "a93b0fd4-5e25-498c-a66c-7af3fdd4dfde",
   "risk_score": 50,
   "description": "Windows process started by the Java runtime",
   "immutable": true,

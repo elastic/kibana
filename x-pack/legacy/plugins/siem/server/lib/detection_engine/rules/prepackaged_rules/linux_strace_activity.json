@@ -1,5 +1,5 @@
 {
-  "rule_id": "acaafae1-e49a-49e9-b34d-d387c84509a5",
+  "rule_id": "d095e618-3ad7-47bc-b65a-45bdd931d113",
   "risk_score": 50,
   "description": "Linux: Strace Activity",
   "immutable": true,
