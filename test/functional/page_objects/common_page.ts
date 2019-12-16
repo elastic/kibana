@@ -34,7 +34,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const find = getService('find');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
-  const security = getService('security');
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -100,7 +99,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         log.debug(
           `Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`
         );
-        await security.loginAsSuperUser();
+        // avoid circular dependency
+        await getService('security').loginAsSuperUser();
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
           2 * defaultFindTimeout
