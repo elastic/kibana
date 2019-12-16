@@ -53,9 +53,11 @@ export class EmbeddableRoot extends React.Component<Props> {
   }
 
   public shouldComponentUpdate(newProps: Props) {
-    return !!(
-      !_.isEqual(newProps, this.props) ||
-      (this.root && this.root.current && newProps.embeddable && !this.alreadyMounted)
+    return Boolean(
+      newProps.error !== this.props.error ||
+        newProps.loading !== this.props.loading ||
+        newProps.embeddable !== this.props.embeddable ||
+        (this.root && this.root.current && newProps.embeddable && !this.alreadyMounted)
     );
   }
 
