@@ -143,8 +143,8 @@ export default () =>
           .keys({
             enabled: Joi.boolean().default(false),
             everyBytes: Joi.number()
-              .greater(102400)
-              .less(1073741824)
+              .greater(102399)
+              .less(1073741825)
               .default(10485760),
             keepFiles: Joi.number()
               .greater(2)
