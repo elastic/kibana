@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { registerRoutes } from './routes';
-
-export class SuggestionsService implements Plugin<void> {
-  public setup(core: CoreSetup) {
-    registerRoutes(core);
-  }
-
-  public start() {}
-}
+export { AutocompleteService } from './autocomplete_service';
