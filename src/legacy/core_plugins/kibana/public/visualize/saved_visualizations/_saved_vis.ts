@@ -27,13 +27,11 @@
 // @ts-ignore
 import { Vis } from 'ui/vis';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
-import { SearchSourceContract } from 'ui/courier';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { updateOldState } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IndexPattern } from '../../../../../../plugins/data/public';
-import { SavedSearch } from '../../discover/types';
 import { VisSavedObject } from '../legacy_imports';
 
 import { createSavedSearchesService } from '../../discover';
@@ -110,11 +108,13 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
     public static searchSource = true;
+    /**
     public savedSearchId?: string;
     public vis?: any;
     public visState?: any;
     public savedSearch?: SavedSearch;
     public searchSource?: SearchSourceContract;
+     **/
 
     constructor(opts: Record<string, unknown> | string = {}) {
       if (typeof opts !== 'object') {
