@@ -7,8 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { ClusterService } from './cluster_service';
 
-uiModules.get('xpack/logstash')
-  .factory('xpackLogstashClusterService', ($injector) => {
-    const $http = $injector.get('$http');
-    return new ClusterService($http);
-  });
+uiModules.get('xpack/logstash').factory('xpackLogstashClusterService', $injector => {
+  const $http = $injector.get('$http');
+  return new ClusterService($http);
+});

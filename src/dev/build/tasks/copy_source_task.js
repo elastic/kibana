@@ -49,7 +49,7 @@ export const CopySourceTask = {
         'config/apm.js',
         'tsconfig*.json',
         '.i18nrc.json',
-        'kibana.d.ts'
+        'kibana.d.ts',
       ],
     });
   },

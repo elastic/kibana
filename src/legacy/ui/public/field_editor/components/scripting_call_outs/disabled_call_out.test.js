@@ -24,19 +24,13 @@ import { ScriptingDisabledCallOut } from './disabled_call_out';
 
 describe('ScriptingDisabledCallOut', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <ScriptingDisabledCallOut
-        isVisible={true}
-      />
-    );
+    const component = shallow(<ScriptingDisabledCallOut isVisible={true} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render nothing if not visible', async () => {
-    const component = shallow(
-      <ScriptingDisabledCallOut />
-    );
+    const component = shallow(<ScriptingDisabledCallOut />);
 
     expect(component).toMatchSnapshot();
   });

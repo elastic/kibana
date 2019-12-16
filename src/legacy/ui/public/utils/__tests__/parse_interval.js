@@ -20,8 +20,8 @@
 import { parseInterval } from '../parse_interval';
 import expect from '@kbn/expect';
 
-describe('parseInterval', function () {
-  it('should correctly parse an interval containing unit and value', function () {
+describe('parseInterval', function() {
+  it('should correctly parse an interval containing unit and value', function() {
     let duration = parseInterval('1d');
     expect(duration.as('d')).to.be(1);
 
@@ -47,7 +47,7 @@ describe('parseInterval', function () {
     expect(duration.as('w')).to.be(52);
   });
 
-  it('should correctly parse fractional intervals containing unit and value', function () {
+  it('should correctly parse fractional intervals containing unit and value', function() {
     let duration = parseInterval('1.5w');
     expect(duration.as('w')).to.be(1.5);
 
@@ -55,7 +55,7 @@ describe('parseInterval', function () {
     expect(duration.as('y')).to.be(2.35);
   });
 
-  it('should correctly bubble up intervals which are less than 1', function () {
+  it('should correctly bubble up intervals which are less than 1', function() {
     let duration = parseInterval('0.5y');
     expect(duration.as('d')).to.be(183);
 
@@ -63,7 +63,7 @@ describe('parseInterval', function () {
     expect(duration.as('h')).to.be(12);
   });
 
-  it('should correctly parse a unit in an interval only', function () {
+  it('should correctly parse a unit in an interval only', function() {
     let duration = parseInterval('ms');
     expect(duration.as('ms')).to.be(1);
 
@@ -80,7 +80,7 @@ describe('parseInterval', function () {
     expect(duration.as('M')).to.be(1);
   });
 
-  it('should return null for an invalid interval', function () {
+  it('should return null for an invalid interval', function() {
     let duration = parseInterval('');
     expect(duration).to.not.be.ok();
 

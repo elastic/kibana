@@ -27,7 +27,9 @@ export class Plugin {
       chrome: { setBreadcrumbs },
       notifications: { toasts },
       fatalError,
-      http: { basePath: { prepend: prependBasePath } },
+      http: {
+        basePath: { prepend: prependBasePath },
+      },
       injectedMetadata: { getInjectedVar },
       documentation: { elasticWebsiteUrl, docLinkVersion },
     } = coreStart;
@@ -41,7 +43,9 @@ export class Plugin {
       const esSection = getSection('elasticsearch');
       esSection.register('remote_clusters', {
         visible: true,
-        display: i18n.translate('xpack.remoteClusters.appTitle', { defaultMessage: 'Remote Clusters' }),
+        display: i18n.translate('xpack.remoteClusters.appTitle', {
+          defaultMessage: 'Remote Clusters',
+        }),
         order: 5,
         url: `#${CRUD_APP_BASE_PATH}/list`,
       });
@@ -70,7 +74,7 @@ export class Plugin {
             // e.g. to check license status per request.
             initHttp($http, prependBasePath);
 
-            setRedirect((path) => {
+            setRedirect(path => {
               $scope.$evalAsync(() => {
                 kbnUrl.redirect(path);
               });
@@ -93,7 +97,8 @@ export class Plugin {
               const appRoute = $route.current;
               const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
                 const currentRoute = $route.current;
-                const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
+                const isNavigationInApp =
+                  currentRoute.$$route.template === appRoute.$$route.template;
 
                 // When we navigate within the app, prevent Angular from re-matching the route and
                 // rebuilding the app.
@@ -111,7 +116,7 @@ export class Plugin {
               });
             });
           }
-        }
+        },
       });
     }
   }

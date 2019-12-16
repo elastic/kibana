@@ -17,12 +17,15 @@ import {
 
 import { FieldList } from '../../field_list';
 
-const columns = [{
-  field: 'name',
-  name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
-    defaultMessage: 'Field' }),
-  sortable: true,
-}];
+const columns = [
+  {
+    field: 'name',
+    name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
+      defaultMessage: 'Field',
+    }),
+    sortable: true,
+  },
+];
 
 export const TabHistogram = ({ histogram, histogramInterval }) => (
   <Fragment>
@@ -34,17 +37,11 @@ export const TabHistogram = ({ histogram, histogramInterval }) => (
         />
       </EuiDescriptionListTitle>
 
-      <EuiDescriptionListDescription>
-        {histogramInterval}
-      </EuiDescriptionListDescription>
+      <EuiDescriptionListDescription>{histogramInterval}</EuiDescriptionListDescription>
     </EuiDescriptionList>
 
     <EuiSpacer size="l" />
 
-    <FieldList
-      columns={columns}
-      fields={histogram}
-      dataTestSubj="detailPanelHistogramTabTable"
-    />
+    <FieldList columns={columns} fields={histogram} dataTestSubj="detailPanelHistogramTabTable" />
   </Fragment>
 );
