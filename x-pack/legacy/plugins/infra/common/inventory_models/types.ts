@@ -320,7 +320,7 @@ export interface InventoryMetrics {
 export interface InventoryModel {
   id: string;
   displayName: string;
-  requiredDataset: string;
+  requiredModule: string;
   fields: {
     id: string;
     name: string;
