@@ -16,13 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import Joi from 'joi';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
+import { Legacy } from 'kibana';
+// @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
-const timelionDefaults = require('../lib/get_namespaced_settings')();
+// @ts-ignore
+import getNamespacesSettings from '../lib/get_namespaced_settings';
+// @ts-ignore
+import getTlConfig from '../handlers/lib/tl_config';
 
-function formatErrorResponse(e, h) {
+const timelionDefaults = getNamespacesSettings();
+
+export interface TimelionRequestQuery {
+  payload: {
+    sheet: string[];
+    extended?: {
+      es: {
+        filter: {
+          bool: {
+            filter: string[] | object;
+            must: string[];
+            should: string[];
+            must_not: string[];
+          };
+        };
+      };
+    };
+  };
+  time?: {
+    from?: string;
+    interval: string;
+    timezone: string;
+    to?: string;
+  };
+}
+
+function formatErrorResponse(e: Error, h: Legacy.ResponseToolkit) {
   return h
     .response({
       title: e.toString(),
@@ -31,34 +62,50 @@ function formatErrorResponse(e, h) {
     .code(500);
 }
 
-export function runRoute(server) {
+const requestPayload = {
+  payload: Joi.object({
+    sheet: Joi.array()
+      .items(Joi.string())
+      .required(),
+    extended: Joi.object({
+      es: Joi.object({
+        filter: Joi.object({
+          bool: Joi.object({
+            filter: Joi.array().allow(null),
+            must: Joi.array().allow(null),
+            should: Joi.array().allow(null),
+            must_not: Joi.array().allow(null),
+          }),
+        }),
+      }),
+    }).optional(),
+    time: Joi.object({
+      from: Joi.string(),
+      interval: Joi.string().required(),
+      timezone: Joi.string().required(),
+      to: Joi.string(),
+    }).required(),
+  }),
+};
+
+export function runRoute(server: Legacy.Server) {
   server.route({
-    method: ['POST', 'GET'],
+    method: 'POST',
     path: '/api/timelion/run',
-    handler: async (request, h) => {
+    options: {
+      validate: requestPayload,
+    },
+    handler: async (request: Legacy.Request & TimelionRequestQuery, h: Legacy.ResponseToolkit) => {
       try {
         const uiSettings = await request.getUiSettingsService().getAll();
 
-        const tlConfig = require('../handlers/lib/tl_config.js')({
+        const tlConfig = getTlConfig({
           server,
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
         });
-
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(
-          chainRunner.processRequest(
-            request.payload || {
-              sheet: [request.query.expression],
-              time: {
-                from: request.query.from,
-                to: request.query.to,
-                interval: request.query.interval,
-                timezone: request.query.timezone,
-              },
-            }
-          )
-        );
+        const sheet = await Bluebird.all(chainRunner.processRequest(request.payload));
 
         return {
           sheet,
