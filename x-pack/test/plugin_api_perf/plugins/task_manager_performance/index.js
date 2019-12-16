@@ -263,6 +263,7 @@ function resetPerfState(target) {
         fillPoolStarts: 0,
         fillPoolCycles: 0,
         fillPoolBail: 0,
+        claimedOnRerunCycle: 0,
         fillPoolBailNoTasks: 0,
       },
       claimAvailableTasksNoTasks: 0,
@@ -325,6 +326,9 @@ function resetPerfState(target) {
           break;
         case 'fillPool.bailExhaustedCapacity':
           performanceState.performance.cycles.fillPoolBail++;
+          break;
+        case 'fillPool.claimedOnRerunCycle':
+          performanceState.performance.cycles.claimedOnRerunCycle++;
           break;
         case 'fillPool.bailNoTasks':
           performanceState.performance.cycles.fillPoolBail++;

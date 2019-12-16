@@ -39,7 +39,7 @@ import {
   PromiseServiceCreator,
   StateManagementConfigProvider,
 } from './legacy_imports';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';

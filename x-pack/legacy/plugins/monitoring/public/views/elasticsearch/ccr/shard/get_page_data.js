@@ -12,7 +12,7 @@ export function getPageData($injector) {
   const $route = $injector.get('$route');
   const globalState = $injector.get('globalState');
   const timeBounds = timefilter.getBounds();
-  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/ccr/${$route.current.params.index}/shard/${$route.current.params.shardId}`; // eslint-disable-line max-len
+  const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/ccr/${$route.current.params.index}/shard/${$route.current.params.shardId}`;
 
   return $http
     .post(url, {
