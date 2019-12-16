@@ -10,7 +10,6 @@ import _ from 'lodash';
 // to plain Object objects. Uncloneable values such as functions, DOM nodes, Maps, Sets, and WeakMaps
 // will be cloned to the empty object.
 function convertKeysToSpecifiedCaseDeep(object, caseConversionFunction) {
-
   // Base case
   if (!(_.isPlainObject(object) || _.isArray(object))) {
     return object;
@@ -28,10 +27,12 @@ function convertKeysToSpecifiedCaseDeep(object, caseConversionFunction) {
   }
 
   // Recursively convert nested object keys
-  _.forEach(newObject, (value, key) => newObject[key] = convertKeysToSpecifiedCaseDeep(value, caseConversionFunction));
+  _.forEach(
+    newObject,
+    (value, key) => (newObject[key] = convertKeysToSpecifiedCaseDeep(value, caseConversionFunction))
+  );
 
   return newObject;
-
 }
 
 function validateObject(object) {

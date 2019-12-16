@@ -39,14 +39,11 @@ export function lintFiles(log, files) {
   );
 
   const failTypes = Object.keys(
-    report.reduce(
-      (failTypes, reportEntry) => {
-        if (reportEntry.warningCount > 0) failTypes.warning = true;
-        if (reportEntry.errorCount > 0) failTypes.errors = true;
-        return failTypes;
-      },
-      {}
-    )
+    report.reduce((failTypes, reportEntry) => {
+      if (reportEntry.warningCount > 0) failTypes.warning = true;
+      if (reportEntry.errorCount > 0) failTypes.errors = true;
+      return failTypes;
+    }, {})
   );
 
   if (!failTypes.length) {

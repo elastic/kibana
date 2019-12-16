@@ -18,14 +18,14 @@
  */
 
 jest.mock('fs', () => ({
-  readFile: jest.fn()
+  readFile: jest.fn(),
 }));
 
 import fs from 'fs';
 import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './__mocks__/_fs_stubs';
 import { getAllStats, readControlGroups, readCPUStat } from './cgroup';
 
-describe('Control Group', function () {
+describe('Control Group', function() {
   const fsStub = cGroupsFsStub();
 
   beforeAll(() => {
@@ -54,7 +54,7 @@ describe('Control Group', function () {
         cpu: `/${fsStub.hierarchy}`,
         cpuacct: `/${fsStub.hierarchy}`,
         cpuset: `/${fsStub.hierarchy}`,
-        'name=systemd': '/user.slice/user-1000.slice/session-2359.scope'
+        'name=systemd': '/user.slice/user-1000.slice/session-2359.scope',
       });
     });
   });
@@ -67,7 +67,7 @@ describe('Control Group', function () {
       expect(cpuStat).toEqual({
         number_of_elapsed_periods: 0,
         number_of_times_throttled: 10,
-        time_throttled_nanos: 20
+        time_throttled_nanos: 20,
       });
     });
 
@@ -78,7 +78,7 @@ describe('Control Group', function () {
       expect(cpuStat).toEqual({
         number_of_elapsed_periods: -1,
         number_of_times_throttled: -1,
-        time_throttled_nanos: -1
+        time_throttled_nanos: -1,
       });
     });
   });
@@ -107,9 +107,9 @@ describe('Control Group', function () {
           stat: {
             number_of_elapsed_periods: 0,
             number_of_times_throttled: 10,
-            time_throttled_nanos: 20
-          }
-        }
+            time_throttled_nanos: 20,
+          },
+        },
       });
     });
 
@@ -119,7 +119,7 @@ describe('Control Group', function () {
         [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
         [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents,
         [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
-        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000'
+        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000',
       });
 
       const stats = await getAllStats();
@@ -150,9 +150,9 @@ describe('Control Group', function () {
           stat: {
             number_of_elapsed_periods: 0,
             number_of_times_throttled: 10,
-            time_throttled_nanos: 20
-          }
-        }
+            time_throttled_nanos: 20,
+          },
+        },
       });
     });
 
@@ -172,9 +172,9 @@ describe('Control Group', function () {
           stat: {
             number_of_elapsed_periods: 0,
             number_of_times_throttled: 10,
-            time_throttled_nanos: 20
-          }
-        }
+            time_throttled_nanos: 20,
+          },
+        },
       });
     });
 
@@ -187,7 +187,7 @@ describe('Control Group', function () {
     it('returns null if CPU accounting files are missing', async () => {
       setMockFiles({
         '/proc/self/cgroup': fsStub.cGroupContents,
-        [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents
+        [`${fsStub.cpuDir}/cpu.stat`]: fsStub.cpuStatContents,
       });
       const stats = await getAllStats();
 
@@ -199,7 +199,7 @@ describe('Control Group', function () {
         '/proc/self/cgroup': fsStub.cGroupContents,
         [`${fsStub.cpuAcctDir}/cpuacct.usage`]: '357753491408',
         [`${fsStub.cpuDir}/cpu.cfs_period_us`]: '100000',
-        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000'
+        [`${fsStub.cpuDir}/cpu.cfs_quota_us`]: '5000',
       });
       const stats = await getAllStats();
 
@@ -211,13 +211,13 @@ describe('Control Group', function () {
           stat: {
             number_of_elapsed_periods: -1,
             number_of_times_throttled: -1,
-            time_throttled_nanos: -1
-          }
+            time_throttled_nanos: -1,
+          },
         },
         cpuacct: {
           control_group: `/${fsStub.hierarchy}`,
-          usage_nanos: 357753491408
-        }
+          usage_nanos: 357753491408,
+        },
       });
     });
   });

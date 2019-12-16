@@ -20,7 +20,6 @@
 import { Writable } from 'stream';
 
 export function createIndexDocRecordsStream(client, stats, progress) {
-
   async function indexDocs(docs) {
     const body = [];
 
@@ -31,7 +30,7 @@ export function createIndexDocRecordsStream(client, stats, progress) {
           index: {
             _index: doc.index,
             _id: doc.id,
-          }
+          },
         },
         doc.source
       );

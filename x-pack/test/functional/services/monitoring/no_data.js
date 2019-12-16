@@ -9,7 +9,7 @@ export function MonitoringNoDataProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
-  return new class NoData {
+  return new (class NoData {
     async enableMonitoring() {
       // Cloud currently does not support Metricbeat-based collection
       // so the UI does not give the user a choice between the two collection
@@ -29,5 +29,5 @@ export function MonitoringNoDataProvider({ getService, getPageObjects }) {
       const pageId = await retry.try(() => testSubjects.find('noDataContainer'));
       return pageId !== null;
     }
-  }();
+  })();
 }

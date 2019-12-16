@@ -8,13 +8,15 @@ import mockAnomalyRecord from './__mocks__/mock_anomaly_record.json';
 import mockDetectorsByJob from './__mocks__/mock_detectors_by_job.json';
 import mockJobConfig from './__mocks__/mock_job_config.json';
 
-jest.mock('../../util/ml_error', () => (class MLRequestFailure {}));
+jest.mock('../../util/ml_error', () => class MLRequestFailure {});
 
 jest.mock('../../services/job_service', () => ({
   mlJobService: {
-    getJob() { return mockJobConfig; },
-    detectorsByJob: mockDetectorsByJob
-  }
+    getJob() {
+      return mockJobConfig;
+    },
+    detectorsByJob: mockDetectorsByJob,
+  },
 }));
 
 import { buildConfig } from './explorer_chart_config_builder';

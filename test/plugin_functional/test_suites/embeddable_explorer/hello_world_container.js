@@ -19,12 +19,11 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
   describe('hello world container', () => {
-
     before(async () => {
       await testSubjects.click('embedExplorerTab-helloWorldContainer');
     });

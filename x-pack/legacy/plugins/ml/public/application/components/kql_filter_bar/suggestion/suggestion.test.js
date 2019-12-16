@@ -18,15 +18,13 @@ const defaultProps = {
     end: 1,
     start: 0,
     text: 'fieldValue',
-    type: 'field'
-  }
+    type: 'field',
+  },
 };
 
 describe('Suggestion', () => {
-
   test('snapshot', () => {
-    const wrapper = shallow(<Suggestion {...defaultProps}/>);
+    const wrapper = shallow(<Suggestion {...defaultProps} />);
     expect(wrapper).toMatchSnapshot();
   });
-
 });
