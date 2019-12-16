@@ -1,7 +1,7 @@
 #!/bin/groovy
 
 library 'kibana-pipeline-library'
-// kibanaLibrary.load()
+kibanaLibrary.load()
 
 def BRANCH = params.BRANCH ?: 'master' // TODO
 BRANCH = BRANCH != 'master' ? BRANCH : 'c1d075a7dab901bc3c80dec55ef74cc0e64b87b9'; // Last known working 8.0.0 version, TODO: Remove once a verified snapshot exists
