@@ -73,7 +73,10 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
-        layout: !rawLicense?.isAvailable ? 'error-xpack-unavailable' : 'error-es-unavailable',
+        layout:
+          rawLicense !== undefined && !rawLicense?.isAvailable
+            ? 'error-xpack-unavailable'
+            : 'error-es-unavailable',
       };
     }
 
