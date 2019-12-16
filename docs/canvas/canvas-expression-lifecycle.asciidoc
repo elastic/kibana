@@ -40,11 +40,11 @@ filters
 | render
 ----
 
-To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn>> function. Each unique value in the "state" column will have an associated "size" value, which in this case, will be the maximum value of the "price" column.
+To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn, pointseries>> function. Each unique value in the "state" column will have an associated "size" value, which in this case, will be the maximum value of the "price" column.
 
-If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is inserted into <<pie_fn>>, which will produce an output that will render a pie visualization. And just like before, this is inserted into <<render_fn>>, which is useful for its arguments.
+If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is inserted into the <<pie_fn, pie>> function, which will produce an output that will render a pie visualization. And just like before, this is inserted into the <<render_fn, render>> function, which is useful for its arguments.
 
-The end result is a simple pie chart that uses the default color palette, but <<pie_fn>> can take additional arguments that control how it gets rendered. For example, you can provide a hole argument to turn your pie chart into a donut chart by changing the expression to:
+The end result is a simple pie chart that uses the default color palette, but the <<pie_fn, pie>> function can take additional arguments that control how it gets rendered. For example, you can provide a hole argument to turn your pie chart into a donut chart by changing the expression to:
 
 
 image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart]
@@ -228,7 +228,7 @@ If you <<image_fn,look at the docs>> for the `image` function, you’ll see that
 
 NOTE: It does not render an image itself.
 
-As explained in "<<canvas-expressions-only-fetch-and-manipulate-data>>", the output of an expression is just data. So the `image` type here is just a specific shape of data, not an actual image.
+As explained in the "<<canvas-fetch-and-manipulate-data, Fetch and manipulate data>>" section, the output of an expression is just data. So the `image` type here is just a specific shape of data, not an actual image.
 
 Next, let’s take a look at the `asset` function. Like `image`, it accepts `null`, but it returns something different, a `string` in this case. Because `asset` will produce a string, its output can be used as the input for any function or argument that accepts a string. 
 
