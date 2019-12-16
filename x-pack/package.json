@@ -247,7 +247,7 @@
     "i18n-iso-countries": "^4.3.1",
     "icalendar": "0.7.1",
     "idx": "^2.5.6",
-    "immer": "^1.5.0",
+    "immer": "^5.0.1",
     "inline-style": "^2.0.0",
     "intl": "^1.2.5",
     "io-ts": "^2.0.1",
