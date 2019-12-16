@@ -15597,10 +15597,10 @@ history@^3.0.0:
     query-string "^4.2.2"
     warning "^3.0.0"
 
-hjson@3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/hjson/-/hjson-3.2.0.tgz#76203ea69bc1c7c88422b48402cc34df8ff8de0e"
-  integrity sha512-XntQJHUg9QRKZYlADJKVoBMvuDbZve1X4Nd6ZIXCVPMwMvLhGjU9pGqW1XX8yPqBJSBAQwpcBDGTspURotVxbA==
+hjson@3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/hjson/-/hjson-3.2.1.tgz#20de41dc87fc9a10d1557d0230b0e02afb1b09ac"
+  integrity sha512-OhhrFMeC7dVuA1xvxuXGTv/yTdhTvbe8hz+3LgVNsfi9+vgz0sF/RrkuX8eegpKaMc9cwYwydImBH6iePoJtdQ==
 
 hmac-drbg@^1.0.0:
   version "1.0.1"
