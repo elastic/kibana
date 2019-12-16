@@ -13,12 +13,11 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiButtonEmpty,
   EuiSelect,
-  EuiSpacer,
   EuiFieldNumber,
   EuiLink,
   EuiIconTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -159,13 +158,13 @@ export class FieldRuleEditor extends Component<Props, {}> {
                 )}
               />
             ) : (
-              <EuiSpacer />
+              <EuiIcon size="l" type="empty" aria-hidden={true} />
             )}
           </EuiFormRow>
         </EuiFlexItem>
-        {renderDeleteButton && (
-          <EuiFlexItem grow={1}>
-            <EuiFormRow hasEmptyLabelSpace={true}>
+        <EuiFlexItem grow={1}>
+          <EuiFormRow hasEmptyLabelSpace={true}>
+            {renderDeleteButton ? (
               <EuiButtonIcon
                 iconType="trash"
                 color="danger"
@@ -179,9 +178,11 @@ export class FieldRuleEditor extends Component<Props, {}> {
                 )}
                 onClick={() => this.onRemoveAlternateValue(valueIndex)}
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
+            ) : (
+              <EuiIcon type="empty" aria-hidden={true} />
+            )}
+          </EuiFormRow>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
