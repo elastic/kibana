@@ -10,7 +10,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('security', () => {
     before(async () => {
@@ -29,7 +28,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
@@ -37,7 +36,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await security.role.delete('global_all_role');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('machine_learning_user', () => {
@@ -54,13 +53,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('gets forbidden after login', async () => {
-        await PageObjects.security.login(
-          'machine_learning_user',
-          'machine_learning_user-password',
-          {
-            expectForbidden: true,
-          }
-        );
+        await security.loginAs({
+          username: 'machine_learning_user',
+          password: 'machine_learning_user-password',
+          expect: 'forbidden',
+        });
       });
     });
 
@@ -72,7 +69,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'global all',
         });
 
-        await PageObjects.security.login('global_all', 'global_all-password');
+        await security.loginAs({
+          username: 'global_all',
+          password: 'global_all-password',
+        });
       });
 
       after(async () => {
@@ -95,7 +95,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'machine learning user and global all user',
         });
 
-        await PageObjects.security.login('machine_learning_user', 'machine_learning_user-password');
+        await security.loginAs({
+          username: 'machine_learning_user',
+          password: 'machine_learning_user-password',
+        });
       });
 
       after(async () => {

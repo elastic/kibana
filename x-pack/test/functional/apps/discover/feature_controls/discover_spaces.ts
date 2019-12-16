@@ -9,13 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects([
-    'common',
-    'discover',
-    'timePicker',
-    'security',
-    'spaceSelector',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 

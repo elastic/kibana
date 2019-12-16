@@ -12,7 +12,8 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header']);
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
@@ -103,8 +104,11 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('user customer1 should see ssn', async function() {
-      await PageObjects.security.forceLogout();
-      await PageObjects.security.login('customer1', 'changeme');
+      await security.logout();
+      await security.loginAs({
+        username: 'customer1',
+        password: 'changeme',
+      });
       await PageObjects.common.navigateToApp('discover');
       await retry.tryForTime(10000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -117,8 +121,11 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('user customer2 should not see ssn', async function() {
-      await PageObjects.security.forceLogout();
-      await PageObjects.security.login('customer2', 'changeme');
+      await security.logout();
+      await security.loginAs({
+        username: 'customer2',
+        password: 'changeme',
+      });
       await PageObjects.common.navigateToApp('discover');
       await retry.tryForTime(10000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -131,7 +138,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async function() {
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
   });
 }

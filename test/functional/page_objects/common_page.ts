@@ -34,7 +34,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const find = getService('find');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['shield']);
+  const security = getService('security');
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -100,10 +100,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         log.debug(
           `Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`
         );
-        await PageObjects.shield.login(
-          config.get('servers.kibana.username'),
-          config.get('servers.kibana.password')
-        );
+        await security.loginAsSuperUser();
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
           2 * defaultFindTimeout

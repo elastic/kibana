@@ -42,8 +42,6 @@ import { SettingsPageProvider } from './settings_page';
 // @ts-ignore not TS yet
 import { SharePageProvider } from './share_page';
 // @ts-ignore not TS yet
-import { ShieldPageProvider } from './shield_page';
-// @ts-ignore not TS yet
 import { TimePickerPageProvider } from './time_picker';
 // @ts-ignore not TS yet
 import { TimelionPageProvider } from './timelion_page';
@@ -65,7 +63,6 @@ export const pageObjects = {
   pointSeries: PointSeriesPageProvider,
   settings: SettingsPageProvider,
   share: SharePageProvider,
-  shield: ShieldPageProvider,
   timelion: TimelionPageProvider,
   timePicker: TimePickerPageProvider,
   visualBuilder: VisualBuilderPageProvider,

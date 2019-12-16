@@ -7,10 +7,11 @@
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['settings', 'common', 'visualize', 'timePicker']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
   describe('rbac ', function() {
@@ -88,7 +89,7 @@ export default function({ getService, getPageObjects }) {
       expect(user.roles).to.eql(['rbac_read']);
       expect(user.fullname).to.eql('kibanareadonlyFirst kibanareadonlyLast');
       expect(user.reserved).to.be(false);
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     //   this is to acertain that all role assigned to the user can perform actions like creating a Visualization
@@ -96,7 +97,10 @@ export default function({ getService, getPageObjects }) {
       const vizName1 = 'Visualization VerticalBarChart';
 
       log.debug('log in as kibanauser with rbac_all role');
-      await PageObjects.security.login('kibanauser', 'changeme');
+      await security.loginAs({
+        username: 'kibanauser',
+        password: 'changeme',
+      });
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVerticalBarChart');
@@ -112,11 +116,11 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async function() {
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
   });
 }

@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -46,15 +46,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'global_index_patterns_all_user',
-          'global_index_patterns_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_index_patterns_all_user',
+          password: 'global_index_patterns_all_user-password',
+        });
 
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
@@ -64,7 +61,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_index_patterns_all_role'),
           security.user.delete('global_index_patterns_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -107,13 +104,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_index_patterns_read_user',
-          'global_index_patterns_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_index_patterns_read_user',
+          password: 'global_index_patterns_read_user-password',
+        });
 
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
@@ -164,13 +158,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_index_patterns_privileges_user',
-          'no_index_patterns_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_index_patterns_privileges_user',
+          password: 'no_index_patterns_privileges_user-password',
+        });
       });
 
       after(async () => {

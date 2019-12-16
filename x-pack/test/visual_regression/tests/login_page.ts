@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const visualTesting = getService('visualTesting');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'security']);
 
   describe.skip('Security', () => {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       after(async () => {
@@ -23,7 +26,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       it('renders login page', async () => {
@@ -38,8 +41,10 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('renders failed login', async () => {
-        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', {
-          expectSuccess: false,
+        await security.loginAs({
+          username: 'wrong-user',
+          password: 'wrong-password',
+          expect: null,
         });
 
         await retry.waitFor(

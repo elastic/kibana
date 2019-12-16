@@ -12,7 +12,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'header', 'security']);
+  const PageObjects = getPageObjects(['common', 'header']);
 
   class SpaceSelectorPage {
     async initTests() {

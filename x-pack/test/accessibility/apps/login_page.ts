@@ -11,13 +11,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'security']);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['common']);
 
   describe('Security', () => {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       after(async () => {
@@ -25,7 +26,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       it('meets a11y requirements', async () => {

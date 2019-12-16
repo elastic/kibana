@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'console', 'security']);
+  const PageObjects = getPageObjects(['common', 'console']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
@@ -20,12 +20,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.load('empty_kibana');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('global dev_tools all privileges', () => {
@@ -47,13 +47,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dev_tools_all_user',
-          'global_dev_tools_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_dev_tools_all_user',
+          password: 'global_dev_tools_all_user-password',
+        });
       });
 
       after(async () => {
@@ -131,13 +128,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dev_tools_read_user',
-          'global_dev_tools_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_dev_tools_read_user',
+          password: 'global_dev_tools_read_user-password',
+        });
       });
 
       after(async () => {
@@ -214,13 +208,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_dev_tools_privileges_user',
-          'no_dev_tools_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_dev_tools_privileges_user',
+          password: 'no_dev_tools_privileges_user-password',
+        });
       });
 
       after(async () => {

@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
+  const PageObjects = getPageObjects(['common', 'settings', 'maps']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -49,10 +49,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login('global_maps_all_user', 'global_maps_all_user-password', {
-          expectSpaceSelector: false,
+        await security.loginAs({
+          username: 'global_maps_all_user',
+          password: 'global_maps_all_user-password',
         });
       });
 
@@ -60,7 +61,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_maps_all_role'),
           security.user.delete('global_maps_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -139,13 +140,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_maps_read_user',
-          'global_maps_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_maps_read_user',
+          password: 'global_maps_read_user-password',
+        });
       });
 
       after(async () => {
@@ -236,13 +234,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_maps_privileges_user',
-          'no_maps_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_maps_privileges_user',
+          password: 'no_maps_privileges_user-password',
+        });
       });
 
       after(async () => {

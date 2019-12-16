@@ -12,7 +12,7 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings']);
 
   class UpgradeAssistant {
     async initTests() {

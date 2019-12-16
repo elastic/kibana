@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SecurityServiceProvider } from './security';
+export { SecurityService, SecurityProvider } from './security';

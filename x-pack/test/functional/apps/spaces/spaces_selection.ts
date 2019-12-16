@@ -10,14 +10,8 @@ export default function spaceSelectorFunctonalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'header',
-    'home',
-    'security',
-    'spaceSelector',
-  ]);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'spaceSelector']);
 
   describe('Spaces', function() {
     this.tags('smoke');
@@ -26,14 +20,14 @@ export default function spaceSelectorFunctonalTests({
       after(async () => await esArchiver.unload('spaces/selector'));
 
       afterEach(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       it('allows user to navigate to different spaces', async () => {
         const spaceId = 'another-space';
 
-        await PageObjects.security.login(null, null, {
-          expectSpaceSelector: true,
+        await security.loginAsSuperUser({
+          expect: 'spaceSelector',
         });
 
         await PageObjects.spaceSelector.clickSpaceCard(spaceId);
@@ -63,8 +57,8 @@ export default function spaceSelectorFunctonalTests({
 
       before(async () => {
         await esArchiver.load('spaces/selector');
-        await PageObjects.security.login(null, null, {
-          expectSpaceSelector: true,
+        await security.loginAsSuperUser({
+          expect: 'spaceSelector',
         });
         await PageObjects.spaceSelector.clickSpaceCard('default');
         await PageObjects.common.navigateToApp('home', {
@@ -87,7 +81,7 @@ export default function spaceSelectorFunctonalTests({
           hash: sampleDataHash,
         });
         await PageObjects.home.removeSampleDataSet('logs');
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await esArchiver.unload('spaces/selector');
       });
 

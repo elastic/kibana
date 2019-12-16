@@ -9,11 +9,10 @@ import { PublicLicenseJSON } from '../../../plugins/licensing/server';
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'security']);
   const testSubjects = getService('testSubjects');
 
   const scenario = {
@@ -37,8 +36,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
-      await PageObjects.security.login('license_manager_user', 'license_manager_user-password');
+      await security.logout();
+      await security.loginAs({
+        username: 'license_manager_user',
+        password: 'license_manager_user-password',
+      });
     },
 
     async teardown() {

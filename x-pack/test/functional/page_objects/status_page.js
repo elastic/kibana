@@ -11,7 +11,7 @@ export function StatusPagePageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'home', 'security']);
+  const PageObjects = getPageObjects(['common', 'home']);
 
   class StatusPage {
     async initTests() {

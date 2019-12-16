@@ -16,7 +16,7 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const esSupertest = getService('esSupertest');
-  const PageObjects = getPageObjects(['security', 'common', 'header', 'settings', 'watcher']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'watcher']);
 
   describe('watcher_test', function() {
     before('initialize tests', async () => {

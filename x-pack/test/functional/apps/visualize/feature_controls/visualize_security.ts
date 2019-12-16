@@ -13,7 +13,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'visualize',
     'header',
-    'security',
     'share',
     'spaceSelector',
     'timePicker',
@@ -56,19 +55,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'global_visualize_all_user',
-          'global_visualize_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_visualize_all_user',
+          password: 'global_visualize_all_user-password',
+        });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await security.role.delete('global_visualize_all_role');
         await security.user.delete('global_visualize_all_user');
       });
@@ -174,17 +170,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_visualize_read_user',
-          'global_visualize_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_visualize_read_user',
+          password: 'global_visualize_read_user-password',
+        });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await security.role.delete('global_visualize_read_role');
         await security.user.delete('global_visualize_read_user');
       });
@@ -283,18 +276,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_visualize_privileges_user',
-          'no_visualize_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_visualize_privileges_user',
+          password: 'no_visualize_privileges_user-password',
+        });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await security.role.delete('no_visualize_privileges_role');
         await security.user.delete('no_visualize_privileges_user');
       });

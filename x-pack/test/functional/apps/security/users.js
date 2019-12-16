@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['security', 'settings']);
+  const PageObjects = getPageObjects(['settings']);
   const config = getService('config');
   const log = getService('log');
 

@@ -19,17 +19,21 @@
 
 import { format as formatUrl } from 'url';
 
+import { ToolingLog } from '@kbn/dev-utils';
+
 import { Role } from './role';
 import { User } from './user';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function SecurityServiceProvider({ getService }: FtrProviderContext) {
+export class SecurityService {
+  role = new Role(this.kibanaUrl, this.log);
+  user = new User(this.kibanaUrl, this.log);
+
+  constructor(protected readonly kibanaUrl: string, protected readonly log: ToolingLog) {}
+}
+
+export function SecurityProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
-  const url = formatUrl(config.get('servers.kibana'));
-
-  return new (class SecurityService {
-    role = new Role(url, log);
-    user = new User(url, log);
-  })();
+  return new SecurityService(formatUrl(config.get('servers.kibana')), log);
 }

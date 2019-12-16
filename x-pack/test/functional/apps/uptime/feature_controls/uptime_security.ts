@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -18,12 +18,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('empty_kibana');
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('global uptime all privileges', () => {
@@ -48,13 +48,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_uptime_all_user',
-          'global_uptime_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_uptime_all_user',
+          password: 'global_uptime_all_user-password',
+        });
       });
 
       after(async () => {
@@ -102,13 +99,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_uptime_read_user',
-          'global_uptime_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_uptime_read_user',
+          password: 'global_uptime_read_user-password',
+        });
       });
 
       after(async () => {
@@ -155,13 +149,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_uptime_privileges_user',
-          'no_uptime_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_uptime_privileges_user',
+          password: 'no_uptime_privileges_user-password',
+        });
       });
 
       after(async () => {

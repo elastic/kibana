@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
@@ -39,10 +39,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login('global_all_user', 'global_all_user-password', {
-          expectSpaceSelector: false,
+        await security.loginAs({
+          username: 'global_all_user',
+          password: 'global_all_user-password',
         });
       });
 
@@ -50,7 +51,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -111,22 +112,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'default_space_all_user',
-          'default_space_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'default_space_all_user',
+          password: 'default_space_all_user-password',
+        });
       });
 
       after(async () => {
         await Promise.all([
           security.role.delete('default_space_all_role'),
           security.user.delete('default_space_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 

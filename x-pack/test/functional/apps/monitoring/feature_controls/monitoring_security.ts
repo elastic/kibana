@@ -6,11 +6,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('security', () => {
     before(async () => {
@@ -29,7 +28,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
@@ -37,7 +36,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await security.role.delete('global_all_role');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('monitoring_user', () => {
@@ -54,8 +53,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('gets forbidden after login', async () => {
-        await PageObjects.security.login('monitoring_user', 'monitoring_user-password', {
-          expectForbidden: true,
+        await security.loginAs({
+          username: 'monitoring_user',
+          password: 'monitoring_user-password',
+          expect: 'forbidden',
         });
       });
     });
@@ -68,7 +69,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'global all',
         });
 
-        await PageObjects.security.login('global_all', 'global_all-password');
+        await security.loginAs({
+          username: 'global_all',
+          password: 'global_all-password',
+        });
       });
 
       after(async () => {
@@ -91,7 +95,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'monitoring user',
         });
 
-        await PageObjects.security.login('monitoring_user', 'monitoring_user-password');
+        await security.loginAs({
+          username: 'monitoring_user',
+          password: 'monitoring_user-password',
+        });
       });
 
       after(async () => {

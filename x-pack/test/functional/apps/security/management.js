@@ -17,13 +17,12 @@ export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
+  const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('Management', function() {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',

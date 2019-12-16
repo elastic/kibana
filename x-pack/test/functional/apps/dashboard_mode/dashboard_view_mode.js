@@ -17,8 +17,8 @@ export default function({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const appsMenu = getService('appsMenu');
   const filterBar = getService('filterBar');
+  const security = getService('security');
   const PageObjects = getPageObjects([
-    'security',
     'common',
     'discover',
     'dashboard',
@@ -112,12 +112,15 @@ export default function({ getService, getPageObjects }) {
       });
 
       after('logout', async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       it('shows only the dashboard app link', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('dashuser', '123456');
+        await security.logout();
+        await security.loginAs({
+          username: 'dashuser',
+          password: '123456',
+        });
 
         const appLinks = await appsMenu.readLinks();
         expect(appLinks).to.have.length(1);
@@ -196,8 +199,11 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('mixeduser', '123456');
+        await security.logout();
+        await security.loginAs({
+          username: 'mixeduser',
+          password: '123456',
+        });
 
         if (await appsMenu.linkExists('Management')) {
           throw new Error('Expected management nav link to not be shown');
@@ -205,8 +211,11 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('mysuperuser', '123456');
+        await security.logout();
+        await security.loginAs({
+          username: 'mysuperuser',
+          password: '123456',
+        });
 
         if (!(await appsMenu.linkExists('Management'))) {
           throw new Error('Expected management nav link to be shown');

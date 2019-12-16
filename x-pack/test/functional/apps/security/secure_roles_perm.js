@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
-    'security',
     'settings',
     'monitoring',
     'discover',
@@ -22,6 +21,7 @@ export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const security = getService('security');
 
   describe('secure roles and permissions', function() {
     before(async () => {
@@ -70,8 +70,11 @@ export default function({ getService, getPageObjects }) {
       expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_user']);
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
-      await PageObjects.security.forceLogout();
-      await PageObjects.security.login('Rashmi', 'changeme');
+      await security.logout();
+      await security.loginAs({
+        username: 'Rashmi',
+        password: 'changeme',
+      });
     });
 
     it('Kibana User navigating to Management gets permission denied', async function() {
@@ -93,7 +96,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async function() {
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
   });
 }

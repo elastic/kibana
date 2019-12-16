@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'spaceSelector', 'share']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -27,14 +27,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
       await esArchiver.unload('dashboard/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('global dashboard all privileges, no embeddable application privileges', () => {
@@ -59,13 +59,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dashboard_all_user',
-          'global_dashboard_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_dashboard_all_user',
+          password: 'global_dashboard_all_user-password',
+        });
       });
 
       after(async () => {
@@ -160,13 +157,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dashboard_visualize_all_user',
-          'global_dashboard_visualize_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_dashboard_visualize_all_user',
+          password: 'global_dashboard_visualize_all_user-password',
+        });
       });
 
       after(async () => {
@@ -240,13 +234,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_dashboard_read_user',
-          'global_dashboard_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_dashboard_read_user',
+          password: 'global_dashboard_read_user-password',
+        });
       });
 
       after(async () => {
@@ -353,13 +344,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_dashboard_privileges_user',
-          'no_dashboard_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_dashboard_privileges_user',
+          password: 'no_dashboard_privileges_user-password',
+        });
       });
 
       after(async () => {

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { services as ossVisualRegressionServices } from '../../../test/visual_regression/services';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 export default async function({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
@@ -19,10 +20,8 @@ export default async function({ readConfigFile }) {
       require.resolve('./tests/infra'),
     ],
 
-    services: {
-      ...functionalConfig.get('services'),
-      visualTesting: ossVisualRegressionServices.visualTesting,
-    },
+    services,
+    pageObjects,
 
     junit: {
       reportName: 'X-Pack Visual Regression Tests',

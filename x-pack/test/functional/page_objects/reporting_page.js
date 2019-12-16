@@ -15,7 +15,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'settings', 'share', 'timePicker']);
 
   class ReportingPage {
     async initTests() {

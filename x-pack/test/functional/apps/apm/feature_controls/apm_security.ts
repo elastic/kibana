@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'error', 'security']);
+  const PageObjects = getPageObjects(['common', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -18,12 +18,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load('empty_kibana');
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('global apm all privileges', () => {
@@ -48,8 +48,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_apm_all_user', 'global_apm_all_user-password', {
-          expectSpaceSelector: false,
+        await security.loginAs({
+          username: 'global_apm_all_user',
+          password: 'global_apm_all_user-password',
         });
       });
 
@@ -100,8 +101,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_apm_read_user', 'global_apm_read_user-password', {
-          expectSpaceSelector: false,
+        await security.loginAs({
+          username: 'global_apm_read_user',
+          password: 'global_apm_read_user-password',
         });
       });
 
@@ -151,13 +153,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_apm_privileges_user',
-          'no_apm_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_apm_privileges_user',
+          password: 'no_apm_privileges_user-password',
+        });
       });
 
       after(async () => {

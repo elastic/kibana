@@ -23,7 +23,7 @@ import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryProvider } from './retry';
 import { RandomnessProvider } from './randomness';
-import { SecurityServiceProvider } from './security';
+import { SecurityProvider } from './security';
 
 export const services = {
   legacyEs: LegacyEsProvider,
@@ -32,5 +32,5 @@ export const services = {
   kibanaServer: KibanaServerProvider,
   retry: RetryProvider,
   randomness: RandomnessProvider,
-  security: SecurityServiceProvider,
+  security: SecurityProvider,
 };

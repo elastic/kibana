@@ -51,6 +51,7 @@ import { ToastsProvider } from './toasts';
 import { PieChartProvider } from './visualizations';
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
+import { SecurityProvider } from './security';
 
 export const services = {
   ...commonServiceProviders,
@@ -83,4 +84,5 @@ export const services = {
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartProvider,
+  security: SecurityProvider,
 };

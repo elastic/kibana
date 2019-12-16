@@ -9,9 +9,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'error']);
   const appsMenu = getService('appsMenu');
   const find = getService('find');
+  const security = getService('security');
 
   describe('spaces', () => {
     before(async () => {
@@ -21,7 +22,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('empty_kibana');
       await PageObjects.common.navigateToApp('home');
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('space with no features disabled', () => {

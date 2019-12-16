@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'settings', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -46,14 +46,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login(
-          'global_advanced_settings_all_user',
-          'global_advanced_settings_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.logout();
+        await security.loginAs({
+          username: 'global_advanced_settings_all_user',
+          password: 'global_advanced_settings_all_user-password',
+        });
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
       });
@@ -62,7 +59,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_advanced_settings_all_role'),
           security.user.delete('global_advanced_settings_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -107,13 +104,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_advanced_settings_read_user',
-          'global_advanced_settings_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_advanced_settings_read_user',
+          password: 'global_advanced_settings_read_user-password',
+        });
 
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
@@ -163,13 +157,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_advanced_settings_privileges_user',
-          'no_advanced_settings_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_advanced_settings_privileges_user',
+          password: 'no_advanced_settings_privileges_user-password',
+        });
       });
 
       after(async () => {

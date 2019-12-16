@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 

@@ -12,8 +12,9 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
+  const security = getService('security');
   const screenshot = getService('screenshots');
-  const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   describe('dls', function() {
     before('initialize tests', async () => {
@@ -67,8 +68,11 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('user East should only see EAST doc', async function() {
-      await PageObjects.security.forceLogout();
-      await PageObjects.security.login('userEast', 'changeme');
+      await security.logout();
+      await security.loginAs({
+        username: 'userEast',
+        password: 'changeme',
+      });
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -80,7 +84,7 @@ export default function({ getService, getPageObjects }) {
       );
     });
     after('logout', async () => {
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
   });
 }

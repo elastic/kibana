@@ -14,7 +14,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'discover',
     'timePicker',
-    'security',
     'share',
     'spaceSelector',
   ]);
@@ -33,14 +32,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     after(async () => {
       await esArchiver.unload('discover/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     describe('global discover all privileges', () => {
@@ -65,13 +64,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_discover_all_user',
-          'global_discover_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_discover_all_user',
+          password: 'global_discover_all_user-password',
+        });
       });
 
       after(async () => {
@@ -155,13 +151,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_discover_read_user',
-          'global_discover_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_discover_read_user',
+          password: 'global_discover_read_user-password',
+        });
       });
 
       after(async () => {
@@ -247,13 +240,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_discover_visualize_read_user',
-          'global_discover_visualize_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_discover_visualize_read_user',
+          password: 'global_discover_visualize_read_user-password',
+        });
       });
 
       after(async () => {
@@ -291,13 +281,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_discover_privileges_user',
-          'no_discover_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_discover_privileges_user',
+          password: 'no_discover_privileges_user-password',
+        });
       });
 
       after(async () => {

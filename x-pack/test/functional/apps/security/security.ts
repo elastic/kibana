@@ -6,17 +6,22 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
+  const retry = getService('retry');
 
   describe('Security', function() {
-    this.tags('smoke');
+    (this as any).tags('smoke');
+
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       after(async () => {
@@ -24,24 +29,38 @@ export default function({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
       });
 
       it('can login', async () => {
-        await PageObjects.security.login();
+        await security.loginAsSuperUser();
       });
 
       it('displays message if login fails', async () => {
-        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', {
-          expectSuccess: false,
+        await security.loginAs({
+          username: 'wrong-user',
+          password: 'wrong-password',
+          expect: null,
         });
-        const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
+
+        const errorMessage = await retry.try(async () => {
+          const errorMessageContainer = await retry.try(() =>
+            testSubjects.find('loginErrorMessage')
+          );
+          const errorMessageText = await errorMessageContainer.getVisibleText();
+
+          if (!errorMessageText) {
+            throw new Error('Login Error Message not present yet');
+          }
+
+          return errorMessageText;
+        });
         expect(errorMessage).to.be('Invalid username or password. Please try again.');
       });
 
       it('displays message acknowledging logout', async () => {
-        await PageObjects.security.login();
-        await PageObjects.security.logout();
+        await security.loginAsSuperUser();
+        await PageObjects.security.logoutWithUserMenu();
 
         const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
         expect(logoutMessage).to.eql('You have logged out of Kibana.');

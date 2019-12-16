@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'canvas']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -45,22 +45,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login(
-          'global_canvas_all_user',
-          'global_canvas_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.logout();
+        await security.loginAs({
+          username: 'global_canvas_all_user',
+          password: 'global_canvas_all_user-password',
+        });
       });
 
       after(async () => {
         await Promise.all([
           security.role.delete('global_canvas_all_role'),
           security.user.delete('global_canvas_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -128,13 +124,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_canvas_read_user',
-          'global_canvas_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_canvas_read_user',
+          password: 'global_canvas_read_user-password',
+        });
       });
 
       after(async () => {
@@ -207,13 +200,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_canvas_privileges_user',
-          'no_canvas_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_canvas_privileges_user',
+          password: 'no_canvas_privileges_user-password',
+        });
       });
 
       after(async () => {

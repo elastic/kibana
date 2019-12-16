@@ -11,7 +11,7 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'infraHome']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -40,22 +40,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'global_infrastructure_all_user',
-          'global_infrastructure_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_infrastructure_all_user',
+          password: 'global_infrastructure_all_user-password',
+        });
       });
 
       after(async () => {
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
           security.user.delete('global_infrastructure_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -155,22 +152,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'global_infrastructure_read_user',
-          'global_infrastructure_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_infrastructure_read_user',
+          password: 'global_infrastructure_read_user-password',
+        });
       });
 
       after(async () => {
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
           security.user.delete('global_infrastructure_read_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -276,13 +270,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_infrastructure_logs_read_user',
-          'global_infrastructure_logs_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_infrastructure_logs_read_user',
+          password: 'global_infrastructure_logs_read_user-password',
+        });
       });
 
       after(async () => {
@@ -342,13 +333,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_infrastructure_apm_read_user',
-          'global_infrastructure_apm_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_infrastructure_apm_read_user',
+          password: 'global_infrastructure_apm_read_user-password',
+        });
       });
 
       after(async () => {
@@ -402,13 +390,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'no_infrastructure_privileges_user',
-          'no_infrastructure_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_infrastructure_privileges_user',
+          password: 'no_infrastructure_privileges_user-password',
+        });
       });
 
       after(async () => {

@@ -54,8 +54,8 @@ import { TransformProvider } from './transform';
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
 export const services = {
-  ...kibanaFunctionalServices,
   ...commonServices,
+  ...kibanaFunctionalServices,
 
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,

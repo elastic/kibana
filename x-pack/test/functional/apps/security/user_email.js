@@ -7,9 +7,10 @@
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
+  const PageObjects = getPageObjects(['settings', 'common', 'accountSetting']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const security = getService('security');
 
   describe('useremail', function() {
     this.tags('smoke');
@@ -35,27 +36,33 @@ export default function({ getService, getPageObjects }) {
       expect(users.newuser.fullname).to.eql('newuserFirst newuserLast');
       expect(users.newuser.email).to.eql('newuser@myEmail.com');
       expect(users.newuser.reserved).to.be(false);
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     it('login as new user and verify email', async function() {
-      await PageObjects.security.login('newuser', 'changeme');
+      await security.loginAs({
+        username: 'newuser',
+        password: 'changeme',
+      });
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
     });
 
     it('click changepassword link, change the password and re-login', async function() {
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
       await PageObjects.accountSetting.changePassword('changeme', 'mechange');
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     it('login as new user with changed password', async function() {
-      await PageObjects.security.login('newuser', 'mechange');
+      await security.loginAs({
+        username: 'newuser',
+        password: 'mechange',
+      });
       await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
     });
 
     after(async function() {
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
   });
 }

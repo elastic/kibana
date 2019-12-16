@@ -12,8 +12,9 @@ export default function spaceSelectorFunctonalTests({
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spaces = getService('spaces');
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['security', 'settings', 'copySavedObjectsToSpace']);
+  const PageObjects = getPageObjects(['settings', 'copySavedObjectsToSpace']);
 
   // TODO: Flakey again https://github.com/elastic/kibana/issues/44575#issuecomment-528864287
   describe.skip('Copy Saved Objects to Space', function() {
@@ -32,9 +33,7 @@ export default function spaceSelectorFunctonalTests({
         disabledFeatures: [],
       });
 
-      await PageObjects.security.login(null, null, {
-        expectSpaceSelector: true,
-      });
+      await security.loginAsSuperUser({ expect: 'spaceSelector' });
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();

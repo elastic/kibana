@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -44,10 +44,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login('global_all_user', 'global_all_user-password', {
-          expectSpaceSelector: false,
+        await security.loginAs({
+          username: 'global_all_user',
+          password: 'global_all_user-password',
         });
       });
 
@@ -55,7 +56,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -162,10 +163,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login('global_som_read_user', 'global_som_read_user-password', {
-          expectSpaceSelector: false,
+        await security.loginAs({
+          username: 'global_som_read_user',
+          password: 'global_som_read_user-password',
         });
       });
 
@@ -173,7 +175,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_som_read_role'),
           security.user.delete('global_som_read_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 
@@ -281,22 +283,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'global_visualize_all_user',
-          'global_visualize_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_visualize_all_user',
+          password: 'global_visualize_all_user-password',
+        });
       });
 
       after(async () => {
         await Promise.all([
           security.role.delete('global_visualize_all_role'),
           security.user.delete('global_visualize_all_user'),
-          PageObjects.security.forceLogout(),
+          security.logout(),
         ]);
       });
 

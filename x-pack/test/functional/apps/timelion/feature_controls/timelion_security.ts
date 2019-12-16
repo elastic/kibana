@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
 
@@ -41,19 +41,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'global_timelion_all_user',
-          'global_timelion_all_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_timelion_all_user',
+          password: 'global_timelion_all_user-password',
+        });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await security.role.delete('global_timelion_all_role');
         await security.user.delete('global_timelion_all_user');
       });
@@ -97,17 +94,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login(
-          'global_timelion_read_user',
-          'global_timelion_read_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'global_timelion_read_user',
+          password: 'global_timelion_read_user-password',
+        });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await security.role.delete('global_timelion_read_role');
         await security.user.delete('global_timelion_read_user');
       });
@@ -151,19 +145,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.forceLogout();
+        await security.logout();
 
-        await PageObjects.security.login(
-          'no_timelion_privileges_user',
-          'no_timelion_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await security.loginAs({
+          username: 'no_timelion_privileges_user',
+          password: 'no_timelion_privileges_user-password',
+        });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
+        await security.logout();
         await security.role.delete('no_timelion_privileges_role');
         await security.user.delete('no_timelion_privileges_user');
       });

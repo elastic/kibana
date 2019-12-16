@@ -9,9 +9,10 @@ export default function enterSpaceFunctonalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
+  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['spaceSelector']);
 
   describe('Enter Space', function() {
     this.tags('smoke');
@@ -19,14 +20,14 @@ export default function enterSpaceFunctonalTests({
     after(async () => await esArchiver.unload('spaces/enter_space'));
 
     afterEach(async () => {
-      await PageObjects.security.forceLogout();
+      await security.logout();
     });
 
     it('allows user to navigate to different spaces, respecting the configured default route', async () => {
       const spaceId = 'another-space';
 
-      await PageObjects.security.login(null, null, {
-        expectSpaceSelector: true,
+      await security.loginAsSuperUser({
+        expect: 'spaceSelector',
       });
 
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
@@ -48,8 +49,8 @@ export default function enterSpaceFunctonalTests({
       // This test only works with the default space, as other spaces have an enforced relative url of `${serverBasePath}/s/space-id/${defaultRoute}`
       const spaceId = 'default';
 
-      await PageObjects.security.login(null, null, {
-        expectSpaceSelector: true,
+      await security.loginAsSuperUser({
+        expect: 'spaceSelector',
       });
 
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
