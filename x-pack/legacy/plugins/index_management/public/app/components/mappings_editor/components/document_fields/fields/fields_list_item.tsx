@@ -209,10 +209,13 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                       position="top"
                       content={
                         <p>
-                          {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldToolipLabel', {
-                            defaultMessage:
-                              'Multi-fields are useful to index the same field in different ways.',
-                          })}
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.addMultiFieldTooltipLabel',
+                            {
+                              defaultMessage:
+                                'Multi-fields are useful to index the same field in different ways.',
+                            }
+                          )}
                         </p>
                       }
                     >
