@@ -19,18 +19,21 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 export const DetectionEngineContainer = React.memo<Props>(() => (
   <Switch>
-    <Route exact path={detectionEnginePath} render={() => <DetectionEngineComponent />} strict />
-    <Route exact path={`${detectionEnginePath}/rules`} render={() => <RulesComponent />} />
-    <Route path={`${detectionEnginePath}/rules/create`} render={() => <CreateRuleComponent />} />
-    <Route
-      exact
-      path={`${detectionEnginePath}/rules/:ruleId`}
-      render={props => <RuleDetailsComponent ruleId={props.match.params.ruleId} />}
-    />
-    <Route
-      path={`${detectionEnginePath}/rules/:ruleId/edit`}
-      render={props => <EditRuleComponent ruleId={props.match.params.ruleId} />}
-    />
+    <Route exact path={detectionEnginePath} strict>
+      <DetectionEngineComponent />
+    </Route>
+    <Route exact path={`${detectionEnginePath}/rules`}>
+      <RulesComponent />
+    </Route>
+    <Route path={`${detectionEnginePath}/rules/create`}>
+      <CreateRuleComponent />
+    </Route>
+    <Route exact path={`${detectionEnginePath}/rules/:ruleId`}>
+      <RuleDetailsComponent />
+    </Route>
+    <Route path={`${detectionEnginePath}/rules/:ruleId/edit`}>
+      <EditRuleComponent />
+    </Route>
     <Route
       path="/detection-engine/"
       render={({ location: { search = '' } }) => (

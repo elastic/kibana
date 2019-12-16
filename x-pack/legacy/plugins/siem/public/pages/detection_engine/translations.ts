@@ -10,8 +10,16 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
   defaultMessage: 'Detection engine',
 });
 
-export const PAGE_SUBTITLE = i18n.translate('xpack.siem.detectionEngine.pageSubtitle', {
-  defaultMessage: 'Last signal: X minutes ago',
+export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignaltitle', {
+  defaultMessage: 'Last signal:',
+});
+
+export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSignaltitle', {
+  defaultMessage: 'Total',
+});
+
+export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signaltitle', {
+  defaultMessage: 'Signals',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate('xpack.siem.detectionEngine.buttonManageRules', {

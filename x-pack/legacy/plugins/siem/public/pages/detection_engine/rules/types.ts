@@ -5,8 +5,9 @@
  */
 
 import { esFilters } from '../../../../../../../../src/plugins/data/common';
-import { Rule } from '../../../containers/detection_engine/rules/types';
+import { Rule } from '../../../containers/detection_engine/rules';
 import { FieldValueQueryBar } from './components/query_bar';
+import { FormData, FormHook } from './components/shared_imports';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -55,10 +56,13 @@ export interface RuleStepData {
 }
 
 export interface RuleStepProps {
-  setStepData: (step: RuleStep, data: unknown, isValid: boolean) => void;
-  isEditView: boolean;
+  descriptionDirection?: 'row' | 'column';
+  setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
+  isReadOnlyView: boolean;
+  isUpdateView?: boolean;
   isLoading: boolean;
   resizeParentContainer?: (height: number) => void;
+  setForm?: (step: RuleStep, form: FormHook<FormData>) => void;
 }
 
 interface StepRuleData {
@@ -107,7 +111,13 @@ export interface AboutStepRuleJson {
   threats: IMitreEnterpriseAttack[];
 }
 
-export type ScheduleStepRuleJson = ScheduleStepRule;
+export interface ScheduleStepRuleJson {
+  enabled: boolean;
+  interval: string;
+  from: string;
+  to?: string;
+  meta?: unknown;
+}
 
 export type FormatRuleType = 'query' | 'saved_query';
 

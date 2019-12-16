@@ -4,28 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
-import { noop } from 'lodash/fp';
-import React, { useState } from 'react';
+import { EuiButton, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
+import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { HeaderPage } from '../../../../components/header_page';
-import { HeaderSection } from '../../../../components/header_section';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
-import { ProgressInline } from '../../../../components/progress_inline';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
+import { useRule } from '../../../../containers/detection_engine/rules';
+
 import {
   indicesExistOrDataTemporarilyUnavailable,
   WithSource,
@@ -35,16 +26,53 @@ import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { SignalsCharts } from '../../components/signals_chart';
 import { SignalsTable } from '../../components/signals';
 import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
-
+import { useSignalInfo } from '../../components/signals_info';
+import { StepAboutRule } from '../components/step_about_rule';
+import { StepDefineRule } from '../components/step_define_rule';
+import { StepScheduleRule } from '../components/step_schedule_rule';
+import { buildSignalsRuleIdFilter } from '../../components/signals/default_config';
+import * as detectionI18n from '../../translations';
+import { RuleSwitch } from '../components/rule_switch';
+import { StepPanel } from '../components/step_panel';
+import { getStepsData } from '../helpers';
+import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 
-interface RuleDetailsComponentProps {
-  ruleId: string;
-}
+export const RuleDetailsComponent = memo(() => {
+  const { ruleId } = useParams();
+  const [loading, rule] = useRule(ruleId);
+  const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
+    rule,
+    detailsView: true,
+  });
+  const [lastSignals] = useSignalInfo({ ruleId });
 
-export const RuleDetailsComponent = React.memo<RuleDetailsComponentProps>(({ ruleId }) => {
-  const [popoverState, setPopoverState] = useState(false);
-
+  const title = loading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
+  const subTitle =
+    loading === true || rule === null ? (
+      <EuiLoadingSpinner size="m" />
+    ) : (
+      [
+        <FormattedMessage
+          id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
+          defaultMessage="Created by: {by} on 'coming soon'"
+          values={{
+            by: rule?.created_by ?? 'unknown',
+          }}
+        />,
+        rule?.updated_by != null ? (
+          <FormattedMessage
+            id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
+            defaultMessage="Updated by: {by} on 'coming soon'"
+            values={{
+              by: rule?.updated_by ?? 'unknown',
+            }}
+          />
+        ) : (
+          ''
+        ),
+      ]
+    );
   return (
     <>
       <WithSource sourceId="default">
@@ -57,24 +85,27 @@ export const RuleDetailsComponent = React.memo<RuleDetailsComponentProps>(({ rul
 
               <WrapperPage>
                 <HeaderPage
-                  backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
-                  badgeOptions={{ text: 'Experimental' }}
+                  backOptions={{ href: '#detection-engine/rules', text: i18n.BACK_TO_RULES }}
+                  badgeOptions={{ text: i18n.EXPERIMENTAL }}
                   border
-                  subtitle={[
-                    'Created by: mmarcialis on 12/28/2019, 12:00 PM',
-                    'Updated by: agoldstein on 12/28/2019, 12:00 PM',
-                  ]}
+                  subtitle={subTitle}
                   subtitle2={[
-                    'Last signal: 23 minutes ago',
-                    <ProgressInline current={95000} max={105000} unit="events">
-                      {'Status: Running'}
-                    </ProgressInline>,
+                    <>
+                      {detectionI18n.LAST_SIGNAL}
+                      {': '}
+                      {lastSignals}
+                    </>,
+                    'Status: Comming Soon',
                   ]}
-                  title="Automated exfiltration"
+                  title={title}
                 >
                   <EuiFlexGroup alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiSwitch checked={true} label="Activate rule" onChange={() => noop} />
+                      <RuleSwitch
+                        id={rule?.id ?? '-1'}
+                        enabled={rule?.enabled ?? false}
+                        optionLabel={i18n.ACTIVATE_RULE}
+                      />
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
@@ -83,91 +114,56 @@ export const RuleDetailsComponent = React.memo<RuleDetailsComponentProps>(({ rul
                           <EuiButton
                             href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}/edit`}
                             iconType="visControls"
+                            isDisabled={rule?.immutable ?? true}
                           >
-                            {'Edit rule settings'}
+                            {ruleI18n.EDIT_RULE_SETTINGS}
                           </EuiButton>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem grow={false}>
-                          <EuiPopover
-                            button={
-                              <EuiButtonIcon
-                                aria-label="Additional actions"
-                                iconType="boxesHorizontal"
-                                onClick={() => setPopoverState(!popoverState)}
-                              />
-                            }
-                            closePopover={() => setPopoverState(false)}
-                            isOpen={popoverState}
-                          >
-                            <p>{'Overflow context menu here.'}</p>
-                          </EuiPopover>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </HeaderPage>
 
-                <EuiCallOut
-                  color="danger"
-                  iconType="alert"
-                  size="s"
-                  title="Rule failed to run on 12/28/2019, 12:00 PM"
-                >
-                  <p>{'Full fail message here.'}</p>
-                </EuiCallOut>
-
                 <EuiSpacer />
 
                 <EuiFlexGroup>
                   <EuiFlexItem component="section" grow={1}>
-                    <EuiPanel>
-                      <HeaderSection title="Definition" />
-                    </EuiPanel>
+                    <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
+                      {defineRuleData != null && (
+                        <StepDefineRule
+                          descriptionDirection="column"
+                          isReadOnlyView={true}
+                          isLoading={false}
+                          defaultValues={defineRuleData}
+                        />
+                      )}
+                    </StepPanel>
                   </EuiFlexItem>
 
                   <EuiFlexItem component="section" grow={2}>
-                    <EuiPanel>
-                      <HeaderSection title="About" />
-
-                      {/* <p>{'Description'}</p> */}
-
-                      {/* <EuiFlexGrid columns={2}>
-                      <EuiFlexItem style={{ flex: '0 0 calc(100% - 24px)' }}>
-                        <p>{'Description'}</p>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <p>{'Severity'}</p>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <p>{'Risk score boost'}</p>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <p>{'References'}</p>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <p>{'False positives'}</p>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <p>{'Mitre ATT&CK types'}</p>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem>
-                        <p>{'Tags'}</p>
-                      </EuiFlexItem>
-                    </EuiFlexGrid> */}
-                    </EuiPanel>
+                    <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+                      {aboutRuleData != null && (
+                        <StepAboutRule
+                          descriptionDirection="column"
+                          isReadOnlyView={true}
+                          isLoading={false}
+                          defaultValues={aboutRuleData}
+                        />
+                      )}
+                    </StepPanel>
                   </EuiFlexItem>
 
                   <EuiFlexItem component="section" grow={1}>
-                    <EuiPanel>
-                      <HeaderSection title="Schedule" />
-                    </EuiPanel>
+                    <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+                      {scheduleRuleData != null && (
+                        <StepScheduleRule
+                          descriptionDirection="column"
+                          isReadOnlyView={true}
+                          isLoading={false}
+                          defaultValues={scheduleRuleData}
+                        />
+                      )}
+                    </StepPanel>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
@@ -177,7 +173,9 @@ export const RuleDetailsComponent = React.memo<RuleDetailsComponentProps>(({ rul
 
                 <EuiSpacer />
 
-                <SignalsTable />
+                {ruleId != null && (
+                  <SignalsTable defaultFilters={buildSignalsRuleIdFilter(ruleId)} />
+                )}
               </WrapperPage>
             </StickyContainer>
           ) : (

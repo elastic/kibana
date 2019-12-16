@@ -7,6 +7,7 @@
 import {
   EuiBadge,
   EuiDescriptionList,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextArea,
@@ -32,6 +33,7 @@ import { IMitreEnterpriseAttack } from '../../types';
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
 interface StepRuleDescriptionProps {
+  direction?: 'row' | 'column';
   data: unknown;
   indexPatterns?: IIndexPattern;
   schema: FormSchema;
@@ -43,8 +45,8 @@ const EuiBadgeWrap = styled(EuiBadge)`
   }
 `;
 
-const EuiFlexItemWidth = styled(EuiFlexItem)`
-  width: 50%;
+const EuiFlexItemWidth = styled(EuiFlexItem)<{ direction: string }>`
+  ${props => (props.direction === 'row' ? 'width : 50%;' : 'width: 100%;')};
 `;
 
 const MyEuiListGroup = styled(EuiListGroup)`
@@ -60,8 +62,13 @@ const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
+const MyEuiTextArea = styled(EuiTextArea)`
+  max-width: 100%;
+  height: 80px;
+`;
+
 export const StepRuleDescription = memo<StepRuleDescriptionProps>(
-  ({ data, indexPatterns, schema }) => {
+  ({ data, direction = 'row', indexPatterns, schema }) => {
     const keys = Object.keys(schema);
     const listItems = keys.reduce(
       (acc: ListItems[], key: string) => [
@@ -71,10 +78,14 @@ export const StepRuleDescription = memo<StepRuleDescriptionProps>(
       []
     );
     return (
-      <EuiFlexGroup gutterSize="none" direction="row" justifyContent="spaceAround">
+      <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
         {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
-          <EuiFlexItemWidth key={`description-step-rule-${index}`} grow={false}>
-            <EuiDescriptionList listItems={chunckListItems} />
+          <EuiFlexItemWidth
+            direction={direction}
+            key={`description-step-rule-${index}`}
+            grow={false}
+          >
+            <EuiDescriptionList listItems={chunckListItems} compressed />
           </EuiFlexItemWidth>
         ))}
       </EuiFlexGroup>
@@ -108,7 +119,7 @@ const getDescriptionItem = (
 ): ListItems[] => {
   if (field === 'useIndicesConfig') {
     return [];
-  } else if (field === 'queryBar' && indexPatterns != null) {
+  } else if (field === 'queryBar') {
     const filters = get('queryBar.filters', value) as esFilters.Filter[];
     const query = get('queryBar.query', value) as Query;
     const savedId = get('queryBar.saved_id', value);
@@ -123,10 +134,14 @@ const getDescriptionItem = (
               {filters.map((filter, index) => (
                 <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                   <EuiBadgeWrap color="hollow">
-                    <FilterLabel
-                      filter={filter}
-                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
-                    />
+                    {indexPatterns != null ? (
+                      <FilterLabel
+                        filter={filter}
+                        valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
+                      />
+                    ) : (
+                      <EuiLoadingSpinner size="m" />
+                    )}
                   </EuiBadgeWrap>
                 </EuiFlexItem>
               ))}
@@ -202,7 +217,7 @@ const getDescriptionItem = (
     return [
       {
         title: label,
-        description: <EuiTextArea value={get(field, value)} readOnly={true} />,
+        description: <MyEuiTextArea value={get(field, value)} readOnly={true} />,
       },
     ];
   } else if (Array.isArray(get(field, value))) {
@@ -212,7 +227,7 @@ const getDescriptionItem = (
         {
           title: label,
           description: (
-            <EuiFlexGroup responsive={false} gutterSize="xs">
+            <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
               {values.map((val: string) =>
                 isEmpty(val) ? null : (
                   <EuiFlexItem grow={false} key={`${field}-${val}`}>
@@ -227,10 +242,14 @@ const getDescriptionItem = (
     }
     return [];
   }
-  return [
-    {
-      title: label,
-      description: get(field, value),
-    },
-  ];
+  const description: string = get(field, value);
+  if (!isEmpty(description)) {
+    return [
+      {
+        title: label,
+        description,
+      },
+    ];
+  }
+  return [];
 };

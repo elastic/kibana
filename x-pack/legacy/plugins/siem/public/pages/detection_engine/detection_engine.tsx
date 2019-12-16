@@ -18,10 +18,12 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 
 import { SignalsTable } from './components/signals';
 import { SignalsCharts } from './components/signals_chart';
+import { useSignalInfo } from './components/signals_info';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import * as i18n from './translations';
 
 export const DetectionEngineComponent = React.memo(() => {
+  const [lastSignals] = useSignalInfo({});
   return (
     <>
       <WithSource sourceId="default">
@@ -33,7 +35,17 @@ export const DetectionEngineComponent = React.memo(() => {
               </FiltersGlobal>
 
               <WrapperPage>
-                <HeaderPage border subtitle={i18n.PAGE_SUBTITLE} title={i18n.PAGE_TITLE}>
+                <HeaderPage
+                  border
+                  subtitle={
+                    <>
+                      {i18n.LAST_SIGNAL}
+                      {': '}
+                      {lastSignals}
+                    </>
+                  }
+                  title={i18n.PAGE_TITLE}
+                >
                   <EuiButton fill href="#/detection-engine/rules" iconType="gear">
                     {i18n.BUTTON_MANAGE_RULES}
                   </EuiButton>

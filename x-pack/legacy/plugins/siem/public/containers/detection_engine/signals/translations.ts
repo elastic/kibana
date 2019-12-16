@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { i18n } from '@kbn/i18n';
 
-export const querySignalsSchema = Joi.object({
-  query: Joi.object(),
-  aggs: Joi.object(),
-  size: Joi.number(),
-  track_total_hits: Joi.boolean(),
-  _source: Joi.array().items(Joi.string()),
-}).min(1);
+export const SIGNAL_FETCH_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDexcription',
+  {
+    defaultMessage: 'Failed to query signals',
+  }
+);

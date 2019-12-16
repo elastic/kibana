@@ -5,88 +5,144 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import { isEqual, get } from 'lodash/fp';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 
-import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
+import { RuleStep, RuleStepProps, ScheduleStepRule, ScheduleStepRuleJson } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../shared_imports';
 import { schema } from './schema';
 import * as I18n from './translations';
 
-export const StepScheduleRule = memo<RuleStepProps>(({ isEditView, isLoading, setStepData }) => {
-  const [myStepData, setMyStepData] = useState<ScheduleStepRule>({
-    enabled: true,
-    interval: '5m',
-    isNew: true,
-    from: '0m',
-  });
-  const { form } = useForm({
-    schema,
-    defaultValue: myStepData,
-    options: { stripEmptyFields: false },
-  });
+interface StepScheduleRuleProps extends RuleStepProps {
+  defaultValues?: ScheduleStepRuleJson | null;
+}
 
-  const onSubmit = useCallback(
-    async (enabled: boolean) => {
-      const { isValid: newIsValid, data } = await form.submit();
-      if (newIsValid) {
-        setStepData(RuleStep.scheduleRule, { ...data, enabled }, newIsValid);
-        setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
+const stepScheduleDefaultValue = {
+  enabled: true,
+  interval: '5m',
+  isNew: true,
+  from: '0m',
+};
+
+export const StepScheduleRule = memo<StepScheduleRuleProps>(
+  ({
+    defaultValues,
+    descriptionDirection = 'row',
+    isReadOnlyView,
+    isLoading,
+    isUpdateView = false,
+    setStepData,
+    setForm,
+  }) => {
+    const [myStepData, setMyStepData] = useState<ScheduleStepRule>(stepScheduleDefaultValue);
+
+    const { form } = useForm({
+      defaultValue: myStepData,
+      options: { stripEmptyFields: false },
+      schema,
+    });
+
+    const onSubmit = useCallback(
+      async (enabled: boolean) => {
+        if (setStepData) {
+          setStepData(RuleStep.aboutRule, null, false);
+          const { isValid: newIsValid, data } = await form.submit();
+          if (newIsValid) {
+            setStepData(RuleStep.scheduleRule, { ...data, enabled }, newIsValid);
+            setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
+          }
+        }
+      },
+      [form]
+    );
+
+    useEffect(() => {
+      const { isNew, ...initDefaultValue } = myStepData;
+      if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
+        const myDefaultValues = {
+          ...defaultValues,
+          isNew: false,
+        };
+        setMyStepData(myDefaultValues);
+        if (!isReadOnlyView) {
+          Object.keys(schema).forEach(key => {
+            const val = get(key, myDefaultValues);
+            if (val != null) {
+              form.setFieldValue(key, val);
+            }
+          });
+        }
       }
-    },
-    [form]
-  );
+    }, [defaultValues]);
 
-  return isEditView && myStepData != null ? (
-    <StepRuleDescription schema={schema} data={myStepData} />
-  ) : (
-    <>
-      <Form form={form} data-test-subj="stepScheduleRule">
-        <UseField
-          path="interval"
-          component={ScheduleItem}
-          componentProps={{
-            compressed: true,
-            idAria: 'detectionEngineStepScheduleRuleInterval',
-            isDisabled: isLoading,
-            dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-          }}
-        />
-        <UseField
-          path="from"
-          component={ScheduleItem}
-          componentProps={{
-            compressed: true,
-            idAria: 'detectionEngineStepScheduleRuleFrom',
-            isDisabled: isLoading,
-            dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-          }}
-        />
-      </Form>
-      <EuiHorizontalRule margin="s" />
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill={false}
-            isDisabled={isLoading}
-            isLoading={isLoading}
-            onClick={onSubmit.bind(null, false)}
-          >
-            {I18n.COMPLETE_WITHOUT_ACTIVATING}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            isDisabled={isLoading}
-            isLoading={isLoading}
-            onClick={onSubmit.bind(null, true)}
-          >
-            {I18n.COMPLETE_WITH_ACTIVATING}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+    useEffect(() => {
+      if (setForm != null) {
+        setForm(RuleStep.scheduleRule, form);
+      }
+    }, [form]);
+
+    return isReadOnlyView && myStepData != null ? (
+      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+    ) : (
+      <>
+        <Form form={form} data-test-subj="stepScheduleRule">
+          <UseField
+            path="interval"
+            component={ScheduleItem}
+            componentProps={{
+              compressed: true,
+              idAria: 'detectionEngineStepScheduleRuleInterval',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+            }}
+          />
+          <UseField
+            path="from"
+            component={ScheduleItem}
+            componentProps={{
+              compressed: true,
+              idAria: 'detectionEngineStepScheduleRuleFrom',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+            }}
+          />
+        </Form>
+
+        {!isUpdateView && (
+          <>
+            <EuiHorizontalRule margin="s" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill={false}
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit.bind(null, false)}
+                >
+                  {I18n.COMPLETE_WITHOUT_ACTIVATING}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit.bind(null, true)}
+                >
+                  {I18n.COMPLETE_WITH_ACTIVATING}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </>
+    );
+  }
+);

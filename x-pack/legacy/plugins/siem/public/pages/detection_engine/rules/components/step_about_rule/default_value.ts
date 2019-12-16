@@ -6,7 +6,7 @@
 
 import { AboutStepRule } from '../../types';
 
-export const defaultValue: AboutStepRule = {
+export const stepAboutDefaultValue: AboutStepRule = {
   name: '',
   description: '',
   isNew: true,

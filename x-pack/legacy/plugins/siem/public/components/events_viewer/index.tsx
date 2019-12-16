@@ -204,7 +204,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id, defaultFilters = [], defaultModel }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
     const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
@@ -212,7 +212,7 @@ const makeMapStateToProps = () => {
     return {
       columns,
       dataProviders,
-      filters: [...getGlobalFiltersQuerySelector(state), ...defaultFilters],
+      filters: [...getGlobalFiltersQuerySelector(state)],
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+<<<<<<< HEAD
 import {
   EuiBadge,
   EuiHealth,
@@ -12,6 +13,10 @@ import {
   EuiTableActionsColumnType,
   EuiTextColor,
 } from '@elastic/eui';
+=======
+import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
+import * as H from 'history';
+>>>>>>> add editing/details feature for a rule
 import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getEmptyTagValue } from '../../../../components/empty_value';
@@ -19,7 +24,6 @@ import {
   deleteRulesAction,
   duplicateRuleAction,
   editRuleAction,
-  enableRulesAction,
   exportRulesAction,
   runRuleAction,
 } from './actions';
@@ -28,20 +32,24 @@ import { Action } from './reducer';
 import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
+<<<<<<< HEAD
 <<<<<<< HEAD:x-pack/legacy/plugins/siem/public/pages/detection_engine/rules/all_rules/columns.tsx
 import { RuleSwitch, RuleStateChangeCallback } from '../components/rule_switch';
 =======
 import { RuleSwitch } from '../../components/rule_switch';
 >>>>>>> re-structure detection engine + change routing name:x-pack/legacy/plugins/siem/public/pages/detection_engine/rules/all/columns.tsx
+=======
+import { RuleSwitch } from '../components/rule_switch';
+>>>>>>> add editing/details feature for a rule
 
-const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
+const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, history: H.History) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
     type: 'icon',
     icon: 'visControls',
     name: i18n.EDIT_RULE_SETTINGS,
-    onClick: editRuleAction,
-    enabled: () => false,
+    onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
+    enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
   },
   {
     description: i18n.RUN_RULE_MANUALLY,
@@ -75,7 +83,11 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
+export const getColumns = (
+  dispatch: React.Dispatch<Action>,
+  kbnVersion: string,
+  history: H.History
+) => [
   {
     field: 'rule',
     name: i18n.COLUMN_RULE,
@@ -163,6 +175,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     align: 'center' as const,
     field: 'activate',
     name: i18n.COLUMN_ACTIVATE,
+<<<<<<< HEAD
     render: (value: TableData['activate'], item: TableData) => {
       const handleRuleStateChange: RuleStateChangeCallback = async (enabled, id) => {
         await enableRulesAction([id], enabled, dispatch, kbnVersion);
@@ -177,11 +190,21 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
         />
       );
     },
+=======
+    render: (value: TableData['activate'], item: TableData) => (
+      <RuleSwitch
+        dispatch={dispatch}
+        id={item.id}
+        enabled={item.activate}
+        isLoading={item.isLoading}
+      />
+    ),
+>>>>>>> add editing/details feature for a rule
     sortable: true,
     width: '85px',
   },
   {
-    actions: getActions(dispatch, kbnVersion),
+    actions: getActions(dispatch, kbnVersion, history),
     width: '40px',
   } as EuiTableActionsColumnType<TableData>,
 ];

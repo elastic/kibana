@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Rule } from '../../../../containers/detection_engine/rules/types';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import { TableData } from '../types';
 import { getEmptyValue } from '../../../../components/empty_value';
 

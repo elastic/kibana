@@ -11,10 +11,10 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../../../components/detection_engine/utility_bar';
-import * as i18n from '../../translations';
+} from '../../../../../components/detection_engine/utility_bar';
+import * as i18n from '../translations';
 
-export const OpenSignals = React.memo<{ totalCount: number }>(({ totalCount }) => {
+export const ClosedSignals = React.memo<{ totalCount: number }>(({ totalCount }) => {
   return (
     <>
       <UtilityBar>
@@ -22,26 +22,22 @@ export const OpenSignals = React.memo<{ totalCount: number }>(({ totalCount }) =
           <UtilityBarGroup>
             <UtilityBarText>{`${i18n.PANEL_SUBTITLE_SHOWING}: ${totalCount} signals`}</UtilityBarText>
           </UtilityBarGroup>
+        </UtilityBarSection>
 
+        <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText>{'Selected: 20 signals'}</UtilityBarText>
-
             <UtilityBarAction
               iconSide="right"
               iconType="arrowDown"
-              popoverContent={() => <p>{'Batch actions context menu here.'}</p>}
+              popoverContent={() => <p>{'Customize columns context menu here.'}</p>}
             >
-              {'Batch actions'}
+              {'Customize columns'}
             </UtilityBarAction>
 
-            <UtilityBarAction iconType="listAdd">
-              {'Select all signals on all pages'}
-            </UtilityBarAction>
+            <UtilityBarAction iconType="indexMapping">{'Aggregate data'}</UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>
-
-      {/* Michael: Open signals datagrid here. Talk to Chandler Prall about possibility of early access. If not possible, use basic table. */}
     </>
   );
 });

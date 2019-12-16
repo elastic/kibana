@@ -6,106 +6,285 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
+  EuiTabbedContentTab,
 } from '@elastic/eui';
-import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Redirect, useHistory, useParams } from 'react-router-dom';
 
 import { HeaderPage } from '../../../../components/header_page';
-import { HeaderSection } from '../../../../components/header_section';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
-import * as i18n from './translations';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
+import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { FormHook, FormData } from '../components/shared_imports';
+import { StepPanel } from '../components/step_panel';
+import { StepAboutRule } from '../components/step_about_rule';
+import { StepDefineRule } from '../components/step_define_rule';
+import { StepScheduleRule } from '../components/step_schedule_rule';
+import {
+  formatRule,
+  formatAboutStepData,
+  formatDefineStepData,
+  formatScheduleStepData,
+} from '../create/helpers';
+import { getStepsData } from '../helpers';
+import * as ruleI18n from '../translations';
+import {
+  RuleStep,
+  DefineStepRule,
+  AboutStepRule,
+  ScheduleStepRule,
+  AboutStepRuleJson,
+  DefineStepRuleJson,
+  ScheduleStepRuleJson,
+} from '../types';
+import * as i18n from './translations';
 
-const Define = React.memo(() => (
-  <>
-    <EuiSpacer />
-
-    <EuiPanel>
-      <HeaderSection title="Define rule" />
-    </EuiPanel>
-  </>
-));
-Define.displayName = 'Define';
-
-const About = React.memo(() => (
-  <>
-    <EuiSpacer />
-
-    <EuiPanel>
-      <HeaderSection title="About rule" />
-    </EuiPanel>
-  </>
-));
-About.displayName = 'About';
-
-const Schedule = React.memo(() => (
-  <>
-    <EuiSpacer />
-
-    <EuiPanel>
-      <HeaderSection title="Schedule rule" />
-    </EuiPanel>
-  </>
-));
-Schedule.displayName = 'Schedule';
-
-interface EditRuleComponent {
-  ruleId: string;
+interface StepRuleForm {
+  isValid: boolean;
+}
+interface AboutStepRuleForm extends StepRuleForm {
+  data: AboutStepRuleJson | null;
+}
+interface DefineStepRuleForm extends StepRuleForm {
+  data: DefineStepRuleJson | null;
+}
+interface ScheduleStepRuleForm extends StepRuleForm {
+  data: ScheduleStepRuleJson | null;
 }
 
-export const EditRuleComponent = memo<EditRuleComponent>(({ ruleId }) => {
+export const EditRuleComponent = memo(() => {
+  const { ruleId } = useParams();
+  const [loading, rule] = useRule(ruleId);
+  const [initForm, setInitForm] = useState(false);
+  const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
+    data: null,
+    isValid: false,
+  });
+  const [myDefineRuleForm, setMyDefineRuleForm] = useState<DefineStepRuleForm>({
+    data: null,
+    isValid: false,
+  });
+  const [myScheduleRuleForm, setMyScheduleRuleForm] = useState<ScheduleStepRuleForm>({
+    data: null,
+    isValid: false,
+  });
+  const [selectedTab, setSelectedTab] = useState<EuiTabbedContentTab>();
+  const stepsForm = useRef<Record<RuleStep, FormHook<FormData> | null>>({
+    [RuleStep.defineRule]: null,
+    [RuleStep.aboutRule]: null,
+    [RuleStep.scheduleRule]: null,
+  });
+  const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
+
+  const setStepsForm = useCallback(
+    (step: RuleStep, form: FormHook<FormData>) => {
+      stepsForm.current[step] = form;
+      if (initForm && step === (selectedTab?.id as RuleStep) && form.isSubmitted === false) {
+        setInitForm(false);
+        form.submit();
+      }
+    },
+    [initForm, selectedTab]
+  );
+
+  const onSubmit = useCallback(async () => {
+    const activeFormId = selectedTab?.id as RuleStep;
+    const activeForm = await stepsForm.current[activeFormId]?.submit();
+
+    const invalidForms = [RuleStep.aboutRule, RuleStep.defineRule, RuleStep.scheduleRule].reduce<
+      RuleStep[]
+    >((acc, step) => {
+      if (
+        (step === activeFormId && activeForm != null && !activeForm?.isValid) ||
+        (step === RuleStep.aboutRule && !myAboutRuleForm.isValid) ||
+        (step === RuleStep.defineRule && !myDefineRuleForm.isValid) ||
+        (step === RuleStep.scheduleRule && !myScheduleRuleForm.isValid)
+      ) {
+        return [...acc, step];
+      }
+      return acc;
+    }, []);
+
+    if (invalidForms.length === 0 && activeForm != null) {
+      setTabHasError([]);
+      setRule(
+        formatRule(
+          (activeFormId === RuleStep.defineRule
+            ? activeForm.data
+            : myDefineRuleForm.data) as DefineStepRule,
+          (activeFormId === RuleStep.aboutRule
+            ? activeForm.data
+            : myAboutRuleForm.data) as AboutStepRule,
+          (activeFormId === RuleStep.scheduleRule
+            ? activeForm.data
+            : myScheduleRuleForm.data) as ScheduleStepRule
+        )
+      );
+    } else {
+      setTabHasError(invalidForms);
+    }
+  }, [stepsForm, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, selectedTab]);
+
+  useEffect(() => {
+    if (rule != null) {
+      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
+      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
+      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+    }
+  }, [rule]);
+
+  const onTabClick = useCallback(
+    async (tab: EuiTabbedContentTab) => {
+      if (selectedTab != null) {
+        const ruleStep = selectedTab.id as RuleStep;
+        const respForm = await stepsForm.current[ruleStep]?.submit();
+        if (respForm != null) {
+          if (ruleStep === RuleStep.aboutRule) {
+            setMyAboutRuleForm({
+              data: formatAboutStepData(respForm.data as AboutStepRule),
+              isValid: respForm.isValid,
+            });
+          } else if (ruleStep === RuleStep.defineRule) {
+            setMyDefineRuleForm({
+              data: formatDefineStepData(respForm.data as DefineStepRule),
+              isValid: respForm.isValid,
+            });
+          } else if (ruleStep === RuleStep.scheduleRule) {
+            setMyScheduleRuleForm({
+              data: formatScheduleStepData(respForm.data as ScheduleStepRule),
+              isValid: respForm.isValid,
+            });
+          }
+        }
+      }
+      setInitForm(true);
+      setSelectedTab(tab);
+    },
+    [selectedTab, stepsForm.current]
+  );
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: RuleStep.defineRule,
+        name: ruleI18n.DEFINITION,
+        content: (
+          <>
+            <EuiSpacer />
+            <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
+              {myDefineRuleForm.data != null && (
+                <StepDefineRule
+                  isReadOnlyView={false}
+                  isLoading={isLoading}
+                  isUpdateView
+                  defaultValues={myDefineRuleForm.data}
+                  setForm={setStepsForm}
+                />
+              )}
+              <EuiSpacer />
+            </StepPanel>
+          </>
+        ),
+      },
+      {
+        id: RuleStep.aboutRule,
+        name: ruleI18n.ABOUT,
+        content: (
+          <>
+            <EuiSpacer />
+            <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+              {myAboutRuleForm.data != null && (
+                <StepAboutRule
+                  isReadOnlyView={false}
+                  isLoading={isLoading}
+                  isUpdateView
+                  defaultValues={myAboutRuleForm.data}
+                  setForm={setStepsForm}
+                />
+              )}
+              <EuiSpacer />
+            </StepPanel>
+          </>
+        ),
+      },
+      {
+        id: RuleStep.scheduleRule,
+        name: ruleI18n.SCHEDULE,
+        content: (
+          <>
+            <EuiSpacer />
+            <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+              {myScheduleRuleForm.data != null && (
+                <StepScheduleRule
+                  isReadOnlyView={false}
+                  isLoading={isLoading}
+                  isUpdateView
+                  defaultValues={myScheduleRuleForm.data}
+                  setForm={setStepsForm}
+                />
+              )}
+              <EuiSpacer />
+            </StepPanel>
+          </>
+        ),
+      },
+    ],
+    [loading, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, setStepsForm, stepsForm]
+  );
+
+  if (isSaved || (rule != null && rule.immutable)) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`} />;
+  }
+
   return (
     <>
       <WrapperPage restrictWidth>
         <HeaderPage
           backOptions={{
             href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`,
-            text: 'Back to automated exfiltration',
+            text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
           }}
+          isLoading={isLoading}
           title={i18n.PAGE_TITLE}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButton href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`} iconType="cross">
-                {'Cancel'}
-              </EuiButton>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`}
-                iconType="save"
-              >
-                {'Save changes'}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </HeaderPage>
+        />
+        {tabHasError.length > 0 && (
+          <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+            <FormattedMessage
+              id="xpack.siem.detectionEngine.rule.editRule.errorMsgDescription"
+              defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
+              values={{
+                countError: tabHasError.length,
+                tabHasError: tabHasError
+                  .map(t => {
+                    if (t === RuleStep.aboutRule) {
+                      return ruleI18n.ABOUT;
+                    } else if (t === RuleStep.defineRule) {
+                      return ruleI18n.DEFINITION;
+                    } else if (t === RuleStep.scheduleRule) {
+                      return ruleI18n.SCHEDULE;
+                    }
+                    return t;
+                  })
+                  .join(', '),
+              }}
+            />
+          </EuiCallOut>
+        )}
 
         <EuiTabbedContent
-          tabs={[
-            {
-              id: 'tabDefine',
-              name: 'Define',
-              content: <Define />,
-            },
-            {
-              id: 'tabAbout',
-              name: 'About',
-              content: <About />,
-            },
-            {
-              id: 'tabSchedule',
-              name: 'Schedule',
-              content: <Schedule />,
-            },
-          ]}
+          initialSelectedTab={tabs[0]}
+          selectedTab={tabs.find(t => t.id === selectedTab?.id)}
+          onTabClick={onTabClick}
+          tabs={tabs}
         />
 
         <EuiSpacer />
@@ -117,14 +296,14 @@ export const EditRuleComponent = memo<EditRuleComponent>(({ ruleId }) => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton href="#/detection-engine/rules/rule-details" iconType="cross">
-              {'Cancel'}
+            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`}>
+              {i18n.CANCEL}
             </EuiButton>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton fill href="#/detection-engine/rules/rule-details" iconType="save">
-              {'Save changes'}
+            <EuiButton fill onClick={onSubmit} iconType="save" isLoading={isLoading}>
+              {i18n.SAVE_CHANGES}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
