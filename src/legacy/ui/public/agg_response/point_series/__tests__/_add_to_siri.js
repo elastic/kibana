@@ -20,9 +20,8 @@
 import expect from '@kbn/expect';
 import { addToSiri } from '../_add_to_siri';
 
-describe('addToSiri', function () {
-
-  it('creates a new series the first time it sees an id', function () {
+describe('addToSiri', function() {
+  it('creates a new series the first time it sees an id', function() {
     const series = new Map();
     const point = {};
     const id = 'id';
@@ -35,7 +34,7 @@ describe('addToSiri', function () {
     expect(series.get(id).values[0]).to.be(point);
   });
 
-  it('adds points to existing series if id has been seen', function () {
+  it('adds points to existing series if id has been seen', function() {
     const series = new Map();
     const id = 'id';
 
@@ -53,7 +52,7 @@ describe('addToSiri', function () {
     expect(series.get(id).values[1]).to.be(point2);
   });
 
-  it('allows overriding the series label', function () {
+  it('allows overriding the series label', function() {
     const series = new Map();
     const id = 'id';
     const label = 'label';
@@ -67,7 +66,7 @@ describe('addToSiri', function () {
     expect(series.get(id).values[0]).to.be(point);
   });
 
-  it('correctly sets id and rawId', function () {
+  it('correctly sets id and rawId', function() {
     const series = new Map();
     const id = 'id-id2';
 

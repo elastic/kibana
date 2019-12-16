@@ -56,7 +56,10 @@ describe('SearchRequest', () => {
   });
 
   test('should return a MultiSearchRequest for multi searches', () => {
-    const searches = [{ index: 'index', body: 'body' }, { index: 'index', body: 'body' }];
+    const searches = [
+      { index: 'index', body: 'body' },
+      { index: 'index', body: 'body' },
+    ];
 
     const result = searchRequest.getSearchRequestType(searches);
 

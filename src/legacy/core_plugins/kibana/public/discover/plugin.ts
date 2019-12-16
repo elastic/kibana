@@ -25,7 +25,7 @@ import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './helpers/build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
