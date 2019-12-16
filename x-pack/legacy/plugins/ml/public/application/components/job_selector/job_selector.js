@@ -232,7 +232,11 @@ export function JobSelector({
     // Set `skipRefresh` again to `false` here so after
     // both the time range and jobs have been updated
     // Single Metric Viewer should again update itself.
-    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection, skipRefresh: false });
+    setGlobalState(globalState, {
+      selectedIds: allNewSelectionUnique,
+      selectedGroups: groupSelection,
+      skipRefresh: false,
+    });
     jobSelectService$.next({ selection: allNewSelectionUnique, groups: groupSelection });
   }
 

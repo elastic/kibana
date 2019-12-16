@@ -38,10 +38,14 @@ function getInvalidJobIds(ids) {
 }
 
 let jobSelectService$;
-export const getJobSelectService$ = (globalState) => {
+export const getJobSelectService$ = globalState => {
   if (jobSelectService$ === undefined) {
     const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-    jobSelectService$ = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+    jobSelectService$ = new BehaviorSubject({
+      selection: jobIds,
+      groups: selectedGroups,
+      resetSelection: false,
+    });
   }
 
   return jobSelectService$;

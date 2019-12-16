@@ -37,7 +37,7 @@ export function initializeAppState(appState, stateName, defaultState) {
   // - if it's not an object, check if defaultState and current appState are of the same type.
   if (
     (typeof defaultState === 'object' && !hasEqualKeys(defaultState, appState.get(stateName))) ||
-    (typeof defaultState !== typeof appState.get(stateName))
+    typeof defaultState !== typeof appState.get(stateName)
   ) {
     appState.set(stateName, cloneDeep(defaultState));
     appState.save();
