@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "@kbn/plugin-helpers": "9.0.2",
-    "typescript": "3.7.2"
+    "typescript": "3.7.3"
   }
 }
