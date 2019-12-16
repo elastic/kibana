@@ -7,6 +7,7 @@
 import sinon from 'sinon';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
+import { asOk } from './lib/result_type';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
@@ -128,13 +129,13 @@ describe('TaskPool', () => {
     const firstRun = sinon.spy(async () => {
       await sleep(0);
       firstWork.resolve();
-      return { state: {} };
+      return asOk({ state: {} });
     });
     const secondWork = resolvable();
     const secondRun = sinon.spy(async () => {
       await sleep(0);
       secondWork.resolve();
-      return { state: {} };
+      return asOk({ state: {} });
     });
 
     const result = await pool.run([
@@ -179,9 +180,7 @@ describe('TaskPool', () => {
           this.isExpired = true;
           expired.resolve();
           await sleep(10);
-          return {
-            state: {},
-          };
+          return asOk({ state: {} });
         },
         cancel: shouldRun,
       },
@@ -189,9 +188,7 @@ describe('TaskPool', () => {
         ...mockTask(),
         async run() {
           await sleep(10);
-          return {
-            state: {},
-          };
+          return asOk({ state: {} });
         },
         cancel: shouldNotRun,
       },
@@ -225,9 +222,7 @@ describe('TaskPool', () => {
         async run() {
           this.isExpired = true;
           await sleep(10);
-          return {
-            state: {},
-          };
+          return asOk({ state: {} });
         },
         async cancel() {
           cancelled.resolve();
@@ -253,13 +248,14 @@ describe('TaskPool', () => {
   function mockRun() {
     return jest.fn(async () => {
       await sleep(0);
-      return { state: {} };
+      return asOk({ state: {} });
     });
   }
 
   function mockTask() {
     return {
       isExpired: false,
+      id: 'foo',
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
