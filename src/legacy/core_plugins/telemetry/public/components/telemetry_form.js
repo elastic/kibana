@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
-import { Field } from '../../../kibana/public/management/sections/settings/components/field/field';
+import { Field } from 'ui/management';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
