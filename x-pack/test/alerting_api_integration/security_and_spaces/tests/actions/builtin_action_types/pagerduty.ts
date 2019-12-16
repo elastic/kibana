@@ -39,6 +39,9 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .send({
           name: 'A pagerduty action',
           actionTypeId: '.pagerduty',
+          config: {
+            apiUrl: pagerdutySimulatorURL,
+          },
           secrets: {
             routingKey: 'pager-duty-routing-key',
           },
@@ -50,7 +53,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
-          apiUrl: null,
+          apiUrl: pagerdutySimulatorURL,
         },
       });
 
@@ -65,12 +68,35 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         name: 'A pagerduty action',
         actionTypeId: '.pagerduty',
         config: {
-          apiUrl: null,
+          apiUrl: pagerdutySimulatorURL,
         },
       });
     });
 
     it('should return unsuccessfully when passed invalid create parameters', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A pagerduty action',
+          actionTypeId: '.pagerduty',
+          config: {
+            apiUrl: pagerdutySimulatorURL,
+          },
+          secrets: {},
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should return unsuccessfully when default pagerduty url is not whitelisted', async () => {
       await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
@@ -85,7 +111,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]',
+              'error validating action type config: error configuring pagerduty action: target url "https://events.pagerduty.com/v2/enqueue" is not in the Kibana whitelist',
           });
         });
     });

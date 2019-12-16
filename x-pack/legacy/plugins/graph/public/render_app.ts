@@ -37,9 +37,9 @@ import {
   Plugin as DataPlugin,
   IndexPatternsContract,
 } from '../../../../../src/plugins/data/public';
-import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { checkLicense } from '../../../../plugins/graph/common/check_license';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

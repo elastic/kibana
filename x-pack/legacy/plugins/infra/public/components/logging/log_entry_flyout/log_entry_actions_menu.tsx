@@ -11,6 +11,7 @@ import url from 'url';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { InfraLogItem } from '../../../graphql/types';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
+import { getTraceUrl } from '../../../../../apm/public/components/shared/Links/apm/ExternalLinks';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
@@ -130,8 +131,6 @@ const getAPMLink = (logItem: InfraLogItem) => {
 
   return url.format({
     pathname: '/app/apm',
-    hash: `/traces?kuery=${encodeURIComponent(
-      `trace.id:${traceIdEntry.value}`
-    )}&rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
+    hash: getTraceUrl({ traceId: traceIdEntry.value, rangeFrom, rangeTo }),
   });
 };
