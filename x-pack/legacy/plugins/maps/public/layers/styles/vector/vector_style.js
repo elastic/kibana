@@ -330,7 +330,6 @@ export class VectorStyle extends AbstractStyle {
 
     const data = styleMetaDataRequest.getData();
     const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
-
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
 
@@ -377,20 +376,13 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderLegendDetails() {
-    const loadRows = async () => {
-      const styles = await this._getLegendDetailStyleProperties();
-      const promises = styles.map(async style => {
-        return {
-          label: await style.getField().getLabel(),
-          fieldFormatter: await this._source.getFieldFormatter(style.getField().getName()),
-          meta: this._getFieldMeta(style.getField().getName()),
-          style,
-        };
-      });
-      return await Promise.all(promises);
+    const formatField = async (fieldName, value) => {
+      const ff = await this._source.getFieldFormatter(fieldName);
+      return ff ? ff(value) : value;
     };
 
-    return <VectorStyleLegend loadRows={loadRows} />;
+    const stylesPromise = this._getLegendDetailStyleProperties();
+    return <VectorStyleLegend formatField={formatField} stylesPromise={stylesPromise} />;
   }
 
   _getFeatureStyleParams() {
@@ -559,7 +551,7 @@ export class VectorStyle extends AbstractStyle {
       return new StaticSizeProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicSizeProperty(descriptor.options, styleName, field);
+      return new DynamicSizeProperty(descriptor.options, styleName, field, this._getFieldMeta);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
@@ -572,7 +564,7 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicColorProperty(descriptor.options, styleName, field);
+      return new DynamicColorProperty(descriptor.options, styleName, field, this._getFieldMeta);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }

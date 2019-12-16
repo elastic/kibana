@@ -111,7 +111,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return getColorRampStops(this._options.color);
   }
 
-  renderHeader() {
+  renderStylePropertyLegendHeader() {
     if (this._options.color) {
       return <ColorGradient colorRampName={this._options.color} />;
     } else {
