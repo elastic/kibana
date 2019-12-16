@@ -237,7 +237,8 @@ def sendKibanaMail() {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
-        to: 'build-kibana@elastic.co',
+        // to: 'build-kibana@elastic.co',
+        to: 'brian.seeders@elastic.co', // TODO change this back
         subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
