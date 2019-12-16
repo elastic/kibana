@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { Fragment } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { setAppDependencies } from '../../../app_dependencies';
 import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
