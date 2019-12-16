@@ -319,6 +319,12 @@ export class DashboardAppController {
             kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
             kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
           }
+          if ($routeParams[DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM]) {
+            container.addSavedObjectEmbeddable(
+              LENS_EMBEDDABLE_TYPE,
+              $routeParams[DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM]
+            );
+          }
         }
 
         if (dashboardDom) {
