@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './nav_control';
-
-export { SpacesNavState } from './nav_control';
+export { initSpacesNavControl } from './nav_control';
