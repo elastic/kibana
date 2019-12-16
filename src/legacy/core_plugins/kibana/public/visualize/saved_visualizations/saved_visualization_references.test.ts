@@ -118,7 +118,7 @@ describe('injectReferences', () => {
     expect(context).toMatchInlineSnapshot(`
 Object {
   "id": "1",
-  "title": "test,
+  "title": "test",
 }
 `);
   });
