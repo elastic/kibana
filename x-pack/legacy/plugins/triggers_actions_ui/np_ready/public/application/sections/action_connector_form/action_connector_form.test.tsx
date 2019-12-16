@@ -11,7 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
+import { ValidationResult, ActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
 jest.mock('../../context/actions_connectors_context');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -57,7 +57,11 @@ describe('action_connector_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    const initialConnector = { actionTypeId: actionType.id, config: {}, secrets: {} };
+    const initialConnector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
 
     await act(async () => {
       wrapper = mountWithIntl(
