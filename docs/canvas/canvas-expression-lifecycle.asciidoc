@@ -20,7 +20,7 @@ filters
 | render
 ----
 
-This expression starts out with the <<filters_fn, function>> function, which provides the value of any time filters or dropdown filters in the workpad. This is then inserted into <<demodata_fn, demodata>>, a function that returns exactly what you expect, demo data. Because the <<demodata_fn, demodata>> function receives the filter information from the <<filters_fn, filters>> function before it, it applies those filters to reduce the set of data it returns. We call the output from the previous function _context_.
+This expression starts out with the <<filters_fn, filters>> function, which provides the value of any time filters or dropdown filters in the workpad. This is then inserted into <<demodata_fn, demodata>>, a function that returns exactly what you expect, demo data. Because the <<demodata_fn, demodata>> function receives the filter information from the <<filters_fn, filters>> function before it, it applies those filters to reduce the set of data it returns. We call the output from the previous function _context_.
 
 The filtered <<demodata_fn, demo data>> becomes the _context_ of the next function, <<table_fn, table>>, which creates a table visualization from this data set. The <<table_fn, table>> function isn’t strictly required, but by being explicit, you have the option of providing arguments to control things like the font used in the table. The output of the <<table_fn, table>> function becomes the _context_ of the <<render_fn, render>> function. Like the <<table_fn, table>>, the <<render_fn, render>> function isn’t required either, but it allows access to other arguments, such as styling the border of the element or injecting custom CSS.
 
@@ -226,7 +226,7 @@ image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
 
 If you <<image_fn,look at the docs>> for the `image` function, you’ll see that it accepts the `null` data type and returns an `image` data type. Accepting `null` effectively means that it does not use context at all, so if you pipe anything to `image`, the value that was produced previously will be ignored. When the function executes, it will produce an `image` output, which is simply an object of type `image` that contains the information required to render an image. 
 
-NOTE: It does not render an image itself.
+NOTE: The function does not render an image itself.
 
 As explained in the "<<canvas-fetch-and-manipulate-data, Fetch and manipulate data>>" section, the output of an expression is just data. So the `image` type here is just a specific shape of data, not an actual image.
 
@@ -234,7 +234,7 @@ Next, let’s take a look at the `asset` function. Like `image`, it accepts `nul
 
 <<asset_fn,Looking at the docs>> for the `dataurl` argument, its type is `string`, meaning it will accept any kind of string. There are some rules about the value of the string that the function itself enforces, but as far as the interpreter is concerned, that expression is valid because the argument accepts a string and the output of `asset` is a string. 
 
-The interpreter also attempts to cast some input types into others, which allows you to, use a string input even when the function or argument calls for a number. Keep in mind that it’s not able to convert any string value, but if the string is a number, it can easily be cast into a `number` type. Take the following expression for example:
+The interpreter also attempts to cast some input types into others, which allows you to use a string input even when the function or argument calls for a number. Keep in mind that it’s not able to convert any string value, but if the string is a number, it can easily be cast into a `number` type. Take the following expression for example:
 
 [source,text]
 ----
