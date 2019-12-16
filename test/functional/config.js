@@ -20,7 +20,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
@@ -44,10 +44,7 @@ export default async function ({ readConfigFile }) {
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
-      ],
+      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs'), '--oss'],
     },
 
     uiSettings: {
@@ -102,10 +99,10 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'Chrome UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests',
     },
     browser: {
-      type: 'chrome'
-    }
+      type: 'chrome',
+    },
   };
 }

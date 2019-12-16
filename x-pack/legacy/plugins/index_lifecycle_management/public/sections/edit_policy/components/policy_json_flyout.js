@@ -27,11 +27,15 @@ export class PolicyJsonFlyout extends PureComponent {
   };
 
   getEsJson({ phases }) {
-    return JSON.stringify({
-      policy: {
-        phases
-      }
-    }, null, 2);
+    return JSON.stringify(
+      {
+        policy: {
+          phases,
+        },
+      },
+      null,
+      2
+    );
   }
 
   render() {
@@ -72,20 +76,13 @@ export class PolicyJsonFlyout extends PureComponent {
 
           <EuiSpacer />
 
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-          >
+          <EuiCodeBlock language="json" isCopyable>
             {request}
           </EuiCodeBlock>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={close}
-            flush="left"
-          >
+          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeButtonLabel"
               defaultMessage="Close"

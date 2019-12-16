@@ -16,60 +16,49 @@ export class QuotaMetric extends Metric {
       format: LARGE_FLOAT,
       metricAgg: 'max', // makes an average metric of `this.field`, which is the "actual cpu utilization"
       derivative: true,
-      units: '%'
+      units: '%',
     });
 
     this.aggs = {
       usage: {
-        max: { field: `${this.fieldSource}.${this.usageField}` }
+        max: { field: `${this.fieldSource}.${this.usageField}` },
       },
       periods: {
-        max: { field: `${this.fieldSource}.${this.periodsField}` }
+        max: { field: `${this.fieldSource}.${this.periodsField}` },
       },
       quota: {
         // Use min for this value. Basically environment to max, but picks -1
         // as the value if quota is disabled in one of the docs, which affects
         // the logic by routing to the non-quota scenario
         min: {
-          field: `${this.fieldSource}.${this.quotaField}`
-        }
+          field: `${this.fieldSource}.${this.quotaField}`,
+        },
       },
       usage_deriv: {
         derivative: {
           buckets_path: 'usage',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT
-        }
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
       },
       periods_deriv: {
         derivative: {
           buckets_path: 'periods',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT
-        }
-      }
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
     };
 
     this.calculation = bucket => {
       const quota = get(bucket, 'quota.value');
-      const deltaUsageDerivNormalizedValue = get(
-        bucket,
-        'usage_deriv.normalized_value'
-      );
-      const periodsDerivNormalizedValue = get(
-        bucket,
-        'periods_deriv.normalized_value'
-      );
+      const deltaUsageDerivNormalizedValue = get(bucket, 'usage_deriv.normalized_value');
+      const periodsDerivNormalizedValue = get(bucket, 'periods_deriv.normalized_value');
 
-      if (
-        deltaUsageDerivNormalizedValue &&
-        periodsDerivNormalizedValue &&
-        quota > 0
-      ) {
+      if (deltaUsageDerivNormalizedValue && periodsDerivNormalizedValue && quota > 0) {
         // if throttling is configured
         const factor =
-          deltaUsageDerivNormalizedValue /
-          (periodsDerivNormalizedValue * quota * 1000); // convert quota from microseconds to nanoseconds by multiplying 1000
+          deltaUsageDerivNormalizedValue / (periodsDerivNormalizedValue * quota * 1000); // convert quota from microseconds to nanoseconds by multiplying 1000
         return factor * 100; // convert factor to percentage
       }
       // if throttling is NOT configured, show nothing. The user should see that something is not configured correctly

@@ -6,7 +6,7 @@
 
 import { MonitorChart, MonitorPageTitle } from '../../../../common/graphql/types';
 import { UMElasticsearchQueryFn } from '../framework';
-import { MonitorDetails } from '../../../../common/runtime_types';
+import { MonitorDetails, MonitorLocations } from '../../../../common/runtime_types';
 
 export interface GetMonitorChartsDataParams {
   /** @member monitorId ID value for the selected monitor */
@@ -34,6 +34,18 @@ export interface GetMonitorPageTitleParams {
   monitorId: string;
 }
 
+/**
+ * Fetch data for the monitor page title.
+ */
+export interface GetMonitorLocationsParams {
+  /**
+   * @member monitorId the ID to query
+   */
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+}
+
 export interface UMMonitorsAdapter {
   /**
    * Fetches data used to populate monitor charts
@@ -45,4 +57,5 @@ export interface UMMonitorsAdapter {
    */
   getMonitorPageTitle: UMElasticsearchQueryFn<{ monitorId: string }, MonitorPageTitle | null>;
   getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails>;
+  getMonitorLocations: UMElasticsearchQueryFn<GetMonitorLocationsParams, MonitorLocations>;
 }

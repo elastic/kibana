@@ -16,9 +16,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 const renderReact = (elem, user) => {
   render(
     <I18nContext>
-      <AccountManagementPage
-        user={user}
-      />
+      <AccountManagementPage user={user} />
     </I18nContext>,
     elem
   );
@@ -30,13 +28,13 @@ routes.when('/account', {
     {
       text: i18n.translate('xpack.security.account.breadcrumb', {
         defaultMessage: 'Account Management',
-      })
-    }
+      }),
+    },
   ],
   resolve: {
     user(ShieldUser) {
       return ShieldUser.getCurrent().$promise;
-    }
+    },
   },
   controllerAs: 'accountController',
   controller($scope, $route) {
@@ -50,5 +48,5 @@ routes.when('/account', {
       const elem = document.getElementById('userProfileReactRoot');
       renderReact(elem, $route.current.locals.user);
     });
-  }
+  },
 });
