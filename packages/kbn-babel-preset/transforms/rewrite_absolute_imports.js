@@ -42,6 +42,13 @@ try {
 }
 
 const REPO_ROOT = Path.dirname(KIBANA_PACKAGE_JSON);
+const IMPORTED_FROM_ROOT_DIRS = ['src', 'x-pack'];
+
+function isImportedFromRoot(importRequest) {
+  return IMPORTED_FROM_ROOT_DIRS.some(
+    p => importRequest === p || importRequest.startsWith(`${p}/`)
+  );
+}
 
 module.exports = () => ({
   name: '@kbn/babel-preset/transform/rewrite_absolute_imports',
@@ -50,19 +57,20 @@ module.exports = () => ({
       const source = path.get('source');
       const importPath = t.isStringLiteral(source.node) && source.node.value;
 
-      if (!importPath || !(importPath.startsWith('src/') || importPath.startsWith('x-pack/'))) {
+      if (!importPath || !isImportedFromRoot(importPath)) {
         return;
       }
 
       const { root, sourceFileName, filename } = path.hub.file.opts;
 
-      let absPath;
+      // The absolute path of the source file where the import is made from
+      let sourceFileAbsPath;
       if (sourceFileName && Path.isAbsolute(sourceFileName)) {
-        absPath = sourceFileName;
+        sourceFileAbsPath = sourceFileName;
       } else if (filename && Path.isAbsolute(filename)) {
-        absPath = filename;
-      } else if (!absPath && root) {
-        absPath = Path.resolve(root, sourceFileName || filename);
+        sourceFileAbsPath = filename;
+      } else if (!sourceFileAbsPath && root) {
+        sourceFileAbsPath = Path.resolve(root, sourceFileName || filename);
       } else {
         throw new Error(`
           Unable to determine absolute path of file, either sourceFileName or filename opt
@@ -70,8 +78,16 @@ module.exports = () => ({
         `);
       }
 
-      const targetPath = Path.resolve(REPO_ROOT, source.node.value);
-      source.replaceWith(t.stringLiteral(Path.relative(Path.dirname(absPath), targetPath)));
-    }
-  }
+      // The absolute path of the target file referenced in the import clause.
+      const importedFileAbsPath = Path.resolve(REPO_ROOT, importPath);
+
+      // The actual source-to-import relative path
+      let rewrittenImportPath = Path.relative(Path.dirname(sourceFileAbsPath), importedFileAbsPath);
+      if (!rewrittenImportPath.startsWith('.')) {
+        rewrittenImportPath = `./${rewrittenImportPath}`;
+      }
+
+      source.replaceWith(t.stringLiteral(rewrittenImportPath));
+    },
+  },
 });
