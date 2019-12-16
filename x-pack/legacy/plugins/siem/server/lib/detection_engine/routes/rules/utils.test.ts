@@ -357,6 +357,8 @@ describe('utils', () => {
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual({
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
