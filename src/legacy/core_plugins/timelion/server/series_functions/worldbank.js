@@ -23,7 +23,7 @@ import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 
-export default new Datasource ('worldbank', {
+export default new Datasource('worldbank', {
   args: [
     {
       name: 'code', // countries/all/indicators/SP.POP.TOTL
@@ -35,12 +35,11 @@ export default new Datasource ('worldbank', {
           apiPathExample: '/en/countries/ind;chn/indicators/DPANUSSPF',
         },
       }),
-    }
+    },
   ],
   aliases: ['wb'],
   help: i18n.translate('timelion.help.functions.worldbankHelpText', {
-    defaultMessage:
-      `
+    defaultMessage: `
     [experimental]
     Pull data from {worldbankUrl} using path to series.
     The worldbank provides mostly yearly data, and often has no data for the current year.
@@ -54,62 +53,76 @@ export default new Datasource ('worldbank', {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
     const config = _.defaults(args.byName, {
-      code: 'countries/wld/indicators/SP.POP.TOTL'
+      code: 'countries/wld/indicators/SP.POP.TOTL',
     });
 
     const time = {
       min: moment(tlConfig.time.from).format('YYYY'),
-      max: moment(tlConfig.time.to).format('YYYY')
+      max: moment(tlConfig.time.to).format('YYYY'),
     };
 
-    const URL = 'http://api.worldbank.org/' + config.code +
-      '?date=' + time.min + ':' + time.max +
+    const URL =
+      'http://api.worldbank.org/' +
+      config.code +
+      '?date=' +
+      time.min +
+      ':' +
+      time.max +
       '&format=json' +
       '&per_page=1000';
 
-    return fetch(URL).then(function (resp) { return resp.json(); }).then(function (resp) {
-      let hasData = false;
+    return fetch(URL)
+      .then(function(resp) {
+        return resp.json();
+      })
+      .then(function(resp) {
+        let hasData = false;
 
-      const respSeries = resp[1];
+        const respSeries = resp[1];
 
-      const deduped = {};
-      let description;
-      _.each (respSeries, function (bucket) {
-        if (bucket.value != null) hasData = true;
-        description = bucket.country.value + ' ' + bucket.indicator.value;
-        deduped[bucket.date] = bucket.value;
-      });
+        const deduped = {};
+        let description;
+        _.each(respSeries, function(bucket) {
+          if (bucket.value != null) hasData = true;
+          description = bucket.country.value + ' ' + bucket.indicator.value;
+          deduped[bucket.date] = bucket.value;
+        });
 
-      const data = _.compact(_.map(deduped, function (val, date) {
-        // Discard nulls
-        if (val == null) return;
-        return [moment(date, 'YYYY').valueOf(), Number(val)];
-      }));
-
-      if (!hasData) {
-        throw new Error(
-          i18n.translate('timelion.serverSideErrors.worldbankFunction.noDataErrorMessage', {
-            defaultMessage: 'Worldbank request succeeded, but there was no data for {code}',
-            values: {
-              code: config.code,
-            },
+        const data = _.compact(
+          _.map(deduped, function(val, date) {
+            // Discard nulls
+            if (val == null) return;
+            return [moment(date, 'YYYY').valueOf(), Number(val)];
           })
         );
-      }
 
-      return {
-        type: 'seriesList',
-        list: [{
-          data: data,
-          type: 'series',
-          label: description,
-          _meta: {
-            worldbank_request: URL
-          }
-        }]
-      };
-    }).catch(function (e) {
-      throw e;
-    });
-  }
+        if (!hasData) {
+          throw new Error(
+            i18n.translate('timelion.serverSideErrors.worldbankFunction.noDataErrorMessage', {
+              defaultMessage: 'Worldbank request succeeded, but there was no data for {code}',
+              values: {
+                code: config.code,
+              },
+            })
+          );
+        }
+
+        return {
+          type: 'seriesList',
+          list: [
+            {
+              data: data,
+              type: 'series',
+              label: description,
+              _meta: {
+                worldbank_request: URL,
+              },
+            },
+          ],
+        };
+      })
+      .catch(function(e) {
+        throw e;
+      });
+  },
 });

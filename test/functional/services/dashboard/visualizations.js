@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -25,7 +24,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
 
-  return new class DashboardVisualizations {
+  return new (class DashboardVisualizations {
     async createAndAddTSVBVisualization(name) {
       log.debug(`createAndAddTSVBVisualization(${name})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -73,18 +72,20 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await dashboardAddPanel.addSavedSearch(name);
     }
 
-    async createAndAddMarkdown({ name, markdown }) {
+    async createAndAddMarkdown({ name, markdown }, checkForAddPanel = true) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.ensureAddPanelIsShowing();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
+      if (checkForAddPanel) {
+        await dashboardAddPanel.ensureAddPanelIsShowing();
+        await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
+      }
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
-  };
+  })();
 }

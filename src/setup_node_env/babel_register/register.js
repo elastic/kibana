@@ -69,8 +69,6 @@ if (global.__BUILT_WITH_BABEL__) {
 require('@babel/register')({
   ignore,
   babelrc: false,
-  presets: [
-    require.resolve('@kbn/babel-preset/node_preset')
-  ],
+  presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
 });

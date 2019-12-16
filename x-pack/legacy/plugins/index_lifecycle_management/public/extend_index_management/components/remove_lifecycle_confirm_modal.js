@@ -6,10 +6,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { removeLifecycleForIndex } from '../../services/api';
@@ -41,7 +38,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
   };
   removePolicy = async () => {
     const { indexNames, httpClient, closeModal, reloadIndices } = this.props;
-    const target = this. getTarget();
+    const target = this.getTarget();
     try {
       await removeLifecycleForIndex(indexNames, httpClient);
       closeModal();
@@ -51,7 +48,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
           {
             defaultMessage: 'Removed lifecycle policy from {target}',
             values: {
-              target
+              target,
             },
           }
         )
@@ -73,21 +70,20 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
     const { indexNames } = this.props;
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
-    return oneIndexSelected ? (indexNames[0]) : `${indexNames.length} ${entity}`;
+    return oneIndexSelected ? indexNames[0] : `${indexNames.length} ${entity}`;
   }
   render() {
-
     const { closeModal } = this.props;
-    const target = this. getTarget();
+    const target = this.getTarget();
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.modalTitle"
-              defaultMessage="Remove lifecycle policy from &quot;{target}&quot;"
+              defaultMessage='Remove lifecycle policy from "{target}"'
               values={{
-                target
+                target,
               }}
             />
           }
@@ -109,10 +105,10 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removeMessage"
-            defaultMessage="You are about to remove the index lifecycle policy from &quot;{target}&quot;.
-              This operation cannot be undone."
+            defaultMessage='You are about to remove the index lifecycle policy from "{target}".
+              This operation cannot be undone.'
             values={{
-              target
+              target,
             }}
           />
         </EuiConfirmModal>

@@ -42,14 +42,15 @@ import { getServices } from '../../kibana_services';
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
   ON_PREM: 'onPrem',
-  ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
+  ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
 };
 
 const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add data' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', {
+  defaultMessage: 'Add data',
+});
 
 class TutorialUi extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -57,7 +58,7 @@ class TutorialUi extends React.Component {
       notFound: false,
       paramValues: {},
       statusCheckStates: [],
-      tutorial: null
+      tutorial: null,
     };
 
     if (props.isCloudEnabled) {
@@ -84,9 +85,12 @@ class TutorialUi extends React.Component {
 
     if (tutorial) {
       // eslint-disable-next-line react/no-did-mount-set-state
-      this.setState({
-        tutorial: tutorial
-      }, this.initInstructionsState);
+      this.setState(
+        {
+          tutorial: tutorial,
+        },
+        this.initInstructionsState
+      );
     } else {
       // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
@@ -97,15 +101,15 @@ class TutorialUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home'
+        href: '#/home',
       },
       {
         text: addDataTitle,
-        href: '#/home/tutorial_directory'
+        href: '#/home/tutorial_directory',
       },
       {
-        text: tutorial ? tutorial.name : this.props.tutorialId
-      }
+        text: tutorial ? tutorial.name : this.props.tutorialId,
+      },
     ]);
   }
 
@@ -114,7 +118,7 @@ class TutorialUi extends React.Component {
       return { instructionSets: [] };
     }
 
-    switch(this.state.visibleInstructions) {
+    switch (this.state.visibleInstructions) {
       case INSTRUCTIONS_TYPE.ELASTIC_CLOUD:
         return this.state.tutorial.elasticCloud;
       case INSTRUCTIONS_TYPE.ON_PREM:
@@ -122,12 +126,17 @@ class TutorialUi extends React.Component {
       case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
         return this.state.tutorial.onPremElasticCloud;
       default:
-        throw new Error(this.props.intl.formatMessage({
-          id: 'kbn.home.tutorial.unhandledInstructionTypeErrorDescription',
-          defaultMessage: 'Unhandled instruction type {visibleInstructions}'
-        }, {
-          visibleInstructions: this.state.visibleInstructions
-        }));
+        throw new Error(
+          this.props.intl.formatMessage(
+            {
+              id: 'kbn.home.tutorial.unhandledInstructionTypeErrorDescription',
+              defaultMessage: 'Unhandled instruction type {visibleInstructions}',
+            },
+            {
+              visibleInstructions: this.state.visibleInstructions,
+            }
+          )
+        );
     }
   };
 
@@ -138,12 +147,14 @@ class TutorialUi extends React.Component {
 
     const paramValues = {};
     if (instructions.params) {
-      instructions.params.forEach((param => {
+      instructions.params.forEach(param => {
         paramValues[param.id] = param.defaultValue;
-      }));
+      });
     }
 
-    const statusCheckStates = new Array(instructions.instructionSets.length).fill(StatusCheckStates.NOT_CHECKED);
+    const statusCheckStates = new Array(instructions.instructionSets.length).fill(
+      StatusCheckStates.NOT_CHECKED
+    );
 
     this.setState({
       paramValues,
@@ -151,10 +162,13 @@ class TutorialUi extends React.Component {
     });
   };
 
-  setVisibleInstructions = (instructionsType) => {
-    this.setState({
-      visibleInstructions: instructionsType
-    }, this.initInstructionsState);
+  setVisibleInstructions = instructionsType => {
+    this.setState(
+      {
+        visibleInstructions: instructionsType,
+      },
+      this.initInstructionsState
+    );
   };
 
   setParameter = (paramId, newValue) => {
@@ -165,18 +179,18 @@ class TutorialUi extends React.Component {
     });
   };
 
-  checkInstructionSetStatus = async (instructionSetIndex) => {
+  checkInstructionSetStatus = async instructionSetIndex => {
     const instructionSet = this.getInstructionSets()[instructionSetIndex];
     const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
 
     if (esHitsCheckConfig) {
       const statusCheckState = await this.fetchEsHitsStatus(esHitsCheckConfig);
 
-      this.setState((prevState) => ({
+      this.setState(prevState => ({
         statusCheckStates: {
           ...prevState.statusCheckStates,
           [instructionSetIndex]: statusCheckState,
-        }
+        },
       }));
     }
   };
@@ -186,7 +200,7 @@ class TutorialUi extends React.Component {
    * @param esHitsCheckConfig
    * @return {Promise<string>}
    */
-  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+  fetchEsHitsStatus = async esHitsCheckConfig => {
     const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
     const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
     const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
@@ -197,7 +211,7 @@ class TutorialUi extends React.Component {
         'content-type': 'application/x-ndjson',
         'kbn-xsrf': 'kibana',
       },
-      credentials: 'same-origin'
+      credentials: 'same-origin',
     });
 
     if (response.status > 300) {
@@ -211,10 +225,14 @@ class TutorialUi extends React.Component {
 
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
-      const selfManagedLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.selfManagedButtonLabel',
-        defaultMessage: 'Self managed' });
-      const cloudLabel = this.props.intl.formatMessage({ id: 'kbn.home.tutorial.elasticCloudButtonLabel',
-        defaultMessage: 'Elastic Cloud' });
+      const selfManagedLabel = this.props.intl.formatMessage({
+        id: 'kbn.home.tutorial.selfManagedButtonLabel',
+        defaultMessage: 'Self managed',
+      });
+      const cloudLabel = this.props.intl.formatMessage({
+        id: 'kbn.home.tutorial.elasticCloudButtonLabel',
+        defaultMessage: 'Elastic Cloud',
+      });
       const radioButtons = [
         {
           id: INSTRUCTIONS_TYPE.ON_PREM,
@@ -223,7 +241,7 @@ class TutorialUi extends React.Component {
         {
           id: INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD,
           label: cloudLabel,
-        }
+        },
       ];
       return (
         <EuiFlexGroup justifyContent="center">
@@ -240,19 +258,19 @@ class TutorialUi extends React.Component {
     }
   };
 
-  onStatusCheck = (instructionSetIndex) => {
+  onStatusCheck = instructionSetIndex => {
     this.setState(
-      (prevState) => ({
+      prevState => ({
         statusCheckStates: {
           ...prevState.statusCheckStates,
           [instructionSetIndex]: StatusCheckStates.FETCHING,
-        }
+        },
       }),
       this.checkInstructionSetStatus.bind(null, instructionSetIndex)
     );
   };
 
-  renderInstructionSets = (instructions) => {
+  renderInstructionSets = instructions => {
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
@@ -264,7 +282,9 @@ class TutorialUi extends React.Component {
           instructionVariants={instructionSet.instructionVariants}
           statusCheckConfig={instructionSet.statusCheck}
           statusCheckState={this.state.statusCheckStates[index]}
-          onStatusCheck={() => { this.onStatusCheck(index); }}
+          onStatusCheck={() => {
+            this.onStatusCheck(index);
+          }}
           offset={currentOffset}
           params={instructions.params}
           paramValues={this.state.paramValues}
@@ -288,8 +308,7 @@ class TutorialUi extends React.Component {
         installMsg={this.state.tutorial.savedObjectsInstallMsg}
       />
     );
-
-  }
+  };
 
   renderFooter = () => {
     let label;
@@ -308,12 +327,7 @@ class TutorialUi extends React.Component {
     }
 
     if (url && label) {
-      return (
-        <Footer
-          label={label}
-          url={url}
-        />
-      );
+      return <Footer label={label} url={url} />;
     }
   };
 
@@ -343,7 +357,9 @@ class TutorialUi extends React.Component {
 
       let exportedFieldsUrl;
       if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
-        exportedFieldsUrl = this.props.replaceTemplateStrings(this.state.tutorial.artifacts.exportedFields.documentationUrl);
+        exportedFieldsUrl = this.props.replaceTemplateStrings(
+          this.state.tutorial.artifacts.exportedFields.documentationUrl
+        );
       }
 
       const instructions = this.getInstructions();
@@ -359,9 +375,7 @@ class TutorialUi extends React.Component {
           />
 
           <EuiSpacer />
-          <div className="eui-textCenter">
-            {this.renderInstructionSetsToggle()}
-          </div>
+          <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
 
           <EuiSpacer />
           <EuiPanel paddingSize="l">
@@ -375,9 +389,7 @@ class TutorialUi extends React.Component {
 
     return (
       <EuiPage restrictWidth={1200}>
-        <EuiPageBody>
-          {content}
-        </EuiPageBody>
+        <EuiPageBody>{content}</EuiPageBody>
       </EuiPage>
     );
   }

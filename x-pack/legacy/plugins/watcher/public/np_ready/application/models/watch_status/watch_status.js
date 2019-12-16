@@ -27,7 +27,9 @@ export class WatchStatus {
     }
 
     const actionStatuses = get(props, 'actionStatuses', []);
-    this.actionStatuses = actionStatuses.map(actionStatus => ActionStatus.fromUpstreamJson(actionStatus));
+    this.actionStatuses = actionStatuses.map(actionStatus =>
+      ActionStatus.fromUpstreamJson(actionStatus)
+    );
   }
 
   static fromUpstreamJson(upstreamWatchStatus) {

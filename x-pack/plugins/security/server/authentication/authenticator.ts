@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Duration } from 'moment';
 import {
   SessionStorageFactory,
   SessionStorage,
@@ -173,12 +174,12 @@ export class Authenticator {
   /**
    * Session timeout in ms. If `null` session will stay active until the browser is closed.
    */
-  private readonly idleTimeout: number | null = null;
+  private readonly idleTimeout: Duration | null = null;
 
   /**
    * Session max lifespan in ms. If `null` session may live indefinitely.
    */
-  private readonly lifespan: number | null = null;
+  private readonly lifespan: Duration | null = null;
 
   /**
    * Internal authenticator logger.
@@ -227,7 +228,6 @@ export class Authenticator {
     );
     this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
-    // only set these vars if they are defined in options (otherwise coalesce to existing/default)
     this.idleTimeout = this.options.config.session.idleTimeout;
     this.lifespan = this.options.config.session.lifespan;
   }
@@ -494,11 +494,16 @@ export class Authenticator {
   private calculateExpiry(
     existingSession: ProviderSession | null
   ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
-    let lifespanExpiration = this.lifespan && Date.now() + this.lifespan;
-    if (existingSession && existingSession.lifespanExpiration && this.lifespan) {
-      lifespanExpiration = existingSession.lifespanExpiration;
-    }
-    const idleTimeoutExpiration = this.idleTimeout && Date.now() + this.idleTimeout;
+    const now = Date.now();
+    // if we are renewing an existing session, use its `lifespanExpiration` -- otherwise, set this value
+    // based on the configured server `lifespan`.
+    // note, if the server had a `lifespan` set and then removes it, remove `lifespanExpiration` on renewed sessions
+    // also, if the server did not have a `lifespan` set and then adds it, add `lifespanExpiration` on renewed sessions
+    const lifespanExpiration =
+      existingSession?.lifespanExpiration && this.lifespan
+        ? existingSession.lifespanExpiration
+        : this.lifespan && now + this.lifespan.asMilliseconds();
+    const idleTimeoutExpiration = this.idleTimeout && now + this.idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
   }

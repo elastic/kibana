@@ -35,13 +35,11 @@ export async function checkCcrEnabled(req, esIndexPattern) {
         start,
         end,
         clusterUuid,
-        metric: metricFields
+        metric: metricFields,
       }),
-      sort: [ { timestamp: { order: 'desc' } } ]
+      sort: [{ timestamp: { order: 'desc' } }],
     },
-    filterPath: [
-      'hits.hits._source.stack_stats.xpack.ccr',
-    ]
+    filterPath: ['hits.hits._source.stack_stats.xpack.ccr'],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

@@ -29,14 +29,14 @@ const functions = {
   max: require('./max'),
   last: require('./last'),
   first: require('./first'),
-  sum: require('./sum')
+  sum: require('./sum'),
 };
 
 export default new Chainable('aggregate', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'function',
@@ -47,7 +47,7 @@ export default new Chainable('aggregate', {
           functions: _.keys(functions).join(', '),
         },
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.aggregateHelpText', {
     defaultMessage:
@@ -58,14 +58,15 @@ export default new Chainable('aggregate', {
   }),
   fn: function aggregateFn(args) {
     const fn = functions[args.byName.function];
-    if (!fn) throw new Error('.aggregate() function must be one of: ' + _.keys(functions).join(', '));
+    if (!fn)
+      throw new Error('.aggregate() function must be one of: ' + _.keys(functions).join(', '));
 
-    return alter(args, function (eachSeries) {
+    return alter(args, function(eachSeries) {
       const times = _.map(eachSeries.data, 0);
       const values = _.map(eachSeries.data, 1);
 
       eachSeries.data = _.zip(times, _.fill(values, fn(values)));
       return eachSeries;
     });
-  }
+  },
 });

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import chrome from 'ui/chrome';
 import { template } from 'lodash';
 import { http } from '../../../../services/http_service';
@@ -14,7 +12,6 @@ import emailBody from './email.html';
 import emailInfluencersBody from './email_influencers.html';
 import { watch } from './watch.js';
 import { i18n } from '@kbn/i18n';
-
 
 const compiledEmailBody = template(emailBody);
 const compiledEmailInfluencersBody = template(emailInfluencersBody);
@@ -25,12 +22,14 @@ const emailSection = {
     email: {
       profile: 'standard',
       to: [],
-      subject: i18n.translate('xpack.ml.newJob.simple.watcher.email.mlWatcherAlertSubjectTitle', { defaultMessage: 'ML Watcher Alert' }),
+      subject: i18n.translate('xpack.ml.newJob.simple.watcher.email.mlWatcherAlertSubjectTitle', {
+        defaultMessage: 'ML Watcher Alert',
+      }),
       body: {
-        html: ''
-      }
-    }
-  }
+        html: '',
+      },
+    },
+  },
 };
 
 // generate a random number between min and max
@@ -45,10 +44,9 @@ function saveWatch(watchModel) {
   return http({
     url,
     method: 'PUT',
-    data: watchModel.upstreamJSON
+    data: watchModel.upstreamJSON,
   });
 }
-
 
 class CreateWatchService {
   constructor() {
@@ -62,7 +60,7 @@ class CreateWatchService {
 
     this.status = {
       realtimeJob: null,
-      watch: null
+      watch: null,
     };
   }
 
@@ -79,7 +77,7 @@ class CreateWatchService {
     this.config.threshold = { display: 'critical', val: 75 };
   }
 
-  createNewWatch = function (jobId) {
+  createNewWatch = function(jobId) {
     return new Promise((resolve, reject) => {
       this.status.watch = this.STATUS.SAVING;
       if (jobId !== undefined) {
@@ -98,32 +96,49 @@ class CreateWatchService {
           // create the html by adding the variables to the compiled email body.
           emailSection.send_email.email.body.html = compiledEmailBody({
             serverAddress: chrome.getAppUrl(),
-            influencersSection: ((this.config.includeInfluencers === true) ?
-              compiledEmailInfluencersBody({
-                topInfluencersLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.topInfluencersLabel', {
-                  defaultMessage: 'Top influencers:'
-                })
-              }) : ''
-            ),
+            influencersSection:
+              this.config.includeInfluencers === true
+                ? compiledEmailInfluencersBody({
+                    topInfluencersLabel: i18n.translate(
+                      'xpack.ml.newJob.simple.watcher.email.topInfluencersLabel',
+                      {
+                        defaultMessage: 'Top influencers:',
+                      }
+                    ),
+                  })
+                : '',
             elasticStackMachineLearningAlertLabel: i18n.translate(
-              'xpack.ml.newJob.simple.watcher.email.elasticStackMachineLearningAlertLabel', {
-                defaultMessage: 'Elastic Stack Machine Learning Alert'
+              'xpack.ml.newJob.simple.watcher.email.elasticStackMachineLearningAlertLabel',
+              {
+                defaultMessage: 'Elastic Stack Machine Learning Alert',
               }
             ),
-            jobLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.jobLabel', { defaultMessage: 'Job' }),
-            timeLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.timeLabel', { defaultMessage: 'Time' }),
-            anomalyScoreLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.anomalyScoreLabel', {
-              defaultMessage: 'Anomaly score'
+            jobLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.jobLabel', {
+              defaultMessage: 'Job',
             }),
-            openInAnomalyExplorerLinkText: i18n.translate('xpack.ml.newJob.simple.watcher.email.openInAnomalyExplorerLinkText', {
-              defaultMessage: 'Click here to open in Anomaly Explorer.'
+            timeLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.timeLabel', {
+              defaultMessage: 'Time',
             }),
-            topRecordsLabel: i18n.translate('xpack.ml.newJob.simple.watcher.email.topRecordsLabel', { defaultMessage: 'Top records:' }),
-
+            anomalyScoreLabel: i18n.translate(
+              'xpack.ml.newJob.simple.watcher.email.anomalyScoreLabel',
+              {
+                defaultMessage: 'Anomaly score',
+              }
+            ),
+            openInAnomalyExplorerLinkText: i18n.translate(
+              'xpack.ml.newJob.simple.watcher.email.openInAnomalyExplorerLinkText',
+              {
+                defaultMessage: 'Click here to open in Anomaly Explorer.',
+              }
+            ),
+            topRecordsLabel: i18n.translate(
+              'xpack.ml.newJob.simple.watcher.email.topRecordsLabel',
+              { defaultMessage: 'Top records:' }
+            ),
           });
 
           // add email section to watch
-          watch.actions.send_email =  emailSection.send_email;
+          watch.actions.send_email = emailSection.send_email;
         }
 
         // set the trigger interval to be a random number between 60 and 120 seconds
@@ -137,22 +152,21 @@ class CreateWatchService {
           upstreamJSON: {
             id,
             type: 'json',
-            watch
-          }
+            watch,
+          },
         };
 
         if (id !== '') {
           saveWatch(watchModel)
             .then(() => {
               this.status.watch = this.STATUS.SAVED;
-              this.config.watcherEditURL =
-              `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
+              this.config.watcherEditURL = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/watcher/watches/watch/${id}/edit?_g=()`;
               resolve({
                 id,
                 url: this.config.watcherEditURL,
               });
             })
-            .catch((resp) => {
+            .catch(resp => {
               this.status.watch = this.STATUS.SAVE_FAILED;
               reject(resp);
             });
@@ -162,7 +176,7 @@ class CreateWatchService {
         reject();
       }
     });
-  }
+  };
 
   loadWatch(jobId) {
     const id = `ml-${jobId}`;
@@ -170,9 +184,9 @@ class CreateWatchService {
     const url = `${basePath}/watch/${id}`;
     return http({
       url,
-      method: 'GET'
+      method: 'GET',
     });
   }
 }
 
-export const mlCreateWatchService =  new CreateWatchService();
+export const mlCreateWatchService = new CreateWatchService();

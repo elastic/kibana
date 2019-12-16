@@ -167,7 +167,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "right",
+            "align": "center",
             "field": "http.response.status_code",
             "name": "Response code",
             "render": [Function],
@@ -176,10 +176,12 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "align": "right",
             "isExpander": true,
             "render": [Function],
-            "width": "40px",
+            "width": "24px",
           },
         ]
       }
+      hasActions={true}
+      isExpandable={true}
       itemId="id"
       itemIdToExpandedRowMap={Object {}}
       items={

@@ -8,24 +8,25 @@ import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { checkLicenseFactory } from '../check_license';
 
-describe('check_license', function () {
-
+describe('check_license', function() {
   let mockLicenseInfo;
   let checkLicense;
 
   beforeEach(() => {
     mockLicenseInfo = {};
     checkLicense = checkLicenseFactory({
-      getAll: () => [{
-        id: 'test',
-        name: 'Test Export Type',
-        jobType: 'testJobType'
-      }]
+      getAll: () => [
+        {
+          id: 'test',
+          name: 'Test Export Type',
+          jobType: 'testJobType',
+        },
+      ],
     });
   });
 
   describe('license information is not available', () => {
-    beforeEach(() => mockLicenseInfo.isAvailable = () => false);
+    beforeEach(() => (mockLicenseInfo.isAvailable = () => false));
 
     it('should set management.showLinks to true', () => {
       expect(checkLicense(mockLicenseInfo).management.showLinks).to.be(true);
@@ -43,7 +44,7 @@ describe('check_license', function () {
       expect(checkLicense(mockLicenseInfo).test.enableLinks).to.be(false);
     });
 
-    it ('should set management.jobTypes to undefined', () => {
+    it('should set management.jobTypes to undefined', () => {
       expect(checkLicense(mockLicenseInfo).management.jobTypes).to.be(undefined);
     });
   });
@@ -60,23 +61,23 @@ describe('check_license', function () {
       describe('& license is active', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
-        it ('should set management.showLinks to true', () => {
+        it('should set management.showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).management.showLinks).to.be(true);
         });
 
-        it ('should set test.showLinks to true', () => {
+        it('should set test.showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).test.showLinks).to.be(true);
         });
 
-        it ('should set management.enableLinks to true', () => {
+        it('should set management.enableLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).management.enableLinks).to.be(true);
         });
 
-        it ('should set test.enableLinks to true', () => {
+        it('should set test.enableLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).test.enableLinks).to.be(true);
         });
 
-        it ('should set management.jobTypes to contain testJobType', () => {
+        it('should set management.jobTypes to contain testJobType', () => {
           expect(checkLicense(mockLicenseInfo).management.jobTypes).to.contain('testJobType');
         });
       });
@@ -84,23 +85,23 @@ describe('check_license', function () {
       describe('& license is expired', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
-        it ('should set management.showLinks to true', () => {
+        it('should set management.showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).management.showLinks).to.be(true);
         });
 
-        it ('should set test.showLinks to true', () => {
+        it('should set test.showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).test.showLinks).to.be(true);
         });
 
-        it ('should set management.enableLinks to false', () => {
+        it('should set management.enableLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).management.enableLinks).to.be(false);
         });
 
-        it ('should set test.enableLinks to false', () => {
+        it('should set test.enableLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).test.enableLinks).to.be(false);
         });
 
-        it ('should set management.jobTypes to undefined', () => {
+        it('should set management.jobTypes to undefined', () => {
           expect(checkLicense(mockLicenseInfo).management.jobTypes).to.be(undefined);
         });
       });
@@ -112,11 +113,11 @@ describe('check_license', function () {
       describe('& license is active', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
-        it ('should set management.showLinks to true', () => {
+        it('should set management.showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).management.showLinks).to.be(false);
         });
 
-        it ('should set test.showLinks to false', () => {
+        it('should set test.showLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).test.showLinks).to.be(false);
         });
 
@@ -129,15 +130,15 @@ describe('check_license', function () {
       describe('& license is expired', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
-        it ('should set management.showLinks to true', () => {
+        it('should set management.showLinks to true', () => {
           expect(checkLicense(mockLicenseInfo).management.showLinks).to.be(true);
         });
 
-        it ('should set test.showLinks to false', () => {
+        it('should set test.showLinks to false', () => {
           expect(checkLicense(mockLicenseInfo).test.showLinks).to.be(false);
         });
 
-        it ('should set management.jobTypes to undefined', () => {
+        it('should set management.jobTypes to undefined', () => {
           expect(checkLicense(mockLicenseInfo).management.jobTypes).to.be(undefined);
         });
       });

@@ -8,11 +8,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
-import {
-  updateFlyout,
-  hideTOCDetails,
-  showTOCDetails,
-} from '../../../../../actions/ui_actions';
+import { updateFlyout, hideTOCDetails, showTOCDetails } from '../../../../../actions/ui_actions';
 import { getIsReadOnly, getOpenTOCDetails } from '../../../../../selectors/ui_selectors';
 import {
   fitToLayerExtent,
@@ -20,10 +16,14 @@ import {
   toggleLayerVisible,
   removeTransientLayer,
   cloneLayer,
-  removeLayer
+  removeLayer,
 } from '../../../../../actions/map_actions';
 
-import { hasDirtyState, getSelectedLayer, isUsingSearch } from '../../../../../selectors/map_selectors';
+import {
+  hasDirtyState,
+  getSelectedLayer,
+  isUsingSearch,
+} from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}, ownProps) {
   return {
@@ -37,7 +37,7 @@ function mapStateToProps(state = {}, ownProps) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return ({
+  return {
     openLayerPanel: async layerId => {
       await dispatch(removeTransientLayer());
       await dispatch(setSelectedLayer(layerId));
@@ -61,7 +61,7 @@ function mapDispatchToProps(dispatch) {
     showTOCDetails: layerId => {
       dispatch(showTOCDetails(layerId));
     },
-  });
+  };
 }
 
 const connectedTOCEntry = connect(mapStateToProps, mapDispatchToProps)(TOCEntry);
