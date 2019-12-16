@@ -20,13 +20,13 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { npStart, SearchSource as SearchSourceClass } from '../legacy_imports';
+import { SearchSource as SearchSourceClass } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IFieldType } from '../.../../../../../../plugins/data/public';
+import { IFieldType, TimefilterSetup } from '../.../../../../../../plugins/data/public';
 
 const minMaxAgg = (field?: IFieldType) => {
   const aggBody: any = {};
@@ -52,7 +52,7 @@ const minMaxAgg = (field?: IFieldType) => {
 };
 
 export class RangeControl extends Control<RangeFilterManager> {
-  timefilter: InputControlVisDependencies['timefilter'];
+  timefilter: TimefilterSetup['timefilter'];
   abortController: any;
   min: any;
   max: any;
@@ -62,10 +62,10 @@ export class RangeControl extends Control<RangeFilterManager> {
     filterManager: RangeFilterManager,
     useTimeFilter: boolean,
     SearchSource: SearchSourceClass,
-    timefilter: InputControlVisDependencies['timefilter']
+    deps: InputControlVisDependencies
   ) {
     super(controlParams, filterManager, useTimeFilter, SearchSource);
-    this.timefilter = timefilter;
+    this.timefilter = deps.data.query.timefilter.timefilter;
   }
 
   async fetch() {
@@ -130,27 +130,21 @@ export async function rangeControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
   SearchSource: SearchSourceClass,
-  timefilter: InputControlVisDependencies['timefilter']
+  deps: InputControlVisDependencies
 ): Promise<RangeControl> {
-  let indexPattern;
-  try {
-    indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
-  } catch (err) {
-    // ignore not found error and return control so it can be displayed in disabled state.
-  }
-  const { filterManager } = npStart.plugins.data.query;
+  const [, { data: dataPluginStart }] = await deps.core.getStartServices();
+  const indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
+
   return new RangeControl(
     controlParams,
     new RangeFilterManager(
       controlParams.id,
       controlParams.fieldName,
-      // TODO: Fix error handling to create indexPattern in a more cononical way
-      // @ts-ignore
       indexPattern,
-      filterManager
+      deps.data.query.filterManager
     ),
     useTimeFilter,
     SearchSource,
-    timefilter
+    deps
   );
 }

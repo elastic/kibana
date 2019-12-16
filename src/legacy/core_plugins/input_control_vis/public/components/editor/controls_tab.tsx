@@ -44,7 +44,8 @@ import {
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { IIndexPattern } from '../../../../../../plugins/data/public';
-import { VisOptionsProps, npStart } from '../../legacy_imports';
+import { VisOptionsProps } from '../../legacy_imports';
+import { InputControlVisDependencies } from '../../plugin';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;
@@ -54,17 +55,20 @@ interface ControlsTabUiParams {
   controls: ControlParams[];
 }
 type ControlsTabUiInjectedProps = InjectedIntlProps &
-  Pick<VisOptionsProps<ControlsTabUiParams>, 'vis' | 'stateParams' | 'setValue'>;
+  Pick<VisOptionsProps<ControlsTabUiParams>, 'vis' | 'stateParams' | 'setValue'> & {
+    deps: InputControlVisDependencies;
+  };
 
 export type ControlsTabUiProps = ControlsTabUiInjectedProps;
 
-class ControlsTabUi extends PureComponent<ControlsTabUiInjectedProps, ControlsTabUiState> {
+class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState> {
   state = {
     type: CONTROL_TYPES.LIST,
   };
 
   getIndexPattern = async (indexPatternId: string): Promise<IIndexPattern> => {
-    return await npStart.plugins.data.indexPatterns.get(indexPatternId);
+    const [, startDeps] = await this.props.deps.core.getStartServices();
+    return await startDeps.data.indexPatterns.get(indexPatternId);
   };
 
   onChange = (value: ControlParams[]) => this.props.setValue('controls', value);
@@ -151,6 +155,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiInjectedProps, ControlsTa
           handleNumberOptionChange={this.handleNumberOptionChange}
           parentCandidates={parentCandidates}
           handleParentChange={this.handleParentChange}
+          deps={this.props.deps}
         />
       );
     });
@@ -221,3 +226,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiInjectedProps, ControlsTa
 }
 
 export const ControlsTab = injectI18n(ControlsTabUi);
+
+export const getControlsTab = (deps: InputControlVisDependencies) => (
+  props: Omit<ControlsTabUiProps, 'core'>
+) => <ControlsTab {...props} deps={deps} />;

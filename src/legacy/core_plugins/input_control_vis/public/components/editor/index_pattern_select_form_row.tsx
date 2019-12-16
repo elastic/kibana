@@ -22,15 +22,12 @@ import { injectI18n } from '@kbn/i18n/react';
 import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntlProps } from 'react-intl';
 
-import { npStart } from '../../legacy_imports';
-
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;
+  IndexPatternSelect: any;
 };
-
-const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
   const { controlIndex, indexPatternId, intl, onChange } = props;
@@ -44,7 +41,7 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
         defaultMessage: 'Index Pattern',
       })}
     >
-      <IndexPatternSelect
+      <props.IndexPatternSelect
         placeholder={intl.formatMessage({
           id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
           defaultMessage: 'Select index pattern...',

@@ -18,21 +18,17 @@
  */
 
 import { rangeControlFactory } from './range_control_factory';
-import { getListControlFactory } from './list_control_factory';
+import { listControlFactory } from './list_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
-import { InputControlVisDependencies } from '../plugin';
 
-export function getControlFactory(
-  controlParams: ControlParams,
-  getInjectedVar: InputControlVisDependencies['getInjectedVar']
-) {
+export function getControlFactory(controlParams: ControlParams) {
   let factory = null;
   switch (controlParams.type) {
     case CONTROL_TYPES.RANGE:
       factory = rangeControlFactory;
       break;
     case CONTROL_TYPES.LIST:
-      factory = getListControlFactory(getInjectedVar);
+      factory = listControlFactory;
       break;
     default:
       throw new Error(`Unhandled control type ${controlParams.type}`);

@@ -36,6 +36,7 @@ import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
 import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { InputControlVisDependencies } from '../../plugin';
 
 interface ControlEditorUiProps {
   controlIndex: number;
@@ -61,6 +62,7 @@ interface ControlEditorUiProps {
     text: string;
   }>;
   handleParentChange: (controlIndex: number, event: ChangeEvent<HTMLSelectElement>) => void;
+  deps: InputControlVisDependencies;
 }
 
 class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlProps> {
@@ -103,6 +105,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
             handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
             parentCandidates={this.props.parentCandidates}
             handleParentChange={this.props.handleParentChange}
+            deps={this.props.deps}
           />
         );
         break;

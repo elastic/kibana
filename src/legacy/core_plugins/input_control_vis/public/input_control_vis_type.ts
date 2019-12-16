@@ -20,13 +20,14 @@
 import { i18n } from '@kbn/i18n';
 
 import { createInputControlVisController } from './vis_controller';
-import { ControlsTab } from './components/editor/controls_tab';
+import { getControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { Status, defaultFeedbackMessage } from '../../visualizations/public';
 import { InputControlVisDependencies } from './plugin';
 
 export function createInputControlVisTypeDefinition(deps: InputControlVisDependencies) {
   const InputControlVisController = createInputControlVisController(deps);
+  const ControlsTab = getControlsTab(deps.core);
 
   return {
     name: 'input_control_vis',

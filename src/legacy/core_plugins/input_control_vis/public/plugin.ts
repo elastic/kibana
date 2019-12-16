@@ -16,16 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
+import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 
+type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies>;
+
 export interface InputControlVisDependencies {
-  getInjectedVar: CoreSetup['injectedMetadata']['getInjectedVar'];
-  timefilter: DataPublicPluginSetup['query']['timefilter']['timefilter'];
+  core: InputControlVisCoreSetup;
+  data: DataPublicPluginSetup;
 }
 
 /** @internal */
@@ -36,20 +39,23 @@ export interface InputControlVisPluginSetupDependencies {
 }
 
 /** @internal */
-export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
-  initializerContext: PluginInitializerContext;
+export interface InputControlVisPluginStartDependencies {
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
+  visualizations: VisualizationsStart;
+  data: DataPublicPluginStart;
+}
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-  }
+/** @internal */
+export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
+  constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
-    core: CoreSetup,
+    core: InputControlVisCoreSetup,
     { expressions, visualizations, data }: InputControlVisPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<InputControlVisDependencies> = {
-      getInjectedVar: core.injectedMetadata.getInjectedVar,
-      timefilter: data.query.timefilter.timefilter,
+      core,
+      data,
     };
 
     expressions.registerFunction(createInputControlVisFn);
@@ -58,7 +64,7 @@ export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
     // nothing to do here
   }
 }

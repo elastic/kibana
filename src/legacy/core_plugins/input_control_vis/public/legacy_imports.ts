@@ -17,10 +17,8 @@
  * under the License.
  */
 
-export { npSetup, npStart } from 'ui/new_platform';
-
-export { I18nContext } from 'ui/i18n';
 export { Vis, VisParams } from 'ui/vis';
 export { VisOptionsProps } from 'ui/vis/editors/default';
 export { ValidatedDualRange } from 'ui/validated_range';
 export { SearchSource } from 'ui/courier';
+export { SearchSourceFields } from 'ui/courier/types';

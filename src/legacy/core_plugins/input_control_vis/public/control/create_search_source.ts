@@ -16,17 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { esFilters, IIndexPattern } from '../../../../../plugins/data/public';
-import { InputControlVisDependencies } from '../plugin';
+import { Class } from '@kbn/utility-types';
+import { esFilters, IIndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
+import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 
 export function createSearchSource(
-  SearchSource: any,
-  initialState: any,
+  SearchSource: Class<SearchSourceClass>,
+  initialState: SearchSourceFields,
   indexPattern: IIndexPattern,
   aggs: any,
   useTimeFilter: boolean,
   filters: esFilters.PhraseFilter[] = [],
-  timefilter: InputControlVisDependencies['timefilter']
+  timefilter: TimefilterSetup['timefilter']
 ) {
   const searchSource = initialState ? new SearchSource(initialState) : new SearchSource();
   // Do not not inherit from rootSearchSource to avoid picking up time and globals

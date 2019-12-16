@@ -33,6 +33,7 @@ import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
 import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
+import { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {
   isLoadingFieldType: boolean;
@@ -58,6 +59,7 @@ interface ListControlEditorProps {
   ) => void;
   handleParentChange: (controlIndex: number, event: ChangeEvent<HTMLSelectElement>) => void;
   parentCandidates: EuiSelectProps['options'];
+  deps: InputControlVisDependencies;
 }
 
 function filterField(field: IFieldType) {
@@ -270,13 +272,15 @@ export class ListControlEditor extends PureComponent<
     return options;
   };
 
-  render() {
+  async render() {
+    const [, { data }] = await this.props.deps.core.getStartServices();
     return (
       <>
         <IndexPatternSelectFormRow
           indexPatternId={this.props.controlParams.indexPattern}
           onChange={this.props.handleIndexPatternChange}
           controlIndex={this.props.controlIndex}
+          IndexPatternSelect={data.ui.IndexPatternSelect}
         />
 
         <FieldSelect

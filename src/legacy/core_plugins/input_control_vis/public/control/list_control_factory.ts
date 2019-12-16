@@ -20,13 +20,13 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { npStart, SearchSource as SearchSourceClass } from '../legacy_imports';
+import { SearchSource as SearchSourceClass } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IIndexPattern, IFieldType } from '../../../../../plugins/data/public';
+import { IIndexPattern, IFieldType, TimefilterSetup } from '../../../../../plugins/data/public';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -73,25 +73,25 @@ const termsAgg = ({ field, size, direction, query }: TermsAggArgs) => {
 };
 
 export class ListControl extends Control<PhraseFilterManager> {
+  private getInjectedVar: InputControlVisDependencies['core']['injectedMetadata']['getInjectedVar'];
+  private timefilter: TimefilterSetup['timefilter'];
+
   abortController?: AbortController;
   lastAncestorValues: any;
   lastQuery?: string;
   partialResults?: boolean;
   selectOptions?: string[];
-  getInjectedVar: InputControlVisDependencies['getInjectedVar'];
-  timefilter: InputControlVisDependencies['timefilter'];
 
   constructor(
     controlParams: ControlParams,
     filterManager: PhraseFilterManager,
     useTimeFilter: boolean,
     SearchSource: SearchSourceClass,
-    getInjectedVar: InputControlVisDependencies['getInjectedVar'],
-    timefilter: InputControlVisDependencies['timefilter']
+    deps: InputControlVisDependencies
   ) {
     super(controlParams, filterManager, useTimeFilter, SearchSource);
-    this.getInjectedVar = getInjectedVar;
-    this.timefilter = timefilter;
+    this.getInjectedVar = deps.core.injectedMetadata.getInjectedVar;
+    this.timefilter = deps.data.query.timefilter.timefilter;
   }
 
   fetch = async (query?: string) => {
@@ -137,7 +137,7 @@ export class ListControl extends Control<PhraseFilterManager> {
       terminate_after: this.getInjectedVar('autocompleteTerminateAfter'),
     };
     const aggs = termsAgg({
-      field: indexPattern.fields.getByName(fieldName),
+      field: indexPattern.fields.byName[fieldName],
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
       direction: 'desc',
       query,
@@ -199,45 +199,33 @@ export class ListControl extends Control<PhraseFilterManager> {
   }
 }
 
-export function getListControlFactory(
-  getInjectedVar: InputControlVisDependencies['getInjectedVar']
+export async function listControlFactory(
+  controlParams: ControlParams,
+  useTimeFilter: boolean,
+  SearchSource: SearchSourceClass,
+  deps: InputControlVisDependencies
 ) {
-  return async function listControlFactory(
-    controlParams: ControlParams,
-    useTimeFilter: boolean,
-    SearchSource: SearchSourceClass,
-    timefilter: InputControlVisDependencies['timefilter']
-  ) {
-    let indexPattern: IIndexPattern;
-    try {
-      indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
+  const [, { data: dataPluginStart }] = await deps.core.getStartServices();
+  const indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
 
-      // dynamic options are only allowed on String fields but the setting defaults to true so it could
-      // be enabled for non-string fields (since UI input is hidden for non-string fields).
-      // If field is not string, then disable dynamic options.
-      const field = indexPattern.fields.find(({ name }) => name === controlParams.fieldName);
-      if (field && field.type !== 'string') {
-        controlParams.options.dynamicOptions = false;
-      }
-    } catch (err) {
-      // ignore not found error and return control so it can be displayed in disabled state.
-    }
+  // dynamic options are only allowed on String fields but the setting defaults to true so it could
+  // be enabled for non-string fields (since UI input is hidden for non-string fields).
+  // If field is not string, then disable dynamic options.
+  const field = indexPattern.fields.find(({ name }) => name === controlParams.fieldName);
+  if (field && field.type !== 'string') {
+    controlParams.options.dynamicOptions = false;
+  }
 
-    const { filterManager } = npStart.plugins.data.query;
-    return new ListControl(
-      controlParams,
-      new PhraseFilterManager(
-        controlParams.id,
-        controlParams.fieldName,
-        // TODO: Fix error handling to create indexPattern in a more cononical way
-        // @ts-ignore
-        indexPattern as IIndexPattern,
-        filterManager
-      ),
-      useTimeFilter,
-      SearchSource,
-      getInjectedVar,
-      timefilter
-    );
-  };
+  return new ListControl(
+    controlParams,
+    new PhraseFilterManager(
+      controlParams.id,
+      controlParams.fieldName,
+      indexPattern,
+      deps.data.query.filterManager
+    ),
+    useTimeFilter,
+    SearchSource,
+    deps
+  );
 }

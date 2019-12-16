@@ -53,29 +53,22 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
   value: any;
 
   id: string;
-  controlParams: ControlParams;
   options: ControlParamsOptions;
   type: CONTROL_TYPES;
   label: string;
-  useTimeFilter: boolean;
-  filterManager: FilterManager;
-  SearchSource: SearchSourceClass;
   ancestors: Array<Control<PhraseFilterManager | RangeFilterManager>> = [];
 
   constructor(
-    controlParams: ControlParams,
-    filterManager: FilterManager,
-    useTimeFilter: boolean,
-    SearchSource: SearchSourceClass
+    public controlParams: ControlParams,
+    public filterManager: FilterManager,
+    public useTimeFilter: boolean,
+    public SearchSource: SearchSourceClass
   ) {
     this.id = controlParams.id;
     this.controlParams = controlParams;
     this.options = controlParams.options;
     this.type = controlParams.type;
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
-    this.useTimeFilter = useTimeFilter;
-    this.filterManager = filterManager;
-    this.SearchSource = SearchSource;
 
     // restore state from kibana filter context
     this.reset();

@@ -18,18 +18,32 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from './legacy_imports';
+import { npSetup, npStart } from 'ui/new_platform';
+
 import { plugin } from '.';
 
-import { InputControlVisPluginSetupDependencies } from './plugin';
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
+import {
+  InputControlVisPluginSetupDependencies,
+  InputControlVisPluginStartDependencies,
+} from './plugin';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../visualizations/public/np_ready/public/legacy';
 
-const plugins: Readonly<InputControlVisPluginSetupDependencies> = {
+const setupPlugins: Readonly<InputControlVisPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
+  data: npSetup.plugins.data,
   visualizations: visualizationsSetup,
+};
+
+const startPlugins: Readonly<InputControlVisPluginStartDependencies> = {
+  expressions: npStart.plugins.expressions,
+  data: npStart.plugins.data,
+  visualizations: visualizationsStart,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
+export const start = pluginInstance.start(npStart.core, startPlugins);

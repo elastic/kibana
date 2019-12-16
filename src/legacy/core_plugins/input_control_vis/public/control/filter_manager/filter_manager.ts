@@ -26,22 +26,12 @@ import {
 } from '../../../../../../plugins/data/public';
 
 export abstract class FilterManager {
-  controlId: string;
-  fieldName: string;
-  indexPattern: IIndexPattern;
-  queryFilter: QueryFilterManager;
-
   constructor(
-    controlId: string,
-    fieldName: string,
-    indexPattern: IIndexPattern,
-    queryFilter: QueryFilterManager
-  ) {
-    this.controlId = controlId;
-    this.fieldName = fieldName;
-    this.indexPattern = indexPattern;
-    this.queryFilter = queryFilter;
-  }
+    public controlId: string,
+    public fieldName: string,
+    public indexPattern: IIndexPattern,
+    public queryFilter: QueryFilterManager
+  ) {}
 
   /**
    * Convert phrases into filter

@@ -20,7 +20,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { npStart, I18nContext, Vis, VisParams, SearchSource } from './legacy_imports';
+import { I18nStart } from 'kibana/public';
+import { Vis, VisParams, SearchSource } from './legacy_imports';
+
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
@@ -29,26 +31,22 @@ import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 
-export const createInputControlVisController = ({
-  getInjectedVar,
-}: InputControlVisDependencies) => {
+export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
-    el: Element;
-    vis: Vis;
+    private I18nContext?: I18nStart['Context'];
+
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
     filterManager: any;
     updateSubsciption: any;
     visParams?: VisParams;
 
-    constructor(el: Element, vis: Vis) {
-      this.el = el;
-      this.vis = vis;
+    constructor(public el: Element, public vis: Vis) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
 
-      this.filterManager = npStart.plugins.data.query.filterManager;
+      this.filterManager = deps.data.query.filterManager;
       this.updateSubsciption = this.filterManager
         .getUpdates$()
         .subscribe(this.queryBarUpdateHandler);
@@ -59,6 +57,8 @@ export const createInputControlVisController = ({
         this.visParams = visParams;
         this.controls = [];
         this.controls = await this.initControls();
+        const [{ i18n }] = await deps.core.getStartServices();
+        this.I18nContext = i18n.Context;
         this.drawVis();
       }
     }
@@ -70,8 +70,12 @@ export const createInputControlVisController = ({
     }
 
     drawVis = () => {
+      if (!this.I18nContext) {
+        throw new Error('no i18n context found');
+      }
+
       render(
-        <I18nContext>
+        <this.I18nContext>
           <InputControlVis
             updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
             controls={this.controls}
@@ -83,7 +87,7 @@ export const createInputControlVisController = ({
             hasValues={this.hasValues}
             refreshControl={this.refreshControl}
           />
-        </I18nContext>,
+        </this.I18nContext>,
         this.el
       );
     };
@@ -97,8 +101,8 @@ export const createInputControlVisController = ({
       );
 
       const controlFactoryPromises = controlParamsList.map(controlParams => {
-        const factory = getControlFactory(controlParams, getInjectedVar);
-        return factory(controlParams, this.visParams?.useTimeFilter, SearchSource);
+        const factory = getControlFactory(controlParams);
+        return factory(controlParams, this.visParams?.useTimeFilter, SearchSource, deps);
       });
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);
 
