@@ -42,7 +42,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
 import { SavedVisualizations } from './types';
 
 export interface LegacyAngularInjectedDependencies {
@@ -138,8 +137,6 @@ export class VisualizePlugin implements Plugin {
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
-
-    VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
   public start(

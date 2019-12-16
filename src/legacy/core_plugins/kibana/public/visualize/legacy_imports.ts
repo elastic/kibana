@@ -67,8 +67,6 @@ export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 
-// @ts-ignore
-export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
 export { wrapInI18nContext } from 'ui/i18n';
 

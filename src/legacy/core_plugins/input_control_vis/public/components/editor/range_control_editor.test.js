@@ -63,27 +63,33 @@ beforeEach(() => {
 });
 
 test('renders RangeControlEditor', () => {
-  const component = shallow(<RangeControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleOptionsChange={handleOptionsChange}
-  />);
+  const component = shallow(
+    <RangeControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleOptionsChange={handleOptionsChange}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('handleOptionsChange - step', () => {
-  const component = mountWithIntl(<RangeControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleOptionsChange={handleOptionsChange}
-  />);
-  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', { target: { valueAsNumber: 0.5 } });
+  const component = mountWithIntl(
+    <RangeControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleOptionsChange={handleOptionsChange}
+    />
+  );
+  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', {
+    target: { valueAsNumber: 0.5 },
+  });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
@@ -94,18 +100,23 @@ test('handleOptionsChange - step', () => {
     expectedControlIndex,
     expectedOptionName,
     expectedValue
+  );
 });
 
 test('handleNumberOptionChange - decimalPlaces', () => {
-  const component = mountWithIntl(<RangeControlEditor
-    getIndexPattern={getIndexPatternMock}
-    controlIndex={0}
-    controlParams={controlParams}
-    handleFieldNameChange={handleFieldNameChange}
-    handleIndexPatternChange={handleIndexPatternChange}
-    handleOptionsChange={handleOptionsChange}
-  />);
-  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', { target: { valueAsNumber: 2 } });
+  const component = mountWithIntl(
+    <RangeControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleOptionsChange={handleOptionsChange}
+    />
+  );
+  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', {
+    target: { valueAsNumber: 2 },
+  });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
@@ -117,4 +128,5 @@ test('handleNumberOptionChange - decimalPlaces', () => {
     expectedControlIndex,
     expectedOptionName,
     expectedValue
+  );
 });

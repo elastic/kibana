@@ -149,7 +149,11 @@ export class ListControlEditor extends Component {
           }
           checked={this.props.controlParams.options.multiselect}
           onChange={evt => {
-            this.props.handleOptionsChange(this.props.controlIndex, 'multiselect', evt.target.checked);
+            this.props.handleOptionsChange(
+              this.props.controlIndex,
+              'multiselect',
+              evt.target.checked
+            );
           }}
           data-test-subj="listControlMultiselectInput"
         />
@@ -182,7 +186,11 @@ export class ListControlEditor extends Component {
           }
           checked={this.props.controlParams.options.dynamicOptions}
           onChange={evt => {
-            this.props.handleOptionsChange(this.props.controlIndex, 'dynamicOptions', evt.target.checked);
+            this.props.handleOptionsChange(
+              this.props.controlIndex,
+              'dynamicOptions',
+              evt.target.checked
+            );
           }}
           disabled={this.state.isStringField ? false : true}
           data-test-subj="listControlDynamicOptionsSwitch"
@@ -213,7 +221,11 @@ export class ListControlEditor extends Component {
             min={1}
             value={this.props.controlParams.options.size}
             onChange={evt => {
-              this.props.handleOptionsChange(this.props.controlIndex, 'size', evt.target.valueAsNumber);
+              this.props.handleOptionsChange(
+                this.props.controlIndex,
+                'size',
+                evt.target.valueAsNumber
+              );
             }}
             data-test-subj="listControlSizeInput"
           />

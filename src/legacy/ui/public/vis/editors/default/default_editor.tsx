@@ -26,7 +26,7 @@ import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/vis
 import {
   PanelsContainer,
   Panel,
-} from '../../../../../core_plugins/console/np_ready/public/application/components/split_panel';
+} from '../../../../../core_plugins/console/public/np_ready/application/components/split_panel';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
