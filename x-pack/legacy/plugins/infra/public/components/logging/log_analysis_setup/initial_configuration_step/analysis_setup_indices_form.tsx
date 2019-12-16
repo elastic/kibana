@@ -59,10 +59,12 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
     <EuiDescribedFormGroup
       idAria="indices"
       title={
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.indicesSelectionTitle"
-          defaultMessage="Choose indices"
-        />
+        <h3>
+          <FormattedMessage
+            id="xpack.infra.analysisSetup.indicesSelectionTitle"
+            defaultMessage="Choose indices"
+          />
+        </h3>
       }
       description={
         <FormattedMessage

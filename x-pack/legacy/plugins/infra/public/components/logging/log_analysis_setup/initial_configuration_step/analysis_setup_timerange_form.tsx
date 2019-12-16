@@ -63,10 +63,12 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
     <EuiDescribedFormGroup
       idAria="timeRange"
       title={
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.timeRangeTitle"
-          defaultMessage="Choose a time range"
-        />
+        <h3>
+          <FormattedMessage
+            id="xpack.infra.analysisSetup.timeRangeTitle"
+            defaultMessage="Choose a time range"
+          />
+        </h3>
       }
       description={
         <FormattedMessage
