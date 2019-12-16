@@ -48,7 +48,6 @@ export const spaces = (kibana: Record<string, any>) =>
     },
 
     uiExports: {
-      chromeNavControls: ['plugins/spaces/views/nav_control'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/spaces/views/management'],
       apps: [
@@ -60,7 +59,7 @@ export const spaces = (kibana: Record<string, any>) =>
           hidden: true,
         },
       ],
-      hacks: [],
+      hacks: ['plugins/spaces/legacy'],
       mappings,
       migrations: {
         space: {
@@ -73,19 +72,21 @@ export const spaces = (kibana: Record<string, any>) =>
           hidden: true,
         },
       },
-      home: ['plugins/spaces/register_feature'],
-      injectDefaultVars(server: any) {
+      home: [],
+      injectDefaultVars(server: Server) {
         return {
-          spaces: [],
-          activeSpace: null,
           serverBasePath: server.config().get('server.basePath'),
+          activeSpace: null,
         };
       },
       async replaceInjectedVars(
         vars: Record<string, any>,
         request: Legacy.Request,
-        server: Record<string, any>
+        server: Server
       ) {
+        // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
+        // Known usages:
+        // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
         const spacesPlugin = server.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
         if (!spacesPlugin) {
           throw new Error('New Platform XPack Spaces plugin is not available.');

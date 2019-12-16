@@ -17,13 +17,7 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineOIDCRoutes({
-  router,
-  logger,
-  authc,
-  getLegacyAPI,
-  basePath,
-}: RouteDefinitionParams) {
+export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
     /**
@@ -54,7 +48,7 @@ export function defineOIDCRoutes({
           <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
         `,
             'text/html',
-            getLegacyAPI().cspRules
+            csp.header
           )
         );
       }
@@ -82,7 +76,7 @@ export function defineOIDCRoutes({
           );
         `,
           'text/javascript',
-          getLegacyAPI().cspRules
+          csp.header
         )
       );
     }
