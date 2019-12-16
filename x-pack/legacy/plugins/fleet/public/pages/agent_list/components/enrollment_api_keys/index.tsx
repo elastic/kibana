@@ -7,9 +7,9 @@ import React, { useState } from 'react';
 import { EuiBasicTable, EuiButtonEmpty, EuiSpacer, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 import { EnrollmentApiKey } from '../../../../../common/types/domain_data';
 import { useLibs, usePagination } from '../../../../hooks';
+import { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { CreateApiKeyForm } from './create_api_key_form';
 

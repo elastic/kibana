@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import { AgentEvent, Agent } from '../../../../common/types/domain_data';

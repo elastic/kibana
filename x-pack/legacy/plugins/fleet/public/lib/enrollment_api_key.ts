@@ -11,8 +11,8 @@ import {
   ReturnTypeDelete,
 } from '../../common/return_types';
 import { RestAPIAdapter } from './adapters/rest_api/adapter_types';
-import { Pagination } from '../hooks/use_pagination';
 import { EnrollmentApiKey } from '../../common/types/domain_data';
+import { Pagination } from '../hooks';
 
 export class EnrollmentApiKeyLib {
   constructor(private readonly rest: RestAPIAdapter) {}

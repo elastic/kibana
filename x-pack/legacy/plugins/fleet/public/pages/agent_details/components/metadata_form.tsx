@@ -19,7 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AxiosError } from 'axios';
 import { Agent } from '../../../../common/types/domain_data';
-import { useLibs, useAgentRefresh, useInput } from '../../../hooks/use_libs';
+import { useLibs, useInput } from '../../../hooks';
+import { useAgentRefresh } from '../hooks';
 
 function useAddMetadataForm(agent: Agent, done: () => void) {
   const libs = useLibs();

@@ -20,8 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
 import { ConnectedLink, AgentHealth, AgentUnenrollProvider } from '../../../components';
-import { AgentMetadataFlyout } from './metadata_flyout';
 import { useAgentRefresh } from '../hooks';
+import { AgentMetadataFlyout } from './metadata_flyout';
 
 const Item: React.FC<{ label: string }> = ({ label, children }) => {
   return (

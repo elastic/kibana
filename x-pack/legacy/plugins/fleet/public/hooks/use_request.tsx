@@ -20,7 +20,7 @@ export const useRequest = (config: UseRequestConfig) => {
 };
 
 export const sendRequest = (
-  httpClient,
+  httpClient: any,
   config: SendRequestConfig
 ): Promise<SendRequestResponse> => {
   return _sendRequest(httpClient, config);

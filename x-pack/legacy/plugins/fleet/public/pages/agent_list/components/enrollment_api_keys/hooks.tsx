@@ -5,8 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useLibs } from '../../../../hooks/use_libs';
-import { Pagination } from '../../../../hooks/use_pagination';
+import { useLibs, Pagination } from '../../../../hooks';
 import { ReturnTypeList, ReturnTypeGet } from '../../../../../common/return_types';
 import { EnrollmentApiKey } from '../../../../../common/types/domain_data';
 import { Policy } from '../../../../../common/types/domain_data';
