@@ -10,6 +10,7 @@ jest.mock('../../../lib/router_provider');
 import { workpadAutoplay } from '../workpad_autoplay';
 import { setAutoplayInterval } from '../../../lib/app_state';
 import { createTimeInterval } from '../../../lib/time_interval';
+// @ts-ignore Untyped local
 import { routerProvider } from '../../../lib/router_provider';
 
 const next = jest.fn();
