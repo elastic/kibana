@@ -36,4 +36,6 @@ include::agent-configuration.asciidoc[]
 
 include::advanced-queries.asciidoc[]
 
+include::settings.asciidoc[]
+
 include::troubleshooting.asciidoc[]

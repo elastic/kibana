@@ -1,0 +1,6 @@
+// Do not link directly to this page.
+// Link to the anchor in `/docs/settings/apm-settings.asciidoc` instead.
+[[apm-settings-in-kibana]]
+=== APM settings in Kibana
+
+include::./../settings/apm-settings.asciidoc[tag=general-apm-settings]
