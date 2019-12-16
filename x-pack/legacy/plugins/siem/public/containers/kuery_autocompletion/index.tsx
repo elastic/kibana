@@ -9,7 +9,7 @@ import {
   AutocompleteSuggestion,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-import { useKibana, KibanaContext } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 
 type RendererResult = React.ReactElement<JSX.Element> | null;
 type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
@@ -34,7 +34,7 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
       null
     );
     const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
-    const kibana = useKibana<KibanaContext['services']>();
+    const kibana = useKibana();
     const loadSuggestions = async (
       expression: string,
       cursorPosition: number,

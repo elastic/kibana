@@ -19,4 +19,13 @@ export interface WithKibanaProps {
   kibana: KibanaContext;
 }
 
-export { KibanaContextProvider, useKibana, useUiSetting, useUiSetting$, withKibana };
+// eslint-disable-next-line react-hooks/rules-of-hooks
+const typedUseKibana = () => useKibana<StartServices>();
+
+export {
+  KibanaContextProvider,
+  typedUseKibana as useKibana,
+  useUiSetting,
+  useUiSetting$,
+  withKibana,
+};

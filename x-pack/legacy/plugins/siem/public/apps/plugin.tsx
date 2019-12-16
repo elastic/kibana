@@ -17,7 +17,9 @@ import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../common/cons
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
 export type StartCore = LegacyCoreStart;
-export type StartPlugins = Required<Pick<PluginsStart, 'data'>>;
+export type StartPlugins = Required<
+  Pick<PluginsStart, 'data' | 'embeddable' | 'inspector' | 'uiActions'>
+>;
 export type StartServices = StartCore & StartPlugins;
 
 export class Plugin {
