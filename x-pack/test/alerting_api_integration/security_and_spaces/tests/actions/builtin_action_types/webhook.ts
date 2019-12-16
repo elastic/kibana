@@ -198,6 +198,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling webhook, unexpected error/);
     });
+
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest

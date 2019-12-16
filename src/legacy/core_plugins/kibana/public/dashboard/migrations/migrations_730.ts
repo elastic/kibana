@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// This file should be moved to dashboard/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsMigrationLogger } from 'src/core/server';
 import { inspect } from 'util';
 import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';

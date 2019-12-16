@@ -6,7 +6,7 @@
 
 import { ActionsConfigurationUtilities } from './actions_config';
 
-const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
+export const configUtilsMock: ActionsConfigurationUtilities = {
   isWhitelistedHostname: _ => true,
   isWhitelistedUri: _ => true,
   isActionTypeEnabled: _ => true,
@@ -14,7 +14,3 @@ const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
   ensureWhitelistedUri: _ => {},
   ensureActionTypeEnabled: _ => {},
 };
-
-export function getMockActionConfig(): ActionsConfigurationUtilities {
-  return MOCK_KIBANA_CONFIG_UTILS;
-}

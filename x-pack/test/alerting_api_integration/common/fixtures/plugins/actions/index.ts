@@ -43,6 +43,29 @@ export default function(kibana: any) {
         },
       };
       server.plugins.actions!.setup.registerType(notEnabledActionType);
+      server.plugins.xpack_main.registerFeature({
+        id: 'actions',
+        name: 'Actions',
+        app: ['actions', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['action', 'action_task_params'],
+              read: [],
+            },
+            ui: [],
+            api: ['actions-read', 'actions-all'],
+          },
+          read: {
+            savedObject: {
+              all: ['action_task_params'],
+              read: ['action'],
+            },
+            ui: [],
+            api: ['actions-read'],
+          },
+        },
+      });
 
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
       initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));

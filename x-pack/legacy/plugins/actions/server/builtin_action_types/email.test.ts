@@ -12,7 +12,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
-import { getMockActionConfig } from '../actions_config.mock';
+import { configUtilsMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
@@ -24,8 +24,6 @@ import {
 } from './email';
 
 const sendEmailMock = sendEmail as jest.Mock;
-
-const configUtilsMock = getMockActionConfig();
 
 const ACTION_TYPE_ID = '.email';
 const NO_OP_FN = () => {};

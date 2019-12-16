@@ -6,13 +6,12 @@
 
 import { getActionType } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { getMockActionConfig } from '../actions_config.mock';
+import { configUtilsMock } from '../actions_config.mock';
 import { ActionType } from '../types';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../../src/core/server';
 
 const ACTION_TYPE_ID = '.webhook';
-const configUtilsMock = getMockActionConfig();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;

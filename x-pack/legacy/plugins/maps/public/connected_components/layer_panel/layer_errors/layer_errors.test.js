@@ -11,29 +11,25 @@ import { LayerErrors } from './layer_errors';
 
 test('Should render errors when layer has errors', () => {
   const mockLayer = {
-    hasErrors: () => { return true; },
-    getErrors: () => { return 'simulated layer error'; }
+    hasErrors: () => {
+      return true;
+    },
+    getErrors: () => {
+      return 'simulated layer error';
+    },
   };
-  const component = shallow(
-    <LayerErrors
-      layer={mockLayer}
-    />
-  );
+  const component = shallow(<LayerErrors layer={mockLayer} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 test('should render nothing when layer has no errors', () => {
   const mockLayer = {
-    hasErrors: () => { return false; },
+    hasErrors: () => {
+      return false;
+    },
   };
-  const component = shallow(
-    <LayerErrors
-      layer={mockLayer}
-    />
-  );
+  const component = shallow(<LayerErrors layer={mockLayer} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });

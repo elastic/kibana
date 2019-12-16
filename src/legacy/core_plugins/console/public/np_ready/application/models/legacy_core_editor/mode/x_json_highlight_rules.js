@@ -18,113 +18,148 @@
  */
 
 const _ = require('lodash');
-const ScriptHighlightRules = require('./script_highlight_rules').ScriptHighlightRules;
 
-const jsonRules = function (root) {
+import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
+const { ScriptHighlightRules } = require('./script_highlight_rules');
+
+const jsonRules = function(root) {
   root = root ? root : 'json';
   const rules = {};
-  rules[root] = [
+  const xJsonRules = [
     {
-      token: ['variable', 'whitespace', 'ace.punctuation.colon', 'whitespace', 'punctuation.start_triple_quote'],
+      token: [
+        'variable',
+        'whitespace',
+        'ace.punctuation.colon',
+        'whitespace',
+        'punctuation.start_triple_quote',
+      ],
       regex: '("(?:[^"]*_)?script"|"inline"|"source")(\\s*?)(:)(\\s*?)(""")',
       next: 'script-start',
       merge: false,
-      push: true
+      push: true,
     },
     {
       token: 'variable', // single line
-      regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]\\s*(?=:)'
+      regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]\\s*(?=:)',
     },
     {
       token: 'punctuation.start_triple_quote',
       regex: '"""',
       next: 'string_literal',
       merge: false,
-      push: true
+      push: true,
     },
     {
       token: 'string', // single line
-      regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]'
+      regex: '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]',
     },
     {
       token: 'constant.numeric', // hex
-      regex: '0[xX][0-9a-fA-F]+\\b'
+      regex: '0[xX][0-9a-fA-F]+\\b',
     },
     {
       token: 'constant.numeric', // float
-      regex: '[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b'
+      regex: '[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b',
     },
     {
       token: 'constant.language.boolean',
-      regex: '(?:true|false)\\b'
+      regex: '(?:true|false)\\b',
     },
     {
       token: 'invalid.illegal', // single quoted strings are not allowed
-      regex: '[\'](?:(?:\\\\.)|(?:[^\'\\\\]))*?[\']'
+      regex: "['](?:(?:\\\\.)|(?:[^'\\\\]))*?[']",
     },
     {
       token: 'invalid.illegal', // comments are not allowed
-      regex: '\\/\\/.*$'
+      regex: '\\/\\/.*$',
     },
     {
       token: 'paren.lparen',
       merge: false,
       regex: '{',
       next: root,
-      push: true
+      push: true,
     },
     {
       token: 'paren.lparen',
       merge: false,
-      regex: '[[(]'
+      regex: '[[(]',
     },
     {
       token: 'paren.rparen',
       merge: false,
-      regex: '[\\])]'
+      regex: '[\\])]',
     },
     {
       token: 'paren.rparen',
       regex: '}',
       merge: false,
-      next: 'pop'
+      next: 'pop',
     },
     {
       token: 'punctuation.comma',
-      regex: ','
+      regex: ',',
     },
     {
       token: 'punctuation.colon',
-      regex: ':'
+      regex: ':',
     },
     {
       token: 'whitespace',
-      regex: '\\s+'
+      regex: '\\s+',
     },
     {
       token: 'text',
-      regex: '.+?'
-    }
+      regex: '.+?',
+    },
   ];
+
+  rules[root] = xJsonRules;
+  rules[root + '-sql'] = [
+    {
+      token: [
+        'variable',
+        'whitespace',
+        'ace.punctuation.colon',
+        'whitespace',
+        'punctuation.start_triple_quote',
+      ],
+      regex: '("query")(\\s*?)(:)(\\s*?)(""")',
+      next: 'sql-start',
+      merge: false,
+      push: true,
+    },
+  ].concat(xJsonRules);
+
   rules.string_literal = [
     {
       token: 'punctuation.end_triple_quote',
       regex: '"""',
-      next: 'pop'
+      next: 'pop',
     },
     {
       token: 'multi_string',
-      regex: '.'
-    }
+      regex: '.',
+    },
   ];
   return rules;
 };
 
 export function addToRules(otherRules, embedUnder) {
   otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
-  otherRules.embedRules(ScriptHighlightRules, 'script-', [{
-    token: 'punctuation.end_triple_quote',
-    regex: '"""',
-    next: 'pop',
-  }]);
+  otherRules.embedRules(ScriptHighlightRules, 'script-', [
+    {
+      token: 'punctuation.end_triple_quote',
+      regex: '"""',
+      next: 'pop',
+    },
+  ]);
+  otherRules.embedRules(ElasticsearchSqlHighlightRules, 'sql-', [
+    {
+      token: 'punctuation.end_triple_quote',
+      regex: '"""',
+      next: 'pop',
+    },
+  ]);
 }

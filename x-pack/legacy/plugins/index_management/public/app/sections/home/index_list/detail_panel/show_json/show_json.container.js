@@ -13,7 +13,7 @@ import {
   getDetailPanelError,
   getDetailPanelIndexName,
   getDetailPanelType,
-  getIndexStatusByIndexName
+  getIndexStatusByIndexName,
 } from '../../../../../store/selectors';
 
 const mapStateToProps = state => {
@@ -23,15 +23,13 @@ const mapStateToProps = state => {
     data: getDetailPanelData(state),
     dataType: getDetailPanelType(state),
     indexName,
-    indexStatus: getIndexStatusByIndexName(state, indexName)
+    indexStatus: getIndexStatusByIndexName(state, indexName),
   };
 };
 
 const mapDispatchToProps = {
   loadIndexData,
-  closeDetailPanel
+  closeDetailPanel,
 };
 
-export const ShowJson = connect(mapStateToProps, mapDispatchToProps)(
-  PresentationComponent
-);
+export const ShowJson = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);
