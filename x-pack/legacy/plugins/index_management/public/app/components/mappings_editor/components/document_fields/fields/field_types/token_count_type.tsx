@@ -78,8 +78,6 @@ export const TokenCountType = ({ field }: Props) => {
             formFieldPath="enable_position_increments"
           />
 
-          <StoreParameter />
-
           <DocValuesParameter />
 
           <NullValueParameter
@@ -98,6 +96,8 @@ export const TokenCountType = ({ field }: Props) => {
               config={getFieldConfig('null_value_numeric')}
             />
           </NullValueParameter>
+
+          <StoreParameter />
 
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
