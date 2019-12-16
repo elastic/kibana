@@ -6,10 +6,7 @@
 
 import { resolve } from 'path';
 import dedent from 'dedent';
-import {
-  XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
-  XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS,
-} from '../../server/lib/constants';
+import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
@@ -36,9 +33,6 @@ export const xpackMain = kibana => {
           enabled: Joi.boolean().default(),
           url: Joi.string().default(),
         }).default(), // deprecated
-        xpack_api_polling_frequency_millis: Joi.number().default(
-          XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
-        ),
       }).default();
     },
 
@@ -65,6 +59,7 @@ export const xpackMain = kibana => {
           value: null,
         },
       },
+      hacks: ['plugins/xpack_main/hacks/check_xpack_info_change'],
       replaceInjectedVars,
       injectDefaultVars(server) {
         const config = server.config();

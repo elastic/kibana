@@ -32,9 +32,12 @@ import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/publ
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
-import { LicensingPluginSetup } from '../../../../../x-pack/plugins/licensing/common/types';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import {
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart,
+} from '../../../../plugins/navigation/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -44,10 +47,10 @@ export interface PluginsSetup {
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  navigation: NavigationPublicPluginSetup;
   dev_tools: DevToolsSetup;
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
-  licensing: LicensingPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -60,6 +63,7 @@ export interface PluginsStart {
   home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  navigation: NavigationPublicPluginStart;
   dev_tools: DevToolsStart;
   kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
