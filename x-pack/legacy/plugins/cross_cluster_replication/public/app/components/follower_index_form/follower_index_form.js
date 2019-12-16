@@ -117,8 +117,10 @@ export class FollowerIndexForm extends PureComponent {
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
         };
+
+    // eslint-disable-next-line no-nested-ternary
     const areAdvancedSettingsVisible = isNew
-      ? false // eslint-disable-line no-nested-ternary
+      ? false
       : areAdvancedSettingsEdited(followerIndex)
       ? true
       : false;

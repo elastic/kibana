@@ -27,11 +27,12 @@ describe('Timelion expression suggestions directive', function() {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(inject(function($injector) {
-    // eslint-disable-line no-undef
-    $compile = $injector.get('$compile');
-    scope = $injector.get('$rootScope').$new();
-  }));
+  beforeEach(
+    ngMock.inject(function($injector) {
+      $compile = $injector.get('$compile');
+      scope = $injector.get('$rootScope').$new();
+    })
+  );
 
   describe('attributes', function() {
     describe('suggestions', function() {
