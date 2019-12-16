@@ -37,8 +37,8 @@ let indexPattern;
 let indexPatternList;
 
 // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
-const init = function ($elem, props) {
-  ngMock.inject(function ($rootScope, $compile, $timeout) {
+const init = function($elem, props) {
+  ngMock.inject(function($rootScope, $compile, $timeout) {
     $parentScope = $rootScope;
     _.assign($parentScope, props);
     $compile($elem)($parentScope);
@@ -50,12 +50,12 @@ const init = function ($elem, props) {
   });
 };
 
-const destroy = function () {
+const destroy = function() {
   $scope.$destroy();
   $parentScope.$destroy();
 };
 
-describe('discover field chooser directives', function () {
+describe('discover field chooser directives', function() {
   const $elem = angular.element(`
     <disc-field-chooser
       columns="columns"
@@ -73,54 +73,62 @@ describe('discover field chooser directives', function () {
   beforeEach(() => pluginInstance.initializeServices(true));
   beforeEach(() => pluginInstance.initializeInnerAngular());
 
-  beforeEach(ngMock.module('app/discover', ($provide) => {
-    $provide.decorator('config', ($delegate) => {
-      // disable shortDots for these tests
-      $delegate.get = _.wrap($delegate.get, function (origGet, name) {
-        if (name === 'shortDots:enable') {
-          return false;
-        } else {
-          return origGet.call(this, name);
-        }
+  beforeEach(
+    ngMock.module('app/discover', $provide => {
+      $provide.decorator('config', $delegate => {
+        // disable shortDots for these tests
+        $delegate.get = _.wrap($delegate.get, function(origGet, name) {
+          if (name === 'shortDots:enable') {
+            return false;
+          } else {
+            return origGet.call(this, name);
+          }
+        });
+
+        return $delegate;
+      });
+    })
+  );
+
+  beforeEach(
+    ngMock.inject(function(Private) {
+      hits = Private(FixturesHitsProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      indexPatternList = [
+        new SimpleSavedObject(undefined, { id: '0', attributes: { title: 'b' } }),
+        new SimpleSavedObject(undefined, { id: '1', attributes: { title: 'a' } }),
+        new SimpleSavedObject(undefined, { id: '2', attributes: { title: 'c' } }),
+      ];
+
+      const fieldCounts = _.transform(
+        hits,
+        function(counts, hit) {
+          _.keys(indexPattern.flattenHit(hit)).forEach(function(key) {
+            counts[key] = (counts[key] || 0) + 1;
+          });
+        },
+        {}
+      );
+
+      init($elem, {
+        columns: [],
+        toggle: sinon.spy(),
+        hits: hits,
+        fieldCounts: fieldCounts,
+        addField: sinon.spy(),
+        addFilter: sinon.spy(),
+        indexPattern: indexPattern,
+        indexPatternList: indexPatternList,
+        removeField: sinon.spy(),
       });
 
-      return $delegate;
-    });
-  }));
-
-  beforeEach(ngMock.inject(function (Private) {
-    hits = Private(FixturesHitsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    indexPatternList = [
-      new SimpleSavedObject(undefined, { id: '0', attributes: { title: 'b' } }),
-      new SimpleSavedObject(undefined, { id: '1', attributes: { title: 'a' } }),
-      new SimpleSavedObject(undefined, { id: '2', attributes: { title: 'c' } })
-    ];
-
-    const fieldCounts = _.transform(hits, function (counts, hit) {
-      _.keys(indexPattern.flattenHit(hit)).forEach(function (key) {
-        counts[key] = (counts[key] || 0) + 1;
-      });
-    }, {});
-
-    init($elem, {
-      columns: [],
-      toggle: sinon.spy(),
-      hits: hits,
-      fieldCounts: fieldCounts,
-      addField: sinon.spy(),
-      addFilter: sinon.spy(),
-      indexPattern: indexPattern,
-      indexPatternList: indexPatternList,
-      removeField: sinon.spy(),
-    });
-
-    $scope.$digest();
-  }));
+      $scope.$digest();
+    })
+  );
 
   afterEach(() => destroy());
 
-  const getSections = function (ctx) {
+  const getSections = function(ctx) {
     return {
       selected: $('.dscFieldList--selected', ctx),
       popular: $('.dscFieldList--popular', ctx),
@@ -128,13 +136,13 @@ describe('discover field chooser directives', function () {
     };
   };
 
-  describe('Field listing', function () {
-    it('should have Selected Fields, Fields and Popular Fields sections', function () {
+  describe('Field listing', function() {
+    it('should have Selected Fields, Fields and Popular Fields sections', function() {
       const headers = $elem.find('.sidebar-list-header');
       expect(headers.length).to.be(3);
     });
 
-    it('should have 2 popular fields, 1 unpopular field and no selected fields', function () {
+    it('should have 2 popular fields, 1 unpopular field and no selected fields', function() {
       const section = getSections($elem);
       const popular = find('popular');
       const unpopular = find('unpopular');
@@ -157,25 +165,25 @@ describe('discover field chooser directives', function () {
       }
     });
 
-
-    it('should show the popular fields header if there are popular fields', function () {
+    it('should show the popular fields header if there are popular fields', function() {
       const section = getSections($elem);
       expect(section.popular.hasClass('ng-hide')).to.be(false);
       expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be.above(0);
     });
 
-    it('should not show the popular fields if there are not any', function () {
-
+    it('should not show the popular fields if there are not any', function() {
       // Re-init
       destroy();
 
-      _.each(indexPattern.fields, function (field) { field.$$spec.count = 0; }); // Reset the popular fields
+      _.each(indexPattern.fields, function(field) {
+        field.$$spec.count = 0;
+      }); // Reset the popular fields
       init($elem, {
         columns: [],
         toggle: sinon.spy(),
         hits: require('fixtures/hits'),
         filter: sinon.spy(),
-        indexPattern: indexPattern
+        indexPattern: indexPattern,
       });
 
       const section = getSections($elem);
@@ -185,7 +193,7 @@ describe('discover field chooser directives', function () {
       expect(section.popular.find('li:not(.sidebar-list-header)').length).to.be(0);
     });
 
-    it('should move the field into selected when it is added to the columns array', function () {
+    it('should move the field into selected when it is added to the columns array', function() {
       const section = getSections($elem);
       $scope.columns.push('bytes');
       $scope.$digest();
@@ -202,63 +210,60 @@ describe('discover field chooser directives', function () {
     });
   });
 
-  describe('details processing', function () {
+  describe('details processing', function() {
     let field;
-    function getField() { return _.find($scope.fields, { name: 'bytes' }); }
+    function getField() {
+      return _.find($scope.fields, { name: 'bytes' });
+    }
 
-    beforeEach(function () {
+    beforeEach(function() {
       field = getField();
     });
 
-    it('should have a computeDetails function', function () {
+    it('should have a computeDetails function', function() {
       expect($scope.computeDetails).to.be.a(Function);
     });
 
-    it('should increase the field popularity when called', function () {
+    it('should increase the field popularity when called', function() {
       indexPattern.popularizeField = sinon.spy();
       $scope.computeDetails(field);
       expect(indexPattern.popularizeField.called).to.be(true);
     });
 
-    it('should append a details object to the field', function () {
+    it('should append a details object to the field', function() {
       $scope.computeDetails(field);
       expect(field.details).to.not.be(undefined);
     });
 
-    it('should delete the field details if they already exist', function () {
+    it('should delete the field details if they already exist', function() {
       $scope.computeDetails(field);
       expect(field.details).to.not.be(undefined);
       $scope.computeDetails(field);
       expect(field.details).to.be(undefined);
     });
 
-    it('... unless recompute is true', function () {
+    it('... unless recompute is true', function() {
       $scope.computeDetails(field);
       expect(field.details).to.not.be(undefined);
       $scope.computeDetails(field, true);
       expect(field.details).to.not.be(undefined);
     });
 
-    it('should create buckets with formatted and raw values', function () {
+    it('should create buckets with formatted and raw values', function() {
       $scope.computeDetails(field);
       expect(field.details.buckets).to.not.be(undefined);
       expect(field.details.buckets[0].value).to.be(40.141592);
     });
 
-
-    it('should recalculate the details on open fields if the hits change', function () {
-      $scope.hits = [
-        { _source: { bytes: 1024 } }
-      ];
+    it('should recalculate the details on open fields if the hits change', function() {
+      $scope.hits = [{ _source: { bytes: 1024 } }];
       $scope.$apply();
 
       field = getField();
       $scope.computeDetails(field);
       expect(getField().details.total).to.be(1);
 
-      $scope.hits = [
-        { _source: { notbytes: 1024 } }
-      ];
+      $scope.hits = [{ _source: { notbytes: 1024 } }];
       $scope.$apply();
       field = getField();
       expect(field.details).to.not.have.property('total');

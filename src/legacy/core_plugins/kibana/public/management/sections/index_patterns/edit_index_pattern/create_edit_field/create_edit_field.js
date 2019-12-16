@@ -34,13 +34,12 @@ import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
-const renderFieldEditor = ($scope, indexPattern, field, {
-  Field,
-  getConfig,
-  $http,
-  fieldFormatEditors,
-  redirectAway,
-}) => {
+const renderFieldEditor = (
+  $scope,
+  indexPattern,
+  field,
+  { Field, getConfig, $http, fieldFormatEditors, redirectAway }
+) => {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_FIELD_EDITOR_ID);
     if (!node) {
@@ -61,7 +60,7 @@ const renderFieldEditor = ($scope, indexPattern, field, {
           }}
         />
       </I18nContext>,
-      node,
+      node
     );
   });
 };
@@ -74,11 +73,11 @@ const destroyFieldEditor = () => {
 uiRoutes
   .when('/management/kibana/index_patterns/:indexPatternId/field/:fieldName*', {
     mode: 'edit',
-    k7Breadcrumbs: getEditFieldBreadcrumbs
+    k7Breadcrumbs: getEditFieldBreadcrumbs,
   })
   .when('/management/kibana/index_patterns/:indexPatternId/create-field/', {
     mode: 'create',
-    k7Breadcrumbs: getCreateFieldBreadcrumbs
+    k7Breadcrumbs: getCreateFieldBreadcrumbs,
   })
   .defaults(/management\/kibana\/index_patterns\/[^\/]+\/(field|create-field)(\/|$)/, {
     template,
@@ -91,18 +90,26 @@ uiRoutes
 
         return {
           ...crumb,
-          display: indexPattern.title
+          display: indexPattern.title,
         };
       });
     },
     resolve: {
-      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
-        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
-          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
-      }
+      indexPattern: function($route, Promise, redirectWhenMissing, indexPatterns) {
+        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
+          redirectWhenMissing('/management/kibana/index_patterns')
+        );
+      },
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $timeout, $http, Private, config) {
+    controller: function FieldEditorPageController(
+      $scope,
+      $route,
+      $timeout,
+      $http,
+      Private,
+      config
+    ) {
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
       const kbnUrl = Private(KbnUrlProvider);
@@ -110,41 +117,42 @@ uiRoutes
       this.mode = $route.current.mode;
       this.indexPattern = $route.current.locals.indexPattern;
 
-
       if (this.mode === 'edit') {
         const fieldName = $route.current.params.fieldName;
         this.field = this.indexPattern.fields.getByName(fieldName);
 
         if (!this.field) {
-          const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel',
-            {
-              defaultMessage: '\'{indexPatternTitle}\' index pattern doesn\'t have a scripted field called \'{fieldName}\'',
-              values: { indexPatternTitle: this.indexPattern.title, fieldName }
-            });
+          const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel', {
+            defaultMessage:
+              "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
+            values: { indexPatternTitle: this.indexPattern.title, fieldName },
+          });
           toastNotifications.add(message);
 
           kbnUrl.redirectToRoute(this.indexPattern, 'edit');
           return;
         }
-
-      }
-      else if (this.mode === 'create') {
+      } else if (this.mode === 'create') {
         this.field = new Field(this.indexPattern, {
           scripted: true,
-          type: 'number'
+          type: 'number',
         });
-      }
-      else {
-        const errorMessage = i18n.translate('kbn.management.editIndexPattern.scripted.unknownModeErrorMessage',
+      } else {
+        const errorMessage = i18n.translate(
+          'kbn.management.editIndexPattern.scripted.unknownModeErrorMessage',
           {
             defaultMessage: 'unknown fieldSettings mode {mode}',
-            values: { mode: this.mode }
-          });
+            values: { mode: this.mode },
+          }
+        );
         throw new Error(errorMessage);
       }
 
-      const fieldName = this.field.name || i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
-        { defaultMessage: 'New Scripted Field' });
+      const fieldName =
+        this.field.name ||
+        i18n.translate('kbn.management.editIndexPattern.scripted.newFieldPlaceholder', {
+          defaultMessage: 'New Scripted Field',
+        });
       docTitle.change([fieldName, this.indexPattern.title]);
 
       renderFieldEditor($scope, this.indexPattern, this.field, {
@@ -154,13 +162,16 @@ uiRoutes
         fieldFormatEditors,
         redirectAway: () => {
           $timeout(() => {
-            kbnUrl.changeToRoute(this.indexPattern, this.field.scripted ? 'scriptedFields' : 'indexedFields');
+            kbnUrl.changeToRoute(
+              this.indexPattern,
+              this.field.scripted ? 'scriptedFields' : 'indexedFields'
+            );
           });
-        }
+        },
       });
 
       $scope.$on('$destroy', () => {
         destroyFieldEditor();
       });
-    }
+    },
   });

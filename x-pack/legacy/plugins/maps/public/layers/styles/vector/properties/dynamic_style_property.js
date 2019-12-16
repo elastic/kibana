@@ -10,54 +10,54 @@ import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
-    static type = STYLE_TYPE.DYNAMIC;
+  static type = STYLE_TYPE.DYNAMIC;
 
-    constructor(options, styleName, field) {
-      super(options, styleName);
-      this._field = field;
-    }
+  constructor(options, styleName, field) {
+    super(options, styleName);
+    this._field = field;
+  }
 
-    getField() {
-      return this._field;
-    }
+  getField() {
+    return this._field;
+  }
 
-    isDynamic() {
-      return true;
-    }
+  isDynamic() {
+    return true;
+  }
 
-    isComplete() {
-      return !!this._field;
-    }
+  isComplete() {
+    return !!this._field;
+  }
 
-    getFieldOrigin() {
-      return this._field.getOrigin();
-    }
+  getFieldOrigin() {
+    return this._field.getOrigin();
+  }
 
-    isFieldMetaEnabled() {
-      const fieldMetaOptions = this.getFieldMetaOptions();
-      return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
-    }
+  isFieldMetaEnabled() {
+    const fieldMetaOptions = this.getFieldMetaOptions();
+    return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
+  }
 
-    supportsFieldMeta() {
-      return this.isComplete() && this.isScaled() && this._field.supportsFieldMeta();
-    }
+  supportsFieldMeta() {
+    return this.isComplete() && this.isScaled() && this._field.supportsFieldMeta();
+  }
 
-    async getFieldMetaRequest() {
-      const fieldMetaOptions = this.getFieldMetaOptions();
-      return this._field.getFieldMetaRequest({
-        sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
-      });
-    }
+  async getFieldMetaRequest() {
+    const fieldMetaOptions = this.getFieldMetaOptions();
+    return this._field.getFieldMetaRequest({
+      sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
+    });
+  }
 
-    supportsFeatureState() {
-      return true;
-    }
+  supportsFeatureState() {
+    return true;
+  }
 
-    isScaled() {
-      return true;
-    }
+  isScaled() {
+    return true;
+  }
 
-    getFieldMetaOptions() {
-      return _.get(this.getOptions(), 'fieldMetaOptions', {});
-    }
+  getFieldMetaOptions() {
+    return _.get(this.getOptions(), 'fieldMetaOptions', {});
+  }
 }

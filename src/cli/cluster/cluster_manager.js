@@ -105,12 +105,14 @@ export default class ClusterManager {
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
     if (opts.open) {
-      this.setupOpen(formatUrl({
-        protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
-        hostname: config.get('server.host'),
-        port: config.get('server.port'),
-        pathname: (this.basePathProxy ? this.basePathProxy.basePath : ''),
-      }));
+      this.setupOpen(
+        formatUrl({
+          protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
+          hostname: config.get('server.host'),
+          port: config.get('server.port'),
+          pathname: this.basePathProxy ? this.basePathProxy.basePath : '',
+        })
+      );
     }
 
     if (opts.watch) {
@@ -120,10 +122,7 @@ export default class ClusterManager {
         resolve(REPO_ROOT, 'src/plugins'),
         resolve(REPO_ROOT, 'x-pack/plugins'),
       ];
-      const extraPaths = [
-        ...pluginPaths,
-        ...scanDirs,
-      ];
+      const extraPaths = [...pluginPaths, ...scanDirs];
 
       const pluginInternalDirsIgnore = scanDirs
         .map(scanDir => resolve(scanDir, '*'))
@@ -135,7 +134,7 @@ export default class ClusterManager {
               resolve(path, 'build'),
               resolve(path, 'target'),
               resolve(path, 'scripts'),
-              resolve(path, 'docs'),
+              resolve(path, 'docs')
             ),
           []
         );
@@ -157,21 +156,19 @@ export default class ClusterManager {
 
   setupOpen(openUrl) {
     const serverListening$ = Rx.merge(
-      Rx.fromEvent(this.server, 'listening')
-        .pipe(mapTo(true)),
-      Rx.fromEvent(this.server, 'fork:exit')
-        .pipe(mapTo(false)),
-      Rx.fromEvent(this.server, 'crashed')
-        .pipe(mapTo(false))
+      Rx.fromEvent(this.server, 'listening').pipe(mapTo(true)),
+      Rx.fromEvent(this.server, 'fork:exit').pipe(mapTo(false)),
+      Rx.fromEvent(this.server, 'crashed').pipe(mapTo(false))
     );
 
-    const optimizeSuccess$ = Rx.fromEvent(this.optimizer, 'optimizeStatus')
-      .pipe(map(msg => !!msg.success));
+    const optimizeSuccess$ = Rx.fromEvent(this.optimizer, 'optimizeStatus').pipe(
+      map(msg => !!msg.success)
+    );
 
     Rx.combineLatest(serverListening$, optimizeSuccess$)
       .pipe(
         filter(([serverListening, optimizeSuccess]) => serverListening && optimizeSuccess),
-        take(1),
+        take(1)
       )
       .toPromise()
       .then(() => opn(openUrl));
@@ -200,7 +197,7 @@ export default class ClusterManager {
       fromRoot('x-pack/legacy/plugins/siem/cypress'),
       fromRoot('x-pack/legacy/plugins/apm/cypress'),
       fromRoot('x-pack/legacy/plugins/apm/scripts'),
-      fromRoot('x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
+      fromRoot('x-pack/legacy/plugins/canvas/canvas_plugin_src'), // prevents server from restarting twice for Canvas plugin changes
     ];
 
     this.watcher = chokidar.watch(uniq(watchPaths), {
@@ -210,7 +207,7 @@ export default class ClusterManager {
         /\.test\.(js|ts)$/,
         ...pluginInternalDirsIgnore,
         ...ignorePaths,
-        'plugins/java_languageserver'
+        'plugins/java_languageserver',
       ],
     });
 
@@ -283,7 +280,10 @@ export default class ClusterManager {
   shouldRedirectFromOldBasePath(path) {
     // strip `s/{id}` prefix when checking for need to redirect
     if (path.startsWith('s/')) {
-      path = path.split('/').slice(2).join('/');
+      path = path
+        .split('/')
+        .slice(2)
+        .join('/');
     }
 
     const isApp = path.startsWith('app/');
@@ -297,10 +297,7 @@ export default class ClusterManager {
       return Promise.resolve();
     }
 
-    return Rx.race(
-      Rx.fromEvent(this.server, 'listening'),
-      Rx.fromEvent(this.server, 'crashed')
-    )
+    return Rx.race(Rx.fromEvent(this.server, 'listening'), Rx.fromEvent(this.server, 'crashed'))
       .pipe(first())
       .toPromise();
   }

@@ -7,20 +7,15 @@
 import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
-  const PageObjects = getPageObjects([
-    'security',
-    'common',
-    'header',
-    'discover',
-    'settings']);
+  const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
-  describe('dls', function () {
+  describe('dls', function() {
     before('initialize tests', async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');
@@ -32,18 +27,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchRoles();
     });
 
-    it('should add new role myroleEast', async function () {
+    it('should add new role myroleEast', async function() {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
-          'indices': [{
-            'names': ['dlstest'],
-            'privileges': ['read', 'view_index_metadata'],
-            'query': '{"match": {"region": "EAST"}}'
-          }]
+          indices: [
+            {
+              names: ['dlstest'],
+              privileges: ['read', 'view_index_metadata'],
+              query: '{"match": {"region": "EAST"}}',
+            },
+          ],
         },
         kibana: {
-          global: ['all']
-        }
+          global: ['all'],
+        },
       });
       const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
@@ -52,12 +49,16 @@ export default function ({ getService, getPageObjects }) {
       screenshot.take('Security_Roles');
     });
 
-    it('should add new user userEAST ', async function () {
+    it('should add new user userEAST ', async function() {
       await PageObjects.security.clickElasticsearchUsers();
       await PageObjects.security.addUser({
-        username: 'userEast', password: 'changeme',
-        confirmPassword: 'changeme', fullname: 'dls EAST',
-        email: 'dlstest@elastic.com', save: true, roles: ['kibana_user', 'myroleEast']
+        username: 'userEast',
+        password: 'changeme',
+        confirmPassword: 'changeme',
+        fullname: 'dls EAST',
+        email: 'dlstest@elastic.com',
+        save: true,
+        roles: ['kibana_user', 'myroleEast'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
@@ -65,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
       expect(users.userEast.reserved).to.be(false);
     });
 
-    it('user East should only see EAST doc', async function () {
+    it('user East should only see EAST doc', async function() {
       await PageObjects.security.logout();
       await PageObjects.security.login('userEast', 'changeme');
       await PageObjects.common.navigateToApp('discover');
@@ -74,7 +75,9 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('1');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type: - _index:dlstest _score:0');
+      expect(rowData).to.be(
+        'name:ABC Company region:EAST _id:doc1 _type: - _index:dlstest _score:0'
+      );
     });
     after('logout', async () => {
       await PageObjects.security.logout();

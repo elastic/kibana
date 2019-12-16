@@ -7,12 +7,17 @@
 import { AbstractESSource } from './es_source';
 import { ESAggMetricField } from '../fields/es_agg_field';
 import { ESDocField } from '../fields/es_doc_field';
-import { METRIC_TYPE, COUNT_AGG_TYPE, COUNT_PROP_LABEL, COUNT_PROP_NAME, FIELD_ORIGIN } from '../../../common/constants';
+import {
+  METRIC_TYPE,
+  COUNT_AGG_TYPE,
+  COUNT_PROP_LABEL,
+  COUNT_PROP_NAME,
+  FIELD_ORIGIN,
+} from '../../../common/constants';
 
 const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
-
   static METRIC_SCHEMA_CONFIG = {
     group: 'metrics',
     name: 'metric',
@@ -25,29 +30,30 @@ export class AbstractESAggSource extends AbstractESSource {
       METRIC_TYPE.MAX,
       METRIC_TYPE.MIN,
       METRIC_TYPE.SUM,
-      METRIC_TYPE.UNIQUE_COUNT
+      METRIC_TYPE.UNIQUE_COUNT,
     ],
-    defaults: [
-      { schema: 'metric', type: METRIC_TYPE.COUNT }
-    ]
+    defaults: [{ schema: 'metric', type: METRIC_TYPE.COUNT }],
   };
 
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
-    this._metricFields = this._descriptor.metrics ? this._descriptor.metrics.map(metric => {
-      const esDocField = metric.field ? new ESDocField({ fieldName: metric.field, source: this }) : null;
-      return new ESAggMetricField({
-        label: metric.label,
-        esDocField: esDocField,
-        aggType: metric.type,
-        source: this,
-        origin: this.getOriginForField()
-      });
-    }) : [];
+    this._metricFields = this._descriptor.metrics
+      ? this._descriptor.metrics.map(metric => {
+          const esDocField = metric.field
+            ? new ESDocField({ fieldName: metric.field, source: this })
+            : null;
+          return new ESAggMetricField({
+            label: metric.label,
+            esDocField: esDocField,
+            aggType: metric.type,
+            source: this,
+            origin: this.getOriginForField(),
+          });
+        })
+      : [];
   }
 
   createField({ fieldName, label }) {
-
     //if there is a corresponding field with a custom label, use that one.
     if (!label) {
       const matchField = this._metricFields.find(field => field.getName() === fieldName);
@@ -61,7 +67,7 @@ export class AbstractESAggSource extends AbstractESSource {
         aggType: COUNT_AGG_TYPE,
         label: label,
         source: this,
-        origin: this.getOriginForField()
+        origin: this.getOriginForField(),
       });
     }
     //this only works because aggType is a fixed set and does not include the `_of_` string
@@ -72,7 +78,7 @@ export class AbstractESAggSource extends AbstractESSource {
       esDocField,
       aggType,
       source: this,
-      origin: this.getOriginForField()
+      origin: this.getOriginForField(),
     });
   }
 
@@ -89,11 +95,13 @@ export class AbstractESAggSource extends AbstractESSource {
   getMetricFields() {
     const metrics = this._metricFields.filter(esAggField => esAggField.isValid());
     if (metrics.length === 0) {
-      metrics.push(new ESAggMetricField({
-        aggType: COUNT_AGG_TYPE,
-        source: this,
-        origin: this.getOriginForField()
-      }));
+      metrics.push(
+        new ESAggMetricField({
+          aggType: COUNT_AGG_TYPE,
+          source: this,
+          origin: this.getOriginForField(),
+        })
+      );
     }
     return metrics;
   }
@@ -110,16 +118,14 @@ export class AbstractESAggSource extends AbstractESSource {
     return this.getMetricFields().map(esAggMetric => esAggMetric.makeMetricAggConfig());
   }
 
-
   async getNumberFields() {
     return this.getMetricFields();
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
-
     const metricFields = this.getMetricFields();
     const tooltipPropertiesPromises = [];
-    metricFields.forEach((metricField) => {
+    metricFields.forEach(metricField => {
       let value;
       for (const key in properties) {
         if (properties.hasOwnProperty(key) && metricField.getName() === key) {

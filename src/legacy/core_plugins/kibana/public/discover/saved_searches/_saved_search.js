@@ -62,7 +62,7 @@ export function createSavedSearchFactory(Private) {
 
   SavedSearch.searchSource = true;
 
-  SavedSearch.prototype.getFullPath = function () {
+  SavedSearch.prototype.getFullPath = function() {
     return `/app/kibana#/discover/${this.id}`;
   };
 

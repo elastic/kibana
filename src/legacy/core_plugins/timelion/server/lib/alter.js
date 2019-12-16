@@ -29,21 +29,25 @@ import _ from 'lodash';
 
 export default function alter(args, fn) {
   // In theory none of the args should ever be promises. This is probably a waste.
-  return Bluebird.all(args).then(function (args) {
+  return Bluebird.all(args)
+    .then(function(args) {
+      const seriesList = args.shift();
 
-    const seriesList = args.shift();
+      if (seriesList.type !== 'seriesList') {
+        throw new Error('args[0] must be a seriesList');
+      }
 
-    if (seriesList.type !== 'seriesList') {
-      throw new Error ('args[0] must be a seriesList');
-    }
+      const list = _.chain(seriesList.list)
+        .map(function(series) {
+          return fn.apply(this, [series].concat(args));
+        })
+        .flatten()
+        .value();
 
-    const list = _.chain(seriesList.list).map(function (series) {
-      return fn.apply(this, [series].concat(args));
-    }).flatten().value();
-
-    seriesList.list = list;
-    return seriesList;
-  }).catch(function (e) {
-    throw e;
-  });
+      seriesList.list = list;
+      return seriesList;
+    })
+    .catch(function(e) {
+      throw e;
+    });
 }

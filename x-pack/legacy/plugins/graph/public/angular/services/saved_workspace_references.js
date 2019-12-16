@@ -20,7 +20,7 @@ export function extractReferences({ attributes, references = [] }) {
         name: 'indexPattern_0',
         type: 'index-pattern',
         id: indexPattern,
-      }
+      },
     ],
     attributes: {
       ...attributes,
@@ -41,7 +41,9 @@ export function injectReferences(savedObject, references) {
   if (!state.indexPatternRefName) {
     return;
   }
-  const indexPatternReference = references.find(reference => reference.name === state.indexPatternRefName);
+  const indexPatternReference = references.find(
+    reference => reference.name === state.indexPatternRefName
+  );
   if (!indexPatternReference) {
     // Throw an error as "indexPatternRefName" means the reference exists within
     // "references" and in this scenario we have bad data.

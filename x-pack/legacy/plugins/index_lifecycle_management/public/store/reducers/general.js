@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { handleActions } from 'redux-actions';
 import { setIndexName, setAliasName, setBootstrapEnabled } from '../actions/general';
 
@@ -16,23 +13,26 @@ const defaultState = {
   aliasName: '',
 };
 
-export const general = handleActions({
-  [setIndexName](state, { payload: indexName }) {
-    return {
-      ...state,
-      indexName,
-    };
+export const general = handleActions(
+  {
+    [setIndexName](state, { payload: indexName }) {
+      return {
+        ...state,
+        indexName,
+      };
+    },
+    [setAliasName](state, { payload: aliasName }) {
+      return {
+        ...state,
+        aliasName,
+      };
+    },
+    [setBootstrapEnabled](state, { payload: bootstrapEnabled }) {
+      return {
+        ...state,
+        bootstrapEnabled,
+      };
+    },
   },
-  [setAliasName](state, { payload: aliasName }) {
-    return {
-      ...state,
-      aliasName,
-    };
-  },
-  [setBootstrapEnabled](state, { payload: bootstrapEnabled }) {
-    return {
-      ...state,
-      bootstrapEnabled,
-    };
-  }
-}, defaultState);
+  defaultState
+);

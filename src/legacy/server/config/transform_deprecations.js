@@ -38,22 +38,26 @@ const rewriteBasePath = (settings, log) => {
   if (_.has(settings, 'server.basePath') && !_.has(settings, 'server.rewriteBasePath')) {
     log(
       'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
-      'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
-      'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
-      'current behavior and silence this warning.'
+        'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
+        'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
+        'current behavior and silence this warning.'
     );
   }
 };
 
 const configPath = (settings, log) => {
   if (_.has(process, 'env.CONFIG_PATH')) {
-    log(`Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`);
+    log(
+      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`
+    );
   }
 };
 
 const dataPath = (settings, log) => {
   if (_.has(process, 'env.DATA_PATH')) {
-    log(`Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`);
+    log(
+      `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`
+    );
   }
 };
 
@@ -68,10 +72,12 @@ const cspRules = (settings, log) => {
     return;
   }
 
-  const parsed = new Map(rules.map(ruleStr => {
-    const parts = ruleStr.split(/\s+/);
-    return [parts[0], parts.slice(1)];
-  }));
+  const parsed = new Map(
+    rules.map(ruleStr => {
+      const parts = ruleStr.split(/\s+/);
+      return [parts[0], parts.slice(1)];
+    })
+  );
 
   settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
     if (sourceList.find(source => source.includes(NONCE_STRING))) {
@@ -84,7 +90,10 @@ const cspRules = (settings, log) => {
       }
     }
 
-    if (SELF_POLICIES.includes(policy) && !sourceList.find(source => source.includes(SELF_STRING))) {
+    if (
+      SELF_POLICIES.includes(policy) &&
+      !sourceList.find(source => source.includes(SELF_STRING))
+    ) {
       log(`csp.rules must contain the 'self' source. Automatically adding to ${policy}.`);
       sourceList.push(SELF_STRING);
     }
@@ -110,7 +119,7 @@ const deprecations = [
   rewriteBasePath,
   configPath,
   dataPath,
-  cspRules
+  cspRules,
 ];
 
 export const transformDeprecations = createTransform(deprecations);

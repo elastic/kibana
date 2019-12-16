@@ -20,13 +20,12 @@
 import { UiApp } from './ui_app';
 
 export function uiAppsMixin(kbnServer, server) {
-
   const { uiAppSpecs = [] } = kbnServer.uiExports;
   const existingIds = new Set();
   const appsById = new Map();
   const hiddenAppsById = new Map();
 
-  kbnServer.uiApps = uiAppSpecs.map((spec) => {
+  kbnServer.uiApps = uiAppSpecs.map(spec => {
     const app = new UiApp(kbnServer, spec);
     const id = app.getId();
 
@@ -54,12 +53,15 @@ export function uiAppsMixin(kbnServer, server) {
     injectedVarProviders.push({ appId, provider });
   });
 
-  server.decorate('server', 'getInjectedUiAppVars', async (appId) => {
+  server.decorate('server', 'getInjectedUiAppVars', async appId => {
     return await injectedVarProviders
       .filter(p => p.appId === appId)
-      .reduce(async (acc, { provider }) => ({
-        ...await acc,
-        ...await provider(server)
-      }), {});
+      .reduce(
+        async (acc, { provider }) => ({
+          ...(await acc),
+          ...(await provider(server)),
+        }),
+        {}
+      );
   });
 }

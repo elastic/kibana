@@ -13,8 +13,8 @@ export async function callEsSearchApi({ callCluster, index, body, queryParams })
       resp: await callCluster('search', {
         ...queryParams,
         index,
-        body
-      })
+        body,
+      }),
     };
   } catch (error) {
     throw Boom.boomify(error, { statusCode: error.statusCode || 500 });

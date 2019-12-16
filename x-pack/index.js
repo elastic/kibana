@@ -46,7 +46,7 @@ import { lens } from './legacy/plugins/lens';
 import { ingest } from './legacy/plugins/ingest';
 import { fleet } from './legacy/plugins/fleet';
 
-module.exports = function (kibana) {
+module.exports = function(kibana) {
   return [
     xpackMain(kibana),
     graph(kibana),

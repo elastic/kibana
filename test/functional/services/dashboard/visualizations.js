@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const queryBar = getService('queryBar');
@@ -25,7 +24,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
 
-  return new class DashboardVisualizations {
+  return new (class DashboardVisualizations {
     async createAndAddTSVBVisualization(name) {
       log.debug(`createAndAddTSVBVisualization(${name})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
@@ -86,5 +85,5 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
-  };
+  })();
 }

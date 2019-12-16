@@ -57,7 +57,7 @@ for (let i = 0; i < 105; i++) {
     linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
     name: `testy${i}`,
     policy: {
-      ...policy
+      ...policy,
     },
   });
 }
@@ -82,7 +82,7 @@ const expectedErrorMessages = (rendered, expectedErrorMessages) => {
     expect(foundErrorMessage).toBe(true);
   });
 };
-const noRollover = (rendered) => {
+const noRollover = rendered => {
   findTestSubject(rendered, 'rolloverSwitch').simulate('click');
   rendered.update();
 };
@@ -129,9 +129,7 @@ describe('edit policy', () => {
     test('should show error when trying to save empty form', () => {
       const rendered = mountWithIntl(component);
       save(rendered);
-      expectedErrorMessages(rendered, [
-        policyNameRequiredMessage,
-      ]);
+      expectedErrorMessages(rendered, [policyNameRequiredMessage]);
     });
     test('should show error when trying to save policy name with space', () => {
       const rendered = mountWithIntl(component);
@@ -186,7 +184,11 @@ describe('edit policy', () => {
       maxAgeInput.simulate('change', { target: { value: '' } });
       rendered.update();
       save(rendered);
-      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage, maximumDocumentsRequiredMessage]);
+      expectedErrorMessages(rendered, [
+        maximumSizeRequiredMessage,
+        maximumAgeRequiredMessage,
+        maximumDocumentsRequiredMessage,
+      ]);
     });
     test('should show number above 0 required error when trying to save with -1 for max size', () => {
       const rendered = mountWithIntl(component);
@@ -346,7 +348,7 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -358,7 +360,7 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -417,7 +419,7 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -429,7 +431,7 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');

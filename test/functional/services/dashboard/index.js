@@ -22,4 +22,3 @@ export { DashboardExpectProvider } from './expectations';
 export { DashboardAddPanelProvider } from './add_panel';
 export { DashboardReplacePanelProvider } from './replace_panel';
 export { DashboardPanelActionsProvider } from './panel_actions';
-

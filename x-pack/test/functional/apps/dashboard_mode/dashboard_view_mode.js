@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', function () {
+  describe('Dashboard View Mode', function() {
     this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
       await browser.setWindowSize(1600, 1000);
 
@@ -48,7 +48,9 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await PageObjects.dashboard.addVisualizations(
+        PageObjects.dashboard.getTestVisualizationNames()
+      );
       await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
@@ -206,11 +208,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.security.logout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        if (!await appsMenu.linkExists('Management')) {
+        if (!(await appsMenu.linkExists('Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });
-
     });
   });
 }

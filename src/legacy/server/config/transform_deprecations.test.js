@@ -20,8 +20,8 @@
 import sinon from 'sinon';
 import { transformDeprecations } from './transform_deprecations';
 
-describe('server/config', function () {
-  describe('transformDeprecations', function () {
+describe('server/config', function() {
+  describe('transformDeprecations', function() {
     describe('savedObjects.indexCheckTimeout', () => {
       it('removes the indexCheckTimeout and savedObjects properties', () => {
         const settings = {

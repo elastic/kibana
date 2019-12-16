@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('EPM Endpoints', function () {
+export default function({ loadTestFile }) {
+  describe('EPM Endpoints', function() {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./file'));

@@ -21,11 +21,11 @@ const { existsSync } = require('fs');
 const { join } = require('path');
 const { name, version } = require('../package.json');
 
-module.exports = function (serviceName = name) {
+module.exports = function(serviceName = name) {
   if (process.env.kbnWorkerType === 'optmzr') return;
 
   const conf = {
-    serviceName: `${serviceName}-${version.replace(/\./g, '_')}`
+    serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
   };
 
   if (configFileExists()) conf.configFile = 'config/apm.js';
