@@ -10,6 +10,8 @@ def SNAPSHOT_ID = params.SNAPSHOT_ID ?: "20191216-202229_c1d075a7dab"
 def ES_OSS_SNAPSHOT = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/elasticsearch-oss-${SNAPSHOT_VERSION}-SNAPSHOT-linux-x86_64.tar.gz"
 def ES_XPACK_SNAPSHOT = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/elasticsearch-${SNAPSHOT_VERSION}-SNAPSHOT-linux-x86_64.tar.gz"
 
+// TODO add ability to change scm based on BRANCH passed in
+
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {
     ansiColor('xterm') {
@@ -60,7 +62,7 @@ timeout(time: 120, unit: 'MINUTES') {
         promoteSnapshot(SNAPSHOT_VERSION, SNAPSHOT_ID)
       }
 
-      sendKibanaMail()
+      kibanaPipeline.sendMail()
     }
   }
 }
