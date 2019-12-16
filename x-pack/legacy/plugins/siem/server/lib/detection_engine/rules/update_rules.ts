@@ -120,7 +120,7 @@ export const updateRules = async ({
       schedule: {
         interval: calculateInterval(
           interval,
-          // TODO: we assume the schedule is an interval schedule due to an problem
+          // TODO: we assume the schedule is an interval schedule due to a problem
           // in the Alerting api, which should be addressed by the following
           // issue: https://github.com/elastic/kibana/issues/49703
           // Once this issue is closed, the type should be correctly returned by alerting
