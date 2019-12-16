@@ -15,14 +15,10 @@ import {
   EuiComboBox,
   EuiSelect,
   EuiFieldNumber,
-  EuiLink,
-  EuiIconTip,
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldRule, FieldRuleValue } from '../../../model';
-import { documentationLinks } from '../../../services/documentation_links';
 
 interface Props {
   rule: FieldRule;
@@ -230,19 +226,6 @@ export class FieldRuleEditor extends Component<Props, {}> {
             defaultMessage: 'Value',
           }
         )}
-        labelAppend={
-          <EuiLink href={documentationLinks.getRoleMappingFieldRulesDocUrl()} target="_blank">
-            <EuiIconTip
-              type="questionInCircle"
-              content={
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.fieldRuleEditor.fieldValueHelp"
-                  defaultMessage="Learn more about supported field values"
-                />
-              }
-            />
-          </EuiLink>
-        }
         key={valueIndex}
       >
         {inputField}

@@ -28,6 +28,7 @@ import { AdvancedRuleEditor } from './advanced_rule_editor';
 import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
 import { Rule, generateRulesFromRaw } from '../../../model';
 import { validateRoleMappingRules } from '../../services/role_mapping_validation';
+import { documentationLinks } from '../../../services/documentation_links';
 
 interface Props {
   rawRules: RoleMapping['rules'];
@@ -86,7 +87,21 @@ export class RuleEditorPanel extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.roleMappingRulesFormRowHelpText"
-                  defaultMessage="Roles will be assigned to users matching these rules."
+                  defaultMessage="Roles will be assigned to users matching these rules. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink
+                        href={documentationLinks.getRoleMappingFieldRulesDocUrl()}
+                        target="_blank"
+                        external={true}
+                      >
+                        <FormattedMessage
+                          id="xpack.security.management.editRoleMapping.fieldRuleEditor.fieldValueHelp"
+                          defaultMessage="Learn more about supported field values."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
               </p>
             </EuiText>
