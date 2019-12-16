@@ -7,9 +7,18 @@ module.exports = {
   ],
 
   plugins: [
+    'import',
     '@kbn/eslint-plugin-eslint',
     'prettier',
   ],
+
+  settings: {
+    'import/resolver': {
+      '@kbn/eslint-import-resolver-kibana': {
+        forceNode: true,
+      },
+    },
+  },
 
   parserOptions: {
     ecmaVersion: 2018

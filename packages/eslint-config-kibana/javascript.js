@@ -13,18 +13,9 @@ module.exports = {
       plugins: [
         'mocha',
         'babel',
-        'import',
         'no-unsanitized',
         'prefer-object-spread',
       ],
-
-      settings: {
-        'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
-            forceNode: true,
-          },
-        },
-      },
 
       env: {
         es6: true,

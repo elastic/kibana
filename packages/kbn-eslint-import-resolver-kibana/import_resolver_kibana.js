@@ -17,10 +17,12 @@
  * under the License.
  */
 
-const { join, dirname, extname } = require('path');
-
+const { join, dirname, extname, resolve } = require('path');
 const webpackResolver = require('eslint-import-resolver-webpack');
 const nodeResolver = require('eslint-import-resolver-node');
+
+const REPO_ROOT = dirname(require.resolve('../../package.json'));
+const IMPORTED_FROM_ROOT_DIRS = ['src', 'x-pack'];
 
 const {
   getKibanaPath,
@@ -66,8 +68,19 @@ function tryNodeResolver(importRequest, file, config) {
   );
 }
 
+function isImportedFromRoot(importRequest) {
+  return IMPORTED_FROM_ROOT_DIRS.some(
+    p => importRequest === p || importRequest.startsWith(`${p}/`)
+  );
+}
+
 exports.resolve = function resolveKibanaPath(importRequest, file, config) {
   config = config || {};
+
+  if (isImportedFromRoot(importRequest)) {
+    config = { ...config, forceNode: true };
+    importRequest = resolve(REPO_ROOT, importRequest);
+  }
 
   if (config.forceNode) {
     return tryNodeResolver(importRequest, file, config);

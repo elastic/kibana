@@ -3,9 +3,6 @@
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
 
-const semver = require('semver');
-const PKG = require('../../package.json');
-
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
 module.exports = {
@@ -17,20 +14,8 @@ module.exports = {
       plugins: [
         '@typescript-eslint',
         'ban',
-        'import',
         'prefer-object-spread',
       ],
-
-      settings: {
-        'import/resolver': {
-          node: {
-            extensions: ['.mjs', '.js', '.json', '.ts', '.tsx'],
-          },
-        },
-        react: {
-          version: semver.valid(semver.coerce(PKG.dependencies.react)),
-        },
-      },
 
       env: {
         es6: true,
