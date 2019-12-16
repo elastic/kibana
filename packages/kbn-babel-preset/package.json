@@ -10,7 +10,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.7.4",
     "@babel/plugin-transform-modules-commonjs": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
-    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-react": "^7.7.4",
     "@babel/preset-typescript": "^7.3.3",
     "babel-plugin-add-module-exports": "^1.0.2",
     "babel-plugin-filter-imports": "^4.0.0",
