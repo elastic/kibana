@@ -170,8 +170,9 @@ export class TaskRunnerFactory {
 
         const nextRunAt = getNextRunAt(
           new Date(taskInstance.startedAt!),
-          // as we currenrtly only support `interval` we can cast
-          // this safely
+          // we do not currently have a good way of returning the type
+          // from SavedObjectsClient, and as we currenrtly require a schedule
+          // and we only support `interval`, we can cast this safely
           schedule as IntervalSchedule
         );
 
