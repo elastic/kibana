@@ -692,10 +692,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async sizeUpEditor() {
       const resizerPanel = await testSubjects.find('splitPanelResizer');
       // Drag panel 100 px left
-      await browser.dragAndDrop(
-        { location: resizerPanel },
-        { location: { x: -100, y: 0 } }
-      );
+      await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }
 
     async changeHeatmapColorNumbers(value = 6) {
@@ -1337,7 +1334,6 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async getBucketErrorMessage() {
       const error = await find.byCssSelector(
         '[data-test-subj="bucketsAggGroup"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
-        '[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
       );
       const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
