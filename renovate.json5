@@ -502,6 +502,14 @@
         ],
       },
       {
+        groupSlug: 'pegjs',
+        groupName: 'pegjs related packages',
+        packageNames: [
+          'pegjs',
+          '@types/pegjs',
+        ],
+      },
+      {
         groupSlug: 'pngjs',
         groupName: 'pngjs related packages',
         packageNames: [
