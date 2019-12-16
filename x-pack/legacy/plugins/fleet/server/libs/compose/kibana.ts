@@ -24,6 +24,7 @@ import { InstallLib } from '../install';
 import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
+import { makePolicyUpdateHandler } from '../policy_update';
 
 export function compose(server: any): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
@@ -59,7 +60,7 @@ export function compose(server: any): FleetServerLib {
 
   const install = new InstallLib(framework);
 
-  return {
+  const libs = {
     agents,
     agentsPolicy,
     agentEvents,
@@ -69,4 +70,8 @@ export function compose(server: any): FleetServerLib {
     install,
     framework,
   };
+  const policyUpdateHandler = makePolicyUpdateHandler(libs);
+  server.plugins.ingest.policy.registerPolicyUpdateHandler(policyUpdateHandler);
+
+  return libs;
 }

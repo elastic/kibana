@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import EventEmitter from 'events';
 import { flatten, unique } from 'lodash';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import { ReturnTypeBulkDelete } from '../../common/types/std_return_format';
@@ -15,9 +14,10 @@ import { DatasourcesLib } from './datasources';
 import { BackendFrameworkLib } from './framework';
 import { OutputsLib } from './outputs';
 import { Status, Policy, Datasource } from '../../common/types/domain_data';
+import { PolicyUpdateHandler } from './types';
 
 export class PolicyLib {
-  public events: EventEmitter = new EventEmitter();
+  public eventsHandler: PolicyUpdateHandler[] = [];
   constructor(
     private readonly adapter: PolicyAdapter,
     private readonly libs: {
@@ -119,6 +119,10 @@ export class PolicyLib {
         } as Policy;
       }),
     };
+  }
+
+  public registerPolicyUpdateHandler(handler: PolicyUpdateHandler) {
+    this.eventsHandler.push(handler);
   }
 
   // public async changeLog(
@@ -264,6 +268,12 @@ export class PolicyLib {
       await this.adapter.create(this.libs.framework.internalUser, newDefaultPolicy, {
         id: DEFAULT_POLICY_ID,
       });
+
+      await this._triggerPolicyUpdatedEvent(
+        this.libs.framework.internalUser,
+        'created',
+        DEFAULT_POLICY_ID
+      );
     }
   }
 
@@ -273,11 +283,21 @@ export class PolicyLib {
       updated_on: new Date().toString(),
       updated_by: (user as FrameworkAuthenticatedUser).username || 'Fleet (system action)',
     });
-    // TODO fire events for fleet that update was made
 
+    await this._triggerPolicyUpdatedEvent(user, 'updated', id);
     // TODO create audit/history log
     // const newPolicy = await this.adapter.create(policyData);
 
     return policy as Policy;
+  }
+
+  private async _triggerPolicyUpdatedEvent(
+    user: FrameworkUser,
+    action: 'created' | 'updated' | 'deleted',
+    policyId: string
+  ) {
+    for (const handler of this.eventsHandler) {
+      await handler(user, action, policyId);
+    }
   }
 }
