@@ -51,11 +51,11 @@ export function concatStreamProviders(sourceProviders, options = {}) {
 
     source
       // proxy errors from the source to the destination
-      .once('error', (error) => destination.emit('error', error))
+      .once('error', error => destination.emit('error', error))
       // pipe the source to the destination but only proxy the
       // end event if this is the last source
       .pipe(destination, { end: isLast });
-  }());
+  })();
 
   return destination;
 }

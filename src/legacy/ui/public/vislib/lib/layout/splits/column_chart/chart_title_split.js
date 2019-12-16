@@ -28,13 +28,14 @@ import $ from 'jquery';
  * if not data.rows or data.columns, return no chart titles
  */
 export function chartTitleSplit(selection) {
-  selection.each(function (data) {
+  selection.each(function(data) {
     const div = d3.select(this);
     const parent = $(this).parents('.visWrapper');
 
     if (!data.series) {
-      div.selectAll('.chart-title')
-        .data(function (d) {
+      div
+        .selectAll('.chart-title')
+        .data(function(d) {
           return d.rows ? d.rows : d.columns;
         })
         .enter()

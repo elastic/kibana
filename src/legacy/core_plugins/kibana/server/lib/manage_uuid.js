@@ -57,7 +57,7 @@ export default async function manageUuid(server) {
   }
 
   // detect if uuid exists already from before a restart
-  const logToServer = (msg) => server.log(['server', 'uuid', fileName], msg);
+  const logToServer = msg => server.log(['server', 'uuid', fileName], msg);
   const dataFileUuid = await detectUuid();
   let serverConfigUuid = config.get('server.uuid'); // check if already set in config
 

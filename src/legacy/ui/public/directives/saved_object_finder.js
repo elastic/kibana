@@ -29,8 +29,7 @@ import './paginate';
 
 const module = uiModules.get('kibana');
 
-module.directive('savedObjectFinder', function ($location, kbnUrl, Private, config) {
-
+module.directive('savedObjectFinder', function($location, kbnUrl, Private, config) {
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
 
   return {
@@ -52,11 +51,11 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
        * @{type} boolean - set this to true, if you don't want the search box above the
        * table to automatically gain focus once loaded
        */
-      disableAutoFocus: '='
+      disableAutoFocus: '=',
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
-    controller: function ($scope, $element) {
+    controller: function($scope, $element) {
       const self = this;
 
       // the text input element
@@ -94,7 +93,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
        * @param  {Array} hits Array of saved finder object hits
        * @return {Array} Array sorted either ascending or descending
        */
-      self.sortHits = function (hits) {
+      self.sortHits = function(hits) {
         self.isAscending = !self.isAscending;
         self.hits = self.isAscending ? _.sortBy(hits, 'title') : _.sortBy(hits, 'title').reverse();
       };
@@ -104,7 +103,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
        * hit should have a url in the UI, returns it if so
        * @return {string|null} - the url or nothing
        */
-      self.makeUrl = function (hit) {
+      self.makeUrl = function(hit) {
         if ($scope.userMakeUrl) {
           return $scope.userMakeUrl(hit);
         }
@@ -116,7 +115,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
         return '#';
       };
 
-      self.preventClick = function ($event) {
+      self.preventClick = function($event) {
         $event.preventDefault();
       };
 
@@ -124,7 +123,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
        * Called when a hit object is clicked, can override the
        * url behavior if necessary.
        */
-      self.onChoose = function (hit, $event) {
+      self.onChoose = function(hit, $event) {
         if ($scope.userOnChoose) {
           $scope.userOnChoose(hit, $event);
         }
@@ -138,7 +137,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
         kbnUrl.change(url.substr(1));
       };
 
-      $scope.$watch('filter', function (newFilter) {
+      $scope.$watch('filter', function(newFilter) {
         // ensure that the currentFilter changes from undefined to ''
         // which triggers
         currentFilter = newFilter || '';
@@ -147,7 +146,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
 
       $scope.pageFirstItem = 0;
       $scope.pageLastItem = 0;
-      $scope.onPageChanged = (page) => {
+      $scope.onPageChanged = page => {
         $scope.pageFirstItem = page.firstItem;
         $scope.pageLastItem = page.lastItem;
       };
@@ -155,15 +154,17 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
       //manages the state of the keyboard selector
       self.selector = {
         enabled: false,
-        index: -1
+        index: -1,
       };
 
-      self.getLabel = function () {
-        return _.words(self.properties.nouns).map(_.capitalize).join(' ');
+      self.getLabel = function() {
+        return _.words(self.properties.nouns)
+          .map(_.capitalize)
+          .join(' ');
       };
 
       //key handler for the filter text box
-      self.filterKeyDown = function ($event) {
+      self.filterKeyDown = function($event) {
         switch (keyMap[$event.keyCode]) {
           case 'enter':
             if (self.hitCount !== 1) return;
@@ -178,7 +179,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
       };
 
       //key handler for the list items
-      self.hitKeyDown = function ($event, page, paginate) {
+      self.hitKeyDown = function($event, page, paginate) {
         switch (keyMap[$event.keyCode]) {
           case 'tab':
             if (!self.selector.enabled) break;
@@ -241,7 +242,7 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
           case 'enter':
             if (!self.selector.enabled) break;
 
-            const hitIndex = ((page.number - 1) * paginate.perPage) + self.selector.index;
+            const hitIndex = (page.number - 1) * paginate.perPage + self.selector.index;
             const hit = self.hits[hitIndex];
             if (!hit) break;
 
@@ -256,21 +257,21 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
         }
       };
 
-      self.hitBlur = function () {
+      self.hitBlur = function() {
         self.selector.index = -1;
         self.selector.enabled = false;
       };
 
-      self.manageObjects = function (type) {
+      self.manageObjects = function(type) {
         $location.url('/management/kibana/objects?_a=' + rison.encode({ tab: type }));
       };
 
-      self.hitCountNoun = function () {
-        return ((self.hitCount === 1) ? self.properties.noun : self.properties.nouns).toLowerCase();
+      self.hitCountNoun = function() {
+        return (self.hitCount === 1 ? self.properties.noun : self.properties.nouns).toLowerCase();
       };
 
       function selectTopHit() {
-        setTimeout(function () {
+        setTimeout(function() {
           //triggering a focus event kicks off a new angular digest cycle.
           $list.find('a:first').focus();
         }, 0);
@@ -290,20 +291,20 @@ module.directive('savedObjectFinder', function ($location, kbnUrl, Private, conf
         prevSearch = filter;
 
         const isLabsEnabled = config.get('visualize:enableLabs');
-        self.service.find(filter)
-          .then(function (hits) {
+        self.service.find(filter).then(function(hits) {
+          hits.hits = hits.hits.filter(
+            hit => isLabsEnabled || _.get(hit, 'type.stage') !== 'experimental'
+          );
+          hits.total = hits.hits.length;
 
-            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || _.get(hit, 'type.stage') !== 'experimental'));
-            hits.total = hits.hits.length;
-
-            // ensure that we don't display old results
-            // as we can't really cancel requests
-            if (currentFilter === filter) {
-              self.hitCount = hits.total;
-              self.hits = _.sortBy(hits.hits, 'title');
-            }
-          });
+          // ensure that we don't display old results
+          // as we can't really cancel requests
+          if (currentFilter === filter) {
+            self.hitCount = hits.total;
+            self.hits = _.sortBy(hits.hits, 'title');
+          }
+        });
       }
-    }
+    },
   };
 });

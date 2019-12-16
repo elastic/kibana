@@ -29,14 +29,13 @@ export default new Chainable('holt', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'alpha',
       types: ['number'],
       help: i18n.translate('timelion.help.functions.holt.args.alphaHelpText', {
-        defaultMessage:
-          `
+        defaultMessage: `
         Smoothing weight from 0 to 1.
         Increasing alpha will make the new series more closely follow the original.
         Lowering it will make the series smoother`,
@@ -46,8 +45,7 @@ export default new Chainable('holt', {
       name: 'beta',
       types: ['number'],
       help: i18n.translate('timelion.help.functions.holt.args.betaHelpText', {
-        defaultMessage:
-          `
+        defaultMessage: `
         Trending weight from 0 to 1.
         Increasing beta will make rising/falling lines continue to rise/fall longer.
         Lowering it will make the function learn the new trend faster`,
@@ -57,8 +55,7 @@ export default new Chainable('holt', {
       name: 'gamma',
       types: ['number'],
       help: i18n.translate('timelion.help.functions.holt.args.gammaHelpText', {
-        defaultMessage:
-          `
+        defaultMessage: `
         Seasonal weight from 0 to 1. Does your data look like a wave?
         Increasing this will give recent seasons more importance, thus changing the wave form faster.
         Lowering it will reduce the importance of new seasons, making history more important.
@@ -79,17 +76,15 @@ export default new Chainable('holt', {
       name: 'sample',
       types: ['number', 'null'],
       help: i18n.translate('timelion.help.functions.holt.args.sampleHelpText', {
-        defaultMessage:
-          `
+        defaultMessage: `
       The number of seasons to sample before starting to "predict" in a seasonal series.
       (Only useful with gamma, Default: all)`,
         description: '"gamma" and "all" are parameter names and values and must not be translated.',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.holtHelpText', {
-    defaultMessage:
-      `
+    defaultMessage: `
     Sample the beginning of a series and use it to forecast what should happen
     via several optional parameters. In general, this doesn't really predict the
     future, but predicts what should be happening right now according to past data,
@@ -97,16 +92,14 @@ export default new Chainable('holt', {
     description: '"null" is a data value here and must not be translated.',
   }),
   fn: function expsmoothFn(args, tlConfig) {
-
     const newSeries = _.cloneDeep(args.byName.inputSeries);
 
     const alpha = args.byName.alpha;
     const beta = args.byName.beta;
     const gamma = args.byName.gamma;
 
-    _.each(newSeries.list, function (series) {
+    _.each(newSeries.list, function(series) {
       const sample = args.byName.sample || series.data.length; // If we use length it should simply never predict
-
 
       // Single exponential smoothing
       // This is basically a weighted moving average in which the older
@@ -132,7 +125,9 @@ export default new Chainable('holt', {
             })
           );
         }
-        const season = Math.round(toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval));
+        const season = Math.round(
+          toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval)
+        );
         points = tes(points, alpha, beta, gamma, season, sample);
       }
 
@@ -140,5 +135,5 @@ export default new Chainable('holt', {
     });
 
     return newSeries;
-  }
+  },
 });

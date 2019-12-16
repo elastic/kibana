@@ -32,7 +32,6 @@ export const isPermissionsLoading = state => {
   return state.permissions.loading;
 };
 
-
 export const getPermissionsError = state => {
   return state.permissions.error;
 };

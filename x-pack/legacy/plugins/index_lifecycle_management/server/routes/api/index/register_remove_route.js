@@ -7,7 +7,7 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 async function removeLifecycle(callWithRequest, indexNames) {
   const responses = [];
@@ -16,7 +16,7 @@ async function removeLifecycle(callWithRequest, indexNames) {
     const params = {
       method: 'POST',
       path: `/${encodeURIComponent(indexName)}/_ilm/remove`,
-      ignore: [ 404 ],
+      ignore: [404],
     };
 
     responses.push(callWithRequest('transport.request', params));
@@ -31,7 +31,7 @@ export function registerRemoveRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/index/remove',
     method: 'POST',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -46,7 +46,7 @@ export function registerRemoveRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

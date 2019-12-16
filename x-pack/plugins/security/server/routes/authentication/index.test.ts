@@ -27,7 +27,7 @@ describe('Authentication routes', () => {
       config: { authc: { providers: ['basic'] } } as ConfigType,
       authc: authenticationMock.create(),
       authz: authorizationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' }),
+      csp: httpServiceMock.createSetupContract().csp,
     });
 
     const samlRoutePathPredicate = ([{ path }]: [{ path: string }, any]) =>

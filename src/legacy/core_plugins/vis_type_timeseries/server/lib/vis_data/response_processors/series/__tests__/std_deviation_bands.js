@@ -97,7 +97,10 @@ describe('stdDeviationBands(resp, panel, series)', () => {
       lines: { show: true, fill: 0.5, lineWidth: 0 },
       points: { show: false },
       fillBetween: 'test:lower',
-      data: [[1, 3.2], [2, 3.5]],
+      data: [
+        [1, 3.2],
+        [2, 3.5],
+      ],
     });
 
     expect(results[1]).to.eql({
@@ -105,7 +108,10 @@ describe('stdDeviationBands(resp, panel, series)', () => {
       color: 'rgb(255, 0, 0)',
       lines: { show: true, fill: false, lineWidth: 0 },
       points: { show: false },
-      data: [[1, 0.2], [2, 0.5]],
+      data: [
+        [1, 0.2],
+        [2, 0.5],
+      ],
     });
   });
 });

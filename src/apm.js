@@ -21,7 +21,7 @@ const { existsSync } = require('fs');
 const { join } = require('path');
 const { name, version } = require('../package.json');
 
-module.exports = function (serviceName = name) {
+module.exports = function(serviceName = name) {
   if (process.env.kbnWorkerType === 'optmzr') return;
 
   const conf = {

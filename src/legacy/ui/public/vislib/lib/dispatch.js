@@ -101,7 +101,6 @@ export class Dispatch extends SimpleEmitter {
    * @returns {Boolean}
    */
   _isSeriesInPercentageMode(rawId, series, visConfig) {
-
     if (!rawId || !Array.isArray(series) || !visConfig) {
       return false;
     }
@@ -175,8 +174,8 @@ export class Dispatch extends SimpleEmitter {
    * @returns {Function}
    */
   addEvent(event, callback) {
-    return function (selection) {
-      selection.each(function () {
+    return function(selection) {
+      selection.each(function() {
         const element = d3.select(this);
 
         if (typeof callback === 'function') {
@@ -239,7 +238,7 @@ export class Dispatch extends SimpleEmitter {
    * @returns {Function}
    */
   addClickEvent() {
-    const onClick = (d) => this.emit('click', this.clickEventResponse(d));
+    const onClick = d => this.emit('click', this.clickEventResponse(d));
 
     return this.addEvent('click', onClick);
   }
@@ -345,9 +344,9 @@ export class Dispatch extends SimpleEmitter {
       const isTimeSeries = data.ordered && data.ordered.date;
 
       // Allows for brushing on d3.scale.ordinal()
-      const selected = xScale.domain().filter((d) =>
-        brush.extent()[0] <= xScale(d) && xScale(d) <= brush.extent()[1]
-      );
+      const selected = xScale
+        .domain()
+        .filter(d => brush.extent()[0] <= xScale(d) && xScale(d) <= brush.extent()[1]);
       const range = isTimeSeries ? brush.extent() : selected;
 
       return self.emit('brush', {
@@ -368,7 +367,7 @@ export class Dispatch extends SimpleEmitter {
           // hijack the brush start event to filter out right/middle clicks
           const brushHandler = brushG.on('mousedown.brush');
           if (!brushHandler) return; // touch events in use
-          brushG.on('mousedown.brush', function () {
+          brushG.on('mousedown.brush', function() {
             if (validBrushClick(d3.event)) brushHandler.apply(this, arguments);
           });
         })

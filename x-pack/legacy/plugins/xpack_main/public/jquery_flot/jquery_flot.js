@@ -5,7 +5,9 @@
  */
 
 import $ from 'jquery';
-if (window) { window.jQuery = $; }
+if (window) {
+  window.jQuery = $;
+}
 import 'ui/flot-charts/jquery.flot';
 
 // load flot plugins

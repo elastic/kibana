@@ -46,9 +46,9 @@ describe('esArchiver createParseArchiveStreams', () => {
             Buffer.from('{'),
             Buffer.from('"'),
             Buffer.from('a":'),
-            Buffer.from('1}')
+            Buffer.from('1}'),
           ]),
-          ...createParseArchiveStreams({ gzip: false })
+          ...createParseArchiveStreams({ gzip: false }),
         ]);
 
         expect(output).to.eql({ a: 1 });
@@ -65,7 +65,7 @@ describe('esArchiver createParseArchiveStreams', () => {
             Buffer.from('1'),
           ]),
           ...createParseArchiveStreams({ gzip: false }),
-          createConcatStream([])
+          createConcatStream([]),
         ]);
 
         expect(output).to.eql([{ a: 1 }, 1]);
@@ -73,7 +73,7 @@ describe('esArchiver createParseArchiveStreams', () => {
 
       it('provides each JSON object as soon as it is parsed', async () => {
         let onReceived;
-        const receivedPromise = new Promise(resolve => onReceived = resolve);
+        const receivedPromise = new Promise(resolve => (onReceived = resolve));
         const input = new PassThrough();
         const check = new Transform({
           writableObjectMode: true,
@@ -81,14 +81,14 @@ describe('esArchiver createParseArchiveStreams', () => {
           transform(chunk, env, callback) {
             onReceived(chunk);
             callback(null, chunk);
-          }
+          },
         });
 
         const finalPromise = createPromiseFromStreams([
           input,
           ...createParseArchiveStreams(),
           check,
-          createConcatStream([])
+          createConcatStream([]),
         ]);
 
         input.write(Buffer.from('{"a": 1}\n\n{"a":'));
@@ -109,7 +109,7 @@ describe('esArchiver createParseArchiveStreams', () => {
               Buffer.from('{"a": 2}\n\n'),
             ]),
             ...createParseArchiveStreams({ gzip: false }),
-            createConcatStream()
+            createConcatStream(),
           ]);
           throw new Error('should have failed');
         } catch (err) {
@@ -134,10 +134,10 @@ describe('esArchiver createParseArchiveStreams', () => {
             Buffer.from('{'),
             Buffer.from('"'),
             Buffer.from('a":'),
-            Buffer.from('1}')
+            Buffer.from('1}'),
           ]),
           createGzip(),
-          ...createParseArchiveStreams({ gzip: true })
+          ...createParseArchiveStreams({ gzip: true }),
         ]);
 
         expect(output).to.eql({ a: 1 });
@@ -145,16 +145,10 @@ describe('esArchiver createParseArchiveStreams', () => {
 
       it('parses valid gzipped JSON strings separated by two newlines', async () => {
         const output = await createPromiseFromStreams([
-          createListStream([
-            '{\n',
-            '  "a": 1\n',
-            '}',
-            '\n\n',
-            '{"a":2}'
-          ]),
+          createListStream(['{\n', '  "a": 1\n', '}', '\n\n', '{"a":2}']),
           createGzip(),
           ...createParseArchiveStreams({ gzip: true }),
-          createConcatStream([])
+          createConcatStream([]),
         ]);
 
         expect(output).to.eql([{ a: 1 }, { a: 2 }]);
@@ -165,8 +159,8 @@ describe('esArchiver createParseArchiveStreams', () => {
       const output = await createPromiseFromStreams([
         createListStream([]),
         createGzip(),
-        ...createParseArchiveStreams(({ gzip: true })),
-        createConcatStream([])
+        ...createParseArchiveStreams({ gzip: true }),
+        createConcatStream([]),
       ]);
 
       expect(output).to.eql([]);
@@ -176,11 +170,9 @@ describe('esArchiver createParseArchiveStreams', () => {
       it('stops when the input is not valid gzip archive', async () => {
         try {
           await createPromiseFromStreams([
-            createListStream([
-              Buffer.from('{"a": 1}'),
-            ]),
+            createListStream([Buffer.from('{"a": 1}')]),
             ...createParseArchiveStreams({ gzip: true }),
-            createConcatStream()
+            createConcatStream(),
           ]);
           throw new Error('should have failed');
         } catch (err) {
@@ -193,9 +185,7 @@ describe('esArchiver createParseArchiveStreams', () => {
   describe('defaults', () => {
     it('does not try to gunzip the content', async () => {
       const output = await createPromiseFromStreams([
-        createListStream([
-          Buffer.from('{"a": 1}'),
-        ]),
+        createListStream([Buffer.from('{"a": 1}')]),
         ...createParseArchiveStreams(),
       ]);
       expect(output).to.eql({ a: 1 });
