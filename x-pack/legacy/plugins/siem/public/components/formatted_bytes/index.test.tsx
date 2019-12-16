@@ -12,6 +12,8 @@ import { mockFrameworks, getMockKibanaUiSetting } from '../../mock';
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { PreferenceFormattedBytesComponent } from '.';
+
+jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 
 describe('formatted_bytes', () => {

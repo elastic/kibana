@@ -13,7 +13,7 @@ import { createStore, State } from '../../../store';
 
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
-// jest.mock('../../../lib/kibana');
+jest.mock('../../../lib/kibana');
 
 jest.mock('ui/vis/lib/timezone', () => ({
   timezoneProvider: () => () => 'America/New_York',

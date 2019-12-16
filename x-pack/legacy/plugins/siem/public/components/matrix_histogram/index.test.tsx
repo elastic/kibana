@@ -9,20 +9,13 @@ import * as React from 'react';
 
 import { MatrixHistogram } from '.';
 
-jest.mock('@elastic/eui', () => {
-  return {
-    EuiPanel: (children: JSX.Element) => <>{children}</>,
-    EuiLoadingContent: () => <div className="euiLoadingContent" />,
-  };
-});
+jest.mock('../../lib/kibana');
 
 jest.mock('../loader', () => {
   return {
     Loader: () => <div className="loader" />,
   };
 });
-
-jest.mock('../../lib/kibana');
 
 jest.mock('../header_section', () => {
   return {

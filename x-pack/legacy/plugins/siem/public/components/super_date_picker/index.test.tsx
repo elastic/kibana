@@ -14,7 +14,7 @@ import { createStore, State } from '../../store';
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../lib/kibana');
 
 describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
