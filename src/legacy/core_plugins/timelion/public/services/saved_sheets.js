@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectLoader } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import { uiModules } from 'ui/modules';
-import './_saved_sheet.js';
+import { createSavedSheetClass } from './_saved_sheet.js';
 import { npStart } from '../../../../ui/public/new_platform';
 
 const module = uiModules.get('app/sheet');
@@ -33,17 +33,23 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function(Private, SavedSheet, kbnUrl) {
-  const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSheetLoader = new SavedObjectLoader(
-    SavedSheet,
-    savedObjectClient,
-    npStart.core.chrome
-  );
-  savedSheetLoader.urlFor = function(id) {
-    return kbnUrl.eval('#/{{id}}', { id: id });
+module.service('savedSheets', function() {
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const services = {
+    savedObjectsClient,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
   };
 
+  const SavedSheet = createSavedSheetClass(services);
+
+  const savedSheetLoader = new SavedObjectLoader(
+    SavedSheet,
+    savedObjectsClient,
+    npStart.core.chrome
+  );
+  savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
   // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
   savedSheetLoader.loaderProperties = {
     name: 'timelion-sheet',
