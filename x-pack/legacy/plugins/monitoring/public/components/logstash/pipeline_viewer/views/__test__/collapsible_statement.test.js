@@ -28,9 +28,7 @@ describe('CollapsibleStatement component', () => {
   it('renders child components', () => {
     const child = <div>child element</div>;
 
-    const wrapper = shallow(
-      <CollapsibleStatement {...props}>{child}</CollapsibleStatement>
-    );
+    const wrapper = shallow(<CollapsibleStatement {...props}>{child}</CollapsibleStatement>);
 
     expect(wrapper).toMatchSnapshot();
   });

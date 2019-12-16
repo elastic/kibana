@@ -12,7 +12,7 @@ describe('Elasticsearch Cluster Settings', () => {
     const result = {
       persistent: {},
       transient: {},
-      defaults: {}
+      defaults: {},
     };
     result[property] = response;
     return result;
@@ -26,20 +26,20 @@ describe('Elasticsearch Cluster Settings', () => {
             plugins: {
               cloud: {
                 isCloudEnabled: false,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         plugins: {
           elasticsearch: {
             getCluster() {
               return {
-                callWithRequest: () => Promise.resolve(response)
+                callWithRequest: () => Promise.resolve(response),
               };
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     };
   };
 
@@ -51,7 +51,7 @@ describe('Elasticsearch Cluster Settings', () => {
 
   it('should find default collection interval reason', async () => {
     const setting = {
-      xpack: { monitoring: { collection: { interval: -1 } } }
+      xpack: { monitoring: { collection: { interval: -1 } } },
     };
     const makeExpected = source => ({
       found: true,
@@ -59,8 +59,8 @@ describe('Elasticsearch Cluster Settings', () => {
         context: `cluster ${source}`,
         data: '-1',
         isCloudEnabled: false,
-        property: 'xpack.monitoring.collection.interval'
-      }
+        property: 'xpack.monitoring.collection.interval',
+      },
     });
 
     let mockReq;
@@ -81,7 +81,7 @@ describe('Elasticsearch Cluster Settings', () => {
 
   it('should find exporters reason', async () => {
     const setting = {
-      xpack: { monitoring: { exporters: { myCoolExporter: {} } } }
+      xpack: { monitoring: { exporters: { myCoolExporter: {} } } },
     };
     const makeExpected = source => ({
       found: true,
@@ -89,8 +89,8 @@ describe('Elasticsearch Cluster Settings', () => {
         context: `cluster ${source}`,
         data: 'Remote exporters indicate a possible misconfiguration: myCoolExporter',
         isCloudEnabled: false,
-        property: 'xpack.monitoring.exporters'
-      }
+        property: 'xpack.monitoring.exporters',
+      },
     });
 
     let mockReq;
@@ -111,7 +111,7 @@ describe('Elasticsearch Cluster Settings', () => {
 
   it('should find enabled reason', async () => {
     const setting = {
-      xpack: { monitoring: { enabled: 'false' } }
+      xpack: { monitoring: { enabled: 'false' } },
     };
     const makeExpected = source => ({
       found: true,
@@ -119,8 +119,8 @@ describe('Elasticsearch Cluster Settings', () => {
         context: `cluster ${source}`,
         data: 'false',
         isCloudEnabled: false,
-        property: 'xpack.monitoring.enabled'
-      }
+        property: 'xpack.monitoring.enabled',
+      },
     });
 
     let mockReq;

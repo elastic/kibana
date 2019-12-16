@@ -37,7 +37,7 @@ import {
 class SavedObjectsInstallerUi extends React.Component {
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
     id: 'kbn.home.tutorial.savedObject.defaultButtonLabel',
-    defaultMessage: 'Load Kibana objects'
+    defaultMessage: 'Load Kibana objects',
   });
 
   state = {
@@ -62,7 +62,9 @@ class SavedObjectsInstallerUi extends React.Component {
 
     let resp;
     try {
-      resp = await this.props.bulkCreate(this.props.savedObjects, { overwrite: this.state.overwrite });
+      resp = await this.props.bulkCreate(this.props.savedObjects, {
+        overwrite: this.state.overwrite,
+      });
     } catch (error) {
       if (!this._isMounted) {
         return;
@@ -71,11 +73,15 @@ class SavedObjectsInstallerUi extends React.Component {
       this.setState({
         isInstalling: false,
         installStatusMsg: this.props.intl.formatMessage(
-          { id: 'kbn.home.tutorial.savedObject.requestFailedErrorMessage', defaultMessage: 'Request failed, Error: {message}' },
-          { message: error.message }),
+          {
+            id: 'kbn.home.tutorial.savedObject.requestFailedErrorMessage',
+            defaultMessage: 'Request failed, Error: {message}',
+          },
+          { message: error.message }
+        ),
         isInstalled: false,
         overwrite: false,
-        buttonLabel: this.DEFAULT_BUTTON_LABEL
+        buttonLabel: this.DEFAULT_BUTTON_LABEL,
       });
       return;
     }
@@ -95,14 +101,23 @@ class SavedObjectsInstallerUi extends React.Component {
       this.setState({
         isInstalling: false,
         installStatusMsg: this.props.intl.formatMessage(
-          { id: 'kbn.home.tutorial.savedObject.installStatusLabel',
-            defaultMessage: '{overwriteErrorsLength} of {savedObjectsLength} objects already exist. \
-Click \'Confirm overwrite\' to import and overwrite existing objects. Any changes to the objects will be lost.' },
-          { overwriteErrorsLength: overwriteErrors.length, savedObjectsLength: this.props.savedObjects.length }),
+          {
+            id: 'kbn.home.tutorial.savedObject.installStatusLabel',
+            defaultMessage:
+              "{overwriteErrorsLength} of {savedObjectsLength} objects already exist. \
+Click 'Confirm overwrite' to import and overwrite existing objects. Any changes to the objects will be lost.",
+          },
+          {
+            overwriteErrorsLength: overwriteErrors.length,
+            savedObjectsLength: this.props.savedObjects.length,
+          }
+        ),
         isInstalled: false,
         overwrite: true,
-        buttonLabel: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.confirmButtonLabel',
-          defaultMessage: 'Confirm overwrite' })
+        buttonLabel: this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.savedObject.confirmButtonLabel',
+          defaultMessage: 'Confirm overwrite',
+        }),
       });
       return;
     }
@@ -110,15 +125,24 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
     const hasErrors = errors.length > 0;
     const statusMsg = hasErrors
       ? this.props.intl.formatMessage(
-        { id: 'kbn.home.tutorial.savedObject.unableToAddErrorMessage',
-          defaultMessage: 'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: {errorMessage}'
-        },
-        { errorsLength: errors.length, savedObjectsLength: this.props.savedObjects.length, errorMessage: errors[0].error.message })
+          {
+            id: 'kbn.home.tutorial.savedObject.unableToAddErrorMessage',
+            defaultMessage:
+              'Unable to add {errorsLength} of {savedObjectsLength} kibana objects, Error: {errorMessage}',
+          },
+          {
+            errorsLength: errors.length,
+            savedObjectsLength: this.props.savedObjects.length,
+            errorMessage: errors[0].error.message,
+          }
+        )
       : this.props.intl.formatMessage(
-        { id: 'kbn.home.tutorial.savedObject.addedLabel',
-          defaultMessage: '{savedObjectsLength} saved objects successfully added'
-        },
-        { savedObjectsLength: this.props.savedObjects.length });
+          {
+            id: 'kbn.home.tutorial.savedObject.addedLabel',
+            defaultMessage: '{savedObjectsLength} saved objects successfully added',
+          },
+          { savedObjectsLength: this.props.savedObjects.length }
+        );
     this.setState({
       isInstalling: false,
       installStatusMsg: statusMsg,
@@ -126,7 +150,7 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
       overwrite: false,
       buttonLabel: this.DEFAULT_BUTTON_LABEL,
     });
-  }
+  };
 
   renderInstallMessage() {
     if (!this.state.installStatusMsg) {
@@ -137,7 +161,9 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
       <EuiCallOut
         title={this.state.installStatusMsg}
         color={this.state.isInstalled ? 'success' : 'warning'}
-        data-test-subj={this.state.isInstalled ? 'loadSavedObjects_success' : 'loadSavedObjects_failed'}
+        data-test-subj={
+          this.state.isInstalled ? 'loadSavedObjects_success' : 'loadSavedObjects_failed'
+        }
       />
     );
   }
@@ -145,8 +171,10 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
   renderInstallStep = () => {
     const installMsg = this.props.installMsg
       ? this.props.installMsg
-      : this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.installLabel',
-        defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.' });
+      : this.props.intl.formatMessage({
+          id: 'kbn.home.tutorial.savedObject.installLabel',
+          defaultMessage: 'Imports index pattern, visualizations and pre-defined dashboards.',
+        });
     const installStep = (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -156,9 +184,7 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem
-            grow={false}
-          >
+          <EuiFlexItem grow={false}>
             <EuiButton
               onClick={this.installSavedObjects}
               isLoading={this.state.isInstalling}
@@ -176,19 +202,18 @@ Click \'Confirm overwrite\' to import and overwrite existing objects. Any change
     );
 
     return {
-      title: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.savedObject.loadTitle', defaultMessage: 'Load Kibana objects' }),
+      title: this.props.intl.formatMessage({
+        id: 'kbn.home.tutorial.savedObject.loadTitle',
+        defaultMessage: 'Load Kibana objects',
+      }),
       status: this.state.isInstalled ? 'complete' : 'incomplete',
       children: installStep,
-      key: 'installStep'
+      key: 'installStep',
     };
-  }
+  };
 
   render() {
-    return (
-      <EuiSteps
-        steps={[this.renderInstallStep()]}
-      />
-    );
+    return <EuiSteps steps={[this.renderInstallStep()]} />;
   }
 }
 

@@ -28,19 +28,21 @@ const dashboardSchema = Joi.object({
     then: Joi.required(),
   }),
   // Is this an Overview / Entry Point dashboard?
-  isOverview: Joi.boolean().required()
+  isOverview: Joi.boolean().required(),
 });
 
 const artifactsSchema = Joi.object({
   // Fields present in Elasticsearch documents created by this product.
   exportedFields: Joi.object({
-    documentationUrl: Joi.string().required()
+    documentationUrl: Joi.string().required(),
   }),
   // Kibana dashboards created by this product.
-  dashboards: Joi.array().items(dashboardSchema).required(),
+  dashboards: Joi.array()
+    .items(dashboardSchema)
+    .required(),
   application: Joi.object({
     path: Joi.string().required(),
-    label: Joi.string().required()
+    label: Joi.string().required(),
   }),
 });
 
@@ -62,12 +64,14 @@ const instructionSchema = Joi.object({
   title: Joi.string(),
   textPre: Joi.string(),
   commands: Joi.array().items(Joi.string().allow('')),
-  textPost: Joi.string()
+  textPost: Joi.string(),
 });
 
 const instructionVariantSchema = Joi.object({
   id: Joi.string().required(),
-  instructions: Joi.array().items(instructionSchema).required()
+  instructions: Joi.array()
+    .items(instructionSchema)
+    .required(),
 });
 
 const instructionSetSchema = Joi.object({
@@ -75,28 +79,40 @@ const instructionSetSchema = Joi.object({
   callOut: Joi.object({
     title: Joi.string().required(),
     message: Joi.string(),
-    iconType: Joi.string()
+    iconType: Joi.string(),
   }),
   // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
-  instructionVariants: Joi.array().items(instructionVariantSchema).required(),
+  instructionVariants: Joi.array()
+    .items(instructionVariantSchema)
+    .required(),
   statusCheck: statusCheckSchema,
 });
 
 const paramSchema = Joi.object({
   defaultValue: Joi.required(),
-  id: Joi.string().regex(/^[a-zA-Z_]+$/).required(),
+  id: Joi.string()
+    .regex(/^[a-zA-Z_]+$/)
+    .required(),
   label: Joi.string().required(),
-  type: Joi.string().valid(Object.values(PARAM_TYPES)).required()
+  type: Joi.string()
+    .valid(Object.values(PARAM_TYPES))
+    .required(),
 });
 
 const instructionsSchema = Joi.object({
-  instructionSets: Joi.array().items(instructionSetSchema).required(),
-  params: Joi.array().items(paramSchema)
+  instructionSets: Joi.array()
+    .items(instructionSetSchema)
+    .required(),
+  params: Joi.array().items(paramSchema),
 });
 
 export const tutorialSchema = {
-  id: Joi.string().regex(/^[a-zA-Z0-9-]+$/).required(),
-  category: Joi.string().valid(Object.values(TUTORIAL_CATEGORY)).required(),
+  id: Joi.string()
+    .regex(/^[a-zA-Z0-9-]+$/)
+    .required(),
+  category: Joi.string()
+    .valid(Object.values(TUTORIAL_CATEGORY))
+    .required(),
   name: Joi.string().required(),
   isBeta: Joi.boolean().default(false),
   shortDescription: Joi.string().required(),

@@ -22,7 +22,7 @@ import { capabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
-import { Feature } from '../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../plugins/features/public';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';
