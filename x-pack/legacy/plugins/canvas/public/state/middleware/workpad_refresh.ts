@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Middleware } from 'redux';
+import { State } from '../../../types';
+// @ts-ignore Untyped Local
 import { fetchAllRenderables } from '../actions/elements';
+// @ts-ignore Untyped Local
 import { setRefreshInterval } from '../actions/workpad';
 import { inFlightComplete } from '../actions/resolved_args';
 import { getInFlight } from '../selectors/resolved_args';
+import { getRefreshInterval } from '../selectors/workpad';
 import { setRefreshInterval as setAppStateRefreshInterval } from '../../lib/app_state';
 import { createTimeInterval } from '../../lib/time_interval';
 
-export const workpadRefresh = ({ dispatch, getState }) => next => {
-  let refreshTimeout;
+export const workpadRefresh: Middleware<{}, State> = ({ dispatch, getState }) => next => {
+  let refreshTimeout: number | undefined;
   let refreshInterval = 0;
 
   function updateWorkpad() {
+    cancelDelayedUpdate();
+
     if (refreshInterval === 0) {
       return;
     }
@@ -31,15 +38,25 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     }
   }
 
+  function cancelDelayedUpdate() {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = undefined;
+  }
+
   function startDelayedUpdate() {
-    clearTimeout(refreshTimeout); // cancel any pending update requests
-    refreshTimeout = setTimeout(() => {
-      updateWorkpad();
-    }, refreshInterval);
+    if (!refreshTimeout) {
+      clearTimeout(refreshTimeout); // cancel any pending update requests
+      refreshTimeout = window.setTimeout(() => {
+        updateWorkpad();
+      }, refreshInterval);
+    }
   }
 
   return action => {
+    const previousRefreshInterval = getRefreshInterval(getState());
     next(action);
+
+    refreshInterval = getRefreshInterval(getState());
 
     // when in-flight requests are finished, update the workpad after a given delay
     if (action.type === inFlightComplete.toString() && refreshInterval > 0) {
@@ -47,14 +64,17 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     } // create new update request
 
     // This middleware creates or destroys an interval that will cause workpad elements to update
-    if (action.type === setRefreshInterval.toString()) {
+    if (
+      action.type === setRefreshInterval.toString() &&
+      previousRefreshInterval !== refreshInterval
+    ) {
       // update the refresh interval
       refreshInterval = action.payload;
 
       setAppStateRefreshInterval(createTimeInterval(refreshInterval));
 
       // clear any pending timeout
-      clearTimeout(refreshTimeout);
+      cancelDelayedUpdate();
 
       // if interval is larger than 0, start the delayed update
       if (refreshInterval > 0) {

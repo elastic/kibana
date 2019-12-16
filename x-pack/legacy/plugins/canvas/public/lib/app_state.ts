@@ -92,7 +92,7 @@ export function setFullscreen(payload: boolean) {
   }
 }
 
-export function setAutoplayInterval(payload: string) {
+export function setAutoplayInterval(payload: string | null) {
   const appState = getAppState();
   const appValue = appState[AppStateKeys.AUTOPLAY_INTERVAL];
 
