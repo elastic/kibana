@@ -36,7 +36,7 @@ export const getAWSMetadata = async (
     body: {
       query: {
         bool: {
-          must: [{ match: { 'event.dataset': model.requiredDataset } }],
+          must: [{ match: { 'event.module': model.requiredDataset } }],
         },
       },
       size: 0,
