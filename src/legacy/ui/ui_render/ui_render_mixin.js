@@ -130,15 +130,15 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${dllBundlePath}/vendors.style.dll.css`,
           ...(darkMode
             ? [
-              `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-              `${basePath}/node_modules/@elastic/charts/dist/theme_only_dark.css`,
-            ]
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+                `${basePath}/node_modules/@elastic/charts/dist/theme_only_dark.css`,
+              ]
             : [
-              `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-              `${basePath}/node_modules/@elastic/charts/dist/theme_only_light.css`,
-            ]),
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+                `${basePath}/node_modules/@elastic/charts/dist/theme_only_light.css`,
+              ]),
           `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
           `${regularBundlePath}/commons.style.css`,
           ...(!isCore ? [`${regularBundlePath}/${app.getId()}.style.css`] : []),
@@ -236,16 +236,18 @@ export function uiRenderMixin(kbnServer, server, config) {
     // Get the list of new platform plugins.
     // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
     const uiPluginConfigs = kbnServer.newPlatform.__internals.uiPlugins.browserConfigs;
-    const uiPlugins = await Promise.all([
-      ...kbnServer.newPlatform.__internals.uiPlugins.public.entries(),
-    ].map(async ([id, plugin]) => {
-      const config$ = uiPluginConfigs.get(id);
-      if (config$) {
-        return { id, plugin, config: await config$.pipe(take(1)).toPromise() };
-      } else {
-        return { id, plugin, config: {} };
-      }
-    }));
+    const uiPlugins = await Promise.all(
+      [...kbnServer.newPlatform.__internals.uiPlugins.public.entries()].map(
+        async ([id, plugin]) => {
+          const config$ = uiPluginConfigs.get(id);
+          if (config$) {
+            return { id, plugin, config: await config$.pipe(take(1)).toPromise() };
+          } else {
+            return { id, plugin, config: {} };
+          }
+        }
+      )
+    );
 
     const response = h.view('ui_app', {
       strictCsp: config.get('csp.strict'),
@@ -289,7 +291,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     return response;
   }
 
-  server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {
+  server.decorate('toolkit', 'renderApp', function(app, injectedVarsOverrides) {
     return renderApp({
       app,
       h: this,
@@ -298,7 +300,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     });
   });
 
-  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
     return renderApp({
       app,
       h: this,

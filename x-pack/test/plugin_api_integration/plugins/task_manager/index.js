@@ -8,8 +8,7 @@ const { EventEmitter } = require('events');
 
 import { initRoutes } from './init_routes';
 
-
-const once = function (emitter, event) {
+const once = function(emitter, event) {
   return new Promise(resolve => {
     emitter.once(event, resolve);
   });
@@ -50,7 +49,8 @@ export default function TaskTestingAPI(kibana) {
                 throw new Error(params.failWith);
               }
 
-              const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+              const callCluster = server.plugins.elasticsearch.getCluster('admin')
+                .callWithInternalUser;
               await callCluster('index', {
                 index: '.kibana_task_manager_test_result',
                 body: {

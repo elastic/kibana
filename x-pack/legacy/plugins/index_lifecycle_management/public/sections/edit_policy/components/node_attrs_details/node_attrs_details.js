@@ -51,15 +51,24 @@ export class NodeAttrsDetails extends PureComponent {
             <EuiInMemoryTable
               items={details || []}
               columns={[
-                { field: 'nodeId', name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.idField', {
-                  defaultMessage: 'ID'
-                }) },
-                { field: 'stats.name', name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.nameField', {
-                  defaultMessage: 'Name'
-                }) },
-                { field: 'stats.host', name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.hostField', {
-                  defaultMessage: 'Host'
-                }) },
+                {
+                  field: 'nodeId',
+                  name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.idField', {
+                    defaultMessage: 'ID',
+                  }),
+                },
+                {
+                  field: 'stats.name',
+                  name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.nameField', {
+                    defaultMessage: 'Name',
+                  }),
+                },
+                {
+                  field: 'stats.host',
+                  name: i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.hostField', {
+                    defaultMessage: 'Host',
+                  }),
+                },
               ]}
               pagination={true}
               sorting={true}
