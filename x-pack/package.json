@@ -181,7 +181,7 @@
     "@elastic/filesaver": "1.1.2",
     "@elastic/maki": "6.1.0",
     "@elastic/node-crypto": "^1.0.0",
-    "@elastic/numeral": "2.3.3",
+    "@elastic/numeral": "2.3.4",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",
