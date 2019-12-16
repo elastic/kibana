@@ -20,6 +20,7 @@
 import React, { useMemo } from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useValidation } from 'ui/vis/editors/default/controls/agg_utils';
 
 const intervalOptions = [
   {
@@ -69,9 +70,10 @@ const intervalOptions = [
 interface TimelionIntervalProps {
   value: string;
   setValue(value: string): void;
+  setValidity(valid: boolean): void;
 }
 
-function TimelionInterval({ value, setValue }: TimelionIntervalProps) {
+function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProps) {
   const onCustomInterval = (customValue: string) => {
     setValue(customValue.trim());
   };
@@ -85,6 +87,10 @@ function TimelionInterval({ value, setValue }: TimelionIntervalProps) {
     [value]
   );
 
+  const isValid = !!value;
+
+  useValidation(setValidity, isValid);
+
   return (
     <EuiFormRow
       compressed
@@ -92,16 +98,18 @@ function TimelionInterval({ value, setValue }: TimelionIntervalProps) {
       label={i18n.translate('timelion.vis.intervalLabel', {
         defaultMessage: 'Interval',
       })}
+      isInvalid={!isValid}
     >
       <EuiComboBox
         compressed
         fullWidth
+        isInvalid={!isValid}
         onChange={onChange}
         onCreateOption={onCustomInterval}
         options={intervalOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
-        placeholder={i18n.translate('common.ui.aggTypes.timeInterval.selectIntervalPlaceholder', {
+        placeholder={i18n.translate('timelion.vis.selectIntervalPlaceholder', {
           defaultMessage: 'Select an interval',
         })}
       />

@@ -82,6 +82,28 @@ function TimelionExpressionInput({
     [argValueSuggestions]
   );
 
+  const provideHover = useCallback(
+    async (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
+      const suggestions = await suggest(
+        model.getValue(),
+        functionList.current,
+        // it's important to offset the cursor position on 1 point left
+        // because of PEG parser starts the line with 0, but monaco with 1
+        position.column - 1,
+        argValueSuggestions
+      );
+
+      return {
+        contents: suggestions
+          ? suggestions.list.map((s: ITimelionFunction | TimelionFunctionArgs) => ({
+              value: s.help,
+            }))
+          : [],
+      };
+    },
+    [argValueSuggestions]
+  );
+
   useEffect(() => {
     http.get('../api/timelion/functions').then(data => {
       functionList.current = data;
@@ -106,6 +128,7 @@ function TimelionExpressionInput({
               triggerCharacters: ['.', '(', '=', ':'],
               provideCompletionItems,
             }}
+            hoverProvider={{ provideHover }}
             options={{
               fontSize: 16,
               scrollBeyondLastLine: false,

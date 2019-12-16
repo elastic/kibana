@@ -34,6 +34,7 @@ function TimelionOptions({
   stateParams,
   setValue,
   uiSettings,
+  setValidity,
 }: VisOptionsProps<VisParams> & TimelionExpressionInputDependencies) {
   const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
     setValue,
@@ -45,7 +46,11 @@ function TimelionOptions({
 
   return (
     <EuiPanel paddingSize="s">
-      <TimelionInterval value={stateParams.interval} setValue={setInterval} />
+      <TimelionInterval
+        value={stateParams.interval}
+        setValue={setInterval}
+        setValidity={setValidity}
+      />
       <TimelionExpressionInput
         argValueSuggestions={argValueSuggestions}
         http={http}
