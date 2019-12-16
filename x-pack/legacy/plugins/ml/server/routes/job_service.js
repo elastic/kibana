@@ -277,20 +277,14 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { categorizationExamples } = jobServiceProvider(callWithRequest);
-      const {
-        indexPatternTitle,
-        query,
-        size,
-        field,
-        start,
-        end,
-      } = request.payload;
-      return categorizationExamples(indexPatternTitle, query, size, field, start, end)
-        .catch(resp => wrapError(resp));
+      const { indexPatternTitle, query, size, field, start, end } = request.payload;
+      return categorizationExamples(indexPatternTitle, query, size, field, start, end).catch(resp =>
+        wrapError(resp)
+      );
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -299,16 +293,11 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { topCategories } = jobServiceProvider(callWithRequest);
-      const {
-        jobId,
-        count,
-      } = request.payload;
-      return topCategories(jobId, count)
-        .catch(resp => wrapError(resp));
+      const { jobId, count } = request.payload;
+      return topCategories(jobId, count).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

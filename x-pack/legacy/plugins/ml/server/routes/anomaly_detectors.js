@@ -189,15 +189,14 @@ export function jobRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const options = {
         jobId: request.params.jobId,
-        categoryId: request.params.categoryId
+        categoryId: request.params.categoryId,
       };
       return callWithRequest('ml.categories', options)
         .then(resp => reply(resp))
         .catch(resp => reply(wrapError(resp)));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }
