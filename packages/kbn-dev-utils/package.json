@@ -12,7 +12,7 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "dedent": "^0.7.0",
-    "execa": "^3.2.0",
+    "execa": "^3.4.0",
     "exit-hook": "^2.2.0",
     "getopts": "^2.2.5",
     "moment": "^2.24.0",
