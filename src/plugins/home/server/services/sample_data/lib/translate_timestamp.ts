@@ -51,8 +51,8 @@ export function translateTimeRelativeToDifference(
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference);
 
-  const timeDelta: number = sourceDate.getTime() - sourceReferenceDate.getTime();
-  const translatedDate: any = new Date(targetReferenceDate.getTime() + timeDelta);
+  const timeDelta = sourceDate.getTime() - sourceReferenceDate.getTime();
+  const translatedDate = new Date(targetReferenceDate.getTime() + timeDelta);
 
   return `${dateToIso8601IgnoringTime(translatedDate)}T${source.substring(11)}`;
 }

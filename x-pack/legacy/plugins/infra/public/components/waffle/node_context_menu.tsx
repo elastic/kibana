@@ -15,14 +15,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { injectUICapabilities } from 'ui/capabilities/react';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
+import { findInventoryModel } from '../../../common/inventory_models';
 
 interface Props {
   options: InfraWaffleMapOptions;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   children: any;
   node: InfraWaffleMapNode;
   nodeType: InfraNodeType;
@@ -35,25 +36,21 @@ interface Props {
 export const NodeContextMenu = injectUICapabilities(
   ({
     options,
-    timeRange,
+    currentTime,
     children,
     node,
     isPopoverOpen,
     closePopover,
     nodeType,
-
     uiCapabilities,
     popoverPosition,
   }: Props) => {
+    const inventoryModel = findInventoryModel(nodeType);
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
     // #26620 for the details for these fields.
     // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-    const APM_FIELDS = {
-      [InfraNodeType.host]: 'host.hostname',
-      [InfraNodeType.container]: 'container.id',
-      [InfraNodeType.pod]: 'kubernetes.pod.uid',
-    };
+    const apmField = nodeType === InfraNodeType.host ? 'host.hostname' : inventoryModel.fields.id;
 
     const nodeLogsMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
@@ -62,11 +59,12 @@ export const NodeContextMenu = injectUICapabilities(
       href: getNodeLogsUrl({
         nodeType,
         nodeId: node.id,
-        time: timeRange.to,
+        time: currentTime,
       }),
       'data-test-subj': 'viewLogsContextMenuItem',
     };
 
+    const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const nodeDetailMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewMetricsName', {
         defaultMessage: 'View metrics',
@@ -74,45 +72,47 @@ export const NodeContextMenu = injectUICapabilities(
       href: getNodeDetailUrl({
         nodeType,
         nodeId: node.id,
-        from: timeRange.from,
-        to: timeRange.to,
+        from: nodeDetailFrom,
+        to: currentTime,
       }),
     };
 
     const apmTracesMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
-        defaultMessage: 'View {nodeType} APM traces',
-        values: { nodeType },
+        defaultMessage: 'View APM traces',
       }),
-      href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}:"${node.id}"`,
+      href: `../app/apm#/traces?_g=()&kuery=${apmField}:"${node.id}"`,
       'data-test-subj': 'viewApmTracesContextMenuItem',
     };
 
     const uptimeMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
-        defaultMessage: 'View {nodeType} in Uptime',
-        values: { nodeType },
+        defaultMessage: 'View in Uptime',
       }),
       href: createUptimeLink(options, nodeType, node),
     };
 
-    const showLogsLink = node.id && uiCapabilities.logs.show;
-    const showAPMTraceLink = uiCapabilities.apm && uiCapabilities.apm.show;
+    const showDetail = inventoryModel.crosslinkSupport.details;
+    const showLogsLink =
+      inventoryModel.crosslinkSupport.logs && node.id && uiCapabilities.logs.show;
+    const showAPMTraceLink =
+      inventoryModel.crosslinkSupport.apm && uiCapabilities.apm && uiCapabilities.apm.show;
     const showUptimeLink =
-      [InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip;
+      inventoryModel.crosslinkSupport.uptime &&
+      ([InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip);
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: [
-          ...(showLogsLink ? [nodeLogsMenuItem] : []),
-          nodeDetailMenuItem,
-          ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
-          ...(showUptimeLink ? [uptimeMenuItem] : []),
-        ],
-      },
+    const items = [
+      ...(showLogsLink ? [nodeLogsMenuItem] : []),
+      ...(showDetail ? [nodeDetailMenuItem] : []),
+      ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
+      ...(showUptimeLink ? [uptimeMenuItem] : []),
     ];
+    const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, title: '', items }];
+
+    // If there is nothing to show then we need to return the child as is
+    if (items.length === 0) {
+      return <>{children}</>;
+    }
 
     return (
       <EuiPopover

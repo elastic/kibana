@@ -18,9 +18,9 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Config, Lifecycle } from '../src/functional_test_runner/lib';
+import { Config, Lifecycle, FailureMetadata } from '../src/functional_test_runner/lib';
 
-export { Lifecycle, Config };
+export { Lifecycle, Config, FailureMetadata };
 
 interface AsyncInstance<T> {
   /**
@@ -61,7 +61,7 @@ export interface GenericFtrProviderContext<
    * Determine if a service is avaliable
    * @param serviceName
    */
-  hasService(serviceName: 'config' | 'log' | 'lifecycle'): true;
+  hasService(serviceName: 'config' | 'log' | 'lifecycle' | 'failureMetadata'): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
   hasService(serviceName: string): serviceName is Extract<keyof ServiceMap, string>;
 
@@ -73,6 +73,7 @@ export interface GenericFtrProviderContext<
   getService(serviceName: 'config'): Config;
   getService(serviceName: 'log'): ToolingLog;
   getService(serviceName: 'lifecycle'): Lifecycle;
+  getService(serviceName: 'failureMetadata'): FailureMetadata;
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
   /**

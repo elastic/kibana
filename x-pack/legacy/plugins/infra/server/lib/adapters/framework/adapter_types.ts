@@ -9,7 +9,7 @@ import { Lifecycle } from 'hapi';
 import { ObjectType } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
-import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../../../../../plugins/apm/server';
 import { HomeServerPluginSetup } from '../../../../../../../../src/plugins/home/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"

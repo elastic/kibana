@@ -3,14 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
-import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as hooks from '../../../../hooks/useFetcher';
+import React from 'react';
 import { TraceLink } from '../';
+import * as hooks from '../../../../hooks/useFetcher';
+import * as urlParamsHooks from '../../../../hooks/useUrlParams';
+import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 
-jest.mock('../../Main/route_config/index.tsx', () => ({
+const renderOptions = { wrapper: MockApmPluginContextWrapper };
+
+jest.mock('../../Main/route_config', () => ({
   routes: [
     {
       path: '/services/:serviceName/transactions/view',
@@ -28,7 +31,7 @@ describe('TraceLink', () => {
     jest.clearAllMocks();
   });
   it('renders transition page', () => {
-    const component = render(<TraceLink />);
+    const component = render(<TraceLink />, renderOptions);
     expect(component.getByText('Fetching trace...')).toBeDefined();
   });
 

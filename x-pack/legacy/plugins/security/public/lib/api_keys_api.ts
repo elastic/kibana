@@ -5,8 +5,7 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { ApiKey, ApiKeyToInvalidate } from '../../common/model/api_key';
-import { INTERNAL_API_BASE_PATH } from '../../common/constants';
+import { ApiKey, ApiKeyToInvalidate } from '../../common/model';
 
 interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;
@@ -22,7 +21,7 @@ interface GetApiKeysResponse {
   apiKeys: ApiKey[];
 }
 
-const apiKeysUrl = `${INTERNAL_API_BASE_PATH}/api_key`;
+const apiKeysUrl = `/internal/security/api_key`;
 
 export class ApiKeysApi {
   public static async checkPrivileges(): Promise<CheckPrivilegesResponse> {

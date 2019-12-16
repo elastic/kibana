@@ -14,7 +14,7 @@ import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { InfraSetup } from '../../../plugins/infra/server';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../plugins/apm/server';
 
 export const APP_ID = 'infra';
 

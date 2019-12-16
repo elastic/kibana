@@ -6,7 +6,7 @@
 
 import { parse, stringify } from 'querystring';
 import React from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
 
@@ -22,9 +22,7 @@ export interface URLStateProps<URLState = object> {
   ) => void;
   urlState: URLState;
 }
-interface ComponentProps<URLState extends object> {
-  history: any;
-  match: any;
+interface ComponentProps<URLState extends object> extends RouteComponentProps {
   children: RendererFunction<URLStateProps<URLState>>;
 }
 
@@ -66,8 +64,8 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     }
 
     const search: string = stringify({
-      ...(pastState as any),
-      ...(newState as any),
+      ...pastState,
+      ...newState,
     });
 
     const newLocation = {
@@ -86,16 +84,12 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
     });
   };
 }
-export const WithURLState = withRouter<any>(WithURLStateComponent);
+export const WithURLState = withRouter(WithURLStateComponent);
 
-export function withUrlState<OP>(
-  UnwrappedComponent: React.ComponentType<OP & URLStateProps>
-): React.FC<any> {
-  return (origProps: OP) => {
-    return (
-      <WithURLState>
-        {(URLProps: URLStateProps) => <UnwrappedComponent {...URLProps} {...origProps} />}
-      </WithURLState>
-    );
-  };
+export function withUrlState<OP>(UnwrappedComponent: React.ComponentType<OP & URLStateProps>) {
+  return (origProps: OP) => (
+    <WithURLState>
+      {(URLProps: URLStateProps) => <UnwrappedComponent {...URLProps} {...origProps} />}
+    </WithURLState>
+  );
 }

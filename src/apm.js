@@ -21,19 +21,17 @@ const { existsSync } = require('fs');
 const { join } = require('path');
 const { name, version } = require('../package.json');
 
-module.exports = function (serviceName = name) {
+module.exports = function(serviceName = name) {
   if (process.env.kbnWorkerType === 'optmzr') return;
 
   const conf = {
-    serviceName: `${serviceName}-${version.replace(/\./g, '_')}`
+    serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
   };
 
-  if (configFileExists()) conf.configFile = 'config/apm.js';
+  const configFile = join(__dirname, '..', 'config', 'apm.js');
+
+  if (existsSync(configFile)) conf.configFile = configFile;
   else conf.active = false;
 
   require('elastic-apm-node').start(conf);
 };
-
-function configFileExists() {
-  return existsSync(join(__dirname, '..', 'config', 'apm.js'));
-}

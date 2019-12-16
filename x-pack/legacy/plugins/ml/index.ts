@@ -41,9 +41,9 @@ export const ml = (kibana: any) => {
         }),
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/application/app',
+        main: 'plugins/ml/legacy',
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {

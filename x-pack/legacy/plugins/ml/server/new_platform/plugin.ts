@@ -12,7 +12,7 @@ import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CloudSetup } from '../../../../../plugins/cloud/server';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module

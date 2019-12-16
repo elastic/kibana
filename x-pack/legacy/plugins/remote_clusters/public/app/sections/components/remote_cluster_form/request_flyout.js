@@ -74,20 +74,13 @@ export class RequestFlyout extends PureComponent {
 
           <EuiSpacer />
 
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-          >
+          <EuiCodeBlock language="json" isCopyable>
             {request}
           </EuiCodeBlock>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={close}
-            flush="left"
-          >
+          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
             <FormattedMessage
               id="xpack.remoteClusters.requestFlyout.closeButtonLabel"
               defaultMessage="Close"

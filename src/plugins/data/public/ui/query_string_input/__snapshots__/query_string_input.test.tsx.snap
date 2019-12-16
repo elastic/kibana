@@ -209,6 +209,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -829,6 +830,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -1437,6 +1439,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -2054,6 +2057,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -2662,6 +2666,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -3279,6 +3284,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
