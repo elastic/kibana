@@ -41,11 +41,20 @@ export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
+ * Special internal structure for tags for signals. This is used
+ * to filter out tags that have internal structures within them.
+ */
+export const INTERNAL_IDENTIFIER = '__internal';
+export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;
+export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges`;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
+export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -53,3 +62,4 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
+export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;

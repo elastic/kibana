@@ -5,13 +5,22 @@
  */
 
 import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
+import { Logger } from '../types';
 
-export function ensureDeprecatedFieldsAreCorrected({
-  interval,
-  schedule,
-  ...taskInstance
-}: TaskInstanceWithDeprecatedFields): TaskInstance {
+export function ensureDeprecatedFieldsAreCorrected(
+  { id, taskType, interval, schedule, ...taskInstance }: TaskInstanceWithDeprecatedFields,
+  logger: Logger
+): TaskInstance {
+  if (interval) {
+    logger.warn(
+      `Task${
+        id ? ` "${id}"` : ''
+      } of type "${taskType}" has been scheduled with the deprecated 'interval' field which is due to be removed in a future release`
+    );
+  }
   return {
+    id,
+    taskType,
     ...taskInstance,
     schedule: schedule || (interval ? { interval } : undefined),
   };

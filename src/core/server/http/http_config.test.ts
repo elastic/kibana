@@ -256,6 +256,7 @@ describe('with TLS', () => {
           clientAuthentication: 'none',
         },
       }),
+      {} as any,
       Env.createDefault(getEnvOptions())
     );
 
@@ -273,6 +274,7 @@ describe('with TLS', () => {
           clientAuthentication: 'optional',
         },
       }),
+      {} as any,
       Env.createDefault(getEnvOptions())
     );
 
@@ -290,6 +292,7 @@ describe('with TLS', () => {
           clientAuthentication: 'required',
         },
       }),
+      {} as any,
       Env.createDefault(getEnvOptions())
     );
 

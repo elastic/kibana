@@ -14,7 +14,7 @@ import {
   getPolicies,
   isPolicyListLoaded,
   getIsNewPolicy,
-  getSelectedOriginalPolicyName
+  getSelectedOriginalPolicyName,
 } from '../../store/selectors';
 
 import {

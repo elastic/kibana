@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
 
@@ -23,6 +24,10 @@ export const getIdError = ({
   } else {
     return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
   }
+};
+
+export const transformTags = (tags: string[]): string[] => {
+  return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
 };
 
 // Transforms the data but will remove any null or undefined it encounters and not include
@@ -51,7 +56,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
-    tags: alert.tags,
+    tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
     threats: alert.params.threats,

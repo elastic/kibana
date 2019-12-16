@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "target",
+    "target": "ES2019",
     "declaration": true
   },
   "include": [

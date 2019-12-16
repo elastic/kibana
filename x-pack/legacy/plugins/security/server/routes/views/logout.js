@@ -14,7 +14,7 @@ export function initLogoutView(server) {
       return h.renderAppWithDefaultConfig(logout);
     },
     config: {
-      auth: false
-    }
+      auth: false,
+    },
   });
 }

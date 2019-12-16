@@ -13,8 +13,7 @@ import { CloudServiceResponse } from './cloud_response';
  * that may help to determine the best defaults and priorities.
  */
 export class CloudService {
-
-  constructor(name, options = { }) {
+  constructor(name, options = {}) {
     this._name = name.toLowerCase();
 
     // Allow the HTTP handler to be swapped out for tests
@@ -39,8 +38,7 @@ export class CloudService {
    * @return {Promise} Never {@code null} {@code CloudServiceResponse}.
    */
   checkIfService() {
-    return this._checkIfService(this._request)
-      .catch(() => this._createUnconfirmedResponse());
+    return this._checkIfService(this._request).catch(() => this._createUnconfirmedResponse());
   }
 
   /**
@@ -113,5 +111,4 @@ export class CloudService {
     // use default handling
     return Promise.reject();
   }
-
 }

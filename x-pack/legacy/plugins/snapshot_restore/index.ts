@@ -7,8 +7,8 @@
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { Plugin as SnapshotRestorePlugin } from './plugin';
-import { createShim } from './shim';
+import { Plugin as SnapshotRestorePlugin } from './server/plugin';
+import { createShim } from './server/shim';
 
 export function snapshotRestore(kibana: any) {
   return new kibana.Plugin({

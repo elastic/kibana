@@ -11,14 +11,20 @@ import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('security', ['ngResource']);
 module.service('ShieldRole', ($resource, chrome) => {
-  return $resource(chrome.addBasePath('/api/security/role/:name'), {
-    name: '@name'
-  }, {
-    save: {
-      method: 'PUT',
-      transformRequest(data) {
-        return angular.toJson(omit(data, 'name', 'transient_metadata', '_unrecognized_applications'));
-      }
+  return $resource(
+    chrome.addBasePath('/api/security/role/:name'),
+    {
+      name: '@name',
+    },
+    {
+      save: {
+        method: 'PUT',
+        transformRequest(data) {
+          return angular.toJson(
+            omit(data, 'name', 'transient_metadata', '_unrecognized_applications')
+          );
+        },
+      },
     }
-  });
+  );
 });

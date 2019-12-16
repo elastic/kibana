@@ -23,7 +23,9 @@ export const kueryProvider = ({ config, indexPatterns, boolFilter }) => {
   });
 
   return function getSuggestions({ query, selectionStart, selectionEnd, signal }) {
-    const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(selectionEnd)}`;
+    const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(
+      selectionEnd
+    )}`;
 
     let cursorNode;
     try {
@@ -36,7 +38,8 @@ export const kueryProvider = ({ config, indexPatterns, boolFilter }) => {
     const suggestionsByType = suggestionTypes.map(type => {
       return getSuggestionsByType[type](cursorNode, signal);
     });
-    return Promise.all(suggestionsByType)
-      .then(suggestionsByType => dedup(flatten(suggestionsByType)));
+    return Promise.all(suggestionsByType).then(suggestionsByType =>
+      dedup(flatten(suggestionsByType))
+    );
   };
 };

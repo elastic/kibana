@@ -31,12 +31,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const Header = ({
-  onExportAll,
-  onImport,
-  onRefresh,
-  filteredCount,
-}) => (
+export const Header = ({ onExportAll, onImport, onRefresh, filteredCount }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
@@ -63,7 +58,7 @@ export const Header = ({
                 id="kbn.management.objects.objectsTable.header.exportButtonLabel"
                 defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
                 values={{
-                  filteredCount
+                  filteredCount,
                 }}
               />
             </EuiButtonEmpty>
@@ -82,11 +77,7 @@ export const Header = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="refresh"
-              onClick={onRefresh}
-            >
+            <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
                 defaultMessage="Refresh"
@@ -96,7 +87,7 @@ export const Header = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="m"/>
+    <EuiSpacer size="m" />
     <EuiText size="s">
       <p>
         <EuiTextColor color="subdued">
@@ -110,7 +101,7 @@ export const Header = ({
         </EuiTextColor>
       </p>
     </EuiText>
-    <EuiSpacer size="m"/>
+    <EuiSpacer size="m" />
   </Fragment>
 );
 

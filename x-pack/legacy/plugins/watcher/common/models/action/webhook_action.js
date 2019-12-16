@@ -96,7 +96,7 @@ export class WebhookAction extends BaseAction {
         host: this.host,
         port: this.port,
         ...optionalFields,
-      }
+      },
     };
 
     return result;
@@ -148,28 +148,33 @@ export class WebhookAction extends BaseAction {
     if (json.webhook && !json.webhook.host) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookHostPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonWebhookHost} property',
-          values: {
-            actionJsonWebhookHost: 'actionJson.webhook.host'
+        message: i18n.translate(
+          'xpack.watcher.models.loggingAction.actionJsonWebhookHostPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonWebhookHost} property',
+            values: {
+              actionJsonWebhookHost: 'actionJson.webhook.host',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (json.webhook && !json.webhook.port) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookPortPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonWebhookPort} property',
-          values: {
-            actionJsonWebhookPort: 'actionJson.webhook.port'
+        message: i18n.translate(
+          'xpack.watcher.models.loggingAction.actionJsonWebhookPortPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonWebhookPort} property',
+            values: {
+              actionJsonWebhookPort: 'actionJson.webhook.port',
+            },
           }
-        }),
+        ),
       });
     }
 
     return { errors: errors.length ? errors : null };
   }
-
 }

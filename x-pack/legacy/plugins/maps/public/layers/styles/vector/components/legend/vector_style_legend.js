@@ -11,10 +11,9 @@ import PropTypes from 'prop-types';
 import { StylePropertyLegendRow } from './style_property_legend_row';
 
 export class VectorStyleLegend extends Component {
-
   state = {
     rows: [],
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -35,7 +34,7 @@ export class VectorStyleLegend extends Component {
     const rowDescriptors = rows.map(row => {
       return {
         label: row.label,
-        range: row.range,
+        range: row.meta,
         styleOptions: row.style.getOptions(),
       };
     });
@@ -47,12 +46,7 @@ export class VectorStyleLegend extends Component {
 
   render() {
     return this.state.rows.map(rowProps => {
-      return (
-        <StylePropertyLegendRow
-          key={rowProps.style.getStyleName()}
-          {...rowProps}
-        />
-      );
+      return <StylePropertyLegendRow key={rowProps.style.getStyleName()} {...rowProps} />;
     });
   }
 }
