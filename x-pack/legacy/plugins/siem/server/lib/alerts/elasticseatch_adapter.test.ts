@@ -12,6 +12,7 @@ import {
   mockOptions,
   mockAlertsHistogramDataResponse,
   mockAlertsHistogramQueryDsl,
+  mockAlertsHistogramDataFormattedResponse,
 } from './mock';
 
 jest.mock('./query.dsl', () => {
@@ -44,12 +45,12 @@ describe('alerts elasticsearch_adapter', () => {
       );
 
       expect(data).to.eql({
-        alertsOverTimeByModule: [],
+        alertsOverTimeByModule: mockAlertsHistogramDataFormattedResponse,
         inspect: {
           dsl: ['"mockAlertsHistogramQueryDsl"'],
-          response: ['"mockAlertsHistogramDataResponse"'],
+          response: [JSON.stringify(mockAlertsHistogramDataResponse, null, 2)],
         },
-        totalCount: 0,
+        totalCount: 1599508,
       });
     });
   });
