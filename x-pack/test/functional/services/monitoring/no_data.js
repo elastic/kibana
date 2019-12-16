@@ -15,7 +15,7 @@ export function MonitoringNoDataProvider({ getService, getPageObjects }) {
       // so the UI does not give the user a choice between the two collection
       // methods. So if we're on cloud, do not try and switch to internal collection
       // as it's already the default
-      if (!await PageObjects.common.isCloud()) {
+      if (!(await PageObjects.common.isCloud())) {
         await testSubjects.click('useInternalCollection');
       }
       await testSubjects.click('enableCollectionEnabled');
