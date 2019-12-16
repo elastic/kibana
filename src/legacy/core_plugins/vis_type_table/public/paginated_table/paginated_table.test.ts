@@ -42,7 +42,6 @@ interface Column {
   title: string;
   formatter?: {
     convert?: (val: string) => string;
-    [key: string]: any;
   };
   sortable?: boolean;
 }
@@ -95,11 +94,7 @@ describe('Table Vis - Paginated table', () => {
 
     if (isNumber(colCount)) {
       times(colCount, i => {
-        columns.push({
-          id: `${i}`,
-          title: `column${i}`,
-          formatter: { convert: identity, getConverterFor: () => identity },
-        });
+        columns.push({ id: `${i}`, title: `column${i}`, formatter: { convert: identity } });
       });
     } else {
       columns = colCount.map(
@@ -107,7 +102,7 @@ describe('Table Vis - Paginated table', () => {
           ({
             id: `${i}`,
             title: col.title,
-            formatter: col.formatter || { convert: identity, getConverterFor: () => identity },
+            formatter: col.formatter || { convert: identity },
           } as Column)
       );
     }
@@ -681,9 +676,6 @@ describe('Table Vis - Paginated table', () => {
           id: '0',
           formatter: {
             convert: val => {
-              return val === 'zzz' ? '<h1>hello</h1>' : val;
-            },
-            getConverterFor: () => (val: any) => {
               return val === 'zzz' ? '<h1>hello</h1>' : val;
             },
           },
