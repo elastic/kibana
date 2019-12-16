@@ -17,18 +17,9 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 import { indexPatterns as npIndexPatterns } from '../../../../../plugins/data/public';
 
-const dataSetup = dataPluginMock.createSetupContract();
-
-// mocks for stateful code
-export const { indexPatterns } = dataSetup.indexPatterns!;
-
 export const flattenHitWrapper = npIndexPatterns.flattenHitWrapper;
-export const formatHitProvider = npIndexPatterns.formatHitProvider;
 
 // static code
 export { getFromSavedObject, getRoutes } from '../../../../core_plugins/data/public';
-export { FieldList } from '../../../../../plugins/data/public';

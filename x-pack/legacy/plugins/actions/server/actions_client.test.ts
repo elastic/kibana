@@ -30,7 +30,7 @@ const actionTypeRegistryParams = {
 let actionsClient: ActionsClient;
 let actionTypeRegistry: ActionTypeRegistry;
 const executor: ExecutorType = async options => {
-  return { status: 'ok' };
+  return { status: 'ok', actionId: options.actionId };
 };
 
 beforeEach(() => {
@@ -50,7 +50,7 @@ describe('create()', () => {
       id: '1',
       type: 'type',
       attributes: {
-        description: 'my description',
+        name: 'my name',
         actionTypeId: 'my-action-type',
         config: {},
       },
@@ -64,7 +64,7 @@ describe('create()', () => {
     savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
       action: {
-        description: 'my description',
+        name: 'my name',
         actionTypeId: 'my-action-type',
         config: {},
         secrets: {},
@@ -72,7 +72,7 @@ describe('create()', () => {
     });
     expect(result).toEqual({
       id: '1',
-      description: 'my description',
+      name: 'my name',
       actionTypeId: 'my-action-type',
       config: {},
     });
@@ -83,7 +83,7 @@ describe('create()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
-          "description": "my description",
+          "name": "my name",
           "secrets": Object {},
         },
       ]
@@ -104,7 +104,7 @@ describe('create()', () => {
     await expect(
       actionsClient.create({
         action: {
-          description: 'my description',
+          name: 'my name',
           actionTypeId: 'my-action-type',
           config: {},
           secrets: {},
@@ -119,7 +119,7 @@ describe('create()', () => {
     await expect(
       actionsClient.create({
         action: {
-          description: 'my description',
+          name: 'my name',
           actionTypeId: 'unregistered-action-type',
           config: {},
           secrets: {},
@@ -140,7 +140,7 @@ describe('create()', () => {
       id: '1',
       type: 'type',
       attributes: {
-        description: 'my description',
+        name: 'my name',
         actionTypeId: 'my-action-type',
         config: {
           a: true,
@@ -153,7 +153,7 @@ describe('create()', () => {
     });
     const result = await actionsClient.create({
       action: {
-        description: 'my description',
+        name: 'my name',
         actionTypeId: 'my-action-type',
         config: {
           a: true,
@@ -165,7 +165,7 @@ describe('create()', () => {
     });
     expect(result).toEqual({
       id: '1',
-      description: 'my description',
+      name: 'my name',
       actionTypeId: 'my-action-type',
       config: {
         a: true,
@@ -184,7 +184,7 @@ describe('create()', () => {
             "b": true,
             "c": true,
           },
-          "description": "my description",
+          "name": "my name",
           "secrets": Object {},
         },
       ]
@@ -301,7 +301,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        description: 'my description',
+        name: 'my name',
         config: {},
         secrets: {},
       },
@@ -310,7 +310,7 @@ describe('update()', () => {
     const result = await actionsClient.update({
       id: 'my-action',
       action: {
-        description: 'my description',
+        name: 'my name',
         config: {},
         secrets: {},
       },
@@ -318,7 +318,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       actionTypeId: 'my-action-type',
-      description: 'my description',
+      name: 'my name',
       config: {},
     });
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -329,7 +329,7 @@ describe('update()', () => {
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
-          "description": "my description",
+          "name": "my name",
           "secrets": Object {},
         },
       ]
@@ -366,7 +366,7 @@ describe('update()', () => {
       actionsClient.update({
         id: 'my-action',
         action: {
-          description: 'my description',
+          name: 'my name',
           config: {},
           secrets: {},
         },
@@ -395,7 +395,7 @@ describe('update()', () => {
       type: 'action',
       attributes: {
         actionTypeId: 'my-action-type',
-        description: 'my description',
+        name: 'my name',
         config: {
           a: true,
           b: true,
@@ -408,7 +408,7 @@ describe('update()', () => {
     const result = await actionsClient.update({
       id: 'my-action',
       action: {
-        description: 'my description',
+        name: 'my name',
         config: {
           a: true,
           b: true,
@@ -420,7 +420,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       actionTypeId: 'my-action-type',
-      description: 'my description',
+      name: 'my name',
       config: {
         a: true,
         b: true,
@@ -439,7 +439,7 @@ describe('update()', () => {
             "b": true,
             "c": true,
           },
-          "description": "my description",
+          "name": "my name",
           "secrets": Object {},
         },
       ]

@@ -7,7 +7,6 @@
 import { EuiFieldText } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnFilterChange } from '../../../events';
@@ -30,7 +29,7 @@ const FieldText = styled(EuiFieldText)<{ minwidth: string }>`
 FieldText.displayName = 'FieldText';
 
 /** Renders a text-based column filter */
-export const TextFilter = pure<Props>(
+export const TextFilter = React.memo<Props>(
   ({
     columnId,
     minWidth,

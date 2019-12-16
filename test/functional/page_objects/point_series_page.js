@@ -44,14 +44,19 @@ export function PointSeriesPageProvider({ getService }) {
     async getGridLines() {
       const grid = await find.byCssSelector('g.grid');
       const $ = await grid.parseDomContent();
-      return $('path').toArray().map(line => {
-        const dAttribute = $(line).attr('d');
-        const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
-        return {
-          x: parseFloat(firstPoint[0]),
-          y: parseFloat(firstPoint[1]),
-        };
-      });
+      return $('path')
+        .toArray()
+        .map(line => {
+          const dAttribute = $(line).attr('d');
+          const firstPoint = dAttribute
+            .split('L')[0]
+            .replace('M', '')
+            .split(',');
+          return {
+            x: parseFloat(firstPoint[0]),
+            y: parseFloat(firstPoint[1]),
+          };
+        });
     }
 
     async toggleGridCategoryLines() {

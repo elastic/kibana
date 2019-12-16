@@ -33,6 +33,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.IP,
   ES_FIELD_TYPES.GEO_POINT,
   ES_FIELD_TYPES.GEO_SHAPE,
+  ES_FIELD_TYPES.BOOLEAN,
 ];
 
 export function fieldServiceProvider(

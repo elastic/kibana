@@ -17,108 +17,59 @@
  * under the License.
  */
 
-import 'angular-sanitize'; // used in visualization_editor.js and visualization.js
-// load directives
-import '../../../data/public';
+import {
+  ChromeStart,
+  LegacyCoreStart,
+  SavedObjectsClientContract,
+  ToastsStart,
+  IUiSettingsClient,
+} from 'kibana/public';
 
-import { npStart } from 'ui/new_platform';
-import angular from 'angular'; // just used in editor.js
-import chromeLegacy from 'ui/chrome';
+import { NavigationStart } from '../../../navigation/public';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { SharePluginStart } from '../../../../../plugins/share/public';
+import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
+import { VisualizationsStart } from '../../../visualizations/public';
+import { SavedVisualizations } from './types';
 
-import uiRoutes from 'ui/routes';
+export interface VisualizeKibanaServices {
+  addBasePath: (url: string) => string;
+  chrome: ChromeStart;
+  core: LegacyCoreStart;
+  data: DataPublicPluginStart;
+  editorTypes: any;
+  embeddables: IEmbeddableStart;
+  getBasePath: () => string;
+  indexPatterns: IndexPatternsContract;
+  legacyChrome: any;
+  localStorage: Storage;
+  navigation: NavigationStart;
+  toastNotifications: ToastsStart;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectRegistry: any;
+  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  savedVisualizations: SavedVisualizations;
+  share: SharePluginStart;
+  uiSettings: IUiSettingsClient;
+  visualizeCapabilities: any;
+  visualizations: VisualizationsStart;
+}
 
-// @ts-ignore
-import { docTitle } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-
-// Saved objects
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
-// @ts-ignore
-import { SavedObject, SavedObjectProvider } from 'ui/saved_objects/saved_object';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-
-import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-import { start as embeddables } from '../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { start as data } from '../../../data/public/legacy';
-
-const services = {
-  // new platform
-  addBasePath: npStart.core.http.basePath.prepend,
-  capabilities: npStart.core.application.capabilities,
-  chrome: npStart.core.chrome,
-  docLinks: npStart.core.docLinks,
-  embeddable: npStart.plugins.embeddable,
-  getBasePath: npStart.core.http.basePath.get,
-  savedObjectsClient: npStart.core.savedObjects.client,
-  toastNotifications: npStart.core.notifications.toasts,
-  uiSettings: npStart.core.uiSettings,
-  core: npStart.core,
-
-  share: npStart.plugins.share,
-  npData: npStart.plugins.data,
-  data,
-  embeddables,
-  visualizations,
-
-  // legacy
-  chromeLegacy,
-  docTitle,
-  FeatureCatalogueRegistryProvider,
-  FilterBarQueryFilterProvider,
-  getInjector: () => {
-    return chromeLegacy.dangerouslyGetActiveInjector();
-  },
-  SavedObjectProvider,
-  SavedObjectRegistryProvider,
-  SavedObjectsClientProvider,
-  timefilter: npStart.plugins.data.query.timefilter.timefilter,
-  uiModules,
-  uiRoutes,
-  wrapInI18nContext,
-
-  createUiStatsReporter,
-};
+let services: VisualizeKibanaServices | null = null;
+export function setServices(newServices: VisualizeKibanaServices) {
+  services = newServices;
+}
 
 export function getServices() {
+  if (!services) {
+    throw new Error(
+      'Kibana services not set - are you trying to import this module from outside of the visualize app?'
+    );
+  }
   return services;
 }
 
-// export legacy static dependencies
-export { angular };
-export { getFromSavedObject } from 'ui/index_patterns';
-export { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-// @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { unhashUrl } from 'ui/state_management/state_hashing';
-export {
-  Container,
-  Embeddable,
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-} from '../../../../../plugins/embeddable/public';
-
-// export types
-export { METRIC_TYPE };
-export { AppState } from 'ui/state_management/app_state';
-export { VisType } from 'ui/vis';
-
-// export const
-export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
-
-export { VisSavedObject } from './embeddable/visualize_embeddable';
+export function clearServices() {
+  services = null;
+}

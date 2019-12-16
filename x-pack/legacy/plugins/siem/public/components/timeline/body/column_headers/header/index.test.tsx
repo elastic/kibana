@@ -67,6 +67,31 @@ describe('Header', () => {
       ).toEqual(columnHeader.id);
     });
 
+    test('it renders the header text alias when label is provided', () => {
+      const label = 'Timestamp';
+      const headerWithLabel = { ...columnHeader, label };
+      const wrapper = mount(
+        <TestProviders>
+          <HeaderComponent
+            header={headerWithLabel}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onColumnSorted={jest.fn()}
+            setIsResizing={jest.fn()}
+            sort={sort}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find(`[data-test-subj="header-text-${columnHeader.id}"]`)
+          .first()
+          .text()
+      ).toEqual(label);
+    });
+
     test('it renders a sort indicator', () => {
       const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(

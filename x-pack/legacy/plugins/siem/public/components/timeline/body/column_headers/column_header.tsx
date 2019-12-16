@@ -17,6 +17,7 @@ export interface ColumnHeader {
   example?: string;
   format?: string;
   id: ColumnId;
+  label?: string;
   placeholder?: string;
   type?: string;
   width: number;

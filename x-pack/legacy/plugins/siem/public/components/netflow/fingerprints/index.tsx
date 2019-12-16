@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import {
   CertificateFingerprint,
@@ -20,7 +19,7 @@ import { JA3_HASH_FIELD_NAME, Ja3Fingerprint } from '../../ja3_fingerprint';
  * Renders rows of draggable badges containing ja3 and certificate fingerprints
  * (i.e. sha1 hashes)
  */
-export const Fingerprints = pure<{
+export const Fingerprints = React.memo<{
   contextId: string;
   eventId: string;
   tlsClientCertificateFingerprintSha1?: string[] | null;

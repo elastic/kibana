@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisSavedObject } from './kibana_services';
+import { VisSavedObject } from './legacy_imports';
 
 export { EditorRenderProps } from './editor/types';
 export interface SavedVisualizations {

@@ -40,6 +40,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormNameFormRow"
+            id="mockId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -117,6 +118,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormSeedNodesFormRow"
+            id="mockId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -240,6 +242,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
             data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+            id="mockId-row"
           >
             <div
               class="euiFormRow__fieldWrapper"
@@ -284,12 +287,12 @@ Array [
                     </span>
                   </span>
                 </button>
-                <p
+                <span
                   class="euiSwitch__label"
                   id="mockId"
                 >
                   Skip if unavailable
-                </p>
+                </span>
               </div>
             </div>
           </div>
@@ -367,6 +370,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormNameFormRow"
+    id="mockId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -416,6 +420,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormSeedNodesFormRow"
+    id="mockId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -499,6 +504,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
     data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+    id="mockId-row"
   >
     <div
       class="euiFormRow__fieldWrapper"
@@ -543,12 +549,12 @@ Array [
             </span>
           </span>
         </button>
-        <p
+        <span
           class="euiSwitch__label"
           id="mockId"
         >
           Skip if unavailable
-        </p>
+        </span>
       </div>
     </div>
   </div>,

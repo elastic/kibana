@@ -20,8 +20,9 @@
 export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { IndexPatternSelect } from './index_pattern_select';
 export { FilterBar } from './filter_bar';
-export { applyFiltersPopover } from './apply_filters';
+export { QueryStringInput } from './query_string_input/query_string_input';
+export { SearchBar, SearchBarProps } from './search_bar';
+
 // temp export - will be removed as final components are migrated to NP
-export { QueryLanguageSwitcher } from './query_string_input/language_switcher';
 export { SavedQueryManagementComponent } from './saved_query_management';
 export { SaveQueryForm, SavedQueryMeta } from './saved_query_form';

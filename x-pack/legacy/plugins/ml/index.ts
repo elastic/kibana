@@ -7,7 +7,10 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { plugin } from './server/new_platform';
+import { CloudSetup } from '../../../plugins/cloud/server';
+
 import {
   MlInitializerContext,
   MlCoreSetup,
@@ -38,9 +41,9 @@ export const ml = (kibana: any) => {
         }),
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/application/app',
+        main: 'plugins/ml/legacy',
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
@@ -80,13 +83,14 @@ export const ml = (kibana: any) => {
         http: mlHttpService,
         savedObjects: server.savedObjects,
       };
-
+      const { usageCollection, cloud } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
         elasticsearch: server.plugins.elasticsearch,
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
-        usageCollection: kbnServer.newPlatform.setup.plugins.usageCollection,
+        usageCollection: usageCollection as UsageCollectionSetup,
+        cloud: cloud as CloudSetup,
         ml: this,
       };
 

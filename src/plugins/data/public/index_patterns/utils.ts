@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { find, get } from 'lodash';
+import { find } from 'lodash';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 /**
@@ -47,18 +47,6 @@ export async function findByTitle(
     savedObjects,
     (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
   );
-}
-
-export function getFromSavedObject(savedObject: any) {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
-  }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
 }
 
 export function getRoutes() {

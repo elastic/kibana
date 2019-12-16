@@ -27,7 +27,7 @@ describe('createErrorGroupWatch', () => {
     .mockResolvedValue(undefined);
 
   beforeEach(async () => {
-    jest.spyOn(uuid, 'v4').mockReturnValue(new Buffer('mocked-uuid'));
+    jest.spyOn(uuid, 'v4').mockReturnValue(Buffer.from('mocked-uuid'));
 
     createWatchResponse = await createErrorGroupWatch({
       http: {} as HttpServiceBase,

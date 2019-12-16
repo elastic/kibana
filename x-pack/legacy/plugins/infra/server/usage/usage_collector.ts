@@ -6,6 +6,8 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { InfraNodeType } from '../graphql/types';
+import { InventoryItemType } from '../../common/inventory_models/types';
+
 const KIBANA_REPORTING_TYPE = 'infraops';
 
 interface InfraopsSum {
@@ -31,7 +33,7 @@ export class UsageCollector {
     });
   }
 
-  public static countNode(nodeType: InfraNodeType) {
+  public static countNode(nodeType: InventoryItemType) {
     const bucket = this.getBucket();
     this.maybeInitializeBucket(bucket);
 

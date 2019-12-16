@@ -29,7 +29,7 @@ export const uptime = (kibana: any) =>
         }),
         main: 'plugins/uptime/app',
         order: 8900,
-        url: '/app/uptime/',
+        url: '/app/uptime#/',
       },
       home: ['plugins/uptime/register_feature'],
     },
@@ -41,7 +41,7 @@ export const uptime = (kibana: any) =>
 
       plugin(initializerContext).setup(
         {
-          route: (arg: any) => server.route(arg),
+          route: server.newPlatform.setup.core.http.createRouter(),
         },
         {
           elasticsearch,

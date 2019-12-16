@@ -35,7 +35,7 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     runComplete = true;
   });
 
-  lifecycle.on('cleanup', () => {
+  lifecycle.cleanup.add(() => {
     if (!runComplete) runner.abort();
   });
 

@@ -5,25 +5,23 @@
  */
 
 import { union } from 'lodash';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-} from '../../../lib/adapters/framework';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
   MetricsExplorerColumnType,
-  MetricsExplorerRequest,
   MetricsExplorerRow,
   MetricsExplorerSeries,
-  MetricsExplorerWrappedRequest,
+  MetricsExplorerRequestBody,
 } from '../types';
 import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export const populateSeriesWithTSVBData = (
-  req: InfraFrameworkRequest<MetricsExplorerWrappedRequest>,
-  options: MetricsExplorerRequest,
-  framework: InfraBackendFrameworkAdapter
+  request: KibanaRequest,
+  options: MetricsExplorerRequestBody,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext
 ) => async (series: MetricsExplorerSeries) => {
   // IF there are no metrics selected then we should return an empty result.
   if (options.metrics.length === 0) {
@@ -57,7 +55,7 @@ export const populateSeriesWithTSVBData = (
   const model = createMetricModel(options);
   const calculatedInterval = await calculateMetricInterval(
     framework,
-    req,
+    requestContext,
     {
       indexPattern: options.indexPattern,
       timestampField: options.timerange.field,
@@ -78,7 +76,13 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Get TSVB results using the model, timerange and filters
-  const tsvbResults = await framework.makeTSVBRequest(req, model, timerange, filters);
+  const tsvbResults = await framework.makeTSVBRequest(
+    request,
+    model,
+    timerange,
+    filters,
+    requestContext
+  );
 
   // If there is no data `custom` will not exist.
   if (!tsvbResults.custom) {

@@ -40,11 +40,11 @@ export function getSearchParams(config: IUiSettingsClient, esShardTimeout: numbe
   };
 }
 
-export function getIgnoreThrottled(config: IUiSettingsClient) {
+function getIgnoreThrottled(config: IUiSettingsClient) {
   return !config.get('search:includeFrozen');
 }
 
-export function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
+function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
   const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }

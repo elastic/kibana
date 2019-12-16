@@ -23,7 +23,7 @@ import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { start as data } from '../../../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 import {
   EuiButton,
@@ -35,16 +35,15 @@ import {
 } from '@elastic/eui';
 
 class ControlsTabUi extends Component {
-
   state = {
-    type: 'list'
-  }
+    type: 'list',
+  };
 
-  getIndexPattern = async (indexPatternId) => {
-    return await data.indexPatterns.indexPatterns.get(indexPatternId);
-  }
+  getIndexPattern = async indexPatternId => {
+    return await npStart.plugins.data.indexPatterns.get(indexPatternId);
+  };
 
-  onChange = value => this.props.setValue('controls', value)
+  onChange = value => this.props.setValue('controls', value);
 
   handleLabelChange = (controlIndex, label) => {
     const updatedControl = {
@@ -52,24 +51,24 @@ class ControlsTabUi extends Component {
       label,
     };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  }
+  };
 
   handleIndexPatternChange = (controlIndex, indexPattern) => {
     const updatedControl = {
       ...this.props.stateParams.controls[controlIndex],
       indexPattern,
-      fieldName: ''
+      fieldName: '',
     };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  }
+  };
 
   handleFieldNameChange = (controlIndex, fieldName) => {
     const updatedControl = {
       ...this.props.stateParams.controls[controlIndex],
-      fieldName
+      fieldName,
     };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  }
+  };
 
   handleOptionsChange = (controlIndex, optionName, value) => {
     const control = this.props.stateParams.controls[controlIndex];
@@ -78,30 +77,30 @@ class ControlsTabUi extends Component {
       options: {
         ...control.options,
         [optionName]: value,
-      }
+      },
     };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  }
+  };
 
-  handleRemoveControl = (controlIndex) => {
+  handleRemoveControl = controlIndex => {
     this.onChange(removeControl(this.props.stateParams.controls, controlIndex));
-  }
+  };
 
   moveControl = (controlIndex, direction) => {
     this.onChange(moveControl(this.props.stateParams.controls, controlIndex, direction));
-  }
+  };
 
   handleAddControl = () => {
     this.onChange(addControl(this.props.stateParams.controls, newControl(this.state.type)));
-  }
+  };
 
   handleParentChange = (controlIndex, parent) => {
     const updatedControl = {
       ...this.props.stateParams.controls[controlIndex],
-      parent
+      parent,
     };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  }
+  };
 
   renderControls() {
     const lineageMap = getLineageMap(this.props.stateParams.controls);
@@ -109,7 +108,8 @@ class ControlsTabUi extends Component {
       const parentCandidates = getParentCandidates(
         this.props.stateParams.controls,
         controlParams.id,
-        lineageMap);
+        lineageMap
+      );
       return (
         <ControlEditor
           key={controlParams.id}
@@ -134,40 +134,41 @@ class ControlsTabUi extends Component {
 
     return (
       <div>
-
         {this.renderControls()}
 
         <EuiPanel grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow
-                id="selectControlType"
-              >
+              <EuiFormRow id="selectControlType">
                 <EuiSelect
                   data-test-subj="selectControlType"
                   options={[
-                    { value: 'range', text: intl.formatMessage({
-                      id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
-                      defaultMessage: 'Range slider' })
+                    {
+                      value: 'range',
+                      text: intl.formatMessage({
+                        id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
+                        defaultMessage: 'Range slider',
+                      }),
                     },
-                    { value: 'list', text: intl.formatMessage({
-                      id: 'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
-                      defaultMessage: 'Options list' })
+                    {
+                      value: 'list',
+                      text: intl.formatMessage({
+                        id: 'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
+                        defaultMessage: 'Options list',
+                      }),
                     },
                   ]}
                   value={this.state.type}
                   onChange={evt => this.setState({ type: evt.target.value })}
                   aria-label={intl.formatMessage({
                     id: 'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
-                    defaultMessage: 'Select control type'
+                    defaultMessage: 'Select control type',
                   })}
                 />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFormRow
-                id="addControl"
-              >
+              <EuiFormRow id="addControl">
                 <EuiButton
                   fill
                   onClick={this.handleAddControl}
@@ -175,16 +176,18 @@ class ControlsTabUi extends Component {
                   data-test-subj="inputControlEditorAddBtn"
                   aria-label={intl.formatMessage({
                     id: 'inputControl.editor.controlsTab.select.addControlAriaLabel',
-                    defaultMessage: 'Add control'
+                    defaultMessage: 'Add control',
                   })}
                 >
-                  <FormattedMessage id="inputControl.editor.controlsTab.addButtonLabel" defaultMessage="Add"/>
+                  <FormattedMessage
+                    id="inputControl.editor.controlsTab.addButtonLabel"
+                    defaultMessage="Add"
+                  />
                 </EuiButton>
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-
       </div>
     );
   }
@@ -192,7 +195,7 @@ class ControlsTabUi extends Component {
 
 ControlsTabUi.propTypes = {
   vis: PropTypes.object.isRequired,
-  setValue: PropTypes.func.isRequired
+  setValue: PropTypes.func.isRequired,
 };
 
 export const ControlsTab = injectI18n(ControlsTabUi);

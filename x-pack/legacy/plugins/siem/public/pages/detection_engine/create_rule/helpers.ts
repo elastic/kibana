@@ -40,13 +40,12 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
 };
 
 const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, useIndicesConfig, outputIndex, ...rest } = defineStepData;
+  const { queryBar, useIndicesConfig, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
     ...rest,
     language: query.language,
     filters,
-    output_index: outputIndex,
     query: query.query as string,
     ...(savedId != null ? { saved_id: savedId } : {}),
   };
@@ -69,12 +68,22 @@ const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRul
 };
 
 const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const { falsePositives, references, riskScore, ...rest } = aboutStepData;
+  const { falsePositives, references, riskScore, threats, ...rest } = aboutStepData;
 
   return {
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
     risk_score: riskScore,
+    threats: threats
+      .filter(threat => threat.tactic.name !== 'none')
+      .map(threat => ({
+        ...threat,
+        framework: 'MITRE ATT&CK',
+        techniques: threat.techniques.map(technique => {
+          const { id, name, reference } = technique;
+          return { id, name, reference };
+        }),
+      })),
     ...rest,
   };
 };

@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { WithWaffleFilter } from '../../../containers/waffle/with_waffle_filters';
-import { WithWaffleNodes } from '../../../containers/waffle/with_waffle_nodes';
 import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithOptions } from '../../../containers/with_options';
@@ -22,7 +21,7 @@ export const SnapshotPageContent: React.FC = () => (
           <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
             {({ filterQueryAsJson, applyFilterQuery }) => (
               <WithWaffleTime>
-                {({ currentTimeRange, isAutoReloading }) => (
+                {({ currentTime }) => (
                   <WithWaffleOptions>
                     {({
                       metric,
@@ -33,35 +32,25 @@ export const SnapshotPageContent: React.FC = () => (
                       autoBounds,
                       boundsOverride,
                     }) => (
-                      <WithWaffleNodes
+                      <Layout
+                        currentTime={currentTime}
                         filterQuery={filterQueryAsJson}
                         metric={metric}
                         groupBy={groupBy}
                         nodeType={nodeType}
                         sourceId={sourceId}
-                        timerange={currentTimeRange}
-                      >
-                        {({ nodes, loading, refetch }) => (
-                          <Layout
-                            nodes={nodes}
-                            loading={nodes.length > 0 && isAutoReloading ? false : loading}
-                            nodeType={nodeType}
-                            options={{
-                              ...wafflemap,
-                              metric,
-                              fields: configuration && configuration.fields,
-                              groupBy,
-                            }}
-                            reload={refetch}
-                            onDrilldown={applyFilterQuery}
-                            timeRange={currentTimeRange}
-                            view={view}
-                            onViewChange={changeView}
-                            autoBounds={autoBounds}
-                            boundsOverride={boundsOverride}
-                          />
-                        )}
-                      </WithWaffleNodes>
+                        options={{
+                          ...wafflemap,
+                          metric,
+                          fields: configuration && configuration.fields,
+                          groupBy,
+                        }}
+                        onDrilldown={applyFilterQuery}
+                        view={view}
+                        onViewChange={changeView}
+                        autoBounds={autoBounds}
+                        boundsOverride={boundsOverride}
+                      />
                     )}
                   </WithWaffleOptions>
                 )}

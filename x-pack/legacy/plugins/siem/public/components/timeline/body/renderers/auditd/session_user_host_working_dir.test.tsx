@@ -8,12 +8,14 @@ import { EuiFlexItem } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('SessionUserHostWorkingDir', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default SessionUserHostWorkingDir', () => {
       const wrapper = shallow(
@@ -34,7 +36,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with just eventId and contextId', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -54,7 +56,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with only eventId, contextId, session', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -74,7 +76,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with only eventId, contextId, session, hostName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -94,7 +96,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with only eventId, contextId, session, hostName, userName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -114,7 +116,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with only eventId, contextId, session, hostName, userName, primary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -134,7 +136,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with only eventId, contextId, session, hostName, userName, primary, secondary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
@@ -154,7 +156,7 @@ describe('SessionUserHostWorkingDir', () => {
     });
 
     test('it renders with everything as expected', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir

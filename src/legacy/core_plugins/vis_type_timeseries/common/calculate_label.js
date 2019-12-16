@@ -38,14 +38,18 @@ const paths = [
 
 export function calculateLabel(metric, metrics) {
   if (!metric) {
-    return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
+    return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
+      defaultMessage: 'Unknown',
+    });
   }
   if (metric.alias) {
     return metric.alias;
   }
 
   if (metric.type === 'count') {
-    return i18n.translate('visTypeTimeseries.calculateLabel.countLabel', { defaultMessage: 'Count' });
+    return i18n.translate('visTypeTimeseries.calculateLabel.countLabel', {
+      defaultMessage: 'Count',
+    });
   }
   if (metric.type === 'calculation') {
     return i18n.translate('visTypeTimeseries.calculateLabel.bucketScriptsLabel', {
@@ -84,14 +88,17 @@ export function calculateLabel(metric, metrics) {
       const percentileValueMatch = /\[([0-9\.]+)\]$/;
       const matches = metric.field.match(percentileValueMatch);
       if (matches) {
-        return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel', {
-          defaultMessage: '{lookupMetricType} of {targetLabel} ({additionalLabel})',
-          values: {
-            lookupMetricType: lookup[metric.type],
-            targetLabel,
-            additionalLabel: matches[1],
-          },
-        });
+        return i18n.translate(
+          'visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel',
+          {
+            defaultMessage: '{lookupMetricType} of {targetLabel} ({additionalLabel})',
+            values: {
+              lookupMetricType: lookup[metric.type],
+              targetLabel,
+              additionalLabel: matches[1],
+            },
+          }
+        );
       }
     }
     return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetLabel', {

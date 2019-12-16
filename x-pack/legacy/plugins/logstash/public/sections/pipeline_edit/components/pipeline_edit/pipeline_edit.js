@@ -17,7 +17,7 @@ import 'ace';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('pipelineEdit', function ($injector) {
+app.directive('pipelineEdit', function($injector) {
   const pipelineService = $injector.get('pipelineService');
   const licenseService = $injector.get('logstashLicenseService');
   const kbnUrl = $injector.get('kbnUrl');

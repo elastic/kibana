@@ -20,7 +20,6 @@ import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
 import { maps } from './legacy/plugins/maps';
 import { licenseManagement } from './legacy/plugins/license_management';
-import { cloud } from './legacy/plugins/cloud';
 import { indexManagement } from './legacy/plugins/index_management';
 import { indexLifecycleManagement } from './legacy/plugins/index_lifecycle_management';
 import { consoleExtensions } from './legacy/plugins/console_extensions';
@@ -44,7 +43,7 @@ import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
 
-module.exports = function (kibana) {
+module.exports = function(kibana) {
   return [
     xpackMain(kibana),
     graph(kibana),
@@ -64,7 +63,6 @@ module.exports = function (kibana) {
     maps(kibana),
     canvas(kibana),
     licenseManagement(kibana),
-    cloud(kibana),
     indexManagement(kibana),
     consoleExtensions(kibana),
     indexLifecycleManagement(kibana),

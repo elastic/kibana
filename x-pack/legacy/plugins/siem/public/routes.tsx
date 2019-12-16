@@ -20,8 +20,8 @@ export const PageRouter: FC<RouterProps> = memo(({ history }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <Switch>
-        <Route path="/" component={HomePage} />
-        <Route component={NotFoundPage} />
+        <Route path="/" render={() => <HomePage />} />
+        <Route render={() => <NotFoundPage />} />
       </Switch>
     </Router>
   </ManageRoutesSpy>

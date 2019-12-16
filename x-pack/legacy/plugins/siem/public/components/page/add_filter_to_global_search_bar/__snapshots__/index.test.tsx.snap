@@ -1,43 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
-<Component
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
+<WithHoverActions
+  hoverContent={
+    <ForwardRef(Styled(EuiPanel))
+      data-test-subj="hover-actions-container"
+      paddingSize="none"
+    >
+      <EuiToolTip
+        content="Filter for value"
+        delay="regular"
+        position="top"
+      >
+        <EuiIcon
+          data-test-subj="add-to-filter"
+          onClick={[Function]}
+          type="filter"
+        />
+      </EuiToolTip>
+    </ForwardRef(Styled(EuiPanel))>
   }
->
-  <AddFilterToGlobalSearchBar
-    filter={
-      Object {
-        "meta": Object {
-          "alias": null,
-          "disabled": false,
-          "key": "host.name",
-          "negate": false,
-          "params": Object {
-            "query": "siem-kibana",
-          },
-          "type": "phrase",
-          "value": "siem-kibana",
-        },
-        "query": Object {
-          "match": Object {
-            "host.name": Object {
-              "query": "siem-kibana",
-              "type": "phrase",
-            },
-          },
-        },
-      }
-    }
-  >
-    siem-kibana
-  </AddFilterToGlobalSearchBar>
-</Component>
+  render={[Function]}
+/>
 `;

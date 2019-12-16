@@ -28,6 +28,7 @@ import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
+import { npSetup } from 'ui/new_platform';
 
 export function HomeApp({ directories }) {
   const {
@@ -35,12 +36,11 @@ export function HomeApp({ directories }) {
     savedObjectsClient,
     getBasePath,
     addBasePath,
-    telemetryOptInProvider: {
-      setOptInNoticeSeen,
-    },
+    telemetryOptInProvider: { setOptInNoticeSeen },
   } = getServices();
+  const { cloud } = npSetup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
 
-  const isCloudEnabled = getInjected('isCloudEnabled', false);
   const apmUiEnabled = getInjected('apmUiEnabled', true);
   const mlEnabled = getInjected('mlEnabled', false);
   const defaultAppId = getInjected('kbnDefaultAppId', 'discover');

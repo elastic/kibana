@@ -13,8 +13,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45321
-  describe.skip('graph', function() {
+  describe('graph', function() {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
@@ -82,9 +81,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       const { nodes } = await PageObjects.graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
       expect(circlesText.length).to.equal(expectedNodes.length);
-      circlesText.forEach(circleText => {
-        expect(expectedNodes.includes(circleText)).to.be(true);
-      });
+      const unexpectedCircleTexts = circlesText.filter(t => !expectedNodes.includes(t));
+
+      if (unexpectedCircleTexts.length) {
+        throw new Error(`Find unexpected circle texts: ${unexpectedCircleTexts}`);
+      }
     });
 
     it('should show correct connections', async function() {
@@ -112,6 +113,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       const circlesText = nodes.map(({ label }) => label);
       expect(circlesText.length).to.equal(expectedNodes.length);
       circlesText.forEach(circleText => {
+        log.debug(`Looking for ${circleText}`);
         expect(expectedNodes.includes(circleText)).to.be(true);
       });
     });

@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { WhatIs } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,11 +32,7 @@ export class ExplainCollectionInterval extends React.Component {
   }
 
   render() {
-    const {
-      reason,
-      isCollectionIntervalUpdated,
-      isCollectionIntervalUpdating
-    } = this.props;
+    const { reason, isCollectionIntervalUpdated, isCollectionIntervalUpdating } = this.props;
     const { context, property, data } = reason;
 
     const renderButton = () => (
@@ -51,8 +47,8 @@ export class ExplainCollectionInterval extends React.Component {
               is set to {data}."
               values={{
                 context,
-                property: (<EuiCode>{property}</EuiCode>),
-                data: (<EuiCode>{data}</EuiCode>)
+                property: <EuiCode>{property}</EuiCode>,
+                data: <EuiCode>{data}</EuiCode>,
               }}
             />
           </p>
@@ -71,11 +67,7 @@ export class ExplainCollectionInterval extends React.Component {
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceAround"
-          gutterSize="s"
-        >
+        <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
               fill={true}
@@ -132,5 +124,5 @@ ExplainCollectionInterval.propTypes = {
   enabler: PropTypes.object.isRequired,
   reason: PropTypes.object.isRequired,
   isCollectionIntervalUpdated: PropTypes.bool,
-  isCollectionIntervalUpdating: PropTypes.bool
+  isCollectionIntervalUpdating: PropTypes.bool,
 };

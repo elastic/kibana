@@ -17,11 +17,7 @@
  * under the License.
  */
 
-export {
-  ISavedObjectsRepository,
-  SavedObjectsRepository,
-  SavedObjectsRepositoryOptions,
-} from './repository';
+export { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
 
 export {
   SavedObjectsClientWrapperFactory,

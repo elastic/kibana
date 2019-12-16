@@ -28,7 +28,6 @@ export class AngularVisController {
   }
 
   render(esResponse, visParams, status) {
-
     return new Promise(async (resolve, reject) => {
       if (!this.$rootScope) {
         const $injector = await chrome.dangerouslyGetActiveInjector();
@@ -71,4 +70,3 @@ export class AngularVisController {
     }
   }
 }
-

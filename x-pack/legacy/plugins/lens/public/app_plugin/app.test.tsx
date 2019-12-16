@@ -106,14 +106,10 @@ describe('Lens App', () => {
             },
           },
         },
-      },
-      dataShim: {
         indexPatterns: {
-          indexPatterns: {
-            get: jest.fn(id => {
-              return new Promise(resolve => resolve({ id }));
-            }),
-          },
+          get: jest.fn(id => {
+            return new Promise(resolve => resolve({ id }));
+          }),
         },
       },
       storage: {
@@ -238,7 +234,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.dataShim.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
@@ -29,10 +28,10 @@ jest.mock('ui/new_platform', () => ({
       data: {
         ui: {
           IndexPatternSelect: () => {
-            return <div/>;
-          }
-        }
-      }
+            return <div />;
+          },
+        },
+      },
     },
   },
 }));
@@ -50,8 +49,8 @@ const controlParams = {
   type: 'range',
   options: {
     decimalPlaces: 0,
-    step: 1
-  }
+    step: 1,
+  },
 };
 let handleFieldNameChange;
 let handleIndexPatternChange;
@@ -95,7 +94,6 @@ test('handleOptionsChange - step', () => {
     expectedControlIndex,
     expectedOptionName,
     expectedValue
-  );
 });
 
 test('handleNumberOptionChange - decimalPlaces', () => {
@@ -119,5 +117,4 @@ test('handleNumberOptionChange - decimalPlaces', () => {
     expectedControlIndex,
     expectedOptionName,
     expectedValue
-  );
 });

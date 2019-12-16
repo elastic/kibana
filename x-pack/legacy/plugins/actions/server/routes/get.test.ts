@@ -24,7 +24,7 @@ it('calls get with proper parameters', async () => {
     id: '1',
     actionTypeId: 'my-action-type-id',
     config: {},
-    description: 'my action type description',
+    name: 'my action type name',
   };
 
   actionsClient.get.mockResolvedValueOnce(expectedResult);

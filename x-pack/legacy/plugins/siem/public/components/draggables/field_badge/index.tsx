@@ -6,7 +6,6 @@
 
 import { rgba } from 'polished';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 const Field = styled.div`
@@ -28,11 +27,12 @@ Field.displayName = 'Field';
 // Passing the styles directly to the component because the width is
 // being calculated and is recommended by Styled Components for performance
 // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-export const DraggableFieldBadge = pure<{ fieldId: string; fieldWidth?: string }>(
+export const DraggableFieldBadge = React.memo<{ fieldId: string; fieldWidth?: string }>(
   ({ fieldId, fieldWidth }) => (
     <Field data-test-subj="field" style={{ width: fieldWidth }}>
       {fieldId}
     </Field>
   )
 );
+
 DraggableFieldBadge.displayName = 'DraggableFieldBadge';

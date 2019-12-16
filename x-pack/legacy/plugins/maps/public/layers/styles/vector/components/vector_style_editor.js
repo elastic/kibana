@@ -12,17 +12,14 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import {
-  getDefaultDynamicProperties,
-  getDefaultStaticProperties,
-} from '../vector_style_defaults';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../vector_constants';
 import { i18n } from '@kbn/i18n';
 import { SYMBOL_OPTIONS } from '../symbol_utils';
 
-import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
   state = {
@@ -50,12 +47,11 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadOrdinalFields() {
-
-    const getFieldMeta = async (field) => {
+    const getFieldMeta = async field => {
       return {
         label: await field.getLabel(),
         name: field.getName(),
-        origin: field.getOrigin()
+        origin: field.getOrigin(),
       };
     };
     const dateFields = await this.props.layer.getDateFields();
@@ -73,7 +69,6 @@ export class VectorStyleEditor extends Component {
     if (this._isMounted && !_.isEqual(numberFieldsArray, this.state.numberFields)) {
       this.setState({ numberFields: numberFieldsArray });
     }
-
   }
 
   async _loadSupportedFeatures() {
@@ -116,6 +111,14 @@ export class VectorStyleEditor extends Component {
   _getOrdinalFields() {
     return [...this.state.dateFields, ...this.state.numberFields];
   }
+
+  _handleSelectedFeatureChange = selectedFeature => {
+    this.setState({ selectedFeature });
+  };
+
+  _onIsTimeAwareChange = event => {
+    this.props.onIsTimeAwareChange(event.target.checked);
+  };
 
   _renderFillColor() {
     return (
@@ -235,11 +238,7 @@ export class VectorStyleEditor extends Component {
     );
   }
 
-  _handleSelectedFeatureChange = selectedFeature => {
-    this.setState({ selectedFeature });
-  };
-
-  render() {
+  _renderProperties() {
     const { supportedFeatures, selectedFeature } = this.state;
 
     if (!supportedFeatures) {
@@ -299,6 +298,34 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {styleProperties}
+      </Fragment>
+    );
+  }
+
+  _renderIsTimeAwareSwitch() {
+    if (!this.props.showIsTimeAware) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow display="columnCompressedSwitch">
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
+            defaultMessage: 'Apply global time to style metadata requests',
+          })}
+          checked={this.props.isTimeAware}
+          onChange={this._onIsTimeAwareChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderProperties()}
+        {this._renderIsTimeAwareSwitch()}
       </Fragment>
     );
   }

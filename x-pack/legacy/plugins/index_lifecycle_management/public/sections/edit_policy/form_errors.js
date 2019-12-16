@@ -4,32 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { cloneElement, Children, Fragment } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-export const ErrableFormRow = ({
-  errorKey,
-  isShowingErrors,
-  errors,
-  children,
-  ...rest
-}) => {
+export const ErrableFormRow = ({ errorKey, isShowingErrors, errors, children, ...rest }) => {
   return (
     <EuiFormRow
-      isInvalid={
-        isShowingErrors &&
-        errors[errorKey].length > 0
-      }
+      isInvalid={isShowingErrors && errors[errorKey].length > 0}
       error={errors[errorKey]}
       {...rest}
     >
       <Fragment>
-        {Children.map(children, child => cloneElement(child, {
-          isInvalid: isShowingErrors && errors[errorKey].length > 0,
-        }))}
+        {Children.map(children, child =>
+          cloneElement(child, {
+            isInvalid: isShowingErrors && errors[errorKey].length > 0,
+          })
+        )}
       </Fragment>
     </EuiFormRow>
   );

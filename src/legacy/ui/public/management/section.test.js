@@ -24,10 +24,10 @@ jest.mock('ui/capabilities', () => ({
         kibana: {
           sampleFeature1: true,
           sampleFeature2: false,
-        }
-      }
-    })
-  }
+        },
+      },
+    }),
+  },
 }));
 
 import { ManagementSection } from './section';
@@ -92,7 +92,7 @@ describe('ManagementSection', () => {
       expect(section.register('about').parent).toBe(section);
     });
 
-    it('adds item', function () {
+    it('adds item', function() {
       section.register('about', { description: 'test' });
 
       expect(section.items).toHaveLength(1);
@@ -115,7 +115,9 @@ describe('ManagementSection', () => {
 
     it('calls listener when item added', () => {
       let listerCalled = false;
-      const listenerFn = () => { listerCalled = true; };
+      const listenerFn = () => {
+        listerCalled = true;
+      };
 
       section.addListener(listenerFn);
       section.register('about');
@@ -131,12 +133,12 @@ describe('ManagementSection', () => {
       section.register('about');
     });
 
-    it ('deregisters an existing section', () => {
+    it('deregisters an existing section', () => {
       section.deregister('about');
       expect(section.items).toHaveLength(0);
     });
 
-    it ('allows deregistering a section more than once', () => {
+    it('allows deregistering a section more than once', () => {
       section.deregister('about');
       section.deregister('about');
       expect(section.items).toHaveLength(0);
@@ -144,7 +146,9 @@ describe('ManagementSection', () => {
 
     it('calls listener when item added', () => {
       let listerCalled = false;
-      const listenerFn = () => { listerCalled = true; };
+      const listenerFn = () => {
+        listerCalled = true;
+      };
 
       section.addListener(listenerFn);
       section.deregister('about');
@@ -202,7 +206,9 @@ describe('ManagementSection', () => {
     });
 
     it('can be ordered', () => {
-      const ids = section.items.inOrder.map((i) => { return i.id; });
+      const ids = section.items.inOrder.map(i => {
+        return i.id;
+      });
       expect(ids).toEqual(['one', 'two', 'three']);
     });
   });
@@ -256,20 +262,26 @@ describe('ManagementSection', () => {
     });
 
     it('maintains the order', () => {
-      const ids = section.visibleItems.map((i) => { return i.id; });
+      const ids = section.visibleItems.map(i => {
+        return i.id;
+      });
       expect(ids).toEqual(['one', 'two', 'three']);
     });
 
     it('does not include hidden items', () => {
       section.getSection('two').hide();
 
-      const ids = section.visibleItems.map((i) => { return i.id; });
+      const ids = section.visibleItems.map(i => {
+        return i.id;
+      });
       expect(ids).toEqual(['one', 'three']);
     });
 
     it('does not include visible items hidden via uiCapabilities', () => {
       section.register('sampleFeature2', { order: 4, visible: true });
-      const ids = section.visibleItems.map((i) => { return i.id; });
+      const ids = section.visibleItems.map(i => {
+        return i.id;
+      });
       expect(ids).toEqual(['one', 'two', 'three']);
     });
   });
