@@ -106,7 +106,7 @@ describe('Events Viewer', () => {
       .invoke('text')
       .then(text1 => {
         cy.get(HEADER_SUBTITLE)
-          .invoke('text')
+          .invoke('text', { timeout: DEFAULT_TIMEOUT })
           .should('not.equal', 'Showing: 0 events');
 
         filterSearchBar(filterInput);
