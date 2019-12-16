@@ -21,7 +21,7 @@ import { Breadcrumb } from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../../../plugins/features/public';
+import { Feature } from '../../../../../../../plugins/features/server';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';
