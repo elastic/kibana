@@ -436,7 +436,7 @@
     "listr": "^0.14.1",
     "load-grunt-config": "^3.0.1",
     "mocha": "^6.2.2",
-    "multistream": "^2.1.1",
+    "multistream": "^4.0.0",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "10.0.6",
