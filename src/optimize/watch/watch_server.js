@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { Server } from 'hapi';
 import { registerHapiPlugins } from '../../legacy/server/http/register_hapi_plugins';
 
@@ -27,7 +26,7 @@ export default class WatchServer {
     this.optimizer = optimizer;
     this.server = new Server({
       host: host,
-      port: port
+      port: port,
     });
 
     registerHapiPlugins(this.server);

@@ -33,7 +33,7 @@ describe('makeKQLUsageCollector', () => {
       registerCollector: registerStub,
     };
     server = {
-      config: () => ({ get: () => '.kibana' })
+      config: () => ({ get: () => '.kibana' }),
     };
   });
 

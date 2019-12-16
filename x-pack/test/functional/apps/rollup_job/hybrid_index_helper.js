@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export default function mockRolledUpData(jobName, targetIndexName, day) {
   return {
     index: `${targetIndexName}`,
@@ -14,8 +13,8 @@ export default function mockRolledUpData(jobName, targetIndexName, day) {
       '@timestamp.date_histogram.timestamp': day.toISOString(),
       '@timestamp.date_histogram.interval': '1000ms',
       '@timestamp.date_histogram._count': 1,
-      '_rollup.id': jobName
-    }
+      '_rollup.id': jobName,
+    },
   };
 }
 
@@ -26,7 +25,7 @@ export function mockIndices(day, prepend) {
     index: `${prepend}-${day.format('MM-DD-YYYY')}`,
     body: {
       '@timestamp': day.toISOString(),
-      foo_metric: 1
-    }
+      foo_metric: 1,
+    },
   };
 }

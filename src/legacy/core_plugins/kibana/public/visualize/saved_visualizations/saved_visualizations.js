@@ -24,6 +24,7 @@ import { savedObjectManagementRegistry } from '../../management/saved_object_reg
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 import { createVisualizeEditUrl } from '../visualize_constants';
 import { findListItems } from './find_list_items';
+import { npStart } from '../../../../../ui/public/new_platform';
 
 const app = uiModules.get('app/visualize');
 
@@ -34,17 +35,16 @@ savedObjectManagementRegistry.register({
   title: 'visualizations',
 });
 
-app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) {
+app.service('savedVisualizations', function(SavedVis, Private) {
   const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
     SavedVis,
-    kbnUrl,
-    chrome,
-    savedObjectClient
+    savedObjectClient,
+    npStart.core.chrome
   );
 
-  saveVisualizationLoader.mapHitSource = function (source, id) {
+  saveVisualizationLoader.mapHitSource = function(source, id) {
     source.id = id;
     source.url = this.urlFor(id);
 
@@ -72,13 +72,13 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl, chrome) 
     return source;
   };
 
-  saveVisualizationLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
+  saveVisualizationLoader.urlFor = function(id) {
+    return `#/visualize/edit/${encodeURIComponent(id)}`;
   };
 
   // This behaves similarly to find, except it returns visualizations that are
   // defined as appExtensions and which may not conform to type: visualization
-  saveVisualizationLoader.findListItems = function (search = '', size = 100) {
+  saveVisualizationLoader.findListItems = function(search = '', size = 100) {
     return findListItems({
       search,
       size,

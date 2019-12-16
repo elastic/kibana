@@ -141,7 +141,7 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     },
   ],
   getRequestAggs(agg) {
-    const aggs: IBucketAggConfig[] = [];
+    const aggs = [];
     const params = agg.params;
 
     if (params.isFilteredByCollar && agg.getField()) {

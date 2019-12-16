@@ -30,9 +30,7 @@ import { EventEmitter } from 'events';
  * @param params {Object}
  */
 export class HeatmapMarkers extends EventEmitter {
-
   constructor(featureCollection, options, zoom, max) {
-
     super();
     this._geojsonFeatureCollection = featureCollection;
     const points = dataToHeatArray(featureCollection, max);
@@ -40,15 +38,15 @@ export class HeatmapMarkers extends EventEmitter {
     this._tooltipFormatter = options.tooltipFormatter;
     this._zoom = zoom;
     this._disableTooltips = false;
-    this._getLatLng = _.memoize(function (feature) {
-      return L.latLng(
-        feature.geometry.coordinates[1],
-        feature.geometry.coordinates[0]
-      );
-    }, function (feature) {
-      // turn coords into a string for the memoize cache
-      return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
-    });
+    this._getLatLng = _.memoize(
+      function(feature) {
+        return L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+      },
+      function(feature) {
+        // turn coords into a string for the memoize cache
+        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
+      }
+    );
     this._addTooltips();
   }
 
@@ -60,9 +58,7 @@ export class HeatmapMarkers extends EventEmitter {
     return this._leafletLayer;
   }
 
-  appendLegendContents() {
-  }
-
+  appendLegendContents() {}
 
   movePointer(type, event) {
     if (type === 'mousemove') {
@@ -77,11 +73,8 @@ export class HeatmapMarkers extends EventEmitter {
     }
   }
 
-
   _addTooltips() {
-
-    const mouseMoveLocation = (e) => {
-
+    const mouseMoveLocation = e => {
       if (!this._geojsonFeatureCollection.features.length || this._disableTooltips) {
         this.emit('hideTooltip');
         return;
@@ -95,15 +88,16 @@ export class HeatmapMarkers extends EventEmitter {
         }
         this.emit('showTooltip', {
           content: content,
-          position: e.latlng
+          position: e.latlng,
         });
-      } else { this.emit('hideTooltip');
+      } else {
+        this.emit('hideTooltip');
       }
     };
 
     this._debounceMoveMoveLocation = _.debounce(mouseMoveLocation.bind(this), 15, {
-      'leading': true,
-      'trailing': false
+      leading: true,
+      trailing: false,
     });
   }
 
@@ -122,17 +116,21 @@ export class HeatmapMarkers extends EventEmitter {
       return;
     }
 
-    _.reduce(this._geojsonFeatureCollection.features, function (distance, feature) {
-      const featureLatLng = self._getLatLng(feature);
-      const dist = latLng.distanceTo(featureLatLng);
+    _.reduce(
+      this._geojsonFeatureCollection.features,
+      function(distance, feature) {
+        const featureLatLng = self._getLatLng(feature);
+        const dist = latLng.distanceTo(featureLatLng);
 
-      if (dist < distance) {
-        nearest = feature;
-        return dist;
-      }
+        if (dist < distance) {
+          nearest = feature;
+          return dist;
+        }
 
-      return distance;
-    }, Infinity);
+        return distance;
+      },
+      Infinity
+    );
 
     return nearest;
   }
@@ -155,7 +153,8 @@ export class HeatmapMarkers extends EventEmitter {
     // domain (input values) is map zoom (min 1 and max 18)
     // range (output values) is distance in meters
     // used to compare proximity of event latlng to feature latlng
-    const zoomScale = d3.scale.linear()
+    const zoomScale = d3.scale
+      .linear()
       .domain([1, 4, 7, 10, 13, 16, 18])
       .range([1000000, 300000, 100000, 15000, 2000, 150, 50]);
 
@@ -172,15 +171,14 @@ export class HeatmapMarkers extends EventEmitter {
       showTip = true;
     }
 
-    d3.scale.pow().exponent(0.2)
+    d3.scale
+      .pow()
+      .exponent(0.2)
       .domain([1, 18])
       .range([1500000, 50]);
     return showTip;
   }
-
 }
-
-
 
 /**
  * returns normalized data for heat map intensity
@@ -190,8 +188,7 @@ export class HeatmapMarkers extends EventEmitter {
  * @return {Array}
  */
 function dataToHeatArray(featureCollection, max) {
-
-  return featureCollection.features.map((feature) => {
+  return featureCollection.features.map(feature => {
     const lat = feature.geometry.coordinates[1];
     const lng = feature.geometry.coordinates[0];
     // show bucket value normalized to max value
@@ -200,4 +197,3 @@ function dataToHeatArray(featureCollection, max) {
     return [lat, lng, heatIntensity];
   });
 }
-

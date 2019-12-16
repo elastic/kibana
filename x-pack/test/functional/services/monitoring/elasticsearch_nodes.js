@@ -37,7 +37,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
 
   const SUBJ_NODE_LINK_PREFIX = `${SUBJ_TABLE_BODY} > nodeLink-`;
 
-  return new class ElasticsearchIndices {
+  return new (class ElasticsearchIndices {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
       return pageId !== null;
@@ -128,10 +128,9 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
             memory: memories[current],
             disk: disks[current],
             shards: shards[current],
-          }
+          },
         ];
       }, []);
     }
-
-  };
+  })();
 }

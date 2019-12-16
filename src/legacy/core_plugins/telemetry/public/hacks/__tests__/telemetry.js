@@ -20,7 +20,8 @@
 import { uiModules } from 'ui/modules';
 
 // This overrides settings for other UI tests
-uiModules.get('kibana')
+uiModules
+  .get('kibana')
   // disable stat reporting while running tests,
   // MockInjector used in these tests is not impacted
   .constant('telemetryEnabled', false)

@@ -16,8 +16,10 @@ export async function verifyCcsAvailability(req) {
     }
     const remoteInfo = response[remoteName];
     if (!remoteInfo.connected) {
-      throw Boom.serverUnavailable(`There seems to be some issues with ${remoteName} ` +
-      `cluster. Please make sure it's connected and has at least one node.`);
+      throw Boom.serverUnavailable(
+        `There seems to be some issues with ${remoteName} ` +
+          `cluster. Please make sure it's connected and has at least one node.`
+      );
     }
   }
 }

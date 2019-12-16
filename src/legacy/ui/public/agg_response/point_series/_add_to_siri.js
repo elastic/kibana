@@ -33,6 +33,6 @@ export function addToSiri(series, point, id, yLabel, yFormat, zFormat, zLabel) {
     values: [point],
     format: yFormat,
     zLabel,
-    zFormat
+    zFormat,
   });
 }
