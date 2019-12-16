@@ -26,8 +26,6 @@ import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs } from '../lib/lib';
-import { KibanaCoreContextProvider } from '../lib/compose/kibana_core';
-import { KibanaPluginsContextProvider } from '../lib/compose/kibana_plugins';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -86,11 +84,7 @@ export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
         ...core,
       }}
     >
-      <KibanaCoreContextProvider core={core}>
-        <KibanaPluginsContextProvider plugins={plugins}>
-          <StartApp {...compose()} />
-        </KibanaPluginsContextProvider>
-      </KibanaCoreContextProvider>
+      <StartApp {...compose()} />
     </KibanaContextProvider>
   )
 );
