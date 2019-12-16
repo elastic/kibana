@@ -9,7 +9,6 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -19,6 +18,7 @@ import {
   PageInfoPaginated,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -75,7 +75,7 @@ class NetworkHttpComponentQuery extends QueryTemplatePaginated<
       startDate,
     } = this.props;
     const variables: GetNetworkHttpQuery.Variables = {
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       inspect: isInspected,
       ip,

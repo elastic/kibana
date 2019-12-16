@@ -9,7 +9,6 @@ import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
@@ -20,6 +19,7 @@ import {
   TimelineItem,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
@@ -83,8 +83,7 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex:
-        indexPattern?.title.split(',') ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: indexPattern?.title.split(',') ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     };
     return (

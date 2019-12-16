@@ -7,12 +7,12 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
+import { useUiSetting } from '../../../lib/kibana';
 
 import { HostOverviewQuery } from './host_overview.gql_query';
 import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
@@ -70,7 +70,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
             from: startDate,
             to: endDate,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >

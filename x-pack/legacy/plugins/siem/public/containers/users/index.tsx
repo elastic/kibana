@@ -9,7 +9,6 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetUsersQuery,
@@ -19,6 +18,7 @@ import {
   UsersSortField,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
+import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -77,7 +77,7 @@ class UsersComponentQuery extends QueryTemplatePaginated<
       sort,
     } = this.props;
     const variables: GetUsersQuery.Variables = {
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,

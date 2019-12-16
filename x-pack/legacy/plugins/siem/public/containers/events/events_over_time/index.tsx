@@ -9,11 +9,11 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
+import { useUiSetting } from '../../../lib/kibana';
 
 import { EventsOverTimeGqlQuery } from './events_over_time.gql_query';
 import { GetEventsOverTimeQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
@@ -70,7 +70,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >

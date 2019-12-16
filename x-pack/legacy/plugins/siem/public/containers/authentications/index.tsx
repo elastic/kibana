@@ -9,7 +9,6 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   AuthenticationsEdges,
@@ -19,6 +18,7 @@ import {
 import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { useUiSetting } from '../../lib/kibana';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { authenticationsQuery } from './index.gql_query';
@@ -77,7 +77,7 @@ class AuthenticationsComponentQuery extends QueryTemplatePaginated<
       },
       pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
       inspect: isInspected,
     };
     return (

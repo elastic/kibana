@@ -7,7 +7,8 @@
 import {
   KibanaContextProvider,
   useKibana,
+  useUiSetting,
   useUiSetting$,
 } from '../../../../../../../src/plugins/kibana_react/public';
 
-export { KibanaContextProvider, useKibana, useUiSetting$ };
+export { KibanaContextProvider, useKibana, useUiSetting, useUiSetting$ };
