@@ -31,5 +31,5 @@ export function getValType(def, value) {
     return 'array';
   }
 
-  return (def.value != null ? typeof def.value : typeof value);
+  return def.value != null ? typeof def.value : typeof value;
 }

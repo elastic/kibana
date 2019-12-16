@@ -29,14 +29,18 @@ const module = uiModules.get('app/sheet');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedSheets',
-  title: 'sheets'
+  title: 'sheets',
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function (Private, SavedSheet, kbnUrl) {
+module.service('savedSheets', function(Private, SavedSheet, kbnUrl) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSheetLoader = new SavedObjectLoader(SavedSheet, savedObjectClient, npStart.core.chrome);
-  savedSheetLoader.urlFor = function (id) {
+  const savedSheetLoader = new SavedObjectLoader(
+    SavedSheet,
+    savedObjectClient,
+    npStart.core.chrome
+  );
+  savedSheetLoader.urlFor = function(id) {
     return kbnUrl.eval('#/{{id}}', { id: id });
   };
 
@@ -44,7 +48,7 @@ module.service('savedSheets', function (Private, SavedSheet, kbnUrl) {
   savedSheetLoader.loaderProperties = {
     name: 'timelion-sheet',
     noun: 'Saved Sheets',
-    nouns: 'saved sheets'
+    nouns: 'saved sheets',
   };
   return savedSheetLoader;
 });

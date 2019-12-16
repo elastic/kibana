@@ -10,7 +10,6 @@
  * @param {string[]} [additionalTags]
  */
 
-
 /**
  * Creates a taggedLogger function with tags, allows the consumer to optionally provide additional tags
  *

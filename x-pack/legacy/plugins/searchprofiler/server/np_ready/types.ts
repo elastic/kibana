@@ -6,7 +6,7 @@
 
 import { ServerRoute } from 'hapi';
 import { ElasticsearchPlugin, Request } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 
 export type RegisterRoute = (args: ServerRoute & { config: any }) => void;
 

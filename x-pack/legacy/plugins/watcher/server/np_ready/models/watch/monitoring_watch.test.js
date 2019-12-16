@@ -16,7 +16,7 @@ describe('MonitoringWatch', () => {
     it('should populate all expected fields', () => {
       const actual = new MonitoringWatch(props);
       const expected = {
-        isSystemWatch: true
+        isSystemWatch: true,
       };
 
       expect(actual).toEqual(expected);
@@ -41,7 +41,9 @@ describe('MonitoringWatch', () => {
     it(`throws an error`, () => {
       const watch = new MonitoringWatch({});
 
-      expect(() => watch.getVisualizeQuery()).toThrow(/getVisualizeQuery called for monitoring watch/i);
+      expect(() => watch.getVisualizeQuery()).toThrow(
+        /getVisualizeQuery called for monitoring watch/i
+      );
     });
   });
 
@@ -49,7 +51,9 @@ describe('MonitoringWatch', () => {
     it(`throws an error`, () => {
       const watch = new MonitoringWatch({});
 
-      expect(() => watch.formatVisualizeData()).toThrow(/formatVisualizeData called for monitoring watch/i);
+      expect(() => watch.formatVisualizeData()).toThrow(
+        /formatVisualizeData called for monitoring watch/i
+      );
     });
   });
 
@@ -100,8 +104,9 @@ describe('MonitoringWatch', () => {
 
   describe('fromDownstreamJson factory method', () => {
     it(`throws an error`, () => {
-      expect(() => MonitoringWatch.fromDownstreamJson({}))
-        .toThrow(/fromDownstreamJson called for monitoring watch/i);
+      expect(() => MonitoringWatch.fromDownstreamJson({})).toThrow(
+        /fromDownstreamJson called for monitoring watch/i
+      );
     });
   });
 });

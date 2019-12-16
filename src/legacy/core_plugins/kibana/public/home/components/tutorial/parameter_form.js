@@ -24,7 +24,6 @@ import { StringParameter } from './string_parameter';
 import { EuiPanel } from '@elastic/eui';
 
 export class ParameterForm extends React.Component {
-
   renderInputs = () => {
     return this.props.params.map(param => {
       switch (param.type) {
@@ -52,14 +51,10 @@ export class ParameterForm extends React.Component {
           throw new Error(`Unhandled parameter type ${param.type}`);
       }
     });
-  }
+  };
 
   render() {
-    return (
-      <EuiPanel>
-        {this.renderInputs()}
-      </EuiPanel>
-    );
+    return <EuiPanel>{this.renderInputs()}</EuiPanel>;
   }
 }
 
@@ -72,5 +67,5 @@ const paramsShape = PropTypes.shape({
 ParameterForm.propTypes = {
   params: PropTypes.arrayOf(paramsShape).isRequired,
   paramValues: PropTypes.object.isRequired,
-  setParameter: PropTypes.func.isRequired
+  setParameter: PropTypes.func.isRequired,
 };

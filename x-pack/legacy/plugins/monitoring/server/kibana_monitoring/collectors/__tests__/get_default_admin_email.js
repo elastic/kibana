@@ -24,13 +24,9 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
         .returns(adminEmail);
     }
 
-    config.get
-      .withArgs('kibana.index')
-      .returns('.kibana');
+    config.get.withArgs('kibana.index').returns('.kibana');
 
-    config.get
-      .withArgs('pkg.version')
-      .returns('1.1.1');
+    config.get.withArgs('pkg.version').returns('1.1.1');
 
     return config;
   }

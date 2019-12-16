@@ -18,7 +18,14 @@
  */
 import { timefilter } from 'ui/timefilter';
 
-export function createSearchSource(SearchSource, initialState, indexPattern, aggs, useTimeFilter, filters = []) {
+export function createSearchSource(
+  SearchSource,
+  initialState,
+  indexPattern,
+  aggs,
+  useTimeFilter,
+  filters = []
+) {
   const searchSource = initialState ? new SearchSource(initialState) : new SearchSource();
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(undefined);
