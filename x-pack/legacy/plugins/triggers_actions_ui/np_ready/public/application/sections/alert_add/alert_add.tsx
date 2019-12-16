@@ -51,6 +51,7 @@ import {
 } from '../../../types';
 import { ACTION_GROUPS } from '../../constants/action_groups';
 import { getTimeOptions } from '../../lib/get_time_options';
+import { SectionLoading } from '../../components/section_loading';
 
 interface Props {
   refreshList: () => Promise<void>;
@@ -763,7 +764,16 @@ export const AlertAdd = ({ refreshList }: Props) => {
                 </EuiTitle>
                 <EuiSpacer />
                 <EuiFlexGroup gutterSize="s" wrap>
-                  {actionTypeNodes}
+                  {isLoadingActionTypes ? (
+                    <SectionLoading>
+                      <FormattedMessage
+                        id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
+                        defaultMessage="Loading watch…"
+                      />
+                    </SectionLoading>
+                  ) : (
+                    actionTypeNodes
+                  )}
                 </EuiFlexGroup>
               </Fragment>
             ) : null}

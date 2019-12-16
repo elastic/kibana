@@ -6,6 +6,7 @@
 
 import React, { Fragment, useEffect, useState } from 'react';
 import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   AnnotationDomainTypes,
   Axis,
@@ -98,9 +99,9 @@ interface Props {
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }) => {
   const {
     core: { http, uiSettings },
+    plugins: { toastNotifications },
   } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialRequest, setIsInitialRequest] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
 
@@ -136,22 +137,28 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   const alertWithoutActions = { ...alert.params, actions: [], type: 'threshold' };
 
   useEffect(() => {
-    // Prevent sending a second request on initial render.
-    if (isInitialRequest) {
-      return;
-    }
-
-    async function loadVisualizationData() {
-      setIsLoading(true);
-      setVisualizationData(
-        await getThresholdAlertVisualizationData({
-          model: alertWithoutActions,
-          visualizeOptions,
-          http,
-        })
-      );
-    }
-    loadVisualizationData();
+    (async () => {
+      try {
+        setIsLoading(true);
+        setVisualizationData(
+          await getThresholdAlertVisualizationData({
+            model: alertWithoutActions,
+            visualizeOptions,
+            http,
+          })
+        );
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertAdd.unableToLoadVisualizationMessage',
+            { defaultMessage: 'Unable to load visualization' }
+          ),
+        });
+        setError(e);
+      } finally {
+        setIsLoading(false);
+      }
+    })();
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     index,
@@ -170,7 +177,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   ]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  if (isInitialRequest && isLoading) {
+  if (isLoading) {
     return (
       <EuiEmptyPrompt
         title={<EuiLoadingChart size="xl" />}
