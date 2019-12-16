@@ -12,6 +12,7 @@ import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
+import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
 jest.mock('../../lib/kibana');
 
@@ -188,9 +189,13 @@ describe('QueryBar ', () => {
 
   describe('#onQueryChange', () => {
     test(' is the only reference that changed when filterQueryDraft props get updated', () => {
+      const KibanaWithStorageProvider = createKibanaContextProviderMock();
+
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <QueryBar {...props} />
+          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
+            <QueryBar {...props} />
+          </KibanaWithStorageProvider>
         </TestProviders>
       );
 
