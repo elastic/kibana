@@ -59,19 +59,26 @@ export const createUseUiSetting$Mock = () => <T extends unknown = string>(
   throw new Error(`Unexpected config key: ${key}`);
 };
 
-export const createUseKibanaMock = () => () => ({
-  services: { ...createKibanaCoreStartMock(), ...createKibanaPluginsStartMock() },
-});
+export const createUseKibanaMock = () => {
+  const services = { ...createKibanaCoreStartMock(), ...createKibanaPluginsStartMock() };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createWithKibanaMock = () => (Component: any) => (props: any) => {
-  return <Component {...props} kibana={createUseKibanaMock()()} />;
+  return () => ({ services });
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createKibanaContextProviderMock = () => ({ services, ...rest }: any) => (
-  <KibanaContextProvider
-    {...rest}
-    services={{ ...createUseKibanaMock()().services, ...services }}
-  />
-);
+export const createWithKibanaMock = () => {
+  const kibana = createUseKibanaMock()();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (Component: any) => (props: any) => {
+    return <Component {...props} kibana={kibana} />;
+  };
+};
+
+export const createKibanaContextProviderMock = () => {
+  const kibana = createUseKibanaMock()();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ({ services, ...rest }: any) => (
+    <KibanaContextProvider {...rest} services={{ ...kibana.services, ...services }} />
+  );
+};
