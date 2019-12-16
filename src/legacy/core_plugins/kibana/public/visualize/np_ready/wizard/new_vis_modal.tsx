@@ -143,15 +143,18 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
     }
 
+    let params;
     if ('aliasUrl' in visType) {
-      window.location.assign(this.props.addBasePath(visType.aliasUrl));
+      params = this.props.addBasePath(visType.aliasUrl);
       if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
+        params = `${params}?addToDashboard`;
         this.props.onClose();
       }
+      window.location.assign(params);
       return;
     }
 
-    let params = [`type=${encodeURIComponent(visType.name)}`];
+    params = [`type=${encodeURIComponent(visType.name)}`];
 
     if (searchType) {
       params.push(`${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`);

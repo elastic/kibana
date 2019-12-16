@@ -38,6 +38,7 @@ import {
   SavedObjectSaveOpts,
   unhashUrl,
   VISUALIZE_EMBEDDABLE_TYPE,
+  LENS_EMBEDDABLE_TYPE,
 } from '../legacy_imports';
 import { FilterStateManager } from '../../../../data/public';
 import {
@@ -341,6 +342,14 @@ export class DashboardAppController {
             );
             kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
             kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
+          }
+          if ($routeParams[DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM]) {
+            container.addSavedObjectEmbeddable(
+              LENS_EMBEDDABLE_TYPE,
+              $routeParams[DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM]
+            );
+            kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+            kbnUrl.removeParam(DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM);
           }
         }
 

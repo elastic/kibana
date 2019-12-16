@@ -13,6 +13,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { AppMountContext, NotificationsStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { npStart } from 'ui/new_platform';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -50,6 +51,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
+  addToDashMode,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -57,7 +59,8 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (id?: string) => void;
+  redirectTo: (id?: string, addToDashMode?: boolean) => void;
+  addToDashMode?: boolean;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -165,6 +168,13 @@ export function App({
   );
 
   const { TopNavMenu } = npStart.plugins.navigation.ui;
+
+  const confirmButton = addToDashMode ? (
+    <FormattedMessage
+      id="xpack.lens.app.saveAddToDashboard"
+      defaultMessage="Save and add to dashboard"
+    />
+  ) : null;
 
   return (
     <I18nProvider>
@@ -320,9 +330,8 @@ export function App({
                     persistedDoc: newDoc,
                     lastKnownDoc: newDoc,
                   }));
-
                   if (docId !== id) {
-                    redirectTo(id);
+                    redirectTo(id, addToDashMode);
                   }
                 })
                 .catch(() => {
@@ -341,6 +350,7 @@ export function App({
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
+            confirmButtonLabel={confirmButton}
           />
         )}
       </KibanaContextProvider>

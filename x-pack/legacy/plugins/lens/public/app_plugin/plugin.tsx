@@ -14,8 +14,8 @@ import 'uiExports/visResponseHandlers';
 import 'uiExports/savedObjectTypes';
 
 import React from 'react';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -41,6 +41,7 @@ import {
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
 import { EditorFrameStart } from '../types';
+import { addLensToDashboardUrl, getKibanaBasePathFromDashboardUrl } from './url_helper';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
@@ -94,8 +95,39 @@ export class AppPlugin {
           })
         );
 
+        const redirectTo = (
+          routeProps: RouteComponentProps<{ id?: string }>,
+          addToDashMode: boolean,
+          id?: string
+        ) => {
+          if (!id) {
+            routeProps.history.push('/lens');
+          } else if (!addToDashMode) {
+            routeProps.history.push(`/lens/edit/${id}`);
+          } else if (addToDashMode && id) {
+            routeProps.history.push(`/lens/edit/${id}`);
+            const url = context.core.chrome.navLinks.get('kibana:dashboard');
+            if (!url) {
+              return;
+            }
+            const lastDashboardAbsoluteUrl = url.url;
+            const lensUrl = `${getKibanaBasePathFromDashboardUrl(
+              lastDashboardAbsoluteUrl
+            )}/lens/edit/${id}`;
+            if (lensUrl) {
+              window.history.pushState({}, '', lensUrl);
+              const dashboardParsedUrl = addLensToDashboardUrl(lastDashboardAbsoluteUrl, id);
+              if (dashboardParsedUrl) {
+                window.history.pushState({}, '', dashboardParsedUrl);
+              }
+            }
+          }
+        };
+
         const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
           trackUiEvent('loaded');
+          const addToDashMode =
+            !!routeProps.location.search && routeProps.location.search.includes('addToDashboard');
           return (
             <App
               core={context.core}
@@ -104,13 +136,8 @@ export class AppPlugin {
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}
               docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-              redirectTo={id => {
-                if (!id) {
-                  routeProps.history.push('/lens');
-                } else {
-                  routeProps.history.push(`/lens/edit/${id}`);
-                }
-              }}
+              redirectTo={id => redirectTo(routeProps, addToDashMode, id)}
+              addToDashMode={addToDashMode}
             />
           );
         };
@@ -119,6 +146,7 @@ export class AppPlugin {
           trackUiEvent('loaded_404');
           return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
         }
+
         render(
           <I18nProvider>
             <HashRouter>
