@@ -17,7 +17,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.collection.interval',
           data: '-1',
-          context: 'cluster'
+          context: 'cluster',
         }}
         enabler={enabler}
       />
@@ -31,7 +31,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.exporters',
           data: 'myMonitoringClusterExporter1',
-          context: 'node001foo'
+          context: 'node001foo',
         }}
         enabler={enabler}
       />
@@ -45,7 +45,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.exporters.cloud_enabled',
           data: 'false',
-          context: 'fakeContext'
+          context: 'fakeContext',
         }}
         enabled={enabler}
       />
@@ -59,7 +59,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.enabled',
           data: 'false',
-          context: 'node001foo'
+          context: 'node001foo',
         }}
         enabler={enabler}
       />

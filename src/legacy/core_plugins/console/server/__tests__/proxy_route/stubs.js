@@ -27,14 +27,14 @@ export function createResponseStub(response) {
           this.push(response);
         }
         this.push(null);
-      }
+      },
     });
 
     resp.statusCode = 200;
     resp.statusMessage = 'OK';
     resp.headers = {
       'content-type': 'text/plain',
-      'content-length': String(response ? response.length : 0)
+      'content-length': String(response ? response.length : 0),
     };
 
     return resp;

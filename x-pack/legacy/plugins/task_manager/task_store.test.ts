@@ -7,10 +7,26 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import uuid from 'uuid';
-import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus } from './task';
+import { filter } from 'rxjs/operators';
+
+import {
+  TaskDictionary,
+  TaskDefinition,
+  TaskInstance,
+  TaskStatus,
+  TaskLifecycleResult,
+} from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+import { asTaskClaimEvent, TaskEvent } from './task_events';
+import { asOk, asErr } from './lib/result_type';
 
 const taskDefinitions: TaskDictionary<TaskDefinition> = {
   report: {
@@ -505,6 +521,178 @@ describe('TaskStore', () => {
       });
     });
 
+    test('it supports claiming specific tasks by id', async () => {
+      const maxAttempts = _.random(2, 43);
+      const customMaxAttempts = _.random(44, 100);
+      const {
+        args: {
+          updateByQuery: {
+            body: { query, sort },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          maxAttempts,
+          definitions: {
+            foo: {
+              type: 'foo',
+              title: '',
+              createTaskRunner: jest.fn(),
+            },
+            bar: {
+              type: 'bar',
+              title: '',
+              maxAttempts: customMaxAttempts,
+              createTaskRunner: jest.fn(),
+            },
+          },
+        },
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+          size: 10,
+          claimTasksById: [
+            '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+            'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+          ],
+        },
+      });
+
+      expect(query).toMatchObject({
+        bool: {
+          must: [
+            { term: { type: 'task' } },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              {
+                                bool: {
+                                  must: [
+                                    { term: { 'task.status': 'idle' } },
+                                    { range: { 'task.runAt': { lte: 'now' } } },
+                                  ],
+                                },
+                              },
+                              {
+                                bool: {
+                                  must: [
+                                    {
+                                      bool: {
+                                        should: [
+                                          { term: { 'task.status': 'running' } },
+                                          { term: { 'task.status': 'claiming' } },
+                                        ],
+                                      },
+                                    },
+                                    { range: { 'task.retryAt': { lte: 'now' } } },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              { exists: { field: 'task.interval' } },
+                              {
+                                bool: {
+                                  must: [
+                                    { term: { 'task.taskType': 'foo' } },
+                                    {
+                                      range: {
+                                        'task.attempts': {
+                                          lt: maxAttempts,
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              {
+                                bool: {
+                                  must: [
+                                    { term: { 'task.taskType': 'bar' } },
+                                    {
+                                      range: {
+                                        'task.attempts': {
+                                          lt: customMaxAttempts,
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              { term: { 'task.status': 'idle' } },
+                              { term: { 'task.status': 'failed' } },
+                            ],
+                          },
+                        },
+                        {
+                          ids: {
+                            values: [
+                              'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+                              'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+
+      expect(sort).toMatchObject({
+        _script: {
+          type: 'number',
+          order: 'asc',
+          script: {
+            lang: 'painless',
+            source: `
+if(params.ids.contains(doc['_id'].value)){
+  return 0;
+}
+
+if (doc['task.retryAt'].size()!=0) {
+  return doc['task.retryAt'].value.toInstant().toEpochMilli();
+}
+if (doc['task.runAt'].size()!=0) {
+  return doc['task.runAt'].value.toInstant().toEpochMilli();
+}
+    
+`,
+            params: {
+              ids: [
+                'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+                'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+              ],
+            },
+          },
+        },
+      });
+    });
+
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
@@ -734,6 +922,355 @@ describe('TaskStore', () => {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id);
+    });
+  });
+
+  describe('get', () => {
+    test('gets the task with the specified id', async () => {
+      const id = `id-${_.random(1, 20)}`;
+      const task = {
+        runAt: mockedDate,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        id,
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        attempts: 3,
+        status: 'idle' as TaskStatus,
+        version: '123',
+        ownerId: null,
+      };
+
+      const callCluster = jest.fn();
+      savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
+        id: objectId,
+        type,
+        attributes: {
+          ..._.omit(task, 'id'),
+          ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+        },
+        references: [],
+        version: '123',
+      }));
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      const result = await store.get(id);
+
+      expect(result).toEqual(task);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('task', id);
+    });
+  });
+
+  describe('getLifecycle', () => {
+    test('returns the task status if the task exists ', async () => {
+      expect.assertions(4);
+      return Promise.all(
+        Object.values(TaskStatus).map(async status => {
+          const id = `id-${_.random(1, 20)}`;
+          const task = {
+            runAt: mockedDate,
+            scheduledAt: mockedDate,
+            startedAt: null,
+            retryAt: null,
+            id,
+            params: { hello: 'world' },
+            state: { foo: 'bar' },
+            taskType: 'report',
+            attempts: 3,
+            status: status as TaskStatus,
+            version: '123',
+            ownerId: null,
+          };
+
+          const callCluster = jest.fn();
+          savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
+            id: objectId,
+            type,
+            attributes: {
+              ..._.omit(task, 'id'),
+              ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+            },
+            references: [],
+            version: '123',
+          }));
+
+          const store = new TaskStore({
+            index: 'tasky',
+            taskManagerId: '',
+            serializer,
+            callCluster,
+            maxAttempts: 2,
+            definitions: taskDefinitions,
+            savedObjectsRepository: savedObjectsClient,
+          });
+
+          expect(await store.getLifecycle(id)).toEqual(status);
+        })
+      );
+    });
+
+    test('returns NotFound status if the task doesnt exists ', async () => {
+      const id = `id-${_.random(1, 20)}`;
+
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('type', 'id')
+      );
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      expect(await store.getLifecycle(id)).toEqual(TaskLifecycleResult.NotFound);
+    });
+
+    test('throws if an unknown error takes place ', async () => {
+      const id = `id-${_.random(1, 20)}`;
+
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createBadRequestError()
+      );
+
+      const store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        callCluster: jest.fn(),
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+
+      return expect(store.getLifecycle(id)).rejects.toThrow('Bad Request');
+    });
+  });
+
+  describe('task events', () => {
+    function generateTasks() {
+      const taskManagerId = uuid.v1();
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              interval: undefined,
+              attempts: 0,
+              status: 'idle',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+              startedAt: null,
+              retryAt: null,
+              scheduledAt: new Date(),
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              interval: '5m',
+              attempts: 2,
+              status: 'running',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+              startedAt: null,
+              retryAt: null,
+              scheduledAt: new Date(),
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+
+      return { taskManagerId, runAt, tasks };
+    }
+
+    test('emits an event when a task is succesfully claimed by id', async done => {
+      const { taskManagerId, runAt, tasks } = generateTasks();
+      const callCluster = sinon.spy(async (name: string, params?: any) =>
+        name === 'updateByQuery'
+          ? {
+              total: tasks.length,
+              updated: tasks.length,
+            }
+          : { hits: { hits: tasks } }
+      );
+      const store = new TaskStore({
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        serializer,
+        savedObjectsRepository: savedObjectsClient,
+        taskManagerId,
+        index: '',
+      });
+
+      const sub = store.events
+        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'aaa'))
+        .subscribe({
+          next: (event: TaskEvent<any, any>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent(
+                'aaa',
+                asOk({
+                  id: 'aaa',
+                  runAt,
+                  taskType: 'foo',
+                  interval: undefined,
+                  attempts: 0,
+                  status: 'idle' as TaskStatus,
+                  params: { hello: 'world' },
+                  state: { baby: 'Henhen' },
+                  user: 'jimbo',
+                  scope: ['reporting'],
+                  ownerId: taskManagerId,
+                  startedAt: null,
+                  retryAt: null,
+                  scheduledAt: new Date(),
+                })
+              )
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
+
+      await store.claimAvailableTasks({
+        claimTasksById: ['aaa'],
+        claimOwnershipUntil: new Date(),
+        size: 10,
+      });
+    });
+
+    test('emits an event when a task is succesfully by scheduling', async done => {
+      const { taskManagerId, runAt, tasks } = generateTasks();
+      const callCluster = sinon.spy(async (name: string, params?: any) =>
+        name === 'updateByQuery'
+          ? {
+              total: tasks.length,
+              updated: tasks.length,
+            }
+          : { hits: { hits: tasks } }
+      );
+      const store = new TaskStore({
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        serializer,
+        savedObjectsRepository: savedObjectsClient,
+        taskManagerId,
+        index: '',
+      });
+
+      const sub = store.events
+        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'bbb'))
+        .subscribe({
+          next: (event: TaskEvent<any, any>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent(
+                'bbb',
+                asOk({
+                  id: 'bbb',
+                  runAt,
+                  taskType: 'bar',
+                  interval: '5m',
+                  attempts: 2,
+                  status: 'running' as TaskStatus,
+                  params: { shazm: 1 },
+                  state: { henry: 'The 8th' },
+                  user: 'dabo',
+                  scope: ['reporting', 'ceo'],
+                  ownerId: taskManagerId,
+                  startedAt: null,
+                  retryAt: null,
+                  scheduledAt: new Date(),
+                })
+              )
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
+
+      await store.claimAvailableTasks({
+        claimTasksById: ['aaa'],
+        claimOwnershipUntil: new Date(),
+        size: 10,
+      });
+    });
+
+    test('emits an event when the store fails to claim a required task by id', async done => {
+      const { taskManagerId, tasks } = generateTasks();
+      const callCluster = sinon.spy(async (name: string, params?: any) =>
+        name === 'updateByQuery'
+          ? {
+              total: tasks.length,
+              updated: tasks.length,
+            }
+          : { hits: { hits: tasks } }
+      );
+      const store = new TaskStore({
+        callCluster,
+        maxAttempts: 2,
+        definitions: taskDefinitions,
+        serializer,
+        savedObjectsRepository: savedObjectsClient,
+        taskManagerId,
+        index: '',
+      });
+
+      const sub = store.events
+        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'ccc'))
+        .subscribe({
+          next: (event: TaskEvent<any, any>) => {
+            expect(event).toMatchObject(
+              asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
+            );
+            sub.unsubscribe();
+            done();
+          },
+        });
+
+      await store.claimAvailableTasks({
+        claimTasksById: ['ccc'],
+        claimOwnershipUntil: new Date(),
+        size: 10,
+      });
     });
   });
 });

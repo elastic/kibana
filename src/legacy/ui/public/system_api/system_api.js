@@ -26,11 +26,11 @@ const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
  */
 export function addSystemApiHeader(originalHeaders) {
   const systemApiHeaders = {
-    [SYSTEM_API_HEADER_NAME]: true
+    [SYSTEM_API_HEADER_NAME]: true,
   };
   return {
     ...originalHeaders,
-    ...systemApiHeaders
+    ...systemApiHeaders,
   };
 }
 

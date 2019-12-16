@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 module.exports = params => {
   const result = {};
   Object.keys(params).forEach(param => {

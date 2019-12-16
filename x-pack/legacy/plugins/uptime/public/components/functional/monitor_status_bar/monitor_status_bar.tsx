@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
@@ -16,6 +15,7 @@ import { monitorStatusBarQuery } from '../../../queries';
 import { EmptyStatusBar } from '../empty_status_bar';
 import { convertMicrosecondsToMilliseconds } from '../../../lib/helper';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
+import * as labels from './translations';
 
 interface MonitorStatusBarQueryResult {
   monitorStatus?: Ping[];
@@ -28,58 +28,33 @@ interface MonitorStatusBarProps {
 type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQueryResult>;
 
 export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
-  if (data && data.monitorStatus && data.monitorStatus.length) {
+  if (data?.monitorStatus?.length) {
     const { monitor, timestamp, tls } = data.monitorStatus[0];
     const duration: number | undefined = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
     const full = get<string>(data.monitorStatus[0], 'url.full');
 
     return (
-      <EuiPanel>
+      <>
         <EuiFlexGroup gutterSize="l" wrap>
           <EuiFlexItem grow={false}>
             <EuiHealth
-              aria-label={i18n.translate(
-                'xpack.uptime.monitorStatusBar.healthStatusMessageAriaLabel',
-                {
-                  defaultMessage: 'Monitor status',
-                }
-              )}
+              aria-label={labels.healthStatusMessageAriaLabel}
               color={status === 'up' ? 'success' : 'danger'}
               style={{ lineHeight: 'inherit' }}
             >
-              {status === 'up'
-                ? i18n.translate('xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel', {
-                    defaultMessage: 'Up',
-                  })
-                : i18n.translate('xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel', {
-                    defaultMessage: 'Down',
-                  })}
+              {status === 'up' ? labels.upLabel : labels.downLabel}
             </EuiHealth>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexItem grow={false}>
-              <EuiLink
-                aria-label={i18n.translate(
-                  'xpack.uptime.monitorStatusBar.monitorUrlLinkAriaLabel',
-                  {
-                    defaultMessage: 'Monitor URL link',
-                  }
-                )}
-                href={full}
-                target="_blank"
-              >
+              <EuiLink aria-label={labels.monitorUrlLinkAriaLabel} href={full} target="_blank">
                 {full}
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexItem>
           {!!duration && (
-            <EuiFlexItem
-              aria-label={i18n.translate('xpack.uptime.monitorStatusBar.durationTextAriaLabel', {
-                defaultMessage: 'Monitor duration in milliseconds',
-              })}
-              grow={false}
-            >
+            <EuiFlexItem aria-label={labels.durationTextAriaLabel} grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
                 values={{ duration: convertMicrosecondsToMilliseconds(duration) }}
@@ -88,30 +63,15 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem
-            aria-label={i18n.translate(
-              'xpack.uptime.monitorStatusBar.timestampFromNowTextAriaLabel',
-              {
-                defaultMessage: 'Time since last check',
-              }
-            )}
-            grow={true}
-          >
+          <EuiFlexItem aria-label={labels.timestampFromNowTextAriaLabel} grow={true}>
             {moment(new Date(timestamp).valueOf()).fromNow()}
           </EuiFlexItem>
         </EuiFlexGroup>
         <MonitorSSLCertificate tls={tls} />
-      </EuiPanel>
+      </>
     );
   }
-  return (
-    <EmptyStatusBar
-      message={i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
-        defaultMessage: 'Loading…',
-      })}
-      monitorId={monitorId}
-    />
-  );
+  return <EmptyStatusBar message={labels.loadingMessage} monitorId={monitorId} />;
 };
 
 export const MonitorStatusBar = withUptimeGraphQL<

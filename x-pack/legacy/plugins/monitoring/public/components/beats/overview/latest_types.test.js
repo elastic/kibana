@@ -13,14 +13,10 @@ describe('Latest Types', () => {
     const latestTypes = [
       { type: 'Packetbeat', count: 4 },
       { type: 'Metricbeat', count: 4 },
-      { type: 'Heartbeat', count: 2 }
+      { type: 'Heartbeat', count: 2 },
     ];
 
-    const component = shallow(
-      <LatestTypes
-        latestTypes={latestTypes}
-      />
-    );
+    const component = shallow(<LatestTypes latestTypes={latestTypes} />);
 
     expect(component).toMatchSnapshot();
   });

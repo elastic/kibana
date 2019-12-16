@@ -5,16 +5,14 @@
  */
 
 import { createAction } from 'redux-actions';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 import { refreshIndices as request } from '../../services';
 import { clearRowStatus, reloadIndices } from '../actions';
 import { notificationService } from '../../services/notification';
 
-export const refreshIndicesStart = createAction(
-  'INDEX_MANAGEMENT_REFRESH_INDICES_START'
-);
-export const refreshIndices = ({ indexNames }) => async (dispatch) => {
+export const refreshIndicesStart = createAction('INDEX_MANAGEMENT_REFRESH_INDICES_START');
+export const refreshIndices = ({ indexNames }) => async dispatch => {
   dispatch(refreshIndicesStart({ indexNames }));
   try {
     await request(indexNames);
@@ -26,7 +24,7 @@ export const refreshIndices = ({ indexNames }) => async (dispatch) => {
   notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
       defaultMessage: 'Successfully refreshed: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') }
+      values: { indexNames: indexNames.join(', ') },
     })
   );
 };
