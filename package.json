@@ -440,7 +440,7 @@
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "10.0.6",
-    "node-sass": "^4.9.4",
+    "node-sass": "^4.13.0",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "^5.1.0",

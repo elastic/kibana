@@ -24,7 +24,7 @@
     "gulp-zip": "5.0.1",
     "inquirer": "^1.2.2",
     "minimatch": "^3.0.4",
-    "node-sass": "^4.9.4",
+    "node-sass": "^4.13.0",
     "through2": "^2.0.3",
     "through2-map": "^3.0.0",
     "vinyl-fs": "^3.0.3"
