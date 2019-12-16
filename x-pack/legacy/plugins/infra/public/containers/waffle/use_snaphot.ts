@@ -51,8 +51,8 @@ export function useSnapshot(
       timerange,
       filterQuery,
       sourceId,
-      decodeResponse,
-    })
+    }),
+    decodeResponse
   );
 
   useEffect(() => {
