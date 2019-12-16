@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export { estimateBucketSpanFactory } from './bucket_span_estimator';

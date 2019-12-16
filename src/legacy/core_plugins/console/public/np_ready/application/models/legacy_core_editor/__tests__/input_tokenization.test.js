@@ -26,8 +26,7 @@ describe('Input Tokenization', () => {
   let coreEditor;
   beforeEach(() => {
     // Set up our document body
-    document.body.innerHTML =
-      `<div>
+    document.body.innerHTML = `<div>
         <div id="ConAppEditor" />
         <div id="ConAppEditorActions" />
         <div id="ConCopyAsCurl" />
@@ -42,7 +41,10 @@ describe('Input Tokenization', () => {
   });
 
   function tokensAsList() {
-    const iter = createTokenIterator({ editor: coreEditor, position: { lineNumber: 1, column: 1 } });
+    const iter = createTokenIterator({
+      editor: coreEditor,
+      position: { lineNumber: 1, column: 1 },
+    });
     const ret = [];
     let t = iter.getCurrentToken();
     const parser = new RowParser(coreEditor);
@@ -67,12 +69,11 @@ describe('Input Tokenization', () => {
       if (prefix) {
         data = prefix + '\n' + data;
       }
-    }
-    else {
+    } else {
       data = prefix;
     }
 
-    test('Token test ' + testCount++ + ' prefix: ' + prefix, async function () {
+    test('Token test ' + testCount++ + ' prefix: ' + prefix, async function() {
       await coreEditor.setValue(data, true);
       const tokens = tokensAsList();
       const normTokenList = [];
@@ -84,25 +85,25 @@ describe('Input Tokenization', () => {
     });
   }
 
-  tokenTest(
-    ['method', 'GET', 'url.part', '_search'],
-    'GET _search'
-  );
+  tokenTest(['method', 'GET', 'url.part', '_search'], 'GET _search');
+
+  tokenTest(['method', 'GET', 'url.slash', '/', 'url.part', '_search'], 'GET /_search');
 
   tokenTest(
-    ['method', 'GET', 'url.slash', '/', 'url.part', '_search'],
-    'GET /_search'
-  );
-
-  tokenTest(
-    ['method', 'GET', 'url.protocol_host', 'http://somehost', 'url.slash', '/', 'url.part', '_search'],
+    [
+      'method',
+      'GET',
+      'url.protocol_host',
+      'http://somehost',
+      'url.slash',
+      '/',
+      'url.part',
+      '_search',
+    ],
     'GET http://somehost/_search'
   );
 
-  tokenTest(
-    ['method', 'GET', 'url.protocol_host', 'http://somehost'],
-    'GET http://somehost'
-  );
+  tokenTest(['method', 'GET', 'url.protocol_host', 'http://somehost'], 'GET http://somehost');
 
   tokenTest(
     ['method', 'GET', 'url.protocol_host', 'http://somehost', 'url.slash', '/'],
@@ -120,20 +121,27 @@ describe('Input Tokenization', () => {
   );
 
   tokenTest(
-    ['method', 'GET', 'url.slash', '/', 'url.part', '_cluster', 'url.slash', '/', 'url.part', 'nodes'],
+    [
+      'method',
+      'GET',
+      'url.slash',
+      '/',
+      'url.part',
+      '_cluster',
+      'url.slash',
+      '/',
+      'url.part',
+      'nodes',
+    ],
     'GET /_cluster/nodes'
   );
-
 
   tokenTest(
     ['method', 'GET', 'url.part', 'index', 'url.slash', '/', 'url.part', '_search'],
     'GET index/_search'
   );
 
-  tokenTest(
-    ['method', 'GET', 'url.part', 'index'],
-    'GET index'
-  );
+  tokenTest(['method', 'GET', 'url.part', 'index'], 'GET index');
 
   tokenTest(
     ['method', 'GET', 'url.part', 'index', 'url.slash', '/', 'url.part', 'type'],
@@ -141,48 +149,154 @@ describe('Input Tokenization', () => {
   );
 
   tokenTest(
-    ['method', 'GET', 'url.slash', '/', 'url.part', 'index', 'url.slash', '/', 'url.part', 'type', 'url.slash', '/'],
+    [
+      'method',
+      'GET',
+      'url.slash',
+      '/',
+      'url.part',
+      'index',
+      'url.slash',
+      '/',
+      'url.part',
+      'type',
+      'url.slash',
+      '/',
+    ],
     'GET /index/type/'
   );
 
   tokenTest(
-    ['method', 'GET', 'url.part', 'index', 'url.slash', '/', 'url.part', 'type', 'url.slash', '/', 'url.part', '_search'],
+    [
+      'method',
+      'GET',
+      'url.part',
+      'index',
+      'url.slash',
+      '/',
+      'url.part',
+      'type',
+      'url.slash',
+      '/',
+      'url.part',
+      '_search',
+    ],
     'GET index/type/_search'
   );
 
   tokenTest(
-    ['method', 'GET', 'url.part', 'index', 'url.slash', '/', 'url.part', 'type', 'url.slash', '/', 'url.part', '_search',
-      'url.questionmark', '?', 'url.param', 'value', 'url.equal', '=', 'url.value', '1'
+    [
+      'method',
+      'GET',
+      'url.part',
+      'index',
+      'url.slash',
+      '/',
+      'url.part',
+      'type',
+      'url.slash',
+      '/',
+      'url.part',
+      '_search',
+      'url.questionmark',
+      '?',
+      'url.param',
+      'value',
+      'url.equal',
+      '=',
+      'url.value',
+      '1',
     ],
     'GET index/type/_search?value=1'
   );
 
-
   tokenTest(
-    ['method', 'GET', 'url.part', 'index', 'url.slash', '/', 'url.part', 'type', 'url.slash', '/', 'url.part', '1'],
+    [
+      'method',
+      'GET',
+      'url.part',
+      'index',
+      'url.slash',
+      '/',
+      'url.part',
+      'type',
+      'url.slash',
+      '/',
+      'url.part',
+      '1',
+    ],
     'GET index/type/1'
   );
 
-
   tokenTest(
-    ['method', 'GET', 'url.slash', '/', 'url.part', 'index1', 'url.comma', ',', 'url.part', 'index2', 'url.slash', '/'],
+    [
+      'method',
+      'GET',
+      'url.slash',
+      '/',
+      'url.part',
+      'index1',
+      'url.comma',
+      ',',
+      'url.part',
+      'index2',
+      'url.slash',
+      '/',
+    ],
     'GET /index1,index2/'
   );
 
   tokenTest(
-    ['method', 'GET', 'url.slash', '/', 'url.part', 'index1', 'url.comma', ',', 'url.part', 'index2', 'url.slash', '/',
-      'url.part', '_search'],
+    [
+      'method',
+      'GET',
+      'url.slash',
+      '/',
+      'url.part',
+      'index1',
+      'url.comma',
+      ',',
+      'url.part',
+      'index2',
+      'url.slash',
+      '/',
+      'url.part',
+      '_search',
+    ],
     'GET /index1,index2/_search'
   );
 
   tokenTest(
-    ['method', 'GET', 'url.part', 'index1', 'url.comma', ',', 'url.part', 'index2', 'url.slash', '/',
-      'url.part', '_search'],
+    [
+      'method',
+      'GET',
+      'url.part',
+      'index1',
+      'url.comma',
+      ',',
+      'url.part',
+      'index2',
+      'url.slash',
+      '/',
+      'url.part',
+      '_search',
+    ],
     'GET index1,index2/_search'
   );
 
   tokenTest(
-    ['method', 'GET', 'url.slash', '/', 'url.part', 'index1', 'url.comma', ',', 'url.part', 'index2'],
+    [
+      'method',
+      'GET',
+      'url.slash',
+      '/',
+      'url.part',
+      'index1',
+      'url.comma',
+      ',',
+      'url.part',
+      'index2',
+    ],
     'GET /index1,index2'
   );
 
@@ -196,7 +310,6 @@ describe('Input Tokenization', () => {
     'GET /index1,'
   );
 
-
   tokenTest(
     ['method', 'PUT', 'url.slash', '/', 'url.part', 'index', 'url.slash', '/'],
     'PUT /index/'
@@ -207,52 +320,130 @@ describe('Input Tokenization', () => {
     'GET index/_search '
   );
 
-  tokenTest(
-    ['method', 'PUT', 'url.slash', '/', 'url.part', 'index'],
-    'PUT /index'
-  );
+  tokenTest(['method', 'PUT', 'url.slash', '/', 'url.part', 'index'], 'PUT /index');
 
   tokenTest(
-    ['method', 'PUT', 'url.slash', '/', 'url.part', 'index1', 'url.comma', ',', 'url.part', 'index2',
-      'url.slash', '/', 'url.part', 'type1', 'url.comma', ',', 'url.part', 'type2'],
+    [
+      'method',
+      'PUT',
+      'url.slash',
+      '/',
+      'url.part',
+      'index1',
+      'url.comma',
+      ',',
+      'url.part',
+      'index2',
+      'url.slash',
+      '/',
+      'url.part',
+      'type1',
+      'url.comma',
+      ',',
+      'url.part',
+      'type2',
+    ],
     'PUT /index1,index2/type1,type2'
   );
 
   tokenTest(
-    ['method', 'PUT', 'url.slash', '/', 'url.part', 'index1',
-      'url.slash', '/', 'url.part', 'type1', 'url.comma', ',', 'url.part', 'type2', 'url.comma', ','],
+    [
+      'method',
+      'PUT',
+      'url.slash',
+      '/',
+      'url.part',
+      'index1',
+      'url.slash',
+      '/',
+      'url.part',
+      'type1',
+      'url.comma',
+      ',',
+      'url.part',
+      'type2',
+      'url.comma',
+      ',',
+    ],
     'PUT /index1/type1,type2,'
   );
 
   tokenTest(
-    ['method', 'PUT', 'url.part', 'index1', 'url.comma', ',', 'url.part', 'index2',
-      'url.slash', '/', 'url.part', 'type1', 'url.comma', ',', 'url.part', 'type2', 'url.slash', '/',
-      'url.part', '1234'],
+    [
+      'method',
+      'PUT',
+      'url.part',
+      'index1',
+      'url.comma',
+      ',',
+      'url.part',
+      'index2',
+      'url.slash',
+      '/',
+      'url.part',
+      'type1',
+      'url.comma',
+      ',',
+      'url.part',
+      'type2',
+      'url.slash',
+      '/',
+      'url.part',
+      '1234',
+    ],
     'PUT index1,index2/type1,type2/1234'
   );
 
-
   tokenTest(
-    ['method', 'POST', 'url.part', '_search', 'paren.lparen', '{', 'variable', '"q"', 'punctuation.colon', ':',
-      'paren.lparen', '{', 'paren.rparen', '}', 'paren.rparen', '}'
+    [
+      'method',
+      'POST',
+      'url.part',
+      '_search',
+      'paren.lparen',
+      '{',
+      'variable',
+      '"q"',
+      'punctuation.colon',
+      ':',
+      'paren.lparen',
+      '{',
+      'paren.rparen',
+      '}',
+      'paren.rparen',
+      '}',
     ],
-    'POST _search\n' +
-  '{\n' +
-  '  "q": {}\n' +
-  '  \n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "q": {}\n' + '  \n' + '}'
   );
 
   tokenTest(
-    ['method', 'POST', 'url.part', '_search', 'paren.lparen', '{', 'variable', '"q"', 'punctuation.colon', ':',
-      'paren.lparen', '{', 'variable', '"s"', 'punctuation.colon', ':', 'paren.lparen', '{', 'paren.rparen', '}',
-      'paren.rparen', '}', 'paren.rparen', '}'
+    [
+      'method',
+      'POST',
+      'url.part',
+      '_search',
+      'paren.lparen',
+      '{',
+      'variable',
+      '"q"',
+      'punctuation.colon',
+      ':',
+      'paren.lparen',
+      '{',
+      'variable',
+      '"s"',
+      'punctuation.colon',
+      ':',
+      'paren.lparen',
+      '{',
+      'paren.rparen',
+      '}',
+      'paren.rparen',
+      '}',
+      'paren.rparen',
+      '}',
     ],
-    'POST _search\n' +
-  '{\n' +
-  '  "q": { "s": {}}\n' +
-  '  \n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "q": { "s": {}}\n' + '  \n' + '}'
   );
 
   function statesAsList() {
@@ -262,7 +453,6 @@ describe('Input Tokenization', () => {
     return ret;
   }
 
-
   function statesTest(statesList, prefix, data) {
     if (data && typeof data !== 'string') {
       data = JSON.stringify(data, null, 3);
@@ -271,124 +461,99 @@ describe('Input Tokenization', () => {
       if (prefix) {
         data = prefix + '\n' + data;
       }
-    }
-    else {
+    } else {
       data = prefix;
     }
 
-    test('States test ' + testCount++ + ' prefix: ' + prefix, async function () {
+    test('States test ' + testCount++ + ' prefix: ' + prefix, async function() {
       await coreEditor.setValue(data, true);
       const modes = statesAsList();
       expect(modes).toEqual(statesList);
     });
   }
 
-
   statesTest(
     ['start', 'json', 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "query": { "match_all": {} }\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "query": { "match_all": {} }\n' + '}'
   );
 
   statesTest(
     ['start', 'json', ['json', 'json'], ['json', 'json'], 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "query": { \n' +
-  '  "match_all": {} \n' +
-  '  }\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "query": { \n' + '  "match_all": {} \n' + '  }\n' + '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "script": { "source": "" }\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "script": { "source": "" }\n' + '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "script": ""\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "script": ""\n' + '}'
   );
 
   statesTest(
     ['start', 'json', ['json', 'json'], 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "script": {\n' +
-  '   }\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "script": {\n' + '   }\n' + '}'
   );
 
-
   statesTest(
-    ['start', 'json', ['script-start', 'json', 'json', 'json'], ['script-start', 'json', 'json', 'json'],
-      ['json', 'json'], 'json', 'start'],
+    [
+      'start',
+      'json',
+      ['script-start', 'json', 'json', 'json'],
+      ['script-start', 'json', 'json', 'json'],
+      ['json', 'json'],
+      'json',
+      'start',
+    ],
     'POST _search\n' +
-  '{\n' +
-  '  "test": { "script": """\n' +
-  '  test script\n' +
-  ' """\n' +
-  ' }\n' +
-  '}'
+      '{\n' +
+      '  "test": { "script": """\n' +
+      '  test script\n' +
+      ' """\n' +
+      ' }\n' +
+      '}'
   );
 
   statesTest(
     ['start', 'json', ['script-start', 'json'], ['script-start', 'json'], 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "script": """\n' +
-  '  test script\n' +
-  ' """,\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "script": """\n' + '  test script\n' + ' """,\n' + '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "script": """test script""",\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "script": """test script""",\n' + '}'
   );
-
 
   statesTest(
     ['start', 'json', ['string_literal', 'json'], ['string_literal', 'json'], 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "something": """\n' +
-  '  test script\n' +
-  ' """,\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "something": """\n' + '  test script\n' + ' """,\n' + '}'
   );
 
   statesTest(
-    ['start', 'json', ['string_literal', 'json', 'json', 'json'], ['string_literal', 'json', 'json', 'json'],
-      ['json', 'json'], ['json', 'json'],
-      'json', 'start'],
+    [
+      'start',
+      'json',
+      ['string_literal', 'json', 'json', 'json'],
+      ['string_literal', 'json', 'json', 'json'],
+      ['json', 'json'],
+      ['json', 'json'],
+      'json',
+      'start',
+    ],
     'POST _search\n' +
-  '{\n' +
-  '  "something": { "f" : """\n' +
-  '  test script\n' +
-  ' """,\n' +
-  ' "g": 1\n' +
-  ' }\n' +
-  '}'
+      '{\n' +
+      '  "something": { "f" : """\n' +
+      '  test script\n' +
+      ' """,\n' +
+      ' "g": 1\n' +
+      ' }\n' +
+      '}'
   );
 
   statesTest(
     ['start', 'json', 'json', 'start'],
-    'POST _search\n' +
-  '{\n' +
-  '  "something": """test script""",\n' +
-  '}'
+    'POST _search\n' + '{\n' + '  "something": """test script""",\n' + '}'
   );
 });
-

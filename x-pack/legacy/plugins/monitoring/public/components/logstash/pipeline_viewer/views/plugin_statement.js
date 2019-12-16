@@ -6,12 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
 import { i18n } from '@kbn/i18n';
@@ -38,12 +33,9 @@ function getProcessorStatementMetrics(processorVertex) {
       key="cpuMetric"
       className="monPipelineViewer__metric--cpuTime"
       warning={processorVertex.isTimeConsuming()}
-      value={formatMetric(
-        Math.round(percentOfTotalProcessorTime || 0),
-        '0',
-        '%',
-        { prependSpace: false }
-      )}
+      value={formatMetric(Math.round(percentOfTotalProcessorTime || 0), '0', '%', {
+        prependSpace: false,
+      })}
     />,
     <Metric
       key="eventMillis"
@@ -100,9 +92,12 @@ export function PluginStatement({
             <EuiFlexItem grow={false}>
               <EuiBadge
                 onClick={onNameButtonClick}
-                onClickAriaLabel={i18n.translate('xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel', {
-                  defaultMessage: 'View details'
-                })}
+                onClickAriaLabel={i18n.translate(
+                  'xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel',
+                  {
+                    defaultMessage: 'View details',
+                  }
+                )}
               >
                 {id}
               </EuiBadge>

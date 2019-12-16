@@ -7,14 +7,13 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'header']);
   const overview = getService('monitoringClusterOverview');
   const indicesList = getService('monitoringElasticsearchIndices');
   const indexDetail = getService('monitoringElasticsearchIndexDetail');
 
   describe('Elasticsearch index detail', () => {
-
     afterEach(async () => {
       await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsIndices'); // return back for next test
       await indicesList.clearFilter();
@@ -26,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
           from: 'Oct 5, 2017 @ 20:31:48.354',
-          to: 'Oct 5, 2017 @ 20:35:12.176'
+          to: 'Oct 5, 2017 @ 20:35:12.176',
         });
 
         // go to indices listing
@@ -84,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await setup('monitoring/singlecluster-red-platinum', {
           from: 'Oct 6, 2017 @ 19:53:06.748',
-          to: 'Oct 6, 2017 @ 20:15:30.212'
+          to: 'Oct 6, 2017 @ 20:15:30.212',
         });
 
         // go to indices listing
@@ -110,6 +109,5 @@ export default function ({ getService, getPageObjects }) {
         });
       });
     });
-
   });
 }

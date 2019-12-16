@@ -18,7 +18,7 @@
  */
 
 export function createPlatform(name) {
-  return new class Platform {
+  return new (class Platform {
     getName() {
       return name;
     }
@@ -42,5 +42,5 @@ export function createPlatform(name) {
     isLinux() {
       return name === 'linux';
     }
-  };
+  })();
 }

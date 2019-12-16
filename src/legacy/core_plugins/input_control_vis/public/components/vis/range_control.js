@@ -71,21 +71,14 @@ export class RangeControl extends Component {
   onChangeComplete = _.debounce(value => {
     const controlValue = {
       min: value[0],
-      max: value[1]
+      max: value[1],
     };
     this.props.stageFilter(this.props.controlIndex, controlValue);
   }, 200);
 
-
-
   renderControl() {
     if (!this.props.control.isEnabled()) {
-      return (
-        <ValidatedDualRange
-          disabled
-          showInput
-        />
-      );
+      return <ValidatedDualRange disabled showInput />;
     }
 
     const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);
@@ -94,7 +87,7 @@ export class RangeControl extends Component {
 
     const ticks = [
       { value: min, label: min },
-      { value: max, label: max }
+      { value: max, label: max },
     ];
 
     return (
@@ -129,5 +122,5 @@ export class RangeControl extends Component {
 RangeControl.propTypes = {
   control: PropTypes.object.isRequired,
   controlIndex: PropTypes.number.isRequired,
-  stageFilter: PropTypes.func.isRequired
+  stageFilter: PropTypes.func.isRequired,
 };

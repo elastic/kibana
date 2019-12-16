@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import multiClusterFixture from './fixtures/multicluster';
 import basicClusterFixture from './fixtures/basiccluster';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -17,7 +17,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/multicluster';
       const timeRange = {
         min: '2017-08-15T21:00:00Z',
-        max: '2017-08-16T00:00:00Z'
+        max: '2017-08-16T00:00:00Z',
       };
 
       await esArchiver.load(archive);
@@ -37,10 +37,10 @@ export default function ({ getService }) {
         const archive = 'monitoring/basic_6.3.x';
         const timeRange = {
           min: '2018-07-23T22:07:00Z',
-          max: '2018-07-23T22:13:00Z'
+          max: '2018-07-23T22:13:00Z',
         };
 
-        await  esArchiver.load(archive);
+        await esArchiver.load(archive);
 
         const { body } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')

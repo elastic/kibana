@@ -12,7 +12,7 @@ export const initInfraSource = (config, infraPlugin) => {
     const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
     infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
-      logAlias: filebeatIndexPattern
+      logAlias: filebeatIndexPattern,
     });
   }
 };
