@@ -46,7 +46,7 @@ jest.mock('ui/new_platform', () => {
   return {
     npStart: {
       core: {
-        notifications: { toasts: { } },
+        notifications: { toasts: {} },
         uiSettings: { get: jest.fn(() => 10) },
       },
     },

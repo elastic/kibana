@@ -21,9 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import {
-  OptionsTab,
-} from './options_tab';
+import { OptionsTab } from './options_tab';
 
 describe('OptionsTab', () => {
   let props;
@@ -33,9 +31,9 @@ describe('OptionsTab', () => {
       vis: {},
       stateParams: {
         updateFiltersOnChange: false,
-        useTimeFilter: false
+        useTimeFilter: false,
       },
-      setValue: jest.fn()
+      setValue: jest.fn(),
     };
   });
 
@@ -47,7 +45,9 @@ describe('OptionsTab', () => {
 
   it('should update updateFiltersOnChange', () => {
     const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find('[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] button');
+    const checkbox = component.find(
+      '[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] button'
+    );
     checkbox.simulate('click');
 
     expect(props.setValue).toHaveBeenCalledTimes(1);
@@ -56,7 +56,9 @@ describe('OptionsTab', () => {
 
   it('should update useTimeFilter', () => {
     const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] button');
+    const checkbox = component.find(
+      '[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] button'
+    );
     checkbox.simulate('click');
 
     expect(props.setValue).toHaveBeenCalledTimes(1);
@@ -65,11 +67,12 @@ describe('OptionsTab', () => {
 
   it('should update pinFilters', () => {
     const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] button');
+    const checkbox = component.find(
+      '[data-test-subj="inputControlEditorPinFiltersCheckbox"] button'
+    );
     checkbox.simulate('click');
 
     expect(props.setValue).toHaveBeenCalledTimes(1);
     expect(props.setValue).toHaveBeenCalledWith('pinFilters', true);
   });
-
 });

@@ -46,6 +46,7 @@ export interface HttpServerSetup {
    */
   registerRouter: (router: IRouter) => void;
   basePath: HttpServiceSetup['basePath'];
+  csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -109,6 +110,7 @@ export class HttpServer {
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
       registerAuth: this.registerAuth.bind(this),
       basePath: basePathService,
+      csp: config.csp,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,

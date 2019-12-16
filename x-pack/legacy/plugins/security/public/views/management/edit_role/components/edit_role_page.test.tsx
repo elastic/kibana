@@ -9,8 +9,11 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../plugins/features/public';
+// These modules should be moved into a common directory
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../../../../../plugins/security/server/authorization/actions';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { privilegesFactory } from '../../../../../../../../plugins/security/server/authorization/privileges';
 import { RawKibanaPrivileges, Role } from '../../../../../common/model';
 import { EditRolePage } from './edit_role_page';

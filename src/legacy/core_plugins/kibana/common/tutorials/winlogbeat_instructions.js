@@ -28,30 +28,35 @@ export const createWinlogbeatInstructions = context => ({
       title: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.install.windowsTitle', {
         defaultMessage: 'Download and install Winlogbeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.install.windowsTextPre', {
-        defaultMessage: 'First time using Winlogbeat? See the [Getting Started Guide]({winlogbeatLink}).\n\
+      textPre: i18n.translate(
+        'kbn.common.tutorials.winlogbeatInstructions.install.windowsTextPre',
+        {
+          defaultMessage:
+            'First time using Winlogbeat? See the [Getting Started Guide]({winlogbeatLink}).\n\
  1. Download the Winlogbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Winlogbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Winlogbeat as a Windows service.',
-        values: {
-          directoryName: '`winlogbeat-{config.kibana.version}-windows`',
-          folderPath: '`C:\\Program Files`',
-          winlogbeatLink: '{config.docs.beats.winlogbeat}/winlogbeat-getting-started.html',
-          elasticLink: 'https://www.elastic.co/downloads/beats/winlogbeat',
-        },
-      }),
-      commands: [
-        'cd "C:\\Program Files\\Winlogbeat"',
-        '.\\install-service-winlogbeat.ps1',
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.install.windowsTextPost', {
-        defaultMessage: 'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
-        values: { path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`' },
-      }),
-    }
+          values: {
+            directoryName: '`winlogbeat-{config.kibana.version}-windows`',
+            folderPath: '`C:\\Program Files`',
+            winlogbeatLink: '{config.docs.beats.winlogbeat}/winlogbeat-getting-started.html',
+            elasticLink: 'https://www.elastic.co/downloads/beats/winlogbeat',
+          },
+        }
+      ),
+      commands: ['cd "C:\\Program Files\\Winlogbeat"', '.\\install-service-winlogbeat.ps1'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.winlogbeatInstructions.install.windowsTextPost',
+        {
+          defaultMessage:
+            'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
+          values: { path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`' },
+        }
+      ),
+    },
   },
   START: {
     WINDOWS: {
@@ -59,12 +64,10 @@ export const createWinlogbeatInstructions = context => ({
         defaultMessage: 'Start Winlogbeat',
       }),
       textPre: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.start.windowsTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
+        defaultMessage:
+          'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
-      commands: [
-        '.\\winlogbeat.exe setup',
-        'Start-Service winlogbeat',
-      ],
+      commands: ['.\\winlogbeat.exe setup', 'Start-Service winlogbeat'],
     },
   },
   CONFIG: {
@@ -85,43 +88,53 @@ export const createWinlogbeatInstructions = context => ({
         '  password: "<password>"',
         'setup.kibana:',
         '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context)
+        getSpaceIdForBeatsTutorial(context),
       ],
-      textPost: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.config.windowsTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+      textPost: i18n.translate(
+        'kbn.common.tutorials.winlogbeatInstructions.config.windowsTextPost',
+        {
+          defaultMessage:
+            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    }
-  }
+          values: {
+            passwordTemplate: '`<password>`',
+            esUrlTemplate: '`<es_url>`',
+            kibanaUrlTemplate: '`<kibana_url>`',
+          },
+        }
+      ),
+    },
+  },
 });
 
 export const createWinlogbeatCloudInstructions = () => ({
   CONFIG: {
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
-        values: {
-          path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
-        },
-      }),
-      commands: [
-        'cloud.id: "{config.cloud.id}"',
-        'cloud.auth: "elastic:<password>"'
-      ],
-      textPost: i18n.translate('kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTextPost', {
-        defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-        values: { passwordTemplate: '`<password>`' },
-      }),
-    }
-  }
+      title: i18n.translate(
+        'kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTitle',
+        {
+          defaultMessage: 'Edit the configuration',
+        }
+      ),
+      textPre: i18n.translate(
+        'kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTextPre',
+        {
+          defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
+          values: {
+            path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
+          },
+        }
+      ),
+      commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
+      textPost: i18n.translate(
+        'kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTextPost',
+        {
+          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
+          values: { passwordTemplate: '`<password>`' },
+        }
+      ),
+    },
+  },
 });
 
 export function winlogbeatStatusCheck() {
@@ -162,9 +175,12 @@ export function onPremInstructions(platforms, context) {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.winlogbeat.premInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.winlogbeat.premInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -189,9 +205,12 @@ export function onPremCloudInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.winlogbeat.premCloudInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.winlogbeat.premCloudInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
@@ -217,9 +236,12 @@ export function cloudInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.common.tutorials.winlogbeat.cloudInstructions.gettingStarted.title', {
-          defaultMessage: 'Getting Started',
-        }),
+        title: i18n.translate(
+          'kbn.common.tutorials.winlogbeat.cloudInstructions.gettingStarted.title',
+          {
+            defaultMessage: 'Getting Started',
+          }
+        ),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.WINDOWS,

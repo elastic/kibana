@@ -47,7 +47,7 @@ export function translateTimeRelativeToDifference(source, sourceReference, targe
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference);
 
   const timeDelta = sourceDate.getTime() - sourceReferenceDate.getTime();
-  const translatedDate = (new Date(targetReferenceDate.getTime() + timeDelta));
+  const translatedDate = new Date(targetReferenceDate.getTime() + timeDelta);
 
   return `${dateToIso8601IgnoringTime(translatedDate)}T${source.substring(11)}`;
 }
@@ -65,11 +65,9 @@ export function translateTimeRelativeToWeek(source, sourceReference, targetRefer
   // sourceReference, then we can translate the source to the target while preserving their
   // days of the week.
   const normalizationDelta = dayOfWeekDelta * MILLISECONDS_IN_DAY;
-  const normalizedTargetReference =
-    dateToIso8601IgnoringTime(new Date(targetReferenceDate.getTime() + normalizationDelta));
+  const normalizedTargetReference = dateToIso8601IgnoringTime(
+    new Date(targetReferenceDate.getTime() + normalizationDelta)
+  );
 
-  return translateTimeRelativeToDifference(
-    source,
-    sourceReference,
-    normalizedTargetReference);
+  return translateTimeRelativeToDifference(source, sourceReference, normalizedTargetReference);
 }

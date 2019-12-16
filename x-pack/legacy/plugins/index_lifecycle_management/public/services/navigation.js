@@ -6,18 +6,17 @@
 
 let urlService;
 import { BASE_PATH } from '../../common/constants';
-export const setUrlService = (aUrlService) => {
+export const setUrlService = aUrlService => {
   urlService = aUrlService;
 };
 export const getUrlService = () => {
   return urlService;
 };
 
-
 export const goToPolicyList = () => {
   urlService.change(`${BASE_PATH}policies`);
 };
 
-export const getPolicyPath = (policyName) => {
+export const getPolicyPath = policyName => {
   return encodeURI(`#${BASE_PATH}policies/edit/${encodeURIComponent(policyName)}`);
 };

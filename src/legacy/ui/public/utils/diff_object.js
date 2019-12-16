@@ -21,7 +21,6 @@ import _ from 'lodash';
 import angular from 'angular';
 
 export function applyDiff(target, source) {
-
   const diff = {};
 
   /**
@@ -29,8 +28,8 @@ export function applyDiff(target, source) {
    * @param {string} key The keys
    * @returns {boolean}
    */
-  const filterPrivateAndMethods = function (obj) {
-    return function (key) {
+  const filterPrivateAndMethods = function(obj) {
+    return function(key) {
       if (_.isFunction(obj[key])) return false;
       if (key.charAt(0) === '$') return false;
       return key.charAt(0) !== '_';
@@ -47,7 +46,7 @@ export function applyDiff(target, source) {
   diff.added = _.difference(sourceKeys, targetKeys);
 
   // Find the keys that will be changed
-  diff.changed = _.filter(sourceKeys, function (key) {
+  diff.changed = _.filter(sourceKeys, function(key) {
     return !angular.equals(target[key], source[key]);
   });
 
@@ -55,7 +54,7 @@ export function applyDiff(target, source) {
   diff.keys = _.union(diff.changed, diff.removed, diff.added);
 
   // Remove all the keys
-  _.each(diff.removed, function (key) {
+  _.each(diff.removed, function(key) {
     delete target[key];
   });
 
@@ -65,5 +64,4 @@ export function applyDiff(target, source) {
   _.assign(target, _.pick(source, diff.added));
 
   return diff;
-
 }

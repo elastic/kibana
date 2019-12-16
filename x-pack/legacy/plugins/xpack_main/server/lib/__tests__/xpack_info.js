@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
-import { licensingMock } from '../../../../../../plugins/licensing/server/licensing.mock';
+import { licensingMock } from '../../../../../../plugins/licensing/server/mocks';
 
 function createLicense(license = {}, features = {}) {
   return licensingMock.createLicense({
@@ -19,21 +19,21 @@ function createLicense(license = {}, features = {}) {
       mode: 'gold',
       status: 'active',
       expiryDateInMillis: 1286575200000,
-      ...license
+      ...license,
     },
     features: {
       security: {
         description: 'Security for the Elastic Stack',
         isAvailable: true,
-        isEnabled: true
+        isEnabled: true,
       },
       watcher: {
         description: 'Alerting, Notification and Automation for the Elastic Stack',
         isAvailable: true,
-        isEnabled: false
+        isEnabled: false,
       },
-      ...features
-    }
+      ...features,
+    },
   });
 }
 
@@ -54,11 +54,9 @@ describe('XPackInfo', () => {
       newPlatform: {
         setup: {
           plugins: {
-            licensing: {
-
-            }
-          }
-        }
+            licensing: {},
+          },
+        },
       },
     });
   });
@@ -70,8 +68,8 @@ describe('XPackInfo', () => {
       const xPackInfo = new XPackInfo(mockServer, {
         licensing: {
           license$: new BehaviorSubject(createLicense()),
-          refresh: refresh
-        }
+          refresh: refresh,
+        },
       });
 
       await xPackInfo.refreshNow();
@@ -88,8 +86,8 @@ describe('XPackInfo', () => {
       xPackInfo = new XPackInfo(mockServer, {
         licensing: {
           license$,
-          refresh: () => null
-        }
+          refresh: () => null,
+        },
       });
     });
 
@@ -160,17 +158,22 @@ describe('XPackInfo', () => {
     let xPackInfo;
     let license$;
     beforeEach(async () => {
-      license$ = new BehaviorSubject(createLicense({}, {
-        feature: {
-          isAvailable: false,
-          isEnabled: true
-        }
-      }));
+      license$ = new BehaviorSubject(
+        createLicense(
+          {},
+          {
+            feature: {
+              isAvailable: false,
+              isEnabled: true,
+            },
+          }
+        )
+      );
       xPackInfo = new XPackInfo(mockServer, {
         licensing: {
           license$,
-          refresh: () => null
-        }
+          refresh: () => null,
+        },
       });
     });
 
@@ -205,38 +208,38 @@ describe('XPackInfo', () => {
       expect(xPackInfo.toJSON().features.security).to.be(undefined);
       expect(xPackInfo.toJSON().features.watcher).to.be(undefined);
 
-      securityFeature.registerLicenseCheckResultsGenerator((info) => {
+      securityFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someCustomValue: 100500
+          someCustomValue: 100500,
         };
       });
 
       expect(xPackInfo.toJSON().features.security).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(xPackInfo.toJSON().features.watcher).to.be(undefined);
 
-      watcherFeature.registerLicenseCheckResultsGenerator((info) => {
+      watcherFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someAnotherCustomValue: 500100
+          someAnotherCustomValue: 500100,
         };
       });
 
       expect(xPackInfo.toJSON().features.security).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(xPackInfo.toJSON().features.watcher).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
 
       license$.next(createLicense({ type: 'platinum' }));
@@ -244,12 +247,12 @@ describe('XPackInfo', () => {
       expect(xPackInfo.toJSON().features.security).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(xPackInfo.toJSON().features.watcher).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
     });
 
@@ -260,52 +263,51 @@ describe('XPackInfo', () => {
       expect(securityFeature.getLicenseCheckResults()).to.be(undefined);
       expect(watcherFeature.getLicenseCheckResults()).to.be(undefined);
 
-      securityFeature.registerLicenseCheckResultsGenerator((info) => {
+      securityFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someCustomValue: 100500
+          someCustomValue: 100500,
         };
       });
 
       expect(securityFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(watcherFeature.getLicenseCheckResults()).to.be(undefined);
 
-      watcherFeature.registerLicenseCheckResultsGenerator((info) => {
+      watcherFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someAnotherCustomValue: 500100
+          someAnotherCustomValue: 500100,
         };
       });
 
       expect(securityFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(watcherFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
-
 
       license$.next(createLicense({ type: 'platinum' }));
 
       expect(securityFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(watcherFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
     });
   });
@@ -315,18 +317,20 @@ describe('XPackInfo', () => {
     const xPackInfo = new XPackInfo(mockServer, {
       licensing: {
         license$,
-        refresh: () => null
-      }
+        refresh: () => null,
+      },
     });
 
-    expect(xPackInfo.getSignature()).to.be(getSignature({
-      license: {
-        type: 'gold',
-        isActive: true,
-        expiryDateInMillis: 1286575200000
-      },
-      features: {}
-    }));
+    expect(xPackInfo.getSignature()).to.be(
+      getSignature({
+        license: {
+          type: 'gold',
+          isActive: true,
+          expiryDateInMillis: 1286575200000,
+        },
+        features: {},
+      })
+    );
 
     license$.next(createLicense({ type: 'platinum', expiryDateInMillis: 20304050 }));
 
@@ -334,9 +338,9 @@ describe('XPackInfo', () => {
       license: {
         type: 'platinum',
         isActive: true,
-        expiryDateInMillis: 20304050
+        expiryDateInMillis: 20304050,
       },
-      features: {}
+      features: {},
     });
     expect(xPackInfo.getSignature()).to.be(expectedSignature);
 
