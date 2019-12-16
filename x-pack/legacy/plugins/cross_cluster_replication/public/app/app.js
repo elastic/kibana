@@ -90,9 +90,12 @@ class AppComponent extends Component {
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
-      fatalError(error, i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
-        defaultMessage: 'Cross-Cluster Replication app',
-      }));
+      fatalError(
+        error,
+        i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
+          defaultMessage: 'Cross-Cluster Replication app',
+        })
+      );
     }
   }
 
@@ -141,12 +144,12 @@ class AppComponent extends Component {
       return (
         <Fragment>
           <SectionError
-            title={(
+            title={
               <FormattedMessage
                 id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
                 defaultMessage="Error checking permissions"
               />
-            )}
+            }
             error={fetchPermissionError}
           />
 
@@ -167,7 +170,8 @@ class AppComponent extends Component {
                   id="xpack.crossClusterReplication.app.deniedPermissionTitle"
                   defaultMessage="You're missing cluster privileges"
                 />
-              </h2>}
+              </h2>
+            }
             body={
               <p>
                 <FormattedMessage
@@ -179,7 +183,8 @@ class AppComponent extends Component {
                     clusterPrivilegesCount: missingClusterPrivileges.length,
                   }}
                 />
-              </p>}
+              </p>
+            }
           />
         </EuiPageContent>
       );
@@ -189,10 +194,22 @@ class AppComponent extends Component {
       <div>
         <Switch>
           <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/follower_indices`} />
-          <Route exact path={`${BASE_PATH}/auto_follow_patterns/add`} component={AutoFollowPatternAdd} />
-          <Route exact path={`${BASE_PATH}/auto_follow_patterns/edit/:id`} component={AutoFollowPatternEdit} />
+          <Route
+            exact
+            path={`${BASE_PATH}/auto_follow_patterns/add`}
+            component={AutoFollowPatternAdd}
+          />
+          <Route
+            exact
+            path={`${BASE_PATH}/auto_follow_patterns/edit/:id`}
+            component={AutoFollowPatternEdit}
+          />
           <Route exact path={`${BASE_PATH}/follower_indices/add`} component={FollowerIndexAdd} />
-          <Route exact path={`${BASE_PATH}/follower_indices/edit/:id`} component={FollowerIndexEdit} />
+          <Route
+            exact
+            path={`${BASE_PATH}/follower_indices/edit/:id`}
+            component={FollowerIndexEdit}
+          />
           <Route exact path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>

@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 
-export default function (dot, flatObject) {
+export default function(dot, flatObject) {
   const fullObject = {};
-  _.each(flatObject, function (value, key) {
+  _.each(flatObject, function(value, key) {
     const keys = key.split(dot);
     (function walk(memo, keys, value) {
       const _key = keys.shift();
@@ -31,9 +31,7 @@ export default function (dot, flatObject) {
         if (!memo[_key]) memo[_key] = {};
         walk(memo[_key], keys, value);
       }
-    }(fullObject, keys, value));
+    })(fullObject, keys, value);
   });
   return fullObject;
 }
-
-

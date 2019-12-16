@@ -27,9 +27,12 @@ for (const key in colormaps) {
     //slice off lightest colors
     truncatedColorMaps[key] = {
       ...colormaps[key],
-      value: colormaps[key].value.slice(Math.floor(colormaps[key].value.length / 4))
+      value: colormaps[key].value.slice(Math.floor(colormaps[key].value.length / 4)),
     };
   }
 }
 
-export const colorSchemas = Object.values(truncatedColorMaps).map(({ id, label }) => ({ value: id, text: label }));
+export const colorSchemas = Object.values(truncatedColorMaps).map(({ id, label }) => ({
+  value: id,
+  text: label,
+}));

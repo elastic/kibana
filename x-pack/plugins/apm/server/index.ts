@@ -48,4 +48,4 @@ export type APMConfig = ReturnType<typeof mergeConfigs>;
 
 export const plugin = (initContext: PluginInitializerContext) => new APMPlugin(initContext);
 
-export { APMPlugin } from './plugin';
+export { APMPlugin, APMPluginContract } from './plugin';

@@ -25,7 +25,7 @@ export {
   accessibleClickKeys,
   cascadingMenuKeyCodes,
   comboBoxKeyCodes,
-  htmlIdGenerator
+  htmlIdGenerator,
 } from './accessibility';
 
 export { SortableProperties } from './sort';

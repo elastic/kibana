@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../../../../src/legacy/ui/public/courier';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../../src/legacy/ui/public/courier';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { esFilters } from '../../../../../src/plugins/data/public';
 import { npStart } from 'ui/new_platform';
@@ -21,9 +24,10 @@ export async function fetchSearchSourceAndRecordWithInspector({
   inspectorAdapters,
   abortSignal,
 }) {
-  const inspectorRequest = inspectorAdapters.requests.start(
-    requestName,
-    { id: requestId, description: requestDesc });
+  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
+    id: requestId,
+    description: requestDesc,
+  });
   let resp;
   try {
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
@@ -31,10 +35,8 @@ export async function fetchSearchSourceAndRecordWithInspector({
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest
-      .stats(getResponseInspectorStats(searchSource, resp))
-      .ok({ json: resp });
-  } catch(error) {
+    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+  } catch (error) {
     inspectorRequest.error({ error });
     throw error;
   }

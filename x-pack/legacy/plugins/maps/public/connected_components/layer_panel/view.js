@@ -37,7 +37,6 @@ const localStorage = new Storage(window.localStorage);
 import { npStart } from 'ui/new_platform';
 
 export class LayerPanel extends React.Component {
-
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextId = nextProps.selectedLayer ? nextProps.selectedLayer.getId() : null;
     if (nextId !== prevState.prevId) {
@@ -79,7 +78,7 @@ export class LayerPanel extends React.Component {
     }
 
     this.setState({ displayName });
-  }
+  };
 
   loadImmutableSourceProperties = async () => {
     if (this.state.hasLoadedSourcePropsForLayer || !this.props.selectedLayer) {
@@ -93,7 +92,7 @@ export class LayerPanel extends React.Component {
         hasLoadedSourcePropsForLayer: true,
       });
     }
-  }
+  };
 
   _onSourceChange = ({ propName, value }) => {
     this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value);
@@ -107,7 +106,7 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-          <FilterEditor/>
+          <FilterEditor />
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>
@@ -122,7 +121,7 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-          <JoinEditor/>
+          <JoinEditor />
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>
@@ -133,14 +132,17 @@ export class LayerPanel extends React.Component {
     return this.state.immutableSourceProps.map(({ label, value, link }) => {
       function renderValue() {
         if (link) {
-          return (<EuiLink href={link} target="_blank">{value}</EuiLink>);
+          return (
+            <EuiLink href={link} target="_blank">
+              {value}
+            </EuiLink>
+          );
         }
-        return (<span>{value}</span>);
+        return <span>{value}</span>;
       }
       return (
         <p key={label} className="mapLayerPanel__sourceDetail">
-          <strong>{label}</strong>{' '}
-          {renderValue()}
+          <strong>{label}</strong> {renderValue()}
         </p>
       );
     });
@@ -162,19 +164,14 @@ export class LayerPanel extends React.Component {
           ...npStart.core,
         }}
       >
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-        >
+        <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
             <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  aria-label={
-                    i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
-                      defaultMessage: 'Fit to bounds'
-                    })
-                  }
+                  aria-label={i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
+                    defaultMessage: 'Fit to bounds',
+                  })}
                   iconType={selectedLayer.getLayerTypeIconName()}
                   onClick={this.props.fitToBounds}
                 >
@@ -182,7 +179,6 @@ export class LayerPanel extends React.Component {
                     id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
                     defaultMessage="Fit"
                   />
-
                 </EuiButtonIcon>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -195,11 +191,9 @@ export class LayerPanel extends React.Component {
             <div className="mapLayerPanel__sourceDetails">
               <EuiAccordion
                 id="accordion1"
-                buttonContent={
-                  i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
-                    defaultMessage: 'Source details'
-                  })
-                }
+                buttonContent={i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
+                  defaultMessage: 'Source details',
+                })}
               >
                 <EuiText color="subdued" size="s">
                   <EuiSpacer size="xs" />
@@ -211,19 +205,19 @@ export class LayerPanel extends React.Component {
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
+              <LayerErrors />
 
-              <LayerErrors/>
+              <LayerSettings />
 
-              <LayerSettings/>
-
-              {this.props.selectedLayer.renderSourceSettingsEditor({ onChange: this._onSourceChange })}
+              {this.props.selectedLayer.renderSourceSettingsEditor({
+                onChange: this._onSourceChange,
+              })}
 
               {this._renderFilterSection()}
 
               {this._renderJoinSection()}
 
-              <StyleSettings/>
-
+              <StyleSettings />
             </div>
           </div>
 
