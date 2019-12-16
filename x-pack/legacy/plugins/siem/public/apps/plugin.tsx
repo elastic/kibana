@@ -12,13 +12,12 @@ import { Chrome } from 'ui/chrome';
 
 import { SiemApp } from './start_app';
 import template from './template.html';
+import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../common/constants';
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartPlugins extends PluginsStart {
-  // data
-}
+export type StartCore = LegacyCoreStart;
+export type StartPlugins = Required<Pick<PluginsStart, 'data'>>;
 
 export class Plugin {
   constructor(
@@ -30,7 +29,11 @@ export class Plugin {
     this.chrome = chrome;
   }
 
-  public start(core: LegacyCoreStart, plugins: StartPlugins) {
+  public start(core: StartCore, plugins: StartPlugins) {
+    // TODO(rylnd): once we're on NP, we can populate version from env.packageInfo
+    core.uiSettings.set(DEFAULT_KBN_VERSION, '8.0.0');
+    core.uiSettings.set(DEFAULT_TIMEZONE_BROWSER, 'UTC');
+
     // @ts-ignore improper type description
     this.chrome.setRootTemplate(template);
     const checkForRoot = () => {
