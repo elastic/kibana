@@ -24,10 +24,9 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 
 test('renders', () => {
-  const component = shallowWithIntl(<SavedObjectsInstaller.WrappedComponent
-    bulkCreate={() => {}}
-    savedObjects={[]}
-  />);
+  const component = shallowWithIntl(
+    <SavedObjectsInstaller.WrappedComponent bulkCreate={() => {}} savedObjects={[]} />
+  );
   expect(component).toMatchSnapshot();
 });
 
@@ -35,18 +34,20 @@ describe('bulkCreate', () => {
   const savedObject = {
     id: '1',
     type: 'index-pattern',
-    attributes: {}
+    attributes: {},
   };
   test('should display success message when bulkCreate is successful', async () => {
     const bulkCreateMock = () => {
       return Promise.resolve({
-        savedObjects: [savedObject]
+        savedObjects: [savedObject],
       });
     };
-    const component = mountWithIntl(<SavedObjectsInstaller.WrappedComponent
-      bulkCreate={bulkCreateMock}
-      savedObjects={[savedObject]}
-    />);
+    const component = mountWithIntl(
+      <SavedObjectsInstaller.WrappedComponent
+        bulkCreate={bulkCreateMock}
+        savedObjects={[savedObject]}
+      />
+    );
 
     findTestSubject(component, 'loadSavedObjects').simulate('click');
 
@@ -62,10 +63,12 @@ describe('bulkCreate', () => {
     const bulkCreateMock = () => {
       return Promise.reject(new Error('simulated bulkRequest error'));
     };
-    const component = mountWithIntl(<SavedObjectsInstaller.WrappedComponent
-      bulkCreate={bulkCreateMock}
-      savedObjects={[savedObject]}
-    />);
+    const component = mountWithIntl(
+      <SavedObjectsInstaller.WrappedComponent
+        bulkCreate={bulkCreateMock}
+        savedObjects={[savedObject]}
+      />
+    );
 
     findTestSubject(component, 'loadSavedObjects').simulate('click');
 

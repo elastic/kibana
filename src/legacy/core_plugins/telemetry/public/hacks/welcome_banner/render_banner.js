@@ -39,7 +39,7 @@ export function renderBanner(telemetryOptInProvider, fetchTelemetry, { _banners 
         fetchTelemetry={fetchTelemetry}
       />
     ),
-    priority: 10000
+    priority: 10000,
   });
 
   telemetryOptInProvider.setBannerId(bannerId);

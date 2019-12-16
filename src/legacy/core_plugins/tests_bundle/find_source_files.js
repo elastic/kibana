@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
 import { chain } from 'lodash';
@@ -29,21 +28,25 @@ const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   patterns = [].concat(patterns || []);
 
   const matches = await fromNode(cb => {
-    glob(patterns, {
-      cwd: cwd,
-      ignore: [
-        'node_modules/**/*',
-        'bower_components/**/*',
-        '**/_*.js',
-        '**/*.test.js',
-        '**/*.test.mocks.js',
-        '**/__mocks__/**/*',
-      ],
-      symlinks: findSourceFiles.symlinks,
-      statCache: findSourceFiles.statCache,
-      realpathCache: findSourceFiles.realpathCache,
-      cache: findSourceFiles.cache
-    }, cb);
+    glob(
+      patterns,
+      {
+        cwd: cwd,
+        ignore: [
+          'node_modules/**/*',
+          'bower_components/**/*',
+          '**/_*.js',
+          '**/*.test.js',
+          '**/*.test.mocks.js',
+          '**/__mocks__/**/*',
+        ],
+        symlinks: findSourceFiles.symlinks,
+        statCache: findSourceFiles.statCache,
+        realpathCache: findSourceFiles.realpathCache,
+        cache: findSourceFiles.cache,
+      },
+      cb
+    );
   });
 
   return chain(matches)

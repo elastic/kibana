@@ -36,14 +36,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setIndexPatternValidityResponse();
 
-    ({
-      find,
-      exists,
-      actions,
-      form,
-      getEuiStepsHorizontalActive,
-      goToStep,
-    } = setup());
+    ({ find, exists, actions, form, getEuiStepsHorizontalActive, goToStep } = setup());
   });
 
   describe('layout', () => {
@@ -82,7 +75,9 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       await goToStep(2);
 
-      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
+      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect')
+        .find('option')
+        .map(option => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields);
     });
 
@@ -92,7 +87,9 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       await goToStep(2);
 
-      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
+      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect')
+        .find('option')
+        .map(option => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields.sort());
     });
   });

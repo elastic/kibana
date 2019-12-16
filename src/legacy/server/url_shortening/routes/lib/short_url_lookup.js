@@ -24,7 +24,7 @@ export function shortUrlLookupProvider(server) {
     try {
       await req.getSavedObjectsClient().update('url', doc.id, {
         accessDate: new Date(),
-        accessCount: get(doc, 'attributes.accessCount', 0) + 1
+        accessCount: get(doc, 'attributes.accessCount', 0) + 1,
       });
     } catch (err) {
       server.log('Warning: Error updating url metadata', err);
@@ -38,6 +38,6 @@ export function shortUrlLookupProvider(server) {
       updateMetadata(doc, req);
 
       return doc.attributes.url;
-    }
+    },
   };
 }

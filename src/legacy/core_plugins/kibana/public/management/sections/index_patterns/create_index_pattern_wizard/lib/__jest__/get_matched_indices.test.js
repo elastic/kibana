@@ -29,19 +29,12 @@ const indices = [
   { name: 'logstash' },
   { name: 'packetbeat' },
   { name: 'metricbeat' },
-  { name: '.kibana' }
-];
-
-const partialIndices = [
-  { name: 'kibana' },
-  { name: 'es' },
   { name: '.kibana' },
 ];
 
-const exactIndices = [
-  { name: 'kibana' },
-  { name: '.kibana' },
-];
+const partialIndices = [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }];
+
+const exactIndices = [{ name: 'kibana' }, { name: '.kibana' }];
 
 describe('getMatchedIndices', () => {
   it('should return all indices', () => {
@@ -61,10 +54,7 @@ describe('getMatchedIndices', () => {
       { name: '.kibana' },
     ]);
 
-    expect(exactMatchedIndices).toEqual([
-      { name: 'kibana' },
-      { name: '.kibana' },
-    ]);
+    expect(exactMatchedIndices).toEqual([{ name: 'kibana' }, { name: '.kibana' }]);
 
     expect(partialMatchedIndices).toEqual([
       { name: 'kibana' },
@@ -72,10 +62,7 @@ describe('getMatchedIndices', () => {
       { name: '.kibana' },
     ]);
 
-    expect(visibleIndices).toEqual([
-      { name: 'kibana' },
-      { name: '.kibana' },
-    ]);
+    expect(visibleIndices).toEqual([{ name: 'kibana' }, { name: '.kibana' }]);
   });
 
   it('should return all indices except for system indices', () => {
@@ -94,28 +81,17 @@ describe('getMatchedIndices', () => {
       { name: 'metricbeat' },
     ]);
 
-    expect(exactMatchedIndices).toEqual([
-      { name: 'kibana' },
-    ]);
+    expect(exactMatchedIndices).toEqual([{ name: 'kibana' }]);
 
-    expect(partialMatchedIndices).toEqual([
-      { name: 'kibana' },
-      { name: 'es' },
-    ]);
+    expect(partialMatchedIndices).toEqual([{ name: 'kibana' }, { name: 'es' }]);
 
-    expect(visibleIndices).toEqual([
-      { name: 'kibana' },
-    ]);
+    expect(visibleIndices).toEqual([{ name: 'kibana' }]);
   });
 
   it('should return partial matches as visible if there are no exact', () => {
     const { visibleIndices } = getMatchedIndices(indices, partialIndices, [], '*', true);
 
-    expect(visibleIndices).toEqual([
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' },
-    ]);
+    expect(visibleIndices).toEqual([{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }]);
   });
 
   it('should return all indices as visible if there are no exact or partial', () => {

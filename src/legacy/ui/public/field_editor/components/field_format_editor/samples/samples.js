@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export class FormatEditorSamples extends PureComponent {
   static defaultProps = {
-    sampleType: 'text'
+    sampleType: 'text',
   };
   static propTypes = {
     samples: PropTypes.arrayOf(
@@ -58,16 +58,17 @@ export class FormatEditorSamples extends PureComponent {
           defaultMessage: 'Output',
         }),
         render: output => {
-          return sampleType === 'html' ?
-            (
-              <div
+          return sampleType === 'html' ? (
+            <div
               /*
                * Justification for dangerouslySetInnerHTML:
                * Sample output may contain HTML tags, like URL image/audio format.
                */
-                dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
-              />
-            ) : (<div>{output}</div>);
+              dangerouslySetInnerHTML={{ __html: output }} //eslint-disable-line react/no-danger
+            />
+          ) : (
+            <div>{output}</div>
+          );
         },
       },
     ];

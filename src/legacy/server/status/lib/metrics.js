@@ -41,16 +41,15 @@ export class Metrics {
     return {
       process: {
         memory: {
-          heap: {}
-        }
+          heap: {},
+        },
       },
       os: {
         cpu: {},
-        memory: {}
+        memory: {},
       },
       response_times: {},
-      requests: {
-      }
+      requests: {},
     };
   }
 
@@ -61,7 +60,7 @@ export class Metrics {
 
     const metrics = {
       last_updated: timestamp,
-      collection_interval_in_millis: this.config.get('ops.interval')
+      collection_interval_in_millis: this.config.get('ops.interval'),
     };
 
     return merge(metrics, event, cgroup);
@@ -80,37 +79,37 @@ export class Metrics {
             // https://nodejs.org/docs/latest-v8.x/api/process.html#process_process_memoryusage
             total_in_bytes: get(hapiEvent, 'psmem.heapTotal'),
             used_in_bytes: get(hapiEvent, 'psmem.heapUsed'),
-            size_limit: heapStats.heap_size_limit
+            size_limit: heapStats.heap_size_limit,
           },
           resident_set_size_in_bytes: get(hapiEvent, 'psmem.rss'),
         },
         event_loop_delay: get(hapiEvent, 'psdelay'),
         pid: process.pid,
-        uptime_in_millis: process.uptime() * 1000
+        uptime_in_millis: process.uptime() * 1000,
       },
       os: {
         load: {
           '1m': get(hapiEvent, 'osload.0'),
           '5m': get(hapiEvent, 'osload.1'),
-          '15m': get(hapiEvent, 'osload.2')
+          '15m': get(hapiEvent, 'osload.2'),
         },
         memory: {
           total_in_bytes: os.totalmem(),
           free_in_bytes: os.freemem(),
-          used_in_bytes: get(hapiEvent, 'osmem.total') - get(hapiEvent, 'osmem.free')
+          used_in_bytes: get(hapiEvent, 'osmem.total') - get(hapiEvent, 'osmem.free'),
         },
         uptime_in_millis: os.uptime() * 1000,
-        ...(await getOSInfo())
+        ...(await getOSInfo()),
       },
       response_times: {
         avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
-        max_in_millis: maxInMillis
+        max_in_millis: maxInMillis,
       },
       requests: {
         ...requestDefaults,
-        ...keysToSnakeCaseShallow(get(hapiEvent, ['requests', port]))
+        ...keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
       },
-      concurrent_connections: hapiEvent.concurrent_connections
+      concurrent_connections: hapiEvent.concurrent_connections,
     };
   }
 
@@ -118,14 +117,14 @@ export class Metrics {
     try {
       const cgroup = await cGroupStats({
         cpuPath: this.config.get('cpu.cgroup.path.override'),
-        cpuAcctPath: this.config.get('cpuacct.cgroup.path.override')
+        cpuAcctPath: this.config.get('cpuacct.cgroup.path.override'),
       });
 
       if (isObject(cgroup)) {
         return {
           os: {
-            cgroup
-          }
+            cgroup,
+          },
         };
       }
     } catch (e) {

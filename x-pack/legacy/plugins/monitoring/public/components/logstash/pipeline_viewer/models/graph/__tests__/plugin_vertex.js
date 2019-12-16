@@ -6,10 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Vertex } from '../vertex';
-import {
-  PluginVertex,
-  TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT
-} from '../plugin_vertex';
+import { PluginVertex, TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT } from '../plugin_vertex';
 
 describe('PluginVertex', () => {
   let graph;
@@ -17,10 +14,7 @@ describe('PluginVertex', () => {
 
   beforeEach(() => {
     graph = {
-      processorVertices: [
-        { latestMillisPerEvent: 50 },
-        { latestMillisPerEvent: 10 }
-      ]
+      processorVertices: [{ latestMillisPerEvent: 50 }, { latestMillisPerEvent: 10 }],
     };
     vertexJson = {
       config_name: 'some-name',
@@ -28,8 +22,8 @@ describe('PluginVertex', () => {
         millis_per_event: 50,
         percent_of_total_processor_duration: 0.3,
         events_in_per_millisecond: 0.01,
-        events_out_per_millisecond: 0.01
-      }
+        events_out_per_millisecond: 0.01,
+      },
     };
   });
 
@@ -77,8 +71,8 @@ describe('PluginVertex', () => {
     });
 
     it('should have a true isTimeConsuming result when the plugin consumes a large amount of execution time', () => {
-      vertexJson.stats.percent_of_total_processor_duration = 0.1 +
-        (percentExecution * (TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT));
+      vertexJson.stats.percent_of_total_processor_duration =
+        0.1 + percentExecution * TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT;
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isTimeConsuming()).to.be(true);
     });
@@ -90,13 +84,13 @@ describe('PluginVertex', () => {
       graph.processorVertices[1].millis_per_event = 999999999999999999;
     });
 
-    it('should have a true isSlow result when the plugin\'s seconds per event is 2 standard deviations above the mean', () => {
+    it("should have a true isSlow result when the plugin's seconds per event is 2 standard deviations above the mean", () => {
       vertexJson.stats.millis_per_event = 999999999999999999;
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isSlow()).to.be(true);
     });
 
-    it('should have a false isSlow result when the plugin\'s seconds per event is 2 standard deviations above the mean', () => {
+    it("should have a false isSlow result when the plugin's seconds per event is 2 standard deviations above the mean", () => {
       vertexJson.stats.millis_per_event = 1;
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isSlow()).to.be(false);
