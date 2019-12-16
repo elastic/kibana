@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export { actionsMenuContent } from './management';
 export { ResultLinks } from './results';

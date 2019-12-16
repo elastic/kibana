@@ -31,7 +31,7 @@ function buildFieldList(fields) {
       type,
       normalizedType,
       aggregatable,
-      searchable
+      searchable,
     });
   });
 
@@ -45,7 +45,7 @@ export class Fields {
 
   get downstreamJson() {
     const result = {
-      fields: this.fields
+      fields: this.fields,
     };
 
     return result;
@@ -57,9 +57,9 @@ export class Fields {
         i18n.translate('xpack.watcher.models.fields.fieldsPropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain a {fields} property',
           values: {
-            fields: 'fields'
-          }
-        }),
+            fields: 'fields',
+          },
+        })
       );
     }
 

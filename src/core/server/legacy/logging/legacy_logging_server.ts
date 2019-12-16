@@ -20,7 +20,7 @@
 import { ServerExtType } from 'hapi';
 import Podium from 'podium';
 // @ts-ignore: implicit any for JS file
-import { Config, transformDeprecations } from '../../../../legacy/server/config';
+import { Config } from '../../../../legacy/server/config';
 // @ts-ignore: implicit any for JS file
 import { setupLogging } from '../../../../legacy/server/logging';
 import { LogLevel } from '../../logging/log_level';
@@ -99,7 +99,7 @@ export class LegacyLoggingServer {
       ops: { interval: 2147483647 },
     };
 
-    setupLogging(this, Config.withDefaultSchema(transformDeprecations(config)));
+    setupLogging(this, Config.withDefaultSchema(config));
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {

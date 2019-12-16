@@ -36,7 +36,7 @@ export class UpdateSourceEditor extends Component {
     useTopHits: PropTypes.bool.isRequired,
     topHitsSplitField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
-    source: PropTypes.object
+    source: PropTypes.object,
   };
 
   state = {
@@ -81,7 +81,7 @@ export class UpdateSourceEditor extends Component {
     const sourceFields = rawTooltipFields.map(field => {
       return new ESDocField({
         fieldName: field.name,
-        source: this.props.source
+        source: this.props.source,
       });
     });
 
@@ -109,7 +109,7 @@ export class UpdateSourceEditor extends Component {
 
   onSortOrderChange = e => {
     this.props.onChange({ propName: 'sortOrder', value: e.target.value });
-  }
+  };
 
   onTopHitsSizeChange = size => {
     this.props.onChange({ propName: 'topHitsSize', value: size });
@@ -219,10 +219,7 @@ export class UpdateSourceEditor extends Component {
       <EuiPanel>
         <EuiTitle size="xs">
           <h5>
-            <FormattedMessage
-              id="xpack.maps.esSearch.sortTitle"
-              defaultMessage="Sorting"
-            />
+            <FormattedMessage id="xpack.maps.esSearch.sortTitle" defaultMessage="Sorting" />
           </h5>
         </EuiTitle>
 
@@ -235,12 +232,9 @@ export class UpdateSourceEditor extends Component {
           display="columnCompressed"
         >
           <SingleFieldSelect
-            placeholder={i18n.translate(
-              'xpack.maps.source.esSearch.sortFieldSelectPlaceholder',
-              {
-                defaultMessage: 'Select sort field',
-              }
-            )}
+            placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
+              defaultMessage: 'Select sort field',
+            })}
             value={this.props.sortField}
             onChange={this.onSortFieldChange}
             fields={this.state.sortFields}
@@ -261,14 +255,14 @@ export class UpdateSourceEditor extends Component {
                 text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
                   defaultMessage: 'ascending',
                 }),
-                value: SORT_ORDER.ASC
+                value: SORT_ORDER.ASC,
               },
               {
                 text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
                   defaultMessage: 'descending',
                 }),
-                value: SORT_ORDER.DESC
-              }
+                value: SORT_ORDER.DESC,
+              },
             ]}
             value={this.props.sortOrder}
             onChange={this.onSortOrderChange}
@@ -285,13 +279,11 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <Fragment>
-
         {this._renderTooltipsPanel()}
         <EuiSpacer size="s" />
 
         {this._renderSortPanel()}
         <EuiSpacer size="s" />
-
       </Fragment>
     );
   }

@@ -19,10 +19,7 @@
 
 import React from 'react';
 
-import {
-  banners,
-  toastNotifications,
-} from 'ui/notify';
+import { banners, toastNotifications } from 'ui/notify';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -37,7 +34,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export async function clickBanner(
   telemetryOptInProvider,
   optIn,
-  { _banners = banners, _toastNotifications = toastNotifications } = {}) {
+  { _banners = banners, _toastNotifications = toastNotifications } = {}
+) {
   const bannerId = telemetryOptInProvider.getBannerId();
   let set = false;
 
@@ -73,7 +71,7 @@ export async function clickBanner(
             />
           </EuiText>
         </EuiText>
-      )
+      ),
     });
   }
 }

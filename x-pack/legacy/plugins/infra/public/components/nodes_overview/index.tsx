@@ -11,12 +11,7 @@ import { get, max, min } from 'lodash';
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import {
-  InfraSnapshotMetricType,
-  InfraSnapshotNode,
-  InfraNodeType,
-  InfraTimerangeInput,
-} from '../../graphql/types';
+import { InfraSnapshotMetricType, InfraSnapshotNode, InfraNodeType } from '../../graphql/types';
 import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
@@ -34,7 +29,7 @@ interface Props {
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onViewChange: (view: string) => void;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
@@ -67,6 +62,38 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
   },
+  [InfraSnapshotMetricType.diskIOReadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.diskIOWriteBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}/s',
+  },
+  [InfraSnapshotMetricType.s3BucketSize]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3TotalRequests]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3NumberOfObjects]: {
+    formatter: InfraFormatterType.abbreviatedNumber,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3UploadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.s3DownloadBytes]: {
+    formatter: InfraFormatterType.bytes,
+    template: '{{value}}',
+  },
+  [InfraSnapshotMetricType.sqsOldestMessage]: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}} seconds',
+  },
 };
 
 const calculateBoundsFromNodes = (nodes: InfraSnapshotNode[]): InfraWaffleMapBounds => {
@@ -92,8 +119,8 @@ export const NodesOverview = class extends React.Component<Props, {}> {
       nodeType,
       reload,
       view,
+      currentTime,
       options,
-      timeRange,
     } = this.props;
     if (loading) {
       return (
@@ -152,7 +179,7 @@ export const NodesOverview = class extends React.Component<Props, {}> {
               nodes={nodes}
               options={options}
               formatter={this.formatter}
-              timeRange={timeRange}
+              currentTime={currentTime}
               onFilter={this.handleDrilldown}
             />
           </TableContainer>
@@ -163,7 +190,7 @@ export const NodesOverview = class extends React.Component<Props, {}> {
               nodes={nodes}
               options={options}
               formatter={this.formatter}
-              timeRange={timeRange}
+              currentTime={currentTime}
               onFilter={this.handleDrilldown}
               bounds={bounds}
               dataBounds={dataBounds}
