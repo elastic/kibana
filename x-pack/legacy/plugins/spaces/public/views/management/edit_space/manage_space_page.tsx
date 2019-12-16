@@ -16,12 +16,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
-import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
-import { capabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
+import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../../../plugins/features/server';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
@@ -39,9 +38,9 @@ import { ReservedSpaceBadge } from './reserved_space_badge';
 interface Props {
   spacesManager: SpacesManager;
   spaceId?: string;
-  spacesNavState: SpacesNavState;
   intl: InjectedIntl;
   setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -73,7 +72,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   }
 
   public async componentDidMount() {
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return;
     }
 
@@ -139,7 +138,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   );
 
   public getForm = () => {
-    if (!capabilities.get().spaces.manage) {
+    if (!this.props.capabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -173,7 +172,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EnabledFeatures
           space={this.state.space}
           features={this.state.features}
-          uiCapabilities={capabilities.get()}
+          capabilities={this.props.capabilities}
           onChange={this.onSpaceChange}
           intl={this.props.intl}
         />
@@ -269,7 +268,6 @@ class ManageSpacePageUI extends Component<Props, State> {
             data-test-subj="delete-space-button"
             space={this.state.space as Space}
             spacesManager={this.props.spacesManager}
-            spacesNavState={this.props.spacesNavState}
             onDelete={this.backToSpacesList}
           />
         </EuiFlexItem>
@@ -298,27 +296,30 @@ class ManageSpacePageUI extends Component<Props, State> {
     }
 
     if (this.editingExistingSpace()) {
-      const { spacesNavState } = this.props;
+      const { spacesManager } = this.props;
 
       const originalSpace: Space = this.state.originalSpace as Space;
       const space: Space = this.state.space as Space;
 
-      const editingActiveSpace = spacesNavState.getActiveSpace().id === originalSpace.id;
+      spacesManager.getActiveSpace().then(activeSpace => {
+        const editingActiveSpace = activeSpace.id === originalSpace.id;
 
-      const haveDisabledFeaturesChanged =
-        space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
-        _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+        const haveDisabledFeaturesChanged =
+          space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
+          _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
 
-      if (editingActiveSpace && haveDisabledFeaturesChanged) {
-        this.setState({
-          showAlteringActiveSpaceDialog: true,
-        });
+        if (editingActiveSpace && haveDisabledFeaturesChanged) {
+          this.setState({
+            showAlteringActiveSpaceDialog: true,
+          });
 
-        return;
-      }
+          return;
+        }
+        this.performSave();
+      });
+    } else {
+      this.performSave();
     }
-
-    this.performSave();
   };
 
   private performSave = (requireRefresh = false) => {
@@ -358,7 +359,6 @@ class ManageSpacePageUI extends Component<Props, State> {
 
     action
       .then(() => {
-        this.props.spacesNavState.refreshSpacesList();
         toastNotifications.addSuccess(
           intl.formatMessage(
             {
