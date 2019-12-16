@@ -19,31 +19,36 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
           password: 'monitoring-p@ssw0rd!-internal-test',
           ssl: {},
           customHeaders: {
-            'x-custom-headers-test': 'connection-monitoring'
-          }
-        }
-      }
+            'x-custom-headers-test': 'connection-monitoring',
+          },
+        },
+      },
     },
   };
 
   const config = {
-    get: (path) => { return get(server, path); },
-    set: noop
+    get: path => {
+      return get(server, path);
+    },
+    set: noop,
   };
 
   return {
     config,
     elasticsearchPlugin: {
-      getCluster: sinon.stub().withArgs('admin').returns({
-        config: sinon.stub().returns(server.elasticsearch)
-      }),
+      getCluster: sinon
+        .stub()
+        .withArgs('admin')
+        .returns({
+          config: sinon.stub().returns(server.elasticsearch),
+        }),
       createCluster: sinon.stub(),
     },
     events: {
       on: noop,
     },
     expose: sinon.stub(),
-    log: sinon.stub()
+    log: sinon.stub(),
   };
 }
 
@@ -55,8 +60,8 @@ describe('Instantiate Client', () => {
       exposeClient(server);
 
       expect(server.log.getCall(0).args).to.eql([
-        [ 'monitoring', 'es-client' ],
-        'config sourced from: production cluster'
+        ['monitoring', 'es-client'],
+        'config sourced from: production cluster',
       ]);
     });
 
@@ -65,8 +70,8 @@ describe('Instantiate Client', () => {
       exposeClient(server);
 
       expect(server.log.getCall(0).args).to.eql([
-        [ 'monitoring', 'es-client' ],
-        'config sourced from: monitoring cluster'
+        ['monitoring', 'es-client'],
+        'config sourced from: monitoring cluster',
       ]);
     });
   });
@@ -95,9 +100,9 @@ describe('Instantiate Client', () => {
 
       sinon.assert.calledOnce(createCluster);
       expect(createClusterCall.args[0]).to.be('monitoring');
-      expect(createClusterCall.args[1].customHeaders).to.eql(
-        { 'x-custom-headers-test': 'connection-monitoring' }
-      );
+      expect(createClusterCall.args[1].customHeaders).to.eql({
+        'x-custom-headers-test': 'connection-monitoring',
+      });
     });
   });
 

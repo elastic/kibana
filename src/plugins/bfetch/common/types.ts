@@ -17,16 +17,4 @@
  * under the License.
  */
 
-export const DEFAULT_CSP_RULES = Object.freeze([
-  `script-src 'unsafe-eval' 'self'`,
-  `worker-src blob: 'self'`,
-  `style-src 'unsafe-inline' 'self'`,
-]);
-
-export const DEFAULT_CSP_STRICT = true;
-
-export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
-
-export function createCSPRuleString(rules: string[]) {
-  return rules.join('; ');
-}
+export * from './streaming/types';

@@ -31,16 +31,16 @@ export function logstashNodesRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -49,7 +49,7 @@ export function logstashNodesRoute(server) {
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
-        const [ clusterStatus, nodes ] = await Promise.all([
+        const [clusterStatus, nodes] = await Promise.all([
           getClusterStatus(req, lsIndexPattern, { clusterUuid }),
           getNodes(req, lsIndexPattern, { clusterUuid }),
         ]);
@@ -58,11 +58,9 @@ export function logstashNodesRoute(server) {
           clusterStatus,
           nodes,
         };
-      }
-      catch (err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
-
 }

@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
-
-export const ajaxStream = (version: string, basePath: string) => <T>(opts: BatchOpts<T>) => {
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-    'kbn-version': version,
-  };
-  return ajax(basePath, defaultHeaders, new XMLHttpRequest(), opts);
-};
+export * from './remove_leading_slash';

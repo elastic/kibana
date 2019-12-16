@@ -33,20 +33,24 @@ import _ from 'lodash';
 function initSeasonalComponents(samplePoints, seasonLength) {
   const sampledSeasonCount = samplePoints.length / seasonLength;
   let currentSeason = [];
-  const seasonalAverages = _.reduce(samplePoints, (result, point, i) => {
-    currentSeason.push(point);
-    // If this is the end of the season, add it to the result;
-    if (i % seasonLength === seasonLength - 1) {
-      result.push(_.sum(currentSeason) / seasonLength);
-      currentSeason = [];
-    }
+  const seasonalAverages = _.reduce(
+    samplePoints,
+    (result, point, i) => {
+      currentSeason.push(point);
+      // If this is the end of the season, add it to the result;
+      if (i % seasonLength === seasonLength - 1) {
+        result.push(_.sum(currentSeason) / seasonLength);
+        currentSeason = [];
+      }
 
-    return result;
-  }, []);
+      return result;
+    },
+    []
+  );
 
-  const seasonals = _.times(seasonLength, (i) => {
+  const seasonals = _.times(seasonLength, i => {
     let sumOfValsOverAvg = 0;
-    _.times(sampledSeasonCount, (j) => {
+    _.times(sampledSeasonCount, j => {
       sumOfValsOverAvg += samplePoints[seasonLength * j + i] - seasonalAverages[j];
     });
 
@@ -60,14 +64,13 @@ function initSeasonalComponents(samplePoints, seasonLength) {
 // the difference in points between seasons
 function initTrend(samplePoints, seasonLength) {
   let sum = 0;
-  _.times(seasonLength, (i) => {
+  _.times(seasonLength, i => {
     sum += (samplePoints[i + seasonLength] - samplePoints[i]) / seasonLength;
   });
   return sum / seasonLength;
 }
 
 export default function tes(points, alpha, beta, gamma, seasonLength, seasonsToSample) {
-
   const samplePoints = points.slice(0, seasonLength * seasonsToSample);
   const seasonals = initSeasonalComponents(samplePoints, seasonLength);
   let level;
@@ -90,7 +93,7 @@ export default function tes(points, alpha, beta, gamma, seasonLength, seasonsToS
     if (point == null || i >= samplePoints.length) {
       unknownCount++;
       // Don't know this point, make it up!
-      return (level + (unknownCount * trend)) + seasonals[seasonalPosition];
+      return level + unknownCount * trend + seasonals[seasonalPosition];
     } else {
       unknownCount = 0;
       // These 2 variables are not required, but are used for clarity.
@@ -98,10 +101,10 @@ export default function tes(points, alpha, beta, gamma, seasonLength, seasonsToS
       prevTrend = trend;
       level = alpha * (point - seasonals[seasonalPosition]) + (1 - alpha) * (prevLevel + prevTrend);
       trend = beta * (level - prevLevel) + (1 - beta) * prevTrend;
-      seasonals[seasonalPosition] = gamma * (point - level) + (1 - gamma) * seasonals[seasonalPosition];
+      seasonals[seasonalPosition] =
+        gamma * (point - level) + (1 - gamma) * seasonals[seasonalPosition];
       return level + trend + seasonals[seasonalPosition];
     }
-
   });
 
   return result;

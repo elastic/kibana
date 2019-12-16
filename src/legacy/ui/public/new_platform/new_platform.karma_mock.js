@@ -32,7 +32,7 @@ const mockComponent = () => {
 };
 
 export const mockUiSettings = {
-  get: (item) => {
+  get: item => {
     return mockUiSettings[item];
   },
   getUpdate$: () => ({
@@ -93,7 +93,7 @@ export const npSetup = {
           getSavedQuery: sinon.fake(),
           deleteSavedQuery: sinon.fake(),
           getSavedQueryCount: sinon.fake(),
-        }
+        },
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
