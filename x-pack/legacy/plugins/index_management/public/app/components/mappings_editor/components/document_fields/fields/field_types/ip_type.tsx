@@ -38,19 +38,19 @@ export const IpType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
-        <DocValuesParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
+          <DocValuesParameter />
+
           <NullValueParameter
             defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           />
 
-          {/* boost */}
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

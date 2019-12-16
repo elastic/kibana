@@ -155,6 +155,11 @@ export const PARAMETERS_DEFINITION = {
     },
     docs: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/doc-values.html',
   },
+  doc_values_binary: {
+    fieldConfig: {
+      defaultValue: false,
+    },
+  },
   fielddata: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
@@ -194,6 +199,16 @@ export const PARAMETERS_DEFINITION = {
   coerce: {
     fieldConfig: {
       defaultValue: true,
+    },
+  },
+  coerce_geo_shape: {
+    fieldConfig: {
+      defaultValue: false,
+    },
+  },
+  coerce_shape: {
+    fieldConfig: {
+      defaultValue: false,
     },
   },
   ignore_malformed: {
@@ -551,6 +566,11 @@ export const PARAMETERS_DEFINITION = {
   norms: {
     fieldConfig: {
       defaultValue: true,
+    },
+  },
+  norms_keyword: {
+    fieldConfig: {
+      defaultValue: false,
     },
   },
   term_vector: {

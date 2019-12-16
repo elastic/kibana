@@ -45,27 +45,18 @@ export const DateType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
-        <DocValuesParameter />
+
+        <FormatParameter
+          defaultValue={field.source.format}
+          defaultToggleValue={getDefaultToggleValue('format', field.source)}
+        />
+
+        <IgnoreMalformedParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
-              {
-                defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
-              }
-            )}
-          />
-
-          {/* ignore_malformed */}
-          <IgnoreMalformedParameter />
-
           {/* locale */}
           <EditFieldFormRow
             title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
@@ -79,13 +70,20 @@ export const DateType = ({ field }: Props) => {
             <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
           </EditFieldFormRow>
 
-          {/* format */}
-          <FormatParameter
-            defaultValue={field.source.format}
-            defaultToggleValue={getDefaultToggleValue('format', field.source)}
+          <DocValuesParameter />
+
+          <NullValueParameter
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
+              {
+                defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
+              }
+            )}
           />
 
-          {/* boost */}
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

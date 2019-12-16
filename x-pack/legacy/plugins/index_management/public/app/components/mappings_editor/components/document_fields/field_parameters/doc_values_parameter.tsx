@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 
-export const DocValuesParameter = () => (
+type DocValuesParameterNames = 'doc_values' | 'doc_values_binary';
+
+export const DocValuesParameter = ({
+  configPath = 'doc_values',
+}: {
+  configPath?: DocValuesParameterNames;
+}) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldTitle', {
       defaultMessage: 'Save doc values',
@@ -20,5 +26,6 @@ export const DocValuesParameter = () => (
         'Whether to store fields on disk in a column-stride fashion, so that it can later be used for sorting, aggregations, or scripting.',
     })}
     formFieldPath="doc_values"
+    configPath={configPath}
   />
 );

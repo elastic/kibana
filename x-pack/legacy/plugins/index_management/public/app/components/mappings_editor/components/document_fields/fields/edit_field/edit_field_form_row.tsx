@@ -41,6 +41,7 @@ interface Props {
   formFieldPath?: ParameterName;
   children?: React.ReactNode | ChildrenFunc;
   withToggle?: boolean;
+  configPath?: ParameterName;
 }
 
 export const EditFieldFormRow = React.memo(
@@ -52,6 +53,7 @@ export const EditFieldFormRow = React.memo(
     formFieldPath,
     children,
     withToggle = true,
+    configPath,
   }: Props) => {
     const form = useFormContext();
 
@@ -61,7 +63,7 @@ export const EditFieldFormRow = React.memo(
         : defaultToggleValue !== undefined
         ? defaultToggleValue
         : formFieldPath !== undefined
-        ? (getFieldConfig(formFieldPath).defaultValue! as boolean)
+        ? (getFieldConfig(configPath ? configPath : formFieldPath).defaultValue! as boolean)
         : false;
 
     const [isContentVisible, setIsContentVisible] = useState<boolean>(initialVisibleState);
@@ -91,7 +93,10 @@ export const EditFieldFormRow = React.memo(
       ) : (
         <UseField
           path={formFieldPath}
-          config={{ ...getFieldConfig(formFieldPath), defaultValue: initialVisibleState }}
+          config={{
+            ...getFieldConfig(configPath ? configPath : formFieldPath),
+            defaultValue: initialVisibleState,
+          }}
         >
           {field => {
             return <ToggleField field={field} euiFieldProps={{ label: title, showLabel: false }} />;

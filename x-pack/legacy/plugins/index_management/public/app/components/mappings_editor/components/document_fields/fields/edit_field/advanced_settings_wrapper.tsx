@@ -10,9 +10,10 @@ import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;
+  hasBasicSettings?: boolean;
 }
 
-export const AdvancedSettingsWrapper = ({ children }: Props) => {
+export const AdvancedSettingsWrapper = ({ children, hasBasicSettings = true }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const toggleIsVisible = () => {
@@ -21,7 +22,7 @@ export const AdvancedSettingsWrapper = ({ children }: Props) => {
 
   return (
     <div className="mappingsEditor__editField__advancedSettings">
-      <EuiSpacer size="m" />
+      {hasBasicSettings ? <EuiSpacer size="m" /> : null}
 
       <EuiButtonEmpty onClick={toggleIsVisible} flush="left">
         {isVisible
