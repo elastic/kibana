@@ -16,6 +16,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { GraphPlugin } from './plugin';
 
 // @ts-ignore
