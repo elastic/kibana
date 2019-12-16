@@ -20,10 +20,7 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 
-import {
-  createPromiseFromStreams,
-  concatStreamProviders,
-} from '../../legacy/utils';
+import { createPromiseFromStreams, concatStreamProviders } from '../../legacy/utils';
 
 import {
   isGzip,
@@ -41,12 +38,10 @@ import {
 // pipe a series of streams into each other so that data and errors
 // flow from the first stream to the last. Errors from the last stream
 // are not listened for
-const pipeline = (...streams) => streams
-  .reduce((source, dest) => (
-    source
-      .once('error', (error) => dest.emit('error', error))
-      .pipe(dest)
-  ));
+const pipeline = (...streams) =>
+  streams.reduce((source, dest) =>
+    source.once('error', error => dest.emit('error', error)).pipe(dest)
+  );
 
 export async function loadAction({ name, skipExisting, client, dataDir, log, kbnClient }) {
   const inputDir = resolve(dataDir, name);

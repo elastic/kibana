@@ -44,25 +44,17 @@ jest.mock('../components/table', () => ({
   // Note: this seems to fix React complaining about non lowercase attributes
   Table: () => {
     return 'table';
-  }
+  },
 }));
 
 const indexPattern = {
-  sourceFilters: [
-    { value: 'time*' },
-    { value: 'nam*' },
-    { value: 'age*' },
-  ],
+  sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
 };
-
 
 describe('SourceFiltersTable', () => {
   it('should render normally', async () => {
     const component = shallow(
-      <SourceFiltersTable
-        indexPattern={indexPattern}
-        fieldWildcardMatcher={() => {}}
-      />
+      <SourceFiltersTable indexPattern={indexPattern} fieldWildcardMatcher={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -70,10 +62,7 @@ describe('SourceFiltersTable', () => {
 
   it('should filter based on the query bar', async () => {
     const component = shallow(
-      <SourceFiltersTable
-        indexPattern={indexPattern}
-        fieldWildcardMatcher={() => {}}
-      />
+      <SourceFiltersTable indexPattern={indexPattern} fieldWildcardMatcher={() => {}} />
     );
 
     component.setProps({ filterFilter: 'ti' });
@@ -84,7 +73,7 @@ describe('SourceFiltersTable', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={{
-          sourceFilters: [{ value: 'tim*' }]
+          sourceFilters: [{ value: 'tim*' }],
         }}
         fieldWildcardMatcher={() => {}}
       />
@@ -98,7 +87,7 @@ describe('SourceFiltersTable', () => {
     const component = shallow(
       <SourceFiltersTable
         indexPattern={{
-          sourceFilters: [{ value: 'tim*' }]
+          sourceFilters: [{ value: 'tim*' }],
         }}
         fieldWildcardMatcher={() => {}}
       />
@@ -115,7 +104,7 @@ describe('SourceFiltersTable', () => {
       <SourceFiltersTable
         indexPattern={{
           save,
-          sourceFilters: [{ value: 'tim*' }, { value: 'na*' }]
+          sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
         }}
         fieldWildcardMatcher={() => {}}
       />
@@ -136,7 +125,7 @@ describe('SourceFiltersTable', () => {
       <SourceFiltersTable
         indexPattern={{
           save,
-          sourceFilters: [{ value: 'tim*' }]
+          sourceFilters: [{ value: 'tim*' }],
         }}
         fieldWildcardMatcher={() => {}}
       />
@@ -155,7 +144,7 @@ describe('SourceFiltersTable', () => {
       <SourceFiltersTable
         indexPattern={{
           save,
-          sourceFilters: [{ value: 'tim*' }]
+          sourceFilters: [{ value: 'tim*' }],
         }}
         fieldWildcardMatcher={() => {}}
       />

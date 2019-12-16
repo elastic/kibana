@@ -43,7 +43,7 @@ describe('CLI cluster manager', () => {
         isDead: jest.fn().mockReturnValue(false),
         off: jest.fn(),
         on: jest.fn(),
-        send: jest.fn()
+        send: jest.fn(),
       };
     });
   });
@@ -66,7 +66,7 @@ describe('CLI cluster manager', () => {
     const manager = ClusterManager.create({});
 
     for (const worker of manager.workers) {
-      Worker.prototype.start.call(worker);// bypass the debounced start method
+      Worker.prototype.start.call(worker); // bypass the debounced start method
       worker.onOnline();
     }
 
@@ -144,10 +144,7 @@ describe('CLI cluster manager', () => {
         const blockUntilPromise = blockUntil();
 
         expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
-        expect(clusterManager.server.on).toHaveBeenCalledWith(
-          'crashed',
-          expect.any(Function)
-        );
+        expect(clusterManager.server.on).toHaveBeenCalledWith('crashed', expect.any(Function));
 
         const [, [eventName, onCrashed]] = clusterManager.server.on.mock.calls;
         // Check event name to make sure we call the right callback,
@@ -165,10 +162,7 @@ describe('CLI cluster manager', () => {
         const blockUntilPromise = blockUntil();
 
         expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
-        expect(clusterManager.server.on).toHaveBeenCalledWith(
-          'listening',
-          expect.any(Function)
-        );
+        expect(clusterManager.server.on).toHaveBeenCalledWith('listening', expect.any(Function));
 
         const [[eventName, onListening]] = clusterManager.server.on.mock.calls;
         // Check event name to make sure we call the right callback,

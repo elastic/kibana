@@ -42,7 +42,7 @@ describe('extractReferences', () => {
       references: [],
     };
     const updatedDoc = extractReferences(doc);
-    /* eslint-disable max-len */
+
     expect(updatedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -63,7 +63,6 @@ Object {
   ],
 }
 `);
-    /* eslint-enable max-len */
   });
 
   test('fails when "type" attribute is missing from a panel', () => {
@@ -140,7 +139,7 @@ describe('injectReferences', () => {
       },
     ];
     injectReferences(context, references);
-    /* eslint-disable max-len */
+
     expect(context).toMatchInlineSnapshot(`
 Object {
   "id": "1",
@@ -148,7 +147,6 @@ Object {
   "title": "test",
 }
 `);
-    /* eslint-enable max-len */
   });
 
   test('skips when panelsJSON is missing', () => {

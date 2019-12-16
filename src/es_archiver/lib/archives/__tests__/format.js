@@ -46,7 +46,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       const output = await createPromiseFromStreams([
         createListStream(INPUTS),
         ...createFormatArchiveStreams({ gzip: false }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
       expect(output.length).to.be.greaterThan(0);
@@ -57,7 +57,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       const json = await createPromiseFromStreams([
         createListStream(INPUTS),
         ...createFormatArchiveStreams({ gzip: false }),
-        createConcatStream('')
+        createConcatStream(''),
       ]);
 
       expect(json).to.be(INPUT_JSON);
@@ -76,7 +76,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       const output = await createPromiseFromStreams([
         createListStream([1, 2, { foo: 'bar' }, [1, 2]]),
         ...createFormatArchiveStreams({ gzip: true }),
-        createConcatStream([])
+        createConcatStream([]),
       ]);
 
       expect(output.length).to.be.greaterThan(0);
@@ -88,7 +88,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
         createListStream(INPUTS),
         ...createFormatArchiveStreams({ gzip: true }),
         createGunzip(),
-        createConcatStream('')
+        createConcatStream(''),
       ]);
       expect(output).to.be(INPUT_JSON);
     });
@@ -99,7 +99,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       const json = await createPromiseFromStreams([
         createListStream(INPUTS),
         ...createFormatArchiveStreams(),
-        createConcatStream('')
+        createConcatStream(''),
       ]);
 
       expect(json).to.be(INPUT_JSON);

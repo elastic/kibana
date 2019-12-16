@@ -5,7 +5,6 @@
  */
 
 export class AbstractStyleProperty {
-
   constructor(options, styleName) {
     this._options = options;
     this._styleName = styleName;

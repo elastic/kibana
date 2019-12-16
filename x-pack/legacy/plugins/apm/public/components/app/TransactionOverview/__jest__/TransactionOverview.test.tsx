@@ -27,6 +27,7 @@ import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
+jest.mock('ui/new_platform');
 function setup({
   urlParams,
   serviceTransactionTypes

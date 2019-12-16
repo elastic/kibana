@@ -17,7 +17,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       after(async () => {
@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('meets a11y requirements', async () => {
