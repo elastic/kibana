@@ -23,13 +23,13 @@ import { uiModules } from '../modules';
 
 export function CollapsibleSidebarProvider() {
   // simply a list of all of all of angulars .col-md-* classes except 12
-  const listOfWidthClasses = _.times(11, function (i) {
+  const listOfWidthClasses = _.times(11, function(i) {
     return 'col-md-' + i;
   });
 
   return {
     restrict: 'C',
-    link: function ($scope, $elem) {
+    link: function($scope, $elem) {
       let isCollapsed = false;
       const $collapser = $(
         `<button
@@ -48,7 +48,7 @@ export function CollapsibleSidebarProvider() {
       $collapser.append($icon);
       const $siblings = $elem.siblings();
 
-      const siblingsClass = listOfWidthClasses.reduce(function (prev, className) {
+      const siblingsClass = listOfWidthClasses.reduce(function(prev, className) {
         if (prev) return prev;
         return $siblings.hasClass(className) && className;
       }, false);
@@ -56,7 +56,7 @@ export function CollapsibleSidebarProvider() {
       // If there is are only two elements we can assume the other one will take 100% of the width.
       const hasSingleSibling = $siblings.length === 1 && siblingsClass;
 
-      $collapser.on('click', function () {
+      $collapser.on('click', function() {
         if (isCollapsed) {
           isCollapsed = false;
           $elem.removeClass('closed');

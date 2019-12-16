@@ -25,7 +25,11 @@ import {
   Eval,
 } from '../../../../common';
 import { isCompletedAnalyticsJob } from './common';
-import { isRegressionAnalysis } from '../../../../common/analytics';
+import {
+  isRegressionAnalysis,
+  ANALYSIS_CONFIG_TYPE,
+  isRegressionEvaluateResponse,
+} from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -81,9 +85,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       dependentVariable,
       resultsField,
       predictionFieldName,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (genErrorEval.success === true && genErrorEval.eval) {
+    if (
+      genErrorEval.success === true &&
+      genErrorEval.eval &&
+      isRegressionEvaluateResponse(genErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         meanSquaredError,
@@ -106,9 +115,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       dependentVariable,
       resultsField,
       predictionFieldName,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (trainingErrorEval.success === true && trainingErrorEval.eval) {
+    if (
+      trainingErrorEval.success === true &&
+      trainingErrorEval.eval &&
+      isRegressionEvaluateResponse(trainingErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         meanSquaredError,

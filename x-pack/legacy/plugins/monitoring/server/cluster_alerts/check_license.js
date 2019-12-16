@@ -19,52 +19,64 @@ import { i18n } from '@kbn/i18n';
 export function checkLicense(type, active, clusterSource, watcher = true) {
   // return object, set up with safe defaults
   const licenseInfo = {
-    clusterAlerts: { enabled: false }
+    clusterAlerts: { enabled: false },
   };
 
   // Disabled because there is no license
   if (!type) {
     return Object.assign(licenseInfo, {
-      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseNotDeterminedDescription', {
-        defaultMessage: `Cluster Alerts are not displayed because the [{clusterSource}] cluster's license could not be determined.`,
-        values: {
-          clusterSource
+      message: i18n.translate(
+        'xpack.monitoring.clusterAlerts.checkLicense.licenseNotDeterminedDescription',
+        {
+          defaultMessage: `Cluster Alerts are not displayed because the [{clusterSource}] cluster's license could not be determined.`,
+          values: {
+            clusterSource,
+          },
         }
-      })
+      ),
     });
   }
 
   // Disabled because the license type is not valid (basic)
-  if (!includes([ 'trial', 'standard', 'gold', 'platinum' ], type)) {
-    return  Object.assign(licenseInfo, {
-      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseIsBasicDescription', {
-        defaultMessage:
-          `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is Basic.`,
-        values: {
-          clusterSource
+  if (!includes(['trial', 'standard', 'gold', 'platinum'], type)) {
+    return Object.assign(licenseInfo, {
+      message: i18n.translate(
+        'xpack.monitoring.clusterAlerts.checkLicense.licenseIsBasicDescription',
+        {
+          defaultMessage: `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is Basic.`,
+          values: {
+            clusterSource,
+          },
         }
-      })
+      ),
     });
   }
 
   // Disabled because the license is inactive
   if (!active) {
     return Object.assign(licenseInfo, {
-      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseNotActiveDescription', {
-        defaultMessage: `Cluster Alerts are not displayed because the [{clusterSource}] cluster's current license [{type}] is not active.`,
-        values: {
-          clusterSource,
-          type
+      message: i18n.translate(
+        'xpack.monitoring.clusterAlerts.checkLicense.licenseNotActiveDescription',
+        {
+          defaultMessage: `Cluster Alerts are not displayed because the [{clusterSource}] cluster's current license [{type}] is not active.`,
+          values: {
+            clusterSource,
+            type,
+          },
         }
-      })
+      ),
     });
   }
 
   // Disabled because Watcher is not enabled (it may or may not be available)
   if (!watcher) {
     return Object.assign(licenseInfo, {
-      message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.watcherIsDisabledDescription', {
-        defaultMessage: 'Cluster Alerts are not enabled because Watcher is disabled.' })
+      message: i18n.translate(
+        'xpack.monitoring.clusterAlerts.checkLicense.watcherIsDisabledDescription',
+        {
+          defaultMessage: 'Cluster Alerts are not enabled because Watcher is disabled.',
+        }
+      ),
     });
   }
 

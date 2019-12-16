@@ -18,6 +18,7 @@
         "cbor",
         "smile"
       ]
-    }
+    },
+    "template": "_sql?format=json\n{\n  \"query\": \"\"\"\n  SELECT * FROM \"${1:TABLE}\"\n  \"\"\"\n}\n"
   }
 }

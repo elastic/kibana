@@ -10,12 +10,8 @@ import { loadNodes, loadNodeDetails } from '../../services/api';
 import { SET_SELECTED_NODE_ATTRS } from '../../constants';
 
 export const setSelectedNodeAttrs = createAction(SET_SELECTED_NODE_ATTRS);
-export const setSelectedPrimaryShardCount = createAction(
-  'SET_SELECTED_PRIMARY_SHARED_COUNT'
-);
-export const setSelectedReplicaCount = createAction(
-  'SET_SELECTED_REPLICA_COUNT'
-);
+export const setSelectedPrimaryShardCount = createAction('SET_SELECTED_PRIMARY_SHARED_COUNT');
+export const setSelectedReplicaCount = createAction('SET_SELECTED_REPLICA_COUNT');
 export const fetchedNodes = createAction('FETCHED_NODES');
 let fetchingNodes = false;
 export const fetchNodes = () => async dispatch => {
@@ -26,11 +22,9 @@ export const fetchNodes = () => async dispatch => {
       dispatch(fetchedNodes(nodes));
     }
   } catch (err) {
-    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeInfoErrorMessage',
-      {
-        defaultMessage: 'Error loading node attribute information',
-      },
-    );
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeInfoErrorMessage', {
+      defaultMessage: 'Error loading node attribute information',
+    });
     showApiError(err, title);
   } finally {
     fetchingNodes = false;
@@ -49,11 +43,9 @@ export const fetchNodeDetails = selectedNodeAttrs => async dispatch => {
   try {
     details = await loadNodeDetails(selectedNodeAttrs);
   } catch (err) {
-    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeDetailErrorMessage',
-      {
-        defaultMessage: 'Error loading node attribute details',
-      },
-    );
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeDetailErrorMessage', {
+      defaultMessage: 'Error loading node attribute details',
+    });
     showApiError(err, title);
     return false;
   }

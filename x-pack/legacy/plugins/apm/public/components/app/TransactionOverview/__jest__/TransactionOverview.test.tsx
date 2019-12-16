@@ -22,16 +22,12 @@ import * as useFetcherHook from '../../../../hooks/useFetcher';
 import { fromQuery } from '../../../shared/Links/url_helpers';
 import { Router } from 'react-router-dom';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
-import { KibanaCoreContext } from '../../../../../../observability/public';
-import { LegacyCoreStart } from 'kibana/public';
+import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
 
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
-const coreMock = ({
-  notifications: { toasts: { addWarning: () => {} } }
-} as unknown) as LegacyCoreStart;
-
+jest.mock('ui/new_platform');
 function setup({
   urlParams,
   serviceTransactionTypes
@@ -55,13 +51,13 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return render(
-    <KibanaCoreContext.Provider value={coreMock}>
+    <MockApmPluginContextWrapper>
       <Router history={history}>
         <UrlParamsProvider>
           <TransactionOverview />
         </UrlParamsProvider>
       </Router>
-    </KibanaCoreContext.Provider>
+    </MockApmPluginContextWrapper>
   );
 }
 

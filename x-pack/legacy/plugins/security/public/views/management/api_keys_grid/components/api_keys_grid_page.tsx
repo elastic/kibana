@@ -29,7 +29,7 @@ import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SectionLoading } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
-import { ApiKey, ApiKeyToInvalidate } from '../../../../../common/model/api_key';
+import { ApiKey, ApiKeyToInvalidate } from '../../../../../common/model';
 import { ApiKeysApi } from '../../../../lib/api_keys_api';
 import { PermissionDenied } from './permission_denied';
 import { EmptyPrompt } from './empty_prompt';

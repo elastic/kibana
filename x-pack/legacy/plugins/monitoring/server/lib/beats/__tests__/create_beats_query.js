@@ -8,15 +8,14 @@ import expect from '@kbn/expect';
 import { createBeatsQuery } from '../create_beats_query';
 
 describe('createBeatsQuery', () => {
-
   const noApmFilter = {
     bool: {
       must_not: {
         term: {
-          'beats_stats.beat.type': 'apm-server'
-        }
-      }
-    }
+          'beats_stats.beat.type': 'apm-server',
+        },
+      },
+    },
   };
 
   it('adds filters if no filter exists', () => {
@@ -31,14 +30,12 @@ describe('createBeatsQuery', () => {
 
   it('adds filters with other filters', () => {
     const fauxFilter1 = { iam: { notvalid: {} } };
-    const fauxFilter2 = { ditto: { } };
+    const fauxFilter2 = { ditto: {} };
 
-    const filters1 = [ fauxFilter1 ];
-    const filters2 = [ fauxFilter2, fauxFilter1 ];
+    const filters1 = [fauxFilter1];
+    const filters2 = [fauxFilter2, fauxFilter1];
 
-    [
-      filters1, filters2
-    ].forEach(filters => {
+    [filters1, filters2].forEach(filters => {
       const query = createBeatsQuery({ filters });
       const queryFilters = query.bool.filter;
       const filterCount = queryFilters.length;
@@ -53,5 +50,4 @@ describe('createBeatsQuery', () => {
       expect(queryFilters[filterCount - 1]).to.eql(noApmFilter);
     });
   });
-
 });
