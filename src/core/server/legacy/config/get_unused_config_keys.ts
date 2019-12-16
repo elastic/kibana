@@ -19,8 +19,6 @@
 
 import { difference, get, set } from 'lodash';
 // @ts-ignore
-import { transformDeprecations } from '../../../../legacy/server/config/transform_deprecations';
-// @ts-ignore
 import { getTransform } from '../../../../legacy/deprecation/index';
 import { unset, getFlattenedObject } from '../../../../legacy/utils';
 import { hasConfigPathIntersection } from '../../config';
@@ -33,18 +31,15 @@ export async function getUnusedConfigKeys({
   coreHandledConfigPaths,
   pluginSpecs,
   disabledPluginSpecs,
-  inputSettings,
+  settings,
   legacyConfig,
 }: {
   coreHandledConfigPaths: string[];
   pluginSpecs: LegacyPluginSpec[];
   disabledPluginSpecs: LegacyPluginSpec[];
-  inputSettings: Record<string, any>;
+  settings: Record<string, any>;
   legacyConfig: LegacyConfig;
 }) {
-  // transform deprecated core settings
-  const settings = transformDeprecations(inputSettings);
-
   // transform deprecated plugin settings
   for (let i = 0; i < pluginSpecs.length; i++) {
     const spec = pluginSpecs[i];

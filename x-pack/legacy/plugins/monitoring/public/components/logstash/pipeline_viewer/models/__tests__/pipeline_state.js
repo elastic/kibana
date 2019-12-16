@@ -16,9 +16,9 @@ describe('PipelineState class', () => {
       representation: {
         graph: {
           vertices: [],
-          edges: []
-        }
-      }
+          edges: [],
+        },
+      },
     };
   });
 

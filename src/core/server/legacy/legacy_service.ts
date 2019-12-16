@@ -23,15 +23,17 @@ import { CoreService } from '../../types';
 import { CoreSetup, CoreStart } from '../';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { SavedObjectsLegacyUiExports } from '../types';
-import { Config } from '../config';
+import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
-import { DevConfig, DevConfigType } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
+import { CspConfigType, config as cspConfig } from '../csp';
+import { DevConfig, DevConfigType, config as devConfig } from '../dev';
+import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
-import { LegacyConfig } from './config';
+import { PathConfigType } from '../path';
+import { LegacyConfig, convertLegacyDeprecationProvider } from './config';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -40,7 +42,7 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
-function getLegacyRawConfig(config: Config) {
+function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
   const rawConfig = config.toRaw();
 
   // Elasticsearch config is solely handled by the core and legacy platform
@@ -49,7 +51,10 @@ function getLegacyRawConfig(config: Config) {
     delete rawConfig.elasticsearch;
   }
 
-  return rawConfig;
+  return {
+    ...rawConfig,
+    path: pathConfig, // We rely heavily in the default value of 'path.data' in the legacy world and, since it has been moved to NP, it won't show up in RawConfig
+  };
 }
 
 /**
@@ -96,7 +101,7 @@ export class LegacyService implements CoreService {
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
-  private update$: ConnectableObservable<Config> | undefined;
+  private update$: ConnectableObservable<[Config, PathConfigType]> | undefined;
   private legacyRawConfig: LegacyConfig | undefined;
   private legacyPlugins:
     | {
@@ -108,32 +113,38 @@ export class LegacyService implements CoreService {
   private settings: Record<string, any> | undefined;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.log = coreContext.logger.get('legacy-service');
-    this.devConfig$ = coreContext.configService
-      .atPath<DevConfigType>('dev')
+    const { logger, configService, env } = coreContext;
+
+    this.log = logger.get('legacy-service');
+    this.devConfig$ = configService
+      .atPath<DevConfigType>(devConfig.path)
       .pipe(map(rawConfig => new DevConfig(rawConfig)));
-    this.httpConfig$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
+    this.httpConfig$ = combineLatest(
+      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<CspConfigType>(cspConfig.path)
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
-    this.update$ = this.coreContext.configService.getConfig$().pipe(
-      tap(config => {
+    this.update$ = combineLatest(
+      this.coreContext.configService.getConfig$(),
+      this.coreContext.configService.atPath<PathConfigType>('path')
+    ).pipe(
+      tap(([config, pathConfig]) => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config));
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
       tap({ error: err => this.log.error(err) }),
       publishReplay(1)
-    ) as ConnectableObservable<Config>;
+    ) as ConnectableObservable<[Config, PathConfigType]>;
 
     this.configSubscription = this.update$.connect();
 
     this.settings = await this.update$
       .pipe(
         first(),
-        map(config => getLegacyRawConfig(config))
+        map(([config, pathConfig]) => getLegacyRawConfig(config, pathConfig))
       )
       .toPromise();
 
@@ -149,6 +160,18 @@ export class LegacyService implements CoreService {
       disabledPluginSpecs,
       uiExports,
     };
+
+    const deprecationProviders = await pluginSpecs
+      .map(spec => spec.getDeprecationsProvider())
+      .reduce(async (providers, current) => {
+        if (current) {
+          return [...(await providers), await convertLegacyDeprecationProvider(current)];
+        }
+        return providers;
+      }, Promise.resolve([] as ConfigDeprecationProvider[]));
+    deprecationProviders.forEach(provider =>
+      this.coreContext.configService.addDeprecationProvider('', provider)
+    );
 
     this.legacyRawConfig = pluginExtendedConfig;
 
@@ -221,8 +244,8 @@ export class LegacyService implements CoreService {
       ? combineLatest(this.devConfig$, this.httpConfig$).pipe(
           first(),
           map(
-            ([devConfig, httpConfig]) =>
-              new BasePathProxyServer(this.coreContext.logger.get('server'), httpConfig, devConfig)
+            ([dev, http]) =>
+              new BasePathProxyServer(this.coreContext.logger.get('server'), http, dev)
           )
         )
       : EMPTY;
@@ -263,7 +286,9 @@ export class LegacyService implements CoreService {
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
+        registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
       savedObjects: {
@@ -319,9 +344,9 @@ export class LegacyService implements CoreService {
       require('../../../cli/repl').startRepl(kbnServer);
     }
 
-    const httpConfig = await this.httpConfig$.pipe(first()).toPromise();
+    const { autoListen } = await this.httpConfig$.pipe(first()).toPromise();
 
-    if (httpConfig.autoListen) {
+    if (autoListen) {
       try {
         await kbnServer.listen();
       } catch (err) {

@@ -24,7 +24,7 @@ export class EmailAction extends BaseAction {
     Object.assign(result, {
       to: this.to,
       subject: this.subject,
-      body: this.body
+      body: this.body,
     });
 
     return result;
@@ -62,7 +62,7 @@ export class EmailAction extends BaseAction {
         profile: 'standard',
         to: this.to,
         ...optionalFields,
-      }
+      },
     };
 
     return result;
@@ -97,30 +97,36 @@ export class EmailAction extends BaseAction {
     const errors = [];
 
     if (!json.email) {
-      const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailPropertyMissingBadRequestMessage', {
-        defaultMessage: 'JSON argument must contain an {actionJsonEmail} property',
-        values: {
-          actionJsonEmail: 'actionJson.email'
+      const message = i18n.translate(
+        'xpack.watcher.models.emailAction.actionJsonEmailPropertyMissingBadRequestMessage',
+        {
+          defaultMessage: 'JSON argument must contain an {actionJsonEmail} property',
+          values: {
+            actionJsonEmail: 'actionJson.email',
+          },
         }
-      });
+      );
 
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message
+        message,
       });
     }
 
     if (json.email && !json.email.to) {
-      const message = i18n.translate('xpack.watcher.models.emailAction.actionJsonEmailToPropertyMissingBadRequestMessage', {
-        defaultMessage: 'JSON argument must contain an {actionJsonEmailTo} property',
-        values: {
-          actionJsonEmailTo: 'actionJson.email.to'
+      const message = i18n.translate(
+        'xpack.watcher.models.emailAction.actionJsonEmailToPropertyMissingBadRequestMessage',
+        {
+          defaultMessage: 'JSON argument must contain an {actionJsonEmailTo} property',
+          values: {
+            actionJsonEmailTo: 'actionJson.email.to',
+          },
         }
-      });
+      );
 
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message
+        message,
       });
     }
 

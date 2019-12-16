@@ -26,12 +26,17 @@ export function handleESError(error) {
     throw new Error('Expected an instance of Error');
   }
 
-  if (error instanceof esErrors.ConnectionFault ||
+  if (
+    error instanceof esErrors.ConnectionFault ||
     error instanceof esErrors.ServiceUnavailable ||
     error instanceof esErrors.NoConnections ||
-    error instanceof esErrors.RequestTimeout) {
+    error instanceof esErrors.RequestTimeout
+  ) {
     return Boom.serverUnavailable(error);
-  } else if (error instanceof esErrors.Conflict || _.contains(error.message, 'index_template_already_exists')) {
+  } else if (
+    error instanceof esErrors.Conflict ||
+    _.contains(error.message, 'index_template_already_exists')
+  ) {
     return Boom.conflict(error);
   } else if (error instanceof esErrors[403]) {
     return Boom.forbidden(error);

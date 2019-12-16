@@ -10,7 +10,7 @@ import { notificationService } from '../../services/notification';
 
 export const loadIndexDataSuccess = createAction('INDEX_MANAGEMENT_LOAD_INDEX_DATA_SUCCESS');
 
-export const loadIndexData = ({ indexName, dataType }) => async (dispatch) => {
+export const loadIndexData = ({ indexName, dataType }) => async dispatch => {
   let data;
   try {
     data = await request(dataType, indexName);

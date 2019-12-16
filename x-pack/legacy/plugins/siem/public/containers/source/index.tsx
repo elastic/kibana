@@ -70,7 +70,7 @@ export const getIndexFields = memoizeOne(
       : { fields: [], title }
 );
 
-const getBrowserFields = memoizeOne(
+export const getBrowserFields = memoizeOne(
   (fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(

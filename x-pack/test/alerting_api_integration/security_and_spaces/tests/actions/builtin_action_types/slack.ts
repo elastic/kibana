@@ -40,7 +40,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {
-            webhookUrl: 'http://example.com',
+            webhookUrl: slackSimulatorURL,
           },
         })
         .expect(200);
@@ -86,6 +86,28 @@ export default function slackTest({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should respond with a 400 Bad Request when creating a slack action with a non whitelisted webhookUrl', async () => {
+      await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack action',
+          actionTypeId: '.slack',
+          secrets: {
+            webhookUrl: 'http://slack.mynonexistent.com',
+          },
+        })
+        .expect(400)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 400,
+            error: 'Bad Request',
+            message:
+              'error validating action type secrets: error configuring slack action: target url "http://slack.mynonexistent.com" is not in the Kibana whitelist',
+          });
+        });
+    });
+
     it('should create our slack simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
         .post('/api/action')
@@ -126,7 +148,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
+      expect(result.message).to.match(/unexpected http response from slack: /);
     });
 
     it('should handle a 429 slack error', async () => {
@@ -142,8 +164,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
-      expect(result.message).to.match(/retry at/);
+      expect(result.message).to.match(/error posting a slack message, retry at \d\d\d\d-/);
 
       const dateRetry = new Date(result.retry).getTime();
       expect(dateRetry).to.greaterThan(dateStart);
@@ -161,7 +182,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
+      expect(result.message).to.match(/error posting a slack message, retry later/);
       expect(result.retry).to.equal(true);
     });
   });

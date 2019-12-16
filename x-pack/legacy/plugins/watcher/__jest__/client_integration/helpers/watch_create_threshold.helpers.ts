@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../../test_utils';
-import { WatchEdit } from '../../../public/sections/watch_edit/components/watch_edit';
+import { WatchEdit } from '../../../public/np_ready/application/sections/watch_edit/components/watch_edit';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
-import { registerRouter } from '../../../public/lib/navigation';
+import { registerRouter } from '../../../public/np_ready/application/lib/navigation';
+import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -17,7 +18,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WatchEdit, testBedConfig);
+const initTestBed = registerTestBed(withAppContext(WatchEdit), testBedConfig);
 
 export interface WatchCreateThresholdTestBed extends TestBed<WatchCreateThresholdTestSubjects> {
   actions: {

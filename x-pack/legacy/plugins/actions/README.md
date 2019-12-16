@@ -32,8 +32,14 @@ Built-In-Actions are configured using the _xpack.actions_ namespoace under _kiba
 
 | Namespaced Key                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Type                  |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| _xpack.actions._**enabled**          | Feature toggle which enabled Actions in Kibana. Currently defaulted to false while Actions are experimental.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | boolean               |
-| _xpack.actions._**WhitelistedHosts** | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
+| _xpack.actions._**enabled**          | Feature toggle which enabled Actions in Kibana.  | boolean               |
+| _xpack.actions._**whitelistedHosts** | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
+
+#### Whitelisting Built-in Action Types
+It is worth noting that the **whitelistedHosts** configuation applies to built-in action types (such as Slack, or PagerDuty) as well.
+
+Uniquely, the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about [here](https://v2.developer.pagerduty.com/docs/events-api-v2)) as a default, but this too, must be included in the whitelist before the PagerDuty action can be used.
+
 
 ### Configuration Utilities
 
@@ -272,7 +278,7 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 
 ## index, action id: `.index`
 
-The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
 #### config properties
 

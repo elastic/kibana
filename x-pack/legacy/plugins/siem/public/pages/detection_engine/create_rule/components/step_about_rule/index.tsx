@@ -16,6 +16,7 @@ import { defaultValue } from './default_value';
 import { schema } from './schema';
 import * as I18n from './translations';
 import { StepRuleDescription } from '../description_step';
+import { AddMitreThreat } from '../mitre';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -112,6 +113,16 @@ export const StepAboutRule = memo<RuleStepProps>(({ isEditView, isLoading, setSt
             idAria: 'detectionEngineStepAboutRuleFalsePositives',
             isDisabled: isLoading,
             dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
+          }}
+        />
+        <UseField
+          path="threats"
+          component={AddMitreThreat}
+          componentProps={{
+            compressed: true,
+            idAria: 'detectionEngineStepAboutRuleMitreThreats',
+            isDisabled: isLoading,
+            dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
           }}
         />
         <CommonUseField

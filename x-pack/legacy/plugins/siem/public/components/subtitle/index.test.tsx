@@ -16,11 +16,7 @@ jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('Subtitle', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <Subtitle items="Test subtitle" />
-      </TestProviders>
-    );
+    const wrapper = shallow(<Subtitle items="Test subtitle" />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

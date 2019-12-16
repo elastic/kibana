@@ -27,22 +27,21 @@ import { EuiIcon, EuiBetaBadge, EuiLink, EuiButton, EuiEmptyPrompt } from '@elas
 
 import { getServices } from '../kibana_services';
 
-const { capabilities, toastNotifications, uiSettings } = getServices();
-
 class VisualizeListingTable extends Component {
   constructor(props) {
     super(props);
   }
 
   render() {
+    const { visualizeCapabilities, uiSettings, toastNotifications } = getServices();
     return (
       <TableListView
         // we allow users to create visualizations even if they can't save them
         // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={capabilities.visualize.delete ? this.props.deleteItems : null}
-        editItem={capabilities.visualize.save ? this.props.editItem : null}
+        deleteItems={visualizeCapabilities.delete ? this.props.deleteItems : null}
+        editItem={visualizeCapabilities.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         selectable={item => item.canDelete}

@@ -6,7 +6,6 @@
 
 import { EuiBadge, EuiBadgeProps, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -88,7 +87,7 @@ interface Props {
 /**
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
-export const Empty = pure<Props>(({ showSmallMsg = false }) => (
+export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
   <EmptyContainer
     className="timeline-drop-area-empty"
     data-test-subj="empty"

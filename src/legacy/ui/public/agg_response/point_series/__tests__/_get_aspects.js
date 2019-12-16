@@ -17,12 +17,10 @@
  * under the License.
  */
 
-
 import expect from '@kbn/expect';
 import { getAspects } from '../_get_aspects';
 
-describe('getAspects', function () {
-
+describe('getAspects', function() {
   let table;
   let dimensions;
 
@@ -40,9 +38,9 @@ describe('getAspects', function () {
         { id: '2', title: 'ext' }, // extension
         { id: '3', title: 'geo.src' }, // extension
         { id: '4', title: 'count' }, // count
-        { id: '5', title: 'avg bytes' }  // avg
+        { id: '5', title: 'avg bytes' }, // avg
       ],
-      rows: []
+      rows: [],
     };
 
     dimensions = {
@@ -52,7 +50,7 @@ describe('getAspects', function () {
     };
   }
 
-  it('produces an aspect object for each of the aspect types found in the columns', function () {
+  it('produces an aspect object for each of the aspect types found in the columns', function() {
     init(1, 0, 2);
 
     const aspects = getAspects(table, dimensions);
@@ -61,7 +59,7 @@ describe('getAspects', function () {
     validate(aspects.y[0], '2');
   });
 
-  it('creates a fake x aspect if the column does not exist', function () {
+  it('creates a fake x aspect if the column does not exist', function() {
     init(0, null, 1);
 
     const aspects = getAspects(table, dimensions);
@@ -70,6 +68,5 @@ describe('getAspects', function () {
       .to.be.an('object')
       .and.have.property('accessor', -1)
       .and.have.property('title');
-
   });
 });

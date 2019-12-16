@@ -6,7 +6,6 @@
 
 import { EuiPanel } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
@@ -14,7 +13,7 @@ import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
 
-export const OpenTimeline = pure<OpenTimelineProps>(
+export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,

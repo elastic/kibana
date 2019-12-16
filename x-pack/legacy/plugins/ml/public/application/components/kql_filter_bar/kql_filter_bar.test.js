@@ -8,7 +8,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { KqlFilterBar } from './kql_filter_bar';
 
-
 const defaultProps = {
   indexPattern: {
     title: '.ml-anomalies-*',
@@ -17,25 +16,24 @@ const defaultProps = {
         name: 'nginx.access.geoip.country_iso_code',
         type: 'string',
         aggregatable: true,
-        searchable: true
+        searchable: true,
       },
       {
         name: 'nginx.access.url',
         type: 'string',
         aggregatable: true,
-        searchable: true
+        searchable: true,
       },
-    ]
+    ],
   },
   initialValue: '',
   onSubmit: () => {},
-  placeholder: undefined
+  placeholder: undefined,
 };
 
 describe('KqlFilterBar', () => {
-
   test('snapshot', () => {
-    const wrapper = shallow(<KqlFilterBar {...defaultProps}/>);
+    const wrapper = shallow(<KqlFilterBar {...defaultProps} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -56,5 +54,4 @@ describe('KqlFilterBar', () => {
     filterBar.simulate('change', 'n', 1);
     expect(wrapper.state('isLoadingSuggestions')).toBe(true);
   });
-
 });

@@ -17,8 +17,31 @@
  * under the License.
  */
 
-export * from './fetch';
-export * from './search_source';
-export * from './search_strategy';
-export * from './utils/courier_inspector_utils';
-export * from './types';
+export { SearchSource } from './search_source';
+
+// TODO: Exporting this mock outside of jest tests causes errors because
+// jest is undefined. Need to refactor the mock to be consistent with
+// other NP-style mocks.
+// export { searchSourceMock } from './search_source/mocks';
+
+export {
+  addSearchStrategy, // used externally by Rollups
+  getSearchErrorType, // used externally by Rollups
+  hasSearchStategyForIndexPattern, // used externally by Discover
+  isDefaultTypeIndexPattern, // used externally by Discover
+  SearchError, // used externally by Visualizations & Rollups
+} from './search_strategy';
+
+export {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from './utils/courier_inspector_utils';
+
+// types
+export { SearchSourceContract } from './search_source';
+
+export {
+  EsQuerySortValue, // used externally by Discover
+  FetchOptions, // used externally by AggTypes
+  SortDirection, // used externally by Discover
+} from './types';

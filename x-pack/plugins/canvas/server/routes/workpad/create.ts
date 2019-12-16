@@ -11,14 +11,10 @@ import {
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
 import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
 import { getId } from '../../../../../legacy/plugins/canvas/public/lib/get_id';
+import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema } from './workpad_schema';
-import { okResponse } from './ok_response';
+import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
-
-export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
-  '@timestamp': string;
-  '@created': string;
-};
 
 export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

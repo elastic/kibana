@@ -13,7 +13,6 @@ import * as React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import { pure } from 'recompose';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
@@ -86,7 +85,7 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProviders = pure<Props>(
+export const TestProviders = React.memo<Props>(
   ({ children, store = createStore(state, apolloClientObservable), onDragEnd = jest.fn() }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
@@ -102,7 +101,7 @@ export const TestProviders = pure<Props>(
   )
 );
 
-export const TestProviderWithoutDragAndDrop = pure<Props>(
+export const TestProviderWithoutDragAndDrop = React.memo<Props>(
   ({ children, store = createStore(state, apolloClientObservable) }) => (
     <I18nProvider>
       <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>

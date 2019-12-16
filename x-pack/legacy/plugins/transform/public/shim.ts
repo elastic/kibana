@@ -18,7 +18,7 @@ export type npCore = typeof npStart.core;
 
 // AppCore/AppPlugins is the set of core features/plugins
 // we pass on via context/hooks to the app and its components.
-export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n'>;
+export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n' | 'savedObjects' | 'uiSettings'>;
 
 export interface AppPlugins {
   management: {

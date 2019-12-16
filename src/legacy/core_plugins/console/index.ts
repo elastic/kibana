@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import { first } from 'rxjs/operators';
-import { resolve, join, sep } from 'path';
+import { resolve, join } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
 
@@ -51,9 +51,7 @@ function filterHeaders(originalHeaders: any, headersToKeep: any) {
 
 // eslint-disable-next-line
 export default function(kibana: any) {
-  const modules = resolve(__dirname, 'public/webpackShims/');
-  const quarantinedSrc = resolve(__dirname, 'public/quarantined/src/');
-  const npSrc = resolve(__dirname, 'np_ready/public');
+  const npSrc = resolve(__dirname, 'public/np_ready');
 
   let defaultVars: any;
   return new kibana.Plugin({
@@ -180,16 +178,10 @@ export default function(kibana: any) {
     },
 
     uiExports: {
-      devTools: [`${npSrc}/legacy`],
-      styleSheetPaths: resolve(__dirname, 'public/quarantined/index.scss'),
-
+      devTools: [resolve(__dirname, 'public/legacy')],
+      styleSheetPaths: resolve(npSrc, 'application/styles/index.scss'),
       injectDefaultVars: () => defaultVars,
-
-      noParse: [
-        join(modules, 'ace' + sep),
-        join(modules, 'moment_src/moment' + sep),
-        join(quarantinedSrc, 'sense_editor/mode/worker.js'),
-      ],
+      noParse: [join(npSrc, 'application/models/legacy_core_editor/mode/worker/worker.js')],
     },
   } as any);
 }

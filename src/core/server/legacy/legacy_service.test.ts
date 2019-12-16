@@ -21,13 +21,9 @@ import { BehaviorSubject, throwError } from 'rxjs';
 
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
-jest.mock('./plugins/find_legacy_plugin_specs.ts', () => ({
-  findLegacyPluginSpecs: (settings: Record<string, any>) => ({
-    pluginSpecs: [],
-    pluginExtendedConfig: settings,
-    disabledPluginSpecs: [],
-    uiExports: [],
-  }),
+jest.mock('./plugins/find_legacy_plugin_specs');
+jest.mock('./config/legacy_deprecation_adapters', () => ({
+  convertLegacyDeprecationProvider: (provider: any) => Promise.resolve(provider),
 }));
 
 import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
@@ -47,8 +43,10 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
+import { findLegacyPluginSpecs } from './plugins/find_legacy_plugin_specs';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
+const findLegacyPluginSpecsMock: jest.Mock<typeof findLegacyPluginSpecs> = findLegacyPluginSpecs as any;
 
 let coreId: symbol;
 let env: Env;
@@ -65,6 +63,16 @@ beforeEach(() => {
   coreId = Symbol();
   env = Env.createDefault(getEnvOptions());
   configService = configServiceMock.create();
+
+  findLegacyPluginSpecsMock.mockImplementation(
+    settings =>
+      Promise.resolve({
+        pluginSpecs: [],
+        pluginExtendedConfig: settings,
+        disabledPluginSpecs: [],
+        uiExports: [],
+      }) as any
+  );
 
   MockKbnServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
 
@@ -115,6 +123,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.clearAllMocks();
+  findLegacyPluginSpecsMock.mockReset();
 });
 
 describe('once LegacyService is set up with connection info', () => {
@@ -133,8 +142,8 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: { autoListen: true }, server: { autoListen: true } },
+      { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -159,8 +168,8 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: { autoListen: false }, server: { autoListen: true } },
+      { path: { autoListen: false }, server: { autoListen: true } },
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -296,8 +305,8 @@ describe('once LegacyService is set up without connection info', () => {
   test('creates legacy kbnServer with `autoListen: false`.', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: {}, server: { autoListen: true } },
+      { path: {}, server: { autoListen: true } },
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -381,4 +390,53 @@ test('Cannot start without setup phase', async () => {
   await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Legacy service is not setup yet."`
   );
+});
+
+describe('#discoverPlugins()', () => {
+  it('calls findLegacyPluginSpecs with correct parameters', async () => {
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+    expect(findLegacyPluginSpecs).toHaveBeenCalledTimes(1);
+    expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger);
+  });
+
+  it(`register legacy plugin's deprecation providers`, async () => {
+    findLegacyPluginSpecsMock.mockImplementation(
+      settings =>
+        Promise.resolve({
+          pluginSpecs: [
+            {
+              getDeprecationsProvider: () => undefined,
+            },
+            {
+              getDeprecationsProvider: () => 'providerA',
+            },
+            {
+              getDeprecationsProvider: () => 'providerB',
+            },
+          ],
+          pluginExtendedConfig: settings,
+          disabledPluginSpecs: [],
+          uiExports: [],
+        }) as any
+    );
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+    expect(configService.addDeprecationProvider).toHaveBeenCalledTimes(2);
+    expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerA');
+    expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerB');
+  });
 });

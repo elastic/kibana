@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../../../draggables';
 
@@ -23,7 +22,7 @@ interface Props {
   secondary: string | null | undefined;
 }
 
-export const PrimarySecondary = pure<Props>(({ contextId, eventId, primary, secondary }) => {
+export const PrimarySecondary = React.memo<Props>(({ contextId, eventId, primary, secondary }) => {
   if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return null;
   } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
@@ -95,7 +94,7 @@ interface PrimarySecondaryUserInfoProps {
   secondary: string | null | undefined;
 }
 
-export const PrimarySecondaryUserInfo = pure<PrimarySecondaryUserInfoProps>(
+export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps>(
   ({ contextId, eventId, userName, primary, secondary }) => {
     if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;

@@ -11,7 +11,8 @@ import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_s
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { CloudSetup } from '../../../../../plugins/cloud/server';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
@@ -79,7 +80,8 @@ export interface PluginsSetup {
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -91,6 +93,7 @@ export interface RouteInitialization {
   xpackMainPlugin?: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  cloud?: CloudSetup;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
@@ -190,6 +193,7 @@ export class Plugin {
       xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
       spacesPlugin: plugins.spaces,
+      cloud: plugins.cloud,
     };
     const usageInitializationDeps: UsageInitialization = {
       elasticsearchPlugin: plugins.elasticsearch,

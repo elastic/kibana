@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { fromRoot, pkg } from '../../legacy/utils';
+import { fromRoot, pkg } from '../../core/server/utils';
 import install from './install';
 import Logger from '../lib/logger';
-import { getConfig } from '../../legacy/server/path';
+import { getConfigPath } from '../../core/server/path';
 import { parse, parseMilliseconds } from './settings';
 import logWarnings from '../lib/log_warnings';
 import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
@@ -47,11 +47,7 @@ export default function pluginInstall(program) {
     .command('install <plugin/url>')
     .option('-q, --quiet', 'disable all process messaging except errors')
     .option('-s, --silent', 'disable all process messaging')
-    .option(
-      '-c, --config <path>',
-      'path to the config file',
-      getConfig()
-    )
+    .option('-c, --config <path>', 'path to the config file', getConfigPath())
     .option(
       '-t, --timeout <duration>',
       'length of time before failing; 0 for never fail',
@@ -62,10 +58,12 @@ export default function pluginInstall(program) {
       'path to the directory where plugins are stored (DEPRECATED, known to not work for all plugins)',
       fromRoot('plugins')
     )
-    .description('install a plugin',
+    .description(
+      'install a plugin',
       `Common examples:
   install x-pack
   install file:///Path/to/my/x-pack.zip
-  install https://path.to/my/x-pack.zip`)
+  install https://path.to/my/x-pack.zip`
+    )
     .action(processCommand);
 }

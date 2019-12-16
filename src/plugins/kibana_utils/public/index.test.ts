@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { createStore, createContext } from '.';
+import { createStateContainer, createStateContainerReactHelpers } from '.';
 
 test('exports store methods', () => {
-  expect(typeof createStore).toBe('function');
-  expect(typeof createContext).toBe('function');
+  expect(typeof createStateContainer).toBe('function');
+  expect(typeof createStateContainerReactHelpers).toBe('function');
 });

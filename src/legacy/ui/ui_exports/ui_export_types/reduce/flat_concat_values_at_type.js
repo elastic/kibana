@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  createTypeReducer,
-  flatConcat,
-  mergeWith,
-} from './lib';
+import { createTypeReducer, flatConcat, mergeWith } from './lib';
 
 /**
  *  Reducer that merges specs by concatenating the values of
@@ -29,6 +25,6 @@ import {
  *  @param  {[type]} initial [description]
  *  @return {[type]}         [description]
  */
-export const flatConcatValuesAtType = createTypeReducer((objectA, objectB) => (
+export const flatConcatValuesAtType = createTypeReducer((objectA, objectB) =>
   mergeWith(objectA || {}, objectB || {}, flatConcat)
-));
+);

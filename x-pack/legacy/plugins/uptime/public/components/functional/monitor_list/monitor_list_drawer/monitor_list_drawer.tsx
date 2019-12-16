@@ -15,6 +15,7 @@ import { fetchMonitorDetails } from '../../../../state/actions/monitor';
 import { MostRecentError } from './most_recent_error';
 import { getMonitorDetails } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
+import { MonitorDetails } from '../../../../../common/runtime_types';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -30,7 +31,7 @@ interface MonitorListDrawerProps {
   /**
    * Monitor details to be fetched from rest api using monitorId
    */
-  monitorDetails: any;
+  monitorDetails: MonitorDetails;
 
   /**
    * Redux action to trigger , loading monitor details
@@ -69,7 +70,11 @@ export function MonitorListDrawerComponent({
       <EuiSpacer size="s" />
       <MonitorStatusList checks={summary.state.checks} />
       {monitorDetails && monitorDetails.error && (
-        <MostRecentError error={monitorDetails.error} monitorId={summary.monitor_id} />
+        <MostRecentError
+          error={monitorDetails.error}
+          monitorId={summary.monitor_id}
+          timestamp={monitorDetails.timestamp}
+        />
       )}
     </ContainerDiv>
   );

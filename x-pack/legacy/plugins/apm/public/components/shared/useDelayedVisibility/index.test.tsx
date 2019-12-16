@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import {
+  renderHook,
+  act,
+  RenderHookResult
+} from '@testing-library/react-hooks';
 import { useDelayedVisibility } from '.';
 
 describe('useFetcher', () => {
-  let hook;
+  let hook: RenderHookResult<any, any>;
+
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -26,9 +31,15 @@ describe('useFetcher', () => {
     });
 
     hook.rerender(true);
-    jest.advanceTimersByTime(10);
+    act(() => {
+      jest.advanceTimersByTime(10);
+    });
+
     expect(hook.result.current).toEqual(false);
-    jest.advanceTimersByTime(50);
+    act(() => {
+      jest.advanceTimersByTime(50);
+    });
+
     expect(hook.result.current).toEqual(true);
   });
 
@@ -38,8 +49,11 @@ describe('useFetcher', () => {
     });
 
     hook.rerender(true);
-    jest.advanceTimersByTime(100);
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
     hook.rerender(false);
+
     expect(hook.result.current).toEqual(true);
   });
 
@@ -49,11 +63,22 @@ describe('useFetcher', () => {
     });
 
     hook.rerender(true);
-    jest.advanceTimersByTime(100);
+
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
     hook.rerender(false);
-    jest.advanceTimersByTime(900);
+    act(() => {
+      jest.advanceTimersByTime(900);
+    });
+
     expect(hook.result.current).toEqual(true);
-    jest.advanceTimersByTime(100);
+
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
     expect(hook.result.current).toEqual(false);
   });
 });
