@@ -5,9 +5,14 @@
  */
 
 import Boom from 'boom';
-import { omit } from 'lodash';
+import { omit, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectReference,
+  SavedObject,
+} from 'src/core/server';
 import {
   Alert,
   RawAlert,
@@ -206,7 +211,23 @@ export class AlertsClient {
   }
 
   public async update({ id, data }: UpdateOptions) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
+    const updateResult = await this.updateAlert({ id, data }, alert);
+
+    if (
+      updateResult.scheduledTaskId &&
+      !isEqual(alert.attributes.schedule, updateResult.schedule)
+    ) {
+      await this.taskManager.runNow(updateResult.scheduledTaskId);
+    }
+
+    return updateResult;
+  }
+
+  private async updateAlert(
+    { id, data }: UpdateOptions,
+    { attributes, version }: SavedObject<RawAlert>
+  ) {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
     const apiKey = await this.createAPIKey();
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
@@ -1951,6 +1951,204 @@ describe('update()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
+  });
+
+  test('updating the alert schedule should rerun the task immediately', async () => {
+    const alertId = uuid.v4();
+    const taskId = uuid.v4();
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: alertId,
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        alertTypeId: '123',
+        schedule: { interval: '60m' },
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+      version: '123',
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: taskId,
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: alertId,
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '10s' },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: taskId,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: alertId,
+        },
+      ],
+    });
+
+    await alertsClient.update({
+      id: alertId,
+      data: {
+        schedule: { interval: '10s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(taskManager.runNow).toHaveBeenCalledWith(taskId);
+  });
+
+  test('updating the alert without changing the schedule should not rerun the task', async () => {
+    const alertId = uuid.v4();
+    const taskId = uuid.v4();
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: alertId,
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+      version: '123',
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: taskId,
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: alertId,
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '10s' },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: taskId,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: alertId,
+        },
+      ],
+    });
+
+    await alertsClient.update({
+      id: alertId,
+      data: {
+        schedule: { interval: '10s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+
+    expect(taskManager.runNow).not.toHaveBeenCalled();
   });
 });
 
