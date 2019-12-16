@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import { npSetup } from 'ui/new_platform';
 
-export class TopNavMenuExtensionsRegistry {
-  private menuItems: RegisteredTopNavMenuData[];
+const customExtension = {
+  id: 'registered-prop',
+  label: 'Registered Button',
+  description: 'Registered Demo',
+  run() {},
+  testId: 'demoRegisteredNewButton',
+};
 
-  constructor() {
-    this.menuItems = [];
-  }
+npSetup.plugins.navigation.registerMenuItem(customExtension);
 
-  /** @public **/
-  // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
-  public register(menuItem: RegisteredTopNavMenuData) {
-    this.menuItems.push(menuItem);
-  }
+const customDiscoverExtension = {
+  id: 'registered-discover-prop',
+  label: 'Registered Discover Button',
+  description: 'Registered Discover Demo',
+  run() {},
+  testId: 'demoDiscoverRegisteredNewButton',
+  appName: 'discover',
+};
 
-  /** @internal **/
-  public getAll() {
-    return this.menuItems;
-  }
-
-  /** @internal **/
-  public clear() {
-    this.menuItems.length = 0;
-  }
-}
-
-export type TopNavMenuExtensionsRegistrySetup = Pick<TopNavMenuExtensionsRegistry, 'register'>;
+npSetup.plugins.navigation.registerMenuItem(customDiscoverExtension);
