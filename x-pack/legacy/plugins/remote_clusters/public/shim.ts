@@ -31,7 +31,6 @@ export function createShim() {
     },
     pluginsStart: {
       management: {
-        // @ts-ignore
         getSection: npStart.plugins.management.legacy.getSection.bind(
           npStart.plugins.management.legacy
         ),

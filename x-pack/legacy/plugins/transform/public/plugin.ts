@@ -49,7 +49,6 @@ export class Plugin {
     };
 
     // Register management section
-    // @ts-ignore
     const esSection = management.sections.getSection('elasticsearch');
     esSection.register(PLUGIN.ID, {
       visible: true,

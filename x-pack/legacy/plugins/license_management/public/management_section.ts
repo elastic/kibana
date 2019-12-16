@@ -7,7 +7,6 @@
 import { npStart } from 'ui/new_platform';
 import { BASE_PATH, PLUGIN } from '../common/constants';
 
-// @ts-ignore
 npStart.plugins.management.legacy.getSection('elasticsearch').register('license_management', {
   visible: true,
   display: PLUGIN.TITLE,

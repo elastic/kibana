@@ -65,7 +65,6 @@ function startApp() {
         get(_: string) {
           return {
             registerApp(app) {
-              // @ts-ignore
               npStart.plugins.management.legacy
                 .getSection('elasticsearch')
                 .register('upgrade_assistant', {

@@ -18,5 +18,5 @@
  */
 
 export interface ManagementStart {
-  legacy: unknown;
+  legacy: any;
 }

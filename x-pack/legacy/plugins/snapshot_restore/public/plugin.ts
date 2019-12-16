@@ -25,7 +25,6 @@ export class Plugin {
     const { management, uiMetric } = plugins;
 
     // Register management section
-    // @ts-ignore
     const esSection = management.sections.getSection('elasticsearch');
     esSection.register(PLUGIN.ID, {
       visible: true,

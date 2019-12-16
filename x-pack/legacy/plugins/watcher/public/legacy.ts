@@ -82,7 +82,6 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
 routes.defaults(/\/management/, {
   resolve: {
     watcherManagementSection: () => {
-      // @ts-ignore
       const watchesSection = management.getSection('elasticsearch/watcher');
       const licenseStatus = xpackInfo.get(`features.${PLUGIN.ID}`);
       const { status } = licenseStatus;
@@ -96,7 +95,6 @@ routes.defaults(/\/management/, {
   },
 });
 
-// @ts-ignore
 management.getSection('elasticsearch').register('watcher', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watcherDisplayName', {
     defaultMessage: 'Watcher',
@@ -105,7 +103,6 @@ management.getSection('elasticsearch').register('watcher', {
   url: '#/management/elasticsearch/watcher/',
 } as any);
 
-// @ts-ignore
 management.getSection('elasticsearch/watcher').register('watches', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watchesDisplayName', {
     defaultMessage: 'Watches',
@@ -113,12 +110,10 @@ management.getSection('elasticsearch/watcher').register('watches', {
   order: 1,
 } as any);
 
-// @ts-ignore
 management.getSection('elasticsearch/watcher').register('watch', {
   visible: false,
 } as any);
 
-// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('status', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.statusDisplayName', {
     defaultMessage: 'Status',
@@ -127,7 +122,6 @@ management.getSection('elasticsearch/watcher/watch').register('status', {
   visible: false,
 } as any);
 
-// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('edit', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.editDisplayName', {
     defaultMessage: 'Edit',
@@ -136,7 +130,6 @@ management.getSection('elasticsearch/watcher/watch').register('edit', {
   visible: false,
 } as any);
 
-// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('new', {
   display: i18n.translate(
     'xpack.watcher.sections.watchList.managementSection.newWatchDisplayName',
@@ -148,7 +141,6 @@ management.getSection('elasticsearch/watcher/watch').register('new', {
   visible: false,
 } as any);
 
-// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('history-item', {
   order: 1,
   visible: false,

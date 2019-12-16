@@ -26,7 +26,6 @@ routes.defaults(/\/management/, {
   resolve: {
     spacesManagementSection() {
       function getKibanaSection() {
-        // @ts-ignore
         return npStart.plugins.management.legacy.getSection('kibana');
       }
 

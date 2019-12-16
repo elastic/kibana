@@ -49,7 +49,6 @@ export function compose(
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
       pluginUIModule,
-      // @ts-ignore
       npStart.plugins.management.legacy,
       routes,
       () => '',

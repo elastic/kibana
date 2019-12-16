@@ -22,7 +22,6 @@ if (
   xpackInfo.get('features.ml.showLinks', false) === true &&
   xpackInfo.get('features.ml.licenseType') === LICENSE_TYPE.FULL
 ) {
-  // @ts-ignore
   npStart.plugins.management.legacy
     .register('ml', {
       display: i18n.translate('xpack.ml.management.mlTitle', {

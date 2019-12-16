@@ -9,7 +9,6 @@ import { camelCase } from 'lodash';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
-// @ts-ignore not typed yet
 import routes from 'ui/routes';
 import { npStart } from 'ui/new_platform';
 import { configBlockSchemas } from '../../../common/config_schemas';
@@ -48,7 +47,6 @@ export function compose(): FrontendLibs {
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
       camelCase(PLUGIN.ID),
-      // @ts-ignore
       npStart.plugins.management.legacy,
       routes,
       chrome.getBasePath,

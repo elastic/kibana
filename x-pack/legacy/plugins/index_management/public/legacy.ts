@@ -9,7 +9,6 @@ import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui
 
 export interface LegacyStart {
   management: {
-    // @ts-ignore
     getSection: typeof npStart.plugins.management.legacy.getSection;
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
@@ -22,7 +21,6 @@ export interface LegacyStart {
 
 export const __LEGACYStart = {
   management: {
-    // @ts-ignore
     getSection: npStart.plugins.management.legacy.getSection.bind(
       npStart.plugins.management.legacy
     ),
