@@ -21,9 +21,9 @@ const { join } = require('path');
 const { readFileSync } = require('fs');
 const { execSync } = require('child_process');
 const merge = require('lodash.merge');
-const { name, version, build } = require('../../package.json');
+const { name, version, build } = require('../package.json');
 
-const ROOT_DIR = join(__dirname, '../../');
+const ROOT_DIR = join(__dirname, '..');
 
 function gitRev() {
   try {

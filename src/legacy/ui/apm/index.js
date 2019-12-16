@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getConfig, isKibanaDistributable } from '../../../dev/apm';
+import { getConfig, isKibanaDistributable } from '../../../apm';
 import agent from 'elastic-apm-node';
 
 const apmEnabled = !isKibanaDistributable && process.env.ELASTIC_APM_ACTIVE === 'true';
