@@ -64,7 +64,6 @@ Object {
       const input = {
         attributes: {
           title: 'test',
-          // eslint-disable-next-line max-len
           fields:
             '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":"multi","parent":"customer_name"}]',
         },
@@ -72,7 +71,6 @@ Object {
       const expected = {
         attributes: {
           title: 'test',
-          // eslint-disable-next-line max-len
           fields:
             '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
         },
@@ -466,7 +464,7 @@ Object {
         },
       };
       const migratedDoc = migrate(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -492,7 +490,6 @@ Object {
   "type": "visualization",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     it('extracts index patterns from controls', () => {
@@ -518,7 +515,7 @@ Object {
         },
       };
       const migratedDoc = migrate(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -536,7 +533,6 @@ Object {
   "type": "visualization",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -1601,7 +1597,7 @@ Object {
         },
       };
       const migratedDoc = migration(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -1631,7 +1627,6 @@ Object {
   "type": "dashboard",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     test('skips error when panelsJSON is not a string', () => {
@@ -1949,7 +1944,7 @@ Object {
         },
       };
       const migratedDoc = migration(doc);
-      /* eslint-disable max-len */
+
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -1969,7 +1964,6 @@ Object {
   "type": "search",
 }
 `);
-      /* eslint-enable max-len */
     });
   });
 
