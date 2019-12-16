@@ -12,9 +12,8 @@ import * as React from 'react';
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { mockFrameworks, TestProviders, MockFrameworks, getMockKibanaUiSetting } from '../../mock';
-
-import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 import { getEmptyString, getEmptyValue } from '../empty_value';
+import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;

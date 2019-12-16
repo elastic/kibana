@@ -17,16 +17,12 @@ import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
-import { CoreStart } from 'src/core/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-import { mockUiSettings } from './ui_settings';
+// import './ui_settings';
 import { createKibanaContextProviderMock } from './kibana_react';
 
 jest.mock('ui/new_platform');
-jest.mock('../lib/kibana');
 
 const state: State = mockGlobalState;
 
@@ -42,29 +38,6 @@ export const apolloClient = new ApolloClient({
 });
 
 export const apolloClientObservable = new BehaviorSubject(apolloClient);
-
-// const services = {
-//   uiSettings: mockUiSettings as CoreStart['uiSettings'],
-//   savedObjects: {} as CoreStart['savedObjects'],
-//   notifications: {} as CoreStart['notifications'],
-//   docLinks: {
-//     links: {
-//       query: {
-//         kueryQuerySyntax: '',
-//       },
-//     },
-//   } as CoreStart['docLinks'],
-//   http: {} as CoreStart['http'],
-//   overlays: {} as CoreStart['overlays'],
-//   storage: {
-//     get: () => {},
-//   },
-//   data: {
-//     query: {
-//       savedQueries: {},
-//     },
-//   },
-// };
 
 const localStorageMock = () => {
   let store: Record<string, unknown> = {};

@@ -16,8 +16,6 @@ import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { Network } from './network';
 
-// jest.mock('../../lib/settings/use_kibana_ui_setting');
-
 jest.mock('../../lib/kibana');
 
 // Test will fail because we will to need to mock some core services to make the test work

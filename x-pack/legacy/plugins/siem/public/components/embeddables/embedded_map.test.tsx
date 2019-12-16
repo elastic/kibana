@@ -24,10 +24,6 @@ mockUseIndexPatterns.mockImplementation(() => [true, []]);
 
 jest.mock('../../lib/kibana');
 
-jest.mock('ui/vis/lib/timezone', () => ({
-  timezoneProvider: () => () => 'America/New_York',
-}));
-
 describe('EmbeddedMapComponent', () => {
   let setQuery: SetQuery;
 

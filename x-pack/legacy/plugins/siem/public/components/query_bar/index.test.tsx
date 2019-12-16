@@ -13,8 +13,6 @@ import { QueryBar, QueryBarComponentProps } from '.';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
 
-jest.mock('ui/new_platform');
-
 jest.mock('../../lib/kibana');
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
