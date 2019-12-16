@@ -7,6 +7,7 @@
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ESResponse, timeseriesFetcher } from './fetcher';
 import { APMConfig } from '../../../../../../../../plugins/apm/server';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 describe('timeseriesFetcher', () => {
   let res: ESResponse;
@@ -58,7 +59,7 @@ describe('timeseriesFetcher', () => {
       expect.arrayContaining([
         {
           term: {
-            [PROCESSOR_EVENT]: 'transaction'
+            [PROCESSOR_EVENT]: ProcessorEvent.transaction
           }
         } as any
       ])

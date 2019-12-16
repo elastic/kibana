@@ -10,6 +10,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export async function getServiceTransactionTypes(
   serviceName: string,
@@ -25,7 +26,7 @@ export async function getServiceTransactionTypes(
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
+            { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
             { range: rangeFilter(start, end) }
           ]
         }

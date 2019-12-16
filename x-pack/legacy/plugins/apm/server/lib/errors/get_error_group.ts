@@ -19,6 +19,7 @@ import {
   SetupUIFilters
 } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
 
@@ -42,7 +43,7 @@ export async function getErrorGroup({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES

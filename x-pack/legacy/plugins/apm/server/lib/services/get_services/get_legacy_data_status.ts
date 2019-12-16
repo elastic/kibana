@@ -9,6 +9,7 @@ import {
   PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {
@@ -22,7 +23,7 @@ export async function getLegacyDataStatus(setup: Setup) {
       query: {
         bool: {
           filter: [
-            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
+            { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
             { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } }
           ]
         }

@@ -80,7 +80,11 @@ function getPatternIndices(
 ) {
   const indexNames = processorEvent
     ? [processorEvent]
-    : ['transaction' as const, 'metric' as const, 'error' as const];
+    : [
+        ProcessorEvent.transaction as const,
+        ProcessorEvent.metric as const,
+        ProcessorEvent.error as const
+      ];
 
   const indicesMap = {
     transaction: indices['apm_oss.transactionIndices'],

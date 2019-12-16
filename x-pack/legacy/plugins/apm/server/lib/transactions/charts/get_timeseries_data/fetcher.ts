@@ -21,6 +21,7 @@ import {
   SetupTimeRange,
   SetupUIFilters
 } from '../../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -38,7 +39,7 @@ export function timeseriesFetcher({
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES

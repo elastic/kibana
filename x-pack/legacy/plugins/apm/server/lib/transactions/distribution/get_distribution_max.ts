@@ -16,6 +16,7 @@ import {
   SetupTimeRange,
   SetupUIFilters
 } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getDistributionMax(
   serviceName: string,
@@ -33,7 +34,7 @@ export async function getDistributionMax(
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [TRANSACTION_NAME]: transactionName } },
             {

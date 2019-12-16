@@ -16,6 +16,7 @@ import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export async function getTraceItems(
   traceId: string,
@@ -35,7 +36,9 @@ export async function getTraceItems(
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction', 'error'] } },
+            {
+              terms: { [PROCESSOR_EVENT]: ['span', ProcessorEvent.transaction] }
+            },
             { range: rangeFilter(start, end) }
           ],
           should: {

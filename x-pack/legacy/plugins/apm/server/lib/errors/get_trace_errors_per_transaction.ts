@@ -12,6 +12,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export interface ErrorsPerTransaction {
   [transactionId: string]: number;
@@ -33,7 +34,7 @@ export async function getTraceErrorsPerTransaction(
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
             { range: rangeFilter(start, end) }
           ],
           should: [

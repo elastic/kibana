@@ -16,6 +16,7 @@ import {
   TRANSACTION_NAME
 } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function getTransactionsProjection({
   setup,
@@ -43,7 +44,7 @@ export function getTransactionsProjection({
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
-      { term: { [PROCESSOR_EVENT]: 'transaction' } },
+      { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
       ...transactionNameFilter,
       ...transactionTypeFilter,
       ...serviceNameFilter,

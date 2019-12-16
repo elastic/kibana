@@ -24,6 +24,7 @@ import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getTransactionBreakdown({
   setup,
@@ -82,7 +83,7 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
+    { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES
   ];

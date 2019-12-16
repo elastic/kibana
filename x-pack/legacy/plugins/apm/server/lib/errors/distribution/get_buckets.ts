@@ -16,6 +16,7 @@ import {
   SetupTimeRange,
   SetupUIFilters
 } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getBuckets({
   serviceName,
@@ -30,7 +31,7 @@ export async function getBuckets({
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'error' } },
+    { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES

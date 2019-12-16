@@ -11,6 +11,7 @@ import {
 } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function getServicesProjection({
   setup
@@ -31,7 +32,13 @@ export function getServicesProjection({
         bool: {
           filter: [
             {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.error,
+                  ProcessorEvent.metric
+                ]
+              }
             },
             { range: rangeFilter(start, end) },
             ...uiFiltersES

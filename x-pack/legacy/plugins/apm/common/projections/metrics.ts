@@ -16,6 +16,7 @@ import {
 } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
 import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
+import { ProcessorEvent } from '../../common/processor_event';
 
 function getServiceNodeNameFilters(serviceNodeName?: string) {
   if (!serviceNodeName) {
@@ -42,7 +43,7 @@ export function getMetricsProjection({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
+    { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
     { range: rangeFilter(start, end) },
     ...getServiceNodeNameFilters(serviceNodeName),
     ...uiFiltersES

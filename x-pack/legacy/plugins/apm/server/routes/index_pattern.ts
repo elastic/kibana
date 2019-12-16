@@ -7,6 +7,7 @@ import * as t from 'io-ts';
 import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export const staticIndexPatternRoute = createRoute(() => ({
   method: 'POST',
@@ -25,9 +26,9 @@ export const dynamicIndexPatternRoute = createRoute(() => ({
   params: {
     query: t.partial({
       processorEvent: t.union([
-        t.literal('transaction'),
-        t.literal('metric'),
-        t.literal('error')
+        t.literal(ProcessorEvent.transaction),
+        t.literal(ProcessorEvent.metric),
+        t.literal(ProcessorEvent.error)
       ])
     })
   },

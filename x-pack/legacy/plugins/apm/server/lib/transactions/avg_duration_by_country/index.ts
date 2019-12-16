@@ -19,6 +19,7 @@ import {
 } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getTransactionAvgDurationByCountry({
   setup,
@@ -42,7 +43,7 @@ export async function getTransactionAvgDurationByCountry({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...transactionNameFilter,
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
             { exists: { field: CLIENT_GEO_COUNTRY_ISO_CODE } },
             { range: rangeFilter(start, end) },

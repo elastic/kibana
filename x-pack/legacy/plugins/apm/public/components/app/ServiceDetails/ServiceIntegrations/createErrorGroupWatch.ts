@@ -19,6 +19,7 @@ import {
   SERVICE_NAME
 } from '../../../../../common/elasticsearch_fieldnames';
 import { createWatch } from '../../../../services/rest/watcher';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 function getSlackPathUrl(slackUrl?: string) {
   if (slackUrl) {
@@ -158,7 +159,7 @@ export async function createErrorGroupWatch({
               bool: {
                 filter: [
                   { term: { [SERVICE_NAME]: '{{ctx.metadata.serviceName}}' } },
-                  { term: { [PROCESSOR_EVENT]: 'error' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
                   {
                     range: {
                       '@timestamp': {

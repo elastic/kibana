@@ -14,6 +14,7 @@ import { getMlJobId, getMlPrefix } from '../../../common/ml_job_constants';
 import { callApi } from './callApi';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { createCallApmApi, APMClient } from './createCallApmApi';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 interface MlResponseItem {
   id: string;
@@ -54,7 +55,7 @@ export async function startMLJob({
   const groups = ['apm', serviceName.toLowerCase()];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { term: { [TRANSACTION_TYPE]: transactionType } }
   ];
   groups.push(transactionType.toLowerCase());

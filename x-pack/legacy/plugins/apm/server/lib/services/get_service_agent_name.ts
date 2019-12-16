@@ -10,6 +10,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export async function getServiceAgentName(
   serviceName: string,
@@ -31,7 +32,13 @@ export async function getServiceAgentName(
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             {
-              terms: { [PROCESSOR_EVENT]: ['error', 'transaction', 'metric'] }
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.error,
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.metric
+                ]
+              }
             },
             { range: rangeFilter(start, end) }
           ]

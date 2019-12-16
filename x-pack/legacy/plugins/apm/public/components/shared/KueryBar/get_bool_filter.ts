@@ -13,6 +13,7 @@ import {
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export function getBoolFilter(urlParams: IUrlParams) {
   const { start, end, serviceName, processorEvent } = urlParams;
@@ -42,7 +43,7 @@ export function getBoolFilter(urlParams: IUrlParams) {
   switch (processorEvent) {
     case 'transaction':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'transaction' }
+        term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction }
       });
 
       if (urlParams.transactionName) {
@@ -60,7 +61,7 @@ export function getBoolFilter(urlParams: IUrlParams) {
 
     case 'error':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'error' }
+        term: { [PROCESSOR_EVENT]: ProcessorEvent.error }
       });
 
       if (urlParams.errorGroupId) {
@@ -72,7 +73,7 @@ export function getBoolFilter(urlParams: IUrlParams) {
 
     case 'metric':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'metric' }
+        term: { [PROCESSOR_EVENT]: ProcessorEvent.metric }
       });
       break;
 
@@ -80,9 +81,9 @@ export function getBoolFilter(urlParams: IUrlParams) {
       boolFilter.push({
         bool: {
           should: [
-            { term: { [PROCESSOR_EVENT]: 'error' } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
-            { term: { [PROCESSOR_EVENT]: 'metric' } }
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } }
           ]
         }
       });

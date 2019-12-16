@@ -13,6 +13,7 @@ import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ESFilter } from '../../../typings/elasticsearch';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export async function getEnvironments(
   setup: Setup & SetupTimeRange,
@@ -21,7 +22,15 @@ export async function getEnvironments(
   const { start, end, client, indices } = setup;
 
   const filter: ESFilter[] = [
-    { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
+    {
+      terms: {
+        [PROCESSOR_EVENT]: [
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric
+        ]
+      }
+    },
     { range: rangeFilter(start, end) }
   ];
 

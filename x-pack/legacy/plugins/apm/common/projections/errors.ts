@@ -15,6 +15,7 @@ import {
   ERROR_GROUP_ID
 } from '../elasticsearch_fieldnames';
 import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function getErrorGroupsProjection({
   setup,
@@ -32,7 +33,7 @@ export function getErrorGroupsProjection({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES
           ]

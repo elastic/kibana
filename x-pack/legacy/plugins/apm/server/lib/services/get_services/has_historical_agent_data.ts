@@ -6,6 +6,7 @@
 
 import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(setup: Setup) {
@@ -27,10 +28,10 @@ export async function hasHistoricalAgentData(setup: Setup) {
             {
               terms: {
                 [PROCESSOR_EVENT]: [
-                  'error',
-                  'metric',
+                  ProcessorEvent.error,
+                  ProcessorEvent.metric,
                   'sourcemap',
-                  'transaction'
+                  ProcessorEvent.transaction
                 ]
               }
             }

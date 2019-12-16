@@ -10,6 +10,7 @@ import {
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 import { SERVICE_AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getAgentNameByService({
   serviceName,
@@ -33,7 +34,13 @@ export async function getAgentNameByService({
         bool: {
           filter: [
             {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.error,
+                  ProcessorEvent.metric
+                ]
+              }
             },
             { term: { [SERVICE_NAME]: serviceName } }
           ]

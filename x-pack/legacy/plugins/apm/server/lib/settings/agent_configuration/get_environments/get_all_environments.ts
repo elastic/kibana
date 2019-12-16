@@ -11,6 +11,7 @@ import {
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration_constants';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 export async function getAllEnvironments({
   serviceName,
@@ -38,7 +39,13 @@ export async function getAllEnvironments({
         bool: {
           filter: [
             {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.error,
+                  ProcessorEvent.metric
+                ]
+              }
             },
             ...serviceNameFilter
           ]

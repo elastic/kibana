@@ -11,6 +11,7 @@ import {
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration_constants';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
@@ -29,7 +30,15 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
       query: {
         bool: {
           filter: [
-            { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } }
+            {
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.transaction,
+                  ProcessorEvent.error,
+                  ProcessorEvent.metric
+                ]
+              }
+            }
           ]
         }
       },
