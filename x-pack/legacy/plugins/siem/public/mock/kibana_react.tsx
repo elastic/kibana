@@ -65,7 +65,7 @@ export const createUseUiSetting$Mock = () => {
   return <T extends unknown = string>(
     key: string,
     defaultValue?: T
-  ): [T, () => void] | undefined => [useUiSettingMock(key, defaultValue), jest.fn];
+  ): [T, () => void] | undefined => [useUiSettingMock(key, defaultValue), jest.fn()];
 };
 
 export const createUseKibanaMock = () => {
