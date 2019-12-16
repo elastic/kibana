@@ -18,14 +18,13 @@
  */
 
 import $ from 'jquery';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 /**
  * This class processes all Vega spec customizations,
  * converting url object parameters into query results.
  */
 export class UrlParser {
-
   constructor(onWarning) {
     this._onWarning = onWarning;
   }
@@ -37,25 +36,29 @@ export class UrlParser {
   parseUrl(obj, urlObj) {
     let url = urlObj.url;
     if (!url) {
-      throw new Error(i18n.translate('visTypeVega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage', {
-        defaultMessage: '{dataUrlParam} requires a {urlParam} parameter in a form "{formLink}"',
-        values: {
-          dataUrlParam: '"data.url"',
-          urlParam: '"url"',
-          formLink: 'https://example.org/path/subpath',
-        },
-      }));
+      throw new Error(
+        i18n.translate('visTypeVega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage', {
+          defaultMessage: '{dataUrlParam} requires a {urlParam} parameter in a form "{formLink}"',
+          values: {
+            dataUrlParam: '"data.url"',
+            urlParam: '"url"',
+            formLink: 'https://example.org/path/subpath',
+          },
+        })
+      );
     }
 
     const query = urlObj.query;
     if (!query) {
-      this._onWarning(i18n.translate('visTypeVega.urlParser.urlShouldHaveQuerySubObjectWarningMessage', {
-        defaultMessage: 'Using a {urlObject} should have a {subObjectName} sub-object',
-        values: {
-          urlObject: '"url": {"%type%": "url", "url": ...}',
-          subObjectName: '"query"',
-        },
-      }));
+      this._onWarning(
+        i18n.translate('visTypeVega.urlParser.urlShouldHaveQuerySubObjectWarningMessage', {
+          defaultMessage: 'Using a {urlObject} should have a {subObjectName} sub-object',
+          values: {
+            urlObject: '"url": {"%type%": "url", "url": ...}',
+            subObjectName: '"query"',
+          },
+        })
+      );
     } else {
       url += (url.includes('?') ? '&' : '?') + $.param(query);
     }
@@ -66,7 +69,5 @@ export class UrlParser {
   /**
    * No-op - the url is already set during the parseUrl
    */
-  populateData() {
-  }
-
+  populateData() {}
 }

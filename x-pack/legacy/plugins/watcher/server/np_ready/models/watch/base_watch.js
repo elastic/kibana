@@ -31,9 +31,9 @@ export class BaseWatch {
     const result = {
       metadata: {
         xpack: {
-          type: this.type
-        }
-      }
+          type: this.type,
+        },
+      },
     };
 
     if (this.name) {
@@ -60,7 +60,7 @@ export class BaseWatch {
       isSystemWatch: this.isSystemWatch,
       watchStatus: this.watchStatus ? this.watchStatus.downstreamJson : undefined,
       watchErrors: this.watchErrors ? this.watchErrors.downstreamJson : undefined,
-      actions: map(this.actions, (action) => action.downstreamJson)
+      actions: map(this.actions, action => action.downstreamJson),
     };
 
     return json;
@@ -72,7 +72,7 @@ export class BaseWatch {
 
     return {
       id: this.id,
-      watch
+      watch,
     };
   }
 
@@ -85,7 +85,7 @@ export class BaseWatch {
     return {
       id: json.id,
       name: json.name,
-      actions
+      actions,
     };
   }
 
@@ -96,9 +96,9 @@ export class BaseWatch {
         i18n.translate('xpack.watcher.models.baseWatch.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain an {id} property',
           values: {
-            id: 'id'
-          }
-        }),
+            id: 'id',
+          },
+        })
       );
     }
     if (!json.watchJson) {
@@ -106,19 +106,22 @@ export class BaseWatch {
         i18n.translate('xpack.watcher.models.baseWatch.watchJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain a {watchJson} property',
           values: {
-            watchJson: 'watchJson'
-          }
-        }),
+            watchJson: 'watchJson',
+          },
+        })
       );
     }
     if (!json.watchStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.baseWatch.watchStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
-          values: {
-            watchStatusJson: 'watchStatusJson'
+        i18n.translate(
+          'xpack.watcher.models.baseWatch.watchStatusJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
+            values: {
+              watchStatusJson: 'watchStatusJson',
+            },
           }
-        }),
+        )
       );
     }
 
@@ -131,7 +134,7 @@ export class BaseWatch {
       'metadata',
       'transform',
       'throttle_period',
-      'throttle_period_in_millis'
+      'throttle_period_in_millis',
     ]);
     const watchStatusJson = json.watchStatusJson;
     const name = get(watchJson, 'metadata.name');
@@ -155,7 +158,7 @@ export class BaseWatch {
       watchJson,
       watchStatus,
       watchErrors,
-      actions
+      actions,
     };
   }
 

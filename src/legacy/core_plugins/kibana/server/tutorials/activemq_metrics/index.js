@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function activemqMetricsSpecProvider(context) {
   const moduleName = 'activemq';
@@ -33,7 +37,8 @@ export function activemqMetricsSpecProvider(context) {
       defaultMessage: 'Fetch monitoring metrics from ActiveMQ instances.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.activemqMetrics.longDescription', {
-      defaultMessage: 'The `activemq` Metricbeat module fetches monitoring metrics from ActiveMQ instances \
+      defaultMessage:
+        'The `activemq` Metricbeat module fetches monitoring metrics from ActiveMQ instances \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-activemq.html',
@@ -46,16 +51,16 @@ export function activemqMetricsSpecProvider(context) {
         label: i18n.translate('kbn.server.tutorials.corednsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover'
+        path: '/app/kibana#/discover',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-activemq.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-activemq.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

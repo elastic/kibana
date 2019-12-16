@@ -33,7 +33,7 @@ function getFormattedValue(formatter, value) {
 export function KbnRows($compile) {
   return {
     restrict: 'A',
-    link: function ($scope, $el, attr) {
+    link: function($scope, $el, attr) {
       function addCell($tr, contents, column, row) {
         function createCell() {
           return $(document.createElement('td'));
@@ -112,7 +112,7 @@ export function KbnRows($compile) {
         $tr.append($cell);
       }
 
-      $scope.$watchMulti([attr.kbnRows, attr.kbnRowsMin], function (vals) {
+      $scope.$watchMulti([attr.kbnRows, attr.kbnRowsMin], function(vals) {
         let rows = vals[0];
         const min = vals[1];
 
@@ -126,12 +126,12 @@ export function KbnRows($compile) {
           // crate the empty row which will be pushed into the row list over and over
           const emptyRow = {};
           // push as many empty rows into the row array as needed
-          _.times(min - rows.length, function () {
+          _.times(min - rows.length, function() {
             rows.push(emptyRow);
           });
         }
 
-        rows.forEach(function (row) {
+        rows.forEach(function(row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
           $scope.columns.forEach(column => {
             const value = row[column.id];

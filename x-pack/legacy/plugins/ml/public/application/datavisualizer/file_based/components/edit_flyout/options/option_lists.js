@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export const FORMAT_OPTIONS = [
   'delimited',
   'ndjson',
@@ -113,11 +112,7 @@ export const DELIMITER_OPTIONS = [
   CUSTOM_DROPDOWN_OPTION,
 ];
 
-export const QUOTE_OPTIONS = [
-  '\'',
-  '"',
-  '`',
-];
+export const QUOTE_OPTIONS = ["'", '"', '`'];
 
 export const CHARSET_OPTIONS = [
   'IBM00858',

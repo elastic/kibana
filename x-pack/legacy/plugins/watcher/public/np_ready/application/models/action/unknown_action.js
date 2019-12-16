@@ -18,7 +18,7 @@ export class UnknownAction extends BaseAction {
     const result = super.upstreamJson;
 
     Object.assign(result, {
-      actionJson: this.actionJson
+      actionJson: this.actionJson,
     });
 
     return result;

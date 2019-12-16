@@ -10,32 +10,43 @@ import { Reason } from './reason';
 
 jest.mock('ui/documentation_links', () => ({
   ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-  DOC_LINK_VERSION: 'current'
+  DOC_LINK_VERSION: 'current',
 }));
 
 describe('Logs', () => {
   it('should render a default message', () => {
-    const component = shallow(<Reason reason={{}}/>);
+    const component = shallow(<Reason reason={{}} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should render with a no index pattern found reason', () => {
-    const component = shallow(<Reason reason={{ indexPatternExists: false }}/>);
+    const component = shallow(<Reason reason={{ indexPatternExists: false }} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should render with a no type found reason', () => {
-    const component = shallow(<Reason reason={{ indexPatternExists: true, typeExists: false }}/>);
+    const component = shallow(<Reason reason={{ indexPatternExists: true, typeExists: false }} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should render with a no cluster found reason', () => {
-    const component = shallow(<Reason reason={{ indexPatternExists: true, typeExists: true, clusterExists: false }}/>);
+    const component = shallow(
+      <Reason reason={{ indexPatternExists: true, typeExists: true, clusterExists: false }} />
+    );
     expect(component).toMatchSnapshot();
   });
 
   it('should render with a no node found reason', () => {
-    const component = shallow(<Reason reason={{ indexPatternExists: true, typeExists: true, clusterExists: true, nodeExists: false  }}/>);
+    const component = shallow(
+      <Reason
+        reason={{
+          indexPatternExists: true,
+          typeExists: true,
+          clusterExists: true,
+          nodeExists: false,
+        }}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 
@@ -44,7 +55,7 @@ describe('Logs', () => {
       indexPatternExists: true,
       indexPatternInTimeRangeExists: false,
     };
-    const component = shallow(<Reason reason={reason}/>);
+    const component = shallow(<Reason reason={reason} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -54,29 +65,35 @@ describe('Logs', () => {
       indexPatternInTimeRangeExists: true,
       clusterExists: true,
       typeExists: false,
-      typeExistsAtAnyTime: true
+      typeExistsAtAnyTime: true,
     };
-    const component = shallow(<Reason reason={reason}/>);
+    const component = shallow(<Reason reason={reason} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should render with a no index found reason', () => {
-    const component = shallow(<Reason reason={{
-      indexPatternExists: true,
-      typeExists: true,
-      clusterExists: true,
-      nodeExists: null,
-      indexExists: false
-    }}
-    />);
+    const component = shallow(
+      <Reason
+        reason={{
+          indexPatternExists: true,
+          typeExists: true,
+          clusterExists: true,
+          nodeExists: null,
+          indexExists: false,
+        }}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 
   it('should render with a bad indices reason', () => {
-    const component = shallow(<Reason reason={{
-      correctIndexName: false
-    }}
-    />);
+    const component = shallow(
+      <Reason
+        reason={{
+          correctIndexName: false,
+        }}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 });
