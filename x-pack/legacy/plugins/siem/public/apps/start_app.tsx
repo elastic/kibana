@@ -19,7 +19,10 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  useUiSetting$,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
@@ -28,7 +31,6 @@ import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs } from '../lib/lib';
 import { KibanaCoreContextProvider } from '../lib/compose/kibana_core';
 import { KibanaPluginsContextProvider } from '../lib/compose/kibana_plugins';
-import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -44,7 +46,7 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
   const AppPluginRoot = memo(() => {
-    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     return (
       <EuiErrorBoundary>
         <I18nContext>
