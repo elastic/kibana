@@ -12,10 +12,11 @@ import { useLibs, usePagination } from '../../../../hooks';
 import { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { CreateApiKeyForm } from './create_api_key_form';
-
 export { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 
-export const EnrollmentApiKeysTable: React.FC = () => {
+export const EnrollmentApiKeysTable: React.FC<{
+  onChange: () => void;
+}> = ({ onChange }) => {
   const { enrollmentApiKeys } = useLibs();
   const [confirmDeleteApiKeyId, setConfirmDeleteApiKeyId] = useState<string | null>(null);
   const { pagination } = usePagination();
@@ -81,7 +82,12 @@ export const EnrollmentApiKeysTable: React.FC = () => {
         columns={columns}
       />
       <EuiSpacer size={'s'} />
-      <CreateApiKeyButton onChange={() => refresh()} />
+      <CreateApiKeyButton
+        onChange={() => {
+          refresh();
+          onChange();
+        }}
+      />
     </>
   );
 };
