@@ -7,7 +7,7 @@
 export const combineRangeWithFilters = (
   dateRangeStart: string,
   dateRangeEnd: string,
-  filters: string | undefined
+  filters: Record<string, any>
 ) => {
   const range = {
     range: {
@@ -18,14 +18,13 @@ export const combineRangeWithFilters = (
     },
   };
   if (!filters) return range;
-  const filtersObj = JSON.parse(filters);
-  const clientFiltersList = Array.isArray(filtersObj?.bool?.filter ?? {})
+  const clientFiltersList = Array.isArray(filters?.bool?.filter ?? {})
     ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
-      filtersObj.bool.filter
+      filters.bool.filter
     : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
-      Object.keys(filtersObj?.bool?.filter ?? {}).map(key => ({
-        ...filtersObj?.bool?.filter?.[key],
+      Object.keys(filters?.bool?.filter ?? {}).map(key => ({
+        ...filters?.bool?.filter?.[key],
       }));
-  filtersObj.bool.filter = [...clientFiltersList, range];
-  return filtersObj;
+  filters.bool.filter = [...clientFiltersList, range];
+  return filters;
 };

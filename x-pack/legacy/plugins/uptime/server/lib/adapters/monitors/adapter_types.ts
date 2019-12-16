@@ -5,6 +5,7 @@
  */
 
 import { MonitorChart, MonitorPageTitle } from '../../../../common/graphql/types';
+import { OverviewFilters } from '../../../../common/runtime_types';
 
 export interface UMMonitorsAdapter {
   getMonitorChartsData(
@@ -14,7 +15,13 @@ export interface UMMonitorsAdapter {
     dateRangeEnd: string,
     location?: string | null
   ): Promise<MonitorChart>;
-  getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string, filters: string): Promise<any>;
+  getFilterBar(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: Record<string, any>,
+    filterOptions?: Record<string, string[] | number[]>
+  ): Promise<OverviewFilters>;
   getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
   getMonitorDetails(request: any, monitorId: string): Promise<any>;
 }

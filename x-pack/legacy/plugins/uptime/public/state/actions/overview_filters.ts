@@ -13,7 +13,11 @@ export const FETCH_OVERVIEW_FILTERS_SUCCESS = 'FETCH_OVERVIEW_FILTERS_SUCCESS';
 export interface GetOverviewFiltersPayload {
   dateRangeStart: string;
   dateRangeEnd: string;
-  filters?: string;
+  search?: string;
+  schemes?: string[];
+  ports?: string[];
+  tags?: string[];
+  locations?: string[];
   statusFilter?: string;
 }
 
@@ -40,15 +44,23 @@ export type OverviewFiltersAction =
 export const fetchOverviewFilters = (
   dateRangeStart: string,
   dateRangeEnd: string,
-  filters?: string,
-  statusFilter?: string
+  search?: string,
+  statusFilter?: string,
+  schemes?: string[],
+  locations?: string[],
+  ports?: string[],
+  tags?: string[]
 ): GetOverviewFiltersFetchAction => ({
   type: FETCH_OVERVIEW_FILTERS,
   payload: {
     dateRangeStart,
     dateRangeEnd,
-    filters,
+    search,
     statusFilter,
+    locations,
+    ports,
+    schemes,
+    tags,
   },
 });
 

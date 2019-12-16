@@ -7,7 +7,7 @@
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { isRight } from 'fp-ts/lib/Either';
 import { GetOverviewFiltersPayload } from '../actions/overview_filters';
-import { getApiPath } from '../../lib/helper';
+import { getApiPath, parameterizeValues } from '../../lib/helper';
 import { OverviewFiltersType } from '../../../common/runtime_types';
 
 type ApiRequest = GetOverviewFiltersPayload & {
@@ -18,14 +18,23 @@ export const fetchOverviewFilters = async ({
   basePath,
   dateRangeStart,
   dateRangeEnd,
-  filters,
+  // TODO: cause searches to narrow available filter options
+  search,
+  schemes,
+  locations,
+  ports,
+  tags,
 }: ApiRequest) => {
   const url = getApiPath(`/api/uptime/filters`, basePath);
-  const urlParams = encodeURI(
-    `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}${
-      filters ? `&filters=${filters}` : ''
-    }`
-  );
+  const filterParams =
+    parameterizeValues('schemes', schemes ?? []) +
+    parameterizeValues('locations', locations ?? []) +
+    parameterizeValues('ports', ports ?? []) +
+    parameterizeValues('tags', tags ?? []);
+
+  const requiredParams = `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
+  const searchParam = search ? `&search=${search}` : '';
+  const urlParams = encodeURI(requiredParams + filterParams + searchParam);
 
   const response = await fetch(`${url}${urlParams}`);
   if (!response.ok) {

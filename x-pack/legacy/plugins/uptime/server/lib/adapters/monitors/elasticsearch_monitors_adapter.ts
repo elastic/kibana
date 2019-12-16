@@ -17,6 +17,8 @@ import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 import { MonitorDetails, MonitorError, OverviewFilters } from '../../../../common/runtime_types';
 import { combineRangeWithFilters } from './combine_range_with_filters';
+import { generateFilterAggs } from './generate_filter_aggs';
+import { extractFilterAggsResults } from './extract_filter_aggs_results';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -194,14 +196,18 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters: string
+    filters: Record<string, any>,
+    filterOptions: Record<string, string[] | number[]>
   ): Promise<OverviewFilters> {
-    const fields = {
-      schemes: 'monitor.type',
-      ports: 'url.port',
-      locations: 'observer.geo.name',
-      tags: 'tags',
-    };
+    const aggs = generateFilterAggs(
+      [
+        { aggName: 'locations', filterName: 'locations', field: 'observer.geo.name' },
+        { aggName: 'ports', filterName: 'ports', field: 'url.port' },
+        { aggName: 'schemes', filterName: 'schemes', field: 'monitor.type' },
+        { aggName: 'tags', filterName: 'tags', field: 'tags' },
+      ],
+      filterOptions
+    );
     const filtersObj = combineRangeWithFilters(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -210,23 +216,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         query: {
           ...filtersObj,
         },
-        aggs: Object.values(fields).reduce((acc: { [key: string]: any }, field) => {
-          acc[field] = { terms: { field, size: 20 } };
-          return acc;
-        }, {}),
+        aggs,
       },
     };
     const { aggregations } = await this.database.search(request, params);
 
-    const getValues: (key: string) => string[] = (key: string) =>
-      (aggregations?.[key]?.buckets ?? []).map((bucket: any) => bucket?.key ?? '');
-
-    return {
-      locations: getValues(fields.locations),
-      ports: getValues(fields.ports).map(p => parseInt(p, 10)),
-      schemes: getValues(fields.schemes),
-      tags: getValues(fields.tags),
-    };
+    return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
   }
 
   /**

@@ -25,6 +25,8 @@ import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
+import { store } from '../state';
+import { setEsKueryString } from '../state/actions';
 
 interface OverviewPageProps {
   basePath: string;
@@ -90,7 +92,6 @@ export const OverviewPage = ({
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  const filterQueryString = search || '';
   let error: any;
   let kueryString: string = '';
   try {
@@ -102,6 +103,7 @@ export const OverviewPage = ({
     kueryString = '';
   }
 
+  const filterQueryString = search || '';
   let filters: any | undefined;
   try {
     if (filterQueryString || urlFilters) {
@@ -111,6 +113,20 @@ export const OverviewPage = ({
         const ast = esKuery.fromKueryExpression(combinedFilterString);
         const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
+        if (filterQueryString) {
+          store.dispatch(
+            setEsKueryString(
+              JSON.stringify(
+                esKuery.toElasticsearchQuery(
+                  esKuery.fromKueryExpression(filterQueryString),
+                  staticIndexPattern
+                )
+              )
+            )
+          );
+        } else {
+          store.dispatch(setEsKueryString(''));
+        }
       }
     }
   } catch (e) {

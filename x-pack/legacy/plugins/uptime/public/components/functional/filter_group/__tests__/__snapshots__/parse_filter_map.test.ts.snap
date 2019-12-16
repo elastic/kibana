@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseFiltersMap provides values from valid filter string 1`] = `
+Object {
+  "location": Array [
+    "us-east-2",
+  ],
+  "ports": Array [
+    "5601",
+    "80",
+  ],
+  "scheme": Array [
+    "http",
+    "tcp",
+  ],
+  "tags": Array [],
+}
+`;

@@ -9,31 +9,33 @@ import { combineRangeWithFilters } from '../combine_range_with_filters';
 describe('combineRangeWithFilters', () => {
   it('combines filters that have no filter clause', () => {
     expect(
-      combineRangeWithFilters(
-        'now-15m',
-        'now',
-        '{"bool":{"should":[{"match":{"url.port":80}}],"minimum_should_match":1}}'
-      )
+      combineRangeWithFilters('now-15m', 'now', {
+        bool: { should: [{ match: { 'url.port': 80 } }], minimum_should_match: 1 },
+      })
     ).toMatchSnapshot();
   });
 
   it('combines query with filter object', () => {
     expect(
-      combineRangeWithFilters(
-        'now-15m',
-        'now',
-        '{"bool":{"filter":{"term":{"field":"monitor.id"}},"should":[{"match":{"url.port":80}}],"minimum_should_match":1}}'
-      )
+      combineRangeWithFilters('now-15m', 'now', {
+        bool: {
+          filter: { term: { field: 'monitor.id' } },
+          should: [{ match: { 'url.port': 80 } }],
+          minimum_should_match: 1,
+        },
+      })
     ).toMatchSnapshot();
   });
 
   it('combines query with filter list', () => {
     expect(
-      combineRangeWithFilters(
-        'now-15m',
-        'now',
-        '{"bool":{"filter":[{"field":"monitor.id"}],"should":[{"match":{"url.port":80}}],"minimum_should_match":1}}'
-      )
+      combineRangeWithFilters('now-15m', 'now', {
+        bool: {
+          filter: [{ field: 'monitor.id' }],
+          should: [{ match: { 'url.port': 80 } }],
+          minimum_should_match: 1,
+        },
+      })
     ).toMatchSnapshot();
   });
 });

@@ -8,6 +8,9 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteCreator } from '../types';
 
+const stringToArray = (locations: string | string[] | undefined) =>
+  locations ? (Array.isArray(locations) ? locations : [locations]) : [];
+
 export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/filters',
@@ -15,20 +18,38 @@ export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLi
     query: schema.object({
       dateRangeStart: schema.string(),
       dateRangeEnd: schema.string(),
-      filters: schema.maybe(schema.string()),
+      search: schema.maybe(schema.string()),
+      locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      schemes: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      ports: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
     }),
   },
   options: {
     tags: ['access:uptime'],
   },
   handler: async (_context, request, response) => {
-    const { dateRangeStart, dateRangeEnd, filters } = request.query;
+    const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
 
+    let searchObject: Record<string, any> | undefined;
+    if (search) {
+      try {
+        searchObject = JSON.parse(search);
+      } catch (e) {
+        return response.badRequest();
+      }
+    }
     const filtersResponse = await libs.monitors.getFilterBar(
       request,
       dateRangeStart,
       dateRangeEnd,
-      filters
+      searchObject,
+      {
+        locations: stringToArray(locations),
+        ports: stringToArray(ports),
+        tags: stringToArray(tags),
+        schemes: stringToArray(schemes),
+      }
     );
     return response.ok({ body: { ...filtersResponse } });
   },

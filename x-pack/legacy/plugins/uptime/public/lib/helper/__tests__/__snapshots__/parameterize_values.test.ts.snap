@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parameterizeValues parameterizes the provided values for a given field name 1`] = `"&foo=bar&foo=baz"`;

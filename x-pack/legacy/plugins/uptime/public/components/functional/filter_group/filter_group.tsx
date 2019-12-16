@@ -13,6 +13,8 @@ import { FilterStatusButton } from './filter_status_button';
 import { OverviewFilters } from '../../../../common/runtime_types';
 import { fetchOverviewFilters } from '../../../state/actions';
 import { AppState } from '../../../state';
+import { useUrlParams } from '../../../hooks';
+import { parseFiltersMap } from './parse_filter_map';
 
 interface OwnProps {
   currentFilter: any;
@@ -24,6 +26,7 @@ interface OwnProps {
 }
 
 interface StoreProps {
+  esKuery: string;
   lastRefresh: number;
   loading: boolean;
   overviewFilters: OverviewFilters;
@@ -149,8 +152,16 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
   );
 };
 
+const filterWhitelist = [
+  { name: 'ports', fieldName: 'url.port' },
+  { name: 'locations', fieldName: 'observer.geo.name' },
+  { name: 'tags', fieldName: 'tags' },
+  { name: 'schemes', fieldName: 'monitor.type' },
+];
+
 export const Container: React.FC<Props> = ({
   currentFilter,
+  esKuery,
   filters,
   loading,
   loadFilterGroup,
@@ -160,9 +171,21 @@ export const Container: React.FC<Props> = ({
   statusFilter,
   onFilterUpdate,
 }: Props) => {
+  const [getUrlParams] = useUrlParams();
+  const { filters: urlFilters } = getUrlParams();
   useEffect(() => {
-    loadFilterGroup(dateRangeStart, dateRangeEnd, filters, statusFilter);
-  }, [dateRangeStart, dateRangeEnd, filters, statusFilter]);
+    const filterSelections = parseFiltersMap(urlFilters, filterWhitelist);
+    loadFilterGroup(
+      dateRangeStart,
+      dateRangeEnd,
+      esKuery,
+      statusFilter,
+      filterSelections.schemes ?? [],
+      filterSelections.locations ?? [],
+      filterSelections.ports ?? [],
+      filterSelections.tags ?? []
+    );
+  }, [dateRangeStart, dateRangeEnd, esKuery, filters, statusFilter]);
   return (
     <PresentationalComponent
       currentFilter={currentFilter}
@@ -175,8 +198,9 @@ export const Container: React.FC<Props> = ({
 
 const mapStateToProps = ({
   overviewFilters: { loading, filters },
-  ui: { lastRefresh },
+  ui: { esKuery, lastRefresh },
 }: AppState): StoreProps => ({
+  esKuery,
   overviewFilters: filters,
   lastRefresh,
   loading,
@@ -186,10 +210,25 @@ const mapDispatchToProps = (dispatch: any): DispatchProps => ({
   loadFilterGroup: (
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string,
-    statusFilter?: string
+    search?: string,
+    statusFilter?: string,
+    schemes?: string[],
+    locations?: string[],
+    ports?: string[],
+    tags?: string[]
   ) => {
-    return dispatch(fetchOverviewFilters(dateRangeStart, dateRangeEnd, filters, statusFilter));
+    return dispatch(
+      fetchOverviewFilters(
+        dateRangeStart,
+        dateRangeEnd,
+        search,
+        statusFilter,
+        schemes,
+        locations,
+        ports,
+        tags
+      )
+    );
   },
 });
 
