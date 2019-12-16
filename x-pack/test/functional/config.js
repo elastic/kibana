@@ -215,11 +215,21 @@ export default async function({ readConfigFile }) {
     security: {
       roles: {
         test_logstash_reader: {
-          elasticsearch: { cluster: [], indices: [{ names: ['logstash*'],
-            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
-              except: [] } }], run_as: [] }, kibana: [] }
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
       },
       defaultRoles: ['superuser'],
-    }
+    },
   };
 }

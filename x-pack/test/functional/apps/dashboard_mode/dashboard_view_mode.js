@@ -144,7 +144,11 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
-        await security.testUser.setRoles(['test_logstash_reader', 'kibana_dashboard_only_user', 'kibana_user']);
+        await security.testUser.setRoles([
+          'test_logstash_reader',
+          'kibana_dashboard_only_user',
+          'kibana_user',
+        ]);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         if (await appsMenu.linkExists('Management')) {
