@@ -45,6 +45,8 @@ module.exports = function(wallaby) {
         rootDir: wallaby.localProjectDir,
         moduleNameMapper: {
           '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
+          '^src/(.*)': `${kibanaDirectory}/src/$1`,
+          '^x-pack/(.*)': `${kibanaDirectory}/x-pack/$1'`,
           // eslint-disable-next-line
           '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`,
           '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,

@@ -53,7 +53,8 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
-    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
+    '^src/(.*)': '<rootDir>/src/$1',
+    '^x-pack/(.*)': '<rootDir>/x-pack/$1',
     '^plugins/([^/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',

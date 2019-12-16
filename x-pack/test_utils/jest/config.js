@@ -18,6 +18,8 @@ export default {
   collectCoverageFrom: ['legacy/plugins/**/*.js', 'legacy/common/**/*.js', 'legacy/server/**/*.js'],
   moduleNameMapper: {
     '^ui/(.*)': '<rootDir>**/public/$1',
+    '^src/(.*)': `<rootDir>/../src/$1`,
+    '^x-pack/(.*)': `<rootDir>/$1'`,
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/../src/dev/jest/mocks/style_mock.js',
