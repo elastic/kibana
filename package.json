@@ -351,7 +351,7 @@
     "@types/redux": "^3.6.31",
     "@types/redux-actions": "^2.2.1",
     "@types/request": "^2.48.2",
-    "@types/selenium-webdriver": "^4.0.5",
+    "@types/selenium-webdriver": "^4.0.6",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^7.0.13",
     "@types/strip-ansi": "^3.0.0",
