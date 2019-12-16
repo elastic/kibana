@@ -6,48 +6,42 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { useEffect } from 'react';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { useHTTPRequest } from '../../hooks/use_http_request';
 import {
-  NodeDetailsMetricDataResponseRT,
-  NodeDetailsMetricDataResponse,
-} from '../../../common/http_api/node_details_api';
-import { InventoryMetric } from '../../../common/inventory_models/types';
+  InventoryMetaResponseRT,
+  InventoryMetaResponse,
+} from '../../../common/http_api/inventory_meta_api';
+import { InfraNodeType } from '../../graphql/types';
 
-export function useNodeDetails(
-  metrics: InventoryMetric[],
-  nodeId: string,
-  nodeType: InfraNodeType,
-  sourceId: string,
-  timerange: InfraTimerangeInput,
-  cloudId: string
-) {
+export function useInventoryMeta(sourceId: string, nodeType: InfraNodeType) {
   const decodeResponse = (response: any) => {
     return pipe(
-      NodeDetailsMetricDataResponseRT.decode(response),
+      InventoryMetaResponseRT.decode(response),
       fold(throwErrors(createPlainError), identity)
     );
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<NodeDetailsMetricDataResponse>(
-    '/api/metrics/node_details',
+  const { error, loading, response, makeRequest } = useHTTPRequest<InventoryMetaResponse>(
+    '/api/infra/inventory/meta',
     'POST',
     JSON.stringify({
-      metrics,
-      nodeId,
-      nodeType,
-      timerange,
-      cloudId,
       sourceId,
+      nodeType,
     }),
     decodeResponse
   );
 
+  useEffect(() => {
+    makeRequest();
+  }, [makeRequest]);
+
   return {
     error,
     loading,
-    metrics: response ? response.metrics : [],
+    accounts: response ? response.accounts : [],
+    regions: response ? response.regions : [],
     makeRequest,
   };
 }
