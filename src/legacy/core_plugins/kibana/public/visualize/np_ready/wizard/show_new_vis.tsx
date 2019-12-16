@@ -24,6 +24,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 import { NewVisModal } from './new_vis_modal';
 import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
+import { UsageCollectionSetup } from '../../../../../../../plugins/usage_collection/public';
 
 interface ShowNewVisModalParams {
   editorParams?: string[];
@@ -34,7 +35,8 @@ export function showNewVisModal(
   { editorParams = [] }: ShowNewVisModalParams = {},
   addBasePath: (path: string) => string,
   uiSettings: IUiSettingsClient,
-  savedObjects: SavedObjectsStart
+  savedObjects: SavedObjectsStart,
+  usageCollection?: UsageCollectionSetup
 ) {
   const container = document.createElement('div');
   const onClose = () => {
@@ -53,6 +55,7 @@ export function showNewVisModal(
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         savedObjects={savedObjects}
+        usageCollection={usageCollection}
       />
     </I18nProvider>
   );

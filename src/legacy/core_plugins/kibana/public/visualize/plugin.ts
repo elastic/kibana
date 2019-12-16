@@ -30,7 +30,7 @@ import {
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
@@ -47,6 +47,7 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
 } from './legacy_imports';
 import { SavedVisualizations } from './np_ready/types';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
@@ -69,6 +70,7 @@ export interface VisualizePluginSetupDependencies {
   };
   home: HomePublicPluginSetup;
   kibana_legacy: KibanaLegacySetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class VisualizePlugin implements Plugin {
@@ -83,7 +85,12 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    { home, kibana_legacy, __LEGACY: { getAngularDependencies } }: VisualizePluginSetupDependencies
+    {
+      home,
+      kibana_legacy,
+      __LEGACY: { getAngularDependencies },
+      usageCollection,
+    }: VisualizePluginSetupDependencies
   ) {
     kibana_legacy.registerLegacyApp({
       id: 'visualize',
@@ -121,6 +128,7 @@ export class VisualizePlugin implements Plugin {
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
+          usageCollection,
         };
         setServices(deps);
 

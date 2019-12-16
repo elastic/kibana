@@ -22,16 +22,17 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics/src';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 import { VisType } from '../../legacy_imports';
 import { VisualizeConstants } from '../visualize_constants';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../../../ui_metric/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import {
   TypesStart,
   VisTypeAlias,
 } from '../../../../../visualizations/public/np_ready/public/types';
+import { UsageCollectionSetup } from '../../../../../../../plugins/usage_collection/public';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ interface TypeSelectionProps {
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 interface TypeSelectionState {
@@ -56,7 +58,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private readonly isLabsEnabled: boolean;
-  private readonly trackUiMetric: ReturnType<typeof createUiStatsReporter>;
+  private readonly trackUiMetric:
+    | ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void)
+    | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);
@@ -66,7 +70,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       showSearchVisModal: false,
     };
 
-    this.trackUiMetric = createUiStatsReporter('visualize');
+    this.trackUiMetric = this.props.usageCollection?.reportUiStats.bind(
+      this.props.usageCollection,
+      'visualize'
+    );
   }
 
   public render() {
@@ -132,7 +139,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private redirectToVis(visType: VisType | VisTypeAlias, searchType?: string, searchId?: string) {
-    this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+    if (this.trackUiMetric) {
+      this.trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+    }
 
     if ('aliasUrl' in visType) {
       window.location.assign(this.props.addBasePath(visType.aliasUrl));

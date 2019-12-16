@@ -35,7 +35,7 @@ import 'uiExports/visualize';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 
 import { Legacy } from 'kibana';
 
@@ -200,7 +200,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         },
         npStart.core.http.basePath.prepend,
         npStart.core.uiSettings,
-        npStart.core.savedObjects
+        npStart.core.savedObjects,
+        npSetup.plugins.usageCollection
       );
     }
     return undefined;

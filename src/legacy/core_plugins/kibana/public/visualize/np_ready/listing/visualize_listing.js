@@ -37,6 +37,7 @@ export function initListingDirective(app) {
       ['addBasePath', { watchDepth: 'reference' }],
       ['uiSettings', { watchDepth: 'reference' }],
       ['savedObjects', { watchDepth: 'reference' }],
+      ['usageCollection', { watchDepth: 'reference' }],
       'isOpen',
     ])
   );
@@ -58,6 +59,7 @@ export function VisualizeListingController($injector, createNewVis) {
     uiSettings,
     visualizations,
     core: { docLinks, savedObjects },
+    usageCollection,
   } = getServices();
   const kbnUrl = $injector.get('kbnUrl');
 
@@ -68,6 +70,7 @@ export function VisualizeListingController($injector, createNewVis) {
   this.addBasePath = addBasePath;
   this.uiSettings = uiSettings;
   this.savedObjects = savedObjects;
+  this.usageCollection = usageCollection;
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
