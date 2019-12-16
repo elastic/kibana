@@ -62,6 +62,8 @@
         packageNames: [
           'core-js',
           '@types/core-js',
+          '@babel/preset-react',
+          '@types/babel__preset-react',
           '@babel/preset-typescript',
           '@types/babel__preset-typescript',
         ],
