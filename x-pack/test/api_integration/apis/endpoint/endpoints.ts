@@ -12,10 +12,10 @@ export default function({ getService }: FtrProviderContext) {
   describe('`endpoint` test endpoints api', () => {
     before(() => esArchiver.load('endpoint/endpoints'));
     after(() => esArchiver.unload('endpoint/endpoints'));
-    describe('GET /api/endpoint/endpoints', () => {
+    describe('POST /api/endpoint/endpoints', () => {
       it('endpoints should return one entry for each endpoint', async () => {
         await supertest
-          .get('/api/endpoint/endpoints')
+          .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)

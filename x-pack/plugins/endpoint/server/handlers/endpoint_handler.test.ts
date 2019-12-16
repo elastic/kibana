@@ -105,6 +105,13 @@ describe('test endpoint handler', () => {
               },
             },
           },
+          sort: [
+            {
+              created_at: {
+                order: 'desc',
+              },
+            },
+          ],
         },
         index: 'endpoint-agent*',
       });
@@ -158,6 +165,13 @@ describe('test endpoint handler', () => {
               },
             },
           },
+          sort: [
+            {
+              created_at: {
+                order: 'desc',
+              },
+            },
+          ],
         },
         index: 'endpoint-agent*',
       });

@@ -51,22 +51,27 @@ const columns = [
     render: (name: string, item: { _id: string }) => {
       return <EndpointName name={name} path={`/endpoints/view/${item._id}`} />;
     },
+    'data-test-subj': 'indexTableCellName',
   },
   {
     field: '_source.host.ip',
     name: 'IP Address',
+    'data-test-subj': 'indexTableCellIp',
   },
   {
     field: '_source.host.os.full',
     name: 'Operating System',
+    'data-test-subj': 'indexTableCellOs',
   },
   {
     field: '_source.endpoint.domain',
     name: 'Domain',
+    'data-test-subj': 'indexTableCellDomain',
   },
   {
     field: '_source.host.name',
     name: 'Host Name',
+    'data-test-subj': 'indexTableCellHost',
   },
 ];
 

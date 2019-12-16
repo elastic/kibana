@@ -37,6 +37,7 @@ export class SearchBar extends Component<SearchBarProps, SearchBarState> {
           placeholder: 'try _source.host.ip:"10.11.12.13"',
           incremental: false,
           filters: [],
+          'data-test-subj': 'endpointsSearchBar',
         }}
         onChange={this.defaultOnChange}
       />

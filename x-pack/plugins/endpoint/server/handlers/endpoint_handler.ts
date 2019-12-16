@@ -7,25 +7,25 @@
 import { KibanaRequest } from 'kibana/server';
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { EndpointAppContext, EndpointData } from '../types';
+import { EndpointQueryBuilder } from '../services/query/endpoint_query_builder';
 
 export interface EndpointRequestContext {
   findEndpoint: (
     endpointId: string,
-    request: KibanaRequest
+    request: KibanaRequest<any, any, any>
   ) => Promise<SearchResponse<EndpointData>>;
   findLatestOfAllEndpoints: (request: KibanaRequest) => Promise<SearchResponse<EndpointData>>;
 }
 
 export class EndpointHandler implements EndpointRequestContext {
   private readonly endpointAppContext: EndpointAppContext;
-
   constructor(endpointAppContext: EndpointAppContext) {
     this.endpointAppContext = endpointAppContext;
   }
 
   async findEndpoint(
     endpointId: string,
-    request: KibanaRequest
+    request: KibanaRequest<any, any, any>
   ): Promise<SearchResponse<EndpointData>> {
     const searchParams: SearchParams = {
       body: {
@@ -48,37 +48,13 @@ export class EndpointHandler implements EndpointRequestContext {
     return await this.search(searchParams, request);
   }
 
-  async findLatestOfAllEndpoints(request: KibanaRequest): Promise<SearchResponse<EndpointData>> {
-    const config = await this.endpointAppContext.config();
-    const query = request.query as any;
-    const pageSize: number = query.pageSize || config.searchResultDefaultPageSize;
-    const pageIndex: number = query.pageIndex || config.searchResultDefaultFirstPageIndex;
-    const searchParams: SearchParams = {
-      from: pageIndex * pageSize,
-      size: pageSize,
-      body: {
-        query: {
-          match_all: {},
-        },
-        collapse: {
-          field: 'machine_id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            sort: [{ created_at: 'desc' }],
-          },
-        },
-        aggs: {
-          total: {
-            cardinality: {
-              field: 'machine_id',
-            },
-          },
-        },
-      },
-      index: 'endpoint-agent*',
-    };
-    return await this.search(searchParams, request);
+  async findLatestOfAllEndpoints(
+    request: KibanaRequest<any, any, any>
+  ): Promise<SearchResponse<EndpointData>> {
+    return await this.search(
+      await new EndpointQueryBuilder(request, this.endpointAppContext).toQuery(),
+      request
+    );
   }
 
   private async search(
