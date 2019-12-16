@@ -58,7 +58,10 @@ export default function({ getService, getPageObjects }) {
 
     it('should add new visualization from dashboard', async () => {
       await testSubjects.click('addVisualizationButton');
-      await dashboardVisualizations.createAndAddMarkdown({ name: 'Dashboard Test Markdown', markdown: 'Markdown text' }, false);
+      await dashboardVisualizations.createAndAddMarkdown(
+        { name: 'Dashboard Test Markdown', markdown: 'Markdown text' },
+        false
+      );
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Markdown text']);
     });
