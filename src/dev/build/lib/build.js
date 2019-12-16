@@ -23,7 +23,7 @@ export function createBuild({ config, oss }) {
   const name = oss ? 'kibana-oss' : 'kibana';
   const logTag = oss ? chalk`{magenta [kibana-oss]}` : chalk`{cyan [  kibana  ]}`;
 
-  return new class Build {
+  return new (class Build {
     isOss() {
       return !!oss;
     }
@@ -56,5 +56,5 @@ export function createBuild({ config, oss }) {
     getLogTag() {
       return logTag;
     }
-  }();
+  })();
 }

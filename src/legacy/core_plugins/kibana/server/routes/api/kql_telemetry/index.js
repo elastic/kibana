@@ -32,8 +32,10 @@ export function registerKqlTelemetryApi(server) {
       },
       tags: ['api'],
     },
-    handler: async function (request) {
-      const { savedObjects: { getSavedObjectsRepository } } = server;
+    handler: async function(request) {
+      const {
+        savedObjects: { getSavedObjectsRepository },
+      } = server;
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
       const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
@@ -44,14 +46,12 @@ export function registerKqlTelemetryApi(server) {
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
-        await internalRepository.incrementCounter(
-          'kql-telemetry',
-          'kql-telemetry',
-          counterName,
-        );
-      }
-      catch (error) {
-        return new Boom('Something went wrong', { statusCode: error.status, data: { success: false } });
+        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', counterName);
+      } catch (error) {
+        return new Boom('Something went wrong', {
+          statusCode: error.status,
+          data: { success: false },
+        });
       }
 
       return { success: true };

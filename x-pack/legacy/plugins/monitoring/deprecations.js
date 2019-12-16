@@ -19,10 +19,13 @@ export const deprecations = () => {
   return [
     (settings, log) => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
-      const emailNotificationsEnabled = clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
+      const emailNotificationsEnabled =
+        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
       if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        log(`Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`);
+        log(
+          `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
+        );
       }
-    }
+    },
   ];
 };

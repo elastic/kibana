@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * React component for rendering a select element with limit options.
  */
@@ -13,9 +11,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 
 import { injectObservablesAsProps } from '../../util/observable_utils';
 
@@ -35,7 +31,7 @@ const LIMIT_OPTIONS = [
 
 function optionValueToLimit(value) {
   // Get corresponding limit object with required display and val properties from the specified value.
-  let limit = LIMIT_OPTIONS.find(opt => (opt.val === value));
+  let limit = LIMIT_OPTIONS.find(opt => opt.val === value);
 
   // Default to 10 if supplied value doesn't map to one of the options.
   if (limit === undefined) {
@@ -53,19 +49,15 @@ const EUI_OPTIONS = LIMIT_OPTIONS.map(({ display, val }) => ({
 export const limit$ = new BehaviorSubject(LIMIT_OPTIONS[1]);
 
 class SelectLimitUnwrapped extends Component {
-  onChange = (e) => {
+  onChange = e => {
     const valueDisplay = e.target.value;
     const limit = optionValueToLimit(optionsMap[valueDisplay]);
     limit$.next(limit);
-  }
+  };
 
   render() {
     return (
-      <EuiSelect
-        options={EUI_OPTIONS}
-        onChange={this.onChange}
-        value={this.props.limit.display}
-      />
+      <EuiSelect options={EUI_OPTIONS} onChange={this.onChange} value={this.props.limit.display} />
     );
   }
 }
@@ -78,8 +70,11 @@ SelectLimitUnwrapped.defaultProps = {
   limit: LIMIT_OPTIONS[1],
 };
 
-const SelectLimit = injectObservablesAsProps({
-  limit: limit$
-}, SelectLimitUnwrapped);
+const SelectLimit = injectObservablesAsProps(
+  {
+    limit: limit$,
+  },
+  SelectLimitUnwrapped
+);
 
 export { SelectLimit };

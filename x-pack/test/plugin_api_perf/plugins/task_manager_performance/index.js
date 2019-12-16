@@ -200,7 +200,7 @@ export default function TaskManagerPerformanceAPI(kibana) {
             claimAvailableTasksNoTasks,
             claimAvailableTasksNoAvailableWorkers,
             taskPoolAttemptToRun,
-            taskRunnerMarkTaskAsRunning
+            taskRunnerMarkTaskAsRunning,
           } = performance;
 
           const perfRes = {
@@ -246,7 +246,7 @@ function avg(items) {
 }
 
 function resetPerfState(target) {
-  if(target.performanceObserver) {
+  if (target.performanceObserver) {
     target.performanceObserver.disconnect();
   }
 
@@ -282,7 +282,7 @@ function resetPerfState(target) {
       taskPoolAttemptToRun: [],
       taskRunnerMarkTaskAsRunning: [],
 
-      summarize: []
+      summarize: [],
     },
   });
 
@@ -298,13 +298,19 @@ function resetPerfState(target) {
           performanceState.performance.elasticsearchApiCalls.timeUntilFirstMarkAsRun.push(duration);
           break;
         case 'perfTask.firstMarkAsRunningTillRan':
-          performanceState.performance.elasticsearchApiCalls.firstMarkAsRunningTillRan.push(duration);
+          performanceState.performance.elasticsearchApiCalls.firstMarkAsRunningTillRan.push(
+            duration
+          );
           break;
         case 'perfTask.markUntilRun':
-          performanceState.performance.elasticsearchApiCalls.timeFromMarkAsRunTillRun.push(duration);
+          performanceState.performance.elasticsearchApiCalls.timeFromMarkAsRunTillRun.push(
+            duration
+          );
           break;
         case 'perfTask.runUntilNextMarkAsRunning':
-          performanceState.performance.elasticsearchApiCalls.timeFromRunTillNextMarkAsRun.push(duration);
+          performanceState.performance.elasticsearchApiCalls.timeFromRunTillNextMarkAsRun.push(
+            duration
+          );
           break;
         case 'claimAvailableTasks':
           performanceState.performance.elasticsearchApiCalls.claimAvailableTasks.push(duration);
@@ -350,7 +356,7 @@ function resetPerfState(target) {
         case 'perfTest.duration':
           observer.disconnect();
           const { summarize } = performanceState.performance;
-          if(summarize && summarize.length) {
+          if (summarize && summarize.length) {
             summarize.splice(0, summarize.length).forEach(([resolve, summarize]) => {
               resolve(summarize(duration));
             });

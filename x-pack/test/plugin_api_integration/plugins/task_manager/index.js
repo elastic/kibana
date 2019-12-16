@@ -8,10 +8,9 @@ const { EventEmitter } = require('events');
 
 import { initRoutes } from './init_routes';
 
-
-const once = function (emitter, event) {
+const once = function(emitter, event) {
   return new Promise(resolve => {
-    emitter.once(event, (data) => resolve(data || {}));
+    emitter.once(event, data => resolve(data || {}));
   });
 };
 
@@ -27,7 +26,6 @@ export default function TaskTestingAPI(kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-
 
     init(server) {
       const taskManager = server.plugins.task_manager;
@@ -51,7 +49,7 @@ export default function TaskTestingAPI(kibana) {
             const runParams = {
               ...params,
               // if this task requires custom params provided async - wait for them
-              ...(params.waitForParams ? await once(taskTestingEvents, id) :  {})
+              ...(params.waitForParams ? await once(taskTestingEvents, id) : {}),
             };
 
             if (runParams.failWith) {
@@ -60,7 +58,8 @@ export default function TaskTestingAPI(kibana) {
               }
             }
 
-            const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+            const callCluster = server.plugins.elasticsearch.getCluster('admin')
+              .callWithInternalUser;
             await callCluster('index', {
               index: '.kibana_task_manager_test_result',
               body: {
@@ -95,7 +94,8 @@ export default function TaskTestingAPI(kibana) {
         singleAttemptSampleTask: {
           ...defaultSampleTaskConfig,
           title: 'Failing Sample Task',
-          description: 'A sample task for testing the task_manager that fails on the first attempt to run.',
+          description:
+            'A sample task for testing the task_manager that fails on the first attempt to run.',
           // fail after the first failed run
           maxAttempts: 1,
         },

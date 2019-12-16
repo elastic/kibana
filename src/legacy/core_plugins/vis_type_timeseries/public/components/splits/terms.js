@@ -64,7 +64,10 @@ export const SplitByTermsUI = ({
   };
   const terms = {
     value: '_key',
-    label: intl.formatMessage({ id: 'visTypeTimeseries.splits.terms.termsLabel', defaultMessage: 'Terms' }),
+    label: intl.formatMessage({
+      id: 'visTypeTimeseries.splits.terms.termsLabel',
+      defaultMessage: 'Terms',
+    }),
   };
 
   const dirOptions = [
@@ -104,7 +107,10 @@ export const SplitByTermsUI = ({
           <EuiFormRow
             id={htmlId('group')}
             label={
-              <FormattedMessage id="visTypeTimeseries.splits.terms.groupByLabel" defaultMessage="Group by" />
+              <FormattedMessage
+                id="visTypeTimeseries.splits.terms.groupByLabel"
+                defaultMessage="Group by"
+              />
             }
           >
             <GroupBySelect
@@ -143,7 +149,10 @@ export const SplitByTermsUI = ({
             <EuiFormRow
               id={htmlId('include')}
               label={
-                <FormattedMessage id="visTypeTimeseries.splits.terms.includeLabel" defaultMessage="Include" />
+                <FormattedMessage
+                  id="visTypeTimeseries.splits.terms.includeLabel"
+                  defaultMessage="Include"
+                />
               }
             >
               <EuiFieldText
@@ -156,7 +165,10 @@ export const SplitByTermsUI = ({
             <EuiFormRow
               id={htmlId('exclude')}
               label={
-                <FormattedMessage id="visTypeTimeseries.splits.terms.excludeLabel" defaultMessage="Exclude" />
+                <FormattedMessage
+                  id="visTypeTimeseries.splits.terms.excludeLabel"
+                  defaultMessage="Exclude"
+                />
               }
             >
               <EuiFieldText
@@ -172,7 +184,9 @@ export const SplitByTermsUI = ({
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('top')}
-            label={<FormattedMessage id="visTypeTimeseries.splits.terms.topLabel" defaultMessage="Top" />}
+            label={
+              <FormattedMessage id="visTypeTimeseries.splits.terms.topLabel" defaultMessage="Top" />
+            }
           >
             <EuiFieldNumber
               placeholder={intl.formatMessage({
@@ -188,7 +202,10 @@ export const SplitByTermsUI = ({
           <EuiFormRow
             id={htmlId('order')}
             label={
-              <FormattedMessage id="visTypeTimeseries.splits.terms.orderByLabel" defaultMessage="Order by" />
+              <FormattedMessage
+                id="visTypeTimeseries.splits.terms.orderByLabel"
+                defaultMessage="Order by"
+              />
             }
           >
             <MetricSelect
@@ -205,7 +222,10 @@ export const SplitByTermsUI = ({
           <EuiFormRow
             id={htmlId('direction')}
             label={
-              <FormattedMessage id="visTypeTimeseries.splits.terms.directionLabel" defaultMessage="Direction" />
+              <FormattedMessage
+                id="visTypeTimeseries.splits.terms.directionLabel"
+                defaultMessage="Direction"
+              />
             }
           >
             <EuiComboBox

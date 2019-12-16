@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import pipeline from './fixtures/load';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('list', () => {
@@ -22,11 +22,7 @@ export default function ({ getService }) {
     });
 
     it('should return the specified pipeline', async () => {
-      const { body } = await supertest
-        .get(
-          '/api/logstash/pipeline/tweets_and_beats'
-        )
-        .expect(200);
+      const { body } = await supertest.get('/api/logstash/pipeline/tweets_and_beats').expect(200);
 
       expect(body).to.eql(pipeline);
     });
