@@ -19,8 +19,10 @@ export class EnrollmentApiKeyLib {
 
   public async listKeys(pagination: Pagination) {
     return await this.rest.get<ReturnTypeList<EnrollmentApiKey>>('/api/fleet/enrollment-api-keys', {
-      page: pagination.currentPage,
-      perPage: pagination.pageSize,
+      query: {
+        page: pagination.currentPage,
+        perPage: pagination.pageSize,
+      },
     });
   }
 
@@ -38,8 +40,10 @@ export class EnrollmentApiKeyLib {
     return await this.rest.post<ReturnTypeCreate<EnrollmentApiKey>>(
       `/api/fleet/enrollment-api-keys`,
       {
-        name: data.name,
-        policy_id: data.policyId,
+        body: {
+          name: data.name,
+          policy_id: data.policyId,
+        },
       }
     );
   }
