@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
-
 import { moveApplyGlobalQueryToSources } from './move_apply_global_query';
 
 describe('moveApplyGlobalQueryToSources', () => {

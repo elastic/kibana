@@ -16,6 +16,7 @@ import { defaultColdPhase, defaultWarmPhase } from '../store/defaults';
 import { PHASE_INDEX_PRIORITY } from '../constants';
 
 import { getUiMetricsForPhases } from './ui_metric';
+jest.mock('ui/new_platform');
 
 describe('getUiMetricsForPhases', () => {
   test('gets cold phase', () => {
