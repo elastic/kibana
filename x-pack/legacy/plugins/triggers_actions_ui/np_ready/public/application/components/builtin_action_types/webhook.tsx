@@ -353,8 +353,8 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         onClick={() => addHeader()}
       >
         <FormattedMessage
-          defaultMessage={'Add HTTP header'}
-          id="xpack.triggersActionsUI.components.builtinActionTypes.addHeaderButton"
+          defaultMessage="Add HTTP header"
+          id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton"
         />
       </EuiButton>
 
@@ -366,7 +366,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                defaultMessage={'HTTP headers list:'}
+                defaultMessage="HTTP headers list:"
                 id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.httpHeadersTitle"
               />
             </h5>

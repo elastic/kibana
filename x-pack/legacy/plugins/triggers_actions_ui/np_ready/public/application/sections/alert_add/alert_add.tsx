@@ -346,7 +346,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           <EuiTitle size="s">
             <h5 id="selectedAlertTypeTitle">
               <FormattedMessage
-                defaultMessage={'Trigger: {alertType}'}
+                defaultMessage="Trigger: {alertType}"
                 id="xpack.triggersActionsUI.sections.alertAdd.selectedAlertTypeTitle"
                 values={{ alertType: alertType ? alertType.name : '' }}
               />
@@ -361,7 +361,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
             }}
           >
             <FormattedMessage
-              defaultMessage={'Change'}
+              defaultMessage="Change"
               id="xpack.triggersActionsUI.sections.alertAdd.changeAlertTypeLink"
             />
           </EuiLink>
@@ -432,8 +432,9 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   <EuiTitle size="s">
                     <h5>
                       <FormattedMessage
-                        defaultMessage={`Action: ${actionConnector.name}`}
+                        defaultMessage="Action: {actionConnectorName}"
                         id="xpack.triggersActionsUI.sections.alertAdd.selectAlertActionTypeEditTitle"
+                        values={{ actionConnectorName: actionConnector.name }}
                       />
                     </h5>
                   </EuiTitle>
@@ -526,7 +527,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
         <EuiTitle size="s">
           <h5 id="alertTypeTitle">
             <FormattedMessage
-              defaultMessage={'Select a trigger'}
+              defaultMessage="Select a trigger"
               id="xpack.triggersActionsUI.sections.alertAdd.selectAlertTypeTitle"
             />
           </h5>
@@ -584,7 +585,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
           <EuiTitle size="s">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage={'Create Alert'}
+                defaultMessage="Create Alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
             </h3>
@@ -757,7 +758,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                 <EuiTitle size="s">
                   <h5 id="alertActionTypeTitle">
                     <FormattedMessage
-                      defaultMessage={'Select an action'}
+                      defaultMessage="Select an action"
                       id="xpack.triggersActionsUI.sections.alertAdd.selectAlertActionTypeTitle"
                     />
                   </h5>
@@ -767,8 +768,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
                   {isLoadingActionTypes ? (
                     <SectionLoading>
                       <FormattedMessage
-                        id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
-                        defaultMessage="Loading watch…"
+                        id="xpack.triggersActionsUI.sections.alertAdd.loadingActionTypesDescription"
+                        defaultMessage="Loading action types…"
                       />
                     </SectionLoading>
                   ) : (

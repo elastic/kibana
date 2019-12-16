@@ -46,8 +46,8 @@ export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
             <EuiTitle size="s">
               <h3 id="flyoutTitle">
                 <FormattedMessage
-                  defaultMessage={'Edit connector'}
-                  id="xpack.triggersActionsUI.sections.actionConnectorForm.flyoutTitle"
+                  defaultMessage="Edit connector"
+                  id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutTitle"
                 />
               </h3>
             </EuiTitle>

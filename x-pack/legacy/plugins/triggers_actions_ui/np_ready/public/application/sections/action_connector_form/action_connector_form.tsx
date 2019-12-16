@@ -113,7 +113,7 @@ export const ActionConnectorForm = ({
       if (connector.id === undefined) {
         savedConnector = await createActionConnector({ http, connector });
         message = i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+          'xpack.triggersActionsUI.sections.actionConnectorForm.createSuccessNotificationText',
           {
             defaultMessage: "Created '{connectorName}'",
             values: {
@@ -124,7 +124,7 @@ export const ActionConnectorForm = ({
       } else {
         savedConnector = await updateActionConnector({ http, connector, id: connector.id });
         message = i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.saveSuccessNotificationText',
+          'xpack.triggersActionsUI.sections.actionConnectorForm.updateSuccessNotificationText',
           {
             defaultMessage: "Updated '{connectorName}'",
             values: {

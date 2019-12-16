@@ -72,8 +72,8 @@ export const ConnectorAddFlyout = () => {
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage
-                      defaultMessage={'Connector for '}
-                      id="xpack.triggersActionsUI.sections.actionConnectorForm.flyoutTitle"
+                      defaultMessage="Connector for "
+                      id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
                     />
                     {actionType.name}
                   </h3>
@@ -84,10 +84,10 @@ export const ConnectorAddFlyout = () => {
               </Fragment>
             ) : (
               <EuiTitle size="s">
-                <h3 id="flyoutTitle">
+                <h3 id="selectConnectorFlyoutTitle">
                   <FormattedMessage
-                    defaultMessage={'Select a connector to create'}
-                    id="xpack.triggersActionsUI.sections.actionConnectorForm.flyoutTitle"
+                    defaultMessage="Select a connector to create"
+                    id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"
                   />
                 </h3>
               </EuiTitle>
