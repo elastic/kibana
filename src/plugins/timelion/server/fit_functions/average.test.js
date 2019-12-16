@@ -17,15 +17,14 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/timelion/server/fit_functions/average`);
+import fn from './average';
 import moment from 'moment';
 const expect = require('chai').expect;
 import _ from 'lodash';
 
-describe('average.js', function () {
-
-  describe('average', function () {
-    it('fills holes in the data', function () {
+describe('average.js', function() {
+  describe('average', function() {
+    it('fills holes in the data', function() {
       const data = [
         [moment.utc('1980', 'YYYY').valueOf(), 10],
         [moment.utc('1983', 'YYYY').valueOf(), 40],
@@ -43,8 +42,8 @@ describe('average.js', function () {
       expect(_.map(fn(data, target), 1)).to.eql([10, 20, 30, 40, 50]);
     });
 
-    describe('sampling', function () {
-      it('up', function () {
+    describe('sampling', function() {
+      it('up', function() {
         const data = [
           [moment.utc('1981', 'YYYY').valueOf(), 10],
           [moment.utc('1983', 'YYYY').valueOf(), 30],
@@ -62,8 +61,7 @@ describe('average.js', function () {
         expect(_.map(fn(data, target), 1)).to.eql([10, 20, 30, 50, 70]);
       });
 
-
-      it('down', function () {
+      it('down', function() {
         const data = [
           [moment.utc('1980', 'YYYY').valueOf(), 0],
           [moment.utc('1981', 'YYYY').valueOf(), 2],
@@ -87,7 +85,6 @@ describe('average.js', function () {
         // Essentially the algorithm is left aligned instead of centered
         expect(_.map(fn(data, target), 1)).to.eql([1, 5, 9]);
       });
-
     });
   });
 });

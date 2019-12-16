@@ -18,15 +18,18 @@
  */
 
 import _ from 'lodash';
+import { IRouter } from 'kibana/server';
 
 export function validateEsRoute(router: IRouter) {
-  server.route({
-    method: 'GET',
-    path: '/api/timelion/validate/es',
-    handler: async function (request) {
-      const uiSettings = await request.getUiSettingsService().getAll();
+  router.get(
+    {
+      path: '/api/timelion/validate/es',
+      validate: false,
+    },
+    async function(context, request, response) {
+      const uiSettings = await context.core.uiSettings.client.getAll();
 
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
 
       const timefield = uiSettings['timelion:es.timefield'];
 
@@ -36,39 +39,43 @@ export function validateEsRoute(router: IRouter) {
           aggs: {
             maxAgg: {
               max: {
-                field: timefield
-              }
+                field: timefield,
+              },
             },
             minAgg: {
               min: {
-                field: timefield
-              }
-            }
+                field: timefield,
+              },
+            },
           },
-          size: 0
-        }
+          size: 0,
+        },
       };
 
       let resp = {};
       try {
-        resp = await callWithRequest(request, 'search', body);
+        resp = await callAsCurrentUser('search', body);
       } catch (errResp) {
         resp = errResp;
       }
 
       if (_.has(resp, 'aggregations.maxAgg.value') && _.has(resp, 'aggregations.minAgg.value')) {
-        return {
-          ok: true,
-          field: timefield,
-          min: _.get(resp, 'aggregations.minAgg.value'),
-          max: _.get(resp, 'aggregations.maxAgg.value')
-        };
+        return response.ok({
+          body: {
+            ok: true,
+            field: timefield,
+            min: _.get(resp, 'aggregations.minAgg.value'),
+            max: _.get(resp, 'aggregations.maxAgg.value'),
+          },
+        });
       }
 
-      return {
-        ok: false,
-        resp: resp
-      };
+      return response.ok({
+        body: {
+          ok: false,
+          resp,
+        },
+      });
     }
-  });
+  );
 }

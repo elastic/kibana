@@ -17,23 +17,21 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/timelion/server/series_functions/max`);
+import fn from './max';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('max.js', () => {
-
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/seriesList.js')();
+    seriesList = require('./fixtures/series_list.js')();
   });
 
   it('keeps the max of a series vs a number', () => {
-    return invoke(fn, [seriesList, 20]).then((r) => {
+    return invoke(fn, [seriesList, 20]).then(r => {
       expect(_.map(r.output.list[0].data, 1)).to.eql([20, 20, 82, 20]);
     });
   });
-
 });

@@ -21,9 +21,6 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { LegacyPluginApi, LegacyPluginInitializer } from 'src/legacy/plugin_discovery/types';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { plugin } from './server';
-import { CustomCoreSetup } from './server/plugin';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
@@ -192,12 +189,6 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
           category: ['timelion'],
         },
       },
-    },
-    init: (server: Legacy.Server) => {
-      const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
-
-      plugin(initializerContext).setup(core);
     },
   });
 

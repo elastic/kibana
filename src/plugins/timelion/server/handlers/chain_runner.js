@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import _ from 'lodash';
 import Bluebird from 'bluebird';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +51,7 @@ export default function chainRunner(tlConfig) {
       if (_.isObject(item)) {
         switch (item.type) {
           case 'function': {
-            const itemFunctionDef = tlConfig.server.plugins.timelion.getFunction(item.function);
+            const itemFunctionDef = tlConfig.getFunction(item.function);
             if (itemFunctionDef.cacheKey && queryCache[itemFunctionDef.cacheKey(item)]) {
               stats.queryCount++;
               return Bluebird.resolve(_.cloneDeep(queryCache[itemFunctionDef.cacheKey(item)]));
@@ -66,7 +65,7 @@ export default function chainRunner(tlConfig) {
             } else {
               reference = {
                 type: 'chainList',
-                list: sheet[item.plot - 1]
+                list: sheet[item.plot - 1],
               };
             }
             return invoke('first', [reference]);
@@ -98,7 +97,7 @@ export default function chainRunner(tlConfig) {
 
     args = _.map(args, resolveArgument);
 
-    return Bluebird.all(args).then(function (args) {
+    return Bluebird.all(args).then(function(args) {
       args.byName = indexArguments(functionDef, args);
       return functionDef.fn(args, tlConfig);
     });
@@ -120,21 +119,23 @@ export default function chainRunner(tlConfig) {
       promise = invoke(link.function, args);
     }
 
-    return promise.then(function (result) {
+    return promise.then(function(result) {
       return invokeChain({ type: 'chain', chain: chain }, [result]);
     });
-
   }
 
   function resolveChainList(chainList) {
-    const seriesList = _.map(chainList, function (chain) {
+    const seriesList = _.map(chainList, function(chain) {
       const values = invoke('first', [chain]);
-      return values.then(function (args) {
+      return values.then(function(args) {
         return args;
       });
     });
-    return Bluebird.all(seriesList).then(function (args) {
-      const list = _.chain(args).pluck('list').flatten().value();
+    return Bluebird.all(seriesList).then(function(args) {
+      const list = _.chain(args)
+        .pluck('list')
+        .flatten()
+        .value();
       const seriesList = _.merge.apply(this, _.flatten([{}, args]));
       seriesList.list = list;
       return seriesList;
@@ -142,11 +143,10 @@ export default function chainRunner(tlConfig) {
   }
 
   function preProcessSheet(sheet) {
-
     let queries = {};
-    _.each(sheet, function (chainList, i) {
+    _.each(sheet, function(chainList, i) {
       try {
-        const queriesInCell = _.mapValues(preprocessChain(chainList), function (val) {
+        const queriesInCell = _.mapValues(preprocessChain(chainList), function(val) {
           val.cell = i;
           return val;
         });
@@ -157,16 +157,18 @@ export default function chainRunner(tlConfig) {
     });
     queries = _.values(queries);
 
-    const promises = _.chain(queries).values().map(function (query) {
-      return invoke(query.function, query.arguments);
-    }).value();
+    const promises = _.chain(queries)
+      .values()
+      .map(function(query) {
+        return invoke(query.function, query.arguments);
+      })
+      .value();
 
-    return Bluebird.settle(promises).then(function (resolvedDatasources) {
+    return Bluebird.settle(promises).then(function(resolvedDatasources) {
+      stats.queryTime = new Date().getTime();
 
-      stats.queryTime = (new Date()).getTime();
-
-      _.each(queries, function (query, i) {
-        const functionDef = tlConfig.server.plugins.timelion.getFunction(query.function);
+      _.each(queries, function(query, i) {
+        const functionDef = tlConfig.getFunction(query.function);
         const resolvedDatasource = resolvedDatasources[i];
 
         if (resolvedDatasource.isRejected()) {
@@ -198,31 +200,35 @@ export default function chainRunner(tlConfig) {
       tlConfig.time.to,
       tlConfig.settings['timelion:target_buckets'] || 200,
       tlConfig.time.interval,
-      tlConfig.settings['timelion:min_interval']  || '1ms',
+      tlConfig.settings['timelion:min_interval'] || '1ms'
     );
 
     tlConfig.setTargetSeries();
 
-    stats.invokeTime = (new Date()).getTime();
+    stats.invokeTime = new Date().getTime();
     stats.queryCount = 0;
     queryCache = {};
 
     // This is setting the "global" sheet, required for resolving references
     sheet = parseSheet(request.sheet);
-    return preProcessSheet(sheet).then(function () {
-      return _.map(sheet, function (chainList, i) {
-        return resolveChainList(chainList).then(function (seriesList) {
-          stats.sheetTime = (new Date()).getTime();
-          return seriesList;
-        }).catch(function (e) {
-          throwWithCell(i, e);
-        });
+    return preProcessSheet(sheet).then(function() {
+      return _.map(sheet, function(chainList, i) {
+        return resolveChainList(chainList)
+          .then(function(seriesList) {
+            stats.sheetTime = new Date().getTime();
+            return seriesList;
+          })
+          .catch(function(e) {
+            throwWithCell(i, e);
+          });
       });
     });
   }
 
   return {
     processRequest: processRequest,
-    getStats: function () { return stats; }
+    getStats: function() {
+      return stats;
+    },
   };
 }

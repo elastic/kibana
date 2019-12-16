@@ -17,23 +17,21 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/timelion/server/series_functions/cusum`);
+import fn from './cusum';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('cusum.js', () => {
-
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/seriesList.js')();
+    seriesList = require('./fixtures/series_list.js')();
   });
 
   it('progressively adds the numbers in the list', () => {
-    return invoke(fn, [seriesList]).then((r) => {
+    return invoke(fn, [seriesList]).then(r => {
       expect(_.map(r.output.list[1].data, 1)).to.eql([100, 150, 200, 220]);
     });
   });
-
 });

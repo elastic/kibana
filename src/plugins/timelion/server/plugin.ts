@@ -17,12 +17,20 @@
  * under the License.
  */
 
-import { first, map } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
+import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { CoreSetup, PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
+import {
+  CoreSetup,
+  PluginInitializerContext,
+  RecursiveReadonly,
+} from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { ConfigSchema } from './config';
 import loadFunctions from './lib/load_functions';
+import { functionsRoute } from './routes/functions';
+import { validateEsRoute } from './routes/validate_es';
+import { runRoute } from './routes/run';
 
 /**
  * Describes public Timelion plugin contract returned at the `setup` stage.
@@ -43,11 +51,42 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    const globalConfig = await this.initializerContext.config.legacy.globalConfig$.pipe(first()).toPromise();
-    const shardTimeout = globalConfig.elasticsearch.shardTimeout.asMilliseconds();
-    const allowedUrls = config.graphiteUrls;
+    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
+      .pipe(first())
+      .toPromise();
+    const esShardTimeout = globalConfig.elasticsearch.shardTimeout.asMilliseconds();
+    const allowedGraphiteUrls = config.graphiteUrls || [];
 
     const functions = loadFunctions('series_functions');
+
+    const getFunction = (name: string) => {
+      if (functions[name]) {
+        return functions[name];
+      }
+
+      throw new Error(
+        i18n.translate('timelion.noFunctionErrorMessage', {
+          defaultMessage: 'No such function: {name}',
+          values: { name },
+        })
+      );
+    };
+
+    const logger = this.initializerContext.logger.get('timelion');
+
+    const router = core.http.createRouter();
+
+    const deps = {
+      esShardTimeout,
+      allowedGraphiteUrls,
+      functions,
+      getFunction,
+      logger,
+    };
+
+    functionsRoute(router, deps);
+    runRoute(router, deps);
+    validateEsRoute(router);
 
     return deepFreeze({ uiEnabled: config.ui.enabled });
   }

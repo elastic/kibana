@@ -17,23 +17,22 @@
  * under the License.
  */
 
-const fn = require(`../color`);
+import fn from './color';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('color.js', () => {
-
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/seriesList.js')();
+    seriesList = require('./fixtures/series_list.js')();
   });
 
   it('sets the color, on all series', () => {
-    return invoke(fn, [seriesList, '#eee']).then((r) => {
+    return invoke(fn, [seriesList, '#eee']).then(r => {
       const colors = _.map(r.output.list, 'color');
-      _.each(colors, (color) => expect(color).to.equal('#eee'));
+      _.each(colors, color => expect(color).to.equal('#eee'));
     });
   });
 
@@ -41,9 +40,9 @@ describe('color.js', () => {
     const expected = ['#000000', '#111111', '#222222', '#333333'];
     const fourLongList = {
       type: 'seriesList',
-      list: seriesList.list.slice(0, 4)
+      list: seriesList.list.slice(0, 4),
     };
-    return invoke(fn, [fourLongList, '#000:#333']).then((r) => {
+    return invoke(fn, [fourLongList, '#000:#333']).then(r => {
       const colors = _.map(r.output.list, 'color');
       _.each(colors, (color, i) => expect(color).to.equal(expected[i]));
     });
@@ -62,7 +61,7 @@ describe('color.js', () => {
   it('should work with series.length=1 and more colors', async () => {
     const oneLongList = {
       type: 'seriesList',
-      list: seriesList.list.slice(0, 1)
+      list: seriesList.list.slice(0, 1),
     };
     const colorsArg = '#000:#111';
 
@@ -72,9 +71,8 @@ describe('color.js', () => {
   });
 
   it('throws if you do not pass a color', () => {
-    invoke(fn, [seriesList, '']).catch((e) => {
+    invoke(fn, [seriesList, '']).catch(e => {
       expect(e).to.be.an(Error);
     });
   });
-
 });

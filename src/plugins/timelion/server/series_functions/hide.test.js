@@ -17,29 +17,27 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/timelion/server/series_functions/hide`);
+import fn from './hide';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('hide.js', () => {
-
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/seriesList.js')();
+    seriesList = require('./fixtures/series_list.js')();
   });
 
   it('hides a series', () => {
-    return invoke(fn, [seriesList, true]).then((r) => {
-      _.each(r.output.list, (series) => expect(series._hide).to.equal(true));
+    return invoke(fn, [seriesList, true]).then(r => {
+      _.each(r.output.list, series => expect(series._hide).to.equal(true));
     });
   });
 
   it('unhides a series', () => {
-    return invoke(fn, [seriesList, false]).then((r) => {
-      _.each(r.output.list, (series) => expect(series._hide).to.equal(false));
+    return invoke(fn, [seriesList, false]).then(r => {
+      _.each(r.output.list, series => expect(series._hide).to.equal(false));
     });
   });
-
 });

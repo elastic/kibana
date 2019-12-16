@@ -19,9 +19,9 @@
 
 import _ from 'lodash';
 import { IRouter } from 'kibana/server';
-import { TimelionFunctionInterface } from '../types';
+import { LoadFunctions } from '../lib/load_functions';
 
-export function functionsRoute(router: IRouter, functions: TimelionFunctionInterface[]) {
+export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {
   router.get(
     {
       path: '/api/timelion/functions',

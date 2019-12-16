@@ -56,10 +56,17 @@ export interface TimelionRequestQuery {
 
 export function runRoute(
   router: IRouter,
-  logger: Logger,
-  getFunction: (name: string) => TimelionFunctionInterface,
-  allowedGraphiteUrls: string[],
-  esShardTimeout: number
+  {
+    logger,
+    getFunction,
+    allowedGraphiteUrls,
+    esShardTimeout,
+  }: {
+    logger: Logger;
+    getFunction: (name: string) => TimelionFunctionInterface;
+    allowedGraphiteUrls: string[];
+    esShardTimeout: number;
+  }
 ) {
   router.post(
     {
@@ -85,6 +92,14 @@ export function runRoute(
                   }),
                 }),
               }),
+            })
+          ),
+          time: schema.maybe(
+            schema.object({
+              from: schema.maybe(schema.string()),
+              interval: schema.string(),
+              timezone: schema.string(),
+              to: schema.maybe(schema.string()),
             })
           ),
         }),

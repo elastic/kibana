@@ -17,31 +17,30 @@
  * under the License.
  */
 
-const fn = require(`src/plugins/timelion/server/series_functions/bars`);
+import fn from './bars';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('bars.js', () => {
-
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/seriesList.js')();
+    seriesList = require('./fixtures/series_list.js')();
   });
 
   it('creates the bars property, with defaults, on all series', () => {
-    return invoke(fn, [seriesList]).then((r) => {
+    return invoke(fn, [seriesList]).then(r => {
       const bars = _.map(r.output.list, 'bars');
-      _.each(bars, (bar) => expect(bar).to.be.a('object'));
-      _.each(bars, (bar) => expect(bar.lineWidth).to.equal(6));
-      _.each(bars, (bar) => expect(bar.show).to.equal(1));
+      _.each(bars, bar => expect(bar).to.be.a('object'));
+      _.each(bars, bar => expect(bar.lineWidth).to.equal(6));
+      _.each(bars, bar => expect(bar.show).to.equal(1));
     });
   });
 
   it('leaves existing bars alone when called without option, if they exist', () => {
     seriesList.list[0].bars = { foo: true };
-    return invoke(fn, [seriesList]).then((r) => {
+    return invoke(fn, [seriesList]).then(r => {
       const bars = _.map(r.output.list, 'bars');
       expect(bars[0].foo).to.equal(true);
       expect(bars[1].foo).to.equal(undefined);
@@ -49,12 +48,10 @@ describe('bars.js', () => {
   });
 
   it('sets lineWidth and show to the same value', () => {
-    return invoke(fn, [seriesList, 0]).then((r) => {
+    return invoke(fn, [seriesList, 0]).then(r => {
       const bars = _.map(r.output.list, 'bars');
       expect(bars[0].lineWidth).to.equal(0);
       expect(bars[0].show).to.equal(0);
-
     });
   });
-
 });

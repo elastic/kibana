@@ -23,7 +23,7 @@ import fetch from 'node-fetch';
 import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 
-export default new Datasource ('graphite', {
+export default new Datasource('graphite', {
   args: [
     {
       name: 'metric', // _test-data.users.*.data
@@ -34,57 +34,65 @@ export default new Datasource ('graphite', {
           metricExample: '_test-data.users.*.data',
         },
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.graphiteHelpText', {
-    defaultMessage:
-      `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
+    defaultMessage: `[experimental] Pull data from graphite. Configure your graphite server in Kibana's Advanced Settings`,
   }),
   fn: function graphite(args, tlConfig) {
     const config = args.byName;
 
     const time = {
       min: moment(tlConfig.time.from).format('HH:mm[_]YYYYMMDD'),
-      max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD')
+      max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD'),
     };
     const allowedUrls = tlConfig.allowedGraphiteUrls;
     const configuredUrl = tlConfig.settings['timelion:graphite.url'];
     if (!allowedUrls.includes(configuredUrl)) {
-      throw new Error(i18n.translate('timelion.help.functions.notAllowedGraphiteUrl', {
-        defaultMessage:
-          `This graphite URL is not configured on the kibana.yml file.
+      throw new Error(
+        i18n.translate('timelion.help.functions.notAllowedGraphiteUrl', {
+          defaultMessage: `This graphite URL is not configured on the kibana.yml file.
           Please configure your graphite server list in the kibana.yml file under 'timelion.graphiteUrls' and
           select one from Kibana's Advanced Settings`,
-      }));
+        })
+      );
     }
 
-    const URL = tlConfig.settings['timelion:graphite.url'] + '/render/' +
+    const URL =
+      tlConfig.settings['timelion:graphite.url'] +
+      '/render/' +
       '?format=json' +
-      '&from=' + time.min +
-      '&until=' + time.max +
-      '&target=' + config.metric;
+      '&from=' +
+      time.min +
+      '&until=' +
+      time.max +
+      '&target=' +
+      config.metric;
 
-    return fetch(URL).then(function (resp) {
-      return resp.json();
-    }).then(function (resp) {
-      const list = _.map(resp, function (series) {
-        const data = _.map(series.datapoints, function (point) {
-          return [point[1] * 1000, point[0]];
+    return fetch(URL)
+      .then(function(resp) {
+        return resp.json();
+      })
+      .then(function(resp) {
+        const list = _.map(resp, function(series) {
+          const data = _.map(series.datapoints, function(point) {
+            return [point[1] * 1000, point[0]];
+          });
+          return {
+            data: data,
+            type: 'series',
+            fit: 'nearest', // TODO make this customizable
+            label: series.target,
+          };
         });
-        return {
-          data: data,
-          type: 'series',
-          fit: 'nearest', // TODO make this customizable
-          label: series.target
-        };
-      });
 
-      return {
-        type: 'seriesList',
-        list: list
-      };
-    }).catch(function (e) {
-      throw e;
-    });
-  }
+        return {
+          type: 'seriesList',
+          list: list,
+        };
+      })
+      .catch(function(e) {
+        throw e;
+      });
+  },
 });
