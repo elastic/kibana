@@ -1,4 +1,3 @@
-/* eslint quotes: 0 */
 export const inputTimes = [
   {
     type:"BooleanQuery",

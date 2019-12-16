@@ -19,9 +19,11 @@ export function FieldTitleBar({ card }) {
     return null;
   }
 
-  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
-    defaultMessage: 'document count'
-  });
+  const fieldName =
+    card.fieldName ||
+    i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
+      defaultMessage: 'document count',
+    });
   const cardTitleAriaLabel = [fieldName];
 
   const classNames = ['ml-field-title-bar'];
@@ -35,20 +37,14 @@ export function FieldTitleBar({ card }) {
   }
 
   if (card.isUnsupportedType !== true) {
-    cardTitleAriaLabel.unshift(
-      getMLJobTypeAriaLabel(card.type)
-    );
+    cardTitleAriaLabel.unshift(getMLJobTypeAriaLabel(card.type));
   }
 
   return (
     <EuiText className={classNames.join(' ')}>
       <FieldTypeIcon type={card.type} tooltipEnabled={true} needsAria={false} />
       <EuiToolTip position="left" content={fieldName}>
-        <div
-          className="field-name"
-          tabIndex="0"
-          aria-label={`${cardTitleAriaLabel.join(', ')}`}
-        >
+        <div className="field-name" tabIndex="0" aria-label={`${cardTitleAriaLabel.join(', ')}`}>
           {fieldName}
         </div>
       </EuiToolTip>
@@ -56,5 +52,5 @@ export function FieldTitleBar({ card }) {
   );
 }
 FieldTitleBar.propTypes = {
-  card: PropTypes.object.isRequired
+  card: PropTypes.object.isRequired,
 };

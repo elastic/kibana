@@ -12,7 +12,10 @@ import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
 export function handleResponse(response, apmUuid) {
-  const firstStats = get(response, 'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats');
+  const firstStats = get(
+    response,
+    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats'
+  );
   const stats = get(response, 'hits.hits[0]._source.beats_stats');
 
   const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
@@ -46,7 +49,7 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
 
   const filters = [
     { term: { 'beats_stats.beat.uuid': apmUuid } },
-    { term: { 'beats_stats.beat.type': 'apm-server' } }
+    { term: { 'beats_stats.beat.type': 'apm-server' } },
   ];
   const params = {
     index: apmIndexPattern,
@@ -76,17 +79,17 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
         end,
         clusterUuid,
         metric: ApmMetric.getMetricFields(),
-        filters
+        filters,
       }),
       collapse: {
         field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
         inner_hits: {
           name: 'first_hit',
           size: 1,
-          sort: { 'beats_stats.timestamp': 'asc' }
-        }
-      }
-    }
+          sort: { 'beats_stats.timestamp': 'asc' },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -99,8 +102,8 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
       apmIndexPattern,
       start,
       end,
-      clusterUuid
-    })
+      clusterUuid,
+    }),
   ]);
 
   const formattedResponse = handleResponse(response, apmUuid);

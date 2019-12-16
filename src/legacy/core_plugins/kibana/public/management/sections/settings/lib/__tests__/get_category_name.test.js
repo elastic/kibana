@@ -20,14 +20,14 @@
 import expect from '@kbn/expect';
 import { getCategoryName } from '../get_category_name';
 
-describe('Settings', function () {
-  describe('Advanced', function () {
-    describe('getCategoryName(category)', function () {
-      it('should be a function', function () {
+describe('Settings', function() {
+  describe('Advanced', function() {
+    describe('getCategoryName(category)', function() {
+      it('should be a function', function() {
         expect(getCategoryName).to.be.a(Function);
       });
 
-      it('should return correct name for known categories', function () {
+      it('should return correct name for known categories', function() {
         expect(getCategoryName('general')).to.be('General');
         expect(getCategoryName('timelion')).to.be('Timelion');
         expect(getCategoryName('notifications')).to.be('Notifications');
@@ -38,11 +38,11 @@ describe('Settings', function () {
         expect(getCategoryName('search')).to.be('Search');
       });
 
-      it('should capitalize unknown category', function () {
+      it('should capitalize unknown category', function() {
         expect(getCategoryName('elasticsearch')).to.be('Elasticsearch');
       });
 
-      it('should return empty string for no category', function () {
+      it('should return empty string for no category', function() {
         expect(getCategoryName()).to.be('');
         expect(getCategoryName('')).to.be('');
         expect(getCategoryName(false)).to.be('');

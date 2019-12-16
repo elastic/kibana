@@ -23,11 +23,10 @@ export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
 
-  describe('visualize app', function () {
+  describe('visualize app', function() {
     this.tags('smoke');
 
     describe('experimental visualizations', () => {
-
       beforeEach(async () => {
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
@@ -75,6 +74,5 @@ export default ({ getService, getPageObjects }) => {
         expect(await PageObjects.visualize.isExperimentalInfoShown()).to.be(false);
       });
     });
-
   });
 };

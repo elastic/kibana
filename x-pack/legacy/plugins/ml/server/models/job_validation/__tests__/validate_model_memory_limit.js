@@ -4,45 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { validateModelMemoryLimit } from '../validate_model_memory_limit';
 
 describe('ML - validateModelMemoryLimit', () => {
-
-
   // mock info endpoint response
   const mlInfoResponse = {
     defaults: {
       anomaly_detectors: {
         model_memory_limit: '1gb',
         categorization_examples_limit: 4,
-        model_snapshot_retention_days: 1
+        model_snapshot_retention_days: 1,
       },
       datafeeds: {
-        scroll_size: 1000
-      }
+        scroll_size: 1000,
+      },
     },
     limits: {
-      max_model_memory_limit: '30mb'
-    }
+      max_model_memory_limit: '30mb',
+    },
   };
 
   // mock field caps response
   const fieldCapsResponse = {
-    indices: [
-      'cloudwatch'
-    ],
+    indices: ['cloudwatch'],
     fields: {
       instance: {
         keyword: {
           type: 'keyword',
           searchable: true,
-          aggregatable: true
-        }
-      }
-    }
+          aggregatable: true,
+        },
+      },
+    },
   };
 
   // mock cardinality search response
@@ -53,18 +47,18 @@ describe('ML - validateModelMemoryLimit', () => {
       total: 15,
       successful: 15,
       skipped: 0,
-      failed: 0
+      failed: 0,
     },
     hits: {
       total: 1793481,
       max_score: 0,
-      hits: []
+      hits: [],
     },
     aggregations: {
       instance: {
-        value: 77
-      }
-    }
+        value: 77,
+      },
+    },
   };
 
   // mock callWithRequest
@@ -80,7 +74,7 @@ describe('ML - validateModelMemoryLimit', () => {
     let response = {};
     if (call === 'ml.info') {
       response = mlInfoResponse;
-    } else if(call === 'search') {
+    } else if (call === 'search') {
       response = cardinalitySearchResponse;
     } else if (call === 'fieldCaps') {
       response = fieldCapsResponse;
@@ -93,11 +87,11 @@ describe('ML - validateModelMemoryLimit', () => {
       analysis_config: { detectors, influencers },
       data_description: { time_field: '@timestamp' },
       datafeed_config: {
-        indices: []
+        indices: [],
       },
       analysis_limits: {
-        model_memory_limit: '20mb'
-      }
+        model_memory_limit: '20mb',
+      },
     };
   }
 
@@ -108,7 +102,7 @@ describe('ML - validateModelMemoryLimit', () => {
       dtrs.push({
         function: 'mean',
         field_name: `foo${i}`,
-        partition_field_name: 'instance'
+        partition_field_name: 'instance',
       });
     }
     return dtrs;
@@ -119,12 +113,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const job = getJobConfig();
     const duration = undefined;
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql([]);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql([]);
+    });
   });
 
   it('Called with no duration or split and mml above limit', () => {
@@ -132,12 +124,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = undefined;
     job.analysis_limits.model_memory_limit = '31mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_greater_than_max_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_greater_than_max_mml']);
+    });
   });
 
   it('Called large number of detectors, causing estimated mml to be over the max', () => {
@@ -146,12 +136,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '20mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['estimated_mml_greater_than_max_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['estimated_mml_greater_than_max_mml']);
+    });
   });
 
   it('Called with small number of detectors, so estimated mml is under max', () => {
@@ -160,12 +148,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '30mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['success_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['success_mml']);
+    });
   });
 
   it('Called enough detectors to cause estimated mml to be over specified mml', () => {
@@ -174,12 +160,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '10mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
+    });
   });
 
   it('Called with enough detectors to cause estimated mml to be over specified mml, no max setting', () => {
@@ -189,12 +173,10 @@ describe('ML - validateModelMemoryLimit', () => {
     delete mlInfoResponse.limits.max_model_memory_limit;
     job.analysis_limits.model_memory_limit = '10mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
+    });
   });
 
   it('Called with small number of detectors, so estimated mml is under specified mml, no max setting', () => {
@@ -203,12 +185,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '20mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['success_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['success_mml']);
+    });
   });
 
   it('Called with specified invalid mml of "0mb"', () => {
@@ -217,12 +197,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '0mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_value_invalid']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_value_invalid']);
+    });
   });
 
   it('Called with specified invalid mml of "10mbananas"', () => {
@@ -231,12 +209,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '10mbananas';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_value_invalid']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_value_invalid']);
+    });
   });
 
   it('Called with specified invalid mml of "10"', () => {
@@ -245,12 +221,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '10';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_value_invalid']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_value_invalid']);
+    });
   });
 
   it('Called with specified invalid mml of "mb"', () => {
@@ -259,12 +233,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = 'mb';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_value_invalid']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_value_invalid']);
+    });
   });
 
   it('Called with specified invalid mml of "asdf"', () => {
@@ -273,12 +245,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = 'asdf';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_value_invalid']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_value_invalid']);
+    });
   });
 
   it('Called with specified invalid mml of "1023KB"', () => {
@@ -287,12 +257,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '1023KB';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['mml_value_invalid']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['mml_value_invalid']);
+    });
   });
 
   it('Called with specified valid mml of "1024KB", still triggers a warning', () => {
@@ -301,12 +269,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '1024KB';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
+    });
   });
 
   it('Called with specified valid mml of "6MB", still triggers info', () => {
@@ -315,12 +281,10 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '6MB';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['half_estimated_mml_greater_than_mml']);
+    });
   });
 
   it('Called with specified valid mml of "20MB", triggers success message', () => {
@@ -329,12 +293,9 @@ describe('ML - validateModelMemoryLimit', () => {
     const duration = { start: 0, end: 1 };
     job.analysis_limits.model_memory_limit = '20MB';
 
-    return validateModelMemoryLimit(callWithRequest, job, duration).then(
-      (messages) => {
-        const ids = messages.map(m => m.id);
-        expect(ids).to.eql(['success_mml']);
-      }
-    );
+    return validateModelMemoryLimit(callWithRequest, job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).to.eql(['success_mml']);
+    });
   });
-
 });

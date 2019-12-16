@@ -15,13 +15,13 @@ describe('Edge', () => {
     graph = {
       verticesById: {
         myif: { cola: 'bar' },
-        myes: { cola: 17 }
-      }
+        myes: { cola: 17 },
+      },
     };
     edgeJson = {
       id: 'myif:myes',
       from: 'myif',
-      to: 'myes'
+      to: 'myes',
     };
   });
 
