@@ -18,9 +18,14 @@
  */
 
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
+import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
+import { IUiSettingsClient } from 'kibana/public';
 
 // Used only by the savedSheets service, usually no reason to change this
-export function createSavedSheetClass(services) {
+export function createSavedSheetClass(
+  services: SavedObjectKibanaServices,
+  config: IUiSettingsClient
+) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedSheet extends SavedObjectClass {
@@ -44,13 +49,13 @@ export function createSavedSheetClass(services) {
     static fieldOrder = ['title', 'description'];
     // SavedSheet constructor. Usually you'd interact with an instance of this.
     // ID is option, without it one will be generated on save.
-    constructor(id) {
+    constructor(id: string) {
       super({
         type: SavedSheet.type,
         mapping: SavedSheet.mapping,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
-        id: id,
+        id,
 
         // default values that will get assigned if the doc is new
         defaults: {
@@ -60,15 +65,13 @@ export function createSavedSheetClass(services) {
           timelion_sheet: ['.es(*)'],
           timelion_interval: 'auto',
           timelion_chart_height: 275,
-          timelion_columns: services.config.get('timelion:default_columns') || 2,
-          timelion_rows: services.config.get('timelion:default_rows') || 2,
+          timelion_columns: config.get('timelion:default_columns') || 2,
+          timelion_rows: config.get('timelion:default_rows') || 2,
           version: 1,
         },
       });
       this.showInRecentlyAccessed = true;
-    }
-    getFullPath() {
-      return `/app/timelion#/${this.id}`;
+      this.getFullPath = () => `/app/timelion#/${this.id}`;
     }
   }
 

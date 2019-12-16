@@ -18,7 +18,9 @@
  */
 
 import { SavedObjectLoader } from 'ui/saved_objects';
+// @ts-ignore
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { createSavedSheetClass } from './_saved_sheet.js';
 import { npStart } from '../../../../ui/public/new_platform';
@@ -40,10 +42,9 @@ module.service('savedSheets', function() {
     indexPatterns: npStart.plugins.data.indexPatterns,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
-    config: npStart.core.uiSettings,
   };
 
-  const SavedSheet = createSavedSheetClass(services);
+  const SavedSheet = createSavedSheetClass(services, npStart.core.uiSettings);
 
   const savedSheetLoader = new SavedObjectLoader(
     SavedSheet,

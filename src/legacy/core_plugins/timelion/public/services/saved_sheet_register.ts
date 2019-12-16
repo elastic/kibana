@@ -19,6 +19,7 @@
 
 import './saved_sheets';
 
-export default function savedSearchObjectFn(savedSheets) {
+// eslint-disable-next-line import/no-default-export
+export default function savedSearchObjectFn(savedSheets: any) {
   return savedSheets;
 }
