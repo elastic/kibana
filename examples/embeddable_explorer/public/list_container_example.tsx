@@ -121,7 +121,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         <EuiPageContentBody>
           <EuiText>
             Here is a container embeddable that contains other embeddables and displays them in a
-            list
+            list.
           </EuiText>
           <EuiPanel data-test-subj="listContainerEmbeddablePanel" paddingSize="none" role="figure">
             <EmbeddableFactoryRenderer
@@ -135,15 +135,21 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           <EuiText>
             <p>
               The reason to use a container embeddable instead of just a custom react component is
-              because it comes with helpful methods to store the state of all it&#39;s children
+              because it comes with helpful methods to store the state of all its children
               embeddables, listeners to clean up the input state when an embeddable is added or
-              removed, and a way to pass down the container embeddable&#39;s own input to it&#39;s
-              children. For this particular example, the container does not take any input.
-              Let&#39;s modify it so it does.
+              removed, and a way to pass down the container embeddable&#39;s own input to its
+              children. In the above example, the container did not take any input. Let&#39;s modify
+              it so it does.
             </p>
             <p>
-              Now in this second example, the container takes in a filter string as input and passes
-              that down to all it&#39;s children.
+              In this Searchable List Container, the container takes in a search string as input and
+              passes that down to all its children. It also listens to its children that output
+              `hasMatch`, and removes them from the list when there is a search string and the child
+              doesn&#39;t match.
+            </p>
+            <p>
+              The first HelloWorldEmbeddable does not emit the hasMatch output variable, so the
+              container chooses to hide it.
             </p>
           </EuiText>
 
@@ -162,12 +168,11 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           <EuiSpacer />
           <EuiText>
             <p>
-              If you use the filter input above, you&#39;ll notice the only child that filters
-              it&#39;s contents is the last one. This is because the first two don&#39;t take
-              `filter` as input. There currently is no formal way to limit what children can be
-              added to a container. If the use case arose, it wouldn&#39;t be difficult. In the mean
-              time, it&#39;s good to understand that chilren may ignore input they don&#39;t care
-              about.
+              There currently is no formal way to limit what children can be added to a container.
+              If the use case arose, it wouldn&#39;t be difficult. In the mean time, it&#39;s good
+              to understand that chilren may ignore input they don&#39;t care about. Likewise the
+              container will have to choose what to do when it encounters children that are missing
+              certain output variables.
             </p>
           </EuiText>
         </EuiPageContentBody>
