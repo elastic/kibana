@@ -48,7 +48,7 @@ export const routes: ServerRoute[] = [
     handler: Packages.handleRequestDelete,
   },
   {
-    method: 'GET',
+    method: 'POST',
     path: CommonRoutes.API_INSTALL_DATASOURCE_PATTERN,
     options: { tags: [`access:${PLUGIN.ID}`], json: { space: 2 } },
     handler: Datasources.handleRequestInstallDatasource,

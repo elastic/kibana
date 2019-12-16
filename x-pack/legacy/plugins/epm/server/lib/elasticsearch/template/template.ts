@@ -52,7 +52,11 @@ export function generateMappings(fields: Field[]): Mappings {
 
     // If not type is defined, take keyword
     const type = field.type || 'keyword';
-    props[field.name] = { type };
+    // Only add keyword fields for now
+    // TODO: add support for other field types
+    if (type === 'keyword') {
+      props[field.name] = { type };
+    }
   });
   return { properties: props };
 }
