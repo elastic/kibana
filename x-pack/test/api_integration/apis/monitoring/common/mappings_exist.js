@@ -56,8 +56,8 @@ export default function({ getService }) {
         // eslint-disable-line no-loop-func
         for (const metric of Object.values(metrics)) {
           for (const field of metric.getFields()) {
+            // eslint-disable-next-line no-loop-func
             it(`${field} should exist in the mappings`, () => {
-              // eslint-disable-line no-loop-func
               const propertyGetter = field
                 .split('.')
                 .reduce((list, field) => {
