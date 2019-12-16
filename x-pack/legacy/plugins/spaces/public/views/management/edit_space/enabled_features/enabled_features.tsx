@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../plugins/features/public';
 import { Space } from '../../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 import { SectionPanel } from '../section_panel';

@@ -7,7 +7,7 @@
 import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
-import { XPackMainPlugin } from '../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../xpack_main/server/xpack_main';
 import {
   ElasticsearchPlugin,
   CallCluster,

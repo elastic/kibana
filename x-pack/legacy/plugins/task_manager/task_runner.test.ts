@@ -12,7 +12,10 @@ import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events
 import { ConcreteTaskInstance, TaskStatus } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
