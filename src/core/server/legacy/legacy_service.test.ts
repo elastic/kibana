@@ -354,9 +354,15 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
-    expect(cliArgs.basePath).toBe(false);
-    expect(basePathProxy).not.toBeDefined();
+    expect(MockClusterManager).toHaveBeenCalledTimes(1);
+    expect(MockClusterManager).toHaveBeenCalledWith(
+      expect.objectContaining({ silent: true, basePath: false }),
+      expect.objectContaining({
+        get: expect.any(Function),
+        set: expect.any(Function),
+      }),
+      undefined
+    );
   });
 
   test('creates ClusterManager with base path proxy.', async () => {
@@ -376,11 +382,15 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager.create).toBeCalledTimes(1);
-
-    const [[cliArgs, , basePathProxy]] = MockClusterManager.create.mock.calls;
-    expect(cliArgs.basePath).toEqual(true);
-    expect(basePathProxy).toBeInstanceOf(BasePathProxyServer);
+    expect(MockClusterManager).toHaveBeenCalledTimes(1);
+    expect(MockClusterManager).toHaveBeenCalledWith(
+      expect.objectContaining({ quiet: true, basePath: true }),
+      expect.objectContaining({
+        get: expect.any(Function),
+        set: expect.any(Function),
+      }),
+      expect.any(BasePathProxyServer)
+    );
   });
 });
 
