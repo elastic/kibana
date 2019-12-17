@@ -135,6 +135,10 @@ class DocumentationService {
   public getAnalyzersLink() {
     return `${this.esDocsBase}/analysis-analyzers.html`;
   }
+
+  public getAnalyzerLink() {
+    return `${this.esDocsBase}/analyzer.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();
