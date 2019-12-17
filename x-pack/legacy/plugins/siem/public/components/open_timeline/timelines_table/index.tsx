@@ -24,11 +24,11 @@ import { getIconHeaderColumns } from './icon_header_columns';
 
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
-    animation: none; //Prevents applying max-height from animation
+    animation: none; /* Prevents applying max-height from animation */
   }
 
   .euiTableRow-isExpandedRow .euiTableCellContent__text {
-    width: 100%; //Fixes collapsing nested flex content in IE11
+    width: 100%; /* Fixes collapsing nested flex content in IE11 */
   }
 `;
 BasicTable.displayName = 'BasicTable';

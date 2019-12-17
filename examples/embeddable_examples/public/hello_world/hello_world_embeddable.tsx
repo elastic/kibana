@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Embeddable, EmbeddableInput, IContainer } from '../../..';
+import { Embeddable, EmbeddableInput, IContainer } from '../../../../src/plugins/embeddable/public';
 
-export const HELLO_WORLD_EMBEDDABLE_TYPE = 'HELLO_WORLD_EMBEDDABLE_TYPE';
+export const HELLO_WORLD_EMBEDDABLE = 'HELLO_WORLD_EMBEDDABLE';
 
 export class HelloWorldEmbeddable extends Embeddable {
   // The type of this embeddable. This will be used to find the appropriate factory
   // to instantiate this kind of embeddable.
-  public readonly type = HELLO_WORLD_EMBEDDABLE_TYPE;
+  public readonly type = HELLO_WORLD_EMBEDDABLE;
 
   constructor(initialInput: EmbeddableInput, parent?: IContainer) {
     super(

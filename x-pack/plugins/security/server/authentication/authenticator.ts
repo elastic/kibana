@@ -32,7 +32,7 @@ import {
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
-import { SessionInfo } from '../../public/types';
+import { SessionInfo } from '../../public';
 
 /**
  * The shape of the session that is actually stored in the cookie.
