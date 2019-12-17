@@ -135,6 +135,10 @@ class DocumentationService {
   public getAnalyzerLink() {
     return `${this.esDocsBase}/analyzer.html`;
   }
+
+  public getEnablingFielddataLink() {
+    return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
+  }
 }
 
 export const documentationService = new DocumentationService();
