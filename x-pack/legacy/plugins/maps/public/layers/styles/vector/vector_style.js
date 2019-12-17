@@ -577,13 +577,9 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
   }
 
-  setMBPropertiesForText({ alpha, isLayerVisible, mbMap, textLayerId }) {
-    if (!isLayerVisible || !this._labelStyleProperty.isComplete()) {
-      mbMap.setLayoutProperty(textLayerId, 'visibility', 'none');
-      return;
-    }
-
+  setMBPropertiesForLabelText({ alpha, mbMap, textLayerId }) {
     mbMap.setLayoutProperty(textLayerId, 'visibility', 'visible');
+    mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
     mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);

@@ -628,31 +628,36 @@ export class VectorLayer extends AbstractLayer {
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
     let markerLayerId;
+    let textLayerId;
     if (this._style.arePointsSymbolizedAsCircles()) {
       markerLayerId = pointLayerId;
+      textLayerId = this._getMbTextLayerId();
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
       this._setMbCircleProperties(mbMap);
     } else {
       markerLayerId = symbolLayerId;
+      textLayerId = symbolLayerId;
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
+        mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
       this._setMbSymbolProperties(mbMap);
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
     mbMap.setLayerZoomRange(markerLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-
-    this._setMbTextProperties(mbMap);
+    if (markerLayerId !== textLayerId) {
+      this.syncVisibilityWithMb(mbMap, textLayerId);
+      mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
   }
 
   _setMbCircleProperties(mbMap) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
-
     if (!pointLayer) {
       mbMap.addLayer({
         id: pointLayerId,
@@ -662,23 +667,8 @@ export class VectorLayer extends AbstractLayer {
       });
     }
 
-    const filterExpr = getPointFilterExpression(this._hasJoins());
-    if (filterExpr !== mbMap.getFilter(pointLayerId)) {
-      mbMap.setFilter(pointLayerId, filterExpr);
-    }
-
-    this._style.setMBPaintPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      pointLayerId: pointLayerId,
-    });
-  }
-
-  _setMbTextProperties(mbMap) {
-    const sourceId = this.getId();
     const textLayerId = this._getMbTextLayerId();
     const textLayer = mbMap.getLayer(textLayerId);
-
     if (!textLayer) {
       mbMap.addLayer({
         id: textLayerId,
@@ -688,18 +678,22 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const filterExpr = getPointFilterExpression(this._hasJoins());
-    if (filterExpr !== mbMap.getFilter(textLayerId)) {
+    if (filterExpr !== mbMap.getFilter(pointLayerId)) {
+      mbMap.setFilter(pointLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
     }
 
-    this._style.setMBPropertiesForText({
-      isLayerVisible: this.isVisible(),
+    this._style.setMBPaintPropertiesForPoints({
+      alpha: this.getAlpha(),
+      mbMap,
+      pointLayerId,
+    });
+
+    this._style.setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
       textLayerId,
     });
-
-    mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   _setMbSymbolProperties(mbMap) {
@@ -723,7 +717,13 @@ export class VectorLayer extends AbstractLayer {
     this._style.setMBSymbolPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
-      symbolLayerId: symbolLayerId,
+      symbolLayerId,
+    });
+
+    this._style.setMBPropertiesForLabelText({
+      alpha: this.getAlpha(),
+      mbMap,
+      textLayerId: symbolLayerId,
     });
   }
 
