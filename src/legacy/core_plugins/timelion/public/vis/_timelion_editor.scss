@@ -1,0 +1,31 @@
+.visEditor--timelion{
+
+  vis-options-react-wrapper,
+  .visEditorSidebar__options,
+  .visEditorSidebar__timelionOptions,
+  .visEditor__timelionExpressionInput {
+    @include flex-parent(1, 1, auto, column);
+
+    height: 100%;
+
+    > * {
+      flex-shrink: 1;
+    }
+  }
+}
+
+.visEditor__timelionExpressionInput {
+  .euiFormRow__fieldWrapper {
+    flex-grow: 1;
+  }
+}
+
+.timelionExpressionInput__editor {
+  height: 100%;
+  padding-top: $euiSize;
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    height: $euiSize * 15;
+    max-height: $euiSize * 15;
+  }
+}

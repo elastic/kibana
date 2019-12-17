@@ -45,7 +45,7 @@ function TimelionOptions({
   );
 
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel className="visEditorSidebar__timelionOptions" paddingSize="s">
       <TimelionInterval
         value={stateParams.interval}
         setValue={setInterval}

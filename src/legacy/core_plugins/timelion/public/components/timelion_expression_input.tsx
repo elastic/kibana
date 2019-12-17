@@ -113,13 +113,13 @@ function TimelionExpressionInput({
   return (
     <KibanaContextProvider services={{ uiSettings }}>
       <EuiFormRow
-        compressed
+        className="visEditor__timelionExpressionInput"
         fullWidth
         label={i18n.translate('timelion.vis.expressionLabel', {
           defaultMessage: 'Timelion expression',
         })}
       >
-        <div className="canvasExpressionInput__editor">
+        <div className="timelionExpressionInput__editor">
           <CodeEditor
             languageId={LANGUAGE_ID}
             value={value}
@@ -130,6 +130,8 @@ function TimelionExpressionInput({
             }}
             hoverProvider={{ provideHover }}
             options={{
+              automaticLayout: true,
+              fixedOverflowWidgets: true,
               fontSize: 16,
               scrollBeyondLastLine: false,
               quickSuggestions: true,
