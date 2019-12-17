@@ -917,7 +917,6 @@
     "embeddableApi.samples.contactCard.displayName": "联系卡片",
     "embeddableApi.samples.filterableContainer.displayName": "可筛选仪表板",
     "embeddableApi.samples.filterableEmbeddable.displayName": "可筛选",
-    "embeddableApi.samples.helloworld.displayName": "hello world",
     "embeddableApi.panel.enhancedDashboardPanelAriaLabel": "仪表板面板：{title}",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel": "{title} 的面板选项",
     "embeddableApi.panel.dashboardPanelAriaLabel": "仪表板面板",
