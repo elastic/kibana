@@ -41,3 +41,11 @@ export const ERROR_FETCHING_ALERTS_DATA = i18n.translate(
     defaultMessage: 'Failed to query alerts data',
   }
 );
+
+export const CATEGORY = i18n.translate('xpack.siem.alertsView.categoryLabel', {
+  defaultMessage: 'category',
+});
+
+export const MODULE = i18n.translate('xpack.siem.alertsView.moduleLabel', {
+  defaultMessage: 'module',
+});
