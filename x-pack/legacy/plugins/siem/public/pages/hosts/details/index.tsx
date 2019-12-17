@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
 
+import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
@@ -41,6 +42,7 @@ import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsComponentProps, HostDetailsProps } from './types';
 import { type } from './utils';
+import { filterAlertsHosts as filterAlertsHostDetails } from '../navigation';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -64,6 +66,42 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+    const { tabName } = useParams();
+
+    const hostDetailsFilters = React.useMemo(() => {
+      const defaultFilters = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            value: detailName,
+            params: {
+              query: detailName,
+            },
+          },
+          query: {
+            match: {
+              'host.name': {
+                query: detailName,
+                type: 'phrase',
+              },
+            },
+          },
+        },
+        ...filters,
+      ];
+
+      if (tabName === 'alerts') {
+        return defaultFilters.length > 0
+          ? [...defaultFilters, filterAlertsHostDetails]
+          : [filterAlertsHostDetails];
+      }
+
+      return defaultFilters;
+    }, [tabName]);
 
     return (
       <>
@@ -73,30 +111,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters: [
-                {
-                  meta: {
-                    alias: null,
-                    negate: false,
-                    disabled: false,
-                    type: 'phrase',
-                    key: 'host.name',
-                    value: detailName,
-                    params: {
-                      query: detailName,
-                    },
-                  },
-                  query: {
-                    match: {
-                      'host.name': {
-                        query: detailName,
-                        type: 'phrase',
-                      },
-                    },
-                  },
-                },
-                ...filters,
-              ],
+              filters: hostDetailsFilters,
             });
 
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (

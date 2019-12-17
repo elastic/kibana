@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
 
+import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
@@ -35,6 +36,7 @@ import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
 import { HostsComponentProps, HostsComponentReduxProps } from './types';
+import { filterAlertsHosts } from './navigation';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -52,6 +54,14 @@ const HostsComponent = React.memo<HostsComponentProps>(
   }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+    const { tabName } = useParams();
+
+    const hostsFilters = React.useMemo(() => {
+      if (tabName === 'alerts') {
+        return filters.length > 0 ? [...filters, filterAlertsHosts] : [filterAlertsHosts];
+      }
+      return filters;
+    }, [tabName]);
 
     return (
       <>
@@ -61,7 +71,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters,
+              filters: hostsFilters,
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
