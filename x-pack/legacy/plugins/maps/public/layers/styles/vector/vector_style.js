@@ -295,14 +295,17 @@ export class VectorStyle extends AbstractStyle {
     return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
   };
 
+  _getDynamicPropertyByFieldName = fieldName => {
+    const dynamicProps = this.getDynamicPropertiesArray();
+    return dynamicProps.find(dynamicProp => {
+      return fieldName === dynamicProp.getField().getName();
+    });
+  };
+
   _getFieldMeta = fieldName => {
     const fieldMetaFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
 
-    const dynamicProps = this.getDynamicPropertiesArray();
-    const dynamicProp = dynamicProps.find(dynamicProp => {
-      return fieldName === dynamicProp.getField().getName();
-    });
-
+    const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
       return fieldMetaFromLocalFeatures;
     }
@@ -324,7 +327,7 @@ export class VectorStyle extends AbstractStyle {
       return fieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return fieldMetaFromLocalFeatures;
     }
@@ -336,11 +339,7 @@ export class VectorStyle extends AbstractStyle {
   };
 
   _getFieldFormatter = fieldName => {
-    const dynamicProps = this.getDynamicPropertiesArray();
-    const dynamicProp = dynamicProps.find(dynamicProp => {
-      return fieldName === dynamicProp.getField().getName();
-    });
-
+    const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp) {
       return null;
     }
@@ -362,7 +361,7 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
-    const formattersDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+    const formattersDataRequest = this._layer._findDataRequestById(dataRequestId);
     if (!formattersDataRequest || !formattersDataRequest.hasData()) {
       return null;
     }
