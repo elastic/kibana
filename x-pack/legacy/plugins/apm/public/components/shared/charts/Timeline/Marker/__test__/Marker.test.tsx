@@ -7,13 +7,18 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Marker } from '../';
+import {
+  IWaterfallItemAgentMark,
+  IWaterfallItemError
+} from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 describe('Marker', () => {
   it('renders agent marker', () => {
     const mark = {
+      id: 'agent',
       name: 'agent',
       offset: 1000,
-      type: 'agentMark'
+      docType: 'agentMark'
     } as IWaterfallItemAgentMark;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
@@ -30,7 +35,8 @@ describe('Marker', () => {
       name: 'foo',
       offset: 10000,
       serviceColor: '#fff',
-      serviceName: 'bar'
+      serviceName: 'bar',
+      docType: 'error'
     } as unknown) as IWaterfallItemError;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
