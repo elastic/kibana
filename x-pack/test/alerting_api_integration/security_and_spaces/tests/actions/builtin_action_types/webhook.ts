@@ -180,7 +180,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/not in the Kibana whitelist/);
+      expect(result.message).to.match(/is not whitelisted in the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {
