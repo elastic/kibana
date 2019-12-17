@@ -33,6 +33,7 @@ import {
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
 } from './routes';
+import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
@@ -60,6 +61,9 @@ export class Plugin {
   ): Promise<PluginSetupContract> {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
+    // Register license checker
+    plugins.license.registerLicenseChecker();
+
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
       type: 'alert',
@@ -80,19 +84,19 @@ export class Plugin {
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     // Register routes
-    core.http.route(createAlertRoute);
-    core.http.route(deleteAlertRoute);
-    core.http.route(findAlertRoute);
-    core.http.route(getAlertRoute);
-    core.http.route(listAlertTypesRoute);
-    core.http.route(updateAlertRoute);
-    core.http.route(enableAlertRoute);
-    core.http.route(disableAlertRoute);
-    core.http.route(updateApiKeyRoute);
-    core.http.route(muteAllAlertRoute);
-    core.http.route(unmuteAllAlertRoute);
-    core.http.route(muteAlertInstanceRoute);
-    core.http.route(unmuteAlertInstanceRoute);
+    core.http.route(extendRouteWithLicenseCheck(createAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(deleteAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(findAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(getAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(listAlertTypesRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(updateAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(enableAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(disableAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(updateApiKeyRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(muteAllAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(unmuteAllAlertRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(muteAlertInstanceRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(unmuteAlertInstanceRoute, plugins));
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),

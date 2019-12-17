@@ -6,6 +6,7 @@
 
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
+import { i18n } from '@kbn/i18n';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -25,6 +26,8 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions';
+import { PLUGIN } from './constants/plugin';
+import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -43,7 +46,7 @@ export interface Server extends Legacy.Server {
 export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
-export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
+export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature' | 'info'>;
 export type TaskManagerSetupContract = Pick<
   TaskManager,
   'addMiddleware' | 'registerTaskDefinitions'
@@ -73,6 +76,9 @@ export interface AlertingPluginsSetup {
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  license: {
+    registerLicenseChecker: () => void;
+  };
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -121,6 +127,15 @@ export function shim(
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+    license: {
+      registerLicenseChecker: registerLicenseChecker.bind(
+        null,
+        server,
+        PLUGIN.ID,
+        PLUGIN.getI18nName(i18n),
+        PLUGIN.MINIMUM_LICENSE_REQUIRED
+      ),
+    },
   };
 
   const pluginsStart: AlertingPluginsStart = {
