@@ -22,7 +22,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-
 import { metricsDetailsUrl } from '../../../services';
 import { FieldList } from '../../components';
 import { FieldChooser, StepError } from './components';
@@ -52,7 +51,7 @@ const checkWhiteListedMetricByFieldType = (fieldType, metricType) => {
 // associated field types. After processing each of these
 // objects should have a fieldTypes: { date: true, numeric: true }
 // like object.
-const metricTypesConfig = (function () {
+const metricTypesConfig = (function() {
   return METRICS_CONFIG.map(config => {
     const fieldTypes = {};
     for (const [fieldType, metrics] of Object.entries(whiteListedMetricByFieldType)) {
@@ -63,7 +62,7 @@ const metricTypesConfig = (function () {
       fieldTypes,
     };
   });
-}());
+})();
 
 export class StepMetricsUi extends Component {
   static propTypes = {
@@ -108,69 +107,76 @@ export class StepMetricsUi extends Component {
      * Look at all the metric configs and include the special "All" checkbox which adds the ability
      * to select all the checkboxes across columns and rows.
      */
-    const checkboxElements = [{
-      label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', { defaultMessage: 'All' }),
-      type: 'all',
-    }].concat(metricTypesConfig).map(({ label, type: metricType, fieldTypes }, idx) => {
-      const isAllMetricTypes = metricType === 'all';
-      // For this config we are either considering all user selected metrics or a subset.
-      const applicableMetrics = isAllMetricTypes
-        ? metrics
-        : metrics
-          .filter(({ type }) => {
-            return fieldTypes[type];
+    const checkboxElements = [
+      {
+        label: i18n.translate('xpack.rollupJobs.create.stepMetrics.allCheckbox', {
+          defaultMessage: 'All',
+        }),
+        type: 'all',
+      },
+    ]
+      .concat(metricTypesConfig)
+      .map(({ label, type: metricType, fieldTypes }, idx) => {
+        const isAllMetricTypes = metricType === 'all';
+        // For this config we are either considering all user selected metrics or a subset.
+        const applicableMetrics = isAllMetricTypes
+          ? metrics
+          : metrics.filter(({ type }) => {
+              return fieldTypes[type];
+            });
+
+        let checkedCount = 0;
+        let isChecked = false;
+        let isDisabled = false;
+
+        if (isAllMetricTypes) {
+          applicableMetrics.forEach(({ types, type }) => {
+            const whiteListedSubset = Object.keys(whiteListedMetricByFieldType[type]);
+            if (whiteListedSubset.every(metricName => types.some(type => type === metricName))) {
+              ++checkedCount;
+            }
           });
 
-      let checkedCount = 0;
-      let isChecked = false;
-      let isDisabled = false;
-
-      if (isAllMetricTypes) {
-        applicableMetrics.forEach(({ types, type }) => {
-          const whiteListedSubset = Object.keys(whiteListedMetricByFieldType[type]);
-          if (whiteListedSubset.every(metricName => types.some(type => type === metricName))) {
-            ++checkedCount;
-          }
-        });
-
-        isDisabled = metrics.length === 0;
-      } else {
-        applicableMetrics.forEach(({ types }) => {
-          const metricSelected = types.some(type => type === metricType);
-          if (metricSelected) {
-            ++checkedCount;
-          }
-        });
-
-        isDisabled = !metrics.some(({ type: fieldType }) =>
-          checkWhiteListedMetricByFieldType(fieldType, metricType),
-        );
-      }
-
-      // Determine if a select all checkbox is checked.
-      isChecked = checkedCount === applicableMetrics.length;
-
-      if (isDisabled) ++disabledCheckboxesCount;
-
-      return (
-        <EuiCheckbox
-          id={`${idx}-select-all-checkbox`}
-          data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
-          disabled={isDisabled}
-          label={label}
-          checked={!isDisabled && isChecked}
-          onChange={() => {
-            if (isAllMetricTypes) {
-              const newMetrics = metricTypesConfig
-                .reduce((acc, { type }) => this.setMetrics(type, !isChecked), null);
-              onFieldsChange({ metrics: newMetrics });
-            } else {
-              onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
+          isDisabled = metrics.length === 0;
+        } else {
+          applicableMetrics.forEach(({ types }) => {
+            const metricSelected = types.some(type => type === metricType);
+            if (metricSelected) {
+              ++checkedCount;
             }
-          }}
-        />
-      );
-    });
+          });
+
+          isDisabled = !metrics.some(({ type: fieldType }) =>
+            checkWhiteListedMetricByFieldType(fieldType, metricType)
+          );
+        }
+
+        // Determine if a select all checkbox is checked.
+        isChecked = checkedCount === applicableMetrics.length;
+
+        if (isDisabled) ++disabledCheckboxesCount;
+
+        return (
+          <EuiCheckbox
+            id={`${idx}-select-all-checkbox`}
+            data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
+            disabled={isDisabled}
+            label={label}
+            checked={!isDisabled && isChecked}
+            onChange={() => {
+              if (isAllMetricTypes) {
+                const newMetrics = metricTypesConfig.reduce(
+                  (acc, { type }) => this.setMetrics(type, !isChecked),
+                  null
+                );
+                onFieldsChange({ metrics: newMetrics });
+              } else {
+                onFieldsChange({ metrics: this.setMetrics(metricType, !isChecked) });
+              }
+            }}
+          />
+        );
+      });
 
     return {
       checkboxElements,
@@ -179,10 +185,7 @@ export class StepMetricsUi extends Component {
   }
 
   getMetricsSelectAllMenu() {
-    const {
-      checkboxElements,
-      allCheckboxesDisabled
-    } = this.renderMetricsSelectAllCheckboxes();
+    const { checkboxElements, allCheckboxesDisabled } = this.renderMetricsSelectAllCheckboxes();
 
     return (
       <Fragment>
@@ -196,19 +199,16 @@ export class StepMetricsUi extends Component {
               onClick={this.openMetricsPopover}
               data-test-subj="rollupJobSelectAllMetricsPopoverButton"
             >
-              {
-                i18n.translate(
-                  'xpack.rollupJobs.create.stepMetrics.selectAllPopoverButtonLabel',
-                  { defaultMessage: 'Select metrics' })
-              }
+              {i18n.translate('xpack.rollupJobs.create.stepMetrics.selectAllPopoverButtonLabel', {
+                defaultMessage: 'Select metrics',
+              })}
             </EuiButton>
           }
         >
           <EuiFlexGroup alignItems="flexStart" direction="column">
-            {
-              checkboxElements
-                .map((item, idx) => <EuiFlexItem key={idx}>{item}</EuiFlexItem>)
-            }
+            {checkboxElements.map((item, idx) => (
+              <EuiFlexItem key={idx}>{item}</EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </EuiPopover>
       </Fragment>
@@ -221,10 +221,9 @@ export class StepMetricsUi extends Component {
     const maxItemsToBeSelected = Object.keys(whiteListedMetricByFieldType[fieldType]).length;
     const allSelected = maxItemsToBeSelected === types.length;
 
-    const label = i18n.translate(
-      'xpack.rollupJobs.create.stepMetrics.selectAllRowLabel',
-      { defaultMessage: 'All' },
-    );
+    const label = i18n.translate('xpack.rollupJobs.create.stepMetrics.selectAllRowLabel', {
+      defaultMessage: 'All',
+    });
 
     const onChange = () => {
       const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
@@ -250,7 +249,9 @@ export class StepMetricsUi extends Component {
   getListColumns() {
     return StepMetricsUi.chooserColumns.concat({
       type: 'metrics',
-      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', { defaultMessage: 'Metrics' }),
+      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', {
+        defaultMessage: 'Metrics',
+      }),
       render: ({ name: fieldName, type: fieldType, types }) => {
         const { onFieldsChange } = this.props;
         const checkboxes = metricTypesConfig
@@ -366,7 +367,7 @@ export class StepMetricsUi extends Component {
               </h2>
             </EuiTitle>
 
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
 
             <EuiText>
               <p>
@@ -396,7 +397,7 @@ export class StepMetricsUi extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer/>
+        <EuiSpacer />
 
         <FieldList
           columns={this.getListColumns()}
@@ -404,21 +405,13 @@ export class StepMetricsUi extends Component {
           onRemoveField={this.onRemoveField}
           emptyMessage={
             <p>
-              {
-                i18n.translate(
-                  'xpack.rollupJobs.create.stepMetrics.emptyListLabel',
-                  { defaultMessage: 'No metrics fields added' },
-                )
-              }
+              {i18n.translate('xpack.rollupJobs.create.stepMetrics.emptyListLabel', {
+                defaultMessage: 'No metrics fields added',
+              })}
             </p>
           }
-
           addButton={
-            <EuiFlexGroup
-              justifyContent="spaceEvenly"
-              alignItems="center"
-              gutterSize="s"
-            >
+            <EuiFlexGroup justifyContent="spaceEvenly" alignItems="center" gutterSize="s">
               <EuiFlexItem>
                 <FieldChooser
                   key="stepMetricsFieldChooser"
@@ -435,12 +428,9 @@ export class StepMetricsUi extends Component {
                   dataTestSubj="rollupJobMetricsFieldChooser"
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
-                {this.getMetricsSelectAllMenu()}
-              </EuiFlexItem>
+              <EuiFlexItem>{this.getMetricsSelectAllMenu()}</EuiFlexItem>
             </EuiFlexGroup>
           }
-
           dataTestSubj="rollupJobMetricsFieldList"
         />
 
@@ -459,25 +449,23 @@ export class StepMetricsUi extends Component {
       return null;
     }
 
-    return <StepError title={errorMetrics}/>;
+    return <StepError title={errorMetrics} />;
   };
 
   static chooserColumns = [
     {
       field: 'name',
-      name: i18n.translate(
-        'xpack.rollupJobs.create.stepMetrics.fieldColumnLabel',
-        { defaultMessage: 'Field' }
-      ),
+      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.fieldColumnLabel', {
+        defaultMessage: 'Field',
+      }),
       sortable: true,
       width: '240px',
     },
     {
       field: 'type',
-      name: i18n.translate(
-        'xpack.rollupJobs.create.stepMetrics.typeColumnLabel',
-        { defaultMessage: 'Type' }
-      ),
+      name: i18n.translate('xpack.rollupJobs.create.stepMetrics.typeColumnLabel', {
+        defaultMessage: 'Type',
+      }),
       truncateText: true,
       sortable: true,
       width: '100px',

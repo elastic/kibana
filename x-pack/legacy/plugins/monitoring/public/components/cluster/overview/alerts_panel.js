@@ -36,12 +36,16 @@ export function AlertsPanel({ alerts, changeUrl }) {
     const severityIcon = mapSeverity(item.metadata.severity);
 
     if (item.resolved_timestamp) {
-      severityIcon.title = i18n.translate('xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle', {
-        defaultMessage: '{severityIconTitle} (resolved {time} ago)',
-        values: {
-          severityIconTitle: severityIcon.title, time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE)
+      severityIcon.title = i18n.translate(
+        'xpack.monitoring.cluster.overview.alertsPanel.severityIconTitle',
+        {
+          defaultMessage: '{severityIconTitle} (resolved {time} ago)',
+          values: {
+            severityIconTitle: severityIcon.title,
+            time: formatTimestampToDuration(item.resolved_timestamp, CALCULATE_DURATION_SINCE),
+          },
         }
-      });
+      );
       severityIcon.color = 'success';
       severityIcon.iconType = 'check';
     }
@@ -69,7 +73,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
               defaultMessage="Last checked {updateDateTime} (triggered {duration} ago)"
               values={{
                 updateDateTime: formatDateTimeLocal(item.update_timestamp),
-                duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE)
+                duration: formatTimestampToDuration(item.timestamp, CALCULATE_DURATION_SINCE),
               }}
             />
           </p>
@@ -78,7 +82,9 @@ export function AlertsPanel({ alerts, changeUrl }) {
     );
   }
 
-  const topAlertItems = alerts.map((item, index) => <TopAlertItem item={item} key={`top-alert-item-${index}`} index={index} />);
+  const topAlertItems = alerts.map((item, index) => (
+    <TopAlertItem item={item} key={`top-alert-item-${index}`} index={index} />
+  ));
 
   return (
     <div data-test-subj="clusterAlertsContainer">
@@ -103,7 +109,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      { topAlertItems }
+      {topAlertItems}
       <EuiSpacer size="xxl" />
     </div>
   );

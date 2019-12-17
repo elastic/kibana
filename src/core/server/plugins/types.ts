@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
 import { RecursiveReadonly } from 'kibana/public';
-import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
+import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
@@ -36,7 +36,7 @@ import { CoreSetup, CoreStart } from '..';
 export type PluginConfigSchema<T> = Type<T>;
 
 /**
- * Describes a plugin configuration schema and capabilities.
+ * Describes a plugin configuration properties.
  *
  * @example
  * ```typescript
@@ -56,12 +56,20 @@ export type PluginConfigSchema<T> = Type<T>;
  *     uiProp: true,
  *   },
  *   schema: configSchema,
+ *   deprecations: ({ rename, unused }) => [
+ *     rename('securityKey', 'secret'),
+ *     unused('deprecatedProperty'),
+ *   ],
  * };
  * ```
  *
  * @public
  */
 export interface PluginConfigDescriptor<T = any> {
+  /**
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecationProvider;
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */
@@ -206,6 +214,9 @@ export const SharedGlobalConfigKeys = {
   path: ['data'] as const,
 };
 
+/**
+ * @public
+ */
 export type SharedGlobalConfig = RecursiveReadonly<{
   kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;

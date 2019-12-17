@@ -30,7 +30,7 @@ const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
 cluster.setupMaster({
   exec: cliPath,
-  silent: false
+  silent: false,
 });
 
 const dead = fork => {
@@ -45,7 +45,7 @@ export default class Worker extends EventEmitter {
     this.log = opts.log;
     this.type = opts.type;
     this.title = opts.title || opts.type;
-    this.watch = (opts.watch !== false);
+    this.watch = opts.watch !== false;
     this.startCount = 0;
 
     // status flags
@@ -62,10 +62,7 @@ export default class Worker extends EventEmitter {
     this.env = {
       NODE_OPTIONS: process.env.NODE_OPTIONS || '',
       kbnWorkerType: this.type,
-      kbnWorkerArgv: JSON.stringify([
-        ...(opts.baseArgv || baseArgv),
-        ...(opts.argv || [])
-      ])
+      kbnWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
     };
   }
 
@@ -134,6 +131,9 @@ export default class Worker extends EventEmitter {
         this.listening = true;
         this.emit('listening');
         break;
+      case 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER':
+        this.emit('reloadLoggingConfigFromServerWorker');
+        break;
     }
   }
 
@@ -151,7 +151,7 @@ export default class Worker extends EventEmitter {
   flushChangeBuffer() {
     const files = _.unique(this.changes.splice(0));
     const prefix = files.length > 1 ? '\n - ' : '';
-    return files.reduce(function (list, file) {
+    return files.reduce(function(list, file) {
       return `${list || ''}${prefix}"${file}"`;
     }, '');
   }
@@ -166,8 +166,7 @@ export default class Worker extends EventEmitter {
 
     if (this.changes.length) {
       this.log.warn(`restarting ${this.title}`, `due to changes in ${this.flushChangeBuffer()}`);
-    }
-    else if (this.startCount++) {
+    } else if (this.startCount++) {
       this.log.warn(`restarting ${this.title}...`);
     }
 

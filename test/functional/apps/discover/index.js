@@ -17,14 +17,14 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  describe('discover app', function() {
     this.tags('ciGroup6');
 
-    before(function () {
+    before(function() {
       return browser.setWindowSize(1300, 800);
     });
 

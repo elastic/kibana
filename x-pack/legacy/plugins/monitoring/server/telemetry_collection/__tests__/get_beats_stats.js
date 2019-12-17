@@ -14,7 +14,7 @@ const getBaseOptions = () => ({
   clusterHostSets: {},
   clusterInputSets: {},
   clusterModuleSets: {},
-  clusterArchitectureMaps: {}
+  clusterArchitectureMaps: {},
 });
 
 describe('Get Beats Stats', () => {
@@ -27,9 +27,7 @@ describe('Get Beats Stats', () => {
 
     beforeEach(() => {
       const getStub = { get: sinon.stub() };
-      getStub.get
-        .withArgs('xpack.monitoring.beats.index_pattern')
-        .returns('beats-indices-*');
+      getStub.get.withArgs('xpack.monitoring.beats.index_pattern').returns('beats-indices-*');
       server = { config: () => getStub };
       callCluster = sinon.stub();
     });
@@ -114,14 +112,13 @@ describe('Get Beats Stats', () => {
           },
           architecture: {
             count: 0,
-            architectures: []
-          }
+            architectures: [],
+          },
         },
       });
     });
 
     it('should summarize stats from hits across multiple result objects', () => {
-
       const options = getBaseOptions();
 
       // beatsStatsResultSet is an array of many small query results
@@ -139,11 +136,11 @@ describe('Get Beats Stats', () => {
           hosts: 1,
           module: {
             count: 1,
-            names: [ 'car.ferrari' ],
+            names: ['car.ferrari'],
           },
           input: {
             count: 1,
-            names: [ 'firehose' ],
+            names: ['firehose'],
           },
           architecture: {
             count: 1,
@@ -151,26 +148,26 @@ describe('Get Beats Stats', () => {
               {
                 architecture: 'x86_64',
                 count: 1,
-                name: 'darwin'
-              }
-            ]
+                name: 'darwin',
+              },
+            ],
           },
           heartbeat: {
             endpoints: 4,
             http: {
               endpoints: 1,
-              monitors: 1
+              monitors: 1,
             },
             icmp: {
               monitors: 0,
-              endpoints: 0
+              endpoints: 0,
             },
             tcp: {
               monitors: 2,
-              endpoints: 3
+              endpoints: 3,
             },
-            monitors: 3
-          }
+            monitors: 3,
+          },
         },
         FlV4ckTxQ0a78hmBkzzc9A: {
           count: 405,
@@ -198,8 +195,8 @@ describe('Get Beats Stats', () => {
           },
           architecture: {
             count: 0,
-            architectures: []
-          }
+            architectures: [],
+          },
         },
       });
     });

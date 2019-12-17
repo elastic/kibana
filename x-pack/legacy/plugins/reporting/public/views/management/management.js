@@ -13,7 +13,7 @@ import 'plugins/reporting/views/management/jobs';
 
 routes.defaults(/\/management/, {
   resolve: {
-    reportingManagementSection: function () {
+    reportingManagementSection: function() {
       const kibanaManagementSection = management.getSection('kibana');
       const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
 
@@ -33,12 +33,12 @@ routes.defaults(/\/management/, {
         return kibanaManagementSection.register('reporting', {
           order: 15,
           display: i18n.translate('xpack.reporting.management.reportingTitle', {
-            defaultMessage: 'Reporting'
+            defaultMessage: 'Reporting',
           }),
           url,
-          tooltip
+          tooltip,
         });
       }
-    }
-  }
+    },
+  },
 });

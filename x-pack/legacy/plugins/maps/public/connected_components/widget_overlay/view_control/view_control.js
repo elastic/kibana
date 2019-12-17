@@ -20,23 +20,17 @@ export function ViewControl({ mouseCoordinates, zoom }) {
       <EuiText size="xs">
         <small>
           <strong>
-            <FormattedMessage
-              id="xpack.maps.viewControl.latLabel"
-              defaultMessage="lat:"
-            />
-          </strong> {_.round(mouseCoordinates.lat, DECIMAL_DEGREES_PRECISION)},{' '}
+            <FormattedMessage id="xpack.maps.viewControl.latLabel" defaultMessage="lat:" />
+          </strong>{' '}
+          {_.round(mouseCoordinates.lat, DECIMAL_DEGREES_PRECISION)},{' '}
           <strong>
-            <FormattedMessage
-              id="xpack.maps.viewControl.lonLabel"
-              defaultMessage="lon:"
-            />
-          </strong> {_.round(mouseCoordinates.lon, DECIMAL_DEGREES_PRECISION)},{' '}
+            <FormattedMessage id="xpack.maps.viewControl.lonLabel" defaultMessage="lon:" />
+          </strong>{' '}
+          {_.round(mouseCoordinates.lon, DECIMAL_DEGREES_PRECISION)},{' '}
           <strong>
-            <FormattedMessage
-              id="xpack.maps.viewControl.zoomLabel"
-              defaultMessage="zoom:"
-            />
-          </strong> {zoom}
+            <FormattedMessage id="xpack.maps.viewControl.zoomLabel" defaultMessage="zoom:" />
+          </strong>{' '}
+          {zoom}
         </small>
       </EuiText>
     </div>

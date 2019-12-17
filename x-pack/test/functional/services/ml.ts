@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
+  MachineLearningCommonProvider,
   MachineLearningCustomUrlsProvider,
   MachineLearningDataFrameAnalyticsProvider,
   MachineLearningDataFrameAnalyticsCreationProvider,
@@ -29,6 +30,8 @@ import {
 } from './machine_learning';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
+  const common = MachineLearningCommonProvider(context);
+
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
@@ -41,8 +44,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
-  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, customUrls);
+  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
+  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);

@@ -12,6 +12,7 @@ import url from 'url';
 import chrome from 'ui/chrome';
 import { InfraLogItem } from '../../../graphql/types';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
+import { getTraceUrl } from '../../../../../apm/public/components/shared/Links/apm/ExternalLinks';
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
@@ -51,7 +52,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
     ],
-    [uptimeLink]
+    [apmLink, uptimeLink]
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
@@ -123,8 +124,6 @@ const getAPMLink = (logItem: InfraLogItem) => {
 
   return url.format({
     pathname: chrome.addBasePath('/app/apm'),
-    hash: `/traces?kuery=${encodeURIComponent(
-      `trace.id:${traceIdEntry.value}`
-    )}&rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`,
+    hash: getTraceUrl({ traceId: traceIdEntry.value, rangeFrom, rangeTo }),
   });
 };
