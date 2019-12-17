@@ -38,7 +38,7 @@ export const getAllHandler: RouterRouteHandler = async (
   // Attempt to retrieve policies
   // This could fail if user doesn't have access to read SLM policies
   try {
-    const policiesByName = await callWithRequest('slm.policies');
+    const policiesByName = await callWithRequest('sr.policies');
     policies = Object.keys(policiesByName);
   } catch (e) {
     // Silently swallow error as policy names aren't required in UI

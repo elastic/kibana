@@ -140,7 +140,6 @@ import {
   SnapshotRestoreParams,
   SnapshotStatusParams,
   SnapshotVerifyRepositoryParams,
-  SnapshotCleanupRepositoryParams,
   // tasks
   TasksCancelParams,
   TasksGetParams,
@@ -342,7 +341,6 @@ export interface CallClusterWithRequest {
   (request: Request, endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['restore']>;
   (request: Request, endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['status']>;
   (request: Request, endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['verifyRepository']>;
-  (request: Request, endpoint: 'snapshot.cleanupRepository', params: SnapshotCleanupRepositoryParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['cleanupRepository']>;
 
   // tasks namespace
   (request: Request, endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['cancel']>;

@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { cleanup } from '@testing-library/react';
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import {
   wrapCustomError,
@@ -77,7 +76,7 @@ export const getAllHandler: RouterRouteHandler = async (
     try {
       const policiesByName: {
         [key: string]: SlmPolicyEs;
-      } = await callWithRequest('slm.policies', {
+      } = await callWithRequest('sr.policies', {
         human: true,
       });
       const managedRepositoryPolicy = Object.entries(policiesByName)
@@ -182,14 +181,16 @@ export const getCleanupHandler: RouterRouteHandler = async (
   cleanup: RepositoryCleanup | {};
 }> => {
   const { name } = req.params;
-  const cleanupResults = await callWithRequest('snapshot.cleanupRepository', {
-    repository: name,
+
+  const cleanupResults = await callWithRequest('sr.cleanupRepository', {
+    name,
   }).catch(e => ({
     cleaned: false,
     error: e.response ? JSON.parse(e.response) : e,
   }));
+
   return {
-    cleanup: cleanupResults.errorgi
+    cleanup: cleanupResults.error
       ? cleanupResults
       : {
           cleaned: true,
