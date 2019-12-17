@@ -156,7 +156,7 @@
     "react-test-renderer": "^16.12.0",
     "rxjs-marbles": "^5.0.3",
     "sass-loader": "^7.3.1",
-    "simple-git": "1.129.0",
+    "simple-git": "1.116.0",
     "sinon": "^7.4.2",
     "string-replace-loader": "^2.2.0",
     "supertest": "^3.1.0",
