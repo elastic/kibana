@@ -180,7 +180,7 @@
     "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
     "history": "^4.9.0",
-    "hjson": "3.2.0",
+    "hjson": "3.2.1",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.2",
