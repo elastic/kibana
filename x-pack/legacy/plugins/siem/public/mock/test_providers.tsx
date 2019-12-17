@@ -19,7 +19,6 @@ import { ThemeProvider } from 'styled-components';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-// import './ui_settings';
 import { createKibanaContextProviderMock } from './kibana_react';
 
 jest.mock('ui/new_platform');
