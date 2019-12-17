@@ -88,7 +88,7 @@ describe('license features', function() {
   });
 
   it('should allow to login, allow RBAC, role mappings, and document level security if license >= platinum', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
+    const mockRawLicense = getMockRawLicense({ isAvailable: true, isNotBasic: true });
     mockRawLicense.isOneOf.mockImplementation(licenses => {
       const licenseArray = [licenses].flat();
       return (
