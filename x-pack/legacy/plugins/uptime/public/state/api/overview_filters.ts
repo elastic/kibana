@@ -25,11 +25,12 @@ export const fetchOverviewFilters = async ({
   tags,
 }: ApiRequest) => {
   const url = getApiPath(`/api/uptime/filters`, basePath);
-  const filterParams =
-    parameterizeValues('schemes', schemes) +
-    parameterizeValues('locations', locations) +
-    parameterizeValues('ports', ports) +
-    parameterizeValues('tags', tags);
+  const filterParams = parameterizeValues({
+    schemes,
+    locations,
+    ports,
+    tags,
+  });
 
   const requiredParams = `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
   const searchParam = search ? `&search=${search}` : '';

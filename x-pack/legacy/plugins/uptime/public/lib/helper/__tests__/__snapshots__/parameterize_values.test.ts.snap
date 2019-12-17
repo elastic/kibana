@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`parameterizeValues parameterizes provided values for multiple fields 1`] = `"&foo=bar&foo=baz&bar=foo&bar=baz"`;
+
 exports[`parameterizeValues parameterizes the provided values for a given field name 1`] = `"&foo=bar&foo=baz"`;

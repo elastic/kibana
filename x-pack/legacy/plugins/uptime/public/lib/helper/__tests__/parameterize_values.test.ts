@@ -8,10 +8,14 @@ import { parameterizeValues } from '../parameterize_values';
 
 describe('parameterizeValues', () => {
   it('parameterizes the provided values for a given field name', () => {
-    expect(parameterizeValues('foo', ['bar', 'baz'])).toMatchSnapshot();
+    expect(parameterizeValues({ foo: ['bar', 'baz'] })).toMatchSnapshot();
+  });
+
+  it('parameterizes provided values for multiple fields', () => {
+    expect(parameterizeValues({ foo: ['bar', 'baz'], bar: ['foo', 'baz'] })).toMatchSnapshot();
   });
 
   it('returns an empty string when there are no values provided', () => {
-    expect(parameterizeValues('foo', [])).toBe('');
+    expect(parameterizeValues({ foo: [] })).toBe('');
   });
 });
