@@ -40,20 +40,7 @@ export async function createDatasource(options: {
   await baseSetup(callCluster);
   const pkg = await Registry.fetchInfo(pkgkey);
 
-  // Collect the config for each dataset
-  const streams: Stream[] = [];
-  if (datasets) {
-    for (const dataset of datasets) {
-      const input = yaml.load(await getConfig(pkgkey, dataset));
-      if (input) {
-        streams.push({
-          id: dataset.name,
-          input,
-          output_id: 'default',
-        });
-      }
-    }
-  }
+  const streams = await getStreams(pkgkey, datasets);
 
   await Promise.all([
     installTemplates(pkg, callCluster),
@@ -118,6 +105,23 @@ async function saveDatasourceReferences(options: {
   await ingestDatasourceCreate({ request, datasource });
 
   return toInstall;
+}
+
+async function getStreams(pkgkey: string, datasets: Dataset[]) {
+  const streams: Stream[] = [];
+  if (datasets) {
+    for (const dataset of datasets) {
+      const input = yaml.load(await getConfig(pkgkey, dataset));
+      if (input) {
+        streams.push({
+          id: dataset.name,
+          input,
+          output_id: 'default',
+        });
+      }
+    }
+  }
+  return streams;
 }
 
 async function getDatasource(options: {
