@@ -82,7 +82,7 @@ export const RuleGroupTitle = (props: Props) => {
       <EuiContextMenuPanel
         items={availableRuleTypes.map((rt, index) => {
           const isSelected = rt.getDisplayTitle() === props.rule.getDisplayTitle();
-          const icon = isSelected ? 'check' : undefined;
+          const icon = isSelected ? 'check' : 'empty';
           return (
             <EuiContextMenuItem key={index} icon={icon} onClick={() => onChange(rt as RuleGroup)}>
               {rt.getDisplayTitle()}
@@ -100,7 +100,7 @@ export const RuleGroupTitle = (props: Props) => {
         title={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.confirmGroupChangePromptTitle"
-            defaultMessage="Switch with invalid rules?"
+            defaultMessage="Change group type?"
           />
         }
         onCancel={() => {
@@ -121,14 +121,14 @@ export const RuleGroupTitle = (props: Props) => {
         confirmButtonText={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.confirmGroupChangeConfirmButton"
-            defaultMessage="Switch anyway"
+            defaultMessage="Change anyway"
           />
         }
       >
         <p>
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.switchWithIncompatibleRulesMessage"
-            defaultMessage="This group contains rules which are not compatible. If you switch, you will lose all rules within this group."
+            defaultMessage="This group contains rules that are not compatible with the new type. If you change types, you will lose all rules within this group."
           />
         </p>
       </EuiConfirmModal>

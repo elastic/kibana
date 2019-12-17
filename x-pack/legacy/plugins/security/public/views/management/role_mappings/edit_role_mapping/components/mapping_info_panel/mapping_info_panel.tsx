@@ -61,14 +61,6 @@ export class MappingInfoPanel extends Component<Props, State> {
             />
           </h2>
         </EuiTitle>
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.configureRoleMappingText"
-              defaultMessage="Configure your role mapping."
-            />
-          </p>
-        </EuiText>
         <EuiSpacer />
         {this.getRoleMappingName()}
         {this.getEnabledSwitch()}
@@ -91,7 +83,7 @@ export class MappingInfoPanel extends Component<Props, State> {
         description={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.roleMappingNameFormRowHelpText"
-            defaultMessage="The distinct name that identifies the role mapping. The name is used solely as an identifier; it does not affect the behavior of the mapping in any way."
+            defaultMessage="A distinct name used solely as an identifier."
           />
         }
       >
@@ -140,7 +132,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             <span>
               <FormattedMessage
                 id="xpack.security.management.editRoleMapping.roleMappingRolesFormRowHelpText"
-                defaultMessage="Choose which roles to assign to your users."
+                defaultMessage="Assign roles to your users."
               />
             </span>
             <EuiSpacer size="m" />
@@ -187,7 +179,7 @@ export class MappingInfoPanel extends Component<Props, State> {
           <h3>
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.roleMappingRoleTemplatesFormRowTitle"
-              defaultMessage="Role Templates"
+              defaultMessage="Role templates"
             />
           </h3>
         }
@@ -196,7 +188,7 @@ export class MappingInfoPanel extends Component<Props, State> {
             <span>
               <FormattedMessage
                 id="xpack.security.management.editRoleMapping.roleMappingRoleTemplatesFormRowHelpText"
-                defaultMessage="Create templates which describe the roles to assign to your users."
+                defaultMessage="Create templates that describe the roles to assign to your users."
               />{' '}
               <EuiLink
                 href={documentationLinks.getRoleMappingTemplateDocUrl()}
@@ -205,7 +197,7 @@ export class MappingInfoPanel extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.roleMappingRoleTemplatesFormRowLearnMore"
-                  defaultMessage="Learn more about role templates"
+                  defaultMessage="Learn about role templates"
                 />
               </EuiLink>
             </span>
@@ -247,14 +239,14 @@ export class MappingInfoPanel extends Component<Props, State> {
           <h3>
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.roleMappingEnabledFormRowTitle"
-              defaultMessage="Enabled"
+              defaultMessage="Enable mapping"
             />
           </h3>
         }
         description={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.roleMappingEnabledFormRowHelpText"
-            defaultMessage="Mappings that are disabled are ignored when role mapping is performed."
+            defaultMessage="If disabled, ignore when role mapping is performed."
           />
         }
       >

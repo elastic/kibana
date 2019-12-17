@@ -20,7 +20,7 @@ interface Props {
   onValidityChange: (isValid: boolean) => void;
 }
 
-export const AdvancedRuleEditor = (props: Props) => {
+export const JSONRuleEditor = (props: Props) => {
   const [rawRules, setRawRules] = useState(
     JSON.stringify(props.rules ? props.rules.toRaw() : {}, null, 2)
   );
@@ -59,7 +59,7 @@ export const AdvancedRuleEditor = (props: Props) => {
       isInvalid={Boolean(ruleBuilderError)}
       error={
         ruleBuilderError &&
-        i18n.translate('xpack.security.management.editRoleMapping.advancedEditorRuleError', {
+        i18n.translate('xpack.security.management.editRoleMapping.JSONEditorRuleError', {
           defaultMessage: 'Invalid rule definition at {ruleLocation}: {errorMessage}',
           values: {
             ruleLocation: ruleBuilderError.ruleTrace.join('.'),
@@ -68,7 +68,7 @@ export const AdvancedRuleEditor = (props: Props) => {
         })
       }
       fullWidth
-      data-test-subj="roleMappingsAdvancedEditor"
+      data-test-subj="roleMappingsJSONEditor"
     >
       <Fragment>
         <EuiCodeEditor
@@ -95,14 +95,14 @@ export const AdvancedRuleEditor = (props: Props) => {
         <EuiButton iconType="broom" onClick={reformatRules} size="s">
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.autoFormatRuleText"
-            defaultMessage="Auto-format"
+            defaultMessage="Reformat"
           />
         </EuiButton>
         <EuiSpacer size="s" />
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoleMapping.advancedEditorHelpText"
+              id="xpack.security.management.editRoleMapping.JSONEditorHelpText"
               defaultMessage="Specify your rules in JSON format consistent with the {roleMappingAPI}"
               values={{
                 roleMappingAPI: (
@@ -112,8 +112,8 @@ export const AdvancedRuleEditor = (props: Props) => {
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.security.management.editRoleMapping.advancedEditorEsApi"
-                      defaultMessage="Elasticsearch Role Mapping API"
+                      id="xpack.security.management.editRoleMapping.JSONEditorEsApi"
+                      defaultMessage="Elasticsearch role mapping API."
                     />
                   </EuiLink>
                 ),

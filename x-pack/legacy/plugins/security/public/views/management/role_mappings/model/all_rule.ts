@@ -24,7 +24,7 @@ export class AllRule extends RuleGroup {
   /** {@see RuleGroup.getDisplayTitle} */
   public getDisplayTitle() {
     return i18n.translate('xpack.security.management.editRoleMapping.allRule.displayTitle', {
-      defaultMessage: 'All of the following are true',
+      defaultMessage: 'All are true',
     });
   }
 

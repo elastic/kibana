@@ -16,7 +16,7 @@ export const EmptyPrompt: React.FunctionComponent<{}> = () => (
       <h1>
         <FormattedMessage
           id="xpack.security.management.roleMappings.emptyPromptTitle"
-          defaultMessage="Add your first role mapping"
+          defaultMessage="Create your first role mapping"
         />
       </h1>
     }

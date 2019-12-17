@@ -58,7 +58,7 @@ export const RoleTemplateEditor = ({
             >
               <FormattedMessage
                 id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
-                defaultMessage="Delete role template"
+                defaultMessage="Delete template"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -134,7 +134,7 @@ export const RoleTemplateEditor = ({
           <EuiText size="xs" color="danger" data-test-subj="roleMappingInlineScriptsDisabled">
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.roleTemplateInlineScriptsDisabled"
-              defaultMessage="This template cannot be used because inline scripts are disabled in Elasticsearch."
+              defaultMessage="Template uses inline scripts, which are disabled in Elasticsearch."
             />
           </EuiText>
         );
@@ -153,7 +153,7 @@ export const RoleTemplateEditor = ({
               helpText={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.roleTemplateHelpText"
-                  defaultMessage="You can use mustache templates here. Example: {example}"
+                  defaultMessage="Mustache templates are allowed. Example: {example}"
                   values={{
                     example,
                   }}
@@ -187,7 +187,7 @@ export const RoleTemplateEditor = ({
           <EuiText size="xs" color="danger" data-test-subj="roleMappingStoredScriptsDisabled">
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.roleTemplateStoredScriptsDisabled"
-              defaultMessage="This template cannot be used because stored scripts are disabled in Elasticsearch."
+              defaultMessage="Template uses stored scripts, which are disabled in Elasticsearch."
             />
           </EuiText>
         );
@@ -199,13 +199,13 @@ export const RoleTemplateEditor = ({
               label={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.storedScriptLabel"
-                  defaultMessage="Stored script id"
+                  defaultMessage="Stored script ID"
                 />
               }
               helpText={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.storedScriptHelpText"
-                  defaultMessage="Enter the id of a previously stored painless or mustache script."
+                  defaultMessage="ID of a previously stored Painless or Mustache script."
                 />
               }
               {...extraProps}

@@ -63,7 +63,7 @@ export class ExceptFieldRule extends RuleGroup {
     return i18n.translate(
       'xpack.security.management.editRoleMapping.exceptFieldRule.displayTitle',
       {
-        defaultMessage: 'The following is false',
+        defaultMessage: 'Is false',
       }
     );
   }

@@ -15,7 +15,7 @@ import 'test_utils/stub_web_worker';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { AdvancedRuleEditor } from './advanced_rule_editor';
+import { JSONRuleEditor } from './json_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
 import {
   AllRule,
@@ -26,14 +26,14 @@ import {
   ExceptFieldRule,
 } from '../../../model';
 
-describe('AdvancedRuleEditor', () => {
+describe('JSONRuleEditor', () => {
   it('renders an empty rule set', () => {
     const props = {
       rules: null,
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<AdvancedRuleEditor {...props} />);
+    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
     expect(props.onChange).not.toHaveBeenCalled();
     expect(props.onValidityChange).not.toHaveBeenCalled();
@@ -55,7 +55,7 @@ describe('AdvancedRuleEditor', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<AdvancedRuleEditor {...props} />);
+    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
     const { value } = wrapper.find(EuiCodeEditor).props();
     expect(JSON.parse(value)).toEqual({
@@ -93,7 +93,7 @@ describe('AdvancedRuleEditor', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<AdvancedRuleEditor {...props} />);
+    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {
@@ -114,7 +114,7 @@ describe('AdvancedRuleEditor', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<AdvancedRuleEditor {...props} />);
+    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
     const invalidRule = JSON.stringify({
       all: [
@@ -144,7 +144,7 @@ describe('AdvancedRuleEditor', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
     };
-    const wrapper = mountWithIntl(<AdvancedRuleEditor {...props} />);
+    const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
     const allRule = JSON.stringify(new AllRule().toRaw());
     act(() => {

@@ -292,9 +292,9 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
       this.setState({
         loadState,
-        hasCompatibleRealms,
+        hasCompatibleRealms: false,
         canUseStoredScripts,
-        canUseInlineScripts,
+        canUseInlineScripts: false,
         roleMapping,
       });
     } catch (e) {

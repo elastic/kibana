@@ -39,7 +39,7 @@ interface RuleBuilderResult {
 
 /**
  * Given a set of raw rules, this constructs a class based tree for consumption by the Role Management UI.
- * This also performs validation on the raw rule set, as it is possible to enter raw JSON in the AdvancedRuleEditor,
+ * This also performs validation on the raw rule set, as it is possible to enter raw JSON in the JSONRuleEditor,
  * so we have no guarantees that the rule set is valid ahead of time.
  *
  * @param rawRules the raw rules to translate.

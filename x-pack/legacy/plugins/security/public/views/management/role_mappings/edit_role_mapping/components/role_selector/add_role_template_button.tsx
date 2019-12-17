@@ -40,7 +40,7 @@ export const AddRoleTemplateButton = (props: Props) => {
   const addRoleTemplate = (
     <FormattedMessage
       id="xpack.security.management.editRoleMapping.addRoleTemplate"
-      defaultMessage="Add role template"
+      defaultMessage="Add template"
     />
   );
   if (props.canUseInlineScripts) {

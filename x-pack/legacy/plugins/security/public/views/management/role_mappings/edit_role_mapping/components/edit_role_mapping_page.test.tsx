@@ -17,7 +17,7 @@ import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../../components';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
-import { AdvancedRuleEditor } from './rule_editor_panel/advanced_rule_editor';
+import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
 import { EuiComboBox } from '@elastic/eui';
 
 jest.mock('../../../../../lib/roles_api', () => {
@@ -287,10 +287,10 @@ describe('EditRoleMappingPage', () => {
     wrapper.update();
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
-    expect(wrapper.find(AdvancedRuleEditor)).toHaveLength(0);
+    expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
   });
 
-  it('renders the advanced editor by default for complex rule sets', async () => {
+  it('renders the JSON editor by default for complex rule sets', async () => {
     const createRule = (depth: number): Record<string, any> => {
       if (depth > 0) {
         const rule = {
@@ -336,6 +336,6 @@ describe('EditRoleMappingPage', () => {
     wrapper.update();
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
-    expect(wrapper.find(AdvancedRuleEditor)).toHaveLength(1);
+    expect(wrapper.find(JSONRuleEditor)).toHaveLength(1);
   });
 });

@@ -140,7 +140,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.roleMappings.roleMappingDescription"
-                  defaultMessage="View and manage your role mappings. A role mapping is a rule-based mechanism for assigning roles to users."
+                  defaultMessage="Role mappings define which roles are assigned to users from an external identity provider."
                 />
               </p>
             </EuiText>
@@ -434,7 +434,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
       this.setState({
         loadState: canManageRoleMappings ? this.state.loadState : 'permissionDenied',
-        hasCompatibleRealms,
+        hasCompatibleRealms: false,
       });
 
       if (canManageRoleMappings) {

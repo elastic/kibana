@@ -81,23 +81,23 @@ export class VisualRuleEditor extends Component<Props, {}> {
           iconType="alert"
           title={
             <FormattedMessage
-              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToAdvancedEditorTitle"
-              defaultMessage="Switch to advanced editor"
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToJSONEditorTitle"
+              defaultMessage="Switch to JSON editor"
             />
           }
           data-test-subj="roleMappingsRulesTooComplex"
         >
           <p>
             <FormattedMessage
-              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToAdvancedEditorMessage"
-              defaultMessage="Role mapping rules are too complex for the visual editor. Switch to the advanced editor to continue editing this rule."
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToJSONEditorMessage"
+              defaultMessage="Role mapping rules are too complex for the visual editor. Switch to the JSON editor to continue editing this rule."
             />
           </p>
 
           <EuiButton onClick={this.props.onSwitchEditorMode} size="s">
             <FormattedMessage
-              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToAdvancedEditorButton"
-              defaultMessage="Use advanced editor"
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToJSONEditorButton"
+              defaultMessage="Use JSON editor"
             />
           </EuiButton>
         </EuiCallOut>

@@ -24,7 +24,7 @@ export class ExceptAllRule extends RuleGroup {
   /** {@see RuleGroup.getDisplayTitle} */
   public getDisplayTitle() {
     return i18n.translate('xpack.security.management.editRoleMapping.exceptAllRule.displayTitle', {
-      defaultMessage: 'Any of the following are false',
+      defaultMessage: 'Any are false',
     });
   }
 

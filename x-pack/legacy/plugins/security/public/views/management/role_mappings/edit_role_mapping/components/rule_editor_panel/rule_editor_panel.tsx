@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { RoleMapping } from '../../../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
-import { AdvancedRuleEditor } from './advanced_rule_editor';
+import { JSONRuleEditor } from './json_rule_editor';
 import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
 import { Rule, generateRulesFromRaw } from '../../../model';
 import { validateRoleMappingRules } from '../../services/role_mapping_validation';
@@ -43,7 +43,7 @@ interface State {
   isRuleValid: boolean;
   showConfirmModeChange: boolean;
   showVisualEditorDisabledAlert: boolean;
-  mode: 'visual' | 'advanced';
+  mode: 'visual' | 'json';
 }
 
 export class RuleEditorPanel extends Component<Props, State> {
@@ -87,7 +87,7 @@ export class RuleEditorPanel extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.roleMappingRulesFormRowHelpText"
-                  defaultMessage="Roles will be assigned to users matching these rules. {learnMoreLink}"
+                  defaultMessage="Assign roles to users who match these rules. {learnMoreLink}"
                   values={{
                     learnMoreLink: (
                       <EuiLink
@@ -97,7 +97,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                       >
                         <FormattedMessage
                           id="xpack.security.management.editRoleMapping.fieldRuleEditor.fieldValueHelp"
-                          defaultMessage="Learn more about supported field values."
+                          defaultMessage="Learn about supported field values."
                         />
                       </EuiLink>
                     ),
@@ -126,7 +126,7 @@ export class RuleEditorPanel extends Component<Props, State> {
 
   private initializeFromRawRules = (rawRules: Props['rawRules']) => {
     const { rules, maxDepth } = generateRulesFromRaw(rawRules);
-    const mode: State['mode'] = maxDepth >= VISUAL_MAX_RULE_DEPTH ? 'advanced' : 'visual';
+    const mode: State['mode'] = maxDepth >= VISUAL_MAX_RULE_DEPTH ? 'json' : 'visual';
     return {
       rules,
       mode,
@@ -135,7 +135,7 @@ export class RuleEditorPanel extends Component<Props, State> {
   };
 
   private getModeToggle() {
-    if (this.state.mode === 'advanced' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
+    if (this.state.mode === 'json' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
       return (
         <EuiCallOut
           size="s"
@@ -156,21 +156,21 @@ export class RuleEditorPanel extends Component<Props, State> {
       case 'visual':
         return (
           <EuiLink
-            data-test-subj="roleMappingsAdvancedRuleEditorButton"
+            data-test-subj="roleMappingsJSONRuleEditorButton"
             onClick={() => {
-              this.trySwitchEditorMode('advanced');
+              this.trySwitchEditorMode('json');
             }}
           >
             <Fragment>
               <FormattedMessage
-                id="xpack.security.management.editRoleMapping.switchToAdvancedEditorLink"
-                defaultMessage="Switch to advanced editor"
+                id="xpack.security.management.editRoleMapping.switchToJSONEditorLink"
+                defaultMessage="Switch to JSON editor"
               />{' '}
               <EuiIcon type="inputOutput" size="s" />
             </Fragment>
           </EuiLink>
         );
-      case 'advanced':
+      case 'json':
         return (
           <EuiLink
             data-test-subj="roleMappingsVisualRuleEditorButton"
@@ -200,12 +200,12 @@ export class RuleEditorPanel extends Component<Props, State> {
             rules={this.state.rules}
             maxDepth={this.state.maxDepth}
             onChange={this.onRuleChange}
-            onSwitchEditorMode={() => this.trySwitchEditorMode('advanced')}
+            onSwitchEditorMode={() => this.trySwitchEditorMode('json')}
           />
         );
-      case 'advanced':
+      case 'json':
         return (
-          <AdvancedRuleEditor
+          <JSONRuleEditor
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}
@@ -282,7 +282,7 @@ export class RuleEditorPanel extends Component<Props, State> {
         }
         break;
       }
-      case 'advanced':
+      case 'json':
         this.setState({ mode: newMode });
         this.onValidityChange(true);
         break;

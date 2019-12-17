@@ -8,7 +8,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { RuleEditorPanel } from '.';
 import { VisualRuleEditor } from './visual_rule_editor';
-import { AdvancedRuleEditor } from './advanced_rule_editor';
+import { JSONRuleEditor } from './json_rule_editor';
 import { findTestSubject } from 'test_utils/find_test_subject';
 
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
@@ -28,10 +28,10 @@ describe('RuleEditorPanel', () => {
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
-    expect(wrapper.find(AdvancedRuleEditor)).toHaveLength(0);
+    expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
   });
 
-  it('allows switching to the advanced editor, carrying over rules', () => {
+  it('allows switching to the JSON editor, carrying over rules', () => {
     const props = {
       rawRules: {
         all: [
@@ -48,15 +48,15 @@ describe('RuleEditorPanel', () => {
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
-    expect(wrapper.find(AdvancedRuleEditor)).toHaveLength(0);
+    expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
 
-    findTestSubject(wrapper, 'roleMappingsAdvancedRuleEditorButton').simulate('click');
+    findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton').simulate('click');
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
 
-    const advancedEditor = wrapper.find(AdvancedRuleEditor);
-    expect(advancedEditor).toHaveLength(1);
-    const { rules } = advancedEditor.props();
+    const jsonEditor = wrapper.find(JSONRuleEditor);
+    expect(jsonEditor).toHaveLength(1);
+    const { rules } = jsonEditor.props();
     expect(rules!.toRaw()).toEqual(props.rawRules);
   });
 
@@ -68,21 +68,21 @@ describe('RuleEditorPanel', () => {
       validateForm: false,
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
-    findTestSubject(wrapper, 'roleMappingsAdvancedRuleEditorButton').simulate('click');
+    findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton').simulate('click');
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
-    expect(wrapper.find(AdvancedRuleEditor)).toHaveLength(1);
+    expect(wrapper.find(JSONRuleEditor)).toHaveLength(1);
 
-    const advancedEditor = wrapper.find(AdvancedRuleEditor);
-    expect(advancedEditor).toHaveLength(1);
-    const { rules: initialRules, onChange } = advancedEditor.props();
+    const jsonEditor = wrapper.find(JSONRuleEditor);
+    expect(jsonEditor).toHaveLength(1);
+    const { rules: initialRules, onChange } = jsonEditor.props();
     expect(initialRules).toBeNull();
     onChange(new AllRule([new FieldRule('username', '*')]));
 
     findTestSubject(wrapper, 'roleMappingsVisualRuleEditorButton').simulate('click');
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
-    expect(wrapper.find(AdvancedRuleEditor)).toHaveLength(0);
+    expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [rules] = props.onChange.mock.calls[0];
