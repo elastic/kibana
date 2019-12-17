@@ -11,7 +11,7 @@ import { UptimePlugin } from './plugin';
 export const config = {
   schema: schema.object({
     enabled: schema.maybe(schema.boolean()),
-    indexName: schema.maybe(schema.string()),
+    indexPattern: schema.maybe(schema.string()),
   }),
 };
 

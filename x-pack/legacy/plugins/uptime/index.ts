@@ -17,6 +17,13 @@ export const uptime = (kibana: any) =>
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
+        .unknown()
+        .default();
+    },
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {
@@ -35,11 +42,10 @@ export const uptime = (kibana: any) =>
       home: ['plugins/uptime/register_feature'],
       injectDefaultVars(server: Server) {
         const config = server.config();
-        console.log("INJECT INDEX PATTERN", config.get('xpack.uptime.indexPattern'));
         return {
-          uptimeIndexPattern: config.get('uptime.indexPattern')
-        }
-      }
+          uptimeIndexPattern: config.get('xpack.uptime.indexPattern'),
+        };
+      },
     },
     init(server: KibanaServer) {
       const initializerContext = {} as PluginInitializerContext;

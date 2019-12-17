@@ -1,5 +1,6 @@
 {
   "id": "uptime",
   "version": "8.0.0",
-  "server": true
+  "server": true,
+  "configPath": ["xpack", "uptime"]
 }
