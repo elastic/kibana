@@ -12,23 +12,37 @@ let globalAPI: AxiosInstance;
 export class AxiosRestAPIAdapter implements RestAPIAdapter {
   constructor(private readonly xsrfToken: string, private readonly basePath: string) {}
 
-  public async get<ResponseData>(url: string, query?: FlatObject<object>): Promise<ResponseData> {
-    return await this.REST.get(url, query ? { params: query } : {}).then(resp => resp.data);
+  public async get<ResponseData>(
+    url: string,
+    config?: {
+      query?: FlatObject<object>;
+    }
+  ): Promise<ResponseData> {
+    return await this.REST.get(url, config && config.query ? { params: config.query } : {}).then(
+      resp => resp.data
+    );
   }
 
   public async post<ResponseData>(
     url: string,
-    body?: { [key: string]: any }
+    config: {
+      body: { [key: string]: any };
+    }
   ): Promise<ResponseData> {
-    return await this.REST.post(url, body).then(resp => resp.data);
+    return await this.REST.post(url, config.body).then(resp => resp.data);
   }
 
   public async delete<T>(url: string): Promise<T> {
     return await this.REST.delete(url).then(resp => resp.data);
   }
 
-  public async put<ResponseData>(url: string, body?: any): Promise<ResponseData> {
-    return await this.REST.put(url, body).then(resp => resp.data);
+  public async put<ResponseData>(
+    url: string,
+    config: {
+      body: { [key: string]: any };
+    }
+  ): Promise<ResponseData> {
+    return await this.REST.put(url, config.body).then(resp => resp.data);
   }
 
   private get REST() {

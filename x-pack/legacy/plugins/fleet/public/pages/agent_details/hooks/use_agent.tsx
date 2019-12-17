@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { Agent } from '../../../../common/types/domain_data';
-import { useLibs } from '../../../hooks/use_libs';
+import { useLibs } from '../../../hooks';
 
 export function useGetAgent(id: string) {
   const { agents } = useLibs();

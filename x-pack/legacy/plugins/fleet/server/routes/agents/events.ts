@@ -24,21 +24,21 @@ export const createGETAgentEventsRoute = (libs: FleetServerLib) => ({
           .optional()
           .min(1)
           .default(1),
-        per_page: Joi.number()
+        perPage: Joi.number()
           .optional()
           .min(1)
-          .default(25),
+          .default(20),
       }),
     },
   },
   handler: async (
     request: FrameworkRequest<{
       params: { agentId: string };
-      query: { page: string; per_page: string; kuery: string };
+      query: { page: string; perPage: string; kuery: string };
     }>
   ): Promise<ReturnTypeList<AgentEvent>> => {
     const page = parseInt(request.query.page, 10);
-    const perPage = parseInt(request.query.per_page, 10);
+    const perPage = parseInt(request.query.perPage, 10);
 
     const { items, total } = await libs.agentEvents.getEventsById(
       request.user,

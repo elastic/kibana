@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FC } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
 interface RouteConfig {
@@ -12,7 +12,7 @@ interface RouteConfig {
   routes?: RouteConfig[];
 }
 
-export const ChildRoutes: FC<{
+export const ChildRoutes: React.FC<{
   routes?: RouteConfig[];
   useSwitch?: boolean;
   [other: string]: any;

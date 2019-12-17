@@ -22,11 +22,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Policy } from '../../../common/types/domain_data';
-import { useLibs } from '../../hooks/use_libs';
-import { usePagination } from '../../hooks/use_pagination';
-import { ConnectedLink } from '../../components/navigation/connected_link';
-import { SearchBar } from '../../components/search_bar';
-import { CreatePolicyFlyout } from './components/create_policy';
+import { useLibs, usePagination } from '../../hooks';
+import { ConnectedLink, SearchBar } from '../../components';
+import { CreatePolicyFlyout } from './components';
 
 export const PolicyListPage: React.FC<{}> = () => {
   const libs = useLibs();

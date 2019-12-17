@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import * as React from 'react';
 
 export const Loading: React.FC<{}> = () => (
   <EuiFlexGroup justifyContent="spaceAround">

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useEffect } from 'react';
-import { useLibs } from '../../../hooks/use_libs';
+import { useLibs } from '../../../hooks';
 
 export function useGetAgentStatus(policyId: string) {
   const { policies } = useLibs();
