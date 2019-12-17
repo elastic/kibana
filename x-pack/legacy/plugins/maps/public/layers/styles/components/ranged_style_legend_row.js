@@ -9,40 +9,34 @@ import PropTypes from 'prop-types';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
-export class RangedStyleLegendRow extends React.Component {
-  render() {
-    return (
-      <div>
-        <EuiSpacer size="xs" />
-        {this.props.header}
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
-          <EuiFlexItem grow={true}>
-            <EuiText size="xs">
-              <small>{this.props.minLabel}</small>
+export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
+  return (
+    <div>
+      <EuiSpacer size="xs" />
+      {header}
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+        <EuiFlexItem grow={true}>
+          <EuiText size="xs">
+            <small>{minLabel}</small>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" title={propertyLabel} content={fieldLabel}>
+            <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+              <small>
+                <strong>{fieldLabel}</strong>
+              </small>
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              title={this.props.propertyLabel}
-              content={this.props.fieldLabel}
-            >
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
-                <small>
-                  <strong>{this.props.fieldLabel}</strong>
-                </small>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiText textAlign="right" size="xs">
-              <small>{this.props.maxLabel}</small>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
-  }
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiText textAlign="right" size="xs">
+            <small>{maxLabel}</small>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
 }
 
 RangedStyleLegendRow.propTypes = {

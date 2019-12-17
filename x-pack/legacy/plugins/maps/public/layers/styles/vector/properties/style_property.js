@@ -32,7 +32,7 @@ export class AbstractStyleProperty {
     return this._options || {};
   }
 
-  renderStylePropertyLegendHeader() {
+  renderLegendHeader() {
     return null;
   }
 

@@ -70,7 +70,7 @@ export class DynamicLegendRow extends React.Component {
 
     return (
       <RangedStyleLegendRow
-        header={this.props.style.renderStylePropertyLegendHeader()}
+        header={this.props.style.renderLegendHeader()}
         minLabel={minLabel}
         maxLabel={maxLabel}
         propertyLabel={getVectorStyleLabel(this.props.style.getStyleName())}
