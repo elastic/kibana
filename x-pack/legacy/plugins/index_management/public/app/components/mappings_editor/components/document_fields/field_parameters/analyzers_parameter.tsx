@@ -31,7 +31,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersDocLinkText', {
           defaultMessage: 'Analyzers documentation',
         }),
-        href: documentationService.getAnalyzersLink(),
+        href: documentationService.getAnalyzerLink(),
       }}
       withToggle={false}
     >

@@ -132,10 +132,6 @@ class DocumentationService {
     return `${this.esDocsBase}/position-increment-gap.html`;
   }
 
-  public getAnalyzersLink() {
-    return `${this.esDocsBase}/analysis-analyzers.html`;
-  }
-
   public getAnalyzerLink() {
     return `${this.esDocsBase}/analyzer.html`;
   }
