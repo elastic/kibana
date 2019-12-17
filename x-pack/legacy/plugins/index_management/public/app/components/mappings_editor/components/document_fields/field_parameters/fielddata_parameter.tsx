@@ -50,84 +50,79 @@ export const FieldDataParameter = () => {
       }}
       formFieldPath="fielddata"
     >
+      {/* fielddata_frequency_filter */}
+      <EuiFormRow
+        label={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterFieldLabel', {
+          defaultMessage: 'Min/max frequency percentage',
+        })}
+        fullWidth
+      >
+        <UseMultiFields
+          fields={{
+            min: {
+              path: 'fielddata_frequency_filter.min',
+              config: getFieldConfig('fielddata_frequency_filter', 'min'),
+            },
+            max: {
+              path: 'fielddata_frequency_filter.max',
+              config: getFieldConfig('fielddata_frequency_filter', 'max'),
+            },
+          }}
+        >
+          {({ min, max }) => {
+            return (
+              <EuiDualRange
+                min={0}
+                max={100}
+                value={[min.value as number, max.value as number]}
+                onChange={onFrequencyFilterChange(min, max)}
+                showInput
+                fullWidth
+              />
+            );
+          }}
+        </UseMultiFields>
+      </EuiFormRow>
+
+      <EuiSpacer />
+
+      <UseField
+        path="fielddata_frequency_filter.min_segment_size"
+        config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
+        component={Field}
+      />
+
       <FormDataProvider pathsToWatch="fielddata">
-        {({ fielddata }) => (
-          <>
-            {/* fielddata_frequency_filter */}
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.fielddata.frequencyFilterFieldLabel',
-                {
-                  defaultMessage: 'Min/max frequency percentage',
-                }
-              )}
-              fullWidth
-            >
-              <UseMultiFields
-                fields={{
-                  min: {
-                    path: 'fielddata_frequency_filter.min',
-                    config: getFieldConfig('fielddata_frequency_filter', 'min'),
-                  },
-                  max: {
-                    path: 'fielddata_frequency_filter.max',
-                    config: getFieldConfig('fielddata_frequency_filter', 'max'),
-                  },
-                }}
-              >
-                {({ min, max }) => {
-                  return (
-                    <EuiDualRange
-                      min={0}
-                      max={100}
-                      value={[min.value as number, max.value as number]}
-                      onChange={onFrequencyFilterChange(min, max)}
-                      showInput
-                      fullWidth
-                    />
-                  );
-                }}
-              </UseMultiFields>
-            </EuiFormRow>
-
-            <EuiSpacer />
-
-            <UseField
-              path="fielddata_frequency_filter.min_segment_size"
-              config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
-              component={Field}
-            />
-
-            {fielddata && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiCallOut color="warning">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledWarningMessage"
-                      defaultMessage="Fielddata can consume significant memory, especially when loading high-cardinality text fields. {docsLink}"
-                      values={{
-                        docsLink: (
-                          <EuiLink
-                            href={documentationService.getEnablingFielddataLink()}
-                            target="_blank"
-                          >
-                            {i18n.translate(
-                              'xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledDocumentationLink',
-                              {
-                                defaultMessage: 'Learn more.',
-                              }
-                            )}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiCallOut>
-              </>
-            )}
-          </>
-        )}
+        {({ fielddata }) =>
+          fielddata === true ? (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut color="warning">
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledWarningMessage"
+                    defaultMessage="Fielddata can consume significant memory, especially when loading high-cardinality text fields. {docsLink}"
+                    values={{
+                      docsLink: (
+                        <EuiLink
+                          href={documentationService.getEnablingFielddataLink()}
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.fielddata.fielddataEnabledDocumentationLink',
+                            {
+                              defaultMessage: 'Learn more.',
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+            </>
+          ) : null
+        }
       </FormDataProvider>
     </EditFieldFormRow>
   );
