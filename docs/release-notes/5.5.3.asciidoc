@@ -3,7 +3,6 @@
 
 Also see <<breaking-changes-5.0>>.
 
-[float]
 [[bug-5.5.3]]
 Visualization::
 * [Fix for #13622] fix IE11 vislib error {pull}13830[#13830]
