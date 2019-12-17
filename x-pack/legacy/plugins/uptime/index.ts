@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Server } from 'hapi';
 import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
@@ -32,6 +33,13 @@ export const uptime = (kibana: any) =>
         url: '/app/uptime#/',
       },
       home: ['plugins/uptime/register_feature'],
+      injectDefaultVars(server: Server) {
+        const config = server.config();
+        console.log("INJECT INDEX PATTERN", config.get('xpack.uptime.indexPattern'));
+        return {
+          uptimeIndexPattern: config.get('uptime.indexPattern')
+        }
+      }
     },
     init(server: KibanaServer) {
       const initializerContext = {} as PluginInitializerContext;
