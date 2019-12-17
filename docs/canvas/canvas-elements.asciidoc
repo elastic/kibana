@@ -17,6 +17,20 @@ When you add elements to your workpad, you can:
 * <<element-save,Save your elements>>
 
 [float]
+[[canvas-supported-datasources]]
+=== Supported data sources
+
+By default, every element you add to a workpad uses demo data until you change the data source. The demo data includes a small sample data set that you can use to experiment with your element. When you have finished using the demo data, connect the element to one of the following data sources:
+
+Elasticsearch SQL:: Allows you to access your data in Elasticsearch using SQL syntax. Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
+
+Elasticsearch raw data:: Allows you to access your raw data in Elasticsearch without the use of aggregations. Use Elasticsearch raw data when you have low volume datasets, or to plot exact, non-aggregated values.
+To use targeted queries, you can enter a query using the Lucene query string syntax. For more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+
+Timelion:: To use time series data in Canvas, connect elements to Timelion, which uses Timelion queries to pull time series data in a tabular format. Timelion queries use the Lucene query string syntax. For information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
+For information about Timelion, refer to <<timelion,Timelion>>.
+
+[float]
 [[add-canvas-element]]
 === Add elements to your workpad
 
@@ -24,12 +38,12 @@ Choose the elements to display on your workpad, then familiarize yourself with t
 
 . Click *Add element*.
 
-. In the *Elements* window, select the element you want to use. 
+. In the *Elements* window, select the element you want to use.
 +
 [role="screenshot"]
 image::images/canvas-element-select.gif[Canvas elements]
 
-. Play around with the default settings and see what the element can do. 
+. Play around with the default settings and see what the element can do.
 
 TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
 
@@ -49,13 +63,11 @@ When you are ready to move on from the demo data, connect the element to your ow
 
 Access your data in Elasticsearch using the Elasticsearch SQL syntax.
 
-Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
-
 . Click *Elasticsearch SQL*.
 
 . In the *Elasticearch SQL query* box, enter your query, then *Preview* it.
 
-. If everything looks correct, *Save* it. 
+. If everything looks correct, *Save* it.
 
 [float]
 [[elasticsearch-raw-doc-data-source]]
@@ -63,37 +75,33 @@ Unfamiliar with writing Elasticsearch SQL queries? For more information, refer t
 
 Use the Lucene query syntax to use your raw data in Elasticsearch.
 
-For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
-
 . Click *Elasticsearch raw documents*.
 
-. In the *Index* field, enter the index pattern that you want to display. 
+. In the *Index* field, enter the index pattern that you want to display.
 
 . From the *Fields* dropdown, select the associated fields you want to display.
 
 . To sort the data, select an option from the *Sort Field* and *Sort Order* dropdowns.
 
-. For more targeted queries, enter a *Query* using the Lucene query string syntax. 
+. For more targeted queries, enter a *Query* using the Lucene query string syntax.
 
-. *Preview* the query. 
+. *Preview* the query.
 
-. If your query looks correct, *Save* it. 
+. If your query looks correct, *Save* it.
 
 [float]
 [[timelion-data-source]]
 ==== Connect to Timelion
 
-Use <<timelion,Timelion>> queries to use your time series data. 
+Use Timelion queries to use your time series data.
 
 . Click *Timelion*.
 
-. Enter a *Query* using the Lucene query string syntax. 
-+
-For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
+. Enter a *Query* using the Lucene query string syntax.
 
 . Enter the *Interval*, then *Preview* the query.
 
-. If your query looks correct, *Save* it. 
+. If your query looks correct, *Save* it.
 
 [float]
 [[configure-display-options]]
@@ -109,7 +117,7 @@ When you connect your element to a data source, the element often appears as a w
 
 . Click *Display*
 
-. Change the display options for the element. 
+. Change the display options for the element.
 
 [float]
 [[element-display-container]]
@@ -122,7 +130,7 @@ Further define the appearance of the element container and border.
 . Expand *Container style*.
 
 . Change the *Appearance* and *Border* options.
- 
+
 [float]
 [[apply-element-styles]]
 ==== Apply a set of styles
@@ -155,7 +163,7 @@ Increase or decrease how often your data refreshes on your workpad.
 [role="screenshot"]
 image::images/canvas-refresh-interval.png[Element data refresh interval]
 
-TIP: To manually refresh the data, click the *Refresh data* icon. 
+TIP: To manually refresh the data, click the *Refresh data* icon.
 
 [float]
 [[organize-element]]
@@ -223,7 +231,7 @@ Change the order of how the elements are displayed on your workpad.
 
 . Select an element.
 
-. In the top right corder, click the *Element options* icon. 
+. In the top right corder, click the *Element options* icon.
 
 . Select *Order*, then select the order that you want the element to appear.
 
@@ -262,7 +270,7 @@ When you have run out of room on your workpad page, add more pages.
 
 . Click *Page 1*, then click *+*.
 
-. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown. 
+. On the *Page* editor panel on the right, select the page transition from the *Transition* dropdown.
 +
 [role="screenshot"]
 image::images/canvas-add-pages.gif[Add pages]
