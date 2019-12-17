@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { parseQueryString } from './lib/parse_querystring';
 import { calculateBounds, getTime } from './get_time';
@@ -158,7 +158,7 @@ export class Timefilter {
     }
   };
 
-  public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+  public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
   };
 

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IFieldList } from '../../public';
+import { IFieldType } from '../../public';
 
 export interface IIndexPattern {
-  fields: IFieldList;
+  fields: IFieldType[];
   title: string;
   id?: string;
   type?: string;

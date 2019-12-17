@@ -33,7 +33,7 @@ export interface IFieldList extends Array<Field> {
   /**
    * Get new `FieldList` based on matching partial `Field` properties
    */
-  getWhere: (condition: Partial<Field>) => IFieldList;
+  getWhere: (condition: Partial<Field>) => FieldList;
 }
 
 export class FieldList extends Array<Field> implements IFieldList {
@@ -58,7 +58,7 @@ export class FieldList extends Array<Field> implements IFieldList {
     specs.map(field => this.add(field));
   }
 
-  getWhere(condition: Partial<Field>): IFieldList {
+  getWhere(condition: Partial<Field>): FieldList {
     return new FieldList(this.indexPattern, where(this, condition), this.shortDotsEnable);
   }
 
@@ -81,11 +81,12 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.splice(fieldIndex, 1);
   };
 
-  update = (field: Field) => {
+  update = (field: IFieldType) => {
     const index = this.findIndex(f => f.name === field.name);
-    this.splice(index, 1, field);
-    this.setByName(field);
-    this.removeByGroup(field);
-    this.setByGroup(field);
+    const fullField = this[index];
+    this.splice(index, 1, fullField);
+    this.setByName(fullField);
+    this.removeByGroup(fullField);
+    this.setByGroup(fullField);
   };
 }
