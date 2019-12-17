@@ -41,10 +41,13 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
       await PageObjects.security.login('license_manager_user', 'license_manager_user-password');
     },
 
+    // make sure a license is present, otherwise the security is not available anymore.
     async teardown() {
       await security.role.delete('license_manager-role');
+      await security.user.delete('license_manager_user');
     },
 
+    // elasticsearch allows to downgrade a license only once. other attempts will throw 403.
     async startBasic() {
       const response = await esSupertestWithoutAuth
         .post('/_license/start_basic?acknowledge=true')
@@ -54,6 +57,7 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
       expect(response.body.basic_was_started).to.be(true);
     },
 
+    // elasticsearch allows to request trial only once. other attempts will throw 403.
     async startTrial() {
       const response = await esSupertestWithoutAuth
         .post('/_license/start_trial?acknowledge=true')

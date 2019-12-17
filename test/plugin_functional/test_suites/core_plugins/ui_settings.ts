@@ -18,7 +18,7 @@
  */
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_provider_plugin/types';
+import { CoreProvider } from '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -32,9 +32,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
 
     it('client plugins have access to registered settings', async () => {
-      const settings = await browser.execute(
-        () => window.np.setup.core.uiSettings.getAll().ui_settings_plugin
-      );
+      const settings = await browser.execute(() => {
+        const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
+        return setup.core.uiSettings.getAll().ui_settings_plugin;
+      });
 
       expect(settings).to.eql({
         category: ['any'],
@@ -43,17 +44,16 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         value: '2',
       });
 
-      const settingsValue = await browser.execute(() =>
-        window.np.setup.core.uiSettings.get('ui_settings_plugin')
-      );
+      const settingsValue = await browser.execute(() => {
+        const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
+        return setup.core.uiSettings.get('ui_settings_plugin');
+      });
 
       expect(settingsValue).to.be('2');
 
-      const settingsValueViaObservables = await browser.executeAsync((callback: Function) => {
-        let value;
-        window.np.setup.core.uiSettings.get$('ui_settings_plugin').subscribe(v => (value = v));
-        callback(value);
-        return Promise.resolve(value);
+      const settingsValueViaObservables = await browser.executeAsync(async (callback: Function) => {
+        const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
+        setup.core.uiSettings.get$('ui_settings_plugin').subscribe(v => callback(v));
       });
 
       expect(settingsValueViaObservables).to.be('2');

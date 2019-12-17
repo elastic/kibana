@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_provider_plugin/types';
+import { CoreProvider } from '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -35,24 +35,32 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       it('should run the new platform plugins', async () => {
         expect(
           await browser.execute(() => {
-            return window.np.setup.plugins.core_plugin_b.sayHi();
+            const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
+            return setup.plugins.core_plugin_b.sayHi();
           })
         ).to.be('Plugin A said: Hello from Plugin A!');
       });
+    });
 
-      it('should attach string to window.corePluginB', async () => {
+    describe('should have access to the core services', function describeIndexTests() {
+      before(async () => {
+        await PageObjects.common.navigateToApp('settings');
+      });
+
+      it('to injectedMetadata service', async () => {
         expect(
           await browser.execute(() => {
-            return window.np.setup.core.injectedMetadata.getKibanaBuildNumber();
+            const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
+            return setup.core.injectedMetadata.getKibanaBuildNumber();
           })
         ).to.be.a('number');
       });
 
-      it('should have access to start services via coreSetup.getStartServices', async () => {
+      it('to start services via coreSetup.getStartServices', async () => {
         expect(
           await browser.executeAsync(async cb => {
-            window.np.setup.core.injectedMetadata.getKibanaBuildNumber();
-            const [coreStart] = await window.np.setup.core.getStartServices();
+            const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
+            const [coreStart] = await setup.core.getStartServices();
             cb(Boolean(coreStart.overlays));
           })
         ).to.be(true);

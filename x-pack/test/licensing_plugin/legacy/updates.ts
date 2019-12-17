@@ -19,6 +19,8 @@ export default function(ftrContext: FtrProviderContext) {
   describe('changes in license types', () => {
     after(async () => {
       await scenario.startBasic();
+      await scenario.waitForPluginToDetectLicenseUpdate();
+      await scenario.teardown();
     });
 
     it('provides changes in license types', async () => {
@@ -34,8 +36,6 @@ export default function(ftrContext: FtrProviderContext) {
       expect(legacyInitialLicense.features).to.have.property('security');
       expect(legacyInitialLicenseHeaders['kbn-xpack-sig']).to.be.a('string');
 
-      // server allows to request trial only once.
-      // other attempts will throw 403
       await scenario.startTrial();
       await scenario.waitForPluginToDetectLicenseUpdate();
 

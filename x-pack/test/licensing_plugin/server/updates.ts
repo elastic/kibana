@@ -18,6 +18,8 @@ export default function(ftrContext: FtrProviderContext) {
   describe('changes in license types', () => {
     after(async () => {
       await scenario.startBasic();
+      await scenario.waitForPluginToDetectLicenseUpdate();
+      await scenario.teardown();
     });
 
     it('provides changes in license types', async () => {
@@ -37,8 +39,6 @@ export default function(ftrContext: FtrProviderContext) {
       expect(refetchedLicense.license?.type).to.be('basic');
       expect(refetchedLicense.signature).to.be(initialLicense.signature);
 
-      // server allows to request trial only once.
-      // other attempts will throw 403
       await scenario.startTrial();
       await scenario.waitForPluginToDetectLicenseUpdate();
       const trialLicense = await scenario.getLicense();

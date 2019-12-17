@@ -17,9 +17,9 @@
  * under the License.
  */
 import { npSetup, npStart } from 'ui/new_platform';
-import '../types';
+import { CoreProvider } from '../types';
 
-window.np = {
+((window as unknown) as CoreProvider).__coreProvider = {
   setup: npSetup,
   start: npStart,
   testUtils: {

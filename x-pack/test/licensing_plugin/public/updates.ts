@@ -7,7 +7,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { createScenario } from '../scenario';
-import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import { CoreProvider } from '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function(ftrContext: FtrProviderContext) {
@@ -20,6 +20,8 @@ export default function(ftrContext: FtrProviderContext) {
   describe('changes in license types', () => {
     after(async () => {
       await scenario.startBasic();
+      await scenario.waitForPluginToDetectLicenseUpdate();
+      await scenario.teardown();
     });
 
     it('provides changes in license types', async () => {
@@ -28,15 +30,14 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
+          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
-          await window.np.setup.core.http.get('/');
-          await window.np.testUtils.delay(100);
+          await setup.core.http.get('/');
+          await testUtils.delay(100);
 
-          const licensing: LicensingPluginSetup = window.np.setup.plugins.licensing;
-          let licenseType;
-          licensing.license$.subscribe(license => (licenseType = license.type));
-          cb(licenseType);
+          const licensing: LicensingPluginSetup = setup.plugins.licensing;
+          licensing.license$.subscribe(license => cb(license.type));
         })
       ).to.be('basic');
 
@@ -45,34 +46,30 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
+          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
-          await window.np.setup.core.http.get('/');
-          await window.np.testUtils.delay(100);
+          await setup.core.http.get('/');
+          await testUtils.delay(100);
 
-          const licensing: LicensingPluginSetup = window.np.setup.plugins.licensing;
-          let licenseType;
-          licensing.license$.subscribe(license => (licenseType = license.type));
-          cb(licenseType);
+          const licensing: LicensingPluginSetup = setup.plugins.licensing;
+          licensing.license$.subscribe(license => cb(license.type));
         })
       ).to.be('basic');
 
-      // server allows to request trial only once.
-      // other attempts will throw 403
       await scenario.startTrial();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
+          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
-          await window.np.setup.core.http.get('/');
-          await window.np.testUtils.delay(100);
+          await setup.core.http.get('/');
+          await testUtils.delay(100);
 
-          const licensing: LicensingPluginSetup = window.np.setup.plugins.licensing;
-          let licenseType;
-          licensing.license$.subscribe(license => (licenseType = license.type));
-          cb(licenseType);
+          const licensing: LicensingPluginSetup = setup.plugins.licensing;
+          licensing.license$.subscribe(license => cb(license.type));
         })
       ).to.be('trial');
 
@@ -81,15 +78,14 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
+          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
-          await window.np.setup.core.http.get('/');
-          await window.np.testUtils.delay(100);
+          await setup.core.http.get('/');
+          await testUtils.delay(100);
 
-          const licensing: LicensingPluginSetup = window.np.setup.plugins.licensing;
-          let licenseType;
-          licensing.license$.subscribe(license => (licenseType = license.type));
-          cb(licenseType);
+          const licensing: LicensingPluginSetup = setup.plugins.licensing;
+          licensing.license$.subscribe(license => cb(license.type));
         })
       ).to.be('basic');
 
@@ -98,15 +94,14 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
+          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
-          await window.np.setup.core.http.get('/');
-          await window.np.testUtils.delay(100);
+          await setup.core.http.get('/');
+          await testUtils.delay(100);
 
-          const licensing: LicensingPluginSetup = window.np.setup.plugins.licensing;
-          let licenseType;
-          licensing.license$.subscribe(license => (licenseType = license.type));
-          cb(licenseType);
+          const licensing: LicensingPluginSetup = setup.plugins.licensing;
+          licensing.license$.subscribe(license => cb(license.type));
         })
       ).to.be(null);
 

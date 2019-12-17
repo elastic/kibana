@@ -16,6 +16,9 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
+
+        // Required to load new platform plugin provider via `--plugin-path` flag.
+        '--env.name=development',
         `--plugin-path=${path.resolve(
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
