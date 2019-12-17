@@ -48,7 +48,7 @@ export const StepOne = ({
             isInvalid={showErrors && datasourceName === ''}
             label="Data source name"
             describedByIds={['data-source-name']}
-            error="Enter a data source name"
+            error="This field is required"
           >
             <EuiFieldText name="datasourceName" value={datasourceName} onChange={onTextChange} />
           </EuiFormRow>
