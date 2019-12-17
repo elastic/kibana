@@ -6,6 +6,9 @@
 
 import { Matrix3 } from '../types';
 
+/**
+ * Return a new matrix which is the product of the first and second matrix.
+ */
 export function multiply(
   [a11, a12, a13, a21, a22, a23, a31, a32, a33]: Matrix3,
   [b11, b12, b13, b21, b22, b23, b31, b32, b33]: Matrix3
@@ -30,6 +33,9 @@ export function multiply(
   ];
 }
 
+/**
+ * Return a new matrix which is the sum of the two passed in.
+ */
 export function add(
   [a11, a12, a13, a21, a22, a23, a31, a32, a33]: Matrix3,
   [b11, b12, b13, b21, b22, b23, b31, b32, b33]: Matrix3

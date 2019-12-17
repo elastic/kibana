@@ -6,6 +6,9 @@
 
 import { Matrix3, Vector2 } from '../types';
 
+/**
+ * The inverse of `orthographicProjection`.
+ */
 export function inverseOrthographicProjection(
   top: number,
   right: number,
@@ -22,10 +25,11 @@ export function inverseOrthographicProjection(
 }
 
 /**
- * Adjust x, y to be bounded, in scale, of a clipping plane defined by top, right, bottom, left
+ * Adjust x, y to be bounded, in scale, of a clipping plane defined by top, right, bottom, left.
  *
  * See explanation:
  * https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix
+ * https://en.wikipedia.org/wiki/Orthographic_projection
  */
 export function orthographicProjection(
   top: number,
@@ -42,6 +46,10 @@ export function orthographicProjection(
   return [m11, 0, m13, 0, m22, m23, 0, 0, 0];
 }
 
+/**
+ * Returns a 2D transformation matrix that when applied to a vector will scale the vector by `x` and `y` in their respective axises.
+ * See https://en.wikipedia.org/wiki/Scaling_(geometry)#Matrix_representation
+ */
 export function scalingTransformation([x, y]: Vector2): Matrix3 {
   // prettier-ignore
   return [
@@ -51,6 +59,10 @@ export function scalingTransformation([x, y]: Vector2): Matrix3 {
   ]
 }
 
+/**
+ * Returns a 2D transformation matrix that when applied to a vector will translate by `x` and `y` in their respective axises.
+ * See https://en.wikipedia.org/wiki/Translation_(geometry)#Matrix_representation
+ */
 export function translationTransformation([x, y]: Vector2): Matrix3 {
   // prettier-ignore
   return [

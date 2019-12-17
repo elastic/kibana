@@ -34,17 +34,23 @@ export type CameraState = PanningState & {
   readonly translationNotCountingCurrentPanning: Vector2;
   // This is the world coordinates of the current mouse position. used to keep wheel zoom smooth (any other stuff eventually?)
   readonly latestFocusedWorldCoordinates: Vector2 | null;
-};
+}
 
 export type Vector2 = readonly [number, number];
 
 export type Vector3 = readonly [number, number, number];
 
+/**
+ * A rectangle with sides that align with the `x` and `y` axises.
+ */
 export interface AABB {
   readonly minimum: Vector2;
   readonly maximum: Vector2;
 }
 
+/**
+ * A 2D transformation matrix in row-major order
+ */
 export type Matrix3 = readonly [
   number,
   number,
