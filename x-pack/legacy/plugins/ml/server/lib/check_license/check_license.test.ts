@@ -7,30 +7,28 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { set } from 'lodash';
-import { XPackInfo } from '../../../../../../../legacy/plugins/xpack_main/server/lib/xpack_info';
-import { checkLicense } from '../check_license';
+import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
+import { checkLicense } from './check_license';
 
 describe('check_license', () => {
   let mockLicenseInfo: XPackInfo;
   beforeEach(() => (mockLicenseInfo = {} as XPackInfo));
 
   describe('license information is undefined', () => {
-    beforeEach(() => (mockLicenseInfo = {} as XPackInfo));
-
     it('should set isAvailable to false', () => {
-      expect(checkLicense(mockLicenseInfo).isAvailable).to.be(false);
+      expect(checkLicense(undefined as any).isAvailable).to.be(false);
     });
 
     it('should set showLinks to true', () => {
-      expect(checkLicense(mockLicenseInfo).showLinks).to.be(true);
+      expect(checkLicense(undefined as any).showLinks).to.be(true);
     });
 
     it('should set enableLinks to false', () => {
-      expect(checkLicense(mockLicenseInfo).enableLinks).to.be(false);
+      expect(checkLicense(undefined as any).enableLinks).to.be(false);
     });
 
     it('should set a message', () => {
-      expect(checkLicense(mockLicenseInfo).message).to.not.be(undefined);
+      expect(checkLicense(undefined as any).message).to.not.be(undefined);
     });
   });
 
@@ -101,7 +99,7 @@ describe('check_license', () => {
         );
       });
 
-      describe('& license is trial or platinum', () => {
+      describe('& license is >= platinum', () => {
         beforeEach(() => set(mockLicenseInfo, 'license.isOneOf', () => true));
 
         describe('& license is active', () => {
