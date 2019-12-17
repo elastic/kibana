@@ -6,7 +6,15 @@
 
 import React, { FC, useEffect, Fragment } from 'react';
 
-import { EuiPage, EuiPageBody, EuiPageContentBody } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiTitle,
+  EuiPageContentBody,
+} from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { Wizard } from './wizard';
@@ -37,7 +45,6 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const kibanaContext = useKibanaContext();
-
   const jobCreator = jobCreatorFactory(jobType)(
     kibanaContext.currentIndexPattern,
     kibanaContext.currentSavedSearch,
@@ -153,17 +160,27 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     <Fragment>
       <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiPageBody>
-          <EuiPageContentBody>
-            <Wizard
-              jobCreator={jobCreator}
-              chartLoader={chartLoader}
-              resultsLoader={resultsLoader}
-              chartInterval={chartInterval}
-              jobValidator={jobValidator}
-              existingJobsAndGroups={existingJobsAndGroups}
-              firstWizardStep={firstWizardStep}
-            />
-          </EuiPageContentBody>
+          <EuiPageContent>
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle>
+                  <h2>Create job: {jobType} </h2>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+
+            <EuiPageContentBody>
+              <Wizard
+                jobCreator={jobCreator}
+                chartLoader={chartLoader}
+                resultsLoader={resultsLoader}
+                chartInterval={chartInterval}
+                jobValidator={jobValidator}
+                existingJobsAndGroups={existingJobsAndGroups}
+                firstWizardStep={firstWizardStep}
+              />
+            </EuiPageContentBody>
+          </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     </Fragment>

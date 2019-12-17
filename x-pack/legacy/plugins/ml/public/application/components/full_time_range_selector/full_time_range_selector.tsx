@@ -31,7 +31,6 @@ export const FullTimeRangeSelector: FC<Props> = ({ indexPattern, query, disabled
   }
   return (
     <EuiButton
-      fill
       isDisabled={disabled}
       onClick={() => setRange(indexPattern, query)}
       data-test-subj="mlButtonUseFullData"
