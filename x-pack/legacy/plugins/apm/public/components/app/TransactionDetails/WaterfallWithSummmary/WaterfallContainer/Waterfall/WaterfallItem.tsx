@@ -14,7 +14,10 @@ import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCountBadge } from '../../ErrorCountBadge';
-import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
+import {
+  IWaterfallItemTransaction,
+  IWaterfallItemSpan
+} from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 
@@ -78,17 +81,19 @@ interface ITimelineMargins {
   bottom: number;
 }
 
+type WaterfallItem = IWaterfallItemTransaction | IWaterfallItemSpan;
+
 interface IWaterfallItemProps {
   timelineMargins: ITimelineMargins;
   totalDuration?: number;
-  item: IWaterfallItem;
+  item: WaterfallItem;
   color: string;
   isSelected: boolean;
   errorCount: number;
   onClick: () => unknown;
 }
 
-function PrefixIcon({ item }: { item: IWaterfallItem }) {
+function PrefixIcon({ item }: { item: WaterfallItem }) {
   if (item.docType === 'span') {
     // icon for database spans
     const isDbType = item.span.span.type.startsWith('db');
@@ -110,7 +115,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
 }
 
 interface SpanActionToolTipProps {
-  item?: IWaterfallItem;
+  item?: WaterfallItem;
 }
 
 const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
@@ -129,7 +134,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   return <>{children}</>;
 };
 
-function Duration({ item }: { item: IWaterfallItem }) {
+function Duration({ item }: { item: WaterfallItem }) {
   return (
     <EuiText color="subdued" size="xs">
       {asDuration(item.duration)}
@@ -137,7 +142,7 @@ function Duration({ item }: { item: IWaterfallItem }) {
   );
 }
 
-function HttpStatusCode({ item }: { item: IWaterfallItem }) {
+function HttpStatusCode({ item }: { item: WaterfallItem }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
     item.docType === 'transaction' &&
@@ -152,7 +157,7 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
 }
 
-function NameLabel({ item }: { item: IWaterfallItem }) {
+function NameLabel({ item }: { item: WaterfallItem }) {
   if (item.docType === 'span') {
     return <EuiText size="s">{item.name}</EuiText>;
   }
