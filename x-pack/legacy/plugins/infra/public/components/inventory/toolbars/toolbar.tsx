@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
+import { InventoryAWSAccount } from '../../../../common/http_api/inventory_meta_api';
 import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import {
   InfraNodeType,
@@ -58,7 +59,12 @@ const wrapToolbarItems = (ToolbarItems: FunctionComponent<ToolbarProps>) => {
   );
 };
 
-export const Toolbar = ({ nodeType }: { nodeType: InfraNodeType }) => {
+interface Props {
+  nodeType: InfraNodeType;
+  regions: string[];
+  accounts: InventoryAWSAccount[];
+}
+export const Toolbar = ({ nodeType }: Props) => {
   const ToolbarItems = findToolbar(nodeType);
   return wrapToolbarItems(ToolbarItems);
 };

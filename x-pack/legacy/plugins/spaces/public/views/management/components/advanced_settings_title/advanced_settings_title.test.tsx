@@ -4,16 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { AdvancedSettingsTitle } from './advanced_settings_title';
+import { SpaceAvatar } from '../../../../components';
 
 describe('AdvancedSettingsTitle', () => {
-  it('renders as expected', () => {
+  it('renders without crashing', async () => {
     const space = {
       id: 'my-space',
       name: 'My Space',
       disabledFeatures: [],
     };
-    expect(shallowWithIntl(<AdvancedSettingsTitle space={space} />)).toMatchSnapshot();
+
+    const wrapper = mountWithIntl(
+      <AdvancedSettingsTitle getActiveSpace={() => Promise.resolve(space)} />
+    );
+
+    await Promise.resolve();
+    await Promise.resolve();
+    wrapper.update();
+    expect(wrapper.find(SpaceAvatar)).toHaveLength(1);
   });
 });
