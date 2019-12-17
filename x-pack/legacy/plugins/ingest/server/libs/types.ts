@@ -50,6 +50,7 @@ export interface Datasource extends SavedObjectAttributes {
   package: Package;
   read_alias?: string;
   streams: Stream[];
+  config: string[];
 }
 
 /**

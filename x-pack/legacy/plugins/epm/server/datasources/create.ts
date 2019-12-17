@@ -16,6 +16,7 @@ import { installTemplates } from '../lib/elasticsearch/template/install';
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 import { Request } from '../types';
+import { createInput } from '../lib/agent/agent';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -37,6 +38,14 @@ export async function createDatasource(options: {
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
   const pkg = await Registry.fetchInfo(pkgkey);
+
+  // Collect the config for each dataset
+  const configs: string[] = [];
+  if (pkg.datasets) {
+    for (const dataset of pkg.datasets) {
+      configs.push(await getConfig(pkgkey, dataset));
+    }
+  }
 
   await Promise.all([
     installTemplates(pkg, callCluster),
@@ -184,3 +193,26 @@ async function ingestDatasourceCreate({
     },
   }).then(response => response.json());
 }
+
+async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
+  const vars = dataset.vars;
+
+  // This searches for the /agent/input.yml file
+  const paths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
+    isDatasetInput(entry, dataset.name)
+  );
+
+  if (paths.length === 1) {
+    const buffer = Registry.getAsset(paths[0]);
+    // Load input template from path
+    return createInput(vars, buffer.toString());
+  }
+  return '';
+}
+
+const isDatasetInput = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
+  const pathParts = Registry.pathParts(path);
+  return !isDirectory({ path }) && pathParts.type === 'input' && pathParts.dataset === datasetName;
+};
+
+const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
