@@ -13,8 +13,11 @@ import { esFilters } from '../../../../../src/plugins/data/public';
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
 
-export const license = {};
-export const setLicenseId = latestLicenseId => (license.id = latestLicenseId);
+let licenseId;
+export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
+export const getLicenseId = () => {
+  return licenseId;
+};
 
 export let indexPatternService;
 export const initServicesAndConstants = ({ indexPatterns }) => {

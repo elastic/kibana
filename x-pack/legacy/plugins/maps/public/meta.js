@@ -8,7 +8,7 @@ import { GIS_API_PATH, EMS_CATALOGUE_PATH, EMS_GLYPHS_PATH } from '../common/con
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { license } from './kibana_services';
+import { getLicenseId } from './kibana_services';
 import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
@@ -68,7 +68,7 @@ export function getEMSClient() {
       };
     }
   }
-  const licenseId = license.id;
+  const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
     emsClient.addQueryParams({ license: licenseId });
