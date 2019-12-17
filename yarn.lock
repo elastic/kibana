@@ -4344,7 +4344,7 @@
   dependencies:
     "@types/linkify-it" "*"
 
-"@types/memoize-one@^4.1.1":
+"@types/memoize-one@^4.1.0":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@types/memoize-one/-/memoize-one-4.1.1.tgz#41dd138a4335b5041f7d8fc038f9d593d88b3369"
   integrity sha512-+9djKUUn8hOyktLCfCy4hLaIPgDNovaU36fsnZe9trFHr6ddlbIn2q0SEsnkCkNR+pBWEU440Molz/+Mpyf+gQ==
