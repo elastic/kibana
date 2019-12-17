@@ -6,7 +6,7 @@
 
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -129,13 +129,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
-    const isInitialRender = useRef(true);
-    useEffect(() => {
-      if (isInitialRender.current) {
-        isInitialRender.current = false;
-      }
-    });
-
     const timelineTypeContext = useTimelineTypeContext();
 
     const getNotesByIds = useCallback(
@@ -203,6 +196,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [id]
     );
 
+    // TODO: Rework selectAll dispatch via timelineTypeContext
     // Sync to timelineTypeContext.selectAll so parent components can select all events
     useEffect(() => {
       if (timelineTypeContext.selectAll) {

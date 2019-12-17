@@ -27,7 +27,7 @@ import {
   SignalsTableFilterGroup,
 } from './components/signals_filter_group/signals_filter_group';
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { DEFAULT_KBN_VERSION, DEFAULT_SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { defaultHeaders } from '../../../components/timeline/body/column_headers/default_headers';
 import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
 import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
@@ -142,6 +142,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     );
 
     // Catches state change to selectAll->false upon user selection change
+    // TODO: Simplify as isSelectAllChecked in redux state
     useEffect(() => {
       if (Object.keys(selectedEventIds).length !== previousSelectedCount?.current && selectAll) {
         setShowClearSelectionAction(false);
@@ -175,6 +176,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
 
     const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
       async ({ signalIds, status }: UpdateSignalsStatusProps) => {
+        // TODO: When select all on all pages send global query/filter/daterange
         await updateSignalStatusAction({
           signalIds: Object.keys(selectedEventIds),
           status,
@@ -238,7 +240,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         <GlobalTime>
           {({ to, from }) => (
             <StatefulEventsViewer
-              defaultIndices={['.siem-signals-spong-default']} // TODO Get from new FrankInspired XavierHook
+              defaultIndices={[DEFAULT_SIGNALS_INDEX_KEY]} // TODO Get from new FrankInspired XavierHook
               defaultFilters={
                 filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters
               }

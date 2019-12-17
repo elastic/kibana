@@ -107,6 +107,9 @@ export const Body = React.memo<BodyProps>(
       actionsColumnWidth
     );
 
+    const isSelectAllChecked =
+      data.length > 0 && data.length === Object.keys(selectedEventIds).length;
+
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
@@ -120,9 +123,7 @@ export const Body = React.memo<BodyProps>(
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               isEventViewer={isEventViewer}
-              isSelectAllChecked={
-                data.length > 0 && data.length === Object.keys(selectedEventIds).length
-              }
+              isSelectAllChecked={isSelectAllChecked}
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
               onColumnSorted={onColumnSorted}

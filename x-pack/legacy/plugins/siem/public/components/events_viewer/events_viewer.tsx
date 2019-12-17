@@ -232,7 +232,7 @@ export const EventsViewer = React.memo<Props>(
     prevProps.browserFields === nextProps.browserFields &&
     prevProps.columns === nextProps.columns &&
     prevProps.dataProviders === nextProps.dataProviders &&
-    isEqual(prevProps.deletedEventIds, nextProps.deletedEventIds) &&
+    prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     isEqual(prevProps.filters, nextProps.filters) &&
     prevProps.height === nextProps.height &&
