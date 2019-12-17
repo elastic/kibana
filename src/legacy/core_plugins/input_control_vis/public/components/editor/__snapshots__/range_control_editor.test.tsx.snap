@@ -3,6 +3,7 @@
 exports[`renders RangeControlEditor 1`] = `
 <Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
+    IndexPatternSelect={[Function]}
     controlIndex={0}
     indexPatternId="indexPattern1"
     onChange={[Function]}

@@ -17,20 +17,6 @@
  * under the License.
  */
 
-jest.mock('../../legacy_imports.ts', () => ({
-  npStart: {
-    plugins: {
-      data: {
-        ui: {
-          IndexPatternSelect: () => {
-            return <div />;
-          },
-        },
-      },
-    },
-  },
-}));
-
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
@@ -39,10 +25,11 @@ import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { getDepsMock } from './__tests__/get_deps_mock';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
-
 import { ListControlEditor } from './list_control_editor';
 import { ControlParams } from '../../editor_utils';
+import { updateComponent } from './__tests__/update_component';
 
 const controlParamsBase: ControlParams = {
   id: '1',
@@ -58,6 +45,7 @@ const controlParamsBase: ControlParams = {
   },
   parent: '',
 };
+const deps = getDepsMock();
 let handleFieldNameChange: sinon.SinonSpy;
 let handleIndexPatternChange: sinon.SinonSpy;
 let handleCheckboxOptionChange: sinon.SinonSpy;
@@ -88,6 +76,7 @@ describe('renders', () => {
     };
     const component = shallow(
       <ListControlEditor
+        deps={deps}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -100,10 +89,7 @@ describe('renders', () => {
       />
     );
 
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
+    await updateComponent(component);
 
     expect(component).toMatchSnapshot();
   });
@@ -115,6 +101,7 @@ describe('renders', () => {
     ];
     const component = shallow(
       <ListControlEditor
+        deps={deps}
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParamsBase}
@@ -127,10 +114,7 @@ describe('renders', () => {
       />
     );
 
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
+    await updateComponent(component);
 
     expect(component).toMatchSnapshot();
   });
@@ -153,6 +137,7 @@ describe('renders', () => {
       };
       const component = shallow(
         <ListControlEditor
+          deps={deps}
           getIndexPattern={getIndexPatternMock}
           controlIndex={0}
           controlParams={controlParams}
@@ -165,10 +150,7 @@ describe('renders', () => {
         />
       );
 
-      // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
+      await updateComponent(component);
 
       expect(component).toMatchSnapshot();
     });
@@ -190,6 +172,7 @@ describe('renders', () => {
       };
       const component = shallow(
         <ListControlEditor
+          deps={deps}
           getIndexPattern={getIndexPatternMock}
           controlIndex={0}
           controlParams={controlParams}
@@ -202,10 +185,7 @@ describe('renders', () => {
         />
       );
 
-      // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
+      await updateComponent(component);
 
       expect(component).toMatchSnapshot();
     });
@@ -227,6 +207,7 @@ describe('renders', () => {
       };
       const component = shallow(
         <ListControlEditor
+          deps={deps}
           getIndexPattern={getIndexPatternMock}
           controlIndex={0}
           controlParams={controlParams}
@@ -239,10 +220,7 @@ describe('renders', () => {
         />
       );
 
-      // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
-      // Ensure the state changes are reflected
-      component.update();
+      await updateComponent(component);
 
       expect(component).toMatchSnapshot();
     });
@@ -252,6 +230,7 @@ describe('renders', () => {
 test('handleCheckboxOptionChange - multiselect', async () => {
   const component = mountWithIntl(
     <ListControlEditor
+      deps={deps}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParamsBase}
@@ -264,10 +243,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
     />
   );
 
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
+  await updateComponent(component);
 
   const checkbox = findTestSubject(component, 'listControlMultiselectInput');
   checkbox.simulate('click');
@@ -294,6 +270,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
 test('handleNumberOptionChange - size', async () => {
   const component = mountWithIntl(
     <ListControlEditor
+      deps={deps}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParamsBase}
@@ -306,10 +283,7 @@ test('handleNumberOptionChange - size', async () => {
     />
   );
 
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
+  await updateComponent(component);
 
   const input = findTestSubject(component, 'listControlSizeInput');
   input.simulate('change', { target: { value: 7 } });
@@ -334,6 +308,7 @@ test('handleNumberOptionChange - size', async () => {
 test('field name change', async () => {
   const component = shallowWithIntl(
     <ListControlEditor
+      deps={deps}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParamsBase}
@@ -346,18 +321,11 @@ test('field name change', async () => {
     />
   );
 
-  const update = async () => {
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-  };
-
   // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled
   expect(
     component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
   ).toHaveLength(0);
-  await update();
+  await updateComponent(component);
   expect(
     component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
   ).toHaveLength(1);
@@ -373,7 +341,7 @@ test('field name change', async () => {
   expect(
     component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')
   ).toHaveLength(0);
-  await update();
+  await updateComponent(component);
   expect(
     component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')
   ).toHaveLength(1);
@@ -386,7 +354,7 @@ test('field name change', async () => {
   expect(
     component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
   ).toHaveLength(0);
-  await update();
+  await updateComponent(component);
   expect(
     component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')
   ).toHaveLength(1);

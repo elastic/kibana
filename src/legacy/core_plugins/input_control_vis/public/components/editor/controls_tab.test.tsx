@@ -17,32 +17,11 @@
  * under the License.
  */
 
-jest.mock('../../../../../core_plugins/data/public/legacy', () => ({
-  indexPatterns: {
-    indexPatterns: {
-      get: jest.fn(),
-    },
-  },
-}));
-
-jest.mock('../../legacy_imports.ts', () => ({
-  npStart: {
-    plugins: {
-      data: {
-        ui: {
-          IndexPatternSelect: () => {
-            return <div />;
-          },
-        },
-      },
-    },
-  },
-}));
-
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { getDepsMock } from './__tests__/get_deps_mock';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 import { ControlsTab, ControlsTabUiProps } from './controls_tab';
 
@@ -53,6 +32,7 @@ let props: ControlsTabUiProps;
 
 beforeEach(() => {
   props = {
+    deps: getDepsMock(),
     vis: {
       API: {
         indexPatterns: indexPatternsMock,

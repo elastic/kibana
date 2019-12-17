@@ -22,26 +22,14 @@ import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert, match } from 'sinon';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('../../legacy_imports.ts', () => ({
-  npStart: {
-    plugins: {
-      data: {
-        ui: {
-          IndexPatternSelect: () => {
-            return <div />;
-          },
-        },
-      },
-    },
-  },
-}));
-
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
 import { RangeControlEditor } from './range_control_editor';
 import { ControlParams } from '../../editor_utils';
+import { getDepsMock } from './__tests__/get_deps_mock';
+import { updateComponent } from './__tests__/update_component';
 
 const controlParams: ControlParams = {
   id: '1',
@@ -55,6 +43,7 @@ const controlParams: ControlParams = {
   },
   parent: '',
 };
+const deps = getDepsMock();
 let handleFieldNameChange: SinonSpy;
 let handleIndexPatternChange: SinonSpy;
 let handleNumberOptionChange: SinonSpy;
@@ -65,9 +54,10 @@ beforeEach(() => {
   handleNumberOptionChange = spy();
 });
 
-test('renders RangeControlEditor', () => {
+test('renders RangeControlEditor', async () => {
   const component = shallow(
     <RangeControlEditor
+      deps={deps}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -76,12 +66,16 @@ test('renders RangeControlEditor', () => {
       handleNumberOptionChange={handleNumberOptionChange}
     />
   );
+
+  await updateComponent(component);
+
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('handleNumberOptionChange - step', () => {
+test('handleNumberOptionChange - step', async () => {
   const component = mountWithIntl(
     <RangeControlEditor
+      deps={deps}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -90,6 +84,9 @@ test('handleNumberOptionChange - step', () => {
       handleNumberOptionChange={handleNumberOptionChange}
     />
   );
+
+  await updateComponent(component);
+
   findTestSubject(component, 'rangeControlSizeInput0').simulate('change', {
     target: { value: 0.5 },
   });
@@ -110,9 +107,10 @@ test('handleNumberOptionChange - step', () => {
   );
 });
 
-test('handleNumberOptionChange - decimalPlaces', () => {
+test('handleNumberOptionChange - decimalPlaces', async () => {
   const component = mountWithIntl(
     <RangeControlEditor
+      deps={deps}
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -121,6 +119,9 @@ test('handleNumberOptionChange - decimalPlaces', () => {
       handleNumberOptionChange={handleNumberOptionChange}
     />
   );
+
+  await updateComponent(component);
+
   findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', {
     target: { value: 2 },
   });

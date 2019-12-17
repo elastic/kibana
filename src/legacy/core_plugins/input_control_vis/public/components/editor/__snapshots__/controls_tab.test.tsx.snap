@@ -20,6 +20,29 @@ exports[`renders ControlsTab 1`] = `
         "type": "list",
       }
     }
+    deps={
+      Object {
+        "core": Object {
+          "getStartServices": [MockFunction],
+          "injectedMetadata": Object {
+            "getInjectedVar": [MockFunction],
+          },
+        },
+        "data": Object {
+          "query": Object {
+            "filterManager": Object {
+              "fieldName": "myField",
+              "getAppFilters": [MockFunction],
+              "getGlobalFilters": [MockFunction],
+              "getIndexPattern": [Function],
+            },
+            "timefilter": Object {
+              "timefilter": Object {},
+            },
+          },
+        },
+      }
+    }
     getIndexPattern={[Function]}
     handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
@@ -52,6 +75,29 @@ exports[`renders ControlsTab 1`] = `
         },
         "parent": "parent",
         "type": "range",
+      }
+    }
+    deps={
+      Object {
+        "core": Object {
+          "getStartServices": [MockFunction],
+          "injectedMetadata": Object {
+            "getInjectedVar": [MockFunction],
+          },
+        },
+        "data": Object {
+          "query": Object {
+            "filterManager": Object {
+              "fieldName": "myField",
+              "getAppFilters": [MockFunction],
+              "getGlobalFilters": [MockFunction],
+              "getIndexPattern": [Function],
+            },
+            "timefilter": Object {
+              "timefilter": Object {},
+            },
+          },
+        },
       }
     }
     getIndexPattern={[Function]}

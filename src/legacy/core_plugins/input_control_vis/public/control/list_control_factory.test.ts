@@ -19,76 +19,15 @@
 
 import { listControlFactory, ListControl } from './list_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
+import { getDepsMock } from '../components/editor/__tests__/get_deps_mock';
+import { getSearchSourceMock } from '../components/editor/__tests__/get_search_service_mock';
 
-jest.mock('./../legacy_imports.ts', () => ({
-  chrome: {
-    getInjected: jest.fn().mockImplementation(key => {
-      switch (key) {
-        case 'autocompleteTimeout':
-          return 1000;
-        case 'autocompleteTerminateAfter':
-          return 100000;
-      }
-    }),
-  },
-  createFilter: jest.fn(),
-  npStart: {
-    plugins: {
-      data: {
-        query: {
-          filterManager: {
-            fieldName: 'myNumberField',
-            getIndexPattern: () => ({
-              fields: {
-                getByName: (name: any) => {
-                  const fields: any = { myField: { name: 'myField' } };
-                  return fields[name];
-                },
-              },
-            }),
-            getAppFilters: jest.fn().mockImplementation(() => []),
-            getGlobalFilters: jest.fn().mockImplementation(() => []),
-          },
-        },
-        indexPatterns: {
-          get: () => ({
-            fields: {
-              getByName: (name: any) => {
-                const fields: any = { myField: { name: 'myField' } };
-                return fields[name];
-              },
-            },
-          }),
-        },
-      },
-    },
-  },
+const MockSearchSource = getSearchSourceMock();
+const deps = getDepsMock();
+
+jest.doMock('./create_search_source.ts', () => ({
+  createSearchSource: MockSearchSource,
 }));
-
-function MockSearchSource() {
-  return {
-    setParent: () => {},
-    setField: () => {},
-    fetch: async () => {
-      return {
-        aggregations: {
-          termsAgg: {
-            buckets: [
-              {
-                key: 'Zurich Airport',
-                doc_count: 691,
-              },
-              {
-                key: 'Xi an Xianyang International Airport',
-                doc_count: 526,
-              },
-            ],
-          },
-        },
-      };
-    },
-  };
-}
 
 describe('hasValue', () => {
   const controlParams: ControlParams = {
@@ -104,7 +43,7 @@ describe('hasValue', () => {
 
   let listControl: ListControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource, deps);
   });
 
   test('should be false when control has no value', () => {
@@ -133,16 +72,15 @@ describe('fetch', () => {
     parent: 'parent',
   };
   const useTimeFilter = false;
-  const SearchSource = jest.fn(MockSearchSource);
 
   let listControl: ListControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, useTimeFilter, SearchSource);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource, deps);
   });
 
   test('should pass in timeout parameters from injected vars', async () => {
     await listControl.fetch();
-    expect(SearchSource).toHaveBeenCalledWith({
+    expect(MockSearchSource).toHaveBeenCalledWith({
       timeout: `1000ms`,
       terminate_after: 100000,
     });
@@ -172,7 +110,7 @@ describe('fetch with ancestors', () => {
   let listControl: ListControl;
   let parentControl;
   beforeEach(async () => {
-    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource);
+    listControl = await listControlFactory(controlParams, useTimeFilter, MockSearchSource, deps);
 
     const parentControlParams: ControlParams = {
       id: 'parent',
@@ -183,7 +121,12 @@ describe('fetch with ancestors', () => {
       indexPattern: {} as any,
       parent: 'parent',
     };
-    parentControl = await listControlFactory(parentControlParams, useTimeFilter, MockSearchSource);
+    parentControl = await listControlFactory(
+      parentControlParams,
+      useTimeFilter,
+      MockSearchSource,
+      deps
+    );
     parentControl.clear();
     listControl.setAncestors([parentControl]);
   });

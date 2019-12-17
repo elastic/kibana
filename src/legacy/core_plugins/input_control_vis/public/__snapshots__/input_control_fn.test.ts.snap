@@ -1,3 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`interpreter/functions#input_control_vis returns an object with the correct structure 1`] = `Promise {}`;
+exports[`interpreter/functions#input_control_vis returns an object with the correct structure 1`] = `
+Object {
+  "as": "visualization",
+  "type": "render",
+  "value": Object {
+    "visConfig": Object {
+      "controls": Array [
+        Object {
+          "fieldName": "geo.src",
+          "id": "123",
+          "indexPatternRefName": "control_0_index_pattern",
+          "label": "Source Country",
+          "options": Object {
+            "multiselect": true,
+            "order": "desc",
+            "size": 100,
+            "type": "terms",
+          },
+          "parent": "",
+          "type": "list",
+        },
+      ],
+      "pinFilters": false,
+      "updateFiltersOnChange": false,
+      "useTimeFilter": false,
+    },
+    "visType": "input_control_vis",
+  },
+}
+`;

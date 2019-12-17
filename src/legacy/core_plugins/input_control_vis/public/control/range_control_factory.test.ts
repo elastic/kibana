@@ -17,52 +17,12 @@
  * under the License.
  */
 
-import { rangeControlFactory, RangeControl } from './range_control_factory';
+import { rangeControlFactory } from './range_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
+import { getSearchSourceMock } from '../components/editor/__tests__/get_search_service_mock';
+import { getDepsMock } from '../components/editor/__tests__/get_deps_mock';
 
-let esSearchResponse: any;
-class MockSearchSource {
-  setParent() {}
-  setField() {}
-  async fetch() {
-    return esSearchResponse;
-  }
-}
-
-jest.mock('../legacy_imports.ts', () => ({
-  createFilter: jest.fn(),
-  npStart: {
-    plugins: {
-      data: {
-        query: {
-          filterManager: {
-            fieldName: 'myNumberField',
-            getIndexPattern: () => ({
-              fields: {
-                getByName: (name: string) => {
-                  const fields: any = { myNumberField: { name: 'myNumberField' } };
-                  return fields[name];
-                },
-              },
-            }),
-            getAppFilters: jest.fn().mockImplementation(() => []),
-            getGlobalFilters: jest.fn().mockImplementation(() => []),
-          },
-        },
-        indexPatterns: {
-          get: () => ({
-            fields: {
-              getByName: (name: string) => {
-                const fields: any = { myNumberField: { name: 'myNumberField' } };
-                return fields[name];
-              },
-            },
-          }),
-        },
-      },
-    },
-  },
-}));
+const deps = getDepsMock();
 
 describe('fetch', () => {
   const controlParams: ControlParams = {
@@ -76,18 +36,19 @@ describe('fetch', () => {
   };
   const useTimeFilter = false;
 
-  let rangeControl: RangeControl;
-  beforeEach(async () => {
-    rangeControl = await rangeControlFactory(controlParams, useTimeFilter, MockSearchSource);
-  });
-
   test('should set min and max from aggregation results', async () => {
-    esSearchResponse = {
+    const esSearchResponse = {
       aggregations: {
         maxAgg: { value: 100 },
         minAgg: { value: 10 },
       },
     };
+    const rangeControl = await rangeControlFactory(
+      controlParams,
+      useTimeFilter,
+      getSearchSourceMock(esSearchResponse),
+      deps
+    );
     await rangeControl.fetch();
 
     expect(rangeControl.isEnabled()).toBe(true);
@@ -97,12 +58,18 @@ describe('fetch', () => {
 
   test('should disable control when there are 0 hits', async () => {
     // ES response when the query does not match any documents
-    esSearchResponse = {
+    const esSearchResponse = {
       aggregations: {
         maxAgg: { value: null },
         minAgg: { value: null },
       },
     };
+    const rangeControl = await rangeControlFactory(
+      controlParams,
+      useTimeFilter,
+      getSearchSourceMock(esSearchResponse),
+      deps
+    );
     await rangeControl.fetch();
 
     expect(rangeControl.isEnabled()).toBe(false);
@@ -111,7 +78,13 @@ describe('fetch', () => {
   test('should disable control when response is empty', async () => {
     // ES response for dashboardonly user who does not have read permissions on index is 200 (which is weird)
     // and there is not aggregations key
-    esSearchResponse = {};
+    const esSearchResponse = {};
+    const rangeControl = await rangeControlFactory(
+      controlParams,
+      useTimeFilter,
+      getSearchSourceMock(esSearchResponse),
+      deps
+    );
     await rangeControl.fetch();
 
     expect(rangeControl.isEnabled()).toBe(false);
