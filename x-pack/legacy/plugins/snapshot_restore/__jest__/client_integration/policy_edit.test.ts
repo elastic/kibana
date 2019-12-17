@@ -11,6 +11,8 @@ import { PolicyForm } from '../../public/app/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.policyEdit;
 const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 
