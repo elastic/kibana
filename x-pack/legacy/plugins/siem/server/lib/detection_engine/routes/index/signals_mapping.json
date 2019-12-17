@@ -99,10 +99,19 @@
               "filters": {
                 "type": "object"
               },
+              "created_at": {
+                "type": "date"
+              },
+              "updated_at": {
+                "type": "date"
+              },
               "created_by": {
                 "type": "keyword"
               },
               "updated_by": {
+                "type": "keyword"
+              },
+              "version": {
                 "type": "keyword"
               }
             }
