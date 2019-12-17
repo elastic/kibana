@@ -124,7 +124,7 @@ function renderLog(log) {
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       {log.levels.map((level, index) => (
         <EuiFlexItem grow={false} key={index}>
-          <EuiToolTip position="top" content={logLevelText[level.level]}>
+          <EuiToolTip position="top" content={logLevelText[level.level] || logLevelText.info}>
             <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
               {formatNumber(level.count, 'int_commas')}
             </EuiBadge>

@@ -31,6 +31,10 @@ const getColumns = (kbnUrl, scope) => [
     render: severity => {
       const severityIcon = mapSeverity(severity);
 
+      if (!severityIcon || !severityIcon.title) {
+        return null;
+      }
+
       return (
         <EuiToolTip content={severityIcon.title} position="bottom">
           <EuiHealth

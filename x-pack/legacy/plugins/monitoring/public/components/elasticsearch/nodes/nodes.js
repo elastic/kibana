@@ -29,6 +29,21 @@ import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
+const getNodeTooltip = node => {
+  const { nodeTypeLabel, nodeTypeClass } = node;
+  if (nodeTypeLabel) {
+    return (
+      <>
+        <EuiToolTip position="bottom" content={nodeTypeLabel}>
+          {nodeTypeClass && <EuiIcon type={nodeTypeClass} />}
+        </EuiToolTip>{' '}
+        &nbsp;
+      </>
+    );
+  }
+  return null;
+};
+
 const getSortHandler = type => item => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   const cols = [];
@@ -86,10 +101,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         <div>
           <div className="monTableCell__name">
             <EuiText size="m">
-              <EuiToolTip position="bottom" content={node.nodeTypeLabel}>
-                {node.nodeTypeClass && <EuiIcon type={node.nodeTypeClass} />}
-              </EuiToolTip>
-              &nbsp;
+              {getNodeTooltip(node)}
               <span data-test-subj="name">{nameLink}</span>
             </EuiText>
           </div>

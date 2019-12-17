@@ -96,13 +96,9 @@ export class Shard extends React.Component {
 
     let shardUi = <EuiBadge color={color}>{shard.shard}</EuiBadge>;
 
-    if (this.state.tooltipVisible) {
+    if (this.state.tooltipVisible && shard.tooltip_message) {
       shardUi = (
-        <EuiToolTip
-          content={this.props.shard.tooltip_message}
-          position="bottom"
-          data-test-subj="shardTooltip"
-        >
+        <EuiToolTip content={shard.tooltip_message} position="bottom" data-test-subj="shardTooltip">
           <p>{shardUi}</p>
         </EuiToolTip>
       );
