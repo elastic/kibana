@@ -26,6 +26,7 @@ import {
   InternalSavedObjectsServiceSetup,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -35,6 +36,7 @@ export interface InternalCoreSetup {
   elasticsearch: InternalElasticsearchServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  uuid: UuidServiceSetup;
 }
 
 /**
