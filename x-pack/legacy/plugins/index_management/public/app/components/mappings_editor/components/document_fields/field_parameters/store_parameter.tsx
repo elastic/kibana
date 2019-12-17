@@ -8,6 +8,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const StoreParameter = () => (
@@ -19,6 +20,12 @@ export const StoreParameter = () => (
       defaultMessage:
         'Whether the field value should be stored and retrieved separately from the _source field.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.storeDocLinkText', {
+        defaultMessage: 'Store documentation',
+      }),
+      href: documentationService.getStoreLink(),
+    }}
     formFieldPath="store"
   />
 );

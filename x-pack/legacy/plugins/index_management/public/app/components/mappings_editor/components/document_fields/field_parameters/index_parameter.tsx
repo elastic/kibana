@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
@@ -31,6 +32,12 @@ export const IndexParameter = ({
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldDescription', {
       defaultMessage: 'Allow the field to be searchable.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexDocLinkText', {
+        defaultMessage: 'Searchable documentation',
+      }),
+      href: documentationService.getIndexLink(),
+    }}
     formFieldPath="index"
   >
     {/* index_options */}

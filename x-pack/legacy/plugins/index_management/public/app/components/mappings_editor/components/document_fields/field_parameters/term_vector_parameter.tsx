@@ -14,6 +14,7 @@ import { NormalizedField } from '../../../types';
 import { getFieldConfig } from '../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   field: NormalizedField;
@@ -29,6 +30,12 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
         defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
       })}
+      docLink={{
+        text: i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorDocLinkText', {
+          defaultMessage: 'Term vector documentation',
+        }),
+        href: documentationService.getTermVectorLink(),
+      }}
       defaultToggleValue={defaultToggleValue}
     >
       <FormDataProvider pathsToWatch="term_vector">
