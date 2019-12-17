@@ -55,7 +55,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const networkFilters = useMemo(() => {
       if (tabName === 'alerts') {
-        return filters.length > 0 ? [...filters, filterAlertsNetwork] : [filterAlertsNetwork];
+        return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
       }
       return filters;
     }, [tabName]);
