@@ -211,16 +211,6 @@ Object {
   "body": Object {
     "aggs": Object {
       "transactions": Object {
-        "aggs": Object {
-          "error": Object {
-            "top_hits": Object {
-              "_source": Array [
-                "timestamp",
-              ],
-              "size": 1,
-            },
-          },
-        },
         "terms": Object {
           "execution_hint": "map",
           "field": "transaction.id",

@@ -2726,6 +2726,7 @@ Array [
             color="#3185fc"
             radius={11}
             shape="circle"
+            withMargin={true}
           >
             <span
               className="c2"
@@ -2766,6 +2767,7 @@ Array [
             color="#e6c220"
             radius={11}
             shape="circle"
+            withMargin={true}
           >
             <span
               className="c5"
@@ -2799,6 +2801,7 @@ Array [
             color="#f98510"
             radius={11}
             shape="circle"
+            withMargin={true}
           >
             <span
               className="c6"
@@ -5174,6 +5177,7 @@ Array [
                               color="#3185fc"
                               radius={8}
                               shape="circle"
+                              withMargin={true}
                             >
                               <span
                                 className="c6"
@@ -5219,6 +5223,7 @@ Array [
                               color="#e6c220"
                               radius={8}
                               shape="circle"
+                              withMargin={true}
                             >
                               <span
                                 className="c8"
@@ -5264,6 +5269,7 @@ Array [
                               color="#f98510"
                               radius={8}
                               shape="circle"
+                              withMargin={true}
                             >
                               <span
                                 className="c9"
@@ -5899,6 +5905,7 @@ Array [
             color="#3185fc"
             radius={11}
             shape="circle"
+            withMargin={true}
           >
             <span
               className="c2"
@@ -5939,6 +5946,7 @@ Array [
             color="#e6c220"
             radius={11}
             shape="circle"
+            withMargin={true}
           >
             <span
               className="c5"
@@ -5972,6 +5980,7 @@ Array [
             color="#f98510"
             radius={11}
             shape="circle"
+            withMargin={true}
           >
             <span
               className="c6"

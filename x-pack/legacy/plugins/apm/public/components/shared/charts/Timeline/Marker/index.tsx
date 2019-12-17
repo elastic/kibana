@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { px } from '../../../../../style/variables';
@@ -25,17 +24,12 @@ const MarkerContainer = styled.div`
   bottom: 0;
 `;
 
-export const Marker: React.FC<Props> = ({ mark, x }) => {
-  if (isEmpty(mark)) {
-    return null;
-  }
-  return (
-    <MarkerContainer style={{ left: px(x) }}>
-      {mark.docType === 'agentMark' ? (
-        <AgentMarker mark={mark} />
-      ) : (
-        <ErrorMarker mark={mark} />
-      )}
-    </MarkerContainer>
-  );
-};
+export const Marker: React.FC<Props> = ({ mark, x }) => (
+  <MarkerContainer style={{ left: px(x) }}>
+    {mark.docType === 'agentMark' ? (
+      <AgentMarker mark={mark} />
+    ) : (
+      <ErrorMarker mark={mark} />
+    )}
+  </MarkerContainer>
+);

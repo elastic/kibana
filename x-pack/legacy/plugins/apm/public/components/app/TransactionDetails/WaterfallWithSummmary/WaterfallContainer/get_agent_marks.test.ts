@@ -21,9 +21,9 @@ describe('getAgentMarks', () => {
       }
     } as any;
     expect(getAgentMarks(transaction)).toEqual([
-      { name: 'timeToFirstByte', us: 10000 },
-      { name: 'domInteractive', us: 117000 },
-      { name: 'domComplete', us: 118000 }
+      { name: 'domInteractive', offset: 117000 },
+      { name: 'timeToFirstByte', offset: 10000 },
+      { name: 'domComplete', offset: 118000 }
     ]);
   });
 

@@ -1,22 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ErrorMarker renders 1`] = `
-<Fragment>
-  <EuiToolTip
-    content={
-      <div>
-        foo
-      </div>
-    }
-    delay="regular"
-    id="foo"
-    position="top"
-  >
+<EuiPopover
+  anchorPosition="upCenter"
+  button={
     <Legend
       clickable={true}
       color="#bd271e"
+      onClick={[Function]}
       shape="square"
     />
-  </EuiToolTip>
-</Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="popover"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="m"
+>
+  <styled.div>
+    <styled.div>
+      @ 10,000 μs
+    </styled.div>
+    <Legend
+      color="#fff"
+      key="#fff"
+      text="bar"
+    />
+    <styled.div>
+      <ErrorDetailLink
+        errorGroupId="123"
+        query={
+          Object {
+            "kuery": "trace.id%20%3A%20%22123%22%20and%20transaction.id%20%3A%20%22456%22",
+            "rangeFrom": undefined,
+            "rangeTo": undefined,
+          }
+        }
+        serviceName="bar"
+      />
+    </styled.div>
+  </styled.div>
+</EuiPopover>
 `;

@@ -23,7 +23,7 @@ exports[`Timeline should render with data 1`] = `
 .c2 {
   width: 11px;
   height: 11px;
-  margin-right: 5.5px;
+  margin-right: 0;
   background: #98a2b3;
   border-radius: 100%;
 }
@@ -534,7 +534,7 @@ exports[`Timeline should render with data 1`] = `
             <styled.div
               style={
                 Object {
-                  "left": "494.5px",
+                  "left": "500px",
                 }
               }
             >
@@ -542,7 +542,7 @@ exports[`Timeline should render with data 1`] = `
                 className="c0"
                 style={
                   Object {
-                    "left": "494.5px",
+                    "left": "500px",
                   }
                 }
               >
@@ -569,6 +569,7 @@ exports[`Timeline should render with data 1`] = `
                         color="#98a2b3"
                         radius={11}
                         shape="circle"
+                        withMargin={false}
                       >
                         <span
                           className="c2"
@@ -585,7 +586,7 @@ exports[`Timeline should render with data 1`] = `
             <styled.div
               style={
                 Object {
-                  "left": "539.5px",
+                  "left": "545px",
                 }
               }
             >
@@ -593,7 +594,7 @@ exports[`Timeline should render with data 1`] = `
                 className="c0"
                 style={
                   Object {
-                    "left": "539.5px",
+                    "left": "545px",
                   }
                 }
               >
@@ -620,6 +621,7 @@ exports[`Timeline should render with data 1`] = `
                         color="#98a2b3"
                         radius={11}
                         shape="circle"
+                        withMargin={false}
                       >
                         <span
                           className="c2"
@@ -636,7 +638,7 @@ exports[`Timeline should render with data 1`] = `
             <styled.div
               style={
                 Object {
-                  "left": "899.5px",
+                  "left": "905px",
                 }
               }
             >
@@ -644,7 +646,7 @@ exports[`Timeline should render with data 1`] = `
                 className="c0"
                 style={
                   Object {
-                    "left": "899.5px",
+                    "left": "905px",
                   }
                 }
               >
@@ -671,6 +673,7 @@ exports[`Timeline should render with data 1`] = `
                         color="#98a2b3"
                         radius={11}
                         shape="circle"
+                        withMargin={false}
                       >
                         <span
                           className="c2"
