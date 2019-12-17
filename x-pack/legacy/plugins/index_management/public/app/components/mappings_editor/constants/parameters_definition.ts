@@ -220,6 +220,16 @@ export const PARAMETERS_DEFINITION = {
       label: nullValueLabel,
     },
   },
+  null_value_ip: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: nullValueLabel,
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.nullValueHelpText', {
+        defaultMessage: 'Accepts an IP address.',
+      }),
+    },
+  },
   null_value_numeric: {
     fieldConfig: {
       defaultValue: '', // Needed for FieldParams typing

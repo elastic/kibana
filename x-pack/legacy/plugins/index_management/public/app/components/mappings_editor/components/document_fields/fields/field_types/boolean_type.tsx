@@ -71,7 +71,8 @@ export const BooleanType = ({ field }: Props) => {
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
               {
-                defaultMessage: 'Whether to substitute values for any explicit null values.',
+                defaultMessage:
+                  'Replace explicit null values with the specified boolean value so that it can be indexed and searched.',
               }
             )}
           >

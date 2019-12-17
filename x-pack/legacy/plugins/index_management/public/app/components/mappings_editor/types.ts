@@ -88,6 +88,7 @@ export type ParameterName =
   | 'null_value_numeric'
   | 'null_value_boolean'
   | 'null_value_geo_point'
+  | 'null_value_ip'
   | 'copy_to'
   | 'dynamic'
   | 'enabled'
