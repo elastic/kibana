@@ -18,13 +18,14 @@ import {
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
 
 interface IWaterfallIndex {
   [key: string]: IWaterfallItem | undefined;
 }
 
 interface IWaterfallGroup {
-  [key: string]: IWaterfallItem[];
+  [key: string]: IWaterfallTraceItem[];
 }
 
 export interface IWaterfall {
@@ -83,7 +84,24 @@ interface IWaterfallItemSpan extends IWaterfallItemBase {
   docType: 'span';
 }
 
-export type IWaterfallItem = IWaterfallItemSpan | IWaterfallItemTransaction;
+export interface IWaterfallItemAgentMark
+  extends Pick<IWaterfallItemBase, 'id' | 'name' | 'offset'> {
+  docType: 'agentMark';
+}
+
+export interface IWaterfallItemError extends Omit<IWaterfallItemBase, 'name'> {
+  error: APMError;
+  docType: 'error';
+  message?: string;
+  serviceColor?: string;
+}
+
+type IWaterfallTraceItem =
+  | IWaterfallItemSpan
+  | IWaterfallItemTransaction
+  | IWaterfallItemError;
+
+export type IWaterfallItem = IWaterfallTraceItem | IWaterfallItemAgentMark;
 
 function getTransactionItem(
   transaction: Transaction,
@@ -119,9 +137,44 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
   };
 }
 
+function getErrorItem(error: APMError): IWaterfallItemError {
+  return {
+    id: error.error.id,
+    parentId: error.parent?.id,
+    serviceName: error.service.name,
+    message: error.error.log?.message || error.error.exception?.[0]?.message,
+    timestamp: error.timestamp.us,
+    offset: 0,
+    skew: 0,
+    docType: 'error',
+    error,
+    duration: 0
+  };
+}
+
+function getAgentMarks(transaction?: Transaction): IWaterfallItemAgentMark[] {
+  if (
+    !(
+      transaction &&
+      transaction.transaction.marks &&
+      transaction.transaction.marks.agent
+    )
+  ) {
+    return [];
+  }
+  return Object.entries(transaction.transaction.marks.agent).map(
+    ([name, ms]) => ({
+      id: name,
+      name,
+      offset: ms * 1000,
+      docType: 'agentMark'
+    })
+  );
+}
+
 export function getClockSkew(
-  item: IWaterfallItem,
-  parentItem?: IWaterfallItem
+  item: IWaterfallTraceItem,
+  parentItem?: IWaterfallTraceItem
 ) {
   if (!parentItem) {
     return 0;
@@ -146,17 +199,19 @@ export function getClockSkew(
       // child transaction starts after parent thus no adjustment is needed
       return 0;
     }
+    case 'error':
+      return parentItem.skew;
   }
 }
 
 export function getOrderedWaterfallItems(
   childrenByParentId: IWaterfallGroup,
-  entryTransactionItem: IWaterfallItem
+  entryTransactionItem: IWaterfallTraceItem
 ) {
   const visitedWaterfallItemSet = new Set();
   function getSortedChildren(
-    item: IWaterfallItem,
-    parentItem?: IWaterfallItem
+    item: IWaterfallTraceItem,
+    parentItem?: IWaterfallTraceItem
   ): IWaterfallItem[] {
     if (visitedWaterfallItemSet.has(item)) {
       return [];
@@ -165,7 +220,9 @@ export function getOrderedWaterfallItems(
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
+    // get offset from the beginning of trace
     item.offset = item.timestamp - entryTransactionItem.timestamp;
+    // get skew when the child starts before the parent, take latency into account
     item.skew = getClockSkew(item, parentItem);
 
     const deepChildren = flatten(
@@ -185,7 +242,10 @@ function getTraceRoot(childrenByParentId: IWaterfallGroup) {
 }
 
 function getServices(items: IWaterfallItem[]) {
-  const serviceNames = items.map(item => item.serviceName);
+  const serviceNames = (items.filter(
+    item => item.docType !== 'agentMark'
+  ) as IWaterfallTraceItem[]).map(item => item.serviceName);
+
   return uniq(serviceNames);
 }
 
@@ -209,9 +269,14 @@ function getDuration(items: IWaterfallItem[]) {
   if (items.length === 0) {
     return 0;
   }
-  const timestampStart = items[0].timestamp;
+
+  const traceItems = items.filter(
+    item => item.docType !== 'agentMark' && item.docType !== 'error'
+  ) as IWaterfallTraceItem[];
+
+  const timestampStart = traceItems[0].timestamp;
   const timestampEnd = Math.max(
-    ...items.map(item => item.timestamp + item.duration + item.skew)
+    ...traceItems.map(item => item.timestamp + item.duration + item.skew)
   );
   return timestampEnd - timestampStart;
 }
@@ -246,7 +311,7 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems = trace.items.map(traceItem => {
+  const waterfallItems: IWaterfallTraceItem[] = trace.items.map(traceItem => {
     const docType = traceItem.processor.event;
     switch (docType) {
       case 'span':
@@ -256,8 +321,14 @@ export function getWaterfall(
           traceItem as Transaction,
           errorsPerTransaction
         );
+      case 'error':
+        return getErrorItem(traceItem as APMError);
     }
   });
+
+  const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
+  const getTransactionById = createGetTransactionById(itemsById);
+  const entryTransaction = getTransactionById(entryTransactionId);
 
   const childrenByParentId = groupBy(waterfallItems, item =>
     item.parentId ? item.parentId : 'root'
@@ -267,17 +338,26 @@ export function getWaterfall(
       waterfallItem.docType === 'transaction' &&
       waterfallItem.id === entryTransactionId
   );
-  const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
   const orderedItems = entryTransactionItem
     ? getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
     : [];
+
   const traceRoot = getTraceRoot(childrenByParentId);
   const duration = getDuration(orderedItems);
   const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
   const services = getServices(orderedItems);
-  const getTransactionById = createGetTransactionById(itemsById);
   const serviceColors = getServiceColors(services);
-  const entryTransaction = getTransactionById(entryTransactionId);
+
+  const agentMarks = getAgentMarks(entryTransaction);
+  orderedItems.push(...agentMarks);
+
+  orderedItems
+    .filter(item => item.docType === 'error')
+    .map(item => {
+      const error = item as IWaterfallItemError;
+      error.serviceColor = serviceColors[error.serviceName];
+      return error;
+    });
 
   return {
     entryTransaction,

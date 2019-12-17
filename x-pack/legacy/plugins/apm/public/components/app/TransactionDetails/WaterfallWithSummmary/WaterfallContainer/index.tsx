@@ -6,16 +6,13 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
-import { getAgentMarks } from './get_agent_marks';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';
 import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   urlParams: IUrlParams;
-  transaction: Transaction;
   location: Location;
   waterfall: IWaterfall;
   exceedsMax: boolean;
@@ -24,11 +21,9 @@ interface Props {
 export function WaterfallContainer({
   location,
   urlParams,
-  transaction,
   waterfall,
   exceedsMax
 }: Props) {
-  const agentMarks = getAgentMarks(transaction);
   if (!waterfall) {
     return null;
   }
@@ -37,7 +32,6 @@ export function WaterfallContainer({
     <div>
       <ServiceLegends serviceColors={waterfall.serviceColors} />
       <Waterfall
-        agentMarks={agentMarks}
         location={location}
         serviceColors={waterfall.serviceColors}
         urlParams={urlParams}

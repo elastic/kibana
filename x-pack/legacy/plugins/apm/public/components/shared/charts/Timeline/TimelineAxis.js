@@ -31,7 +31,7 @@ const getXAxisTickValues = (tickValues, topTraceDuration) => {
   });
 };
 
-function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
+function TimelineAxis({ plotValues, marks, topTraceDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
@@ -82,11 +82,9 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
                 />
               )}
 
-              {agentMarks.map(mark => {
-                return (
-                  <Marker key={mark.name} mark={mark} x={xScale(mark.us)} />
-                );
-              })}
+              {marks.map(mark => (
+                <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
+              ))}
             </XYPlot>
           </div>
         );
@@ -98,11 +96,11 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
 TimelineAxis.propTypes = {
   header: PropTypes.node,
   plotValues: PropTypes.object.isRequired,
-  agentMarks: PropTypes.array
+  marks: PropTypes.array
 };
 
 TimelineAxis.defaultProps = {
-  agentMarks: []
+  marks: []
 };
 
 export default TimelineAxis;

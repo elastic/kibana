@@ -20,7 +20,6 @@ import {
   toQuery
 } from '../../../../../shared/Links/url_helpers';
 import { history } from '../../../../../../utils/history';
-import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
 import {
@@ -44,7 +43,6 @@ const TIMELINE_MARGINS = {
 };
 
 interface Props {
-  agentMarks: AgentMark[];
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   location: Location;
@@ -69,6 +67,10 @@ export class Waterfall extends Component<Props> {
 
   public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
+
+    if (item.docType === 'error' || item.docType === 'agentMark') {
+      return null;
+    }
 
     const errorCount =
       item.docType === 'transaction'
@@ -133,6 +135,10 @@ export class Waterfall extends Component<Props> {
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
     const waterfallHeight = itemContainerHeight * waterfall.orderedItems.length;
 
+    const marks = waterfall.orderedItems.filter(
+      item => item.docType === 'error' || item.docType === 'agentMark'
+    );
+
     return (
       <Container>
         {exceedsMax ? (
@@ -148,7 +154,7 @@ export class Waterfall extends Component<Props> {
         ) : null}
         <StickyContainer>
           <Timeline
-            agentMarks={this.props.agentMarks}
+            marks={marks}
             duration={waterfall.duration}
             height={waterfallHeight}
             margins={TIMELINE_MARGINS}

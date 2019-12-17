@@ -12,13 +12,9 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ErrorRaw } from '../../../typings/es_schemas/raw/ErrorRaw';
 
 export interface ErrorsPerTransaction {
-  [transactionId: string]: {
-    count: number;
-    error: ErrorRaw;
-  };
+  [transactionId: string]: number;
 }
 
 const includedLogLevels = ['critical', 'error', 'fatal'];
@@ -32,7 +28,7 @@ export async function getTraceErrorsPerTransaction(
   const params = {
     index: indices['apm_oss.errorIndices'],
     body: {
-      size: 0,
+      size: 30,
       query: {
         bool: {
           filter: [
@@ -49,9 +45,7 @@ export async function getTraceErrorsPerTransaction(
       aggs: {
         transactions: {
           terms: {
-            field: TRANSACTION_ID,
-            // high cardinality
-            execution_hint: 'map'
+            field: TRANSACTION_ID
           },
           aggs: {
             error: {
@@ -66,14 +60,10 @@ export async function getTraceErrorsPerTransaction(
   } as const;
 
   const resp = await client.search(params);
-
   return (resp.aggregations?.transactions.buckets || []).reduce(
     (acc, bucket) => ({
       ...acc,
-      [bucket.key]: {
-        count: bucket.doc_count,
-        error: bucket.error.hits.hits[0]?._source
-      }
+      [bucket.key]: bucket.doc_count
     }),
     {}
   );

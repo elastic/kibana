@@ -34,11 +34,12 @@ interface IndicatorProps {
   radius: number;
   color: string;
   shape: Shape;
+  withMargin: boolean;
 }
 export const Indicator = styled.span<IndicatorProps>`
   width: ${props => px(props.radius)};
   height: ${props => px(props.radius)};
-  margin-right: ${props => px(props.radius / 2)};
+  margin-right: ${props => (props.withMargin ? px(props.radius / 2) : 0)};
   background: ${props => props.color};
   border-radius: ${props => {
     return props.shape === Shape.circle ? '100%' : '0';
@@ -80,7 +81,12 @@ export const Legend: React.FC<Props> = ({
       {indicator ? (
         indicator()
       ) : (
-        <Indicator color={color} radius={radius} shape={shape} />
+        <Indicator
+          color={color}
+          radius={radius}
+          shape={shape}
+          withMargin={!!text}
+        />
       )}
       {text}
     </Container>
