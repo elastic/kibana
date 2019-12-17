@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { px, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { Legend } from '../../Legend';
+import { IWaterfallItemAgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const NameContainer = styled.div`
   border-bottom: 1px solid ${theme.euiColorMediumShade};
@@ -23,7 +24,7 @@ const TimeContainer = styled.div`
 `;
 
 interface Props {
-  mark: any; // TODO: agent mark,
+  mark: IWaterfallItemAgentMark;
 }
 
 export const AgentMarker: React.FC<Props> = ({ mark }) => {
@@ -35,7 +36,7 @@ export const AgentMarker: React.FC<Props> = ({ mark }) => {
         content={
           <div>
             <NameContainer>{mark.name}</NameContainer>
-            <TimeContainer>{asDuration(mark.us)}</TimeContainer>
+            <TimeContainer>{asDuration(mark.offset)}</TimeContainer>
           </div>
         }
       >

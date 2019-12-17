@@ -17,9 +17,10 @@ import { fontSizes, px, unit } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
+import { IWaterfallItemError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
-  mark: any; // TODO: error mark,
+  mark: IWaterfallItemError;
 }
 
 const Popover = styled.div`
@@ -42,19 +43,21 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
+  const togglePopover = () => showPopover(!isPopoverOpen);
+
   const legend = (
     <Legend
       clickable
       color={theme.euiColorDanger}
       shape={Shape.square}
-      onClick={() => showPopover(true)}
+      onClick={togglePopover}
     />
   );
 
   const { rangeTo, rangeFrom } = urlParams;
   const query = {
     kuery: encodeURIComponent(
-      `${TRACE_ID} : "${mark.traceId}" and ${TRANSACTION_ID} : "${mark.transactionId}"`
+      `${TRACE_ID} : "${mark.error.trace?.id}" and ${TRANSACTION_ID} : "${mark.error.transaction?.id}"`
     ),
     rangeFrom,
     rangeTo
@@ -65,26 +68,25 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       id="popover"
       button={legend}
       isOpen={isPopoverOpen}
-      closePopover={() => showPopover(false)}
+      closePopover={togglePopover}
       anchorPosition="upCenter"
     >
       <Popover>
-        <Label>{`@ ${asDuration(mark.us)}`}</Label>
+        <Label>{`@ ${asDuration(mark.offset)}`}</Label>
         <Legend
-          key={mark.service.color}
-          color={mark.service.color}
-          text={mark.service.name}
+          key={mark.serviceColor}
+          color={mark.serviceColor}
+          text={mark.serviceName}
         />
         <Link>
           <ErrorDetailLink
-            serviceName={mark.service.name}
-            errorGroupId={mark.errorGroupId}
+            serviceName={mark.serviceName}
+            errorGroupId={mark.error.error.grouping_key}
             query={query}
           >
             {mark.message}
           </ErrorDetailLink>
         </Link>
-        <Label>{`${mark.occurences} occurences (avg.)`}</Label>
       </Popover>
     </EuiPopover>
   );
