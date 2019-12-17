@@ -16,12 +16,12 @@ export function StaticLabelSelector({ onChange, styleOptions }) {
   return (
     <EuiFieldText
       placeholder={i18n.translate('xpack.maps.styles.staticLabel.valuePlaceholder', {
-        defaultMessage: 'symbol label'
+        defaultMessage: 'symbol label',
       })}
       value={styleOptions.value}
       onChange={onValueChange}
       aria-label={i18n.translate('xpack.maps.styles.staticLabel.valueAriaLabel', {
-        defaultMessage: 'symbol label'
+        defaultMessage: 'symbol label',
       })}
     />
   );
