@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -23,9 +23,7 @@ export default async function ({ readConfigFile }) {
 
   return {
     // list paths to the files that contain your plugins tests
-    testFiles: [
-      resolve(__dirname, './apps/security/basic_license'),
-    ],
+    testFiles: [resolve(__dirname, './apps/security/basic_license')],
 
     services,
     pageObjects,
