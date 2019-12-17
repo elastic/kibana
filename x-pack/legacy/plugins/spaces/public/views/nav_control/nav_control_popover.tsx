@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiPopover,
+  PopoverAnchorPosition,
+  EuiLoadingSpinner,
+  EuiHeaderSectionItemButton,
+} from '@elastic/eui';
 import React, { Component } from 'react';
+import { Capabilities } from 'src/core/public';
+import { Subscription } from 'rxjs';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
-import { ButtonProps } from './types';
 
 interface Props {
   spacesManager: SpacesManager;
-  activeSpace: {
-    valid: boolean;
-    error?: string;
-    space: Space;
-  };
   anchorPosition: PopoverAnchorPosition;
-  buttonClass: React.ComponentType<ButtonProps>;
+  capabilities: Capabilities;
 }
 
 interface State {
@@ -32,23 +33,31 @@ interface State {
 }
 
 export class NavControlPopover extends Component<Props, State> {
+  private activeSpace$?: Subscription;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       showSpaceSelector: false,
       loading: false,
-      activeSpace: props.activeSpace.space,
+      activeSpace: null,
       spaces: [],
     };
   }
 
-  public componentDidMount() {
-    this.loadSpaces();
+  public componentWillMount() {
+    this.activeSpace$ = this.props.spacesManager.onActiveSpaceChange$.subscribe({
+      next: activeSpace => {
+        this.setState({
+          activeSpace,
+        });
+      },
+    });
+  }
 
-    if (this.props.spacesManager) {
-      this.props.spacesManager.on('request_refresh', () => {
-        this.loadSpaces();
-      });
+  public componentWillUnmount() {
+    if (this.activeSpace$) {
+      this.activeSpace$.unsubscribe();
     }
   }
 
@@ -59,20 +68,26 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     let element: React.ReactNode;
-    if (this.state.spaces.length < 2) {
-      element = <SpacesDescription onManageSpacesClick={this.toggleSpaceSelector} />;
+    if (!this.state.loading && this.state.spaces.length < 2) {
+      element = (
+        <SpacesDescription
+          onManageSpacesClick={this.toggleSpaceSelector}
+          capabilities={this.props.capabilities}
+        />
+      );
     } else {
       element = (
         <SpacesMenu
           spaces={this.state.spaces}
+          isLoading={this.state.loading}
           onSelectSpace={this.onSelectSpace}
           onManageSpacesClick={this.toggleSpaceSelector}
+          capabilities={this.props.capabilities}
         />
       );
     }
 
     return (
-      // @ts-ignore repositionOnScroll doesn't exist on EuiPopover
       <EuiPopover
         id={'spcMenuPopover'}
         data-test-subj={`spacesNavSelector`}
@@ -91,7 +106,11 @@ export class NavControlPopover extends Component<Props, State> {
   }
 
   private async loadSpaces() {
-    const { spacesManager, activeSpace } = this.props;
+    const { spacesManager } = this.props;
+
+    if (this.state.loading) {
+      return;
+    }
 
     this.setState({
       loading: true,
@@ -99,16 +118,8 @@ export class NavControlPopover extends Component<Props, State> {
 
     const spaces = await spacesManager.getSpaces();
 
-    // Update the active space definition, if it changed since the last load operation
-    let activeSpaceEntry: Space | null = activeSpace.space;
-
-    if (activeSpace.valid) {
-      activeSpaceEntry = spaces.find(space => space.id === this.props.activeSpace.space.id) || null;
-    }
-
     this.setState({
       spaces,
-      activeSpace: activeSpaceEntry,
       loading: false,
     });
   }
@@ -117,10 +128,7 @@ export class NavControlPopover extends Component<Props, State> {
     const { activeSpace } = this.state;
 
     if (!activeSpace) {
-      return this.getButton(
-        <EuiAvatar size={'s'} className={'spaceNavGraphic'} name={'error'} />,
-        'error'
-      );
+      return this.getButton(<EuiLoadingSpinner size="m" />, 'loading');
     }
 
     return this.getButton(
@@ -130,14 +138,17 @@ export class NavControlPopover extends Component<Props, State> {
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
-    const Button = this.props.buttonClass;
     return (
-      <Button
-        linkTitle={linkTitle}
-        linkIcon={linkIcon}
-        toggleSpaceSelector={this.toggleSpaceSelector}
-        spaceSelectorShown={this.state.showSpaceSelector}
-      />
+      <EuiHeaderSectionItemButton
+        aria-controls="headerSpacesMenuList"
+        aria-expanded={this.state.showSpaceSelector}
+        aria-haspopup="true"
+        aria-label={linkTitle}
+        title={linkTitle}
+        onClick={this.toggleSpaceSelector}
+      >
+        {linkIcon}
+      </EuiHeaderSectionItemButton>
     );
   };
 

@@ -137,6 +137,13 @@ export const npStart = {
     chrome: {},
   },
   plugins: {
+    management: {
+      legacy: {
+        getSection: () => ({
+          register: sinon.fake(),
+        }),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
@@ -242,6 +249,11 @@ export const npStart = {
     home: {
       featureCatalogue: {
         register: sinon.fake(),
+      },
+    },
+    navigation: {
+      ui: {
+        TopNavMenu: mockComponent,
       },
     },
   },

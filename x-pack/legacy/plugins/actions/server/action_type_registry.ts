@@ -10,20 +10,23 @@ import { TaskManagerSetupContract } from './shim';
 import { RunContext } from '../../task_manager';
 import { ExecutorError, TaskRunnerFactory } from './lib';
 import { ActionType } from './types';
-
+import { ActionsConfigurationUtilities } from './actions_config';
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
+  actionsConfigUtils: ActionsConfigurationUtilities;
 }
 
 export class ActionTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
+  private readonly actionsConfigUtils: ActionsConfigurationUtilities;
 
-  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
-    this.taskManager = taskManager;
-    this.taskRunnerFactory = taskRunnerFactory;
+  constructor(constructorParams: ConstructorOptions) {
+    this.taskManager = constructorParams.taskManager;
+    this.taskRunnerFactory = constructorParams.taskRunnerFactory;
+    this.actionsConfigUtils = constructorParams.actionsConfigUtils;
   }
 
   /**
@@ -31,6 +34,13 @@ export class ActionTypeRegistry {
    */
   public has(id: string) {
     return this.actionTypes.has(id);
+  }
+
+  /**
+   * Throws error if action type is not enabled.
+   */
+  public ensureActionTypeEnabled(id: string) {
+    this.actionsConfigUtils.ensureActionTypeEnabled(id);
   }
 
   /**
@@ -86,12 +96,13 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns a list of registered action types [{ id, name }]
+   * Returns a list of registered action types [{ id, name, enabled }]
    */
   public list() {
     return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
       id: actionTypeId,
       name: actionType.name,
+      enabled: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
     }));
   }
 }
