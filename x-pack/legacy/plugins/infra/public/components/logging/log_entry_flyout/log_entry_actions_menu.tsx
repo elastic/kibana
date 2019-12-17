@@ -19,17 +19,16 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   logItem: InfraLogItem;
 }> = ({ logItem }) => {
   const prependBasePath = useKibana().services.http?.basePath?.prepend;
-
   const { hide, isVisible, show } = useVisibilityState(false);
 
   const uptimeLink = useMemo(() => {
     const link = getUptimeLink(logItem);
-    return prependBasePath && link ? prependBasePath(link) : undefined;
+    return prependBasePath && link ? prependBasePath(link) : link;
   }, [logItem, prependBasePath]);
 
   const apmLink = useMemo(() => {
     const link = getAPMLink(logItem);
-    return prependBasePath && link ? prependBasePath(link) : undefined;
+    return prependBasePath && link ? prependBasePath(link) : link;
   }, [logItem, prependBasePath]);
 
   const menuItems = useMemo(
@@ -63,7 +62,6 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
-
   return (
     <EuiPopover
       anchorPosition="downRight"
