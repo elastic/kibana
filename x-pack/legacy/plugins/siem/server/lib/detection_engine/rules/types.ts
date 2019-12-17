@@ -40,6 +40,10 @@ export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
 }
 
+export interface BulkRulesRequest extends RequestFacade {
+  payload: [RulesRequest['payload']];
+}
+
 export interface FindRuleParams {
   alertsClient: AlertsClient;
   perPage?: number;
