@@ -26,7 +26,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 const module = uiModules.get('app/maps');
 
-module.factory('SavedGisMap', function (Private) {
+module.factory('SavedGisMap', function(Private) {
   const SavedObject = Private(SavedObjectProvider);
   createLegacyClass(SavedGisMap).inherits(SavedObject);
   function SavedGisMap(id) {
@@ -38,7 +38,7 @@ module.factory('SavedGisMap', function (Private) {
       injectReferences: (savedObject, references) => {
         const { attributes } = injectReferences({
           attributes: { layerListJSON: savedObject.layerListJSON },
-          references
+          references,
         });
 
         savedObject.layerListJSON = attributes.layerListJSON;
@@ -76,23 +76,23 @@ module.factory('SavedGisMap', function (Private) {
     layerListJSON: 'text',
     uiStateJSON: 'text',
     bounds: {
-      type: 'object'
-    }
+      type: 'object',
+    },
   };
 
   SavedGisMap.fieldOrder = ['title', 'description'];
 
   SavedGisMap.searchsource = false;
 
-  SavedGisMap.prototype.getFullPath = function () {
+  SavedGisMap.prototype.getFullPath = function() {
     return `/app/maps#map/${this.id}`;
   };
 
-  SavedGisMap.prototype.getLayerList = function () {
+  SavedGisMap.prototype.getLayerList = function() {
     return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
   };
 
-  SavedGisMap.prototype.syncWithStore = function (state) {
+  SavedGisMap.prototype.syncWithStore = function(state) {
     const layerList = getLayerListRaw(state);
     const layerListConfigOnly = copyPersistentState(layerList);
     this.layerListJSON = JSON.stringify(layerListConfigOnly);
@@ -116,4 +116,3 @@ module.factory('SavedGisMap', function (Private) {
 
   return SavedGisMap;
 });
-

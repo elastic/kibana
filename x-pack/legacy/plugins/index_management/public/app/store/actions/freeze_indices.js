@@ -5,16 +5,14 @@
  */
 
 import { createAction } from 'redux-actions';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { freezeIndices as request } from '../../services';
 import { clearRowStatus, reloadIndices } from '../actions';
 import { notificationService } from '../../services/notification';
 
-export const freezeIndicesStart = createAction(
-  'INDEX_MANAGEMENT_FREEZE_INDICES_START'
-);
+export const freezeIndicesStart = createAction('INDEX_MANAGEMENT_FREEZE_INDICES_START');
 
-export const freezeIndices = ({ indexNames }) => async (dispatch) => {
+export const freezeIndices = ({ indexNames }) => async dispatch => {
   dispatch(freezeIndicesStart({ indexNames }));
   try {
     await request(indexNames);
@@ -26,7 +24,7 @@ export const freezeIndices = ({ indexNames }) => async (dispatch) => {
   notificationService.showSuccessToast(
     i18n.translate('xpack.idxMgmt.freezeIndicesAction.successfullyFrozeIndicesMessage', {
       defaultMessage: 'Successfully froze: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') }
+      values: { indexNames: indexNames.join(', ') },
     })
   );
 };

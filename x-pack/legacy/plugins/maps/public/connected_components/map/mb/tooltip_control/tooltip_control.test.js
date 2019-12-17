@@ -6,8 +6,8 @@
 
 jest.mock('../../features_tooltip/features_tooltip', () => ({
   FeaturesTooltip: () => {
-    return (<div>mockFeaturesTooltip</div>);
-  }
+    return <div>mockFeaturesTooltip</div>;
+  },
 }));
 
 import sinon from 'sinon';
@@ -23,22 +23,28 @@ let mockMbMapBounds;
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
 const mockLayer = {
-  getMbLayerIds: () => { return [mbLayerId]; },
-  getId: () => { return layerId; },
-  canShowTooltip: () => { return true; },
+  getMbLayerIds: () => {
+    return [mbLayerId];
+  },
+  getId: () => {
+    return layerId;
+  },
+  canShowTooltip: () => {
+    return true;
+  },
   getFeatureById: () => {
     return {
       geometry: {
         type: 'Point',
-        coordinates: [102.0, 0.5]
-      }
+        coordinates: [102.0, 0.5],
+      },
     };
   },
 };
 
 const mockMbMapHandlers = {};
 const mockMBMap = {
-  project: (lonLatArray) => {
+  project: lonLatArray => {
     const lonDistanceFromCenter = Math.abs(lonLatArray[0] - mapCenter[0]);
     const latDistanceFromCenter = Math.abs(lonLatArray[1] - mapCenter[1]);
     return {
@@ -49,19 +55,29 @@ const mockMBMap = {
   on: (eventName, callback) => {
     mockMbMapHandlers[eventName] = callback;
   },
-  off: (eventName) => {
+  off: eventName => {
     delete mockMbMapHandlers[eventName];
   },
   getBounds: () => {
     return {
-      getNorth: () => { return mockMbMapBounds.north; },
-      getSouth: () => { return mockMbMapBounds.south; },
-      getWest: () => { return mockMbMapBounds.west; },
-      getEast: () => { return mockMbMapBounds.east; },
+      getNorth: () => {
+        return mockMbMapBounds.north;
+      },
+      getSouth: () => {
+        return mockMbMapBounds.south;
+      },
+      getWest: () => {
+        return mockMbMapBounds.west;
+      },
+      getEast: () => {
+        return mockMbMapBounds.east;
+      },
     };
   },
   getLayer: () => {},
-  queryRenderedFeatures: () => { return featuresAtLocation; },
+  queryRenderedFeatures: () => {
+    return featuresAtLocation;
+  },
 };
 
 const defaultProps = {
@@ -71,7 +87,7 @@ const defaultProps = {
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: () => {},
-  geoFields: [{  }],
+  geoFields: [{}],
 };
 
 const hoverTooltipState = {
@@ -82,8 +98,8 @@ const hoverTooltipState = {
       id: 1,
       layerId: layerId,
       geometry: {},
-    }
-  ]
+    },
+  ],
 };
 
 const lockedTooltipState = {
@@ -94,12 +110,11 @@ const lockedTooltipState = {
       id: 1,
       layerId: layerId,
       geometry: {},
-    }
-  ]
+    },
+  ],
 };
 
 describe('TooltipControl', () => {
-
   beforeEach(() => {
     featuresAtLocation = [];
     mapCenter = [0, 0];
@@ -107,18 +122,14 @@ describe('TooltipControl', () => {
       west: -180,
       east: 180,
       north: 90,
-      south: -90
+      south: -90,
     };
   });
 
   describe('render', () => {
     describe('tooltipState is not provided', () => {
       test('should not render tooltip popover when tooltipState is not provided', () => {
-        const component = shallow(
-          <TooltipControl
-            {...defaultProps}
-          />
-        );
+        const component = shallow(<TooltipControl {...defaultProps} />);
 
         expect(component).toMatchSnapshot();
       });
@@ -127,10 +138,7 @@ describe('TooltipControl', () => {
     describe('tooltipState is provided', () => {
       test('should render tooltip popover with features tooltip content', () => {
         const component = shallow(
-          <TooltipControl
-            {...defaultProps}
-            tooltipState={hoverTooltipState}
-          />
+          <TooltipControl {...defaultProps} tooltipState={hoverTooltipState} />
         );
 
         expect(component).toMatchSnapshot();
@@ -141,7 +149,7 @@ describe('TooltipControl', () => {
           <TooltipControl
             {...defaultProps}
             tooltipState={hoverTooltipState}
-            renderTooltipContent={(props) => {
+            renderTooltipContent={props => {
               return <div {...props}>Custom tooltip content</div>;
             }}
           />
@@ -237,14 +245,14 @@ describe('TooltipControl', () => {
       const feature = {
         geometry: {
           type: 'Point',
-          coordinates: [ 100, 30 ]
+          coordinates: [100, 30],
         },
         layer: {
-          id: mbLayerId
+          id: mbLayerId,
         },
         properties: {
-          __kbn__feature_id__: 1
-        }
+          __kbn__feature_id__: 1,
+        },
       };
       featuresAtLocation = [feature, feature];
       mount(
@@ -261,7 +269,7 @@ describe('TooltipControl', () => {
       sinon.assert.calledWith(setTooltipStateStub, {
         features: [{ id: 1, layerId: 'tfi3f' }],
         location: [100, 30],
-        type: 'LOCKED'
+        type: 'LOCKED',
       });
     });
   });
@@ -275,10 +283,7 @@ describe('TooltipControl', () => {
 
     test('should safely handle map move when there is no tooltip location', () => {
       const component = mount(
-        <TooltipControl
-          {...defaultProps}
-          clearTooltipState={clearTooltipStateStub}
-        />
+        <TooltipControl {...defaultProps} clearTooltipState={clearTooltipStateStub} />
       );
 
       mockMbMapHandlers.move();
@@ -325,7 +330,7 @@ describe('TooltipControl', () => {
         west: -180,
         east: -170,
         north: 90,
-        south: 80
+        south: 80,
       };
       mockMbMapHandlers.move();
       component.update();
@@ -335,11 +340,7 @@ describe('TooltipControl', () => {
   });
 
   test('should un-register all map callbacks on unmount', () => {
-    const component = mount(
-      <TooltipControl
-        {...defaultProps}
-      />
-    );
+    const component = mount(<TooltipControl {...defaultProps} />);
 
     expect(Object.keys(mockMbMapHandlers).length).toBe(4);
 

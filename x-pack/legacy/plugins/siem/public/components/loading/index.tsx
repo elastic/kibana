@@ -6,14 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
-
-// SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
-const LoadingPanelGlobalStyle = createGlobalStyle`
-  .euiPanel-loading-hide-border {
-    border: none;
-  }
-`;
+import styled from 'styled-components';
 
 const SpinnerFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
@@ -39,30 +32,27 @@ export const LoadingPanel = React.memo<LoadingProps>(
     position = 'relative',
     zIndex = 'inherit',
   }) => (
-    <>
-      <LoadingStaticPanel
-        className="app-loading"
-        height={height}
-        width={width}
-        position={position}
-        zIndex={zIndex}
-      >
-        <LoadingStaticContentPanel>
-          <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
-            <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
-              <SpinnerFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </SpinnerFlexItem>
+    <LoadingStaticPanel
+      className="app-loading"
+      height={height}
+      width={width}
+      position={position}
+      zIndex={zIndex}
+    >
+      <LoadingStaticContentPanel>
+        <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
+          <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+            <SpinnerFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </SpinnerFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiText>{text}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </LoadingStaticContentPanel>
-      </LoadingStaticPanel>
-      <LoadingPanelGlobalStyle />
-    </>
+            <EuiFlexItem grow={false}>
+              <EuiText>{text}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </LoadingStaticContentPanel>
+    </LoadingStaticPanel>
   )
 );
 

@@ -6,10 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiOverlayMask,
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 
@@ -36,10 +33,11 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
         i18n.translate(
           'xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removePolicySuccess',
           {
-            defaultMessage: 'Removed lifecycle policy from {count, plural, one {index} other {indices}}',
+            defaultMessage:
+              'Removed lifecycle policy from {count, plural, one {index} other {indices}}',
             values: {
               count: indexNames.length,
-            }
+            },
           }
         )
       );

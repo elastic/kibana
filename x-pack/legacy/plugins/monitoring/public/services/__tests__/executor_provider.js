@@ -12,24 +12,24 @@ import Bluebird from 'bluebird';
 import { timefilter } from 'ui/timefilter';
 
 describe('$executor service', () => {
-
   let scope;
   let executor;
   let $timeout;
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (_$rootScope_) {
-    scope = _$rootScope_.$new();
-  }));
+  beforeEach(
+    ngMock.inject(function(_$rootScope_) {
+      scope = _$rootScope_.$new();
+    })
+  );
 
   beforeEach(() => {
-
     $timeout = sinon.spy(setTimeout);
-    $timeout.cancel = (id) => clearTimeout(id);
+    $timeout.cancel = id => clearTimeout(id);
 
     timefilter.setRefreshInterval({
-      value: 0
+      value: 0,
     });
 
     executor = executorProvider(Bluebird, $timeout);
@@ -45,56 +45,59 @@ describe('$executor service', () => {
   it('should call $timeout if the timefilter is not paused and set to 1000ms', () => {
     timefilter.setRefreshInterval({
       pause: false,
-      value: 1000
+      value: 1000,
     });
     executor.start(scope);
     expect($timeout.callCount).to.equal(1);
   });
 
-  it('should execute function if timefilter is not paused and interval set to 1000ms', (done) => {
+  it('should execute function if timefilter is not paused and interval set to 1000ms', done => {
     timefilter.setRefreshInterval({
       pause: false,
-      value: 1000
+      value: 1000,
     });
     executor.register({ execute: () => Bluebird.resolve().then(() => done(), done) });
     executor.start(scope);
   });
 
-  it('should execute function multiple times', (done) => {
+  it('should execute function multiple times', done => {
     let calls = 0;
     timefilter.setRefreshInterval({
       pause: false,
-      value: 10
+      value: 10,
     });
-    executor.register({ execute: () => {
-      if (calls++ > 1) { done(); }
-      return Bluebird.resolve();
-    } });
+    executor.register({
+      execute: () => {
+        if (calls++ > 1) {
+          done();
+        }
+        return Bluebird.resolve();
+      },
+    });
     executor.start(scope);
   });
 
-  it('should call handleResponse', (done) => {
+  it('should call handleResponse', done => {
     timefilter.setRefreshInterval({
       pause: false,
-      value: 10
+      value: 10,
     });
     executor.register({
       execute: () => Bluebird.resolve(),
-      handleResponse: () => done()
+      handleResponse: () => done(),
     });
     executor.start(scope);
   });
 
-  it('should call handleError', (done) => {
+  it('should call handleError', done => {
     timefilter.setRefreshInterval({
       pause: false,
-      value: 10
+      value: 10,
     });
     executor.register({
       execute: () => Bluebird.reject(new Error('reject test')),
-      handleError: () => done()
+      handleError: () => done(),
     });
     executor.start(scope);
   });
-
 });

@@ -32,15 +32,23 @@ import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/publ
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+import { ManagementStart } from '../../../../plugins/management/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import {
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart,
+} from '../../../../plugins/navigation/public';
 
 export interface PluginsSetup {
+  bfetch: BfetchPublicSetup;
   data: ReturnType<DataPlugin['setup']>;
   embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  navigation: NavigationPublicPluginSetup;
   dev_tools: DevToolsSetup;
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
@@ -48,6 +56,7 @@ export interface PluginsSetup {
 }
 
 export interface PluginsStart {
+  bfetch: BfetchPublicStart;
   data: ReturnType<DataPlugin['start']>;
   embeddable: IEmbeddableStart;
   eui_utils: EuiUtilsStart;
@@ -55,9 +64,11 @@ export interface PluginsStart {
   home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  navigation: NavigationPublicPluginStart;
   dev_tools: DevToolsStart;
   kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
+  management: ManagementStart;
 }
 
 export const npSetup = {
