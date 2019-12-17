@@ -13,6 +13,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
+import { Capabilities } from 'src/core/public';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -30,7 +31,7 @@ interface Props {
   series: MetricsExplorerSeries;
   source?: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
-  uiCapabilities: UICapabilities;
+  uiCapabilities: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 

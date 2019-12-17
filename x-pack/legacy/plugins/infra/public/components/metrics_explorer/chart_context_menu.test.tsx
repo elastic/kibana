@@ -11,9 +11,10 @@ import { options, source, timeRange, chartOptions } from '../../utils/fixtures/m
 import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
 import { ReactWrapper } from 'enzyme';
+import { Capabilities } from 'src/core/public';
 
 const series = { id: 'exmaple-01', rows: [], columns: [] };
-const uiCapabilities: UICapabilities = {
+const uiCapabilities: Capabilities = {
   navLinks: { show: false },
   management: { fake: { show: false } },
   catalogue: { show: false },

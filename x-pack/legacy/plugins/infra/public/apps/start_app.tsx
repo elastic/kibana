@@ -27,8 +27,8 @@ import {
   KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { ROOT_ELEMENT_ID } from '../index';
-
-export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: ClientPlugins) {
+// NP_TODO: Type plugins
+export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: any) {
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
