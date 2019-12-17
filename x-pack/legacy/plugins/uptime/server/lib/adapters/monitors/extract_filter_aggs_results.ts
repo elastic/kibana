@@ -9,7 +9,7 @@ import { OverviewFilters } from '../../../../common/runtime_types';
 type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
 
 export const extractFilterAggsResults = (
-  obj: Record<string, any>,
+  responseAggregations: Record<string, any>,
   keys: SupportedFields[]
 ): OverviewFilters => {
   const values: OverviewFilters = {
@@ -19,7 +19,7 @@ export const extractFilterAggsResults = (
     tags: [],
   };
   keys.forEach(key => {
-    const buckets = obj[key]?.term?.buckets ?? [];
+    const buckets = responseAggregations[key]?.term?.buckets ?? [];
     values[key] = buckets.map((item: { key: string | number }) => item.key);
   });
   return values;
