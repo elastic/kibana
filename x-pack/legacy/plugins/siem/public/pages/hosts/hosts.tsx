@@ -58,7 +58,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
 
     const hostsFilters = React.useMemo(() => {
       if (tabName === 'alerts') {
-        return filters.length > 0 ? [...filters, filterAlertsHosts] : [filterAlertsHosts];
+        return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
       }
       return filters;
     }, [tabName]);

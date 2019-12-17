@@ -10,29 +10,31 @@ import { esFilters } from '../../../../../../../../src/plugins/data/common/es_qu
 import { AlertsView } from '../../../components/alerts_viewer';
 import { AlertsComponentQueryProps } from './types';
 
-export const filterAlertsHosts: esFilters.Filter = {
-  query: {
-    bool: {
-      should: [
-        {
-          exists: {
-            field: 'host.name',
+export const filterAlertsHosts: esFilters.Filter[] = [
+  {
+    query: {
+      bool: {
+        should: [
+          {
+            exists: {
+              field: 'host.name',
+            },
           },
-        },
-      ],
-      minimum_should_match: 1,
+        ],
+        minimum_should_match: 1,
+      },
+    },
+    meta: {
+      alias: '',
+      disabled: false,
+      key: 'bool',
+      negate: false,
+      type: 'custom',
+      value:
+        '{"bool":{"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1},"minimum_should_match": 1}',
     },
   },
-  meta: {
-    alias: '',
-    disabled: false,
-    key: 'bool',
-    negate: false,
-    type: 'custom',
-    value:
-      '{"bool":{"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1},"minimum_should_match": 1}',
-  },
-};
+];
 export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => (
   <AlertsView {...alertsProps} pageFilters={filterAlertsHosts} />
 ));
