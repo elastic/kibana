@@ -87,9 +87,10 @@ export abstract class FieldFormat {
   /**
    * Convert a raw value to a formatted string
    * @param  {any} value
-   * @param  {string} [contentType=text] - optional content type, the only two contentTypes
-   *                                currently supported are "html" and "text", which helps
-   *                                formatters adjust to different contexts
+   * @param  {string} [contentType=text] - the only two contentTypes
+   *                                       currently supported are "html" and "text", which helps
+   *                                       formatters adjust to different contexts
+   * @param {object} options - help to pass different args to any converter.
    * @return {string} - the formatted string, which is assumed to be html, safe for
    *                    injecting into the DOM or a DOM attribute
    * @public
