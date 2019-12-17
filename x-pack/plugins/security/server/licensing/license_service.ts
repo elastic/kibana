@@ -71,7 +71,7 @@ export class SecurityLicenseService {
             };
           }
 
-          const isLicensePlatinumOrTrial = rawLicense.isOneOf(['platinum', 'trial']);
+          const isLicensePlatinumOrBetter = rawLicense.isOneOf(['platinum', 'enterprise', 'trial']);
           return {
             showLogin: true,
             allowLogin: true,
@@ -80,8 +80,8 @@ export class SecurityLicenseService {
             // The free realms (native, file) do not support role mappings, so the UI to manage them is useless.
             showRoleMappingsManagement: rawLicense.isNotBasic,
             // Only platinum and trial licenses are compliant with field- and document-level security.
-            allowRoleDocumentLevelSecurity: isLicensePlatinumOrTrial,
-            allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial,
+            allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
+            allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,
             allowRbac: true,
           };
         },

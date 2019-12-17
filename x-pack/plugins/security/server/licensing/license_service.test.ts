@@ -87,11 +87,15 @@ describe('license features', function() {
     });
   });
 
-  it('should allow to login, allow RBAC, document level security, and role mappings if license is platinum or trial.', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true, isNotBasic: true });
+  it('should allow to login, allow RBAC, role mappings, and document level security if license >= platinum', () => {
+    const mockRawLicense = getMockRawLicense({ isAvailable: true });
     mockRawLicense.isOneOf.mockImplementation(licenses => {
       const licenseArray = [licenses].flat();
-      return licenseArray.includes('trial') || licenseArray.includes('platinum');
+      return (
+        licenseArray.includes('trial') ||
+        licenseArray.includes('platinum') ||
+        licenseArray.includes('enterprise')
+      );
     });
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 

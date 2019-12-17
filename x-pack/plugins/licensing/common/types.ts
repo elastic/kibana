@@ -16,7 +16,8 @@ export enum LICENSE_TYPE {
   standard = 20,
   gold = 30,
   platinum = 40,
-  trial = 50,
+  enterprise = 50,
+  trial = 60,
 }
 
 /** @public */
