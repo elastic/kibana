@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-
-import { management } from '..';
-import { ManagementSection } from '../section';
-
-describe('Management', () => {
-  it('provides ManagementSection', () => {
-    expect(management).to.be.a(ManagementSection);
-  });
-});
+export { management } from './sections_register';

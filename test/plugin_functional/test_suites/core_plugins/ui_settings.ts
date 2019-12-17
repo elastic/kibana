@@ -46,7 +46,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await supertest
         .get('/api/ui-settings-plugin')
         .expect(200)
-        .expect({ uiSettingsValue: '2' });
+        .expect({ uiSettingsValue: 2 });
     });
   });
 }

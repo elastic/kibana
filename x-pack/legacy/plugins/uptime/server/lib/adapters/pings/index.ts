@@ -5,4 +5,4 @@
  */
 
 export * from './adapter_types';
-export { ElasticsearchPingsAdapter } from './elasticsearch_pings_adapter';
+export { elasticsearchPingsAdapter } from './elasticsearch_pings_adapter';
