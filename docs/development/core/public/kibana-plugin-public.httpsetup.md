@@ -15,13 +15,11 @@ export interface HttpSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [addLoadingCount](./kibana-plugin-public.httpsetup.addloadingcount.md) | <code>LoadingCountSetup['addLoadingCount']</code> | See . |
 |  [anonymousPaths](./kibana-plugin-public.httpsetup.anonymouspaths.md) | <code>IAnonymousPaths</code> | APIs for denoting certain paths for not requiring authentication |
 |  [basePath](./kibana-plugin-public.httpsetup.basepath.md) | <code>IBasePath</code> | APIs for manipulating the basePath on URL segments. |
 |  [delete](./kibana-plugin-public.httpsetup.delete.md) | <code>HttpHandler</code> | Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
 |  [fetch](./kibana-plugin-public.httpsetup.fetch.md) | <code>HttpHandler</code> | Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
 |  [get](./kibana-plugin-public.httpsetup.get.md) | <code>HttpHandler</code> | Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
-|  [getLoadingCount$](./kibana-plugin-public.httpsetup.getloadingcount_.md) | <code>LoadingCountSetup['getLoadingCount$']</code> | See . |
 |  [head](./kibana-plugin-public.httpsetup.head.md) | <code>HttpHandler</code> | Makes an HTTP request with the HEAD method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
 |  [options](./kibana-plugin-public.httpsetup.options.md) | <code>HttpHandler</code> | Makes an HTTP request with the OPTIONS method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
 |  [patch](./kibana-plugin-public.httpsetup.patch.md) | <code>HttpHandler</code> | Makes an HTTP request with the PATCH method. See [HttpHandler](./kibana-plugin-public.httphandler.md) for options. |
@@ -32,5 +30,7 @@ export interface HttpSetup
 
 |  Method | Description |
 |  --- | --- |
+|  [addLoadingCountSource(countSource$)](./kibana-plugin-public.httpsetup.addloadingcountsource.md) | Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are more than 0. |
+|  [getLoadingCount$()](./kibana-plugin-public.httpsetup.getloadingcount_.md) | Get the sum of all loading count sources as a single Observable. |
 |  [intercept(interceptor)](./kibana-plugin-public.httpsetup.intercept.md) | Adds a new [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) to the global HTTP client. |
 

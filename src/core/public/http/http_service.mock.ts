@@ -41,7 +41,7 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
     register: jest.fn(),
     isAnonymous: jest.fn(),
   },
-  addLoadingCount: jest.fn(),
+  addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
   intercept: jest.fn(),
 });

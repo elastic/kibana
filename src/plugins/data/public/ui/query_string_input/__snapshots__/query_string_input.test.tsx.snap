@@ -299,7 +299,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -918,7 +918,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -1525,7 +1525,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -2141,7 +2141,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -2748,7 +2748,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -3364,7 +3364,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],

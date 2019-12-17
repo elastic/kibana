@@ -2,12 +2,16 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [HttpSetup](./kibana-plugin-public.httpsetup.md) &gt; [getLoadingCount$](./kibana-plugin-public.httpsetup.getloadingcount_.md)
 
-## HttpSetup.getLoadingCount$ property
+## HttpSetup.getLoadingCount$() method
 
-See .
+Get the sum of all loading count sources as a single Observable.
 
 <b>Signature:</b>
 
 ```typescript
-getLoadingCount$: LoadingCountSetup['getLoadingCount$'];
+getLoadingCount$(): Observable<number>;
 ```
+<b>Returns:</b>
+
+`Observable<number>`
+

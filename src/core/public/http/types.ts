@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LoadingCountSetup } from './loading_count_service';
+import { Observable } from 'rxjs';
 
 /** @public */
 export interface HttpSetup {
@@ -55,10 +55,17 @@ export interface HttpSetup {
   /** Makes an HTTP request with the PUT method. See {@link HttpHandler} for options. */
   put: HttpHandler;
 
-  /** See {@link LoadingCountSetup.addLoadingCount}. */
-  addLoadingCount: LoadingCountSetup['addLoadingCount'];
-  /** See {@link LoadingCountSetup.getLoadingCount$}. */
-  getLoadingCount$: LoadingCountSetup['getLoadingCount$'];
+  /**
+   * Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are
+   * more than 0.
+   * @param countSource$ an Observable to subscribe to for loading count updates.
+   */
+  addLoadingCountSource(countSource$: Observable<number>): void;
+
+  /**
+   * Get the sum of all loading count sources as a single Observable.
+   */
+  getLoadingCount$(): Observable<number>;
 }
 
 /**

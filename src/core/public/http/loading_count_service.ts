@@ -32,16 +32,8 @@ import { CoreService } from '../../types';
 
 /** @public */
 export interface LoadingCountSetup {
-  /**
-   * Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are
-   * more than 0.
-   * @param countSource$ an Observable to subscribe to for loading count updates.
-   */
-  addLoadingCount(countSource$: Observable<number>): void;
+  addLoadingCountSource(countSource$: Observable<number>): void;
 
-  /**
-   * Get the sum of all loading count sources as a single Observable.
-   */
   getLoadingCount$(): Observable<number>;
 }
 
@@ -59,7 +51,7 @@ export class LoadingCountService implements CoreService<LoadingCountSetup, Loadi
   public setup({ fatalErrors }: { fatalErrors: FatalErrorsSetup }) {
     return {
       getLoadingCount$: () => this.loadingCount$.pipe(distinctUntilChanged()),
-      addLoadingCount: (count$: Observable<number>) => {
+      addLoadingCountSource: (count$: Observable<number>) => {
         count$
           .pipe(
             distinctUntilChanged(),

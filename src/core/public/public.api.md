@@ -545,16 +545,13 @@ export interface HttpRequestInit {
 
 // @public (undocumented)
 export interface HttpSetup {
-    // Warning: (ae-forgotten-export) The symbol "LoadingCountSetup" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LoadingCountSetup"
-    addLoadingCount: LoadingCountSetup['addLoadingCount'];
+    addLoadingCountSource(countSource$: Observable<number>): void;
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
     fetch: HttpHandler;
     get: HttpHandler;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LoadingCountSetup"
-    getLoadingCount$: LoadingCountSetup['getLoadingCount$'];
+    getLoadingCount$(): Observable<number>;
     head: HttpHandler;
     intercept(interceptor: HttpInterceptor): () => void;
     options: HttpHandler;

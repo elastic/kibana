@@ -28,24 +28,6 @@ export class AnonymousPathsService implements CoreService<IAnonymousPaths, IAnon
   private readonly paths = new Set<string>();
 
   public setup({ basePath }: Deps) {
-    const normalizePath = (path: string) => {
-      // always lower-case it
-      let normalized = path.toLowerCase();
-
-      // remove the slash from the end
-      if (normalized.endsWith('/')) {
-        normalized = normalized.slice(0, normalized.length - 1);
-      }
-
-      // put a slash at the start
-      if (!normalized.startsWith('/')) {
-        normalized = `/${normalized}`;
-      }
-
-      // it's normalized!!!
-      return normalized;
-    };
-
     return {
       isAnonymous: (path: string): boolean => {
         const pathWithoutBasePath = basePath.remove(path);
@@ -66,3 +48,21 @@ export class AnonymousPathsService implements CoreService<IAnonymousPaths, IAnon
 
   public stop() {}
 }
+
+const normalizePath = (path: string) => {
+  // always lower-case it
+  let normalized = path.toLowerCase();
+
+  // remove the slash from the end
+  if (normalized.endsWith('/')) {
+    normalized = normalized.slice(0, normalized.length - 1);
+  }
+
+  // put a slash at the start
+  if (!normalized.startsWith('/')) {
+    normalized = `/${normalized}`;
+  }
+
+  // it's normalized!!!
+  return normalized;
+};

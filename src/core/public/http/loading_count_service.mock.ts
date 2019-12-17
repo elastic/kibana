@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<LoadingCountSetup> = {
-    addLoadingCount: jest.fn(),
+    addLoadingCountSource: jest.fn(),
     getLoadingCount$: jest.fn(),
   };
   setupContract.getLoadingCount$.mockReturnValue(new BehaviorSubject(0));
