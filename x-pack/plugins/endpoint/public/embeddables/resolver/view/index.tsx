@@ -65,7 +65,7 @@ const Diagnostic = styled(
         dispatch({
           type: 'userStartedPanning',
           // TODO why is this negative?
-          payload: [event.clientX, -event.clientY],
+          payload: [event.clientX, event.clientY],
         });
       },
       [dispatch]
@@ -77,7 +77,7 @@ const Diagnostic = styled(
           dispatch({
             type: 'userContinuedPanning',
             // TODO why is this negative?
-            payload: [event.clientX, -event.clientY],
+            payload: [event.clientX, event.clientY],
           });
         }
         // TODO, don't fire two actions here. make userContinuedPanning also pass world position

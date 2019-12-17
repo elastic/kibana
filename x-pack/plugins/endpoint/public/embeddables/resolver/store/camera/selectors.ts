@@ -14,7 +14,7 @@ import {
   translationTransformation,
 } from '../../lib/transformation';
 
-interface RasterCameraProperties {
+interface ClippingPlane {
   renderWidth: number;
   renderHeight: number;
   clippingPlaneRight: number;
@@ -24,7 +24,7 @@ interface RasterCameraProperties {
 }
 
 export function viewableBoundingBox(state: CameraState): AABB {
-  const { renderWidth, renderHeight } = rasterCameraProperties(state);
+  const { renderWidth, renderHeight } = clippingPlane(state);
   const matrix = inverseProjectionMatrix(state);
   return {
     minimum: applyMatrix3([0, renderHeight], matrix),
@@ -32,7 +32,7 @@ export function viewableBoundingBox(state: CameraState): AABB {
   };
 }
 
-function rasterCameraProperties(state: CameraState): RasterCameraProperties {
+function clippingPlane(state: CameraState): ClippingPlane {
   const renderWidth = state.rasterSize[0];
   const renderHeight = state.rasterSize[1];
   const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
@@ -59,7 +59,7 @@ export const projectionMatrix: (state: CameraState) => Matrix3 = state => {
     clippingPlaneTop,
     clippingPlaneLeft,
     clippingPlaneBottom,
-  } = rasterCameraProperties(state);
+  } = clippingPlane(state);
 
   return multiply(
     // 5. convert from 0->2 to 0->rasterWidth (or height)
@@ -90,7 +90,11 @@ export function translation(state: CameraState): Vector2 {
   if (state.panning) {
     return add(
       state.translationNotCountingCurrentPanning,
-      divide(subtract(state.panning.currentOffset, state.panning.origin), state.scaling)
+      divide(subtract(state.panning.currentOffset, state.panning.origin), [
+        state.scaling[0],
+        // Invert `y` since the `.panning` vectors are in screen coordinates and therefore have backwards `y`
+        -state.scaling[1],
+      ])
     );
   } else {
     return state.translationNotCountingCurrentPanning;
@@ -105,7 +109,7 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
     clippingPlaneTop,
     clippingPlaneLeft,
     clippingPlaneBottom,
-  } = rasterCameraProperties(state);
+  } = clippingPlane(state);
 
   const [translationX, translationY] = translation(state);
 
