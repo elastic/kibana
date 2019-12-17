@@ -7,12 +7,15 @@
 import { StaticStyleProperty } from './static_style_property';
 
 export class StaticTextProperty extends StaticStyleProperty {
-
   isComplete() {
     return this.getOptions().value.length > 0;
   }
 
   syncTextFieldWithMb(mbLayerId, mbMap) {
-    mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
+    if (this.getOptions().value.length) {
+      mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
+    } else {
+      mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
+    }
   }
 }
