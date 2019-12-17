@@ -25,6 +25,7 @@ export interface ManagementSetup {
 
 export interface ManagementStart {
   sections: SectionsServiceStart;
+  legacy: any;
 }
 
 interface SectionsServiceSetup {
