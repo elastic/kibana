@@ -22,8 +22,8 @@ import { npSetup } from 'ui/new_platform';
 npSetup.core.application.register({
   id: 'core_legacy_compat',
   title: 'Core Legacy Compat',
-  async mount(...args) {
+  async mount(context, params) {
     const { renderApp } = await import('./application');
-    return renderApp(...args);
+    return renderApp(context, params);
   },
 });

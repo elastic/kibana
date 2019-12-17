@@ -28,4 +28,3 @@ import d3 from 'd3';
 export function dataLabel(selection, label) {
   d3.select(selection).attr('data-label', label);
 }
-

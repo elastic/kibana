@@ -40,8 +40,8 @@ export function useNodeDetails(
       timerange,
       cloudId,
       sourceId,
-      decodeResponse,
-    })
+    }),
+    decodeResponse
   );
 
   return {

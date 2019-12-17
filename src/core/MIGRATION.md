@@ -45,6 +45,7 @@
       - [UI Exports](#ui-exports)
   - [How to](#how-to)
     - [Configure plugin](#configure-plugin)
+      - [Handle plugin configuration deprecations](#handle-plugin-config-deprecations)
     - [Mock new platform services in tests](#mock-new-platform-services-in-tests)
       - [Writing mocks for your plugin](#writing-mocks-for-your-plugin)
       - [Using mocks in your tests](#using-mocks-in-your-tests)
@@ -63,7 +64,7 @@ We'll start with an overview of how plugins work in the new platform, and we'll 
 
 Plugins in the new platform are not especially novel or complicated to describe. Our intention wasn't to build some clever system that magically solved problems through abstractions and layers of obscurity, and we wanted to make sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
-New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories.
+New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories. _See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ### Architecture
 
@@ -108,7 +109,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 ```
 
-**[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
+**[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way. _See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ```ts
 import { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
@@ -214,7 +215,7 @@ These are the contracts exposed by the core services for each lifecycle event:
 
 Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `start`.
 
-Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
+Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all first-party Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
 
 **foobar plugin.ts:**
 
@@ -1094,6 +1095,8 @@ The benefit of this approach is that the details of where code lives and whether
 
 A plugin author that decides some set of code should diverge from having a single "common" definition can now safely change the implementation details without impacting downstream consumers.
 
+_See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
+
 ### When does code go into a plugin, core, or packages?
 
 This is an impossible question to answer definitively for all circumstances. For each time this question is raised, we must carefully consider to what extent we think that code is relevant to almost everyone developing in Kibana, what license the code is shipping under, which teams are most appropriate to "own" that code, is the code stateless etc.
@@ -1193,8 +1196,9 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | `server.savedObjects.setScopedSavedObjectsClientFactory`                      | [`core.savedObjects.setClientFactory`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.setclientfactory.md)                                                                                                                                                                     |                                                                             |
 | `server.savedObjects.addScopedSavedObjectsClientWrapperFactory`               | [`core.savedObjects.addClientWrapper`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md)                                                                                                                                                                     |                                                                             |
 | `server.savedObjects.getSavedObjectsRepository`                               | [`core.savedObjects.createInternalRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createinternalrepository.md) [`core.savedObjects.createScopedRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createscopedrepository.md) |                                                                             |
-| `server.savedObjects.getScopedSavedObjectsClient`                             | [`core.savedObjects.getScopedClient`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicestart.getscopedclient.md)                                                                                                                                                                        |                                                                             |
-| `request.getSavedObjectsClient`                                               | [`context.core.savedObjects.client`](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.core.md)                                                                                                                                                                                       |                                                                             |
+| `server.savedObjects.getScopedSavedObjectsClient`                             | [`core.savedObjects.getScopedClient`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicestart.getscopedclient.md)                                                                                                                                                                       |                                                                             |
+| `request.getSavedObjectsClient`                                               | [`context.core.savedObjects.client`](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.core.md)                                                                                                                                                                                      |                                                                             |
+| `kibana.Plugin.deprecations`                                                  | [Handle plugin configuration deprecations](#handle-plugin-config-deprecations) and [`PluginConfigDescriptor.deprecations`](docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.md)                                                                                                     | Deprecations from New Platform are not applied to legacy configuration      |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
@@ -1370,6 +1374,52 @@ export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
 ```
+
+#### Handle plugin configuration deprecations
+
+If your plugin have deprecated properties, you can describe them using the  `deprecations` config descriptor field.
+
+The system is quite similar to the legacy plugin's deprecation management. The most important difference
+is that deprecations are managed on a per-plugin basis, meaning that you don't need to specify the whole
+property path, but use the relative path from your plugin's configuration root.
+
+```typescript
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  newProperty: schema.string({ defaultValue: 'Some string' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ rename, unused }) => [
+    rename('oldProperty', 'newProperty'),
+    unused('someUnusedProperty'),
+  ]   
+};
+```
+
+In some cases, accessing the whole configuration for deprecations is necessary. For these edge cases,
+`renameFromRoot` and `unusedFromRoot` are also accessible when declaring deprecations.
+
+```typescript
+// my_plugin/server/index.ts
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot, unusedFromRoot }) => [
+    renameFromRoot('oldplugin.property', 'myplugin.property'),
+    unusedFromRoot('oldplugin.deprecated'),
+  ]   
+};
+```
+
+Note that deprecations registered in new platform's plugins are not applied to the legacy configuration.
+During migration, if you still need the deprecations to be effective in the legacy plugin, you need to declare them in
+both plugin definitions.
 
 ### Mock new platform services in tests
 

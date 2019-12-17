@@ -35,11 +35,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
   class DiscoverPage {
     async getQueryField() {
-      return await find.byCssSelector('input[ng-model=\'state.query\']');
+      return await find.byCssSelector("input[ng-model='state.query']");
     }
 
     async getQuerySearchButton() {
-      return await find.byCssSelector('button[aria-label=\'Search\']');
+      return await find.byCssSelector("button[aria-label='Search']");
     }
 
     async getChartTimespan() {
@@ -71,7 +71,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
+      return await Promise.all(headerElements.map(async el => await el.getVisibleText()));
     }
 
     async openLoadSavedSearchPanel() {
@@ -121,7 +121,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickHistogramBar() {
       const el = await find.byCssSelector('.echChart canvas:last-of-type');
 
-      await browser.getActions()
+      await browser
+        .getActions()
         .move({ x: 200, y: 20, origin: el._webElement })
         .click()
         .perform();
@@ -143,7 +144,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       let yAxisLabel = 0;
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const y = await find.byCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
+      const y = await find.byCssSelector(
+        'div.visAxis__splitAxes--y > div > svg > g > g:last-of-type'
+      );
       const yLabel = await y.getVisibleText();
       yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
@@ -152,10 +155,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const $ = await svg.parseDomContent();
       const yAxisHeight = $('rect.background').attr('height');
       log.debug('theHeight = ' + yAxisHeight);
-      const bars = $('g > g.series > rect').toArray().map(chart => {
-        const barHeight = $(chart).attr('height');
-        return Math.round(barHeight / yAxisHeight * yAxisLabel);
-      });
+      const bars = $('g > g.series > rect')
+        .toArray()
+        .map(chart => {
+          const barHeight = $(chart).attr('height');
+          return Math.round((barHeight / yAxisHeight) * yAxisLabel);
+        });
 
       return bars;
     }
@@ -189,7 +194,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getDocTableIndex(index) {
-      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + (index) + ')');
+      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + index + ')');
       return await row.getVisibleText();
     }
 
@@ -210,7 +215,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getMarks() {
       const marks = await find.allByCssSelector('mark');
-      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
+      return await Promise.all(marks.map(mark => mark.getVisibleText()));
     }
 
     async toggleSidebarCollapse() {
@@ -219,7 +224,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getAllFieldNames() {
       const items = await find.allByCssSelector('.sidebar-item');
-      return await Promise.all(items.map((item) => item.getVisibleText()));
+      return await Promise.all(items.map(item => item.getVisibleText()));
     }
 
     async getSidebarWidth() {

@@ -24,24 +24,25 @@ import { pluginInstance } from 'plugins/kibana/discover/index';
 import { createStateStub } from './_utils';
 import { getQueryParameterActions } from '../actions';
 
-
-describe('context app', function () {
+describe('context app', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
 
-  describe('action setQueryParameters', function () {
+  describe('action setQueryParameters', function() {
     let setQueryParameters;
 
-    beforeEach(ngMock.inject(function createPrivateStubs() {
-      setQueryParameters = getQueryParameterActions().setQueryParameters;
-    }));
+    beforeEach(
+      ngMock.inject(function createPrivateStubs() {
+        setQueryParameters = getQueryParameterActions().setQueryParameters;
+      })
+    );
 
-    it('should update the queryParameters with valid properties from the given object', function () {
+    it('should update the queryParameters with valid properties from the given object', function() {
       const state = createStateStub({
         queryParameters: {
           additionalParameter: 'ADDITIONAL_PARAMETER',
-        }
+        },
       });
 
       setQueryParameters(state)({
@@ -68,7 +69,7 @@ describe('context app', function () {
       });
     });
 
-    it('should ignore invalid properties', function () {
+    it('should ignore invalid properties', function() {
       const state = createStateStub();
 
       setQueryParameters(state)({
