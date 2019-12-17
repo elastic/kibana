@@ -5,7 +5,7 @@
  */
 
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,6 +52,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           mutedInstanceIds: [],
           scheduledTaskId: createdAlert.scheduledTaskId,
         });
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdAlert.id,
+      });
     });
 
     it(`shouldn't update alert from another space`, async () => {

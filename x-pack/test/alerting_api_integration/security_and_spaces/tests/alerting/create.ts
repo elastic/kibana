@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -104,6 +104,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: response.body.id,
                 spaceId: space.id,
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: response.body.id,
               });
               break;
             default:
