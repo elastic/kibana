@@ -8,7 +8,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import {
   MetricsExplorerMetric,
@@ -21,7 +21,7 @@ interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: FieldType[];
+  fields: IFieldType[];
 }
 
 interface SelectedOption {
