@@ -12,7 +12,6 @@ import fs from 'fs';
 import { union, difference, once } from 'lodash';
 import path from 'path';
 import { argv } from 'yargs';
-import Axios from 'axios';
 
 const config = yaml.safeLoad(
   fs.readFileSync(
@@ -41,10 +40,13 @@ const getKibanaBasePath = once(async () => {
   try {
     await axios.request({ url: KIBANA_BASE_URL, maxRedirects: 0 });
   } catch (e) {
-    const err = e as AxiosError;
-    const location = err.response?.headers?.location;
-    const isBasePath = RegExp(/^\/\w{3}$/).test(location);
-    return isBasePath ? location : '';
+    if (isAxiosError(e)) {
+      const location = e.response?.headers?.location;
+      const isBasePath = RegExp(/^\/\w{3}$/).test(location);
+      return isBasePath ? location : '';
+    }
+
+    throw e;
   }
   return '';
 });
@@ -58,6 +60,7 @@ init().catch(e => {
         e.response?.status
       })`
     );
+
     if (e.response) {
       console.error(
         JSON.stringify(
@@ -246,10 +249,8 @@ async function getUser(username: string) {
       url: `/internal/security/users/${username}`
     });
   } catch (e) {
-    const err = e as AxiosError;
-
     // return empty if user doesn't exist
-    if (err.response?.status === 404) {
+    if (isAxiosError(e) && e.response?.status === 404) {
       return null;
     }
 
@@ -264,10 +265,8 @@ async function getRole(roleName: string) {
       url: `/api/security/role/${roleName}`
     });
   } catch (e) {
-    const err = e as AxiosError;
-
     // return empty if role doesn't exist
-    if (err.response?.status === 404) {
+    if (isAxiosError(e) && e.response?.status === 404) {
       return null;
     }
 
