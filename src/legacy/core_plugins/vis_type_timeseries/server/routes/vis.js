@@ -28,19 +28,28 @@ export const visDataRoutes = (server, { logFailedValidation }) => {
     method: 'POST',
     handler: async req => {
       const { error } = visPayloadSchema.validate(req.payload);
-      if (error && server.config().get('metrics.validateRequest')) {
+      if (error) {
         logFailedValidation();
-        server.log(['tsvb', 'error'], `Request validation error: ${error}. To disable validation, set 'metrics.validateRequest' to false.`);
-        throw new Boom(
-          i18n.translate('visTypeTimeseries.validationError', {
-            defaultMessage:
-              // eslint-disable-next-line max-len
-              'Request validation failed. To disable request validation please contact your system administrator. Detailed error message: {error}',
-            values: {
-              error,
-            },
-          }),
-          { statusCode: 400 }
+        if (server.config().get('metrics.failOnRequestValidation')) {
+          server.log(
+            ['tsvb', 'error'],
+            `Request validation error: ${error}. To allow outdated requests, set 'metrics.failOnRequestValidation' to false.`
+          );
+          throw new Boom(
+            i18n.translate('visTypeTimeseries.validationError', {
+              defaultMessage:
+                // eslint-disable-next-line max-len
+                'Request validation failed. To disable request validation please contact your system administrator. Detailed error message: {error}',
+              values: {
+                error,
+              },
+            }),
+            { statusCode: 400 }
+          );
+        }
+        server.log(
+          ['tsvb', 'warning'],
+          `Request validation error: ${error}. This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
         );
       }
       try {

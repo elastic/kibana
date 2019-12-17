@@ -65,7 +65,7 @@ const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
         minimumBucketSize: Joi.number().default(10),
-        validateRequest: Joi.boolean().default(false),
+        failOnRequestValidation: Joi.boolean().default(false),
       }).default();
     },
   } as Legacy.PluginSpecOptions);
