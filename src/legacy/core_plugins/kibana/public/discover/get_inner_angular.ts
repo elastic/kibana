@@ -25,6 +25,8 @@ import 'ui/angular-bootstrap';
 import { IPrivate } from 'ui/private';
 import { EuiIcon } from '@elastic/eui';
 // @ts-ignore
+import { StateProvider } from 'ui/state_management/state';
+// @ts-ignore
 import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
@@ -66,7 +68,7 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { configureAppAngularModule } from 'ui/legacy_compat';
 import { IndexPatterns } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { createDocTableDirective } from './angular/doc_table/doc_table';
 import { createTableHeaderDirective } from './angular/doc_table/components/table_header';
 import {
@@ -277,6 +279,9 @@ function createLocalAppStateModule() {
     })
     .service('getAppState', function(Private: any) {
       return Private(AppStateProvider).getAppState;
+    })
+    .service('State', function(Private: any) {
+      return Private(StateProvider);
     });
 }
 
@@ -301,7 +306,7 @@ function createElasticSearchModule() {
 }
 
 function createIndexPatternsModule() {
-  angular.module('discoverIndexPatterns', []).service('indexPatterns', IndexPatterns);
+  angular.module('discoverIndexPatterns', []).value('indexPatterns', IndexPatterns);
 }
 
 function createPagerFactoryModule() {

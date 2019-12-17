@@ -196,8 +196,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/Unreachable Remote Webhook/);
+      expect(result.message).to.match(/error calling webhook, unexpected error/);
     });
+
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
@@ -211,7 +212,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/Bad Request/);
+      expect(result.message).to.match(/error calling webhook, invalid response/);
+      expect(result.serviceMessage).to.eql('[400] Bad Request');
     });
   });
 }

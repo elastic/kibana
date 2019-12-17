@@ -229,31 +229,49 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * Headers to send with the request. See {@link HttpHeadersInit}.
    */
   headers?: HttpHeadersInit;
+
+  /**
+   * When `true` the return type of {@link HttpHandler} will be an {@link IHttpResponse} with detailed request and
+   * response information. When `false`, the return type will just be the parsed response body. Defaults to `false`.
+   */
+  asResponse?: boolean;
 }
 
 /**
  * A function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and
- * {@link HttpBody} for the response.
+ * {@link IHttpResponse} for the response.
  *
  * @param path the path on the Kibana server to send the request to. Should not include the basePath.
  * @param options {@link HttpFetchOptions}
- * @returns a Promise that resolves to a {@link HttpBody}
+ * @returns a Promise that resolves to a {@link IHttpResponse}
  * @public
  */
-export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
-
-/** @public */
-export type HttpBody = BodyInit | null | any;
-
-/** @public */
-export interface InterceptedHttpResponse {
-  response?: Response;
-  body?: HttpBody;
+export interface HttpHandler {
+  <TResponseBody = any>(path: string, options: HttpFetchOptions & { asResponse: true }): Promise<
+    IHttpResponse<TResponseBody>
+  >;
+  <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
 }
 
 /** @public */
-export interface HttpResponse extends InterceptedHttpResponse {
-  request: Readonly<Request>;
+export interface IHttpResponse<TResponseBody = any> {
+  /** Raw request sent to Kibana server. */
+  readonly request: Readonly<Request>;
+  /** Raw response received, may be undefined if there was an error. */
+  readonly response?: Readonly<Response>;
+  /** Parsed body received, may be undefined if there was an error. */
+  readonly body?: TResponseBody;
+}
+
+/**
+ * Properties that can be returned by HttpInterceptor.request to override the response.
+ * @public
+ */
+export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+  /** Raw response received, may be undefined if there was an error. */
+  readonly response?: Readonly<Response>;
+  /** Parsed body received, may be undefined if there was an error. */
+  readonly body?: TResponseBody;
 }
 
 /** @public */
@@ -272,7 +290,7 @@ export interface IHttpFetchError extends Error {
 }
 
 /** @public */
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse extends IHttpResponse {
   error: Error | IHttpFetchError;
 }
 /** @public */
@@ -310,13 +328,13 @@ export interface HttpInterceptor {
 
   /**
    * Define an interceptor to be executed after a response is received.
-   * @param httpResponse {@link HttpResponse}
+   * @param httpResponse {@link IHttpResponse}
    * @param controller {@link IHttpInterceptController}
    */
   response?(
-    httpResponse: HttpResponse,
+    httpResponse: IHttpResponse,
     controller: IHttpInterceptController
-  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+  ): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
@@ -326,7 +344,7 @@ export interface HttpInterceptor {
   responseError?(
     httpErrorResponse: HttpErrorResponse,
     controller: IHttpInterceptController
-  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+  ): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 }
 
 /**

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 const Joi = require('joi');
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -30,16 +30,22 @@ export default function ({ getService }) {
         .uuid()
         .required(),
       type: Joi.string().required(),
-      relationship: Joi.string().valid('parent', 'child').required(),
-      meta: Joi.object().keys({
-        title: Joi.string().required(),
-        icon: Joi.string().required(),
-        editUrl: Joi.string().required(),
-        inAppUrl: Joi.object().keys({
-          path: Joi.string().required(),
-          uiCapabilitiesPath: Joi.string().required(),
-        }).required(),
-      }).required(),
+      relationship: Joi.string()
+        .valid('parent', 'child')
+        .required(),
+      meta: Joi.object()
+        .keys({
+          title: Joi.string().required(),
+          icon: Joi.string().required(),
+          editUrl: Joi.string().required(),
+          inAppUrl: Joi.object()
+            .keys({
+              path: Joi.string().required(),
+              uiCapabilitiesPath: Joi.string().required(),
+            })
+            .required(),
+        })
+        .required(),
     })
   );
 
@@ -49,8 +55,16 @@ export default function ({ getService }) {
 
     const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
     const coerceToArray = itemOrItems => [].concat(itemOrItems);
-    const getSavedObjectTypesQuery = types => coerceToArray(types).map(type => `savedObjectTypes=${type}`).join('&');
-    const defaultQuery = getSavedObjectTypesQuery(['visualization', 'index-pattern', 'search', 'dashboard']);
+    const getSavedObjectTypesQuery = types =>
+      coerceToArray(types)
+        .map(type => `savedObjectTypes=${type}`)
+        .join('&');
+    const defaultQuery = getSavedObjectTypesQuery([
+      'visualization',
+      'index-pattern',
+      'search',
+      'dashboard',
+    ]);
 
     describe('searches', () => {
       it('should validate search response schema', async () => {
@@ -78,7 +92,8 @@ export default function ({ getService }) {
                   icon: 'indexPatternApp',
                   editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
-                    path: '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                    path:
+                      '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'management.kibana.index_patterns',
                   },
                 },
@@ -90,7 +105,8 @@ export default function ({ getService }) {
                 meta: {
                   title: 'VisualizationFromSavedSearch',
                   icon: 'visualizeApp',
-                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -103,7 +119,11 @@ export default function ({ getService }) {
 
       it('should filter based on savedObjectTypes', async () => {
         await supertest
-          .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('visualization')}`)
+          .get(
+            `${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery(
+              'visualization'
+            )}`
+          )
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -115,11 +135,12 @@ export default function ({ getService }) {
                   title: 'saved_objects*',
                   editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
-                    path: '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                    path:
+                      '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'management.kibana.index_patterns',
                   },
                 },
-                relationship: 'child'
+                relationship: 'child',
               },
               {
                 id: 'a42c0580-3224-11e8-a572-ffca06da1357',
@@ -127,7 +148,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
-                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -141,7 +163,9 @@ export default function ({ getService }) {
 
       //TODO: https://github.com/elastic/kibana/issues/19713 causes this test to fail.
       it.skip('should return 404 if search finds no results', async () => {
-        await supertest.get(`${baseApiUrl}/search/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx${defaultQuery}`).expect(404);
+        await supertest
+          .get(`${baseApiUrl}/search/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx${defaultQuery}`)
+          .expect(404);
       });
     });
 
@@ -169,7 +193,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
-                  editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -183,7 +208,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
-                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -196,7 +222,11 @@ export default function ({ getService }) {
 
       it('should filter based on savedObjectTypes', async () => {
         await supertest
-          .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
+          .get(
+            `${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery(
+              'search'
+            )}`
+          )
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -206,7 +236,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
-                  editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -220,7 +251,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
-                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -264,7 +296,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'discoverApp',
                   title: 'OneRecord',
-                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'discover.show',
@@ -278,7 +311,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'dashboardApp',
                   title: 'Dashboard',
-                  editUrl: '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'dashboard.show',
@@ -291,7 +325,11 @@ export default function ({ getService }) {
 
       it('should filter based on savedObjectTypes', async () => {
         await supertest
-          .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
+          .get(
+            `${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery(
+              'search'
+            )}`
+          )
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -301,7 +339,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'discoverApp',
                   title: 'OneRecord',
-                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'discover.show',
@@ -344,7 +383,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'discoverApp',
                   title: 'OneRecord',
-                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'discover.show',
@@ -358,7 +398,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'visualizeApp',
                   title: 'Visualization',
-                  editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'visualize.show',
@@ -371,7 +412,11 @@ export default function ({ getService }) {
 
       it('should filter based on savedObjectTypes', async () => {
         await supertest
-          .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
+          .get(
+            `${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery(
+              'search'
+            )}`
+          )
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -381,7 +426,8 @@ export default function ({ getService }) {
                 meta: {
                   icon: 'discoverApp',
                   title: 'OneRecord',
-                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  editUrl:
+                    '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
                   inAppUrl: {
                     path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
                     uiCapabilitiesPath: 'discover.show',

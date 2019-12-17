@@ -22,8 +22,10 @@ const fn = require(`../calculate_interval`);
 const moment = require('moment');
 const expect = require('chai').expect;
 
-
-const from = (count, unit) => moment().subtract(count, unit).valueOf();
+const from = (count, unit) =>
+  moment()
+    .subtract(count, unit)
+    .valueOf();
 const to = moment().valueOf();
 const size = 200;
 const min = '1ms';
@@ -34,7 +36,7 @@ describe(filename, () => {
   });
 
   it('Only calculates when interval = auto', () => {
-    const partialFn = (interval) => fn(from(1, 'y'), to, size, interval, min);
+    const partialFn = interval => fn(from(1, 'y'), to, size, interval, min);
     expect(partialFn('1ms')).to.equal('1ms');
     expect(partialFn('bag_of_beans')).to.equal('bag_of_beans');
     expect(partialFn('auto')).to.not.equal('auto');

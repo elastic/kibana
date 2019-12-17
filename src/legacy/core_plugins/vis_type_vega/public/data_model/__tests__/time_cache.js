@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import { TimeCache } from '../time_cache';
 
 describe(`TimeCache`, () => {
-
   class FauxTimefilter {
     constructor(min, max) {
       // logs all requests
@@ -95,7 +94,5 @@ describe(`TimeCache`, () => {
     expect(tc.getTimeBounds()).to.eql({ min: 20220, max: 30220 });
     expect(time._accessCount).to.be(++timeAccess);
     expect(timefilter._accessCount).to.be(++filterAccess);
-
   });
-
 });

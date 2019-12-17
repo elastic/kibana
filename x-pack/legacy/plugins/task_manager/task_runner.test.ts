@@ -7,10 +7,15 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
-import { ConcreteTaskInstance } from './task';
+import { asOk, asErr } from './lib/result_type';
+import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
+import { ConcreteTaskInstance, TaskStatus } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+// Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+// be moved under task_manager/server/
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -88,7 +93,7 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       instance: {
         interval: '10m',
-        status: 'running',
+        status: TaskStatus.Running,
         startedAt: new Date(),
       },
       definitions: {
@@ -657,45 +662,245 @@ describe('TaskManagerRunner', () => {
     );
   });
 
+  describe('TaskEvents', () => {
+    test('emits TaskEvent when a task is marked as running', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, instance, store } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+        },
+        definitions: {
+          bar: {
+            timeout: `1m`,
+            getRetry: () => {},
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      store.update.returns(instance);
+
+      await runner.markTaskAsRunning();
+
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskMarkRunningEvent(id, asOk(instance)));
+    });
+
+    test('emits TaskEvent when a task fails to be marked as running', async () => {
+      expect.assertions(2);
+
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, store } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+        },
+        definitions: {
+          bar: {
+            timeout: `1m`,
+            getRetry: () => {},
+            createTaskRunner: () => ({
+              run: async () => undefined,
+            }),
+          },
+        },
+      });
+
+      store.update.throws(new Error('cant mark as running'));
+
+      try {
+        await runner.markTaskAsRunning();
+      } catch (err) {
+        expect(onTaskEvent).toHaveBeenCalledWith(asTaskMarkRunningEvent(id, asErr(err)));
+      }
+      expect(onTaskEvent).toHaveBeenCalledTimes(1);
+    });
+
+    test('emits TaskEvent when a task is run successfully', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, instance } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+        },
+        definitions: {
+          bar: {
+            createTaskRunner: () => ({
+              async run() {
+                return {};
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
+    });
+
+    test('emits TaskEvent when a recurring task is run successfully', async () => {
+      const id = _.random(1, 20).toString();
+      const runAt = minutesFromNow(_.random(5));
+      const onTaskEvent = jest.fn();
+      const { runner, instance } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+          interval: '1m',
+        },
+        definitions: {
+          bar: {
+            createTaskRunner: () => ({
+              async run() {
+                return { runAt };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asOk(instance)));
+    });
+
+    test('emits TaskEvent when a task run throws an error', async () => {
+      const id = _.random(1, 20).toString();
+      const error = new Error('Dangit!');
+      const onTaskEvent = jest.fn();
+      const { runner } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+        },
+        definitions: {
+          bar: {
+            createTaskRunner: () => ({
+              async run() {
+                throw error;
+              },
+            }),
+          },
+        },
+      });
+      await runner.run();
+
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledTimes(1);
+    });
+
+    test('emits TaskEvent when a task run returns an error', async () => {
+      const id = _.random(1, 20).toString();
+      const error = new Error('Dangit!');
+      const onTaskEvent = jest.fn();
+      const { runner } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+          interval: '1m',
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            createTaskRunner: () => ({
+              async run() {
+                return { error };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledTimes(1);
+    });
+
+    test('emits TaskEvent when a task returns an error and is marked as failed', async () => {
+      const id = _.random(1, 20).toString();
+      const error = new Error('Dangit!');
+      const onTaskEvent = jest.fn();
+      const { runner, store } = testOpts({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            getRetry: () => false,
+            createTaskRunner: () => ({
+              async run() {
+                return { error };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      const instance = store.update.args[0][0];
+      expect(instance.status).toBe('failed');
+
+      expect(onTaskEvent).toHaveBeenCalledWith(asTaskRunEvent(id, asErr(error)));
+      expect(onTaskEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: any;
+    onTaskEvent?: (event: TaskEvent<any, any>) => void;
   }
 
   function testOpts(opts: TestOpts) {
     const callCluster = sinon.stub();
     const createTaskRunner = sinon.stub();
     const logger = mockLogger();
+
+    const instance = Object.assign(
+      {
+        id: 'foo',
+        taskType: 'bar',
+        sequenceNumber: 32,
+        primaryTerm: 32,
+        runAt: new Date(),
+        scheduledAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        attempts: 0,
+        params: {},
+        scope: ['reporting'],
+        state: {},
+        status: 'idle',
+        user: 'example',
+        ownerId: null,
+      },
+      opts.instance || {}
+    );
+
     const store = {
       update: sinon.stub(),
       remove: sinon.stub(),
       maxAttempts: 5,
     };
+
+    store.update.returns(instance);
+
     const runner = new TaskManagerRunner({
       beforeRun: context => Promise.resolve(context),
       beforeMarkRunning: context => Promise.resolve(context),
       logger,
       store,
-      instance: Object.assign(
-        {
-          id: 'foo',
-          taskType: 'bar',
-          sequenceNumber: 32,
-          primaryTerm: 32,
-          runAt: new Date(),
-          scheduledAt: new Date(),
-          startedAt: null,
-          retryAt: null,
-          attempts: 0,
-          params: {},
-          scope: ['reporting'],
-          state: {},
-          status: 'idle',
-          user: 'example',
-          ownerId: null,
-        },
-        opts.instance || {}
-      ),
+      instance,
       definitions: Object.assign(opts.definitions || {}, {
         testbar: {
           type: 'bar',
@@ -703,6 +908,7 @@ describe('TaskManagerRunner', () => {
           createTaskRunner,
         },
       }),
+      onTaskEvent: opts.onTaskEvent,
     });
 
     return {
@@ -711,6 +917,7 @@ describe('TaskManagerRunner', () => {
       runner,
       logger,
       store,
+      instance,
     };
   }
 

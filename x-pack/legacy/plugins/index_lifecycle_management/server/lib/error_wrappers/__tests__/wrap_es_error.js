@@ -9,7 +9,6 @@ import { wrapEsError } from '../wrap_es_error';
 
 describe('wrap_es_error', () => {
   describe('#wrapEsError', () => {
-
     let originalError;
     beforeEach(() => {
       originalError = new Error('I am an error');

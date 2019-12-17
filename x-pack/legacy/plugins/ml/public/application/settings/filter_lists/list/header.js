@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for the header section of the filter lists page.
  */
@@ -63,11 +62,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="refresh"
-                onClick={() => refreshFilterLists()}
-              >
+              <EuiButtonEmpty size="s" iconType="refresh" onClick={() => refreshFilterLists()}>
                 <FormattedMessage
                   id="xpack.ml.settings.filterLists.listHeader.refreshButtonLabel"
                   defaultMessage="Refresh"
@@ -77,7 +72,7 @@ export function FilterListsHeader({ totalCount, refreshFilterLists }) {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
       <EuiText>
         <p>
           <EuiTextColor color="subdued">
@@ -100,12 +95,11 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
           </EuiTextColor>
         </p>
       </EuiText>
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
     </React.Fragment>
   );
-
 }
 FilterListsHeader.propTypes = {
   totalCount: PropTypes.number.isRequired,
-  refreshFilterLists: PropTypes.func.isRequired
+  refreshFilterLists: PropTypes.func.isRequired,
 };

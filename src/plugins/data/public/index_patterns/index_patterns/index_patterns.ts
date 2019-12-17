@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import {
   SavedObjectsClientContract,
   SimpleSavedObject,
@@ -64,7 +63,7 @@ export class IndexPatterns {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => idx(obj, _ => _.id));
+    return this.savedObjectsCache.map(obj => obj?.id);
   };
 
   getTitles = async (refresh: boolean = false): Promise<string[]> => {
@@ -74,7 +73,7 @@ export class IndexPatterns {
     if (!this.savedObjectsCache) {
       return [];
     }
-    return this.savedObjectsCache.map(obj => idx(obj, _ => _.attributes.title));
+    return this.savedObjectsCache.map(obj => obj?.attributes?.title);
   };
 
   getFields = async (fields: string[], refresh: boolean = false) => {
@@ -86,7 +85,7 @@ export class IndexPatterns {
     }
     return this.savedObjectsCache.map((obj: Record<string, any>) => {
       const result: Record<string, any> = {};
-      fields.forEach((f: string) => (result[f] = obj[f] || idx(obj, _ => _.attributes[f])));
+      fields.forEach((f: string) => (result[f] = obj[f] || obj?.attributes?.[f]));
       return result;
     });
   };
@@ -146,3 +145,5 @@ export class IndexPatterns {
     return indexPattern.init();
   };
 }
+
+export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;

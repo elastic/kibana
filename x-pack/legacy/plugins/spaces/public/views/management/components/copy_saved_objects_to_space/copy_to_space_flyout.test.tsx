@@ -6,6 +6,7 @@
 import React from 'react';
 import Boom from 'boom';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mockManagementPlugin } from '../../../../../../../../../src/legacy/core_plugins/management/public/np_ready/mocks';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
@@ -18,6 +19,11 @@ import { spacesManagerMock } from '../../../../lib/mocks';
 import { SpacesManager } from '../../../../lib';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
 
+jest.mock('../../../../../../../../../src/legacy/core_plugins/management/public/legacy', () => ({
+  setup: mockManagementPlugin.createSetupContract(),
+  start: mockManagementPlugin.createStartContract(),
+}));
+
 interface SetupOpts {
   mockSpaces?: Space[];
   returnBeforeSpacesLoad?: boolean;
@@ -27,6 +33,13 @@ const setup = async (opts: SetupOpts = {}) => {
   const onClose = jest.fn();
 
   const mockSpacesManager = spacesManagerMock.create();
+
+  mockSpacesManager.getActiveSpace.mockResolvedValue({
+    id: 'my-active-space',
+    name: 'my active space',
+    disabledFeatures: [],
+  });
+
   mockSpacesManager.getSpaces.mockResolvedValue(
     opts.mockSpaces || [
       {
@@ -73,11 +86,6 @@ const setup = async (opts: SetupOpts = {}) => {
     <CopySavedObjectsToSpaceFlyout
       savedObject={savedObjectToCopy}
       spacesManager={(mockSpacesManager as unknown) as SpacesManager}
-      activeSpace={{
-        id: 'my-active-space',
-        name: 'my active space',
-        disabledFeatures: [],
-      }}
       toastNotifications={(mockToastNotifications as unknown) as ToastNotifications}
       onClose={onClose}
     />
@@ -85,6 +93,7 @@ const setup = async (opts: SetupOpts = {}) => {
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender
+    await Promise.resolve();
     await Promise.resolve();
     wrapper.update();
   }
