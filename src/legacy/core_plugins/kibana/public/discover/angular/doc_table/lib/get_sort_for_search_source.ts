@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../kibana_services';
+import { IIndexPattern } from '../../../kibana_services';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 
@@ -26,7 +26,7 @@ import { getSort } from './get_sort';
  * the addon of the numeric_type guarantees the right sort order
  * when there are indices with date and indices with date_nanos field
  */
-export function getSortForSearchSource(sort?: SortOrder[], indexPattern?: IndexPattern) {
+export function getSortForSearchSource(sort?: SortOrder[], indexPattern?: IIndexPattern) {
   if (!sort || !indexPattern) {
     return [];
   }

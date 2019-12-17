@@ -51,13 +51,13 @@ export class IndexPattern implements IIndexPattern {
   public fieldFormatMap: any;
   public typeMeta: any;
   public fields: IFieldList;
-  public timeFieldName: string | undefined;
+  public timeFieldName?: string;
   public formatHit: any;
   public formatField: any;
   public flattenHit: any;
   public metaFields: string[];
 
-  private version: string | undefined;
+  private version?: string;
   private savedObjectsClient: SavedObjectsClientContract;
   private patternCache: any;
   private getConfig: any;
@@ -115,7 +115,7 @@ export class IndexPattern implements IIndexPattern {
     this.formatField = this.formatHit.formatField;
   }
 
-  private serializeFieldFormatMap(flat: any, format: string, field: string | undefined) {
+  private serializeFieldFormatMap(flat: any, format: string, field?: string) {
     if (format && field) {
       flat[field] = format;
     }
@@ -166,7 +166,7 @@ export class IndexPattern implements IIndexPattern {
       throw new SavedObjectNotFound(type, this.id, '#/management/kibana/index_pattern');
     }
 
-    _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {
+    _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name?: string) => {
       if (!fieldMapping._deserialize || !name) {
         return;
       }
@@ -284,7 +284,7 @@ export class IndexPattern implements IIndexPattern {
       )
     );
 
-    await this.save();
+    return this.save();
   }
 
   removeScriptedField(field: IFieldType) {
@@ -302,15 +302,15 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-    await this.save();
+    return this.save();
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return _.where(this.fields, { scripted: false }) as IFieldList;
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return _.where(this.fields, { scripted: true }) as IFieldList;
   }
 
   isTimeBased(): boolean {
@@ -378,7 +378,7 @@ export class IndexPattern implements IIndexPattern {
     const potentialDuplicateByTitle = await findByTitle(this.savedObjectsClient, this.title);
     // If there is potentially duplicate title, just create it
     if (!potentialDuplicateByTitle) {
-      return await _create();
+      return _create();
     }
 
     // We found a duplicate but we aren't allowing override, show the warn modal
@@ -386,7 +386,7 @@ export class IndexPattern implements IIndexPattern {
       return false;
     }
 
-    return await _create(potentialDuplicateByTitle.id);
+    return _create(potentialDuplicateByTitle.id);
   }
 
   async save(saveAttempts: number = 0): Promise<void | Error> {

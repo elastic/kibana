@@ -18,15 +18,17 @@
  */
 
 import { get } from 'lodash';
+import { IIndexPattern } from '../..';
 
-export function getFromSavedObject(savedObject: any) {
+export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
   if (get(savedObject, 'attributes.fields') === undefined) {
     return;
   }
 
   return {
+    // TODO: This does not return a full `IIndexPattern` type
     id: savedObject.id,
     fields: JSON.parse(savedObject.attributes.fields),
     title: savedObject.attributes.title,
-  };
+  } as IIndexPattern;
 }

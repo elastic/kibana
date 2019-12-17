@@ -19,13 +19,14 @@
 
 import { IIndexPattern } from '../../common';
 import { stubFields } from './field.stub';
+import { IFieldList } from '.';
 
 export const stubIndexPattern: IIndexPattern = {
   id: 'logstash-*',
-  fields: stubFields,
+  fields: stubFields as IFieldList,
   title: 'logstash-*',
   timeFieldName: '@timestamp',
-};
+} as IIndexPattern;
 
 export const stubIndexPatternWithFields: IIndexPattern = {
   id: '1234',
@@ -39,5 +40,5 @@ export const stubIndexPatternWithFields: IIndexPattern = {
       filterable: true,
       searchable: true,
     },
-  ],
-};
+  ] as IFieldList,
+} as IIndexPattern;
