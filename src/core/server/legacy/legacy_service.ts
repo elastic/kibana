@@ -200,6 +200,9 @@ export class LegacyService implements CoreService {
         'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
       );
     }
+    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
+    this.legacyRawConfig.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
+
     this.setupDeps = setupDeps;
   }
 
@@ -299,6 +302,9 @@ export class LegacyService implements CoreService {
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
+      },
+      uuid: {
+        getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
     };
     const coreStart: CoreStart = {
