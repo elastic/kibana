@@ -292,7 +292,7 @@ export class IndexPattern implements IIndexPattern {
     return this.save();
   }
 
-  async popularizeField(fieldName: string, unit = 1) {
+  async popularizeField(fieldName: string, unit = 1, save: boolean = true) {
     const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
@@ -302,7 +302,9 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-    await this.save();
+    if (save) {
+      await this.save();
+    }
   }
 
   getNonScriptedFields() {

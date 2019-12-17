@@ -36,6 +36,7 @@ import { showOpenSearchPanel } from '../components/top_nav/show_open_search_pane
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
+import { popularizeField } from '../helpers/popularize_field';
 import {
   angular,
   buildVislibDimensions,
@@ -936,7 +937,7 @@ function discoverController(
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function(field, values, operation) {
-    $scope.indexPattern.popularizeField(field, 1);
+    popularizeField(field, $scope.indexPattern);
     const newFilters = generateFilters(
       filterManager,
       field,
@@ -948,12 +949,12 @@ function discoverController(
   };
 
   $scope.addColumn = function addColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
+    popularizeField(columnName, $scope.indexPattern);
     columnActions.addColumn($scope.state.columns, columnName);
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
+    popularizeField(columnName, $scope.indexPattern);
     columnActions.removeColumn($scope.state.columns, columnName);
   };
 
