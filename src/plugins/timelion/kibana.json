@@ -4,5 +4,5 @@
   "kibanaVersion": "kibana",
   "configPath": ["timelion"],
   "server": true,
-  "ui": true
+  "ui": false
 }

@@ -43,7 +43,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../../../plugins/timelion/public/chain.peg';
+import grammar from 'raw-loader!../../../../../plugins/timelion/common/chain.peg';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
