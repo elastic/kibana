@@ -5845,7 +5845,6 @@
     "xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel": "查看设置说明",
     "xpack.infra.homePage.noMetricsIndicesTitle": "似乎您没有任何指标索引。",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "搜索基础设施数据……（例如 host.name:host-1）",
-    "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "在选定时间显示过去 1 分钟的数据",
     "xpack.infra.infrastructureDescription": "浏览您的基础设施",
     "xpack.infra.infrastructureMetricsExplorerPage.documentTitle": "{previousTitle} | 指标浏览器",
     "xpack.infra.infrastructureSnapshotPage.documentTitle": "{previousTitle} | 库存",
