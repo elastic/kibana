@@ -23,6 +23,7 @@ export const query = Joi.string();
 export const language = Joi.string().valid('kuery', 'lucene');
 export const output_index = Joi.string();
 export const saved_id = Joi.string();
+export const timeline_id = Joi.string();
 export const meta = Joi.object();
 export const max_signals = Joi.number().greater(0);
 export const name = Joi.string();

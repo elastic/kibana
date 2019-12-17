@@ -76,5 +76,6 @@
   "references": [
     "http://www.example.com/some-article-about-attack",
     "Some plain text string here explaining why this is a valid thing to look out for"
-  ]
+  ],
+  "timeline_id": "timeline_id"
 }

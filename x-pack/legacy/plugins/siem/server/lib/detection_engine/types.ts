@@ -43,6 +43,7 @@ export interface RuleAlertParams {
   severity: string;
   tags: string[];
   to: string;
+  timelineId: string | undefined | null;
   threats: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   updatedAt: string;
@@ -57,6 +58,7 @@ export type RuleAlertParamsRest = Omit<
   | 'maxSignals'
   | 'savedId'
   | 'riskScore'
+  | 'timelineId'
   | 'outputIndex'
   | 'updatedAt'
   | 'createdAt'
@@ -64,6 +66,7 @@ export type RuleAlertParamsRest = Omit<
   rule_id: RuleAlertParams['ruleId'];
   false_positives: RuleAlertParams['falsePositives'];
   saved_id: RuleAlertParams['savedId'];
+  timeline_id: RuleAlertParams['timelineId'];
   max_signals: RuleAlertParams['maxSignals'];
   risk_score: RuleAlertParams['riskScore'];
   output_index: RuleAlertParams['outputIndex'];

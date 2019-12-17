@@ -33,6 +33,9 @@
               "saved_id": {
                 "type": "keyword"
               },
+              "timeline_id": {
+                "type": "keyword"
+              },
               "max_signals": {
                 "type": "keyword"
               },
@@ -100,6 +103,9 @@
                 "type": "keyword"
               },
               "updated_by": {
+                "type": "keyword"
+              },
+              "version": {
                 "type": "keyword"
               }
             }

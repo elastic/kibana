@@ -30,6 +30,7 @@ export const sampleRuleAlertParams = (
   maxSignals: maxSignals ? maxSignals : 10000,
   filters: undefined,
   savedId: undefined,
+  timelineId: undefined,
   meta: undefined,
   threats: undefined,
   updatedAt: '2019-12-17T15:04:25.343Z',

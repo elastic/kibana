@@ -15,13 +15,14 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
+import { OutputRuleAlertRest } from '../../types';
 
 describe('utils', () => {
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();
       const rule = transformAlertToRule(fullRule);
-      expect(rule).toEqual({
+      const expected: OutputRuleAlertRest = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -61,15 +62,30 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(rule).toEqual(expected);
     });
 
     test('should work with a partial data set missing data', () => {
       const fullRule = getResult();
       const { from, language, ...omitData } = transformAlertToRule(fullRule);
-      expect(omitData).toEqual({
+      const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -107,16 +123,31 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(omitData).toEqual(expected);
     });
 
     test('should omit query if query is null', () => {
       const fullRule = getResult();
       fullRule.params.query = null;
       const rule = transformAlertToRule(fullRule);
-      expect(rule).toEqual({
+      const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -155,16 +186,31 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(rule).toEqual(expected);
     });
 
     test('should omit query if query is undefined', () => {
       const fullRule = getResult();
       fullRule.params.query = undefined;
       const rule = transformAlertToRule(fullRule);
-      expect(rule).toEqual({
+      const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -203,9 +249,24 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(rule).toEqual(expected);
     });
 
     test('should omit a mix of undefined, null, and missing fields', () => {
@@ -213,7 +274,7 @@ describe('utils', () => {
       fullRule.params.query = undefined;
       fullRule.params.language = null;
       const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
-      expect(omitData).toEqual({
+      const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -249,16 +310,31 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(omitData).toEqual(expected);
     });
 
     test('should return enabled is equal to false', () => {
       const fullRule = getResult();
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
-      expect(ruleWithEnabledFalse).toEqual({
+      const expected: OutputRuleAlertRest = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -298,16 +374,31 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
     test('should return immutable is equal to false', () => {
       const fullRule = getResult();
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
-      expect(ruleWithEnabledFalse).toEqual({
+      const expected: OutputRuleAlertRest = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -347,16 +438,31 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
     test('should work with tags but filter out any internal tags', () => {
       const fullRule = getResult();
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
-      expect(rule).toEqual({
+      const expected: OutputRuleAlertRest = {
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
         created_by: 'elastic',
@@ -396,9 +502,24 @@ describe('utils', () => {
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
-      });
+      };
+      expect(rule).toEqual(expected);
     });
   });
 
@@ -454,52 +575,65 @@ describe('utils', () => {
       const output = transformFindAlertsOrError({
         data: [getResult()],
       });
-      expect(output).toEqual({
-        data: [
+      const expected: OutputRuleAlertRest = {
+        created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
+        description: 'Detecting root and admin users',
+        enabled: true,
+        false_positives: [],
+        from: 'now-6m',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        output_index: '.siem-signals',
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: '5m',
+        risk_score: 50,
+        rule_id: 'rule-1',
+        language: 'kuery',
+        max_signals: 100,
+        name: 'Detect Root/Admin Users',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://www.example.com', 'https://ww.example.com'],
+        severity: 'high',
+        updated_by: 'elastic',
+        tags: [],
+        to: 'now',
+        type: 'query',
+        threats: [
           {
-            created_by: 'elastic',
-            created_at: '2019-12-13T16:40:33.400Z',
-            updated_at: '2019-12-13T16:40:33.400Z',
-            description: 'Detecting root and admin users',
-            enabled: true,
-            false_positives: [],
-            from: 'now-6m',
-            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            immutable: false,
-            output_index: '.siem-signals',
-            index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            interval: '5m',
-            risk_score: 50,
-            rule_id: 'rule-1',
-            language: 'kuery',
-            max_signals: 100,
-            name: 'Detect Root/Admin Users',
-            query: 'user.name: root or user.name: admin',
-            references: ['http://www.example.com', 'https://ww.example.com'],
-            severity: 'high',
-            updated_by: 'elastic',
-            tags: [],
-            to: 'now',
-            type: 'query',
-            threats: [
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
               {
-                framework: 'MITRE ATT&CK',
-                tactic: {
-                  id: 'TA0040',
-                  name: 'impact',
-                  reference: 'https://attack.mitre.org/tactics/TA0040/',
-                },
-                techniques: [
-                  {
-                    id: 'T1499',
-                    name: 'endpoint denial of service',
-                    reference: 'https://attack.mitre.org/techniques/T1499/',
-                  },
-                ],
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
               },
             ],
           },
         ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
+      };
+      expect(output).toEqual({
+        data: [expected],
       });
     });
 
@@ -512,7 +646,7 @@ describe('utils', () => {
   describe('transformOrError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transformOrError(getResult());
-      expect(output).toEqual({
+      const expected: OutputRuleAlertRest = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -554,7 +688,22 @@ describe('utils', () => {
             ],
           },
         ],
-      });
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
+      };
+      expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {

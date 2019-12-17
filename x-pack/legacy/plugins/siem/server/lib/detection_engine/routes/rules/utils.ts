@@ -55,6 +55,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     query: alert.params.query,
     references: alert.params.references,
     saved_id: alert.params.savedId,
+    timeline_id: alert.params.timelineId,
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
