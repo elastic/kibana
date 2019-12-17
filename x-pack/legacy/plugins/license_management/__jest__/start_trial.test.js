@@ -60,6 +60,26 @@ describe('StartTrial component when trial is allowed', () => {
     );
     expect(rendered.html()).toMatchSnapshot();
   });
+  test('should not display for active enterprise license', () => {
+    const rendered = getComponent(
+      {
+        license: createMockLicense('enterprise'),
+        trialStatus: { canStartTrial: true },
+      },
+      StartTrial
+    );
+    expect(rendered.isEmptyRender()).toBeTruthy();
+  });
+  test('should display for expired enterprise license', () => {
+    const rendered = getComponent(
+      {
+        license: createMockLicense('enterprise', 0),
+        trialStatus: { canStartTrial: true },
+      },
+      StartTrial
+    );
+    expect(rendered.html()).toMatchSnapshot();
+  });
 });
 
 describe('StartTrial component when trial is not available', () => {
@@ -87,6 +107,16 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum'),
+        trialStatus: { canStartTrial: false },
+      },
+      StartTrial
+    );
+    expect(rendered.isEmptyRender()).toBeTruthy();
+  });
+  test('should not display for enterprise license', () => {
+    const rendered = getComponent(
+      {
+        license: createMockLicense('enterprise'),
         trialStatus: { canStartTrial: false },
       },
       StartTrial
