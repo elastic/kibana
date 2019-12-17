@@ -473,8 +473,8 @@ export class DashboardStateManager {
    */
   public applyFilters(query: Query, filters: esFilters.Filter[]) {
     this.appState.query = query;
-    this.savedDashboard.searchSource!.setField('query', query);
-    this.savedDashboard.searchSource!.setField('filter', filters);
+    this.savedDashboard.searchSource.setField('query', query);
+    this.savedDashboard.searchSource.setField('filter', filters);
     this.saveState();
   }
 
