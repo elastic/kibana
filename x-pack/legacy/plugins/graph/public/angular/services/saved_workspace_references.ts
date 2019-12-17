@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function extractReferences({ attributes, references = [] }) {
+import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
+import { SavedWorkspace } from './saved_workspace';
+
+export function extractReferences({
+  attributes,
+  references = [],
+}: {
+  attributes: SavedObjectAttributes;
+  references: SavedObjectReference[];
+}) {
   // For some reason, wsState comes in stringified 2x
-  const state = JSON.parse(JSON.parse(attributes.wsState));
+  const state = JSON.parse(JSON.parse(String(attributes.wsState)));
   const { indexPattern } = state;
   if (!indexPattern) {
     throw new Error('indexPattern attribute is missing in "wsState"');
@@ -29,7 +38,7 @@ export function extractReferences({ attributes, references = [] }) {
   };
 }
 
-export function injectReferences(savedObject, references) {
+export function injectReferences(savedObject: SavedWorkspace, references: SavedObjectReference[]) {
   // Skip if wsState is missing, at the time of development of this, there is no guarantee each
   // saved object has wsState.
   if (typeof savedObject.wsState !== 'string') {

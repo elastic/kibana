@@ -5,6 +5,7 @@
  */
 
 import { extractReferences, injectReferences } from './saved_workspace_references';
+import { SavedWorkspace } from './saved_workspace';
 
 describe('extractReferences', () => {
   test('extracts references from wsState', () => {
@@ -19,6 +20,7 @@ describe('extractReferences', () => {
           })
         ),
       },
+      references: [],
     };
     const updatedDoc = extractReferences(doc);
     expect(updatedDoc).toMatchInlineSnapshot(`
@@ -48,6 +50,7 @@ Object {
           })
         ),
       },
+      references: [],
     };
     expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
       `"indexPattern attribute is missing in \\"wsState\\""`
@@ -59,12 +62,12 @@ describe('injectReferences', () => {
   test('injects references into context', () => {
     const context = {
       id: '1',
-      foo: true,
+      title: 'test',
       wsState: JSON.stringify({
         indexPatternRefName: 'indexPattern_0',
         bar: true,
       }),
-    };
+    } as SavedWorkspace;
     const references = [
       {
         name: 'indexPattern_0',
@@ -75,8 +78,8 @@ describe('injectReferences', () => {
     injectReferences(context, references);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+  "title": "test",
   "wsState": "{\\"bar\\":true,\\"indexPattern\\":\\"pattern*\\"}",
 }
 `);
@@ -85,13 +88,13 @@ Object {
   test('skips when wsState is not a string', () => {
     const context = {
       id: '1',
-      foo: true,
-    };
+      title: 'test',
+    } as SavedWorkspace;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+  "title": "test",
 }
 `);
   });
@@ -100,7 +103,7 @@ Object {
     const context = {
       id: '1',
       wsState: JSON.stringify({ bar: true }),
-    };
+    } as SavedWorkspace;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
@@ -116,7 +119,7 @@ Object {
       wsState: JSON.stringify({
         indexPatternRefName: 'indexPattern_0',
       }),
-    };
+    } as SavedWorkspace;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find reference \\"indexPattern_0\\""`
     );
