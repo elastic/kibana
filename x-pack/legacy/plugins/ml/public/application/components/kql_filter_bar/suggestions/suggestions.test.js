@@ -13,26 +13,27 @@ const defaultProps = {
   onClick: () => {},
   onMouseEnter: () => {},
   show: true,
-  suggestions: [{
-    description: '<p>Test description for fieldValueOne</p>',
-    end: 1,
-    start: 0,
-    text: 'fieldValueOne',
-    type: 'field'
-  },
-  {
-    description: '<p>Test description for fieldValueTwo</p>',
-    end: 1,
-    start: 0,
-    text: 'fieldValueTwo',
-    type: 'field'
-  }]
+  suggestions: [
+    {
+      description: '<p>Test description for fieldValueOne</p>',
+      end: 1,
+      start: 0,
+      text: 'fieldValueOne',
+      type: 'field',
+    },
+    {
+      description: '<p>Test description for fieldValueTwo</p>',
+      end: 1,
+      start: 0,
+      text: 'fieldValueTwo',
+      type: 'field',
+    },
+  ],
 };
 
 describe('Suggestions', () => {
-
   test('snapshot', () => {
-    const wrapper = shallow(<Suggestions {...defaultProps}/>);
+    const wrapper = shallow(<Suggestions {...defaultProps} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -53,5 +54,4 @@ describe('Suggestions', () => {
     const suggestions = wrapper.find('li');
     expect(suggestions.length).toEqual(2);
   });
-
 });

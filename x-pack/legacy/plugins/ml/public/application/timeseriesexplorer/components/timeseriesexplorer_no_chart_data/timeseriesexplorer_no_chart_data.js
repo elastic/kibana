@@ -20,26 +20,25 @@ export const TimeseriesexplorerNoChartData = ({ dataNotChartable, entities }) =>
     title={
       <h2>
         {i18n.translate('xpack.ml.timeSeriesExplorer.noResultsFoundLabel', {
-          defaultMessage: 'No results found'
+          defaultMessage: 'No results found',
         })}
       </h2>
     }
-    body={dataNotChartable
-      ? (
+    body={
+      dataNotChartable ? (
         <p>
           {i18n.translate('xpack.ml.timeSeriesExplorer.dataNotChartableDescription', {
             defaultMessage: `Model plot is not collected for the selected {entityCount, plural, one {entity} other {entities}}
 and the source data cannot be plotted for this detector.`,
             values: {
-              entityCount: entities.length
-            }
+              entityCount: entities.length,
+            },
           })}
         </p>
-      )
-      : (
+      ) : (
         <p>
           {i18n.translate('xpack.ml.timeSeriesExplorer.tryWideningTheTimeSelectionDescription', {
-            defaultMessage: 'Try widening the time selection or moving further back in time.'
+            defaultMessage: 'Try widening the time selection or moving further back in time.',
           })}
         </p>
       )

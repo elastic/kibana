@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint max-len:0 */
 const filter = metric => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import _ from 'lodash';

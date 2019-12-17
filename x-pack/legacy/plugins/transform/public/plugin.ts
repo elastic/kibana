@@ -27,12 +27,21 @@ const template = `<kbn-management-app section="${KBN_MANAGEMENT_SECTION}"><div i
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { http, routing, legacyHttp, chrome, documentation, docTitle } = core;
+    const {
+      http,
+      routing,
+      legacyHttp,
+      chrome,
+      documentation,
+      docTitle,
+      uiSettings,
+      savedObjects,
+    } = core;
     const { management, savedSearches: coreSavedSearches, uiMetric } = plugins;
 
     // AppCore/AppPlugins to be passed on as React context
     const AppDependencies = {
-      core: { chrome, http, i18n: core.i18n },
+      core: { chrome, http, i18n: core.i18n, uiSettings, savedObjects },
       plugins: {
         management: { sections: management.sections },
         savedSearches: coreSavedSearches,

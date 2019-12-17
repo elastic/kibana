@@ -31,10 +31,10 @@ maki.svgArray.forEach(svgString => {
 });
 
 export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map(symbolId => {
-  return ({
+  return {
     value: symbolId,
     label: symbolId,
-  });
+  };
 });
 
 export function getMakiSymbolSvg(symbolId) {
@@ -54,7 +54,6 @@ export function getMakiSymbolAnchor(symbolId) {
       return 'center';
   }
 }
-
 
 export function buildSrcUrl(svgString) {
   const domUrl = window.URL || window.webkitURL || window;

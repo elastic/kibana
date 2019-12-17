@@ -6,7 +6,6 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import moment from 'moment-timezone';
-import { idx } from '@kbn/elastic-idx';
 
 import { EuiIcon, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
 
@@ -26,7 +25,11 @@ import {
   Eval,
 } from '../../../../common';
 import { isCompletedAnalyticsJob } from './common';
-import { isRegressionAnalysis } from '../../../../common/analytics';
+import {
+  isRegressionAnalysis,
+  ANALYSIS_CONFIG_TYPE,
+  isRegressionEvaluateResponse,
+} from '../../../../common/analytics';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 
 function getItemDescription(value: any) {
@@ -64,7 +67,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
   const [isLoadingGeneralization, setIsLoadingGeneralization] = useState<boolean>(false);
-  const index = idx(item, _ => _.config.dest.index) as string;
+  const index = item?.config?.dest?.index;
   const dependentVariable = getDependentVar(item.config.analysis);
   const predictionFieldName = getPredictionFieldName(item.config.analysis);
   // default is 'ml'
@@ -82,9 +85,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       dependentVariable,
       resultsField,
       predictionFieldName,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (genErrorEval.success === true && genErrorEval.eval) {
+    if (
+      genErrorEval.success === true &&
+      genErrorEval.eval &&
+      isRegressionEvaluateResponse(genErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(genErrorEval.eval);
       setGeneralizationEval({
         meanSquaredError,
@@ -107,9 +115,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       dependentVariable,
       resultsField,
       predictionFieldName,
+      jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (trainingErrorEval.success === true && trainingErrorEval.eval) {
+    if (
+      trainingErrorEval.success === true &&
+      trainingErrorEval.eval &&
+      isRegressionEvaluateResponse(trainingErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         meanSquaredError,

@@ -7,6 +7,7 @@
 import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { HeaderPage } from '../../../components/header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
@@ -24,7 +25,16 @@ import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
+const ResizeEuiPanel = styled(EuiPanel)<{
+  height?: number;
+}>`
+  .euiAccordion__childWrapper {
+    height: ${props => (props.height !== -1 ? `${props.height}px !important` : 'auto')};
+  }
+`;
+
 export const CreateRuleComponent = React.memo(() => {
+  const [heightAccordion, setHeightAccordion] = useState(-1);
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep | null>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
@@ -169,7 +179,7 @@ export const CreateRuleComponent = React.memo(() => {
           isLoading={isLoading}
           title={i18n.PAGE_TITLE}
         />
-        <EuiPanel>
+        <ResizeEuiPanel height={heightAccordion}>
           <EuiAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
@@ -194,9 +204,10 @@ export const CreateRuleComponent = React.memo(() => {
               isEditView={isStepRuleInEditView[RuleStep.defineRule]}
               isLoading={isLoading}
               setStepData={setStepData}
+              resizeParentContainer={height => setHeightAccordion(height)}
             />
           </EuiAccordion>
-        </EuiPanel>
+        </ResizeEuiPanel>
         <EuiSpacer size="s" />
         <EuiPanel>
           <EuiAccordion

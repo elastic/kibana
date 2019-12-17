@@ -5,13 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import {
-  EuiButtonIcon,
-  EuiFormRow,
-  EuiPopover,
-  EuiRange,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFormRow, EuiPopover, EuiRange, EuiSwitch } from '@elastic/eui';
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 
@@ -20,25 +14,24 @@ function getIsEnableToggleLabel(styleName) {
     case VECTOR_STYLES.FILL_COLOR:
     case VECTOR_STYLES.LINE_COLOR:
       return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.colorLabel', {
-        defaultMessage: 'Calculate color ramp range from indices'
+        defaultMessage: 'Calculate color ramp range from indices',
       });
     case VECTOR_STYLES.LINE_WIDTH:
       return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.widthLabel', {
-        defaultMessage: 'Calculate border width range from indices'
+        defaultMessage: 'Calculate border width range from indices',
       });
     case VECTOR_STYLES.ICON_SIZE:
       return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.sizeLabel', {
-        defaultMessage: 'Calculate symbol size range from indices'
+        defaultMessage: 'Calculate symbol size range from indices',
       });
     default:
       return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.defaultLabel', {
-        defaultMessage: 'Calculate symbolization range from indices'
+        defaultMessage: 'Calculate symbolization range from indices',
       });
   }
 }
 
 export class FieldMetaOptionsPopover extends Component {
-
   state = {
     isPopoverOpen: false,
   };
@@ -47,13 +40,13 @@ export class FieldMetaOptionsPopover extends Component {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
   _closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   _onIsEnabledChange = event => {
     this.props.onChange({
@@ -67,7 +60,7 @@ export class FieldMetaOptionsPopover extends Component {
       ...this.props.styleProperty.getFieldMetaOptions(),
       sigma: event.target.value,
     });
-  }
+  };
 
   _renderButton() {
     return (
@@ -85,9 +78,7 @@ export class FieldMetaOptionsPopover extends Component {
   _renderContent() {
     return (
       <Fragment>
-        <EuiFormRow
-          display="columnCompressedSwitch"
-        >
+        <EuiFormRow display="columnCompressedSwitch">
           <EuiSwitch
             label={getIsEnableToggleLabel(this.props.styleProperty.getStyleName())}
             checked={this.props.styleProperty.getFieldMetaOptions().isEnabled}

@@ -47,26 +47,28 @@ function TabifyBuckets(aggResp, aggParams, timeRange) {
   }
 }
 
-TabifyBuckets.prototype.forEach = function (fn) {
+TabifyBuckets.prototype.forEach = function(fn) {
   const buckets = this.buckets;
 
   if (this.objectMode) {
-    this._keys.forEach(function (key) {
+    this._keys.forEach(function(key) {
       fn(buckets[key], key);
     });
   } else {
-    buckets.forEach(function (bucket) {
+    buckets.forEach(function(bucket) {
       fn(bucket, bucket.key);
     });
   }
 };
 
-TabifyBuckets.prototype._isRangeEqual = function (range1, range2) {
-  return _.get(range1, 'from', null) === _.get(range2, 'from', null)
-    && _.get(range1, 'to', null) === _.get(range2, 'to', null);
+TabifyBuckets.prototype._isRangeEqual = function(range1, range2) {
+  return (
+    _.get(range1, 'from', null) === _.get(range2, 'from', null) &&
+    _.get(range1, 'to', null) === _.get(range2, 'to', null)
+  );
 };
 
-TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
+TabifyBuckets.prototype._orderBucketsAccordingToParams = function(params) {
   if (params.filters && this.objectMode) {
     this._keys = params.filters.map(filter => {
       const query = _.get(filter, 'input.query.query_string.query', filter.input.query);
@@ -93,11 +95,13 @@ TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
 
 // dropPartials should only be called if the aggParam setting is enabled,
 // and the agg field is the same as the Time Range.
-TabifyBuckets.prototype._dropPartials = function (params, timeRange) {
-  if (!timeRange ||
+TabifyBuckets.prototype._dropPartials = function(params, timeRange) {
+  if (
+    !timeRange ||
     this.buckets.length <= 1 ||
     this.objectMode ||
-    params.field.name !== timeRange.name) {
+    params.field.name !== timeRange.name
+  ) {
     return;
   }
 

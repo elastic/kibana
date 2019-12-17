@@ -15,7 +15,12 @@ import {
 import { getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-import { MonitorDetails, MonitorError } from '../../../../common/runtime_types';
+import {
+  MonitorDetails,
+  MonitorError,
+  MonitorLocations,
+  MonitorLocation,
+} from '../../../../common/runtime_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -272,6 +277,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
   }
 
+  /**
+   * Fetch data for the monitor page title.
+   * @param request Kibana server request
+   * @param monitorId the ID to query
+   */
   public async getMonitorDetails(request: any, monitorId: string): Promise<MonitorDetails> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -317,6 +327,102 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       monitorId,
       error: monitorError,
       timestamp: errorTimeStamp,
+    };
+  }
+
+  /**
+   * Fetch data for the monitor page title.
+   * @param request Kibana server request
+   * @param monitorId the ID to query
+   */
+  public async getMonitorLocations(
+    request: any,
+    monitorId: string,
+    dateStart: string,
+    dateEnd: string
+  ): Promise<MonitorLocations> {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                match: {
+                  'monitor.id': monitorId,
+                },
+              },
+              {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
+                    lte: dateEnd,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          location: {
+            terms: {
+              field: 'observer.geo.name',
+              missing: '__location_missing__',
+            },
+            aggs: {
+              most_recent: {
+                top_hits: {
+                  size: 1,
+                  sort: {
+                    '@timestamp': {
+                      order: 'desc',
+                    },
+                  },
+                  _source: ['monitor', 'summary', 'observer'],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = await this.database.search(request, params);
+    const locations = result?.aggregations?.location?.buckets ?? [];
+
+    const getGeo = (locGeo: any) => {
+      const { name, location } = locGeo;
+      const latLon = location.trim().split(',');
+      return {
+        name,
+        location: {
+          lat: latLon[0],
+          lon: latLon[1],
+        },
+      };
+    };
+
+    const monLocs: MonitorLocation[] = [];
+    locations.forEach((loc: any) => {
+      if (loc?.key !== '__location_missing__') {
+        const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+        const location: MonitorLocation = {
+          summary: mostRecentLocation?.summary,
+          geo: getGeo(mostRecentLocation?.observer?.geo),
+        };
+        monLocs.push(location);
+      }
+    });
+
+    return {
+      monitorId,
+      locations: monLocs,
     };
   }
 }

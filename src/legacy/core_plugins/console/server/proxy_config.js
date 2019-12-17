@@ -27,21 +27,22 @@ import { WildcardMatcher } from './wildcard_matcher';
 export class ProxyConfig {
   constructor(config) {
     config = {
-      ...config
+      ...config,
     };
 
     // -----
     // read "match" info
     // -----
     const rawMatches = {
-      ...config.match
+      ...config.match,
     };
-    this.id = formatUrl({
-      protocol: rawMatches.protocol,
-      hostname: rawMatches.host,
-      port: rawMatches.port,
-      pathname: rawMatches.path
-    }) || '*';
+    this.id =
+      formatUrl({
+        protocol: rawMatches.protocol,
+        hostname: rawMatches.host,
+        port: rawMatches.port,
+        pathname: rawMatches.path,
+      }) || '*';
 
     this.matchers = {
       protocol: new WildcardMatcher(rawMatches.protocol),
@@ -83,7 +84,7 @@ export class ProxyConfig {
     return {
       timeout: this.timeout,
       rejectUnauthorized: this.sslAgent ? undefined : this.verifySsl,
-      agent: protocol === 'https:' ? this.sslAgent : undefined
+      agent: protocol === 'https:' ? this.sslAgent : undefined,
     };
   }
 }

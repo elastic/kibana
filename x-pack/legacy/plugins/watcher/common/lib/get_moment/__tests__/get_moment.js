@@ -8,9 +8,7 @@ import expect from '@kbn/expect';
 import { getMoment } from '../get_moment';
 
 describe('get_moment', () => {
-
   describe('getMoment', () => {
-
     it(`returns a moment object when passed a date`, () => {
       const moment = getMoment('2017-03-30T14:53:08.121Z');
 
@@ -24,14 +22,12 @@ describe('get_moment', () => {
         getMoment(''),
         getMoment(null),
         getMoment(undefined),
-        getMoment(NaN)
+        getMoment(NaN),
       ];
 
       results.forEach(result => {
         expect(result).to.be(null);
       });
     });
-
   });
-
 });
