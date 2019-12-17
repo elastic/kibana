@@ -8,8 +8,8 @@ import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
 import { Plugin } from './plugin';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-new Plugin({ opaqueId: Symbol('siem'), env: {} as any }, chrome).start(
-  npStart.core,
-  npStart.plugins
-);
+new Plugin(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { opaqueId: Symbol('siem'), env: {} as any, config: { get: () => ({} as any) } },
+  chrome
+).start(npStart.core, npStart.plugins);

@@ -13,6 +13,7 @@
     'x-pack/package.json',
     'x-pack/legacy/plugins/*/package.json',
     'packages/*/package.json',
+    'examples/*/package.json',
     'test/plugin_functional/plugins/*/package.json',
     'test/interpreter_functional/plugins/*/package.json',
   ],
@@ -21,6 +22,7 @@
   ],
   labels: [
     'release_note:skip',
+    'Team:Operations',
     'renovate',
     'v8.0.0',
     'v7.6.0',
@@ -28,6 +30,7 @@
   major: {
     labels: [
       'release_note:skip',
+      'Team:Operations',
       'renovate',
       'v8.0.0',
       'v7.6.0',
@@ -59,6 +62,10 @@
         packageNames: [
           'core-js',
           '@types/core-js',
+          '@babel/preset-react',
+          '@types/babel__preset-react',
+          '@babel/preset-typescript',
+          '@types/babel__preset-typescript',
         ],
       },
       {
@@ -228,6 +235,7 @@
         ],
         labels: [
           'release_note:skip',
+          'Team:Operations',
           'renovate',
           'v8.0.0',
           'v7.6.0',
@@ -950,5 +958,6 @@
     enabled: false,
   },
   rebaseStalePrs: false,
+  rebaseConflictedPrs: false,
   semanticCommits: false,
 }

@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -14,11 +13,7 @@ import { SkeletonRow } from './index';
 
 describe('SkeletonRow', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <SkeletonRow />
-      </TestProviders>
-    );
+    const wrapper = shallow(<SkeletonRow />);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 

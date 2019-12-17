@@ -16,16 +16,18 @@ export interface EuiTheme {
   darkMode: boolean;
 }
 
-const EuiThemeProvider = <T extends any>({
+const EuiThemeProvider = <
+  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
+>({
   darkMode = false,
   ...otherProps
-}: ThemeProviderProps<T & EuiTheme> & {
+}: Omit<ThemeProviderProps<OuterTheme, OuterTheme & EuiTheme>, 'theme'> & {
   darkMode?: boolean;
-  children?: React.ReactNode;
 }) => (
   <ThemeProvider
     {...otherProps}
-    theme={() => ({
+    theme={(outerTheme?: OuterTheme) => ({
+      ...outerTheme,
       eui: darkMode ? euiDarkVars : euiLightVars,
       darkMode,
     })}
@@ -35,9 +37,9 @@ const EuiThemeProvider = <T extends any>({
 const {
   default: euiStyled,
   css,
-  injectGlobal,
+  createGlobalStyle,
   keyframes,
   withTheme,
 } = (styledComponents as unknown) as ThemedStyledComponentsModule<EuiTheme>;
 
-export { css, euiStyled, EuiThemeProvider, injectGlobal, keyframes, withTheme };
+export { css, euiStyled, EuiThemeProvider, createGlobalStyle, keyframes, withTheme };

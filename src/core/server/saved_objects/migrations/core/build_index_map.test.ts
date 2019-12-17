@@ -20,10 +20,13 @@
 import { createIndexMap } from './build_index_map';
 import { ObjectToConfigAdapter } from '../../../config';
 import { SavedObjectsSchema } from '../../schema';
+import { LegacyConfig } from '../../../legacy/config';
+
+const config = (new ObjectToConfigAdapter({}) as unknown) as LegacyConfig;
 
 test('mappings without index pattern goes to default index', () => {
   const result = createIndexMap({
-    config: new ObjectToConfigAdapter({}),
+    config,
     kibanaIndexName: '.kibana',
     schema: new SavedObjectsSchema({
       type1: {
@@ -57,7 +60,7 @@ test('mappings without index pattern goes to default index', () => {
 
 test(`mappings with custom index pattern doesn't go to default index`, () => {
   const result = createIndexMap({
-    config: new ObjectToConfigAdapter({}),
+    config,
     kibanaIndexName: '.kibana',
     schema: new SavedObjectsSchema({
       type1: {
@@ -92,7 +95,7 @@ test(`mappings with custom index pattern doesn't go to default index`, () => {
 
 test('creating a script gets added to the index pattern', () => {
   const result = createIndexMap({
-    config: new ObjectToConfigAdapter({}),
+    config,
     kibanaIndexName: '.kibana',
     schema: new SavedObjectsSchema({
       type1: {
@@ -157,7 +160,7 @@ test('throws when two scripts are defined for an index pattern', () => {
   };
   expect(() =>
     createIndexMap({
-      config: new ObjectToConfigAdapter({}),
+      config,
       kibanaIndexName: defaultIndex,
       schema,
       indexMap,

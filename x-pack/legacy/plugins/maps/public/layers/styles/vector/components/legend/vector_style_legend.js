@@ -4,37 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import _ from 'lodash';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { StylePropertyLegendRow } from './style_property_legend_row';
 
-export function VectorStyleLegend({ getFieldLabel, getFieldFormatter, styleProperties }) {
-  return styleProperties.map(styleProperty => {
-    return (
-      <StylePropertyLegendRow
-        key={styleProperty.name}
-        name={styleProperty.name}
-        type={styleProperty.type}
-        options={styleProperty.options}
-        range={styleProperty.range}
-        getFieldLabel={getFieldLabel}
-        getFieldFormatter={getFieldFormatter}
-      />
-    );
-  });
+export class VectorStyleLegend extends Component {
+  state = {
+    rows: [],
+  };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._prevRowDescriptors = undefined;
+    this._loadRows();
+  }
+
+  componentDidUpdate() {
+    this._loadRows();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  _loadRows = _.debounce(async () => {
+    const rows = await this.props.loadRows();
+    const rowDescriptors = rows.map(row => {
+      return {
+        label: row.label,
+        range: row.meta,
+        styleOptions: row.style.getOptions(),
+      };
+    });
+    if (this._isMounted && !_.isEqual(rowDescriptors, this._prevRowDescriptors)) {
+      this._prevRowDescriptors = rowDescriptors;
+      this.setState({ rows });
+    }
+  }, 100);
+
+  render() {
+    return this.state.rows.map(rowProps => {
+      return <StylePropertyLegendRow key={rowProps.style.getStyleName()} {...rowProps} />;
+    });
+  }
 }
 
-const stylePropertyShape = PropTypes.shape({
-  name: PropTypes.string.isRequired,
-  type: PropTypes.string,
-  options: PropTypes.oneOfType(styleOptionShapes).isRequired,
-  range: rangeShape,
-});
-
 VectorStyleLegend.propTypes = {
-  styleProperties: PropTypes.arrayOf(stylePropertyShape).isRequired,
-  getFieldLabel: PropTypes.func.isRequired,
-  getFieldFormatter: PropTypes.func.isRequired,
+  loadRows: PropTypes.func.isRequired,
 };

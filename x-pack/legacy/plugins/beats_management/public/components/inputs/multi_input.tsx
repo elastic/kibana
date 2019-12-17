@@ -42,7 +42,7 @@ class MultiFieldText extends Component<
     }
   }
 
-  public componentWillReceiveProps(nextProps: ComponentProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: ComponentProps) {
     if (nextProps.isFormSubmitted()) {
       this.showError();
     }

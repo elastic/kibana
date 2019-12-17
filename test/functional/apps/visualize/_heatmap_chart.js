@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
@@ -27,16 +27,14 @@ export default function ({ getService, getPageObjects }) {
   describe('heatmap chart', function indexPatternCreation() {
     this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
-    before(async function () {
+    before(async function() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickHeatmapChart');
       await PageObjects.visualize.clickHeatmapChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -47,20 +45,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
-    it('should save and load', async function () {
+    it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct data', async function () {
+    it('should show correct data', async function() {
       // this is only the first page of the tabular data.
-      const expectedChartData =  [
+      const expectedChartData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
         ['2015-09-20 06:00', '740'],
@@ -83,19 +81,18 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-22 09:00', '1,408'],
       ];
 
-
       await inspector.open();
       await inspector.expectTableData(expectedChartData);
       await inspector.close();
     });
 
-    it('should show 4 color ranges as default colorNumbers param', async function () {
+    it('should show 4 color ranges as default colorNumbers param', async function() {
       const legends = await PageObjects.visualize.getLegendEntries();
       const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
       expect(legends).to.eql(expectedLegends);
     });
 
-    it('should show 6 color ranges if changed on options', async function () {
+    it('should show 6 color ranges if changed on options', async function() {
       await PageObjects.visualize.clickOptionsTab();
       await PageObjects.visualize.changeHeatmapColorNumbers(6);
       await PageObjects.visualize.clickGo();
@@ -110,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
       ];
       expect(legends).to.eql(expectedLegends);
     });
-    it('should show 6 custom color ranges', async function () {
+    it('should show 6 custom color ranges', async function() {
       await PageObjects.visualize.clickOptionsTab();
       await PageObjects.visualize.clickEnableCustomRanges();
       await PageObjects.visualize.clickAddRange();

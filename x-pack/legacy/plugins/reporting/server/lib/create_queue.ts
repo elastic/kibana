@@ -5,16 +5,28 @@
  */
 
 import { PLUGIN_ID } from '../../common/constants';
-import { ServerFacade, QueueConfig } from '../../types';
+import {
+  ServerFacade,
+  ExportTypesRegistry,
+  HeadlessChromiumDriverFactory,
+  QueueConfig,
+} from '../../types';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
-import { oncePerServer } from './once_per_server';
 import { LevelLogger } from './level_logger';
 // @ts-ignore
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 
-function createQueueFn(server: ServerFacade): Esqueue {
+interface CreateQueueFactoryOpts {
+  exportTypesRegistry: ExportTypesRegistry;
+  browserDriverFactory: HeadlessChromiumDriverFactory;
+}
+
+export function createQueueFactory(
+  server: ServerFacade,
+  { exportTypesRegistry, browserDriverFactory }: CreateQueueFactoryOpts
+): Esqueue {
   const queueConfig: QueueConfig = server.config().get('xpack.reporting.queue');
   const index = server.config().get('xpack.reporting.index');
 
@@ -30,7 +42,7 @@ function createQueueFn(server: ServerFacade): Esqueue {
 
   if (queueConfig.pollEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = createWorkerFactory(server);
+    const createWorker = createWorkerFactory(server, { exportTypesRegistry, browserDriverFactory });
     createWorker(queue);
   } else {
     const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'create_queue']);
@@ -45,5 +57,3 @@ function createQueueFn(server: ServerFacade): Esqueue {
 
   return queue;
 }
-
-export const createQueueFactory = oncePerServer(createQueueFn);

@@ -6,7 +6,6 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import 'jest-styled-components';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 

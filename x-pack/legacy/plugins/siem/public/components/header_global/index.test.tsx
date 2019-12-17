@@ -8,7 +8,6 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
 import '../../mock/match_media';
 import '../../mock/ui_settings';
 import { HeaderGlobal } from './index';
@@ -23,11 +22,7 @@ jest.mock('../search_bar', () => ({
 
 describe('HeaderGlobal', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <HeaderGlobal />
-      </TestProviders>
-    );
+    const wrapper = shallow(<HeaderGlobal />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

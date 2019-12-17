@@ -67,7 +67,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "name": "",
             "render": [Function],
             "sortable": true,
-            "width": "40px",
+            "width": "24px",
           },
         ]
       }
@@ -81,9 +81,11 @@ exports[`MonitorList component renders a no items message when no data is provid
       responsive={true}
     />
     <EuiSpacer
-      size="s"
+      size="m"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
       >
@@ -172,7 +174,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "name": "",
             "render": [Function],
             "sortable": true,
-            "width": "40px",
+            "width": "24px",
           },
         ]
       }
@@ -248,9 +250,11 @@ exports[`MonitorList component renders the monitor list 1`] = `
       responsive={true}
     />
     <EuiSpacer
-      size="s"
+      size="m"
     />
-    <EuiFlexGroup>
+    <EuiFlexGroup
+      responsive={false}
+    >
       <EuiFlexItem
         grow={false}
       >

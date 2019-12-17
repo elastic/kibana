@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, StatelessComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 
 import {
   EuiFlexGroup,
@@ -24,7 +24,7 @@ import { LoadingErrorBanner } from '../../error_banner';
 import { LoadingState, UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
-export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props => (
+export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = props => (
   <Fragment>
     <EuiSpacer />
 

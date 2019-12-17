@@ -69,7 +69,7 @@ describe('setup.getPlugins()', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
         uiPlugins: [
-          { id: 'plugin-1', plugin: {} },
+          { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
           { id: 'plugin-2', plugin: {} },
         ],
       },
@@ -77,7 +77,7 @@ describe('setup.getPlugins()', () => {
 
     const plugins = injectedMetadata.setup().getPlugins();
     expect(plugins).toEqual([
-      { id: 'plugin-1', plugin: {} },
+      { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
       { id: 'plugin-2', plugin: {} },
     ]);
   });

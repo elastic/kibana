@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -16,7 +17,7 @@ import { validateConfig, validateSecrets } from './lib';
 import { ActionResult, FindActionResult, RawAction } from './types';
 
 interface ActionUpdate extends SavedObjectAttributes {
-  description: string;
+  name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }
@@ -87,14 +88,20 @@ export class ActionsClient {
    * Create an action
    */
   public async create({ action }: CreateOptions): Promise<ActionResult> {
-    const { actionTypeId, description, config, secrets } = action;
+    const { actionTypeId, name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
 
+    try {
+      this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    } catch (err) {
+      throw Boom.badRequest(err.message);
+    }
+
     const result = await this.savedObjectsClient.create('action', {
       actionTypeId,
-      description,
+      name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
     });
@@ -102,7 +109,7 @@ export class ActionsClient {
     return {
       id: result.id,
       actionTypeId: result.attributes.actionTypeId,
-      description: result.attributes.description,
+      name: result.attributes.name,
       config: result.attributes.config,
     };
   }
@@ -113,14 +120,14 @@ export class ActionsClient {
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
     const existingObject = await this.savedObjectsClient.get('action', id);
     const { actionTypeId } = existingObject.attributes;
-    const { description, config, secrets } = action;
+    const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
 
     const result = await this.savedObjectsClient.update('action', id, {
       actionTypeId,
-      description,
+      name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
       secrets: validatedActionTypeSecrets as SavedObjectAttributes,
     });
@@ -128,7 +135,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
-      description: result.attributes.description as string,
+      name: result.attributes.name as string,
       config: result.attributes.config as Record<string, any>,
     };
   }
@@ -142,7 +149,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
-      description: result.attributes.description as string,
+      name: result.attributes.name as string,
       config: result.attributes.config as Record<string, any>,
     };
   }

@@ -5,9 +5,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
+import { InventoryAWSAccount } from '../../../../common/http_api/inventory_meta_api';
 import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import {
   InfraNodeType,
@@ -21,9 +21,10 @@ import { InfraGroupByOptions } from '../../../lib/lib';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
 import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ToolbarProps {
-  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
+  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
   changeMetric: (payload: InfraSnapshotMetricInput) => Action<InfraSnapshotMetricInput>;
   changeGroupBy: (payload: InfraSnapshotGroupbyInput[]) => Action<InfraSnapshotGroupbyInput[]>;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;
@@ -58,7 +59,12 @@ const wrapToolbarItems = (ToolbarItems: FunctionComponent<ToolbarProps>) => {
   );
 };
 
-export const Toolbar = ({ nodeType }: { nodeType: InfraNodeType }) => {
+interface Props {
+  nodeType: InfraNodeType;
+  regions: string[];
+  accounts: InventoryAWSAccount[];
+}
+export const Toolbar = ({ nodeType }: Props) => {
   const ToolbarItems = findToolbar(nodeType);
   return wrapToolbarItems(ToolbarItems);
 };

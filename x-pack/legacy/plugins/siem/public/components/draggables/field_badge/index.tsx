@@ -6,20 +6,17 @@
 
 import { rgba } from 'polished';
 import * as React from 'react';
-import { pure } from 'recompose';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 const Field = styled.div`
-  ${({ theme }) => css`
-    background-color: ${theme.eui.euiColorEmptyShade};
-    border: ${theme.eui.euiBorderThin};
-    box-shadow: 0 2px 2px -1px ${rgba(theme.eui.euiColorMediumShade, 0.3)},
-      0 1px 5px -2px ${rgba(theme.eui.euiColorMediumShade, 0.3)};
-    font-size: ${theme.eui.euiFontSizeXS};
-    font-weight: ${theme.eui.euiFontWeightSemiBold};
-    line-height: ${theme.eui.euiLineHeight};
-    padding: ${theme.eui.paddingSizes.xs};
-  `}
+  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border: ${({ theme }) => theme.eui.euiBorderThin};
+  box-shadow: 0 2px 2px -1px ${({ theme }) => rgba(theme.eui.euiColorMediumShade, 0.3)},
+    0 1px 5px -2px ${({ theme }) => rgba(theme.eui.euiColorMediumShade, 0.3)};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
+  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
 `;
 Field.displayName = 'Field';
 
@@ -30,11 +27,12 @@ Field.displayName = 'Field';
 // Passing the styles directly to the component because the width is
 // being calculated and is recommended by Styled Components for performance
 // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-export const DraggableFieldBadge = pure<{ fieldId: string; fieldWidth?: string }>(
+export const DraggableFieldBadge = React.memo<{ fieldId: string; fieldWidth?: string }>(
   ({ fieldId, fieldWidth }) => (
     <Field data-test-subj="field" style={{ width: fieldWidth }}>
       {fieldId}
     </Field>
   )
 );
+
 DraggableFieldBadge.displayName = 'DraggableFieldBadge';

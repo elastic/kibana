@@ -17,9 +17,13 @@
  * under the License.
  */
 
+import uuid from 'uuid';
 import { config, HttpConfig } from '.';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
+
+const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
+const invalidHostname = 'asdf$%^';
 
 test('has defaults for config', () => {
   const httpSchema = config.schema;
@@ -28,18 +32,16 @@ test('has defaults for config', () => {
 });
 
 test('accepts valid hostnames', () => {
-  const { host: host1 } = config.schema.validate({ host: 'www.example.com' });
-  const { host: host2 } = config.schema.validate({ host: '8.8.8.8' });
-  const { host: host3 } = config.schema.validate({ host: '::1' });
-  const { host: host4 } = config.schema.validate({ host: 'localhost' });
-
-  expect({ host1, host2, host3, host4 }).toMatchSnapshot('valid host names');
+  for (const val of validHostnames) {
+    const { host } = config.schema.validate({ host: val });
+    expect({ host }).toMatchSnapshot();
+  }
 });
 
 test('throws if invalid hostname', () => {
   const httpSchema = config.schema;
   const obj = {
-    host: 'asdf$%^',
+    host: invalidHostname,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
@@ -74,6 +76,14 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
     rewriteBasePath: true,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
+test('accepts only valid uuids for server.uuid', () => {
+  const httpSchema = config.schema;
+  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
+    `"[uuid]: must be a valid uuid"`
+  );
 });
 
 describe('with TLS', () => {
@@ -255,6 +265,7 @@ describe('with TLS', () => {
           clientAuthentication: 'none',
         },
       }),
+      {} as any,
       Env.createDefault(getEnvOptions())
     );
 
@@ -272,6 +283,7 @@ describe('with TLS', () => {
           clientAuthentication: 'optional',
         },
       }),
+      {} as any,
       Env.createDefault(getEnvOptions())
     );
 
@@ -289,10 +301,52 @@ describe('with TLS', () => {
           clientAuthentication: 'required',
         },
       }),
+      {} as any,
       Env.createDefault(getEnvOptions())
     );
 
     expect(httpConfig.ssl.requestCert).toBe(true);
     expect(httpConfig.ssl.rejectUnauthorized).toBe(true);
+  });
+});
+
+describe('with compression', () => {
+  test('accepts valid referrer whitelist', () => {
+    const {
+      compression: { referrerWhitelist },
+    } = config.schema.validate({
+      compression: {
+        referrerWhitelist: validHostnames,
+      },
+    });
+
+    expect(referrerWhitelist).toMatchSnapshot();
+  });
+
+  test('throws if invalid referrer whitelist', () => {
+    const httpSchema = config.schema;
+    const invalidHostnames = {
+      compression: {
+        referrerWhitelist: [invalidHostname],
+      },
+    };
+    const emptyArray = {
+      compression: {
+        referrerWhitelist: [],
+      },
+    };
+    expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(emptyArray)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if referrer whitelist is specified and compression is disabled', () => {
+    const httpSchema = config.schema;
+    const obj = {
+      compression: {
+        enabled: false,
+        referrerWhitelist: validHostnames,
+      },
+    };
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
   });
 });

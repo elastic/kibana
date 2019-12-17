@@ -16,13 +16,13 @@ export interface IUiSettingsClient
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [get](./kibana-plugin-server.iuisettingsclient.get.md) | <code>&lt;T extends SavedObjectAttribute = any&gt;(key: string) =&gt; Promise&lt;T&gt;</code> | Retrieves uiSettings values set by the user with fallbacks to default values if not specified. |
-|  [getAll](./kibana-plugin-server.iuisettingsclient.getall.md) | <code>&lt;T extends SavedObjectAttribute = any&gt;() =&gt; Promise&lt;Record&lt;string, T&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified. |
+|  [get](./kibana-plugin-server.iuisettingsclient.get.md) | <code>&lt;T = any&gt;(key: string) =&gt; Promise&lt;T&gt;</code> | Retrieves uiSettings values set by the user with fallbacks to default values if not specified. |
+|  [getAll](./kibana-plugin-server.iuisettingsclient.getall.md) | <code>&lt;T = any&gt;() =&gt; Promise&lt;Record&lt;string, T&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified. |
 |  [getRegistered](./kibana-plugin-server.iuisettingsclient.getregistered.md) | <code>() =&gt; Readonly&lt;Record&lt;string, UiSettingsParams&gt;&gt;</code> | Returns registered uiSettings values [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) |
-|  [getUserProvided](./kibana-plugin-server.iuisettingsclient.getuserprovided.md) | <code>&lt;T extends SavedObjectAttribute = any&gt;() =&gt; Promise&lt;Record&lt;string, UserProvidedValues&lt;T&gt;&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user. |
+|  [getUserProvided](./kibana-plugin-server.iuisettingsclient.getuserprovided.md) | <code>&lt;T = any&gt;() =&gt; Promise&lt;Record&lt;string, UserProvidedValues&lt;T&gt;&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user. |
 |  [isOverridden](./kibana-plugin-server.iuisettingsclient.isoverridden.md) | <code>(key: string) =&gt; boolean</code> | Shows whether the uiSettings value set by the user. |
 |  [remove](./kibana-plugin-server.iuisettingsclient.remove.md) | <code>(key: string) =&gt; Promise&lt;void&gt;</code> | Removes uiSettings value by key. |
 |  [removeMany](./kibana-plugin-server.iuisettingsclient.removemany.md) | <code>(keys: string[]) =&gt; Promise&lt;void&gt;</code> | Removes multiple uiSettings values by keys. |
-|  [set](./kibana-plugin-server.iuisettingsclient.set.md) | <code>&lt;T extends SavedObjectAttribute = any&gt;(key: string, value: T) =&gt; Promise&lt;void&gt;</code> | Writes uiSettings value and marks it as set by the user. |
-|  [setMany](./kibana-plugin-server.iuisettingsclient.setmany.md) | <code>&lt;T extends SavedObjectAttribute = any&gt;(changes: Record&lt;string, T&gt;) =&gt; Promise&lt;void&gt;</code> | Writes multiple uiSettings values and marks them as set by the user. |
+|  [set](./kibana-plugin-server.iuisettingsclient.set.md) | <code>(key: string, value: any) =&gt; Promise&lt;void&gt;</code> | Writes uiSettings value and marks it as set by the user. |
+|  [setMany](./kibana-plugin-server.iuisettingsclient.setmany.md) | <code>(changes: Record&lt;string, any&gt;) =&gt; Promise&lt;void&gt;</code> | Writes multiple uiSettings values and marks them as set by the user. |
 

@@ -7,7 +7,7 @@
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
@@ -23,10 +23,10 @@ interface Props {
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
 }
 
-export const GroupOfGroups: React.SFC<Props> = props => {
+export const GroupOfGroups: React.FC<Props> = props => {
   return (
     <GroupOfGroupsContainer>
       <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />
@@ -41,7 +41,7 @@ export const GroupOfGroups: React.SFC<Props> = props => {
             formatter={props.formatter}
             bounds={props.bounds}
             nodeType={props.nodeType}
-            timeRange={props.timeRange}
+            currentTime={props.currentTime}
           />
         ))}
       </Groups>
@@ -51,7 +51,7 @@ export const GroupOfGroups: React.SFC<Props> = props => {
 
 const GroupOfGroupsContainer = euiStyled.div`
   margin: 0 10px;
-  width: 100%
+  width: 100%;
 `;
 
 const Groups = euiStyled.div`

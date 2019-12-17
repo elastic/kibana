@@ -82,6 +82,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   return (
     <EuiFormRow
       label={field.label}
+      labelAppend={field.labelAppend}
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

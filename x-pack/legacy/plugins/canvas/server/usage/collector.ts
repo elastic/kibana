@@ -5,7 +5,8 @@
  */
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { CoreSetup, PluginsSetup } from '../shim';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CoreSetup } from '../shim';
 // @ts-ignore missing local declaration
 import { CANVAS_USAGE_TYPE } from '../../common/lib/constants';
 import { workpadCollector } from './workpad_collector';
@@ -22,9 +23,12 @@ const collectors: TelemetryCollector[] = [workpadCollector, customElementCollect
 
   A usage collector function returns an object derived from current data in the ES Cluster.
 */
-export function registerCanvasUsageCollector(setup: CoreSetup, plugins: PluginsSetup) {
-  const kibanaIndex = setup.getServerConfig().get<string>('kibana.index');
-  const canvasCollector = plugins.usage.collectorSet.makeUsageCollector({
+export function registerCanvasUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  core: CoreSetup
+) {
+  const kibanaIndex = core.getServerConfig().get<string>('kibana.index');
+  const canvasCollector = usageCollection.makeUsageCollector({
     type: CANVAS_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: CallCluster) => {
@@ -42,5 +46,5 @@ export function registerCanvasUsageCollector(setup: CoreSetup, plugins: PluginsS
     },
   });
 
-  plugins.usage.collectorSet.register(canvasCollector);
+  usageCollection.registerCollector(canvasCollector);
 }

@@ -54,8 +54,8 @@ Formulae are available from the Elastic Homebrew tap for installing {kib} on mac
 <<brew>>
 
 IMPORTANT: If your Elasticsearch installation is protected by
-{xpack-ref}/elasticsearch-security.html[{security}] see
-{kibana-ref}/using-kibana-with-security.html[Configuring Security in Kibana] for
+{ref}/elasticsearch-security.html[{security}] see
+{kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana] for
 additional setup instructions.
 
 include::install/targz.asciidoc[]

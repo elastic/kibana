@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useRef, useState } from 'react';
+import React, { Fragment, FC, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
+import { useKibanaContext } from '../../../../lib/kibana';
 
 import { getCreateRequestBody } from '../../../../common';
 
@@ -42,7 +42,7 @@ interface DefinePivotStepProps {
   setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
 }
 
-const StepDefine: SFC<DefinePivotStepProps> = ({
+const StepDefine: FC<DefinePivotStepProps> = ({
   isCurrentStep,
   stepDefineState,
   setCurrentStep,
@@ -67,8 +67,8 @@ const StepDefine: SFC<DefinePivotStepProps> = ({
   );
 };
 
-export const Wizard: SFC = React.memo(() => {
-  const kibanaContext = useContext(KibanaContext);
+export const Wizard: FC = React.memo(() => {
+  const kibanaContext = useKibanaContext();
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
@@ -108,11 +108,6 @@ export const Wizard: SFC = React.memo(() => {
     }
   }, []);
 
-  if (!isKibanaContextInitialized(kibanaContext)) {
-    // TODO proper loading indicator
-    return null;
-  }
-
   const indexPattern = kibanaContext.currentIndexPattern;
 
   const transformConfig = getCreateRequestBody(
@@ -133,18 +128,6 @@ export const Wizard: SFC = React.memo(() => {
     ) : (
       <StepCreateSummary />
     );
-
-  // scroll to the currently selected wizard step
-  /*
-  function scrollToRef() {
-    if (definePivotRef !== null && definePivotRef.current !== null) {
-      // TODO Fix types
-      const dummy = definePivotRef as any;
-      const headerOffset = 70;
-      window.scrollTo(0, dummy.current.offsetTop - headerOffset);
-    }
-  }
-  */
 
   const stepsConfig = [
     {
@@ -171,7 +154,6 @@ export const Wizard: SFC = React.memo(() => {
             <WizardNav
               previous={() => {
                 setCurrentStep(WIZARD_STEPS.DEFINE);
-                // scrollToRef();
               }}
               next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
               nextActive={stepDetailsState.valid}

@@ -20,7 +20,7 @@ import React from 'react';
 import { EuiToolTip, EuiFlexItem, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-
+import { i18n } from '@kbn/i18n';
 export interface DiscoverIndexPatternTitleProps {
   /**
    * determines whether the change link is displayed
@@ -65,18 +65,19 @@ export function DiscoverIndexPatternTitle({
             }
           >
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'kbn.discover.fieldChooser.indexPattern.changeLinkAriaLabel',
+                {
+                  defaultMessage: 'Change current index pattern',
+                }
+              )}
               data-test-subj="indexPattern-switch-link"
               size="xs"
               onClick={() => onChange()}
-            >
-              (
-              <FormattedMessage
-                id="kbn.discover.fieldChooser.indexPattern.changeLinkLabel"
-                defaultMessage="change"
-                description="should be a short word since lack of space"
-              />
-              )
-            </EuiButtonEmpty>
+              iconSide="right"
+              iconType="arrowDown"
+              color="text"
+            />
           </EuiToolTip>
         </EuiFlexItem>
       )}

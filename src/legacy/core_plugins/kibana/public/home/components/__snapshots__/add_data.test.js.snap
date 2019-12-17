@@ -67,10 +67,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoAPM"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="APM"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -104,10 +101,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Logs"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -141,10 +135,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -178,10 +169,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -332,10 +320,7 @@ exports[`isNewKibanaInstance 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Logs"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -369,10 +354,7 @@ exports[`isNewKibanaInstance 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -406,10 +388,7 @@ exports[`isNewKibanaInstance 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -560,10 +539,7 @@ exports[`mlEnabled 1`] = `
             type="logoAPM"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="APM"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -597,10 +573,7 @@ exports[`mlEnabled 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Logs"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -634,10 +607,7 @@ exports[`mlEnabled 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -671,10 +641,7 @@ exports[`mlEnabled 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -861,10 +828,7 @@ exports[`render 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Logs"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -898,10 +862,7 @@ exports[`render 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -935,10 +896,7 @@ exports[`render 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

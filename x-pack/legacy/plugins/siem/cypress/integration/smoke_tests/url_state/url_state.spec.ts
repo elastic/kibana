@@ -51,7 +51,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets the url state when start and end date are set', () => {
+  it('sets the url state when start and end date are set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
 
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).click({ force: true });
@@ -64,7 +64,7 @@ describe('url state', () => {
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true });
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
 
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
 
@@ -76,7 +76,7 @@ describe('url state', () => {
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true });
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
 
     cy.url().should(
       'include',
@@ -127,7 +127,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
+  it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlUnlinked);
 
     toggleTimelineVisibility();
@@ -165,23 +165,23 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets kql on network page', () => {
+  it('sets kql on network page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
-  it.skip('sets kql on hosts page', () => {
+  it('sets kql on hosts page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
-  it.skip('sets the url state when kql is set', () => {
+  it('sets the url state when kql is set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.url().should('include', `query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`);
   });
 
-  it.skip('sets the url state when kql is set and check if href reflect this change', () => {
+  it('sets the url state when kql is set and check if href reflect this change', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.get(NAVIGATION_HOSTS)
@@ -194,7 +194,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
+  it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlHost);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
     cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })
@@ -241,7 +241,7 @@ describe('url state', () => {
       );
   });
 
-  it.skip('Do not clears kql when navigating to a new page', () => {
+  it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');

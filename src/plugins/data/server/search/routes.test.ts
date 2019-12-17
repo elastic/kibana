@@ -60,7 +60,7 @@ describe('Search service', () => {
 
     expect(mockSearch).toBeCalled();
     expect(mockSearch.mock.calls[0][0]).toStrictEqual(mockBody);
-    expect(mockSearch.mock.calls[0][1]).toBe(mockParams.strategy);
+    expect(mockSearch.mock.calls[0][2]).toBe(mockParams.strategy);
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: 'yay' });
   });
@@ -92,7 +92,7 @@ describe('Search service', () => {
 
     expect(mockSearch).toBeCalled();
     expect(mockSearch.mock.calls[0][0]).toStrictEqual(mockBody);
-    expect(mockSearch.mock.calls[0][1]).toBe(mockParams.strategy);
+    expect(mockSearch.mock.calls[0][2]).toBe(mockParams.strategy);
     expect(mockResponse.internalError).toBeCalled();
     expect(mockResponse.internalError.mock.calls[0][0]).toEqual({ body: 'oh no' });
   });

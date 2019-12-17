@@ -9,7 +9,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -30,7 +30,7 @@ interface OwnProps {
   fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;

@@ -6,7 +6,6 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { MarkdownHint } from '../../markdown/markdown_hint';
@@ -34,7 +33,7 @@ const ButtonsContainer = styled(EuiFlexGroup)`
 
 ButtonsContainer.displayName = 'ButtonsContainer';
 
-export const CancelButton = pure<{ onCancelAddNote: () => void }>(({ onCancelAddNote }) => (
+export const CancelButton = React.memo<{ onCancelAddNote: () => void }>(({ onCancelAddNote }) => (
   <EuiButtonEmpty data-test-subj="cancel" onClick={onCancelAddNote}>
     {i18n.CANCEL}
   </EuiButtonEmpty>
@@ -43,7 +42,7 @@ export const CancelButton = pure<{ onCancelAddNote: () => void }>(({ onCancelAdd
 CancelButton.displayName = 'CancelButton';
 
 /** Displays an input for entering a new note, with an adjacent "Add" button */
-export const AddNote = pure<{
+export const AddNote = React.memo<{
   associateNote: AssociateNote;
   getNewNoteId: GetNewNoteId;
   newNote: string;

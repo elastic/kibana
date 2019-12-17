@@ -5,7 +5,7 @@
  */
 
 import { groupBy } from 'lodash';
-import React, { Fragment, StatelessComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 
 import {
   EuiAccordion,
@@ -59,7 +59,7 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
 /**
  * A single accordion item for a grouped deprecation item.
  */
-export const DeprecationAccordion: StatelessComponent<{
+export const DeprecationAccordion: FunctionComponent<{
   id: string;
   deprecations: EnrichedDeprecationInfo[];
   title: string;

@@ -11,7 +11,7 @@ import {
   TRANSACTION_ID
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface ErrorsPerTransaction {
   [transactionId: string]: number;
@@ -21,7 +21,7 @@ const includedLogLevels = ['critical', 'error', 'fatal'];
 
 export async function getTraceErrorsPerTransaction(
   traceId: string,
-  setup: Setup
+  setup: Setup & SetupTimeRange
 ): Promise<ErrorsPerTransaction> {
   const { start, end, client, indices } = setup;
 
@@ -45,12 +45,14 @@ export async function getTraceErrorsPerTransaction(
       aggs: {
         transactions: {
           terms: {
-            field: TRANSACTION_ID
+            field: TRANSACTION_ID,
+            // high cardinality
+            execution_hint: 'map'
           }
         }
       }
     }
-  };
+  } as const;
 
   const resp = await client.search(params);
 

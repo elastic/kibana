@@ -6,8 +6,7 @@
 
 import { createSelector } from 'reselect';
 
-import { fromKueryExpression } from '@kbn/es-query';
-
+import { esKuery } from '../../../../../../../../src/plugins/data/public';
 import { WaffleFilterState } from './reducer';
 
 export const selectWaffleFilterQuery = (state: WaffleFilterState) =>
@@ -23,7 +22,7 @@ export const selectIsWaffleFilterQueryDraftValid = createSelector(
   filterQueryDraft => {
     if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
       try {
-        fromKueryExpression(filterQueryDraft.expression);
+        esKuery.fromKueryExpression(filterQueryDraft.expression);
       } catch (err) {
         return false;
       }

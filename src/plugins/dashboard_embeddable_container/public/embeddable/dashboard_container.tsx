@@ -30,7 +30,7 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-  Start as EmbeddableStartContract,
+  IEmbeddableStart,
 } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -77,7 +77,7 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  embeddable: EmbeddableStartContract;
+  embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
@@ -89,6 +89,8 @@ export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
+
+  public renderEmpty?: undefined | (() => React.ReactNode);
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -124,7 +126,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport container={this} />
+          <DashboardViewport renderEmpty={this.renderEmpty} container={this} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

@@ -24,6 +24,7 @@ import angular from 'angular';
 import { uniq } from 'lodash';
 
 import { Subscription } from 'rxjs';
+import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
   subscribeWithScope,
@@ -34,12 +35,11 @@ import {
   State,
   AppStateClass as TAppStateClass,
   KbnUrl,
-  SaveOptions,
-  SavedObjectFinder,
+  SavedObjectSaveOpts,
   unhashUrl,
 } from './legacy_imports';
-import { FilterStateManager, IndexPattern, SavedQuery } from '../../../data/public';
-import { Query } from '../../../../../plugins/data/public';
+import { FilterStateManager, IndexPattern } from '../../../data/public';
+import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
 
 import {
   DashboardContainer,
@@ -53,6 +53,7 @@ import {
   ErrorEmbeddable,
   ViewMode,
   openAddPanelFlyout,
+  EmbeddableFactoryNotFoundError,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
@@ -69,6 +70,10 @@ import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../plugins/kibana_react/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -76,9 +81,7 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   getAppState: any;
   globalState: State;
-  indexPatterns: {
-    getDefault: () => Promise<IndexPattern>;
-  };
+  indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
   kbnUrl: KbnUrl;
   AppStateClass: TAppStateClass<DashboardAppState>;
@@ -115,14 +118,10 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata },
+    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
-
-    function getUnhashableStates(): State[] {
-      return [getAppState(), globalState].filter(Boolean);
-    }
 
     let lastReloadRequestTime = 0;
 
@@ -147,6 +146,20 @@ export class DashboardAppController {
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
+    const getShouldShowEditHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsEditMode() &&
+      !dashboardConfig.getHideWriteControls();
+
+    const getShouldShowViewHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsViewMode() &&
+      !dashboardConfig.getHideWriteControls();
+
+    const addVisualization = () => {
+      navActions[TopNavIds.VISUALIZE]();
+    };
+
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
         return;
@@ -169,10 +182,21 @@ export class DashboardAppController {
       } else {
         indexPatterns.getDefault().then(defaultIndexPattern => {
           $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern];
+            $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
         });
       }
+    };
+
+    const getEmptyScreenProps = (shouldShowEditHelp: boolean): DashboardEmptyScreenProps => {
+      const emptyScreenProps: DashboardEmptyScreenProps = {
+        onLinkClick: shouldShowEditHelp ? $scope.showAddPanel : $scope.enterEditMode,
+        showLinkToVisualize: shouldShowEditHelp,
+      };
+      if (shouldShowEditHelp) {
+        emptyScreenProps.onVisualizeClick = addVisualization;
+      }
+      return emptyScreenProps;
     };
 
     const getDashboardInput = (): DashboardContainerInput => {
@@ -186,6 +210,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
       }
+      const shouldShowEditHelp = getShouldShowEditHelp();
+      const shouldShowViewHelp = getShouldShowViewHelp();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -198,6 +224,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
@@ -237,6 +264,15 @@ export class DashboardAppController {
       .then((container: DashboardContainer | ErrorEmbeddable) => {
         if (!isErrorEmbeddable(container)) {
           dashboardContainer = container;
+
+          dashboardContainer.renderEmpty = () => {
+            const shouldShowEditHelp = getShouldShowEditHelp();
+            const shouldShowViewHelp = getShouldShowViewHelp();
+            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
+            return isEmptyState ? (
+              <DashboardEmptyScreen {...getEmptyScreenProps(shouldShowEditHelp)} />
+            ) : null;
+          };
 
           updateIndexPatterns(dashboardContainer);
 
@@ -337,15 +373,6 @@ export class DashboardAppController {
 
     updateBreadcrumbs();
     dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-
-    $scope.getShouldShowEditHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsEditMode() &&
-      !dashboardConfig.getHideWriteControls();
-    $scope.getShouldShowViewHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsViewMode() &&
-      !dashboardConfig.getHideWriteControls();
 
     const getChangesFromAppStateForContainerState = () => {
       const appStateDashboardInput = getDashboardInput();
@@ -581,7 +608,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<SaveResult> {
+    function save(saveOptions: SavedObjectSaveOpts): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -722,6 +749,10 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
+        );
+
         openAddPanelFlyout({
           embeddable: dashboardContainer,
           getAllFactories: embeddables.getEmbeddableFactories,
@@ -730,6 +761,18 @@ export class DashboardAppController {
           overlays,
           SavedObjectFinder,
         });
+      }
+    };
+
+    navActions[TopNavIds.VISUALIZE] = async () => {
+      const type = 'visualization';
+      const factory = embeddables.getEmbeddableFactory(type);
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(type);
+      }
+      const explicitInput = await factory.getExplicitInput();
+      if (dashboardContainer) {
+        await dashboardContainer.addNewEmbeddable(type, explicitInput);
       }
     };
 
@@ -751,7 +794,7 @@ export class DashboardAppController {
         anchorElement,
         allowEmbed: true,
         allowShortUrl: !dashboardConfig.getHideWriteControls(),
-        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',
         sharingData: {

@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import sinon from 'sinon';
-
-import { getServices, chance, assertSinonMatch } from './lib';
+import { getServices, chance } from './lib';
 
 export function docMissingAndIndexReadOnlySuite() {
   // ensure the kibana index has no documents
@@ -80,11 +77,12 @@ export function docMissingAndIndexReadOnlySuite() {
         url: '/api/kibana/settings',
       });
 
-      expect(statusCode).to.be(200);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(200);
+
+      expect(result).toMatchObject({
         settings: {
           buildNum: {
-            userValue: sinon.match.number,
+            userValue: expect.any(Number),
           },
           foo: {
             userValue: 'bar',
@@ -106,10 +104,11 @@ export function docMissingAndIndexReadOnlySuite() {
         payload: { value: defaultIndex },
       });
 
-      expect(statusCode).to.be(403);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(403);
+
+      expect(result).toEqual({
         error: 'Forbidden',
-        message: sinon.match('index read-only'),
+        message: expect.stringContaining('index read-only'),
         statusCode: 403,
       });
     });
@@ -128,10 +127,10 @@ export function docMissingAndIndexReadOnlySuite() {
         },
       });
 
-      expect(statusCode).to.be(403);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(403);
+      expect(result).toEqual({
         error: 'Forbidden',
-        message: sinon.match('index read-only'),
+        message: expect.stringContaining('index read-only'),
         statusCode: 403,
       });
     });
@@ -146,10 +145,10 @@ export function docMissingAndIndexReadOnlySuite() {
         url: '/api/kibana/settings/defaultIndex',
       });
 
-      expect(statusCode).to.be(403);
-      assertSinonMatch(result, {
+      expect(statusCode).toBe(403);
+      expect(result).toEqual({
         error: 'Forbidden',
-        message: sinon.match('index read-only'),
+        message: expect.stringContaining('index read-only'),
         statusCode: 403,
       });
     });

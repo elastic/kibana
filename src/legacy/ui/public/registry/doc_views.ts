@@ -21,6 +21,12 @@ import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_v
 
 export { DocViewRenderProps, DocView, DocViewRenderFn } from './doc_views_types';
 
+export interface DocViewsRegistry {
+  docViews: DocView[];
+  addDocView: (docView: DocViewInput) => void;
+  getDocViewsSorted: (hit: ElasticSearchHit) => DocView[];
+}
+
 export const docViews: DocView[] = [];
 
 /**

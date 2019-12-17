@@ -122,7 +122,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         <caption
           aria-live="polite"
           aria-relevant="text"
-          className="euiScreenReaderOnly"
+          className="euiScreenReaderOnly euiTableCaption"
           role="status"
         />
         <thead>
@@ -501,7 +501,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         <caption
           aria-live="polite"
           aria-relevant="text"
-          className="euiScreenReaderOnly"
+          className="euiScreenReaderOnly euiTableCaption"
           role="status"
         />
         <thead>
@@ -669,76 +669,98 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <EuiLink
-                  className="c0"
-                  href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="a0ce2c8978ef92cdf2ff163ae28576ee"
+                  serviceName="opbeans-python"
                 >
-                  <a
-                    className="euiLink euiLink--primary c0"
+                  <EuiLink
+                    className="c0"
                     href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                    rel="noreferrer"
                   >
-                    a0ce2
-                  </a>
-                </EuiLink>
-              </div>
-            </td>
-            <td
-              className="euiTableRowCell"
-              style={
-                Object {
-                  "width": "50%",
-                }
-              }
-            >
-              <div
-                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-              >
-                Error message and culprit
-              </div>
-              <div
-                className="euiTableCellContent euiTableCellContent--overflowingContent"
-              >
-                <div
-                  className="c1"
-                >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <EuiLink
-                      className="c2"
+                    <a
+                      className="euiLink euiLink--primary c0"
                       href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                      rel="noreferrer"
                     >
-                      <a
-                        className="euiLink euiLink--primary c2"
-                        href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      a0ce2
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="a0ce2c8978ef92cdf2ff163ae28576ee"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                        rel="noreferrer"
+                        serviceName="opbeans-python"
                       >
-                        About to blow up!
-                      </a>
-                    </EuiLink>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            About to blow up!
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      elasticapm.contrib.django.client.capture
-                    </div>
-                  </span>
-                </div>
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          elasticapm.contrib.django.client.capture
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
               </div>
             </td>
             <td
@@ -817,18 +839,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <EuiLink
-                  className="c0"
-                  href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="f3ac95493913cc7a3cfec30a19d2120a"
+                  serviceName="opbeans-python"
                 >
-                  <a
-                    className="euiLink euiLink--primary c0"
+                  <EuiLink
+                    className="c0"
                     href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                    rel="noreferrer"
                   >
-                    f3ac9
-                  </a>
-                </EuiLink>
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      f3ac9
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
@@ -847,46 +875,62 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <div
-                  className="c1"
+                <styled.div
+                  className=""
                 >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <div
+                    className="c1"
                   >
-                    <EuiLink
-                      className="c2"
-                      href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      <a
-                        className="euiLink euiLink--primary c2"
-                        href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="f3ac95493913cc7a3cfec30a19d2120a"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                        rel="noreferrer"
+                        serviceName="opbeans-python"
                       >
-                        AssertionError: 
-                      </a>
-                    </EuiLink>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            AssertionError: 
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      opbeans.views.oopsie
-                    </div>
-                  </span>
-                </div>
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.views.oopsie
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
               </div>
             </td>
             <td
@@ -965,18 +1009,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <EuiLink
-                  className="c0"
-                  href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="e90863d04b7a692435305f09bbe8c840"
+                  serviceName="opbeans-python"
                 >
-                  <a
-                    className="euiLink euiLink--primary c0"
+                  <EuiLink
+                    className="c0"
                     href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                    rel="noreferrer"
                   >
-                    e9086
-                  </a>
-                </EuiLink>
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      e9086
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
@@ -995,46 +1045,62 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <div
-                  className="c1"
+                <styled.div
+                  className=""
                 >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <div
+                    className="c1"
                   >
-                    <EuiLink
-                      className="c2"
-                      href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      <a
-                        className="euiLink euiLink--primary c2"
-                        href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="e90863d04b7a692435305f09bbe8c840"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                        rel="noreferrer"
+                        serviceName="opbeans-python"
                       >
-                        AssertionError: Bad luck!
-                      </a>
-                    </EuiLink>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            AssertionError: Bad luck!
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      opbeans.tasks.update_stats
-                    </div>
-                  </span>
-                </div>
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.tasks.update_stats
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
               </div>
             </td>
             <td
@@ -1113,18 +1179,24 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <EuiLink
-                  className="c0"
-                  href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="8673d8bf7a032e387c101bafbab0d2bc"
+                  serviceName="opbeans-python"
                 >
-                  <a
-                    className="euiLink euiLink--primary c0"
+                  <EuiLink
+                    className="c0"
                     href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                    rel="noreferrer"
                   >
-                    8673d
-                  </a>
-                </EuiLink>
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      8673d
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
               </div>
             </td>
             <td
@@ -1143,46 +1215,62 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="euiTableCellContent euiTableCellContent--overflowingContent"
               >
-                <div
-                  className="c1"
+                <styled.div
+                  className=""
                 >
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
+                  <div
+                    className="c1"
                   >
-                    <EuiLink
-                      className="c2"
-                      href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      <a
-                        className="euiLink euiLink--primary c2"
-                        href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="8673d8bf7a032e387c101bafbab0d2bc"
                         onBlur={[Function]}
                         onFocus={[Function]}
-                        rel="noreferrer"
+                        serviceName="opbeans-python"
                       >
-                        Customer with ID 8517 not found
-                      </a>
-                    </EuiLink>
-                  </span>
-                  <br />
-                  <span
-                    className="euiToolTipAnchor"
-                    onMouseOut={[Function]}
-                    onMouseOver={[Function]}
-                  >
-                    <div
-                      className="c3"
-                      onBlur={[Function]}
-                      onFocus={[Function]}
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            Customer with ID 8517 not found
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      opbeans.views.customer
-                    </div>
-                  </span>
-                </div>
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.views.customer
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
               </div>
             </td>
             <td

@@ -12,8 +12,8 @@
     "kbn:watch": "node scripts/build --watch --source-maps"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@types/intl-relativeformat": "^2.1.0",
@@ -28,7 +28,7 @@
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
     "prop-types": "^15.6.2",
-    "react": "^16.6.0",
+    "react": "^16.12.0",
     "react-intl": "^2.8.0"
   }
 }

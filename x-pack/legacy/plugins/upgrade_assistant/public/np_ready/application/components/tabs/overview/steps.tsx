@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, StatelessComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 
 import {
   EuiFormRow,
@@ -92,8 +92,11 @@ const START_UPGRADE_STEP = (isCloudEnabled: boolean) => ({
   ),
 });
 
-export const StepsUI: StatelessComponent<UpgradeAssistantTabProps &
-  ReactIntl.InjectedIntlProps> = ({ checkupData, setSelectedTabIndex, intl }) => {
+export const StepsUI: FunctionComponent<UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps> = ({
+  checkupData,
+  setSelectedTabIndex,
+  intl,
+}) => {
   const checkupDataTyped = (checkupData! as unknown) as { [checkupType: string]: any[] };
   const countByType = Object.keys(checkupDataTyped).reduce((counts, checkupType) => {
     counts[checkupType] = checkupDataTyped[checkupType].length;

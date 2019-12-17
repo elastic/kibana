@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 
@@ -12,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ConditionalToolTip } from './conditional_tooltip';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraTimerangeInput, InfraNodeType } from '../../graphql/types';
+import { InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -30,13 +29,13 @@ interface Props {
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
 }
 
 export const Node = class extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
+    const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
     const { isPopoverOpen } = this.state;
     const { metric } = node;
     const valueMode = squareSize > 70;
@@ -44,12 +43,6 @@ export const Node = class extends React.PureComponent<Props, State> {
     const rawValue = (metric && metric.value) || 0;
     const color = colorFromValue(options.legend, rawValue, bounds);
     const value = formatter(rawValue);
-    const newTimerange = {
-      ...timeRange,
-      from: moment(timeRange.to)
-        .subtract(1, 'hour')
-        .valueOf(),
-    };
     const nodeAriaLabel = i18n.translate('xpack.infra.node.ariaLabel', {
       defaultMessage: '{nodeName}, click to open menu',
       values: { nodeName: node.name },
@@ -61,7 +54,7 @@ export const Node = class extends React.PureComponent<Props, State> {
         isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
         options={options}
-        timeRange={newTimerange}
+        currentTime={currentTime}
         popoverPosition="downCenter"
       >
         <ConditionalToolTip
@@ -116,7 +109,7 @@ interface ColorProps {
   color: string;
 }
 
-const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
+const SquareOuter = euiStyled.div<ColorProps>`
   position: absolute;
   top: 4px;
   left: 4px;
@@ -127,7 +120,7 @@ const SquareOuter = euiStyled<ColorProps, 'div'>('div')`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
-const SquareInner = euiStyled<ColorProps, 'div'>('div')`
+const SquareInner = euiStyled.div<ColorProps>`
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -161,7 +154,7 @@ const ValueInner = euiStyled.button`
   }
 `;
 
-const SquareTextContent = euiStyled<ColorProps, 'div'>('div')`
+const SquareTextContent = euiStyled.div<ColorProps>`
   text-align: center;
   width: 100%;
   overflow: hidden;

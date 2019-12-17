@@ -19,22 +19,25 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import { createStateStub } from './_utils';
-import { QueryParameterActionsProvider } from '../actions';
+import { getQueryParameterActions } from '../actions';
 
+describe('context app', function() {
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices());
+  beforeEach(ngMock.module('app/discover'));
 
-describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
-
-  describe('action setPredecessorCount', function () {
+  describe('action setPredecessorCount', function() {
     let setPredecessorCount;
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      setPredecessorCount = Private(QueryParameterActionsProvider).setPredecessorCount;
-    }));
+    beforeEach(
+      ngMock.inject(function createPrivateStubs() {
+        setPredecessorCount = getQueryParameterActions().setPredecessorCount;
+      })
+    );
 
-    it('should set the predecessorCount to the given value', function () {
+    it('should set the predecessorCount to the given value', function() {
       const state = createStateStub();
 
       setPredecessorCount(state)(20);
@@ -42,7 +45,7 @@ describe('context app', function () {
       expect(state.queryParameters.predecessorCount).to.equal(20);
     });
 
-    it('should limit the predecessorCount to 0 as a lower bound', function () {
+    it('should limit the predecessorCount to 0 as a lower bound', function() {
       const state = createStateStub();
 
       setPredecessorCount(state)(-1);
@@ -50,7 +53,7 @@ describe('context app', function () {
       expect(state.queryParameters.predecessorCount).to.equal(0);
     });
 
-    it('should limit the predecessorCount to 10000 as an upper bound', function () {
+    it('should limit the predecessorCount to 10000 as an upper bound', function() {
       const state = createStateStub();
 
       setPredecessorCount(state)(20000);

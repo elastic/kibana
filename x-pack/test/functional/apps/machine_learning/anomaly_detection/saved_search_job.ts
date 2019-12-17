@@ -294,7 +294,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation loads the job type selection page', async () => {
-          await ml.jobSourceSelection.selectSource(testData.jobSource);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(testData.jobSource);
         });
 
         it('job creation loads the multi metric job wizard page', async () => {

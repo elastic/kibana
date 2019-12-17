@@ -18,7 +18,7 @@
  */
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreContext, CoreSetup, CoreStart, PluginInitializerContext, NotificationsSetup } from '.';
+import { CoreContext, PluginInitializerContext } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -42,10 +42,13 @@ export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 function createCoreSetupMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreSetup> & { notifications: MockedKeys<NotificationsSetup> } = {
+  const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>(() =>
+      Promise.resolve([createCoreStartMock({ basePath }), {}])
+    ),
     http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
@@ -58,7 +61,7 @@ function createCoreSetupMock({ basePath = '' } = {}) {
 }
 
 function createCoreStartMock({ basePath = '' } = {}) {
-  const mock: MockedKeys<CoreStart> & { notifications: MockedKeys<NotificationsSetup> } = {
+  const mock = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
@@ -75,6 +78,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
 
   return mock;
 }
+
 function pluginInitializerContextMock() {
   const mock: PluginInitializerContext = {
     opaqueId: Symbol(),
@@ -91,6 +95,9 @@ function pluginInitializerContextMock() {
         buildSha: 'buildSha',
         dist: false,
       },
+    },
+    config: {
+      get: <T>() => ({} as T),
     },
   };
 

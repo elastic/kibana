@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EmbeddedMap renders correctly against snapshot 1`] = `
+exports[`EmbeddedMapComponent renders correctly against snapshot 1`] = `
 <Embeddable>
   <EmbeddableHeader
     title="Network map"

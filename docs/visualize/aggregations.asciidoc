@@ -1,0 +1,136 @@
+[[supported-aggregations]]
+=== Supported aggregations
+
+The most frequently used visualizations support the following aggregations.
+
+[float]
+[[visualize-metric-aggregations]]
+==== Metric aggregations
+
+The *Count* metric lets you visualize the number of documents in a bucket.
+If there are no bucket aggregations defined, this is the total number of documents that match the query.
+It is the default selection.
+
+All other metric aggregations require a field selection, which will read from the indexed values. Alternatively,
+you can override field values with a script using the <<visualize-advanced-aggregation-options, JSON input>>. The
+other metric aggregations are:
+
+{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: The mean value.
+{ref}/search-aggregations-metrics-max-aggregation.html[Maximum]:: The highest value.
+{ref}/search-aggregations-metrics-percentile-aggregation.html[Median]:: The value that is in the 50% percentile.
+{ref}/search-aggregations-metrics-min-aggregation.html[Minimum]:: The lowest value.
+{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: The total value.
+
+Unique Count:: The {ref}/search-aggregations-metrics-cardinality-aggregation.html[Cardinality] of the field within the bucket.
+Supports any data type.
+
+Standard Deviation:: Requires a numeric field. Uses the {ref}/search-aggregations-metrics-extendedstats-aggregation.html[_extended stats_] aggregation.
+
+{ref}/search-aggregations-metrics-top-hits-aggregation.html[Top Hit]:: Returns a sample of individual documents. When the Top Hit aggregation is matched to more than one document, you must choose a technique for combining the values. Techniques include average, minimum, maximum, and sum.
+
+{ref}/search-aggregations-metrics-percentile-aggregation.html[Percentiles]:: Divides the
+values in a numeric field into specified percentile bands. Select a field from the drop-down, then specify one or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a percentile field.
+
+{ref}/search-aggregations-metrics-percentile-rank-aggregation.html[Percentile Rank]:: Returns the percentile rankings for the values in the specified numeric field. Select a numeric field from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a values field. Click *+Add* to add a values field.
+
+[float]
+[[visualize-sibling-pipeline-aggregations]]
+==== Sibling pipeline aggregations
+
+For each of the sibling pipeline aggregations you have to define a bucket and metric to calculate. This
+has the effect of condensing many buckets into one number.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Average Bucket]:: Calculates the mean, or average, value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Sum Bucket]:: Calculates the sum of the values of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Min Bucket]:: Calculates the minimum value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Max Bucket]:: Calculates the maximum value of a specified metric in a sibling aggregation.
+
+[float]
+[[visualize-bucket-aggregations]]
+==== Bucket aggregations
+
+{ref}/search-aggregations-bucket-datehistogram-aggregation.html[Date Histogram]:: Splits a date field into buckets by interval. If the date field is the primary time field for the index pattern, it will pick an automatic interval for you. You can also choose a minimum time interval, or specify a custom interval frame by selecting *Custom* as the interval and
+specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes,
+*h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
+down to one millisecond. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch.For example, the tooltip for a monthly interval will show the first day of the month.
+
+{ref}/search-aggregations-bucket-histogram-aggregation.html[Histogram]:: Builds from a numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty intervals in the histogram.
+
+{ref}/search-aggregations-bucket-range-aggregation.html[Range]:: Specify ranges of values for a numeric field. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove a range.
+
+{ref}/search-aggregations-bucket-daterange-aggregation.html[Date Range]:: Reports values that are within a range of dates that you specify. You can specify the ranges for the dates using {ref}/common-options.html#date-math[_date math_] expressions. Click *Add Range* to add a set of range endpoints.
+Click the red *(x)* symbol to remove a range.
+
+{ref}/search-aggregations-bucket-iprange-aggregation.html[IPv4 Range]:: Specify ranges of IPv4 addresses. Click *Add Range* to add a set of range endpoints. Click the red *(x)* symbol to remove a range.
+
+*Filters*:: Each filter creates a bucket of documents. You can specify a filter as a
+<<kuery-query, KQL>> or <<lucene-query, Lucene>> query string. Click *Add Filter* to
+add another filter. Click the image:images/labelbutton.png[Label button icon] *label* button to open the label field, where
+you can type in a name to display on the visualization.
+
+{ref}/search-aggregations-bucket-terms-aggregation.html[Terms]:: Specify the top or bottom _n_ elements of a  given field to display, ordered by count or a custom metric.
+
+{ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant Terms]:: Returns interesting or unusual occurrences of terms in a set.
+
+Both Terms and Significant Terms support {es} {ref}/search-aggregations-bucket-terms-aggregation.html#_filtering_values_4[exclude and include patterns] which
+are available by clicking *Advanced* after selecting a field.
+
+Kibana only supports filtering string fields with regular expression patterns, it does not support matching with arrays or filtering numeric fields.
+Patterns are case sensitive.
+
+Example:
+
+* You want to exclude the metricbeat process from your visualization of top processes: `metricbeat.*`
+* You only want to show processes collecting beats: `.*beat`
+* You want to exclude two specific values, the string `"empty"` and `"none"`: `empty|none`
+
+*Geo aggregations*
+
+These are only supported by the tile map and table visualizations:
+
+{ref}/search-aggregations-bucket-geohashgrid-aggregation.html[Geohash]:: Displays points based on a geohash.
+
+{ref}/search-aggregations-bucket-geotilegrid-aggregation.html[Geotile]:: Groups points based on web map tiling.
+
+
+[float]
+[[visualize-parent-pipeline-aggregations]]
+==== Parent pipeline aggregations
+
+For each of the parent pipeline aggregations you have to define a bucket and metric to calculate. These
+metrics expect the buckets to be ordered, and are especially useful for time series data.
+You can also nest these aggregations. For example, if you want to produce a third derivative.
+
+These visualizations support parent pipeline aggregations:
+
+* Line, Area and Bar charts
+* Data table
+
+{ref}/search-aggregations-pipeline-derivative-aggregation.html[Derivative]:: Calculates the derivative of specific metrics.
+
+{ref}/search-aggregations-pipeline-cumulative-sum-aggregation.html[Cumulative Sum]:: Calculates the cumulative sum of a specified metric in a parent histogram.
+
+{ref}/search-aggregations-pipeline-movavg-aggregation.html[Moving Average]:: Slides a window across the data and emits the average value of the window.
+
+{ref}/search-aggregations-pipeline-serialdiff-aggregation.html[Serial Diff]:: Values in a time series are subtracted from itself at different time lags or periods.
+
+Custom {kib} plugins can <<development-visualize-index, add more capabilities to the default editor>>, which includes support for adding more aggregations.
+
+[float]
+[[visualize-advanced-aggregation-options]]
+==== Advanced aggregation options
+
+*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
+definition, as in the following example:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+This example implements a {es} {ref}/search-aggregations.html[Script Value Source] which replaces
+the value in the metric. The availability of these options varies depending on the aggregation
+you choose.
+
+When multiple bucket aggregations are defined, you can use the drag target on each aggregation to change the priority. For more information about working with aggregation order, see https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana, Aggregation Execution Order, and You].

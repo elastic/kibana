@@ -18,7 +18,6 @@
  */
 
 import { omit } from 'lodash';
-
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
@@ -31,7 +30,7 @@ import { CoreSetup, CoreStart } from '../';
  *
  * @public
  */
-export interface PluginInitializerContext {
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
   /**
    * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
    */
@@ -40,6 +39,9 @@ export interface PluginInitializerContext {
     mode: Readonly<EnvironmentMode>;
     packageInfo: Readonly<PackageInfo>;
   };
+  readonly config: {
+    get: <T extends object = ConfigSchema>() => T;
+  };
 }
 
 /**
@@ -47,17 +49,27 @@ export interface PluginInitializerContext {
  * empty but should provide static services in the future, such as config and logging.
  *
  * @param coreContext
- * @param pluginManinfest
+ * @param opaqueId
+ * @param pluginManifest
+ * @param pluginConfig
  * @internal
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
   opaqueId: PluginOpaqueId,
-  pluginManifest: DiscoveredPlugin
+  pluginManifest: DiscoveredPlugin,
+  pluginConfig: {
+    [key: string]: unknown;
+  }
 ): PluginInitializerContext {
   return {
     opaqueId,
     env: coreContext.env,
+    config: {
+      get<T>() {
+        return (pluginConfig as unknown) as T;
+      },
+    },
   };
 }
 
@@ -95,6 +107,7 @@ export function createPluginSetupContext<
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    getStartServices: () => plugin.startDependencies,
   };
 }
 

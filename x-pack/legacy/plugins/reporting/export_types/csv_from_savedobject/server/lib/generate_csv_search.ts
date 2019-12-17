@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore no module definition
+// @ts-ignore no module definition TODO
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
@@ -18,11 +18,15 @@ import {
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
 import { JobParamsDiscoverCsv } from '../../../csv/types';
+
 import {
   esQuery,
   esFilters,
   IIndexPattern,
   Query,
+  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under reporting/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
 
 const getEsQueryConfig = async (config: any) => {

@@ -5,7 +5,7 @@
  */
 
 import { EuiAvatar, isValidHex } from '@elastic/eui';
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import { MAX_SPACE_INITIALS } from '../../common';
 import { Space } from '../../common/model/space';
 import { getSpaceColor, getSpaceInitials, getSpaceImageUrl } from '../lib/space_attributes';
@@ -17,7 +17,7 @@ interface Props {
   announceSpaceName?: boolean;
 }
 
-export const SpaceAvatar: SFC<Props> = (props: Props) => {
+export const SpaceAvatar: FC<Props> = (props: Props) => {
   const { space, size, announceSpaceName, ...rest } = props;
 
   const spaceName = space.name ? space.name.trim() : '';

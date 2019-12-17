@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const listing = getService('monitoringBeatsListing');
   const beatsSummaryStatus = getService('monitoringBeatsSummaryStatus');
@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/beats', {
-        from: '2017-12-19 17:14:09.000',
-        to: '2017-12-19 18:15:09.000',
+        from: 'Dec 19, 2017 @ 17:14:09.000',
+        to: 'Dec 19, 2017 @ 18:15:09.000',
       });
 
       // go to beats listing
@@ -43,6 +43,5 @@ export default function ({ getService, getPageObjects }) {
         bytesSent: 'Bytes Sent\n427.9 MB',
       });
     });
-
   });
 }

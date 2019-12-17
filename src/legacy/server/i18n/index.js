@@ -19,7 +19,8 @@
 
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { basename } from 'path';
-import { fromRoot } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { getTranslationPaths } from './get_translations_path';
 import { I18N_RC } from './constants';
 
@@ -32,21 +33,27 @@ export async function i18nMixin(kbnServer, server, config) {
       glob: I18N_RC,
     }),
     ...config.get('plugins.paths').map(cwd => getTranslationPaths({ cwd, glob: I18N_RC })),
-    ...config.get('plugins.scanDirs').map(cwd => getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })),
+    ...config
+      .get('plugins.scanDirs')
+      .map(cwd => getTranslationPaths({ cwd, glob: `*/${I18N_RC}` })),
     getTranslationPaths({
       cwd: fromRoot('../kibana-extra'),
       glob: `*/${I18N_RC}`,
     }),
   ]);
 
-  const currentTranslationPaths = [].concat(...translationPaths).filter(translationPath => basename(translationPath, '.json') === locale);
+  const currentTranslationPaths = []
+    .concat(...translationPaths)
+    .filter(translationPath => basename(translationPath, '.json') === locale);
   i18nLoader.registerTranslationFiles(currentTranslationPaths);
 
   const translations = await i18nLoader.getTranslationsByLocale(locale);
-  i18n.init(Object.freeze({
-    locale,
-    ...translations,
-  }));
+  i18n.init(
+    Object.freeze({
+      locale,
+      ...translations,
+    })
+  );
 
   server.decorate('server', 'getTranslationsFilePaths', () => currentTranslationPaths);
 }

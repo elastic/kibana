@@ -23,7 +23,7 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalHttpServiceSetup } from '../http';
 import { UiSettingsConfigType } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
@@ -84,7 +84,7 @@ export class UiSettingsService implements CoreService<InternalUiSettingsServiceS
 
   private async getOverrides(deps: SetupDeps) {
     const config = await this.config$.pipe(first()).toPromise();
-    const overrides: Record<string, SavedObjectAttribute> = config.overrides;
+    const overrides: Record<string, any> = config.overrides;
     // manually implemented deprecation until New platform Config service
     // supports them https://github.com/elastic/kibana/issues/40255
     if (typeof deps.http.config.defaultRoute !== 'undefined') {

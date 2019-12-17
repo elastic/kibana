@@ -7,9 +7,7 @@ if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by
 default it is in `$KIBANA_HOME/config`. By default, with package distributions
 (Debian or RPM), it is in `/etc/kibana`.
 
-The default settings configure Kibana to run on `localhost:5601`. To change the
-host or port number, or connect to Elasticsearch running on a different machine,
-you'll need to update your `kibana.yml` file. You can also enable SSL and set a
+The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
 variety of other options. Finally, environment variables can be injected into
 configuration using `${MY_ENV_VAR}` syntax.
 
@@ -32,7 +30,7 @@ strongly recommend that you keep the default CSP rules that ship with Kibana.
 
 `csp.strict:`:: *Default: `true`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
-support for older, less safe browsers like Internet Explorer. 
+support for older, less safe browsers like Internet Explorer.
 See <<csp-strict-mode, Content Security Policy>> for more information.
 
 `csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
@@ -65,6 +63,8 @@ connects to this Kibana instance.
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List
 of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 headers, set this value to [] (an empty list).
+Removing the `authorization` header from being whitelisted means that you cannot
+use <<basic-authentication, basic authentication>> in Kibana.
 
 `elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait
 for responses from the back end or Elasticsearch. This value must be a positive
@@ -93,8 +93,8 @@ the configured certificate.
 `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Optional
 settings that provide the paths to the PEM-format SSL certificate and key files.
 These files are used to verify the identity of Kibana to Elasticsearch and are
-required when `xpack.ssl.verification_mode` in Elasticsearch is set to either
-`certificate` or `full`.
+required when `xpack.security.http.ssl.client_authentication` in Elasticsearch is
+set to `required`.
 
 `elasticsearch.ssl.certificateAuthorities:`:: Optional setting that enables you
 to specify a list of paths to the PEM file for the certificate authority for
@@ -146,6 +146,36 @@ will default to `true`.
 
 `logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output other than error messages.
+
+`logging.rotate:`:: [experimental] Specifies the options for the logging rotate feature.
+When not defined, all the sub options defaults would be applied.
+The following example shows a valid logging rotate configuration:
++
+--
+    logging.rotate:
+      enabled: true
+      everyBytes: 10485760
+      keepFiles: 10
+--
+
+`logging.rotate.enabled:`:: [experimental] *Default: false* Set the value of this setting to `true` to
+enable log rotation. If you do not have a `logging.dest` set that is different from `stdout`
+that feature would not take any effect.
+
+`logging.rotate.everyBytes:`:: [experimental] *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the
+limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
+this option should be in the range of 102400 (100KB) to 1073741824 (1GB).
+
+`logging.rotate.keepFiles:`:: [experimental] *Default: 7* The number of most recent rotated log files to keep
+on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
+option has to be in the range of 2 to 1024 files.
+
+`logging.rotate.pollingInterval:`:: [experimental] *Default: 10000* The number of milliseconds for the polling strategy in case
+the `logging.rotate.usePolling` is enabled. That option has to be in the range of 5000 to 3600000 milliseconds.
+
+`logging.rotate.usePolling:`:: [experimental] *Default: false* By default we try to understand the best way to monitoring
+the log file. However, there is some systems where it could not be always accurate. In those cases, if needed,
+the `polling` method could be used enabling that option.
 
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output.
@@ -258,6 +288,12 @@ running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
+[[server-compression]]`server.compression.enabled:`:: *Default: `true`* Set to `false` to disable HTTP compression for all responses.
+
+`server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the Kibana host, or a reverse
+proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
+This setting may not be used when `server.compression.enabled` is set to `false`.
+
 [[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
 
 `server.cors.origin:`:: *Default: none* Specifies origins. "origin" must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.
@@ -266,7 +302,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
   send on all responses to the client from the Kibana server.
 
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
-back end server.
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server.
 
 `server.keepaliveTimeout:`:: *Default: "120000"* The number of milliseconds to wait for additional data before restarting
 the `server.socketTimeout` counter.
@@ -316,19 +352,31 @@ all http requests to https over the port configured as `server.port`.
 `server.ssl.supportedProtocols:`:: *Default: TLSv1.1, TLSv1.2*  An array of
 supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
 
+`server.xsrf.whitelist:`:: It is not recommended to disable protections for
+arbitrary API endpoints. Instead, supply the `kbn-xsrf` header. There are some
+scenarios where whitelisting is required, however, such as
+<<kibana-authentication, SAML and OpenID Connect Single Sign-On setups>>.
+The `server.xsrf.whitelist` setting requires the following format:
+
+[source,text]
+
+----
+*Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
+----
+
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled,
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
 
-`telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`, 
-users are able to change the telemetry setting at a later time in 
-<<advanced-options, Advanced Settings>>.  If `false`, 
-{kib} looks at the value of `telemetry.optIn` to determine whether to send 
+`telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`,
+users are able to change the telemetry setting at a later time in
+<<advanced-options, Advanced Settings>>.  If `false`,
+{kib} looks at the value of `telemetry.optIn` to determine whether to send
 telemetry data or not. `telemetry.allowChangingOptInStatus` and `telemetry.optIn`
 cannot be `false` at the same time.
 
-`telemetry.optIn`:: *Default: true* If `true`, telemetry data is sent to Elastic. 
- If `false`, collection of telemetry data is disabled.  
+`telemetry.optIn`:: *Default: true* If `true`, telemetry data is sent to Elastic.
+ If `false`, collection of telemetry data is disabled.
  To enable telemetry and prevent users from disabling it,
  set `telemetry.allowChangingOptInStatus` to `false` and `telemetry.optIn` to `true`.
 
@@ -342,6 +390,15 @@ Rollup user interface.
 
 `i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
+`xpack.actions.enabledActionTypes:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of action types that are enabled.  An element of `*` indicates all
+action types registered are enabled.  The action types provided by Kibana are:
+`.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`.
+
+`xpack.actions.whitelistedHosts:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of host names which actions such as email, slack, pagerduty, and
+webhook can connect to.  An element of `*` indicates any host can be connected
+to.  An empty array indicates no hosts can be connected to.
 
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]

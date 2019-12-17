@@ -32,7 +32,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
   };
 }
 
-const DiscoverErrorLink: React.SFC<{
+const DiscoverErrorLink: React.FC<{
   readonly error: APMError;
   readonly kuery?: string;
 }> = ({ error, kuery, children }) => {

@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { FeatureProperty } from '../types';
-import { getRenderedFieldValue, PointToolTipContent } from './point_tool_tip_content';
+import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../search_bar', () => ({
   siemFilterManager: {
@@ -20,6 +21,8 @@ jest.mock('../../search_bar', () => ({
 }));
 
 describe('PointToolTipContent', () => {
+  const mount = useMountAppended();
+
   const mockFeatureProps: FeatureProperty[] = [
     {
       _propertyKey: 'host.name',
@@ -39,14 +42,14 @@ describe('PointToolTipContent', () => {
 
     const wrapper = shallow(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
           featureProps={mockFeatureProps}
           closeTooltip={closeTooltip}
         />
       </TestProviders>
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('PointToolTipContentComponent'))).toMatchSnapshot();
   });
 
   test('renders array filter correctly', () => {
@@ -54,7 +57,7 @@ describe('PointToolTipContent', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
           featureProps={mockFeaturePropsArrayValue}
           closeTooltip={closeTooltip}

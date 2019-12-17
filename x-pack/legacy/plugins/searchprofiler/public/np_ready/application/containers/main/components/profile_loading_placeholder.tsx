@@ -13,7 +13,7 @@ export const ProfileLoadingPlaceholder = () => {
       <EuiText color="subdued">
         <h1>
           {i18n.translate('xpack.searchProfiler.profilingLoaderText', {
-            defaultMessage: 'Profiling...',
+            defaultMessage: 'Loading query profiles...',
           })}
         </h1>
       </EuiText>

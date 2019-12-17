@@ -26,7 +26,7 @@ import {
   ChromeStart,
   LegacyCoreStart,
   SavedObjectsClientContract,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import {
@@ -47,16 +47,13 @@ import {
 
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { DataStart } from '../../../data/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
-import { NavigationStart } from '../../../navigation/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
-  dataStart: DataStart;
   npDataStart: NpDataStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
@@ -64,11 +61,11 @@ export interface RenderDeps {
   dashboardConfig: any;
   savedDashboards: any;
   dashboardCapabilities: any;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
-  savedQueryService: DataStart['search']['services']['savedQueryService'];
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  savedQueryService: NpDataStart['query']['savedQueries'];
+  embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
 }

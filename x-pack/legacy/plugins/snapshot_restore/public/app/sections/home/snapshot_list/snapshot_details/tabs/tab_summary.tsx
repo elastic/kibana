@@ -30,7 +30,7 @@ interface Props {
   snapshotDetails: SnapshotDetails;
 }
 
-export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
+export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   const {
     core: {
       i18n: { FormattedMessage },

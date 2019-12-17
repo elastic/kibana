@@ -6,8 +6,7 @@
 
 import 'hapi';
 
-import { CloudPlugin } from '../../legacy/plugins/cloud';
-import { XPackMainPlugin } from '../../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../legacy/plugins/xpack_main/server/xpack_main';
 import { SecurityPlugin } from '../../legacy/plugins/security';
 import { ActionsPlugin, ActionsClient } from '../../legacy/plugins/actions';
 import { TaskManager } from '../../legacy/plugins/task_manager';
@@ -19,7 +18,6 @@ declare module 'hapi' {
     getAlertsClient?: () => AlertsClient;
   }
   interface PluginProperties {
-    cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
     security?: SecurityPlugin;
     actions?: ActionsPlugin;

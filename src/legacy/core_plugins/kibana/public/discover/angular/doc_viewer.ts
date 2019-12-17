@@ -17,13 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore
-import { getServices } from '../kibana_services';
-import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewer } from '../components/doc_viewer/doc_viewer';
 
-const { uiModules } = getServices();
-
-uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
+export function createDocViewerDirective(reactDirective: any) {
   return reactDirective(
     DocViewer,
     [
@@ -46,4 +42,4 @@ uiModules.get('apps/discover').directive('docViewer', (reactDirective: any) => {
       },
     }
   );
-});
+}

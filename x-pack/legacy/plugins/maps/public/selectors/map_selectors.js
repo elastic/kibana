@@ -11,24 +11,22 @@ import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
-import { VectorStyle } from '../layers/styles/vector/vector_style';
-import { HeatmapStyle } from '../layers/styles/heatmap/heatmap_style';
 import { timefilter } from 'ui/timefilter';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
-  const style = createStyleInstance(layerDescriptor.style, source);
+
   switch (layerDescriptor.type) {
     case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source, style });
+      return new TileLayer({ layerDescriptor, source });
     case VectorLayer.type:
-      return new VectorLayer({ layerDescriptor, source, style });
+      return new VectorLayer({ layerDescriptor, source });
     case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source, style });
+      return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
-      return new HeatmapLayer({ layerDescriptor, source, style });
+      return new HeatmapLayer({ layerDescriptor, source });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
@@ -44,25 +42,6 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new Source(sourceDescriptor, inspectorAdapters);
 }
 
-
-function createStyleInstance(styleDescriptor, source) {
-
-  if (!styleDescriptor || !styleDescriptor.type) {
-    return null;
-  }
-
-  switch (styleDescriptor.type) {
-    case 'TILE'://backfill for old tilestyles.
-      return null;
-    case VectorStyle.type:
-      return new VectorStyle(styleDescriptor, source);
-    case HeatmapStyle.type:
-      return new HeatmapStyle(styleDescriptor);
-    default:
-      throw new Error(`Unrecognized styleType ${styleDescriptor.type}`);
-  }
-}
-
 export const getTooltipState = ({ map }) => {
   return map.tooltipState;
 };
@@ -74,41 +53,43 @@ export const getMapInitError = ({ map }) => map.mapInitError;
 export const getGoto = ({ map }) => map && map.goto;
 
 export const getSelectedLayerId = ({ map }) => {
-  return (!map.selectedLayerId || !map.layerList) ? null : map.selectedLayerId;
+  return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
 
 export const getTransientLayerId = ({ map }) => map.__transientLayerId;
 
-export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
+export const getLayerListRaw = ({ map }) => (map.layerList ? map.layerList : []);
 
-export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapReadyLayerList
-  ? map.waitingForMapReadyLayerList
-  : [];
+export const getWaitingForMapReadyLayerListRaw = ({ map }) =>
+  map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
 export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
 
-export const getMapExtent = ({ map }) => map.mapState.extent ?
-  map.mapState.extent : {};
+export const isInteractiveDisabled = ({ map }) => map.mapState.disableInteractive;
 
-export const getMapBuffer = ({ map }) => map.mapState.buffer ?
-  map.mapState.buffer : {};
+export const isTooltipControlDisabled = ({ map }) => map.mapState.disableTooltipControl;
 
-export const getMapZoom = ({ map }) => map.mapState.zoom ?
-  map.mapState.zoom : 0;
+export const isToolbarOverlayHidden = ({ map }) => map.mapState.hideToolbarOverlay;
 
-export const getMapCenter = ({ map }) => map.mapState.center ?
-  map.mapState.center : { lat: 0, lon: 0 };
+export const getMapExtent = ({ map }) => (map.mapState.extent ? map.mapState.extent : {});
+
+export const getMapBuffer = ({ map }) => (map.mapState.buffer ? map.mapState.buffer : {});
+
+export const getMapZoom = ({ map }) => (map.mapState.zoom ? map.mapState.zoom : 0);
+
+export const getMapCenter = ({ map }) =>
+  map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };
 
 export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 
-export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
-  map.mapState.timeFilters : timefilter.getTime();
+export const getTimeFilters = ({ map }) =>
+  map.mapState.timeFilters ? map.mapState.timeFilters : timefilter.getTime();
 
 export const getQuery = ({ map }) => map.mapState.query;
 
 export const getFilters = ({ map }) => map.mapState.filters;
 
-export const isUsingSearch = (state) => {
+export const isUsingSearch = state => {
   const filters = getFilters(state).filter(filter => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
   return filters.length || queryString.length;
@@ -160,60 +141,56 @@ export const getLayerList = createSelector(
   getInspectorAdapters,
   (layerDescriptorList, inspectorAdapters) => {
     return layerDescriptorList.map(layerDescriptor =>
-      createLayerInstance(layerDescriptor, inspectorAdapters));
-  });
+      createLayerInstance(layerDescriptor, inspectorAdapters)
+    );
+  }
+);
 
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,
   getLayerList,
   (selectedLayerId, layerList) => {
     return layerList.find(layer => layer.getId() === selectedLayerId);
-  });
+  }
+);
 
 export const getMapColors = createSelector(
   getTransientLayerId,
   getLayerListRaw,
-  (transientLayerId, layerList) => layerList.reduce((accu, layer) => {
-    if (layer.id === transientLayerId) {
+  (transientLayerId, layerList) =>
+    layerList.reduce((accu, layer) => {
+      if (layer.id === transientLayerId) {
+        return accu;
+      }
+      const color = _.get(layer, 'style.properties.fillColor.options.color');
+      if (color) accu.push(color);
       return accu;
-    }
-    const color = _.get(layer, 'style.properties.fillColor.options.color');
-    if (color) accu.push(color);
-    return accu;
-  }, [])
+    }, [])
 );
 
-export const getSelectedLayerJoinDescriptors = createSelector(
-  getSelectedLayer,
-  (selectedLayer) => {
-    return selectedLayer.getJoins().map(join => {
-      return join.toDescriptor();
-    });
+export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, selectedLayer => {
+  return selectedLayer.getJoins().map(join => {
+    return join.toDescriptor();
   });
+});
 
 // Get list of unique index patterns used by all layers
-export const getUniqueIndexPatternIds = createSelector(
-  getLayerList,
-  (layerList) => {
-    const indexPatternIds = [];
-    layerList.forEach(layer => {
-      indexPatternIds.push(...layer.getIndexPatternIds());
-    });
-    return _.uniq(indexPatternIds).sort();
-  }
-);
+export const getUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
+  const indexPatternIds = [];
+  layerList.forEach(layer => {
+    indexPatternIds.push(...layer.getIndexPatternIds());
+  });
+  return _.uniq(indexPatternIds).sort();
+});
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(
-  getLayerList,
-  (layerList) => {
-    const indexPatternIds = [];
-    layerList.forEach(layer => {
-      indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-    });
-    return _.uniq(indexPatternIds);
-  }
-);
+export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
+  const indexPatternIds = [];
+  layerList.forEach(layer => {
+    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+  });
+  return _.uniq(indexPatternIds);
+});
 
 export const hasDirtyState = createSelector(
   getLayerListRaw,

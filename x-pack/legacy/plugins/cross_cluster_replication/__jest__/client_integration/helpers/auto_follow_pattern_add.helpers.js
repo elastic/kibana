@@ -12,13 +12,13 @@ import routing from '../../../public/app/services/routing';
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router
-  }
+    onRouter: router => (routing.reactRouter = router),
+  },
 };
 
 const initTestBed = registerTestBed(AutoFollowPatternAdd, testBedConfig);
 
-export const setup = (props) => {
+export const setup = props => {
   const testBed = initTestBed(props);
 
   // User actions
@@ -29,7 +29,7 @@ export const setup = (props) => {
   return {
     ...testBed,
     actions: {
-      clickSaveForm
-    }
+      clickSaveForm,
+    },
   };
 };

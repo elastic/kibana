@@ -192,3 +192,16 @@ export const elements: CanvasElement[] = [
   { ...BaseElement, expression: 'filters | demodata | pointseries | pie | render' },
   { ...BaseElement, expression: 'image | render' },
 ];
+
+export const workpadWithGroupAsElement: CanvasWorkpad = {
+  ...BaseWorkpad,
+  pages: [
+    {
+      ...BasePage,
+      elements: [
+        { ...BaseElement, expression: 'image | render' },
+        { ...BaseElement, id: 'group-1234' },
+      ],
+    },
+  ],
+};

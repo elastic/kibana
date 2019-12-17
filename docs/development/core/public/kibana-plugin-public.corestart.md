@@ -25,5 +25,5 @@ export interface CoreStart
 |  [notifications](./kibana-plugin-public.corestart.notifications.md) | <code>NotificationsStart</code> | [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |
 |  [overlays](./kibana-plugin-public.corestart.overlays.md) | <code>OverlayStart</code> | [OverlayStart](./kibana-plugin-public.overlaystart.md) |
 |  [savedObjects](./kibana-plugin-public.corestart.savedobjects.md) | <code>SavedObjectsStart</code> | [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |
-|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>UiSettingsClientContract</code> | [UiSettingsClient](./kibana-plugin-public.uisettingsclient.md) |
+|  [uiSettings](./kibana-plugin-public.corestart.uisettings.md) | <code>IUiSettingsClient</code> | [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 

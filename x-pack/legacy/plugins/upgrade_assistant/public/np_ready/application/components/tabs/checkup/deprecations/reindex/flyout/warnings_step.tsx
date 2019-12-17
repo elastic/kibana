@@ -29,7 +29,7 @@ interface CheckedIds {
 
 export const idForWarning = (warning: ReindexWarning) => `reindexWarning-${warning}`;
 
-const WarningCheckbox: React.StatelessComponent<{
+const WarningCheckbox: React.FunctionComponent<{
   checkedIds: CheckedIds;
   warning: ReindexWarning;
   label: React.ReactNode;

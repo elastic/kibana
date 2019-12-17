@@ -18,51 +18,40 @@
  */
 
 import _ from 'lodash';
+import { getServices } from '../../../kibana_services';
 import { generateFilters } from '../../../../../../../../plugins/data/public';
-import { npStart } from 'ui/new_platform';
 
-import {
-  MAX_CONTEXT_SIZE,
-  MIN_CONTEXT_SIZE,
-  QUERY_PARAMETER_KEYS,
-} from './constants';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
+export function getQueryParameterActions() {
+  const filterManager = getServices().filterManager;
 
-export function QueryParameterActionsProvider(indexPatterns) {
-  const { filterManager } = npStart.plugins.data.query;
-
-  const setPredecessorCount = (state) => (predecessorCount) => (
-    state.queryParameters.predecessorCount = clamp(
+  const setPredecessorCount = state => predecessorCount =>
+    (state.queryParameters.predecessorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
-      predecessorCount,
-    )
-  );
+      predecessorCount
+    ));
 
-  const setSuccessorCount = (state) => (successorCount) => (
-    state.queryParameters.successorCount = clamp(
+  const setSuccessorCount = state => successorCount =>
+    (state.queryParameters.successorCount = clamp(
       MIN_CONTEXT_SIZE,
       MAX_CONTEXT_SIZE,
-      successorCount,
-    )
-  );
+      successorCount
+    ));
 
-  const setQueryParameters = (state) => (queryParameters) => (
-    Object.assign(
-      state.queryParameters,
-      _.pick(queryParameters, QUERY_PARAMETER_KEYS),
-    )
-  );
+  const setQueryParameters = state => queryParameters =>
+    Object.assign(state.queryParameters, _.pick(queryParameters, QUERY_PARAMETER_KEYS));
 
   const updateFilters = () => filters => {
     filterManager.setFilters(filters);
   };
 
-  const addFilter = (state) => async (field, values, operation) => {
+  const addFilter = state => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
     const newFilters = generateFilters(filterManager, field, values, operation, indexPatternId);
     filterManager.addFilters(newFilters);
-    const indexPattern = await indexPatterns.get(indexPatternId);
+    const indexPattern = await getServices().indexPatterns.get(indexPatternId);
     indexPattern.popularizeField(field.name, 1);
   };
 

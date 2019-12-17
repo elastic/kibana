@@ -18,7 +18,6 @@
  */
 
 import './np_core.test.mocks';
-
 import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { AppStateClass } from './legacy_imports';

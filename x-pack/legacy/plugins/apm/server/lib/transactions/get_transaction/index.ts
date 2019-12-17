@@ -11,12 +11,17 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getTransaction(
   transactionId: string,
   traceId: string,
-  setup: Setup
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
   const { start, end, uiFiltersES, client, indices } = setup;
 
@@ -27,7 +32,7 @@ export async function getTransaction(
       query: {
         bool: {
           filter: [
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
             { range: rangeFilter(start, end) },

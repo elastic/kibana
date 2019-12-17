@@ -16,7 +16,6 @@ import {
   WrappedByAutoSizer,
   ChartSeriesData,
 } from './common';
-import 'jest-styled-components';
 import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {

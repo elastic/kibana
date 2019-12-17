@@ -18,7 +18,7 @@
  */
 
 import { buildQueryFromKuery } from './from_kuery';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { IIndexPattern } from '../../index_patterns';
 import { fields } from '../../index_patterns/mocks';
 import { Query } from '../../query/types';
@@ -30,7 +30,7 @@ describe('build query', () => {
 
   describe('buildQueryFromKuery', () => {
     test('should return the parameters of an Elasticsearch bool query', () => {
-      const result = buildQueryFromKuery(null, [], true);
+      const result = buildQueryFromKuery(undefined, [], true);
       const expected = {
         must: [],
         filter: [],

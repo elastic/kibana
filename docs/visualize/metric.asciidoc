@@ -1,21 +1,4 @@
 [[metric-chart]]
-== Metric
-
-A metric visualization displays a single number for each aggregation you select:
-
-include::y-axis-aggs.asciidoc[]
-
-You can click the *Advanced* link to display more customization options:
-
-*JSON Input*:: A text field where you can add specific JSON-formatted properties to merge with the aggregation
-definition, as in the following example:
-
-[source,shell]
-{ "script" : "doc['grade'].value * 1.2" }
-
-NOTE: In Elasticsearch releases 1.4.3 and later, this functionality requires you to enable
-{ref}/modules-scripting.html[dynamic Groovy scripting].
-
-The availability of these options varies depending on the aggregation you choose.
+=== Metric
 
 Click the *Options* tab to display the font size slider.

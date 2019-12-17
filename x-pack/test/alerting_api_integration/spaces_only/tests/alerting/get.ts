@@ -39,7 +39,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         interval: '1m',
         enabled: true,
         actions: [],
-        alertTypeParams: {},
+        params: {},
         createdBy: null,
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,

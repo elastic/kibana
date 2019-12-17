@@ -45,7 +45,9 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async expectDeprecationLoggingLabel(labelText) {
       return await retry.try(async () => {
         log.debug('expectDeprecationLoggingLabel()');
-        const label = await find.byCssSelector('[data-test-subj="upgradeAssistantDeprecationToggle"] ~ p');
+        const label = await find.byCssSelector(
+          '[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span'
+        );
         const value = await label.getVisibleText();
         expect(value).to.equal(labelText);
       });
@@ -71,7 +73,9 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async expectTelemetryHasFinish() {
       return await retry.try(async () => {
         log.debug('expectTelemetryHasFinish');
-        const isTelemetryFinished = !(await testSubjects.exists('upgradeAssistantTelemetryRunning'));
+        const isTelemetryFinished = !(await testSubjects.exists(
+          'upgradeAssistantTelemetryRunning'
+        ));
         expect(isTelemetryFinished).to.equal(true);
       });
     }

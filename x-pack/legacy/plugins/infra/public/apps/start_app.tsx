@@ -21,6 +21,7 @@ import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
+import { ReduxStateContextProvider } from '../utils/redux_context';
 import { HistoryContext } from '../utils/history_context';
 import {
   useUiSetting$,
@@ -46,15 +47,17 @@ export async function startApp(libs: InfraFrontendLibs) {
         <UICapabilitiesProvider>
           <EuiErrorBoundary>
             <ReduxStoreProvider store={store}>
-              <ApolloProvider client={libs.apolloClient}>
-                <ApolloClientContext.Provider value={libs.apolloClient}>
-                  <EuiThemeProvider darkMode={darkMode}>
-                    <HistoryContext.Provider value={history}>
-                      <PageRouter history={history} />
-                    </HistoryContext.Provider>
-                  </EuiThemeProvider>
-                </ApolloClientContext.Provider>
-              </ApolloProvider>
+              <ReduxStateContextProvider>
+                <ApolloProvider client={libs.apolloClient}>
+                  <ApolloClientContext.Provider value={libs.apolloClient}>
+                    <EuiThemeProvider darkMode={darkMode}>
+                      <HistoryContext.Provider value={history}>
+                        <PageRouter history={history} />
+                      </HistoryContext.Provider>
+                    </EuiThemeProvider>
+                  </ApolloClientContext.Provider>
+                </ApolloProvider>
+              </ReduxStateContextProvider>
             </ReduxStoreProvider>
           </EuiErrorBoundary>
         </UICapabilitiesProvider>

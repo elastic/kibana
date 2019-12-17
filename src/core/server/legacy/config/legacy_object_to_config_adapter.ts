@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { ConfigPath, ObjectToConfigAdapter } from '../../config';
+import { ConfigPath } from '../../config';
+import { ObjectToConfigAdapter } from '../../config/object_to_config_adapter';
 
 /**
  * Represents logging config supported by the legacy platform.
@@ -62,6 +63,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     return {
       autoListen: configValue.autoListen,
       basePath: configValue.basePath,
+      defaultRoute: configValue.defaultRoute,
       cors: configValue.cors,
       host: configValue.host,
       maxPayload: configValue.maxPayloadBytes,
@@ -70,6 +72,8 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       ssl: configValue.ssl,
       keepaliveTimeout: configValue.keepaliveTimeout,
       socketTimeout: configValue.socketTimeout,
+      compression: configValue.compression,
+      uuid: configValue.uuid,
     };
   }
 

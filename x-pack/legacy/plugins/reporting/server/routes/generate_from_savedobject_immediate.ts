@@ -10,12 +10,12 @@ import {
   ServerFacade,
   RequestFacade,
   ResponseFacade,
+  HeadlessChromiumDriverFactory,
   ReportingResponseToolkit,
   Logger,
-  JobDocPayload,
-  JobIDForImmediate,
   JobDocOutputExecuted,
 } from '../../types';
+import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 
@@ -46,18 +46,27 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
+
+      /* TODO these functions should be made available in the export types registry:
+       *
+       *     const { createJobFn, executeJobFn } = exportTypesRegistry.getById(CSV_FROM_SAVEDOBJECT_JOB_TYPE)
+       *
+       * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
+       */
       const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server);
-      const jobDocPayload: JobDocPayload = await createJobFn(jobParams, request.headers, request);
+      const executeJobFn = executeJobFactory(server, {
+        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
+      });
+      const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
+        jobParams,
+        request.headers,
+        request
+      );
       const {
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(
-        null as JobIDForImmediate,
-        jobDocPayload,
-        request
-      );
+      }: JobDocOutputExecuted = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

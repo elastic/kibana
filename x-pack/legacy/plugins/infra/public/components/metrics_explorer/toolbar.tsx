@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -28,7 +28,7 @@ import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_expl
 import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
 
 interface Props {
-  derivedIndexPattern: StaticIndexPattern;
+  derivedIndexPattern: IIndexPattern;
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;

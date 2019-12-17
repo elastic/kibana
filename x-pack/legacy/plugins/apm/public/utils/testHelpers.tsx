@@ -9,15 +9,22 @@
 import { ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
-import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React from 'react';
-import { render, waitForElement } from 'react-testing-library';
+import React, { ReactNode } from 'react';
+import { render, waitForElement } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { APMConfig } from '../../../../../plugins/apm/server';
 import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { ESFilter } from '../../typings/elasticsearch';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue
+} from '../context/ApmPluginContext';
+import { ConfigSchema } from '../new-platform/plugin';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -45,14 +52,15 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MemoryRouter initialEntries={[location]}>
-      <LocationProvider>
-        <Component />
-      </LocationProvider>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper>
+      <MemoryRouter initialEntries={[location]}>
+        <LocationProvider>
+          <Component />
+        </LocationProvider>
+      </MemoryRouter>
+    </MockApmPluginContextWrapper>
   );
 
-  await tick();
   await waitForElement(() => el.container.querySelector('a'));
 
   const a = el.container.querySelector('a');
@@ -67,9 +75,6 @@ export function mockNow(date: string | number | Date) {
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// Await this when you need to "flush" promises to immediately resolve or throw in tests
-export const tick = () => new Promise(resolve => setImmediate(resolve, 0));
 
 export function expectTextsNotInDocument(output: any, texts: string[]) {
   texts.forEach(text => {
@@ -99,10 +104,7 @@ interface MockSetup {
   end: number;
   client: any;
   internalClient: any;
-  config: {
-    get: any;
-    has: any;
-  };
+  config: APMConfig;
   uiFiltersES: ESFilter[];
   indices: {
     'apm_oss.sourcemapIndices': string;
@@ -111,7 +113,7 @@ interface MockSetup {
     'apm_oss.spanIndices': string;
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
-    'apm_oss.apmAgentConfigurationIndex': string;
+    apmAgentConfigurationIndex: string;
   };
 }
 
@@ -139,10 +141,12 @@ export async function inspectSearchParams(
     internalClient: {
       search: internalClientSpy
     } as any,
-    config: {
-      get: () => 'myIndex' as any,
-      has: () => true
-    },
+    config: new Proxy(
+      {},
+      {
+        get: () => 'myIndex'
+      }
+    ) as APMConfig,
     uiFiltersES: [
       {
         term: { 'service.environment': 'prod' }
@@ -155,7 +159,7 @@ export async function inspectSearchParams(
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };
@@ -179,3 +183,53 @@ export async function inspectSearchParams(
 }
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+
+const mockCore = {
+  chrome: {
+    setBreadcrumbs: () => {}
+  },
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`
+    }
+  },
+  notifications: {
+    toasts: {
+      addWarning: () => {}
+    }
+  }
+};
+
+const mockConfig: ConfigSchema = {
+  indexPatternTitle: 'apm-*',
+  serviceMapEnabled: false,
+  ui: {
+    enabled: false
+  }
+};
+
+export const mockApmPluginContextValue = {
+  config: mockConfig,
+  core: mockCore,
+  packageInfo: { version: '0' },
+  plugins: {}
+};
+
+export function MockApmPluginContextWrapper({
+  children,
+  value = {} as ApmPluginContextValue
+}: {
+  children?: ReactNode;
+  value?: ApmPluginContextValue;
+}) {
+  return (
+    <ApmPluginContext.Provider
+      value={{
+        ...mockApmPluginContextValue,
+        ...value
+      }}
+    >
+      {children}
+    </ApmPluginContext.Provider>
+  );
+}

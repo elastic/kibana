@@ -29,10 +29,10 @@ export const transactionGroupsRoute = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path, query }) => {
-    const { serviceName } = path;
-    const { transactionType } = query;
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
 
     return getTransactionGroupList(
       {
@@ -60,10 +60,10 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path, query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
-    const { transactionType, transactionName } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType, transactionName } = context.params.query;
 
     return getTransactionCharts({
       serviceName,
@@ -93,15 +93,15 @@ export const transactionGroupsDistributionRoute = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path, query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
     const {
       transactionType,
       transactionName,
       transactionId = '',
       traceId = ''
-    } = query;
+    } = context.params.query;
 
     return getTransactionDistribution({
       serviceName,
@@ -131,10 +131,10 @@ export const transactionGroupsBreakdownRoute = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path, query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
-    const { transactionName, transactionType } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionName, transactionType } = context.params.query;
 
     return getTransactionBreakdown({
       serviceName,
@@ -160,9 +160,9 @@ export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
 
     return getTransactionAvgDurationByBrowser({
       serviceName,
@@ -183,10 +183,10 @@ export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
       t.partial({ transactionName: t.string })
     ])
   },
-  handler: async (req, { path, query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
-    const { transactionName } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionName } = context.params.query;
 
     return getTransactionAvgDurationByCountry({
       serviceName,

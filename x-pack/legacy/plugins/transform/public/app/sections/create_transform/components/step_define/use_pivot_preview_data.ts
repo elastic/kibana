@@ -32,7 +32,8 @@ interface EsMappingType {
   type: ES_FIELD_TYPES;
 }
 
-type PreviewData = Array<Dictionary<any>>;
+export type PreviewItem = Dictionary<any>;
+type PreviewData = PreviewItem[];
 interface PreviewMappings {
   properties: Dictionary<EsMappingType>;
 }

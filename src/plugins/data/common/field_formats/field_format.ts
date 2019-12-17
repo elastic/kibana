@@ -73,7 +73,7 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  private readonly _params: any;
+  protected readonly _params: any;
   protected getConfig: Function | undefined;
 
   constructor(_params: any = {}, getConfig?: Function) {
@@ -193,6 +193,10 @@ export abstract class FieldFormat {
       [TEXT_CONTEXT_TYPE]: textContentTypeSetup(this, this.textConvert),
       [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
+  }
+
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
   }
 }
 

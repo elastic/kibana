@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled from 'styled-components';
 
-import { pure } from 'recompose';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
@@ -58,7 +57,7 @@ interface InspectButtonDispatch {
 
 type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
 
-const InspectButtonComponent = pure<InspectButtonProps>(
+const InspectButtonComponent = React.memo<InspectButtonProps>(
   ({
     compact = false,
     inputId = 'global',

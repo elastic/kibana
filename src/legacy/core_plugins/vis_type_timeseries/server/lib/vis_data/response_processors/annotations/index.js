@@ -22,7 +22,4 @@ import { filterAnnotations } from './filter';
 import { getAnnotationBuckets } from './buckets';
 
 export const handleAnnotationResponse = timestamp =>
-  flow(
-    getAnnotationBuckets,
-    filterAnnotations(timestamp)
-  );
+  flow(getAnnotationBuckets, filterAnnotations(timestamp));

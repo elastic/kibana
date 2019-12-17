@@ -27,7 +27,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -44,7 +44,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action updated',
+              name: 'My action updated',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -70,7 +70,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: createdAction.id,
                 actionTypeId: 'test.index-record',
-                description: 'My action updated',
+                name: 'My action updated',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
@@ -86,7 +86,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -103,7 +103,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action updated',
+              name: 'My action updated',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -142,7 +142,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              description: 'My action updated',
+              name: 'My action updated',
               config: null,
             });
 
@@ -181,7 +181,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              description: 'My action updated',
+              name: 'My action updated',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -239,8 +239,8 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "description" fails because ["description" is required]',
-                validation: { source: 'payload', keys: ['description'] },
+                message: 'child "name" fails because ["name" is required]',
+                validation: { source: 'payload', keys: ['name'] },
               });
               break;
             default:
@@ -253,7 +253,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -270,7 +270,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              description: 'My action updated',
+              name: 'My action updated',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },

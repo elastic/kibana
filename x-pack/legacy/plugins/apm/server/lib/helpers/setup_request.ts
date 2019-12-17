@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import moment from 'moment';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { getESClient } from './es_client';
-import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
+import { KibanaRequest } from 'src/core/server';
+import { IIndexPattern } from 'src/plugins/data/common';
+import { APMConfig } from '../../../../../../plugins/apm/server';
 import {
   getApmIndices,
   ApmIndicesConfig
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { ESClient } from './es_client';
-import { StaticIndexPattern } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
+import { APMRequestHandlerContext } from '../../routes/typings';
+import { getESClient } from './es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
 
 function decodeUiFilters(
-  indexPattern: StaticIndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   uiFiltersEncoded?: string
 ) {
   if (!uiFiltersEncoded || !indexPattern) {
@@ -30,52 +30,76 @@ function decodeUiFilters(
   const uiFilters = JSON.parse(uiFiltersEncoded);
   return getUiFiltersES(indexPattern, uiFilters);
 }
-
-export interface APMRequestQuery {
-  _debug?: string;
-  start?: string;
-  end?: string;
-  uiFilters?: string;
-  processorEvent?: ProcessorEvent;
-}
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
 
 export interface Setup {
-  start: number;
-  end: number;
-  uiFiltersES: ESFilter[];
   client: ESClient;
   internalClient: ESClient;
-  config: KibanaConfig;
+  config: APMConfig;
   indices: ApmIndicesConfig;
   dynamicIndexPattern?: IIndexPattern;
 }
 
-export async function setupRequest(req: Legacy.Request): Promise<Setup> {
-  const query = (req.query as unknown) as APMRequestQuery;
-  const { server } = req;
-  const savedObjectsClient = server.savedObjects.getScopedSavedObjectsClient(
-    req
-  );
-  const config = server.config();
-  const indices = await getApmIndices({ config, savedObjectsClient });
+export interface SetupTimeRange {
+  start: number;
+  end: number;
+}
+export interface SetupUIFilters {
+  uiFiltersES: ESFilter[];
+}
+
+interface SetupRequestParams {
+  query?: {
+    _debug?: boolean;
+    start?: string;
+    end?: string;
+    uiFilters?: string;
+    processorEvent?: ProcessorEvent;
+  };
+}
+
+type InferSetup<TParams extends SetupRequestParams> = Setup &
+  (TParams extends { query: { start: string } } ? { start: number } : {}) &
+  (TParams extends { query: { end: string } } ? { end: number } : {}) &
+  (TParams extends { query: { uiFilters: string } }
+    ? { uiFiltersES: ESFilter[] }
+    : {});
+
+export async function setupRequest<TParams extends SetupRequestParams>(
+  context: APMRequestHandlerContext<TParams>,
+  request: KibanaRequest
+): Promise<InferSetup<TParams>> {
+  const { config } = context;
+  const { query } = context.params;
+
+  const indices = await getApmIndices({
+    savedObjectsClient: context.core.savedObjects.client,
+    config
+  });
 
   const dynamicIndexPattern = await getDynamicIndexPattern({
-    request: req,
+    context,
     indices,
     processorEvent: query.processorEvent
   });
+
   const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
 
-  return {
-    start: moment.utc(query.start).valueOf(),
-    end: moment.utc(query.end).valueOf(),
-    uiFiltersES,
-    client: getESClient(req, { clientAsInternalUser: false }),
-    internalClient: getESClient(req, { clientAsInternalUser: true }),
-    config,
+  const coreSetupRequest = {
     indices,
+    client: getESClient(context, request, { clientAsInternalUser: false }),
+    internalClient: getESClient(context, request, {
+      clientAsInternalUser: true
+    }),
+    config,
     dynamicIndexPattern
   };
+
+  return {
+    ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
+    ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
+    ...('uiFilters' in query ? { uiFiltersES } : {}),
+    ...coreSetupRequest
+  } as InferSetup<TParams>;
 }

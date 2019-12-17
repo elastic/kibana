@@ -10,12 +10,13 @@
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
+    "@babel/cli": "^7.7.5",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@types/parse-link-header": "^1.0.0",
     "@types/strip-ansi": "^5.2.1",
-    "@types/xml2js": "^0.4.5"
+    "@types/xml2js": "^0.4.5",
+    "diff": "^4.0.1"
   },
   "dependencies": {
     "chalk": "^2.4.2",

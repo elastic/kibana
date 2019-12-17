@@ -5,13 +5,15 @@
  */
 
 import { merge } from 'lodash';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { Server } from 'hapi';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID
 } from '../../../../common/apm_saved_object_constants';
+import { APMConfig } from '../../../../../../../plugins/apm/server';
+import { APMRequestHandlerContext } from '../../../routes/typings';
 
 export interface ApmIndicesConfig {
   'apm_oss.sourcemapIndices': string;
@@ -20,7 +22,7 @@ export interface ApmIndicesConfig {
   'apm_oss.spanIndices': string;
   'apm_oss.transactionIndices': string;
   'apm_oss.metricsIndices': string;
-  'apm_oss.apmAgentConfigurationIndex': string;
+  apmAgentConfigurationIndex: string;
 }
 
 export type ApmIndicesName = keyof ApmIndicesConfig;
@@ -30,7 +32,7 @@ export type ScopedSavedObjectsClient = ReturnType<
 >;
 
 async function getApmIndicesSavedObject(
-  savedObjectsClient: ScopedSavedObjectsClient
+  savedObjectsClient: SavedObjectsClientContract
 ) {
   const apmIndices = await savedObjectsClient.get<Partial<ApmIndicesConfig>>(
     APM_INDICES_SAVED_OBJECT_TYPE,
@@ -39,30 +41,29 @@ async function getApmIndicesSavedObject(
   return apmIndices.attributes;
 }
 
-function getApmIndicesConfig(config: KibanaConfig): ApmIndicesConfig {
+export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    'apm_oss.sourcemapIndices': config.get<string>('apm_oss.sourcemapIndices'),
-    'apm_oss.errorIndices': config.get<string>('apm_oss.errorIndices'),
-    'apm_oss.onboardingIndices': config.get<string>(
-      'apm_oss.onboardingIndices'
-    ),
-    'apm_oss.spanIndices': config.get<string>('apm_oss.spanIndices'),
-    'apm_oss.transactionIndices': config.get<string>(
-      'apm_oss.transactionIndices'
-    ),
-    'apm_oss.metricsIndices': config.get<string>('apm_oss.metricsIndices'),
-    'apm_oss.apmAgentConfigurationIndex': config.get<string>(
-      'apm_oss.apmAgentConfigurationIndex'
-    )
+    'apm_oss.sourcemapIndices': config['apm_oss.sourcemapIndices'],
+    'apm_oss.errorIndices': config['apm_oss.errorIndices'],
+    'apm_oss.onboardingIndices': config['apm_oss.onboardingIndices'],
+    'apm_oss.spanIndices': config['apm_oss.spanIndices'],
+    'apm_oss.transactionIndices': config['apm_oss.transactionIndices'],
+    'apm_oss.metricsIndices': config['apm_oss.metricsIndices'],
+    // system indices, not configurable
+    apmAgentConfigurationIndex: '.apm-agent-configuration'
   };
 }
 
+// export async function getApmIndices(context: APMRequestHandlerContext) {
+//   return _getApmIndices(context.core, context.config);
+// }
+
 export async function getApmIndices({
-  savedObjectsClient,
-  config
+  config,
+  savedObjectsClient
 }: {
-  savedObjectsClient: ScopedSavedObjectsClient;
-  config: KibanaConfig;
+  config: APMConfig;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
@@ -81,20 +82,19 @@ const APM_UI_INDICES: ApmIndicesName[] = [
   'apm_oss.onboardingIndices',
   'apm_oss.spanIndices',
   'apm_oss.transactionIndices',
-  'apm_oss.metricsIndices',
-  'apm_oss.apmAgentConfigurationIndex'
+  'apm_oss.metricsIndices'
 ];
 
 export async function getApmIndexSettings({
-  config,
-  savedObjectsClient
+  context
 }: {
-  config: KibanaConfig;
-  savedObjectsClient: ScopedSavedObjectsClient;
+  context: APMRequestHandlerContext;
 }) {
   let apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>;
   try {
-    apmIndicesSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
+    apmIndicesSavedObject = await getApmIndicesSavedObject(
+      context.core.savedObjects.client
+    );
   } catch (error) {
     if (error.output && error.output.statusCode === 404) {
       apmIndicesSavedObject = {};
@@ -102,7 +102,7 @@ export async function getApmIndexSettings({
       throw error;
     }
   }
-  const apmIndicesConfig = getApmIndicesConfig(config);
+  const apmIndicesConfig = getApmIndicesConfig(context.config);
 
   return APM_UI_INDICES.map(configurationName => ({
     configurationName,

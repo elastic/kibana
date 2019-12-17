@@ -69,30 +69,6 @@ export class Plugin {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
-    plugins.xpack_main.registerFeature({
-      id: 'actions',
-      name: 'Actions',
-      app: ['actions', 'kibana'],
-      privileges: {
-        all: {
-          savedObject: {
-            all: ['action', 'action_task_params'],
-            read: [],
-          },
-          ui: [],
-          api: ['actions-read', 'actions-all'],
-        },
-        read: {
-          savedObject: {
-            all: ['action_task_params'],
-            read: ['action'],
-          },
-          ui: [],
-          api: ['actions-read'],
-        },
-      },
-    });
-
     // Encrypted attributes
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
@@ -100,7 +76,7 @@ export class Plugin {
     plugins.encryptedSavedObjects.registerType({
       type: 'action',
       attributesToEncrypt: new Set(['secrets']),
-      attributesToExcludeFromAAD: new Set(['description']),
+      attributesToExcludeFromAAD: new Set(['name']),
     });
     plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
@@ -109,9 +85,11 @@ export class Plugin {
 
     const actionExecutor = new ActionExecutor();
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
+    const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
       taskManager: plugins.task_manager,
+      actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -121,7 +99,7 @@ export class Plugin {
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
-      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsConfigType),
+      actionsConfigUtils,
     });
 
     // Routes

@@ -7,7 +7,6 @@
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
-import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
@@ -18,25 +17,23 @@ const disableSticky = 'screen and (max-width: ' + euiLightVars.euiBreakpoints.s 
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Wrapper = styled.aside<{ isSticky?: boolean }>`
-  ${props => css`
-    position: relative;
-    z-index: ${props.theme.eui.euiZNavigation};
-    background: ${props.theme.eui.euiColorEmptyShade};
-    border-bottom: ${props.theme.eui.euiBorderThin};
-    padding: ${props.theme.eui.paddingSizes.m} ${gutterTimeline} ${
-    props.theme.eui.paddingSizes.m
-  } ${props.theme.eui.paddingSizes.l};
+  position: relative;
+  z-index: ${({ theme }) => theme.eui.euiZNavigation};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m} ${gutterTimeline} ${({ theme }) =>
+  theme.eui.paddingSizes.m} ${({ theme }) => theme.eui.paddingSizes.l};
 
-    ${props.isSticky &&
-      `
+  ${({ isSticky }) =>
+    isSticky &&
+    css`
       top: ${offsetChrome}px !important;
     `}
 
-    @media only ${disableSticky} {
-      position: static !important;
-      z-index: ${props.theme.eui.euiZContent} !important;
-    }
-  `}
+  @media only ${disableSticky} {
+    position: static !important;
+    z-index: ${({ theme }) => theme.eui.euiZContent} !important;
+  }
 `;
 Wrapper.displayName = 'Wrapper';
 
@@ -44,7 +41,7 @@ export interface FiltersGlobalProps {
   children: React.ReactNode;
 }
 
-export const FiltersGlobal = pure<FiltersGlobalProps>(({ children }) => (
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
       <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>

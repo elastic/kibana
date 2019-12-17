@@ -1,0 +1,3685 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
+<I18nProvider>
+  <IntlProvider
+    defaultLocale="en"
+    formats={
+      Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      }
+    }
+    locale="en"
+    messages={Object {}}
+    textComponent={Symbol(react.fragment)}
+  >
+    <PseudoLocaleWrapper>
+      <Provider
+        services={
+          Object {
+            "appName": "test",
+            "application": Object {
+              "capabilities": Object {
+                "catalogue": Object {},
+                "management": Object {},
+                "navLinks": Object {},
+              },
+              "getUrlForApp": [MockFunction],
+              "navigateToApp": [MockFunction],
+              "registerMountContext": [MockFunction],
+            },
+            "chrome": Object {
+              "addApplicationClass": [MockFunction],
+              "docTitle": Object {
+                "__legacy": Object {
+                  "setBaseTitle": [MockFunction],
+                },
+                "change": [MockFunction],
+                "reset": [MockFunction],
+              },
+              "getApplicationClasses$": [MockFunction],
+              "getBadge$": [MockFunction],
+              "getBrand$": [MockFunction],
+              "getBreadcrumbs$": [MockFunction],
+              "getHeaderComponent": [MockFunction],
+              "getHelpExtension$": [MockFunction],
+              "getIsCollapsed$": [MockFunction],
+              "getIsVisible$": [MockFunction],
+              "navControls": Object {
+                "getLeft$": [MockFunction],
+                "getRight$": [MockFunction],
+                "registerLeft": [MockFunction],
+                "registerRight": [MockFunction],
+              },
+              "navLinks": Object {
+                "enableForcedAppSwitcherNavigation": [MockFunction],
+                "get": [MockFunction],
+                "getAll": [MockFunction],
+                "getForceAppSwitcherNavigation$": [MockFunction],
+                "getNavLinks$": [MockFunction],
+                "has": [MockFunction],
+                "showOnly": [MockFunction],
+                "update": [MockFunction],
+              },
+              "recentlyAccessed": Object {
+                "add": [MockFunction],
+                "get": [MockFunction],
+                "get$": [MockFunction],
+              },
+              "removeApplicationClass": [MockFunction],
+              "setAppTitle": [MockFunction],
+              "setBadge": [MockFunction],
+              "setBrand": [MockFunction],
+              "setBreadcrumbs": [MockFunction],
+              "setHelpExtension": [MockFunction],
+              "setHelpSupportUrl": [MockFunction],
+              "setIsCollapsed": [MockFunction],
+              "setIsVisible": [MockFunction],
+            },
+            "data": Object {
+              "autocomplete": Object {
+                "addProvider": [MockFunction],
+                "clearProviders": [MockFunction],
+                "getProvider": [MockFunction],
+              },
+              "fieldFormats": Object {
+                "getByFieldType": [MockFunction],
+                "getConfig": [MockFunction],
+                "getDefaultConfig": [MockFunction],
+                "getDefaultInstance": [MockFunction],
+                "getDefaultInstanceCacheResolver": [MockFunction],
+                "getDefaultInstancePlain": [MockFunction],
+                "getDefaultType": [MockFunction],
+                "getDefaultTypeName": [MockFunction],
+                "getInstance": [MockFunction],
+                "getType": [MockFunction],
+                "getTypeNameByEsTypes": [MockFunction],
+                "init": [MockFunction],
+                "parseDefaultTypeMap": [MockFunction],
+                "register": [MockFunction],
+              },
+              "getSuggestions": [MockFunction],
+              "indexPatterns": Object {},
+              "query": Object {
+                "filterManager": [MockFunction],
+                "savedQueries": [MockFunction],
+                "timefilter": Object {
+                  "history": Object {
+                    "add": [MockFunction],
+                    "get": [MockFunction],
+                  },
+                  "timefilter": Object {
+                    "calculateBounds": [MockFunction],
+                    "createFilter": [MockFunction],
+                    "disableAutoRefreshSelector": [MockFunction],
+                    "disableTimeRangeSelector": [MockFunction],
+                    "enableAutoRefreshSelector": [MockFunction],
+                    "enableTimeRangeSelector": [MockFunction],
+                    "getActiveBounds": [MockFunction],
+                    "getAutoRefreshFetch$": [MockFunction],
+                    "getBounds": [MockFunction],
+                    "getEnabledUpdated$": [MockFunction],
+                    "getFetch$": [MockFunction],
+                    "getRefreshInterval": [MockFunction],
+                    "getRefreshIntervalUpdate$": [MockFunction],
+                    "getTime": [MockFunction],
+                    "getTimeUpdate$": [MockFunction],
+                    "isAutoRefreshSelectorEnabled": [MockFunction],
+                    "isTimeRangeSelectorEnabled": [MockFunction],
+                    "setRefreshInterval": [MockFunction],
+                    "setTime": [MockFunction],
+                  },
+                },
+              },
+              "search": Object {
+                "search": [MockFunction],
+              },
+              "ui": Object {
+                "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
+              },
+            },
+            "docLinks": Object {
+              "DOC_LINK_VERSION": "mocked-test-branch",
+              "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+              "links": Object {
+                "aggs": Object {
+                  "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+                  "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+                  "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+                  "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+                  "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                  "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+                  "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+                  "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+                  "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+                  "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+                  "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+                  "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+                  "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+                  "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+                  "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+                  "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+                  "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+                  "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+                  "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+                  "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+                  "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+                  "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+                  "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+                  "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+                  "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+                  "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+                  "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                  "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+                  "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+                  "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+                },
+                "auditbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+                },
+                "date": Object {
+                  "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+                },
+                "filebeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+                  "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+                  "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+                  "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+                  "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+                  "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+                },
+                "functionbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+                },
+                "heartbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+                },
+                "indexPatterns": Object {
+                  "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+                  "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+                },
+                "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+                "logstash": Object {
+                  "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                },
+                "metricbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+                },
+                "query": Object {
+                  "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+                  "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+                  "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+                },
+                "scriptedFields": Object {
+                  "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+                  "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+                  "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+                  "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+                  "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+                  "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+                },
+                "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                "winlogbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+                },
+              },
+            },
+            "http": Object {
+              "addLoadingCount": [MockFunction],
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction],
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
+              "removeAllInterceptors": [MockFunction],
+              "stop": [MockFunction],
+            },
+            "i18n": Object {
+              "Context": [MockFunction],
+            },
+            "injectedMetadata": Object {
+              "getInjectedVar": [MockFunction],
+            },
+            "notifications": Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            },
+            "overlays": Object {
+              "banners": Object {
+                "add": [MockFunction],
+                "get$": [MockFunction],
+                "getComponent": [MockFunction],
+                "remove": [MockFunction],
+                "replace": [MockFunction],
+              },
+              "openFlyout": [MockFunction],
+              "openModal": [MockFunction],
+            },
+            "savedObjects": Object {
+              "client": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+            },
+            "storage": Object {
+              "clear": [MockFunction],
+              "get": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "storage": Object {
+                "clear": [MockFunction],
+                "getItem": [MockFunction],
+                "key": [MockFunction],
+                "length": 0,
+                "removeItem": [MockFunction],
+                "setItem": [MockFunction],
+              },
+            },
+            "uiSettings": Object {
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "history:limit",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+            },
+          }
+        }
+      >
+        <InjectIntl(EnhancedType)
+          disableAutoFocus={true}
+          indexPatterns={
+            Array [
+              Object {
+                "fields": Array [
+                  Object {
+                    "aggregatable": true,
+                    "esTypes": Array [
+                      "integer",
+                    ],
+                    "filterable": true,
+                    "name": "response",
+                    "searchable": true,
+                    "type": "number",
+                  },
+                ],
+                "id": "1234",
+                "title": "logstash-*",
+              },
+            ]
+          }
+          intl={null}
+          onSubmit={[Function]}
+          query={
+            Object {
+              "language": "kuery",
+              "query": "response:200",
+            }
+          }
+          screenTitle="Another Screen"
+        >
+          <EnhancedType
+            disableAutoFocus={true}
+            indexPatterns={
+              Array [
+                Object {
+                  "fields": Array [
+                    Object {
+                      "aggregatable": true,
+                      "esTypes": Array [
+                        "integer",
+                      ],
+                      "filterable": true,
+                      "name": "response",
+                      "searchable": true,
+                      "type": "number",
+                    },
+                  ],
+                  "id": "1234",
+                  "title": "logstash-*",
+                },
+              ]
+            }
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
+              }
+            }
+            onSubmit={[Function]}
+            query={
+              Object {
+                "language": "kuery",
+                "query": "response:200",
+              }
+            }
+            screenTitle="Another Screen"
+          >
+            <QueryStringInputUI
+              disableAutoFocus={true}
+              indexPatterns={
+                Array [
+                  Object {
+                    "fields": Array [
+                      Object {
+                        "aggregatable": true,
+                        "esTypes": Array [
+                          "integer",
+                        ],
+                        "filterable": true,
+                        "name": "response",
+                        "searchable": true,
+                        "type": "number",
+                      },
+                    ],
+                    "id": "1234",
+                    "title": "logstash-*",
+                  },
+                ]
+              }
+              intl={
+                Object {
+                  "defaultFormats": Object {},
+                  "defaultLocale": "en",
+                  "formatDate": [Function],
+                  "formatHTMLMessage": [Function],
+                  "formatMessage": [Function],
+                  "formatNumber": [Function],
+                  "formatPlural": [Function],
+                  "formatRelative": [Function],
+                  "formatTime": [Function],
+                  "formats": Object {
+                    "date": Object {
+                      "full": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "weekday": "long",
+                        "year": "numeric",
+                      },
+                      "long": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "year": "numeric",
+                      },
+                      "medium": Object {
+                        "day": "numeric",
+                        "month": "short",
+                        "year": "numeric",
+                      },
+                      "short": Object {
+                        "day": "numeric",
+                        "month": "numeric",
+                        "year": "2-digit",
+                      },
+                    },
+                    "number": Object {
+                      "currency": Object {
+                        "style": "currency",
+                      },
+                      "percent": Object {
+                        "style": "percent",
+                      },
+                    },
+                    "relative": Object {
+                      "days": Object {
+                        "units": "day",
+                      },
+                      "hours": Object {
+                        "units": "hour",
+                      },
+                      "minutes": Object {
+                        "units": "minute",
+                      },
+                      "months": Object {
+                        "units": "month",
+                      },
+                      "seconds": Object {
+                        "units": "second",
+                      },
+                      "years": Object {
+                        "units": "year",
+                      },
+                    },
+                    "time": Object {
+                      "full": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "long": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "medium": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                      },
+                      "short": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                      },
+                    },
+                  },
+                  "formatters": Object {
+                    "getDateTimeFormat": [Function],
+                    "getMessageFormat": [Function],
+                    "getNumberFormat": [Function],
+                    "getPluralFormat": [Function],
+                    "getRelativeFormat": [Function],
+                  },
+                  "locale": "en",
+                  "messages": Object {},
+                  "now": [Function],
+                  "onError": [Function],
+                  "textComponent": Symbol(react.fragment),
+                  "timeZone": null,
+                }
+              }
+              kibana={
+                Object {
+                  "notifications": Object {
+                    "toasts": Object {
+                      "danger": [Function],
+                      "show": [Function],
+                      "success": [Function],
+                      "warning": [Function],
+                    },
+                  },
+                  "overlays": Object {
+                    "openFlyout": [Function],
+                    "openModal": [Function],
+                  },
+                  "services": Object {
+                    "appName": "test",
+                    "application": Object {
+                      "capabilities": Object {
+                        "catalogue": Object {},
+                        "management": Object {},
+                        "navLinks": Object {},
+                      },
+                      "getUrlForApp": [MockFunction],
+                      "navigateToApp": [MockFunction],
+                      "registerMountContext": [MockFunction],
+                    },
+                    "chrome": Object {
+                      "addApplicationClass": [MockFunction],
+                      "docTitle": Object {
+                        "__legacy": Object {
+                          "setBaseTitle": [MockFunction],
+                        },
+                        "change": [MockFunction],
+                        "reset": [MockFunction],
+                      },
+                      "getApplicationClasses$": [MockFunction],
+                      "getBadge$": [MockFunction],
+                      "getBrand$": [MockFunction],
+                      "getBreadcrumbs$": [MockFunction],
+                      "getHeaderComponent": [MockFunction],
+                      "getHelpExtension$": [MockFunction],
+                      "getIsCollapsed$": [MockFunction],
+                      "getIsVisible$": [MockFunction],
+                      "navControls": Object {
+                        "getLeft$": [MockFunction],
+                        "getRight$": [MockFunction],
+                        "registerLeft": [MockFunction],
+                        "registerRight": [MockFunction],
+                      },
+                      "navLinks": Object {
+                        "enableForcedAppSwitcherNavigation": [MockFunction],
+                        "get": [MockFunction],
+                        "getAll": [MockFunction],
+                        "getForceAppSwitcherNavigation$": [MockFunction],
+                        "getNavLinks$": [MockFunction],
+                        "has": [MockFunction],
+                        "showOnly": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                      "recentlyAccessed": Object {
+                        "add": [MockFunction],
+                        "get": [MockFunction],
+                        "get$": [MockFunction],
+                      },
+                      "removeApplicationClass": [MockFunction],
+                      "setAppTitle": [MockFunction],
+                      "setBadge": [MockFunction],
+                      "setBrand": [MockFunction],
+                      "setBreadcrumbs": [MockFunction],
+                      "setHelpExtension": [MockFunction],
+                      "setHelpSupportUrl": [MockFunction],
+                      "setIsCollapsed": [MockFunction],
+                      "setIsVisible": [MockFunction],
+                    },
+                    "data": Object {
+                      "autocomplete": Object {
+                        "addProvider": [MockFunction],
+                        "clearProviders": [MockFunction],
+                        "getProvider": [MockFunction],
+                      },
+                      "fieldFormats": Object {
+                        "getByFieldType": [MockFunction],
+                        "getConfig": [MockFunction],
+                        "getDefaultConfig": [MockFunction],
+                        "getDefaultInstance": [MockFunction],
+                        "getDefaultInstanceCacheResolver": [MockFunction],
+                        "getDefaultInstancePlain": [MockFunction],
+                        "getDefaultType": [MockFunction],
+                        "getDefaultTypeName": [MockFunction],
+                        "getInstance": [MockFunction],
+                        "getType": [MockFunction],
+                        "getTypeNameByEsTypes": [MockFunction],
+                        "init": [MockFunction],
+                        "parseDefaultTypeMap": [MockFunction],
+                        "register": [MockFunction],
+                      },
+                      "getSuggestions": [MockFunction],
+                      "indexPatterns": Object {},
+                      "query": Object {
+                        "filterManager": [MockFunction],
+                        "savedQueries": [MockFunction],
+                        "timefilter": Object {
+                          "history": Object {
+                            "add": [MockFunction],
+                            "get": [MockFunction],
+                          },
+                          "timefilter": Object {
+                            "calculateBounds": [MockFunction],
+                            "createFilter": [MockFunction],
+                            "disableAutoRefreshSelector": [MockFunction],
+                            "disableTimeRangeSelector": [MockFunction],
+                            "enableAutoRefreshSelector": [MockFunction],
+                            "enableTimeRangeSelector": [MockFunction],
+                            "getActiveBounds": [MockFunction],
+                            "getAutoRefreshFetch$": [MockFunction],
+                            "getBounds": [MockFunction],
+                            "getEnabledUpdated$": [MockFunction],
+                            "getFetch$": [MockFunction],
+                            "getRefreshInterval": [MockFunction],
+                            "getRefreshIntervalUpdate$": [MockFunction],
+                            "getTime": [MockFunction],
+                            "getTimeUpdate$": [MockFunction],
+                            "isAutoRefreshSelectorEnabled": [MockFunction],
+                            "isTimeRangeSelectorEnabled": [MockFunction],
+                            "setRefreshInterval": [MockFunction],
+                            "setTime": [MockFunction],
+                          },
+                        },
+                      },
+                      "search": Object {
+                        "search": [MockFunction],
+                      },
+                      "ui": Object {
+                        "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
+                      },
+                    },
+                    "docLinks": Object {
+                      "DOC_LINK_VERSION": "mocked-test-branch",
+                      "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+                      "links": Object {
+                        "aggs": Object {
+                          "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+                          "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+                          "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+                          "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+                          "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                          "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+                          "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+                          "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+                          "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+                          "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+                          "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+                          "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+                          "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+                          "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+                          "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+                          "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+                          "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+                          "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+                          "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+                          "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+                          "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+                          "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+                          "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+                          "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+                          "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+                          "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+                          "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                          "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+                          "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+                          "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+                        },
+                        "auditbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+                        },
+                        "date": Object {
+                          "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+                        },
+                        "filebeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+                          "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+                          "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+                          "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+                          "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+                          "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+                        },
+                        "functionbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+                        },
+                        "heartbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+                        },
+                        "indexPatterns": Object {
+                          "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+                          "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+                        },
+                        "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+                        "logstash": Object {
+                          "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                        },
+                        "metricbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+                        },
+                        "query": Object {
+                          "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+                          "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+                          "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+                        },
+                        "scriptedFields": Object {
+                          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+                          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+                          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+                          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+                          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+                          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+                        },
+                        "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        "winlogbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+                        },
+                      },
+                    },
+                    "http": Object {
+                      "addLoadingCount": [MockFunction],
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
+                      },
+                      "basePath": BasePath {
+                        "basePath": "",
+                        "get": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
+                      },
+                      "delete": [MockFunction],
+                      "fetch": [MockFunction],
+                      "get": [MockFunction],
+                      "getLoadingCount$": [MockFunction],
+                      "head": [MockFunction],
+                      "intercept": [MockFunction],
+                      "options": [MockFunction],
+                      "patch": [MockFunction],
+                      "post": [MockFunction],
+                      "put": [MockFunction],
+                      "removeAllInterceptors": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                    "i18n": Object {
+                      "Context": [MockFunction],
+                    },
+                    "injectedMetadata": Object {
+                      "getInjectedVar": [MockFunction],
+                    },
+                    "notifications": Object {
+                      "toasts": Object {
+                        "add": [MockFunction],
+                        "addDanger": [MockFunction],
+                        "addError": [MockFunction],
+                        "addSuccess": [MockFunction],
+                        "addWarning": [MockFunction],
+                        "get$": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                    },
+                    "overlays": Object {
+                      "banners": Object {
+                        "add": [MockFunction],
+                        "get$": [MockFunction],
+                        "getComponent": [MockFunction],
+                        "remove": [MockFunction],
+                        "replace": [MockFunction],
+                      },
+                      "openFlyout": [MockFunction],
+                      "openModal": [MockFunction],
+                    },
+                    "savedObjects": Object {
+                      "client": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    },
+                    "storage": Object {
+                      "clear": [MockFunction],
+                      "get": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "storage": Object {
+                        "clear": [MockFunction],
+                        "getItem": [MockFunction],
+                        "key": [MockFunction],
+                        "length": 0,
+                        "removeItem": [MockFunction],
+                        "setItem": [MockFunction],
+                      },
+                    },
+                    "uiSettings": Object {
+                      "get": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "history:limit",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": undefined,
+                          },
+                        ],
+                      },
+                      "get$": [MockFunction],
+                      "getAll": [MockFunction],
+                      "getSaved$": [MockFunction],
+                      "getUpdate$": [MockFunction],
+                      "getUpdateErrors$": [MockFunction],
+                      "isCustom": [MockFunction],
+                      "isDeclared": [MockFunction],
+                      "isDefault": [MockFunction],
+                      "isOverridden": [MockFunction],
+                      "overrideLocalDefault": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                    },
+                  },
+                }
+              }
+              onSubmit={[Function]}
+              query={
+                Object {
+                  "language": "kuery",
+                  "query": "response:200",
+                }
+              }
+              screenTitle="Another Screen"
+            >
+              <EuiOutsideClickDetector
+                onOutsideClick={[Function]}
+              >
+                <div
+                  aria-expanded={false}
+                  aria-haspopup="true"
+                  aria-label="Search and filter the test page"
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  role="combobox"
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
+                >
+                  <div
+                    role="search"
+                  >
+                    <div
+                      className="kuiLocalSearchAssistedInput"
+                    >
+                      <EuiFieldText
+                        append={
+                          <QueryLanguageSwitcher
+                            language="kuery"
+                            onSelectLanguage={[Function]}
+                          />
+                        }
+                        aria-autocomplete="list"
+                        aria-label="Start typing to search and filter the test page"
+                        autoComplete="off"
+                        autoFocus={false}
+                        compressed={false}
+                        data-test-subj="queryInput"
+                        fullWidth={true}
+                        inputRef={[Function]}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search"
+                        role="textbox"
+                        spellCheck={false}
+                        type="text"
+                        value="response:200"
+                      >
+                        <EuiFormControlLayout
+                          append={
+                            <QueryLanguageSwitcher
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            />
+                          }
+                          compressed={false}
+                          fullWidth={true}
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiValidatableControl>
+                                <input
+                                  aria-autocomplete="list"
+                                  aria-label="Start typing to search and filter the test page"
+                                  autoComplete="off"
+                                  autoFocus={false}
+                                  className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                  data-test-subj="queryInput"
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onKeyDown={[Function]}
+                                  onKeyUp={[Function]}
+                                  placeholder="Search"
+                                  role="textbox"
+                                  spellCheck={false}
+                                  type="text"
+                                  value="response:200"
+                                />
+                              </EuiValidatableControl>
+                              <EuiFormControlLayoutIcons
+                                isLoading={false}
+                              />
+                            </div>
+                            <QueryLanguageSwitcher
+                              className="euiFormControlLayout__append"
+                              key="0/.0"
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            >
+                              <EuiPopover
+                                anchorClassName="euiFormControlLayout__append"
+                                anchorPosition="downRight"
+                                button={
+                                  <EuiButtonEmpty
+                                    className="euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    size="xs"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="KQL"
+                                      id="data.query.queryBar.kqlLanguageName"
+                                      values={Object {}}
+                                    />
+                                  </EuiButtonEmpty>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="popover"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelPaddingSize="m"
+                                withTitle={true}
+                              >
+                                <EuiOutsideClickDetector
+                                  isDisabled={true}
+                                  onOutsideClick={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+                                    id="popover"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
+                                  >
+                                    <div
+                                      className="euiPopover__anchor euiFormControlLayout__append"
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFormControlLayout__append"
+                                        onClick={[Function]}
+                                        size="xs"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="KQL"
+                                                id="data.query.queryBar.kqlLanguageName"
+                                                values={Object {}}
+                                              >
+                                                KQL
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </div>
+                                  </div>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
+                            </QueryLanguageSwitcher>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiFieldText>
+                    </div>
+                  </div>
+                  <SuggestionsComponent
+                    index={null}
+                    loadMore={[Function]}
+                    onClick={[Function]}
+                    onMouseEnter={[Function]}
+                    show={false}
+                    suggestions={Array []}
+                  />
+                </div>
+              </EuiOutsideClickDetector>
+            </QueryStringInputUI>
+          </EnhancedType>
+        </InjectIntl(EnhancedType)>
+      </Provider>
+    </PseudoLocaleWrapper>
+  </IntlProvider>
+</I18nProvider>
+`;
+
+exports[`QueryStringInput Should pass the query language to the language switcher 1`] = `
+<I18nProvider>
+  <IntlProvider
+    defaultLocale="en"
+    formats={
+      Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      }
+    }
+    locale="en"
+    messages={Object {}}
+    textComponent={Symbol(react.fragment)}
+  >
+    <PseudoLocaleWrapper>
+      <Provider
+        services={
+          Object {
+            "appName": "test",
+            "application": Object {
+              "capabilities": Object {
+                "catalogue": Object {},
+                "management": Object {},
+                "navLinks": Object {},
+              },
+              "getUrlForApp": [MockFunction],
+              "navigateToApp": [MockFunction],
+              "registerMountContext": [MockFunction],
+            },
+            "chrome": Object {
+              "addApplicationClass": [MockFunction],
+              "docTitle": Object {
+                "__legacy": Object {
+                  "setBaseTitle": [MockFunction],
+                },
+                "change": [MockFunction],
+                "reset": [MockFunction],
+              },
+              "getApplicationClasses$": [MockFunction],
+              "getBadge$": [MockFunction],
+              "getBrand$": [MockFunction],
+              "getBreadcrumbs$": [MockFunction],
+              "getHeaderComponent": [MockFunction],
+              "getHelpExtension$": [MockFunction],
+              "getIsCollapsed$": [MockFunction],
+              "getIsVisible$": [MockFunction],
+              "navControls": Object {
+                "getLeft$": [MockFunction],
+                "getRight$": [MockFunction],
+                "registerLeft": [MockFunction],
+                "registerRight": [MockFunction],
+              },
+              "navLinks": Object {
+                "enableForcedAppSwitcherNavigation": [MockFunction],
+                "get": [MockFunction],
+                "getAll": [MockFunction],
+                "getForceAppSwitcherNavigation$": [MockFunction],
+                "getNavLinks$": [MockFunction],
+                "has": [MockFunction],
+                "showOnly": [MockFunction],
+                "update": [MockFunction],
+              },
+              "recentlyAccessed": Object {
+                "add": [MockFunction],
+                "get": [MockFunction],
+                "get$": [MockFunction],
+              },
+              "removeApplicationClass": [MockFunction],
+              "setAppTitle": [MockFunction],
+              "setBadge": [MockFunction],
+              "setBrand": [MockFunction],
+              "setBreadcrumbs": [MockFunction],
+              "setHelpExtension": [MockFunction],
+              "setHelpSupportUrl": [MockFunction],
+              "setIsCollapsed": [MockFunction],
+              "setIsVisible": [MockFunction],
+            },
+            "data": Object {
+              "autocomplete": Object {
+                "addProvider": [MockFunction],
+                "clearProviders": [MockFunction],
+                "getProvider": [MockFunction],
+              },
+              "fieldFormats": Object {
+                "getByFieldType": [MockFunction],
+                "getConfig": [MockFunction],
+                "getDefaultConfig": [MockFunction],
+                "getDefaultInstance": [MockFunction],
+                "getDefaultInstanceCacheResolver": [MockFunction],
+                "getDefaultInstancePlain": [MockFunction],
+                "getDefaultType": [MockFunction],
+                "getDefaultTypeName": [MockFunction],
+                "getInstance": [MockFunction],
+                "getType": [MockFunction],
+                "getTypeNameByEsTypes": [MockFunction],
+                "init": [MockFunction],
+                "parseDefaultTypeMap": [MockFunction],
+                "register": [MockFunction],
+              },
+              "getSuggestions": [MockFunction],
+              "indexPatterns": Object {},
+              "query": Object {
+                "filterManager": [MockFunction],
+                "savedQueries": [MockFunction],
+                "timefilter": Object {
+                  "history": Object {
+                    "add": [MockFunction],
+                    "get": [MockFunction],
+                  },
+                  "timefilter": Object {
+                    "calculateBounds": [MockFunction],
+                    "createFilter": [MockFunction],
+                    "disableAutoRefreshSelector": [MockFunction],
+                    "disableTimeRangeSelector": [MockFunction],
+                    "enableAutoRefreshSelector": [MockFunction],
+                    "enableTimeRangeSelector": [MockFunction],
+                    "getActiveBounds": [MockFunction],
+                    "getAutoRefreshFetch$": [MockFunction],
+                    "getBounds": [MockFunction],
+                    "getEnabledUpdated$": [MockFunction],
+                    "getFetch$": [MockFunction],
+                    "getRefreshInterval": [MockFunction],
+                    "getRefreshIntervalUpdate$": [MockFunction],
+                    "getTime": [MockFunction],
+                    "getTimeUpdate$": [MockFunction],
+                    "isAutoRefreshSelectorEnabled": [MockFunction],
+                    "isTimeRangeSelectorEnabled": [MockFunction],
+                    "setRefreshInterval": [MockFunction],
+                    "setTime": [MockFunction],
+                  },
+                },
+              },
+              "search": Object {
+                "search": [MockFunction],
+              },
+              "ui": Object {
+                "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
+              },
+            },
+            "docLinks": Object {
+              "DOC_LINK_VERSION": "mocked-test-branch",
+              "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+              "links": Object {
+                "aggs": Object {
+                  "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+                  "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+                  "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+                  "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+                  "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                  "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+                  "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+                  "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+                  "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+                  "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+                  "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+                  "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+                  "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+                  "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+                  "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+                  "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+                  "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+                  "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+                  "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+                  "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+                  "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+                  "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+                  "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+                  "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+                  "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+                  "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+                  "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                  "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+                  "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+                  "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+                },
+                "auditbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+                },
+                "date": Object {
+                  "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+                },
+                "filebeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+                  "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+                  "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+                  "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+                  "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+                  "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+                },
+                "functionbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+                },
+                "heartbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+                },
+                "indexPatterns": Object {
+                  "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+                  "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+                },
+                "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+                "logstash": Object {
+                  "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                },
+                "metricbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+                },
+                "query": Object {
+                  "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+                  "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+                  "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+                },
+                "scriptedFields": Object {
+                  "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+                  "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+                  "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+                  "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+                  "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+                  "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+                },
+                "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                "winlogbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+                },
+              },
+            },
+            "http": Object {
+              "addLoadingCount": [MockFunction],
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction],
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
+              "removeAllInterceptors": [MockFunction],
+              "stop": [MockFunction],
+            },
+            "i18n": Object {
+              "Context": [MockFunction],
+            },
+            "injectedMetadata": Object {
+              "getInjectedVar": [MockFunction],
+            },
+            "notifications": Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            },
+            "overlays": Object {
+              "banners": Object {
+                "add": [MockFunction],
+                "get$": [MockFunction],
+                "getComponent": [MockFunction],
+                "remove": [MockFunction],
+                "replace": [MockFunction],
+              },
+              "openFlyout": [MockFunction],
+              "openModal": [MockFunction],
+            },
+            "savedObjects": Object {
+              "client": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+            },
+            "storage": Object {
+              "clear": [MockFunction],
+              "get": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "storage": Object {
+                "clear": [MockFunction],
+                "getItem": [MockFunction],
+                "key": [MockFunction],
+                "length": 0,
+                "removeItem": [MockFunction],
+                "setItem": [MockFunction],
+              },
+            },
+            "uiSettings": Object {
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "history:limit",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+            },
+          }
+        }
+      >
+        <InjectIntl(EnhancedType)
+          indexPatterns={
+            Array [
+              Object {
+                "fields": Array [
+                  Object {
+                    "aggregatable": true,
+                    "esTypes": Array [
+                      "integer",
+                    ],
+                    "filterable": true,
+                    "name": "response",
+                    "searchable": true,
+                    "type": "number",
+                  },
+                ],
+                "id": "1234",
+                "title": "logstash-*",
+              },
+            ]
+          }
+          intl={null}
+          onSubmit={[Function]}
+          query={
+            Object {
+              "language": "lucene",
+              "query": "response:200",
+            }
+          }
+          screenTitle="Another Screen"
+        >
+          <EnhancedType
+            indexPatterns={
+              Array [
+                Object {
+                  "fields": Array [
+                    Object {
+                      "aggregatable": true,
+                      "esTypes": Array [
+                        "integer",
+                      ],
+                      "filterable": true,
+                      "name": "response",
+                      "searchable": true,
+                      "type": "number",
+                    },
+                  ],
+                  "id": "1234",
+                  "title": "logstash-*",
+                },
+              ]
+            }
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
+              }
+            }
+            onSubmit={[Function]}
+            query={
+              Object {
+                "language": "lucene",
+                "query": "response:200",
+              }
+            }
+            screenTitle="Another Screen"
+          >
+            <QueryStringInputUI
+              indexPatterns={
+                Array [
+                  Object {
+                    "fields": Array [
+                      Object {
+                        "aggregatable": true,
+                        "esTypes": Array [
+                          "integer",
+                        ],
+                        "filterable": true,
+                        "name": "response",
+                        "searchable": true,
+                        "type": "number",
+                      },
+                    ],
+                    "id": "1234",
+                    "title": "logstash-*",
+                  },
+                ]
+              }
+              intl={
+                Object {
+                  "defaultFormats": Object {},
+                  "defaultLocale": "en",
+                  "formatDate": [Function],
+                  "formatHTMLMessage": [Function],
+                  "formatMessage": [Function],
+                  "formatNumber": [Function],
+                  "formatPlural": [Function],
+                  "formatRelative": [Function],
+                  "formatTime": [Function],
+                  "formats": Object {
+                    "date": Object {
+                      "full": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "weekday": "long",
+                        "year": "numeric",
+                      },
+                      "long": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "year": "numeric",
+                      },
+                      "medium": Object {
+                        "day": "numeric",
+                        "month": "short",
+                        "year": "numeric",
+                      },
+                      "short": Object {
+                        "day": "numeric",
+                        "month": "numeric",
+                        "year": "2-digit",
+                      },
+                    },
+                    "number": Object {
+                      "currency": Object {
+                        "style": "currency",
+                      },
+                      "percent": Object {
+                        "style": "percent",
+                      },
+                    },
+                    "relative": Object {
+                      "days": Object {
+                        "units": "day",
+                      },
+                      "hours": Object {
+                        "units": "hour",
+                      },
+                      "minutes": Object {
+                        "units": "minute",
+                      },
+                      "months": Object {
+                        "units": "month",
+                      },
+                      "seconds": Object {
+                        "units": "second",
+                      },
+                      "years": Object {
+                        "units": "year",
+                      },
+                    },
+                    "time": Object {
+                      "full": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "long": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "medium": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                      },
+                      "short": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                      },
+                    },
+                  },
+                  "formatters": Object {
+                    "getDateTimeFormat": [Function],
+                    "getMessageFormat": [Function],
+                    "getNumberFormat": [Function],
+                    "getPluralFormat": [Function],
+                    "getRelativeFormat": [Function],
+                  },
+                  "locale": "en",
+                  "messages": Object {},
+                  "now": [Function],
+                  "onError": [Function],
+                  "textComponent": Symbol(react.fragment),
+                  "timeZone": null,
+                }
+              }
+              kibana={
+                Object {
+                  "notifications": Object {
+                    "toasts": Object {
+                      "danger": [Function],
+                      "show": [Function],
+                      "success": [Function],
+                      "warning": [Function],
+                    },
+                  },
+                  "overlays": Object {
+                    "openFlyout": [Function],
+                    "openModal": [Function],
+                  },
+                  "services": Object {
+                    "appName": "test",
+                    "application": Object {
+                      "capabilities": Object {
+                        "catalogue": Object {},
+                        "management": Object {},
+                        "navLinks": Object {},
+                      },
+                      "getUrlForApp": [MockFunction],
+                      "navigateToApp": [MockFunction],
+                      "registerMountContext": [MockFunction],
+                    },
+                    "chrome": Object {
+                      "addApplicationClass": [MockFunction],
+                      "docTitle": Object {
+                        "__legacy": Object {
+                          "setBaseTitle": [MockFunction],
+                        },
+                        "change": [MockFunction],
+                        "reset": [MockFunction],
+                      },
+                      "getApplicationClasses$": [MockFunction],
+                      "getBadge$": [MockFunction],
+                      "getBrand$": [MockFunction],
+                      "getBreadcrumbs$": [MockFunction],
+                      "getHeaderComponent": [MockFunction],
+                      "getHelpExtension$": [MockFunction],
+                      "getIsCollapsed$": [MockFunction],
+                      "getIsVisible$": [MockFunction],
+                      "navControls": Object {
+                        "getLeft$": [MockFunction],
+                        "getRight$": [MockFunction],
+                        "registerLeft": [MockFunction],
+                        "registerRight": [MockFunction],
+                      },
+                      "navLinks": Object {
+                        "enableForcedAppSwitcherNavigation": [MockFunction],
+                        "get": [MockFunction],
+                        "getAll": [MockFunction],
+                        "getForceAppSwitcherNavigation$": [MockFunction],
+                        "getNavLinks$": [MockFunction],
+                        "has": [MockFunction],
+                        "showOnly": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                      "recentlyAccessed": Object {
+                        "add": [MockFunction],
+                        "get": [MockFunction],
+                        "get$": [MockFunction],
+                      },
+                      "removeApplicationClass": [MockFunction],
+                      "setAppTitle": [MockFunction],
+                      "setBadge": [MockFunction],
+                      "setBrand": [MockFunction],
+                      "setBreadcrumbs": [MockFunction],
+                      "setHelpExtension": [MockFunction],
+                      "setHelpSupportUrl": [MockFunction],
+                      "setIsCollapsed": [MockFunction],
+                      "setIsVisible": [MockFunction],
+                    },
+                    "data": Object {
+                      "autocomplete": Object {
+                        "addProvider": [MockFunction],
+                        "clearProviders": [MockFunction],
+                        "getProvider": [MockFunction],
+                      },
+                      "fieldFormats": Object {
+                        "getByFieldType": [MockFunction],
+                        "getConfig": [MockFunction],
+                        "getDefaultConfig": [MockFunction],
+                        "getDefaultInstance": [MockFunction],
+                        "getDefaultInstanceCacheResolver": [MockFunction],
+                        "getDefaultInstancePlain": [MockFunction],
+                        "getDefaultType": [MockFunction],
+                        "getDefaultTypeName": [MockFunction],
+                        "getInstance": [MockFunction],
+                        "getType": [MockFunction],
+                        "getTypeNameByEsTypes": [MockFunction],
+                        "init": [MockFunction],
+                        "parseDefaultTypeMap": [MockFunction],
+                        "register": [MockFunction],
+                      },
+                      "getSuggestions": [MockFunction],
+                      "indexPatterns": Object {},
+                      "query": Object {
+                        "filterManager": [MockFunction],
+                        "savedQueries": [MockFunction],
+                        "timefilter": Object {
+                          "history": Object {
+                            "add": [MockFunction],
+                            "get": [MockFunction],
+                          },
+                          "timefilter": Object {
+                            "calculateBounds": [MockFunction],
+                            "createFilter": [MockFunction],
+                            "disableAutoRefreshSelector": [MockFunction],
+                            "disableTimeRangeSelector": [MockFunction],
+                            "enableAutoRefreshSelector": [MockFunction],
+                            "enableTimeRangeSelector": [MockFunction],
+                            "getActiveBounds": [MockFunction],
+                            "getAutoRefreshFetch$": [MockFunction],
+                            "getBounds": [MockFunction],
+                            "getEnabledUpdated$": [MockFunction],
+                            "getFetch$": [MockFunction],
+                            "getRefreshInterval": [MockFunction],
+                            "getRefreshIntervalUpdate$": [MockFunction],
+                            "getTime": [MockFunction],
+                            "getTimeUpdate$": [MockFunction],
+                            "isAutoRefreshSelectorEnabled": [MockFunction],
+                            "isTimeRangeSelectorEnabled": [MockFunction],
+                            "setRefreshInterval": [MockFunction],
+                            "setTime": [MockFunction],
+                          },
+                        },
+                      },
+                      "search": Object {
+                        "search": [MockFunction],
+                      },
+                      "ui": Object {
+                        "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
+                      },
+                    },
+                    "docLinks": Object {
+                      "DOC_LINK_VERSION": "mocked-test-branch",
+                      "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+                      "links": Object {
+                        "aggs": Object {
+                          "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+                          "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+                          "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+                          "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+                          "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                          "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+                          "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+                          "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+                          "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+                          "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+                          "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+                          "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+                          "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+                          "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+                          "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+                          "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+                          "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+                          "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+                          "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+                          "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+                          "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+                          "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+                          "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+                          "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+                          "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+                          "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+                          "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                          "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+                          "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+                          "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+                        },
+                        "auditbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+                        },
+                        "date": Object {
+                          "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+                        },
+                        "filebeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+                          "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+                          "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+                          "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+                          "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+                          "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+                        },
+                        "functionbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+                        },
+                        "heartbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+                        },
+                        "indexPatterns": Object {
+                          "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+                          "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+                        },
+                        "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+                        "logstash": Object {
+                          "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                        },
+                        "metricbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+                        },
+                        "query": Object {
+                          "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+                          "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+                          "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+                        },
+                        "scriptedFields": Object {
+                          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+                          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+                          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+                          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+                          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+                          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+                        },
+                        "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        "winlogbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+                        },
+                      },
+                    },
+                    "http": Object {
+                      "addLoadingCount": [MockFunction],
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
+                      },
+                      "basePath": BasePath {
+                        "basePath": "",
+                        "get": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
+                      },
+                      "delete": [MockFunction],
+                      "fetch": [MockFunction],
+                      "get": [MockFunction],
+                      "getLoadingCount$": [MockFunction],
+                      "head": [MockFunction],
+                      "intercept": [MockFunction],
+                      "options": [MockFunction],
+                      "patch": [MockFunction],
+                      "post": [MockFunction],
+                      "put": [MockFunction],
+                      "removeAllInterceptors": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                    "i18n": Object {
+                      "Context": [MockFunction],
+                    },
+                    "injectedMetadata": Object {
+                      "getInjectedVar": [MockFunction],
+                    },
+                    "notifications": Object {
+                      "toasts": Object {
+                        "add": [MockFunction],
+                        "addDanger": [MockFunction],
+                        "addError": [MockFunction],
+                        "addSuccess": [MockFunction],
+                        "addWarning": [MockFunction],
+                        "get$": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                    },
+                    "overlays": Object {
+                      "banners": Object {
+                        "add": [MockFunction],
+                        "get$": [MockFunction],
+                        "getComponent": [MockFunction],
+                        "remove": [MockFunction],
+                        "replace": [MockFunction],
+                      },
+                      "openFlyout": [MockFunction],
+                      "openModal": [MockFunction],
+                    },
+                    "savedObjects": Object {
+                      "client": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    },
+                    "storage": Object {
+                      "clear": [MockFunction],
+                      "get": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "storage": Object {
+                        "clear": [MockFunction],
+                        "getItem": [MockFunction],
+                        "key": [MockFunction],
+                        "length": 0,
+                        "removeItem": [MockFunction],
+                        "setItem": [MockFunction],
+                      },
+                    },
+                    "uiSettings": Object {
+                      "get": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "history:limit",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": undefined,
+                          },
+                        ],
+                      },
+                      "get$": [MockFunction],
+                      "getAll": [MockFunction],
+                      "getSaved$": [MockFunction],
+                      "getUpdate$": [MockFunction],
+                      "getUpdateErrors$": [MockFunction],
+                      "isCustom": [MockFunction],
+                      "isDeclared": [MockFunction],
+                      "isDefault": [MockFunction],
+                      "isOverridden": [MockFunction],
+                      "overrideLocalDefault": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                    },
+                  },
+                }
+              }
+              onSubmit={[Function]}
+              query={
+                Object {
+                  "language": "lucene",
+                  "query": "response:200",
+                }
+              }
+              screenTitle="Another Screen"
+            >
+              <EuiOutsideClickDetector
+                onOutsideClick={[Function]}
+              >
+                <div
+                  aria-expanded={false}
+                  aria-haspopup="true"
+                  aria-label="Search and filter the test page"
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  role="combobox"
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
+                >
+                  <div
+                    role="search"
+                  >
+                    <div
+                      className="kuiLocalSearchAssistedInput"
+                    >
+                      <EuiFieldText
+                        append={
+                          <QueryLanguageSwitcher
+                            language="lucene"
+                            onSelectLanguage={[Function]}
+                          />
+                        }
+                        aria-autocomplete="list"
+                        aria-label="Start typing to search and filter the test page"
+                        autoComplete="off"
+                        autoFocus={true}
+                        compressed={false}
+                        data-test-subj="queryInput"
+                        fullWidth={true}
+                        inputRef={[Function]}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search"
+                        role="textbox"
+                        spellCheck={false}
+                        type="text"
+                        value="response:200"
+                      >
+                        <EuiFormControlLayout
+                          append={
+                            <QueryLanguageSwitcher
+                              language="lucene"
+                              onSelectLanguage={[Function]}
+                            />
+                          }
+                          compressed={false}
+                          fullWidth={true}
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiValidatableControl>
+                                <input
+                                  aria-autocomplete="list"
+                                  aria-label="Start typing to search and filter the test page"
+                                  autoComplete="off"
+                                  autoFocus={true}
+                                  className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                  data-test-subj="queryInput"
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onKeyDown={[Function]}
+                                  onKeyUp={[Function]}
+                                  placeholder="Search"
+                                  role="textbox"
+                                  spellCheck={false}
+                                  type="text"
+                                  value="response:200"
+                                />
+                              </EuiValidatableControl>
+                              <EuiFormControlLayoutIcons
+                                isLoading={false}
+                              />
+                            </div>
+                            <QueryLanguageSwitcher
+                              className="euiFormControlLayout__append"
+                              key="0/.0"
+                              language="lucene"
+                              onSelectLanguage={[Function]}
+                            >
+                              <EuiPopover
+                                anchorClassName="euiFormControlLayout__append"
+                                anchorPosition="downRight"
+                                button={
+                                  <EuiButtonEmpty
+                                    className="euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    size="xs"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Lucene"
+                                      id="data.query.queryBar.luceneLanguageName"
+                                      values={Object {}}
+                                    />
+                                  </EuiButtonEmpty>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="popover"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelPaddingSize="m"
+                                withTitle={true}
+                              >
+                                <EuiOutsideClickDetector
+                                  isDisabled={true}
+                                  onOutsideClick={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+                                    id="popover"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
+                                  >
+                                    <div
+                                      className="euiPopover__anchor euiFormControlLayout__append"
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFormControlLayout__append"
+                                        onClick={[Function]}
+                                        size="xs"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="Lucene"
+                                                id="data.query.queryBar.luceneLanguageName"
+                                                values={Object {}}
+                                              >
+                                                Lucene
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </div>
+                                  </div>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
+                            </QueryLanguageSwitcher>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiFieldText>
+                    </div>
+                  </div>
+                  <SuggestionsComponent
+                    index={null}
+                    loadMore={[Function]}
+                    onClick={[Function]}
+                    onMouseEnter={[Function]}
+                    show={false}
+                    suggestions={Array []}
+                  />
+                </div>
+              </EuiOutsideClickDetector>
+            </QueryStringInputUI>
+          </EnhancedType>
+        </InjectIntl(EnhancedType)>
+      </Provider>
+    </PseudoLocaleWrapper>
+  </IntlProvider>
+</I18nProvider>
+`;
+
+exports[`QueryStringInput Should render the given query 1`] = `
+<I18nProvider>
+  <IntlProvider
+    defaultLocale="en"
+    formats={
+      Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      }
+    }
+    locale="en"
+    messages={Object {}}
+    textComponent={Symbol(react.fragment)}
+  >
+    <PseudoLocaleWrapper>
+      <Provider
+        services={
+          Object {
+            "appName": "test",
+            "application": Object {
+              "capabilities": Object {
+                "catalogue": Object {},
+                "management": Object {},
+                "navLinks": Object {},
+              },
+              "getUrlForApp": [MockFunction],
+              "navigateToApp": [MockFunction],
+              "registerMountContext": [MockFunction],
+            },
+            "chrome": Object {
+              "addApplicationClass": [MockFunction],
+              "docTitle": Object {
+                "__legacy": Object {
+                  "setBaseTitle": [MockFunction],
+                },
+                "change": [MockFunction],
+                "reset": [MockFunction],
+              },
+              "getApplicationClasses$": [MockFunction],
+              "getBadge$": [MockFunction],
+              "getBrand$": [MockFunction],
+              "getBreadcrumbs$": [MockFunction],
+              "getHeaderComponent": [MockFunction],
+              "getHelpExtension$": [MockFunction],
+              "getIsCollapsed$": [MockFunction],
+              "getIsVisible$": [MockFunction],
+              "navControls": Object {
+                "getLeft$": [MockFunction],
+                "getRight$": [MockFunction],
+                "registerLeft": [MockFunction],
+                "registerRight": [MockFunction],
+              },
+              "navLinks": Object {
+                "enableForcedAppSwitcherNavigation": [MockFunction],
+                "get": [MockFunction],
+                "getAll": [MockFunction],
+                "getForceAppSwitcherNavigation$": [MockFunction],
+                "getNavLinks$": [MockFunction],
+                "has": [MockFunction],
+                "showOnly": [MockFunction],
+                "update": [MockFunction],
+              },
+              "recentlyAccessed": Object {
+                "add": [MockFunction],
+                "get": [MockFunction],
+                "get$": [MockFunction],
+              },
+              "removeApplicationClass": [MockFunction],
+              "setAppTitle": [MockFunction],
+              "setBadge": [MockFunction],
+              "setBrand": [MockFunction],
+              "setBreadcrumbs": [MockFunction],
+              "setHelpExtension": [MockFunction],
+              "setHelpSupportUrl": [MockFunction],
+              "setIsCollapsed": [MockFunction],
+              "setIsVisible": [MockFunction],
+            },
+            "data": Object {
+              "autocomplete": Object {
+                "addProvider": [MockFunction],
+                "clearProviders": [MockFunction],
+                "getProvider": [MockFunction],
+              },
+              "fieldFormats": Object {
+                "getByFieldType": [MockFunction],
+                "getConfig": [MockFunction],
+                "getDefaultConfig": [MockFunction],
+                "getDefaultInstance": [MockFunction],
+                "getDefaultInstanceCacheResolver": [MockFunction],
+                "getDefaultInstancePlain": [MockFunction],
+                "getDefaultType": [MockFunction],
+                "getDefaultTypeName": [MockFunction],
+                "getInstance": [MockFunction],
+                "getType": [MockFunction],
+                "getTypeNameByEsTypes": [MockFunction],
+                "init": [MockFunction],
+                "parseDefaultTypeMap": [MockFunction],
+                "register": [MockFunction],
+              },
+              "getSuggestions": [MockFunction],
+              "indexPatterns": Object {},
+              "query": Object {
+                "filterManager": [MockFunction],
+                "savedQueries": [MockFunction],
+                "timefilter": Object {
+                  "history": Object {
+                    "add": [MockFunction],
+                    "get": [MockFunction],
+                  },
+                  "timefilter": Object {
+                    "calculateBounds": [MockFunction],
+                    "createFilter": [MockFunction],
+                    "disableAutoRefreshSelector": [MockFunction],
+                    "disableTimeRangeSelector": [MockFunction],
+                    "enableAutoRefreshSelector": [MockFunction],
+                    "enableTimeRangeSelector": [MockFunction],
+                    "getActiveBounds": [MockFunction],
+                    "getAutoRefreshFetch$": [MockFunction],
+                    "getBounds": [MockFunction],
+                    "getEnabledUpdated$": [MockFunction],
+                    "getFetch$": [MockFunction],
+                    "getRefreshInterval": [MockFunction],
+                    "getRefreshIntervalUpdate$": [MockFunction],
+                    "getTime": [MockFunction],
+                    "getTimeUpdate$": [MockFunction],
+                    "isAutoRefreshSelectorEnabled": [MockFunction],
+                    "isTimeRangeSelectorEnabled": [MockFunction],
+                    "setRefreshInterval": [MockFunction],
+                    "setTime": [MockFunction],
+                  },
+                },
+              },
+              "search": Object {
+                "search": [MockFunction],
+              },
+              "ui": Object {
+                "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
+              },
+            },
+            "docLinks": Object {
+              "DOC_LINK_VERSION": "mocked-test-branch",
+              "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+              "links": Object {
+                "aggs": Object {
+                  "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+                  "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+                  "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+                  "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+                  "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                  "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+                  "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+                  "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+                  "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+                  "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+                  "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+                  "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+                  "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+                  "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+                  "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+                  "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+                  "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+                  "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+                  "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+                  "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+                  "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+                  "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+                  "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+                  "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+                  "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+                  "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+                  "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                  "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+                  "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+                  "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+                },
+                "auditbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+                },
+                "date": Object {
+                  "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+                },
+                "filebeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+                  "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+                  "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+                  "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+                  "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+                  "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+                },
+                "functionbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+                },
+                "heartbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+                },
+                "indexPatterns": Object {
+                  "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+                  "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+                },
+                "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+                "logstash": Object {
+                  "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                },
+                "metricbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+                },
+                "query": Object {
+                  "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+                  "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+                  "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+                },
+                "scriptedFields": Object {
+                  "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+                  "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+                  "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+                  "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+                  "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+                  "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+                },
+                "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                "winlogbeat": Object {
+                  "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+                },
+              },
+            },
+            "http": Object {
+              "addLoadingCount": [MockFunction],
+              "anonymousPaths": Object {
+                "isAnonymous": [MockFunction],
+                "register": [MockFunction],
+              },
+              "basePath": BasePath {
+                "basePath": "",
+                "get": [Function],
+                "prepend": [Function],
+                "remove": [Function],
+              },
+              "delete": [MockFunction],
+              "fetch": [MockFunction],
+              "get": [MockFunction],
+              "getLoadingCount$": [MockFunction],
+              "head": [MockFunction],
+              "intercept": [MockFunction],
+              "options": [MockFunction],
+              "patch": [MockFunction],
+              "post": [MockFunction],
+              "put": [MockFunction],
+              "removeAllInterceptors": [MockFunction],
+              "stop": [MockFunction],
+            },
+            "i18n": Object {
+              "Context": [MockFunction],
+            },
+            "injectedMetadata": Object {
+              "getInjectedVar": [MockFunction],
+            },
+            "notifications": Object {
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            },
+            "overlays": Object {
+              "banners": Object {
+                "add": [MockFunction],
+                "get$": [MockFunction],
+                "getComponent": [MockFunction],
+                "remove": [MockFunction],
+                "replace": [MockFunction],
+              },
+              "openFlyout": [MockFunction],
+              "openModal": [MockFunction],
+            },
+            "savedObjects": Object {
+              "client": Object {
+                "bulkCreate": [MockFunction],
+                "bulkGet": [MockFunction],
+                "bulkUpdate": [MockFunction],
+                "create": [MockFunction],
+                "delete": [MockFunction],
+                "find": [MockFunction],
+                "get": [MockFunction],
+                "update": [MockFunction],
+              },
+            },
+            "storage": Object {
+              "clear": [MockFunction],
+              "get": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+              "storage": Object {
+                "clear": [MockFunction],
+                "getItem": [MockFunction],
+                "key": [MockFunction],
+                "length": 0,
+                "removeItem": [MockFunction],
+                "setItem": [MockFunction],
+              },
+            },
+            "uiSettings": Object {
+              "get": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "history:limit",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "get$": [MockFunction],
+              "getAll": [MockFunction],
+              "getSaved$": [MockFunction],
+              "getUpdate$": [MockFunction],
+              "getUpdateErrors$": [MockFunction],
+              "isCustom": [MockFunction],
+              "isDeclared": [MockFunction],
+              "isDefault": [MockFunction],
+              "isOverridden": [MockFunction],
+              "overrideLocalDefault": [MockFunction],
+              "remove": [MockFunction],
+              "set": [MockFunction],
+            },
+          }
+        }
+      >
+        <InjectIntl(EnhancedType)
+          indexPatterns={
+            Array [
+              Object {
+                "fields": Array [
+                  Object {
+                    "aggregatable": true,
+                    "esTypes": Array [
+                      "integer",
+                    ],
+                    "filterable": true,
+                    "name": "response",
+                    "searchable": true,
+                    "type": "number",
+                  },
+                ],
+                "id": "1234",
+                "title": "logstash-*",
+              },
+            ]
+          }
+          intl={null}
+          onSubmit={[Function]}
+          query={
+            Object {
+              "language": "kuery",
+              "query": "response:200",
+            }
+          }
+          screenTitle="Another Screen"
+        >
+          <EnhancedType
+            indexPatterns={
+              Array [
+                Object {
+                  "fields": Array [
+                    Object {
+                      "aggregatable": true,
+                      "esTypes": Array [
+                        "integer",
+                      ],
+                      "filterable": true,
+                      "name": "response",
+                      "searchable": true,
+                      "type": "number",
+                    },
+                  ],
+                  "id": "1234",
+                  "title": "logstash-*",
+                },
+              ]
+            }
+            intl={
+              Object {
+                "defaultFormats": Object {},
+                "defaultLocale": "en",
+                "formatDate": [Function],
+                "formatHTMLMessage": [Function],
+                "formatMessage": [Function],
+                "formatNumber": [Function],
+                "formatPlural": [Function],
+                "formatRelative": [Function],
+                "formatTime": [Function],
+                "formats": Object {
+                  "date": Object {
+                    "full": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "weekday": "long",
+                      "year": "numeric",
+                    },
+                    "long": Object {
+                      "day": "numeric",
+                      "month": "long",
+                      "year": "numeric",
+                    },
+                    "medium": Object {
+                      "day": "numeric",
+                      "month": "short",
+                      "year": "numeric",
+                    },
+                    "short": Object {
+                      "day": "numeric",
+                      "month": "numeric",
+                      "year": "2-digit",
+                    },
+                  },
+                  "number": Object {
+                    "currency": Object {
+                      "style": "currency",
+                    },
+                    "percent": Object {
+                      "style": "percent",
+                    },
+                  },
+                  "relative": Object {
+                    "days": Object {
+                      "units": "day",
+                    },
+                    "hours": Object {
+                      "units": "hour",
+                    },
+                    "minutes": Object {
+                      "units": "minute",
+                    },
+                    "months": Object {
+                      "units": "month",
+                    },
+                    "seconds": Object {
+                      "units": "second",
+                    },
+                    "years": Object {
+                      "units": "year",
+                    },
+                  },
+                  "time": Object {
+                    "full": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "long": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                      "timeZoneName": "short",
+                    },
+                    "medium": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                      "second": "numeric",
+                    },
+                    "short": Object {
+                      "hour": "numeric",
+                      "minute": "numeric",
+                    },
+                  },
+                },
+                "formatters": Object {
+                  "getDateTimeFormat": [Function],
+                  "getMessageFormat": [Function],
+                  "getNumberFormat": [Function],
+                  "getPluralFormat": [Function],
+                  "getRelativeFormat": [Function],
+                },
+                "locale": "en",
+                "messages": Object {},
+                "now": [Function],
+                "onError": [Function],
+                "textComponent": Symbol(react.fragment),
+                "timeZone": null,
+              }
+            }
+            onSubmit={[Function]}
+            query={
+              Object {
+                "language": "kuery",
+                "query": "response:200",
+              }
+            }
+            screenTitle="Another Screen"
+          >
+            <QueryStringInputUI
+              indexPatterns={
+                Array [
+                  Object {
+                    "fields": Array [
+                      Object {
+                        "aggregatable": true,
+                        "esTypes": Array [
+                          "integer",
+                        ],
+                        "filterable": true,
+                        "name": "response",
+                        "searchable": true,
+                        "type": "number",
+                      },
+                    ],
+                    "id": "1234",
+                    "title": "logstash-*",
+                  },
+                ]
+              }
+              intl={
+                Object {
+                  "defaultFormats": Object {},
+                  "defaultLocale": "en",
+                  "formatDate": [Function],
+                  "formatHTMLMessage": [Function],
+                  "formatMessage": [Function],
+                  "formatNumber": [Function],
+                  "formatPlural": [Function],
+                  "formatRelative": [Function],
+                  "formatTime": [Function],
+                  "formats": Object {
+                    "date": Object {
+                      "full": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "weekday": "long",
+                        "year": "numeric",
+                      },
+                      "long": Object {
+                        "day": "numeric",
+                        "month": "long",
+                        "year": "numeric",
+                      },
+                      "medium": Object {
+                        "day": "numeric",
+                        "month": "short",
+                        "year": "numeric",
+                      },
+                      "short": Object {
+                        "day": "numeric",
+                        "month": "numeric",
+                        "year": "2-digit",
+                      },
+                    },
+                    "number": Object {
+                      "currency": Object {
+                        "style": "currency",
+                      },
+                      "percent": Object {
+                        "style": "percent",
+                      },
+                    },
+                    "relative": Object {
+                      "days": Object {
+                        "units": "day",
+                      },
+                      "hours": Object {
+                        "units": "hour",
+                      },
+                      "minutes": Object {
+                        "units": "minute",
+                      },
+                      "months": Object {
+                        "units": "month",
+                      },
+                      "seconds": Object {
+                        "units": "second",
+                      },
+                      "years": Object {
+                        "units": "year",
+                      },
+                    },
+                    "time": Object {
+                      "full": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "long": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                        "timeZoneName": "short",
+                      },
+                      "medium": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                        "second": "numeric",
+                      },
+                      "short": Object {
+                        "hour": "numeric",
+                        "minute": "numeric",
+                      },
+                    },
+                  },
+                  "formatters": Object {
+                    "getDateTimeFormat": [Function],
+                    "getMessageFormat": [Function],
+                    "getNumberFormat": [Function],
+                    "getPluralFormat": [Function],
+                    "getRelativeFormat": [Function],
+                  },
+                  "locale": "en",
+                  "messages": Object {},
+                  "now": [Function],
+                  "onError": [Function],
+                  "textComponent": Symbol(react.fragment),
+                  "timeZone": null,
+                }
+              }
+              kibana={
+                Object {
+                  "notifications": Object {
+                    "toasts": Object {
+                      "danger": [Function],
+                      "show": [Function],
+                      "success": [Function],
+                      "warning": [Function],
+                    },
+                  },
+                  "overlays": Object {
+                    "openFlyout": [Function],
+                    "openModal": [Function],
+                  },
+                  "services": Object {
+                    "appName": "test",
+                    "application": Object {
+                      "capabilities": Object {
+                        "catalogue": Object {},
+                        "management": Object {},
+                        "navLinks": Object {},
+                      },
+                      "getUrlForApp": [MockFunction],
+                      "navigateToApp": [MockFunction],
+                      "registerMountContext": [MockFunction],
+                    },
+                    "chrome": Object {
+                      "addApplicationClass": [MockFunction],
+                      "docTitle": Object {
+                        "__legacy": Object {
+                          "setBaseTitle": [MockFunction],
+                        },
+                        "change": [MockFunction],
+                        "reset": [MockFunction],
+                      },
+                      "getApplicationClasses$": [MockFunction],
+                      "getBadge$": [MockFunction],
+                      "getBrand$": [MockFunction],
+                      "getBreadcrumbs$": [MockFunction],
+                      "getHeaderComponent": [MockFunction],
+                      "getHelpExtension$": [MockFunction],
+                      "getIsCollapsed$": [MockFunction],
+                      "getIsVisible$": [MockFunction],
+                      "navControls": Object {
+                        "getLeft$": [MockFunction],
+                        "getRight$": [MockFunction],
+                        "registerLeft": [MockFunction],
+                        "registerRight": [MockFunction],
+                      },
+                      "navLinks": Object {
+                        "enableForcedAppSwitcherNavigation": [MockFunction],
+                        "get": [MockFunction],
+                        "getAll": [MockFunction],
+                        "getForceAppSwitcherNavigation$": [MockFunction],
+                        "getNavLinks$": [MockFunction],
+                        "has": [MockFunction],
+                        "showOnly": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                      "recentlyAccessed": Object {
+                        "add": [MockFunction],
+                        "get": [MockFunction],
+                        "get$": [MockFunction],
+                      },
+                      "removeApplicationClass": [MockFunction],
+                      "setAppTitle": [MockFunction],
+                      "setBadge": [MockFunction],
+                      "setBrand": [MockFunction],
+                      "setBreadcrumbs": [MockFunction],
+                      "setHelpExtension": [MockFunction],
+                      "setHelpSupportUrl": [MockFunction],
+                      "setIsCollapsed": [MockFunction],
+                      "setIsVisible": [MockFunction],
+                    },
+                    "data": Object {
+                      "autocomplete": Object {
+                        "addProvider": [MockFunction],
+                        "clearProviders": [MockFunction],
+                        "getProvider": [MockFunction],
+                      },
+                      "fieldFormats": Object {
+                        "getByFieldType": [MockFunction],
+                        "getConfig": [MockFunction],
+                        "getDefaultConfig": [MockFunction],
+                        "getDefaultInstance": [MockFunction],
+                        "getDefaultInstanceCacheResolver": [MockFunction],
+                        "getDefaultInstancePlain": [MockFunction],
+                        "getDefaultType": [MockFunction],
+                        "getDefaultTypeName": [MockFunction],
+                        "getInstance": [MockFunction],
+                        "getType": [MockFunction],
+                        "getTypeNameByEsTypes": [MockFunction],
+                        "init": [MockFunction],
+                        "parseDefaultTypeMap": [MockFunction],
+                        "register": [MockFunction],
+                      },
+                      "getSuggestions": [MockFunction],
+                      "indexPatterns": Object {},
+                      "query": Object {
+                        "filterManager": [MockFunction],
+                        "savedQueries": [MockFunction],
+                        "timefilter": Object {
+                          "history": Object {
+                            "add": [MockFunction],
+                            "get": [MockFunction],
+                          },
+                          "timefilter": Object {
+                            "calculateBounds": [MockFunction],
+                            "createFilter": [MockFunction],
+                            "disableAutoRefreshSelector": [MockFunction],
+                            "disableTimeRangeSelector": [MockFunction],
+                            "enableAutoRefreshSelector": [MockFunction],
+                            "enableTimeRangeSelector": [MockFunction],
+                            "getActiveBounds": [MockFunction],
+                            "getAutoRefreshFetch$": [MockFunction],
+                            "getBounds": [MockFunction],
+                            "getEnabledUpdated$": [MockFunction],
+                            "getFetch$": [MockFunction],
+                            "getRefreshInterval": [MockFunction],
+                            "getRefreshIntervalUpdate$": [MockFunction],
+                            "getTime": [MockFunction],
+                            "getTimeUpdate$": [MockFunction],
+                            "isAutoRefreshSelectorEnabled": [MockFunction],
+                            "isTimeRangeSelectorEnabled": [MockFunction],
+                            "setRefreshInterval": [MockFunction],
+                            "setTime": [MockFunction],
+                          },
+                        },
+                      },
+                      "search": Object {
+                        "search": [MockFunction],
+                      },
+                      "ui": Object {
+                        "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
+                      },
+                    },
+                    "docLinks": Object {
+                      "DOC_LINK_VERSION": "mocked-test-branch",
+                      "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+                      "links": Object {
+                        "aggs": Object {
+                          "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+                          "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+                          "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+                          "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+                          "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                          "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+                          "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+                          "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+                          "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+                          "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+                          "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+                          "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+                          "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+                          "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+                          "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+                          "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+                          "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+                          "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+                          "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+                          "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+                          "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+                          "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+                          "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+                          "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+                          "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+                          "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+                          "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+                          "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+                          "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+                          "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+                        },
+                        "auditbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+                        },
+                        "date": Object {
+                          "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+                        },
+                        "filebeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+                          "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+                          "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+                          "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+                          "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+                          "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+                        },
+                        "functionbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+                        },
+                        "heartbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+                        },
+                        "indexPatterns": Object {
+                          "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+                          "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+                        },
+                        "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+                        "logstash": Object {
+                          "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                        },
+                        "metricbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+                        },
+                        "query": Object {
+                          "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+                          "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+                          "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+                        },
+                        "scriptedFields": Object {
+                          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+                          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+                          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+                          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+                          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+                          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+                        },
+                        "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        "winlogbeat": Object {
+                          "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+                        },
+                      },
+                    },
+                    "http": Object {
+                      "addLoadingCount": [MockFunction],
+                      "anonymousPaths": Object {
+                        "isAnonymous": [MockFunction],
+                        "register": [MockFunction],
+                      },
+                      "basePath": BasePath {
+                        "basePath": "",
+                        "get": [Function],
+                        "prepend": [Function],
+                        "remove": [Function],
+                      },
+                      "delete": [MockFunction],
+                      "fetch": [MockFunction],
+                      "get": [MockFunction],
+                      "getLoadingCount$": [MockFunction],
+                      "head": [MockFunction],
+                      "intercept": [MockFunction],
+                      "options": [MockFunction],
+                      "patch": [MockFunction],
+                      "post": [MockFunction],
+                      "put": [MockFunction],
+                      "removeAllInterceptors": [MockFunction],
+                      "stop": [MockFunction],
+                    },
+                    "i18n": Object {
+                      "Context": [MockFunction],
+                    },
+                    "injectedMetadata": Object {
+                      "getInjectedVar": [MockFunction],
+                    },
+                    "notifications": Object {
+                      "toasts": Object {
+                        "add": [MockFunction],
+                        "addDanger": [MockFunction],
+                        "addError": [MockFunction],
+                        "addSuccess": [MockFunction],
+                        "addWarning": [MockFunction],
+                        "get$": [MockFunction],
+                        "remove": [MockFunction],
+                      },
+                    },
+                    "overlays": Object {
+                      "banners": Object {
+                        "add": [MockFunction],
+                        "get$": [MockFunction],
+                        "getComponent": [MockFunction],
+                        "remove": [MockFunction],
+                        "replace": [MockFunction],
+                      },
+                      "openFlyout": [MockFunction],
+                      "openModal": [MockFunction],
+                    },
+                    "savedObjects": Object {
+                      "client": Object {
+                        "bulkCreate": [MockFunction],
+                        "bulkGet": [MockFunction],
+                        "bulkUpdate": [MockFunction],
+                        "create": [MockFunction],
+                        "delete": [MockFunction],
+                        "find": [MockFunction],
+                        "get": [MockFunction],
+                        "update": [MockFunction],
+                      },
+                    },
+                    "storage": Object {
+                      "clear": [MockFunction],
+                      "get": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                      "storage": Object {
+                        "clear": [MockFunction],
+                        "getItem": [MockFunction],
+                        "key": [MockFunction],
+                        "length": 0,
+                        "removeItem": [MockFunction],
+                        "setItem": [MockFunction],
+                      },
+                    },
+                    "uiSettings": Object {
+                      "get": [MockFunction] {
+                        "calls": Array [
+                          Array [
+                            "history:limit",
+                          ],
+                        ],
+                        "results": Array [
+                          Object {
+                            "type": "return",
+                            "value": undefined,
+                          },
+                        ],
+                      },
+                      "get$": [MockFunction],
+                      "getAll": [MockFunction],
+                      "getSaved$": [MockFunction],
+                      "getUpdate$": [MockFunction],
+                      "getUpdateErrors$": [MockFunction],
+                      "isCustom": [MockFunction],
+                      "isDeclared": [MockFunction],
+                      "isDefault": [MockFunction],
+                      "isOverridden": [MockFunction],
+                      "overrideLocalDefault": [MockFunction],
+                      "remove": [MockFunction],
+                      "set": [MockFunction],
+                    },
+                  },
+                }
+              }
+              onSubmit={[Function]}
+              query={
+                Object {
+                  "language": "kuery",
+                  "query": "response:200",
+                }
+              }
+              screenTitle="Another Screen"
+            >
+              <EuiOutsideClickDetector
+                onOutsideClick={[Function]}
+              >
+                <div
+                  aria-expanded={false}
+                  aria-haspopup="true"
+                  aria-label="Search and filter the test page"
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  role="combobox"
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
+                >
+                  <div
+                    role="search"
+                  >
+                    <div
+                      className="kuiLocalSearchAssistedInput"
+                    >
+                      <EuiFieldText
+                        append={
+                          <QueryLanguageSwitcher
+                            language="kuery"
+                            onSelectLanguage={[Function]}
+                          />
+                        }
+                        aria-autocomplete="list"
+                        aria-label="Start typing to search and filter the test page"
+                        autoComplete="off"
+                        autoFocus={true}
+                        compressed={false}
+                        data-test-subj="queryInput"
+                        fullWidth={true}
+                        inputRef={[Function]}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        placeholder="Search"
+                        role="textbox"
+                        spellCheck={false}
+                        type="text"
+                        value="response:200"
+                      >
+                        <EuiFormControlLayout
+                          append={
+                            <QueryLanguageSwitcher
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            />
+                          }
+                          compressed={false}
+                          fullWidth={true}
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiValidatableControl>
+                                <input
+                                  aria-autocomplete="list"
+                                  aria-label="Start typing to search and filter the test page"
+                                  autoComplete="off"
+                                  autoFocus={true}
+                                  className="euiFieldText euiFieldText--fullWidth euiFieldText--inGroup"
+                                  data-test-subj="queryInput"
+                                  onChange={[Function]}
+                                  onClick={[Function]}
+                                  onKeyDown={[Function]}
+                                  onKeyUp={[Function]}
+                                  placeholder="Search"
+                                  role="textbox"
+                                  spellCheck={false}
+                                  type="text"
+                                  value="response:200"
+                                />
+                              </EuiValidatableControl>
+                              <EuiFormControlLayoutIcons
+                                isLoading={false}
+                              />
+                            </div>
+                            <QueryLanguageSwitcher
+                              className="euiFormControlLayout__append"
+                              key="0/.0"
+                              language="kuery"
+                              onSelectLanguage={[Function]}
+                            >
+                              <EuiPopover
+                                anchorClassName="euiFormControlLayout__append"
+                                anchorPosition="downRight"
+                                button={
+                                  <EuiButtonEmpty
+                                    className="euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    size="xs"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="KQL"
+                                      id="data.query.queryBar.kqlLanguageName"
+                                      values={Object {}}
+                                    />
+                                  </EuiButtonEmpty>
+                                }
+                                closePopover={[Function]}
+                                display="inlineBlock"
+                                hasArrow={true}
+                                id="popover"
+                                isOpen={false}
+                                ownFocus={true}
+                                panelPaddingSize="m"
+                                withTitle={true}
+                              >
+                                <EuiOutsideClickDetector
+                                  isDisabled={true}
+                                  onOutsideClick={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover euiPopover--anchorDownRight euiPopover--withTitle"
+                                    id="popover"
+                                    onKeyDown={[Function]}
+                                    onMouseDown={[Function]}
+                                    onMouseUp={[Function]}
+                                    onTouchEnd={[Function]}
+                                    onTouchStart={[Function]}
+                                  >
+                                    <div
+                                      className="euiPopover__anchor euiFormControlLayout__append"
+                                    >
+                                      <EuiButtonEmpty
+                                        className="euiFormControlLayout__append"
+                                        onClick={[Function]}
+                                        size="xs"
+                                      >
+                                        <button
+                                          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__append"
+                                          onClick={[Function]}
+                                          type="button"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              className="euiButtonEmpty__text"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="KQL"
+                                                id="data.query.queryBar.kqlLanguageName"
+                                                values={Object {}}
+                                              >
+                                                KQL
+                                              </FormattedMessage>
+                                            </span>
+                                          </span>
+                                        </button>
+                                      </EuiButtonEmpty>
+                                    </div>
+                                  </div>
+                                </EuiOutsideClickDetector>
+                              </EuiPopover>
+                            </QueryLanguageSwitcher>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiFieldText>
+                    </div>
+                  </div>
+                  <SuggestionsComponent
+                    index={null}
+                    loadMore={[Function]}
+                    onClick={[Function]}
+                    onMouseEnter={[Function]}
+                    show={false}
+                    suggestions={Array []}
+                  />
+                </div>
+              </EuiOutsideClickDetector>
+            </QueryStringInputUI>
+          </EnhancedType>
+        </InjectIntl(EnhancedType)>
+      </Provider>
+    </PseudoLocaleWrapper>
+  </IntlProvider>
+</I18nProvider>
+`;

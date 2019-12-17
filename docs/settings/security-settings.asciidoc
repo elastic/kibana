@@ -20,7 +20,7 @@ are enabled.
 Do not set this to `false`; it disables the login form, user and role management
 screens, and authorization using <<kibana-privileges>>. To disable
 {security-features} entirely, see
-{ref}/security-settings.html[{es} security settings]. 
+{ref}/security-settings.html[{es} security settings].
 
 `xpack.security.audit.enabled`::
 Set to `true` to enable audit logging for security events. By default, it is set
@@ -40,6 +40,8 @@ An arbitrary string of 32 characters or more that is used to encrypt credentials
 in a cookie. It is crucial that this key is not exposed to users of {kib}. By
 default, a value is automatically generated in memory. If you use that default
 behavior, all sessions are invalidated when {kib} restarts.
+In addition, high-availability deployments of {kib} will behave unexpectedly
+if this setting isn't the same for all instances of {kib}.
 
 `xpack.security.secureCookies`::
 Sets the `secure` flag of the session cookie. The default value is `false`. It
@@ -47,7 +49,18 @@ is set to `true` if `server.ssl.certificate` and `server.ssl.key` are set. Set
 this to `true` if SSL is configured outside of {kib} (for example, you are
 routing requests through a load balancer or proxy).
 
-`xpack.security.sessionTimeout`::
-Sets the session duration (in milliseconds). By default, sessions stay active
-until the browser is closed. When this is set to an explicit timeout, closing the
+`xpack.security.session.idleTimeout`::
+Sets the session duration. The format is a string of `<count>[ms|s|m|h|d|w|M|Y]`
+(e.g. '70ms', '5s', '3d', '1Y'). By default, sessions stay active until the
+browser is closed. When this is set to an explicit idle timeout, closing the
 browser still requires the user to log back in to {kib}.
+
+`xpack.security.session.lifespan`::
+Sets the maximum duration, also known as "absolute timeout". The format is a
+string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y'). By default,
+a session can be renewed indefinitely. When this value is set, a session will end
+once its lifespan is exceeded, even if the user is not idle. NOTE: if `idleTimeout`
+is not set, this setting will still cause sessions to expire.
+
+`xpack.security.loginAssistanceMessage`::
+Adds a message to the login screen. Useful for displaying information about maintenance windows, links to corporate sign up pages etc.

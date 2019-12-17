@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuleSwitch renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  justifyContent="spaceAround"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <StaticSwitch
+      checked={true}
+      data-test-subj="rule-switch"
+      disabled={false}
+      label="rule-switch"
+      onChange={[Function]}
+      showLabel={false}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

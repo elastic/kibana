@@ -24,7 +24,7 @@ interface Props {
   shortMessage: React.ReactNode;
 }
 
-export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessage }) => (
+export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessage }) => (
   <FlexPage>
     <EuiPageBody>
       <MinimumPageContent

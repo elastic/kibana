@@ -1,18 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PointToolTipContent renders correctly against snapshot 1`] = `
-<Component>
-  <PointToolTipContent
-    closeTooltip={[MockFunction]}
-    contextId="contextId"
-    featureProps={
-      Array [
-        Object {
-          "_propertyKey": "host.name",
-          "_rawValue": "testPropValue",
-        },
-      ]
-    }
-  />
-</Component>
+<PointToolTipContentComponent
+  closeTooltip={[MockFunction]}
+  contextId="contextId"
+  featureProps={
+    Array [
+      Object {
+        "_propertyKey": "host.name",
+        "_rawValue": "testPropValue",
+      },
+    ]
+  }
+/>
 `;

@@ -8,7 +8,7 @@ import stringify from 'json-stable-stringify';
 import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
-import styled, { css } from '../../../../../../common/eui_styled_components';
+import euiStyled, { css } from '../../../../../../common/eui_styled_components';
 import {
   isFieldColumn,
   isHighlightFieldColumn,
@@ -83,7 +83,7 @@ const unwrappedContentStyle = css`
   white-space: pre;
 `;
 
-const CommaSeparatedLi = styled.li`
+const CommaSeparatedLi = euiStyled.li`
   display: inline;
   &:not(:last-child) {
     margin-right: 1ex;
@@ -93,11 +93,13 @@ const CommaSeparatedLi = styled.li`
   }
 `;
 
-const FieldColumnContent = LogEntryColumnContent.extend.attrs<{
+interface LogEntryColumnContentProps {
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped?: boolean;
-}>({})`
+}
+
+const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnContentProps>`
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 

@@ -19,31 +19,28 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
 
-  describe('metric chart', function () {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
-
-    before(async function () {
+  describe('metric chart', function() {
+    before(async function() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickMetric');
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show Count', async function () {
+    it('should show Count', async function() {
       const expectedCount = ['14,004', 'Count'];
 
       // initial metric of "Count" is selected by default
@@ -53,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Average', async function () {
+    it('should show Average', async function() {
       const avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
       await PageObjects.visualize.clickMetricEditor();
       log.debug('Aggregation = Average');
@@ -67,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Sum', async function () {
+    it('should show Sum', async function() {
       const sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
       log.debug('Aggregation = Sum');
       await PageObjects.visualize.selectAggregation('Sum', 'metrics');
@@ -80,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Median', async function () {
+    it('should show Median', async function() {
       const medianBytes = ['5,565.263', '50th percentile of bytes'];
       //  For now, only comparing the text label part of the metric
       log.debug('Aggregation = Median');
@@ -95,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Min', async function () {
+    it('should show Min', async function() {
       const minTimestamp = ['Sep 20, 2015 @ 00:00:00.000', 'Min @timestamp'];
       log.debug('Aggregation = Min');
       await PageObjects.visualize.selectAggregation('Min', 'metrics');
@@ -108,8 +105,11 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Max', async function () {
-      const maxRelatedContentArticleModifiedTime = ['Apr 4, 2015 @ 00:54:41.000', 'Max relatedContent.article:modified_time'];
+    it('should show Max', async function() {
+      const maxRelatedContentArticleModifiedTime = [
+        'Apr 4, 2015 @ 00:54:41.000',
+        'Max relatedContent.article:modified_time',
+      ];
       log.debug('Aggregation = Max');
       await PageObjects.visualize.selectAggregation('Max', 'metrics');
       log.debug('Field = relatedContent.article:modified_time');
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Unique Count', async function () {
+    it('should show Unique Count', async function() {
       const uniqueCountClientip = ['1,000', 'Unique count of clientip'];
       log.debug('Aggregation = Unique Count');
       await PageObjects.visualize.selectAggregation('Unique Count', 'metrics');
@@ -134,15 +134,22 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Percentiles', async function () {
+    it('should show Percentiles', async function() {
       const percentileMachineRam = [
-        '2,147,483,648', '1st percentile of machine.ram',
-        '3,221,225,472', '5th percentile of machine.ram',
-        '7,516,192,768', '25th percentile of machine.ram',
-        '12,884,901,888', '50th percentile of machine.ram',
-        '18,253,611,008', '75th percentile of machine.ram',
-        '32,212,254,720', '95th percentile of machine.ram',
-        '32,212,254,720', '99th percentile of machine.ram'
+        '2,147,483,648',
+        '1st percentile of machine.ram',
+        '3,221,225,472',
+        '5th percentile of machine.ram',
+        '7,516,192,768',
+        '25th percentile of machine.ram',
+        '12,884,901,888',
+        '50th percentile of machine.ram',
+        '18,253,611,008',
+        '75th percentile of machine.ram',
+        '32,212,254,720',
+        '95th percentile of machine.ram',
+        '32,212,254,720',
+        '99th percentile of machine.ram',
       ];
 
       log.debug('Aggregation = Percentiles');
@@ -156,8 +163,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show Percentile Ranks', async function () {
-      const percentileRankBytes = [ '2.036%', 'Percentile rank 99 of "memory"'];
+    it('should show Percentile Ranks', async function() {
+      const percentileRankBytes = ['2.036%', 'Percentile rank 99 of "memory"'];
       log.debug('Aggregation = Percentile Ranks');
       await PageObjects.visualize.selectAggregation('Percentile Ranks', 'metrics');
       log.debug('Field =  bytes');
@@ -171,8 +178,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('with filters', function () {
-      it('should prevent filtering without buckets', async function () {
+    describe('with filters', function() {
+      it('should prevent filtering without buckets', async function() {
         let filterCount = 0;
         await retry.try(async function tryingForTime() {
           // click first metric bucket
@@ -182,7 +189,7 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(0);
       });
 
-      it('should allow filtering with buckets', async function () {
+      it('should allow filtering with buckets', async function() {
         log.debug('Bucket = Split Group');
         await PageObjects.visualize.clickBucket('Split group');
         log.debug('Aggregation = Terms');
@@ -201,6 +208,5 @@ export default function ({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
       });
     });
-
   });
 }

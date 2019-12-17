@@ -67,8 +67,15 @@ export class ActionExecutor {
 
     // Ensure user can read the action before processing
     const {
-      attributes: { actionTypeId, config, description },
+      attributes: { actionTypeId, config, name },
     } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+
+    try {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    } catch (err) {
+      return { status: 'error', actionId, message: err.message, retry: false };
+    }
+
     // Only get encrypted attributes here, the remaining attributes can be fetched in
     // the savedObjectsClient call
     const {
@@ -91,11 +98,11 @@ export class ActionExecutor {
       validatedConfig = validateConfig(actionType, config);
       validatedSecrets = validateSecrets(actionType, secrets);
     } catch (err) {
-      return { status: 'error', message: err.message, retry: false };
+      return { status: 'error', actionId, message: err.message, retry: false };
     }
 
     let result: ActionTypeExecutorResult | null = null;
-    const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
+    const actionLabel = `${actionId} - ${actionTypeId} - ${name}`;
 
     try {
       result = await actionType.executor({
@@ -113,7 +120,7 @@ export class ActionExecutor {
     logger.debug(`action executed successfully: ${actionLabel}`);
 
     // return basic response if none provided
-    if (result == null) return { status: 'ok' };
+    if (result == null) return { status: 'ok', actionId };
 
     return result;
   }

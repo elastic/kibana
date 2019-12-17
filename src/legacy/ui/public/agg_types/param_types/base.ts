@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { AggParam } from '../';
 import { AggConfigs } from '../agg_configs';
 import { AggConfig } from '../../vis';
-import { SearchSource } from '../../courier';
+import { SearchSourceContract, FetchOptions } from '../../courier/types';
 
-export class BaseParamType implements AggParam {
+export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   name: string;
   type: string;
   displayName: string;
@@ -31,18 +30,18 @@ export class BaseParamType implements AggParam {
   editorComponent: any = null;
   default: any;
   write: (
-    aggConfig: AggConfig,
+    aggConfig: TAggConfig,
     output: Record<string, any>,
     aggConfigs?: AggConfigs,
     locals?: Record<string, any>
   ) => void;
-  serialize: (value: any, aggConfig?: AggConfig) => any;
-  deserialize: (value: any, aggConfig?: AggConfig) => any;
+  serialize: (value: any, aggConfig?: TAggConfig) => any;
+  deserialize: (value: any, aggConfig?: TAggConfig) => any;
   options: any[];
   valueType?: any;
 
-  onChange?(agg: AggConfig): void;
-  shouldShow?(agg: AggConfig): boolean;
+  onChange?(agg: TAggConfig): void;
+  shouldShow?(agg: TAggConfig): boolean;
 
   /**
    *  A function that will be called before an aggConfig is serialized and sent to ES.
@@ -54,9 +53,9 @@ export class BaseParamType implements AggParam {
    *  @returns {Promise<undefined>|undefined}
    */
   modifyAggConfigOnSearchRequestStart: (
-    aggConfig: AggConfig,
-    searchSource?: SearchSource,
-    options?: any
+    aggConfig: TAggConfig,
+    searchSource?: SearchSourceContract,
+    options?: FetchOptions
   ) => void;
 
   constructor(config: Record<string, any>) {
@@ -70,7 +69,7 @@ export class BaseParamType implements AggParam {
     this.default = config.default;
     this.editorComponent = config.editorComponent;
 
-    const defaultWrite = (aggConfig: AggConfig, output: Record<string, any>) => {
+    const defaultWrite = (aggConfig: TAggConfig, output: Record<string, any>) => {
       if (aggConfig.params[this.name]) {
         output.params[this.name] = aggConfig.params[this.name] || this.default;
       }

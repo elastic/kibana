@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import chrome from 'ui/chrome';
 
-export const PopoverDescription = React.memo(() => (
+export const PopoverDescriptionComponent = () => (
   <EuiText size="s">
     <FormattedMessage
       id="xpack.siem.components.mlPopup.anomalyDetectionDescription"
@@ -26,6 +26,10 @@ export const PopoverDescription = React.memo(() => (
       }}
     />
   </EuiText>
-));
+);
+
+PopoverDescriptionComponent.displayName = 'PopoverDescriptionComponent';
+
+export const PopoverDescription = React.memo(PopoverDescriptionComponent);
 
 PopoverDescription.displayName = 'PopoverDescription';

@@ -1,7 +1,7 @@
 {
   "action": {
     "properties": {
-      "description": {
+      "name": {
         "type": "text"
       },
       "actionTypeId": {

@@ -19,10 +19,10 @@
 
 module.exports = {
   kuery: {
-    src: 'packages/kbn-es-query/src/kuery/ast/kuery.peg',
-    dest: 'packages/kbn-es-query/src/kuery/ast/kuery.js',
+    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
+    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
     options: {
-      allowedStartRules: ['start', 'Literal']
-    }
-  }
+      allowedStartRules: ['start', 'Literal'],
+    },
+  },
 };

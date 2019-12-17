@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const defaultMockSavedObjects = [{
-  _id: 'milk:steak',
-  _source: {
-    type: 'food',
+const defaultMockSavedObjects = [
+  {
+    _id: 'milk:steak',
+    _source: {
+      type: 'food',
+    },
   },
-}];
+];
 const defaultMockTaskDocs = [{ state: { runs: 0, stats: {} } }];
 
 export const getMockTaskInstance = () => ({ state: { runs: 0, stats: {} } });
@@ -26,7 +28,8 @@ export const getMockTaskFetch = (docs = defaultMockTaskDocs) => {
 
 export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
-  mockTaskFetch = getMockTaskFetch()) => ({
+  mockTaskFetch = getMockTaskFetch()
+) => ({
   plugins: {
     elasticsearch: {
       getCluster: () => ({
@@ -40,12 +43,6 @@ export const getMockKbnServer = (
       fetch: mockTaskFetch,
     },
   },
-  usage: {
-    collectorSet: {
-      makeUsageCollector: () => '',
-      register: () => undefined,
-    },
-  },
   config: () => ({ get: () => '' }),
-  log: () => undefined
+  log: () => undefined,
 });

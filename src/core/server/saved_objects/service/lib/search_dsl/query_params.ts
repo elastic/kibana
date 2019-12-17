@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { esKuery } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
@@ -91,7 +92,7 @@ interface QueryParams {
   searchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
-  kueryNode?: KueryNode;
+  kueryNode?: esKuery.KueryNode;
 }
 
 /**
@@ -111,7 +112,7 @@ export function getQueryParams({
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
-      ...(kueryNode != null ? [toElasticsearchQuery(kueryNode)] : []),
+      ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
       {
         bool: {
           must: hasReference

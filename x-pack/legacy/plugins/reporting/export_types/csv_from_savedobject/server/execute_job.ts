@@ -5,11 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import {
+  ExecuteJobFactory,
+  ImmediateExecuteFn,
   JobDocOutputExecuted,
   ServerFacade,
-  ExecuteImmediateJobFactory,
   RequestFacade,
 } from '../../../types';
 import {
@@ -17,16 +18,18 @@ import {
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   PLUGIN_ID,
 } from '../../../common/constants';
-import { CsvResultFromSearch, JobDocPayloadPanelCsv, FakeRequest } from '../types';
+import {
+  CsvResultFromSearch,
+  JobParamsPanelCsv,
+  SearchPanel,
+  JobDocPayloadPanelCsv,
+  FakeRequest,
+} from '../types';
 import { createGenerateCsv } from './lib';
 
-type ExecuteJobFn = (
-  jobId: string | null,
-  job: JobDocPayloadPanelCsv,
-  realRequest?: RequestFacade
-) => Promise<JobDocOutputExecuted>;
-
-function executeJobFactoryFn(server: ServerFacade): ExecuteJobFn {
+export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+  JobParamsPanelCsv
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
@@ -45,7 +48,14 @@ function executeJobFactoryFn(server: ServerFacade): ExecuteJobFn {
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
     const { jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams;
+    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
+
+    if (!panel) {
+      i18n.translate(
+        'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToAccessPanel',
+        { defaultMessage: 'Failed to access panel metadata for job execution' }
+      );
+    }
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
 
@@ -111,8 +121,4 @@ function executeJobFactoryFn(server: ServerFacade): ExecuteJobFn {
       size,
     };
   };
-}
-
-export const executeJobFactory: ExecuteImmediateJobFactory = oncePerServer(
-  executeJobFactoryFn as ExecuteImmediateJobFactory
-);
+};

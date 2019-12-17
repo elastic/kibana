@@ -24,7 +24,7 @@ interface LayoutProps {
   activePath: string;
 }
 
-export const WalkthroughLayout: React.SFC<LayoutProps> = ({
+export const WalkthroughLayout: React.FC<LayoutProps> = ({
   walkthroughSteps,
   title,
   activePath,

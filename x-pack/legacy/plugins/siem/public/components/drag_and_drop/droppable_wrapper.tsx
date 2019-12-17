@@ -7,7 +7,6 @@
 import { rgba } from 'polished';
 import * as React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 interface Props {
@@ -40,7 +39,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
         background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
     }
   > div.timeline-drop-area-empty {
-     color: ${props.theme.eui.euiColorSuccess}
+     color: ${props.theme.eui.euiColorSuccess};
      background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
 
      & .euiTextColor--subdued {
@@ -50,7 +49,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
   > div.timeline-drop-area {
     background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
     .provider-item-filter-container div:first-child{
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       transform: none !important;
     }
     .drop-and-provider-timeline {
@@ -69,7 +68,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       background-color: ${props.theme.eui.euiColorLightShade};
     }
     + div {
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;
     }
   }
@@ -80,14 +79,14 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       display: none;
     }
     & + div {
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;
     }
   }
 `;
 ReactDndDropTarget.displayName = 'ReactDndDropTarget';
 
-export const DroppableWrapper = pure<Props>(
+export const DroppableWrapper = React.memo<Props>(
   ({
     children = null,
     droppableId,
@@ -105,7 +104,7 @@ export const DroppableWrapper = pure<Props>(
       {(provided, snapshot) => (
         <ReactDndDropTarget
           height={height}
-          innerRef={provided.innerRef}
+          ref={provided.innerRef}
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
         >

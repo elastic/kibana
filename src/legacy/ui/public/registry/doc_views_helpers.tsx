@@ -26,7 +26,7 @@ import {
   AngularController,
   AngularDirective,
 } from './doc_views_types';
-import { DocViewerError } from '../../../core_plugins/kibana/public/discover/doc_viewer/doc_viewer_render_error';
+import { DocViewerError } from '../../../core_plugins/kibana/public/discover/components/doc_viewer/doc_viewer_render_error';
 
 /**
  * Compiles and injects the give angular template into the given dom node

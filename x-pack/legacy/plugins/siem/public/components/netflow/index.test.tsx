@@ -7,7 +7,7 @@
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -55,6 +55,7 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../source_destination/field_names';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -120,13 +121,15 @@ const getNetflowInstance = () => (
 );
 
 describe('Netflow', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
-    const wrapper = shallowWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = shallow(getNetflowInstance());
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('it renders a destination label', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -137,7 +140,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -148,7 +151,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.continent_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -159,7 +162,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.country_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -170,7 +173,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.country_iso_code', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -181,7 +184,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.region_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -192,7 +195,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.city_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -203,7 +206,7 @@ describe('Netflow', () => {
   });
 
   test('it renders the destination ip and port, separated with a colon', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -214,7 +217,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.packets', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -225,7 +228,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -239,7 +242,7 @@ describe('Netflow', () => {
   });
 
   test('it renders event.duration', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -250,7 +253,7 @@ describe('Netflow', () => {
   });
 
   test('it renders event.end', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -261,7 +264,7 @@ describe('Netflow', () => {
   });
 
   test('it renders event.start', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -272,7 +275,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -283,7 +286,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.community_id', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -294,7 +297,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.direction', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -305,7 +308,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.packets', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -316,7 +319,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.protocol', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -327,7 +330,7 @@ describe('Netflow', () => {
   });
 
   test('it renders process.name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -338,7 +341,7 @@ describe('Netflow', () => {
   });
 
   test('it renders a source label', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -349,7 +352,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.bytes', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -360,7 +363,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.continent_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -371,7 +374,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.country_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -382,7 +385,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.country_iso_code', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -393,7 +396,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.region_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -404,7 +407,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.city_name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -415,7 +418,7 @@ describe('Netflow', () => {
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -426,7 +429,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.packets', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -437,7 +440,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks tls.client_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -451,7 +454,7 @@ describe('Netflow', () => {
   });
 
   test('renders tls.client_certificate.fingerprint.sha1 text', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -463,7 +466,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks tls.fingerprints.ja3.hash site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -474,7 +477,7 @@ describe('Netflow', () => {
   });
 
   test('renders tls.fingerprints.ja3.hash text', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -485,7 +488,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks tls.server_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -499,7 +502,7 @@ describe('Netflow', () => {
   });
 
   test('renders tls.server_certificate.fingerprint.sha1 text', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -511,7 +514,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.transport', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -522,7 +525,7 @@ describe('Netflow', () => {
   });
 
   test('it renders user.name', () => {
-    const wrapper = mountWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper

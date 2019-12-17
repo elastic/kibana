@@ -24,6 +24,27 @@ exports[`DonutChart component passes correct props without errors for valid prop
 `;
 
 exports[`DonutChart component renders a donut chart 1`] = `
+.c1.c1 {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.c2 {
+  text-align: right;
+}
+
+.c0 {
+  max-width: 260px;
+  min-width: 100px;
+}
+
+@media (max-width:767px) {
+  .c0 {
+    min-width: 0px;
+    max-width: 100px;
+  }
+}
+
 <div
   class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
 >
@@ -40,13 +61,13 @@ exports[`DonutChart component renders a donut chart 1`] = `
     class="euiFlexItem"
   >
     <div
-      class="sc-htpNat kGuflQ"
+      class="c0"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
       >
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           <div
             class="euiHealth"
@@ -74,12 +95,12 @@ exports[`DonutChart component renders a donut chart 1`] = `
           </div>
         </span>
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           Down
         </span>
         <span
-          class="euiFlexItem sc-bwzfXH dkRrwr"
+          class="euiFlexItem c2"
         >
           32
         </span>
@@ -91,7 +112,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
       >
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           <div
             class="euiHealth"
@@ -119,12 +140,12 @@ exports[`DonutChart component renders a donut chart 1`] = `
           </div>
         </span>
         <span
-          class="euiFlexItem euiFlexItem--flexGrowZero sc-bdVaJa fYBJge"
+          class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           Up
         </span>
         <span
-          class="euiFlexItem sc-bwzfXH dkRrwr"
+          class="euiFlexItem c2"
         >
           95
         </span>
