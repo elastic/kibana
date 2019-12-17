@@ -1,5 +1,5 @@
 {
-  "rule_id": "c6b6ac2e-d3c8-435f-b6b2-208dbd7c4fb9",
+  "rule_id": "da20a7a9-ba71-40f4-a43e-8a5f821e900a",
   "risk_score": 50,
   "description": "Linux ld.so process activity",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "process.name:ld.so",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "776846e8-d1ed-400b-917f-5b7180a4e444",
+  "rule_id": "cad04535-b3d3-4338-853d-772dd7bd74ba",
   "risk_score": 50,
   "description": "Command shell started by Powershell",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

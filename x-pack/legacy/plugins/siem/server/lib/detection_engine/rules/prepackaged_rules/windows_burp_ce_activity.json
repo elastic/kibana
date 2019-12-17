@@ -1,5 +1,5 @@
 {
-  "rule_id": "068a7dcf-6b5a-49c6-83c9-cbd4bcdf6554",
+  "rule_id": "08c357f5-3b75-4144-97c8-a1afcfaa6754",
   "risk_score": 50,
   "description": "Windows Burp CE activity",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "process.name:BurpSuiteCommunity.exe",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

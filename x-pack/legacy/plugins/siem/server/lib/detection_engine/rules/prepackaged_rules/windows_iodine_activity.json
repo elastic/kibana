@@ -1,5 +1,5 @@
 {
-  "rule_id": "140ecb23-42d7-4cdf-8e96-3b113c47aad9",
+  "rule_id": "be811b02-f961-4868-8ede-3d81ed5155bc",
   "risk_score": 50,
   "description": "Windows Iodine activity",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "process.name:iodine.exe or process.name:iodined.exe",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

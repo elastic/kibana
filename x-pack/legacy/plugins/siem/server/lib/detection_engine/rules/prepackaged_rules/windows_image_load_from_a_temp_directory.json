@@ -1,5 +1,5 @@
 {
-  "rule_id": "502dacf5-dd81-4520-9bfb-a0d5bdda44c6",
+  "rule_id": "ecda202b-5149-487c-a476-e4804d4b41b8",
   "risk_score": 50,
   "description": "Windows image load from a temp directory",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

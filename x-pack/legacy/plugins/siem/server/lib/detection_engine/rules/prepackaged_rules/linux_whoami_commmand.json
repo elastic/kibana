@@ -1,5 +1,5 @@
 {
-  "rule_id": "24d92643-331c-46b4-9174-d75ced2d805d",
+  "rule_id": "2e3900de-9b4a-4dbe-b755-e0063615045c",
   "risk_score": 50,
   "description": "Linux: Whoami Commmand",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

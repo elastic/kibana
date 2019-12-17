@@ -1,5 +1,5 @@
 {
-  "rule_id": "3813c982-e239-4300-b3a1-a1474714f055",
+  "rule_id": "0e41dc03-e0ff-4d27-b830-f4906f01f79f",
   "risk_score": 50,
   "description": "Flow Records [Filebeat Netflow]",
   "immutable": true,
@@ -10,5 +10,6 @@
   "from": "now-6m",
   "to": "now",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

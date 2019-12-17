@@ -23,6 +23,27 @@ export const calculateInterval = (
   }
 };
 
+export const calculateVersion = (
+  prevVersion: number | null | undefined,
+  nextVersion: number | null | undefined
+) => {
+  if (nextVersion == null) {
+    if (prevVersion != null) {
+      return prevVersion + 1;
+    } else {
+      // really should never hit this code but to just be
+      // safe let us always check the prev version and if
+      // its null or undefined return a 1
+      return 1;
+    }
+  } else {
+    // The user wants to custom update their version number which
+    // means this could be in the past. Up to the user if they want
+    // to do this
+    return nextVersion;
+  }
+};
+
 export const calculateName = ({
   updatedName,
   originalName,
@@ -69,6 +90,7 @@ export const updateRules = async ({
   to,
   type,
   references,
+  version,
 }: UpdateRuleParams) => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -104,6 +126,7 @@ export const updateRules = async ({
       to,
       type,
       references,
+      version: calculateVersion(rule.params.version, version),
     }
   );
 

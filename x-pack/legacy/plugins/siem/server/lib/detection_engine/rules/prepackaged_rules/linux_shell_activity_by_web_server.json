@@ -1,5 +1,5 @@
 {
-  "rule_id": "52b05dad-5753-4bcb-9f68-5db1e069d11d",
+  "rule_id": "fd7d8e3a-24a3-4f10-812b-b3b469670324",
   "risk_score": 50,
   "description": "Linux: Shell Activity By Web Server",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "process.name: bash and (user.name: apache or www)",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "029370cb-94a4-45bb-87de-42cce5313a60",
+  "rule_id": "c5584cf9-29d2-4616-a18f-d67ad831376d",
   "risk_score": 50,
   "description": "groupadd logs [Filebeat System] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "system.auth.groupadd:*",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

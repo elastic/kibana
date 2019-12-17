@@ -1,5 +1,5 @@
 {
-  "rule_id": "113630a4-9df1-4486-b54b-ed6856d565ce",
+  "rule_id": "6cc6d34a-fb3b-4e8a-a40b-9fb0e94472ce",
   "risk_score": 50,
   "description": "SSH login attempts [Filebeat System] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.dataset:system.auth AND system.auth.ssh.event:*",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

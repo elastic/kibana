@@ -18,10 +18,40 @@ import {
 import { RuleAlertType } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
 
-// The Omit of filter is because of a Hapi Server Typing issue that I am unclear
-// where it comes from. I would hope to remove the "filter" as an omit at some point
-// when we upgrade and Hapi Server is ok with the filter.
-export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> => ({
+export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
+  rule_id: 'rule-1',
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  risk_score: 50,
+  type: 'query',
+  from: 'now-6m',
+  to: 'now',
+  severity: 'high',
+  query: 'user.name: root or user.name: admin',
+  language: 'kuery',
+  threats: [
+    {
+      framework: 'fake',
+      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+    },
+  ],
+  enabled: true,
+  filters: [],
+  immutable: false,
+  references: [],
+  meta: {},
+  tags: [],
+  version: 1,
+  false_positives: [],
+  saved_id: 'some-id',
+  max_signals: 100,
+});
+
+export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -226,6 +256,7 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
+    version: 1,
   },
   interval: '5m',
   enabled: true,

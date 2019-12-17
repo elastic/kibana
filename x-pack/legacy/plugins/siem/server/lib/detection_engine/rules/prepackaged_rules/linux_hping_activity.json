@@ -1,5 +1,5 @@
 {
-  "rule_id": "6b1a843e-e5a4-4b29-b587-c913c6381842",
+  "rule_id": "52d0fd64-b8b1-450b-92e8-d126e3b0399f",
   "risk_score": 50,
   "description": "Linux: Hping Activity",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

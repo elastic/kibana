@@ -52,6 +52,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
       type,
       threats,
       references,
+      version,
     } = request.payload;
 
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
@@ -89,6 +90,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
         type,
         threats,
         references,
+        version,
       });
       if (rule != null) {
         return transformOrError(rule);

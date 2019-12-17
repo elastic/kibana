@@ -1,5 +1,5 @@
 {
-  "rule_id": "91824f81-61ae-4100-9633-e22952fb7491",
+  "rule_id": "52ee22ab-ed4b-4933-ab46-f7cb09cd5789",
   "risk_score": 50,
   "description": "Linux: Web Download",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

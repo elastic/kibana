@@ -1,5 +1,5 @@
 {
-  "rule_id": "6519f277-d7d9-429f-a50c-2342852f4947",
+  "rule_id": "195c9e4a-a91a-48d9-b5af-ebc204730b00",
   "risk_score": 50,
   "description": "(Search) Windows 10",
   "immutable": true,
@@ -61,5 +61,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

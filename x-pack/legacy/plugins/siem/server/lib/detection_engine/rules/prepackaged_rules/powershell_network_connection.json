@@ -1,5 +1,5 @@
 {
-  "rule_id": "730f700d-3940-404e-8701-0e2f337fa169",
+  "rule_id": "bb4074b5-8f5f-47a5-8b73-0e90dec3aeb4",
   "risk_score": 50,
   "description": "Powershell network connection",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

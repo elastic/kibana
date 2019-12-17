@@ -1,5 +1,5 @@
 {
-  "rule_id": "f34400d5-8140-4a73-8555-df46e61903df",
+  "rule_id": "c6c135ff-1e2f-48c0-b4a5-cf6eb42b182e",
   "risk_score": 50,
   "description": "Debug Log [Filebeat Icinga] ECS",
   "immutable": true,
@@ -65,5 +65,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "6a1f9aac-b2e6-4c34-8af0-8058b5c44c06",
+  "rule_id": "9944f18a-13f2-4057-a76b-1afca044cf00",
   "risk_score": 50,
   "description": "Windows Netcat activity",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

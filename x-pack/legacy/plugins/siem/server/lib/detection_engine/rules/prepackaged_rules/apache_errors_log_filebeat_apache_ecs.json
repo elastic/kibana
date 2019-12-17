@@ -1,5 +1,5 @@
 {
-  "rule_id": "31e69e46-9ab8-405a-ba7d-ecb9e2e45ec9",
+  "rule_id": "76ae7bd6-1131-486b-aa40-cde4dc3eccce",
   "risk_score": 50,
   "description": "Apache errors log [Filebeat Apache] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.dataset:apache.error",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

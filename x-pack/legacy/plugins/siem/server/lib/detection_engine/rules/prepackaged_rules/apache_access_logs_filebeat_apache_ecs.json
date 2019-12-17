@@ -1,5 +1,5 @@
 {
-  "rule_id": "8f107b14-2f03-4c00-b18f-4a7e1835965e",
+  "rule_id": "933704b3-29bf-46df-926c-a08fc06a7e80",
   "risk_score": 50,
   "description": "Apache access logs [Filebeat Apache] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.dataset:apache.access",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

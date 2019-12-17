@@ -1,5 +1,5 @@
 {
-  "rule_id": "f4f863de-1822-4178-a349-8d7f4c1b79b7",
+  "rule_id": "5462f7e3-48f0-4f72-996e-b5d6ffe1e631",
   "risk_score": 50,
   "description": "Windows nmap activity",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

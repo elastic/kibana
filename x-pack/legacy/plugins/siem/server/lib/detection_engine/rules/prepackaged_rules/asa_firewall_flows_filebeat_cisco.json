@@ -1,5 +1,5 @@
 {
-  "rule_id": "e5674d54-f23a-4587-afb2-b5d841a8f8c8",
+  "rule_id": "bb34fb13-a8e2-4ac1-adf3-4c55d2bd88f8",
   "risk_score": 50,
   "description": "ASA Firewall flows [Filebeat Cisco]",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "cisco.asa.message_id:* and event.action:\"flow-expiration\"",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "a081f9c9-8830-45e6-9703-edb10011b532",
+  "rule_id": "87b0f9a8-b3f0-486e-9b3d-01171955fb05",
   "risk_score": 50,
   "description": "Process started by MS Office program - possible payload",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

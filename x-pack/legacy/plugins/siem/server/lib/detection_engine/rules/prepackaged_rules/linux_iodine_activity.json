@@ -1,5 +1,5 @@
 {
-  "rule_id": "a2c1a0aa-d7d5-49a0-b530-6c86fa69a61d",
+  "rule_id": "547329b4-11ae-4f26-921c-2b4d69db555b",
   "risk_score": 50,
   "description": "Linux: Iodine Activity",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

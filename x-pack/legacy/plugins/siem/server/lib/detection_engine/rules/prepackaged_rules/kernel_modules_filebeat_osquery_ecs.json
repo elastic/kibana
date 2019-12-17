@@ -1,5 +1,5 @@
 {
-  "rule_id": "8505ca58-ebe6-4c20-915c-5f69f2b51bfb",
+  "rule_id": "6e103a44-fea8-4094-95c6-822aa4ca4567",
   "risk_score": 50,
   "description": "Kernel modules [Filebeat Osquery] ECS",
   "immutable": true,
@@ -39,5 +39,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

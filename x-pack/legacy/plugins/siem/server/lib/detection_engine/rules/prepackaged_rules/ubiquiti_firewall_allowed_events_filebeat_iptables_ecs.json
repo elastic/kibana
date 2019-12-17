@@ -1,5 +1,5 @@
 {
-  "rule_id": "f677f7d6-34d3-4419-8222-0b5a4bb5c32a",
+  "rule_id": "8ed0f4aa-dde8-4d2b-837f-f86bdfbbcb6a",
   "risk_score": 50,
   "description": "Ubiquiti Firewall Allowed Events [Filebeat Iptables] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "iptables.ubiquiti.rule_set :* and event.outcome : \"allow\"",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

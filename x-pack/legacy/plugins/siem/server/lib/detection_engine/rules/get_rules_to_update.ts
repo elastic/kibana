@@ -12,6 +12,10 @@ export const getRulesToUpdate = (
   installedRules: RuleAlertType[]
 ): RuleAlertParamsRest[] => {
   return rulesFromFileSystem.filter(rule =>
-    installedRules.some(installedRule => installedRule.params.ruleId === rule.rule_id)
+    installedRules.some(installedRule => {
+      return (
+        rule.rule_id === installedRule.params.ruleId && rule.version > installedRule.params.version
+      );
+    })
   );
 };

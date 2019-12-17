@@ -1,5 +1,5 @@
 {
-  "rule_id": "2b2698cc-0a4c-4344-97db-e17079a4a6b0",
+  "rule_id": "5e9d274b-7edd-40b8-bb9d-69c9c11bfe5c",
   "risk_score": 50,
   "description": "Command shell started by Svchost",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "6e7bc73a-3503-4d4d-b876-dc4829ad9601",
+  "rule_id": "a61884b5-deea-4cce-af24-a4defba91648",
   "risk_score": 50,
   "description": "Alerts [Filebeat Suricata] ECS",
   "immutable": true,
@@ -65,5 +65,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

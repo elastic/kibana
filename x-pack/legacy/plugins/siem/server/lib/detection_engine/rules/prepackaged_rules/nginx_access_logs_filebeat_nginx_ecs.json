@@ -1,5 +1,5 @@
 {
-  "rule_id": "cbab8d31-3333-4298-a08c-390022e6ffaf",
+  "rule_id": "7353bf72-b310-4349-a687-080ebe45f9a0",
   "risk_score": 50,
   "description": "Nginx access logs [Filebeat Nginx] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.module:nginx AND url.original:*",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

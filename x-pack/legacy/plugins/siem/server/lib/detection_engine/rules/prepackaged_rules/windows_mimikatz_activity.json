@@ -1,5 +1,5 @@
 {
-  "rule_id": "138e95fa-0541-41d7-838d-9570050c3e35",
+  "rule_id": "57208ed2-c08b-4b8f-8d6a-37c791061e55",
   "risk_score": 50,
   "description": "Windows Mimikatz activity",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

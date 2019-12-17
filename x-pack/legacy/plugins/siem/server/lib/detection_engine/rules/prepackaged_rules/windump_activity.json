@@ -1,5 +1,5 @@
 {
-  "rule_id": "41b705a3-9f81-4366-8409-b499420d6f69",
+  "rule_id": "bb21e81e-2ee9-435a-85b6-2065f8342c4e",
   "risk_score": 50,
   "description": "WinDump activity",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "process.name:WinDump.exe",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

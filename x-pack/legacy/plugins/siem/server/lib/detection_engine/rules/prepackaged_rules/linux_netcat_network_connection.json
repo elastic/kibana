@@ -1,5 +1,5 @@
 {
-  "rule_id": "576d8f3b-6a3e-41a3-8fb5-388386df7347",
+  "rule_id": "1ef6a0f2-dc00-4f57-9e1c-4dd561f23ae3",
   "risk_score": 50,
   "description": "Linux: Netcat Network Connection",
   "immutable": true,
@@ -88,5 +88,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -70,6 +70,7 @@ describe('buildRule', () => {
           query: 'host.name: Braden',
         },
       ],
+      version: 1,
     };
     expect(rule).toEqual(expected);
   });
@@ -110,6 +111,7 @@ describe('buildRule', () => {
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
+      version: 1,
     };
     expect(rule).toEqual(expected);
   });
@@ -150,6 +152,7 @@ describe('buildRule', () => {
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
+      version: 1,
     };
     expect(rule).toEqual(expected);
   });

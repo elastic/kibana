@@ -1,5 +1,5 @@
 {
-  "rule_id": "c0cfe4e1-9094-43f7-972a-92f0d2b24c3c",
+  "rule_id": "4c4011b2-3f99-44fb-9e8c-e027af43baa7",
   "risk_score": 50,
   "description": "Events Search [Filebeat Iptables] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "iptables.length :*",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

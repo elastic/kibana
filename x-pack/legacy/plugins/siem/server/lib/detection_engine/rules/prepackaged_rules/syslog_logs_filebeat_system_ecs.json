@@ -1,5 +1,5 @@
 {
-  "rule_id": "02c24939-9391-45e0-a992-17a4f5ffc3ee",
+  "rule_id": "837a8e7c-2541-44d1-80bd-973e739b6ba7",
   "risk_score": 50,
   "description": "Syslog logs [Filebeat System] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.dataset:system.syslog",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

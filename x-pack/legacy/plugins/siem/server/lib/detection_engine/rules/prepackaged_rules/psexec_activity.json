@@ -1,5 +1,5 @@
 {
-  "rule_id": "cb23119f-f151-4bad-b232-c3f743ffb169",
+  "rule_id": "7ffb7249-e63c-49e4-843e-40f5a25833b2",
   "risk_score": 50,
   "description": "PSexec activity",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "process.name:PsExec.exe or process.name:PsExec64.exe",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

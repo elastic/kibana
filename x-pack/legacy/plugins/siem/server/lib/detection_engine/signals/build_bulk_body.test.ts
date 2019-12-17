@@ -69,6 +69,7 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
         },
       },
     });
@@ -142,6 +143,7 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
         },
       },
     });
@@ -213,6 +215,7 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
         },
       },
     });
@@ -277,6 +280,7 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          version: 1,
         },
       },
     });

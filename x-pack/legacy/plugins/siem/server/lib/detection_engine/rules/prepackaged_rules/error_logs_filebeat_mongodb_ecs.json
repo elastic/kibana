@@ -1,5 +1,5 @@
 {
-  "rule_id": "a3659964-da0d-41af-a23a-fc5243ffbe38",
+  "rule_id": "c53e9e00-a135-47d5-a102-8dbbbbdfb152",
   "risk_score": 50,
   "description": "Error logs [Filebeat MongoDB] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "log.level: F or log.level: W",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

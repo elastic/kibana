@@ -160,6 +160,7 @@ async function main() {
         language,
         filters: filter,
         enabled: ENABLED,
+        version: 1,
         // comment these in if you want to use these for input output, otherwise
         // with these two commented out, we will use the default saved objects from spaces.
         // index: INDEX,

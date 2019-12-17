@@ -1,5 +1,5 @@
 {
-  "rule_id": "55c1363c-744b-4850-90e8-22e4edaea98b",
+  "rule_id": "f5d0f5b6-524f-42a3-9159-c86a57087fc4",
   "risk_score": 50,
   "description": "Windows net command activity by the SYSTEM account",
   "immutable": true,
@@ -48,5 +48,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

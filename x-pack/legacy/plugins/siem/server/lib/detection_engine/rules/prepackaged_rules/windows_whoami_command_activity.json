@@ -1,5 +1,5 @@
 {
-  "rule_id": "2d095135-8d30-4163-aa7f-6f214e68b8ce",
+  "rule_id": "5c736dd5-cf99-4abe-a8fc-155d19e2d2e1",
   "risk_score": 50,
   "description": "Windows whoami command activity",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

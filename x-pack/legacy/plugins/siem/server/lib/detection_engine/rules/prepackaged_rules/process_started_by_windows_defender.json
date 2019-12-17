@@ -1,5 +1,5 @@
 {
-  "rule_id": "7bcbc979-b9c3-45b0-8369-be8ee87519ba",
+  "rule_id": "b1f57051-c341-4a6a-b932-aa0b86f2cd0b",
   "risk_score": 50,
   "description": "Process started by Windows Defender",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "parent.process.name:MsMpEng.exe",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

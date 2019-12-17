@@ -1,5 +1,5 @@
 {
-  "rule_id": "81beed6c-c79f-4b82-9bc1-815643cbf061",
+  "rule_id": "2d56af05-e391-4e4b-ba8e-0e3158951483",
   "risk_score": 50,
   "description": "Errorlogs [Filebeat IBM MQ]",
   "immutable": true,
@@ -38,5 +38,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

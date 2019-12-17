@@ -1,5 +1,5 @@
 {
-  "rule_id": "d095e618-3ad7-47bc-b65a-45bdd931d113",
+  "rule_id": "520319b4-13d7-444a-8217-1242c3ebd296",
   "risk_score": 50,
   "description": "Linux: Strace Activity",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

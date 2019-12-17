@@ -1,5 +1,5 @@
 {
-  "rule_id": "c42ba808-15e8-4340-8f36-4a8680ac328f",
+  "rule_id": "2469f8a1-1833-4527-a76a-a6247d617ea4",
   "risk_score": 50,
   "description": "Linux: Mknod Activity",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

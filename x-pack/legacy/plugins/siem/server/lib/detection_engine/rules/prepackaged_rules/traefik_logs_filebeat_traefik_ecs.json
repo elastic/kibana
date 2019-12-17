@@ -1,5 +1,5 @@
 {
-  "rule_id": "87e4309d-5cc5-4f11-a13e-a66bde5d1d2e",
+  "rule_id": "0294c7e1-92ce-4ef3-900b-32388486552f",
   "risk_score": 50,
   "description": "Traefik logs [Filebeat Traefik] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.module:traefik",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

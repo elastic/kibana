@@ -1,5 +1,5 @@
 {
-  "rule_id": "c8b0a1e1-d0e7-416a-ac5f-05b1e2e92216",
+  "rule_id": "333e9911-a5f4-4141-b7d4-761a17ac59bc",
   "risk_score": 50,
   "description": "Main Log [Filebeat Icinga] ECS",
   "immutable": true,
@@ -65,5 +65,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

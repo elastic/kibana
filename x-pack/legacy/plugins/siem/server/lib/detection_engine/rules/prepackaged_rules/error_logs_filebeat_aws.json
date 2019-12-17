@@ -1,5 +1,5 @@
 {
-  "rule_id": "288fbd99-8585-41a6-a359-1729c6db33d1",
+  "rule_id": "8e252353-1b19-4cb8-adb0-6288f54c9ca9",
   "risk_score": 50,
   "description": "Error Logs [Filebeat AWS]",
   "immutable": true,
@@ -63,5 +63,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

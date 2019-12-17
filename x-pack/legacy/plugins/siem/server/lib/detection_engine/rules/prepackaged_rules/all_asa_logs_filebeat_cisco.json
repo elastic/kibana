@@ -1,5 +1,5 @@
 {
-  "rule_id": "9915e1b9-5caf-4c08-875b-3ea2fa692d2e",
+  "rule_id": "d181937f-1135-4209-a9c6-f3c5b95ca3b2",
   "risk_score": 50,
   "description": "All ASA Logs [Filebeat Cisco]",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "cisco.asa.message_id :*",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

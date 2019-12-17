@@ -1,5 +1,5 @@
 {
-  "rule_id": "eb1d99ec-0942-4c63-bcd0-4083e5af8b7b",
+  "rule_id": "9a5b4bf1-342e-405b-a233-f17852735067",
   "risk_score": 50,
   "description": "All Logs [Filebeat PostgreSQL] ECS",
   "immutable": true,
@@ -39,5 +39,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

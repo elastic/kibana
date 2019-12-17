@@ -1,5 +1,5 @@
 {
-  "rule_id": "51816ad4-44e4-474b-99ab-4a3844758ad3",
+  "rule_id": "064d2642-705c-4f38-84c5-bfec8dcf0aea",
   "risk_score": 50,
   "description": "ASA Firewall Events [Filebeat Cisco]",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "cisco.asa.message_id:* and event.action:\"firewall-rule\"",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

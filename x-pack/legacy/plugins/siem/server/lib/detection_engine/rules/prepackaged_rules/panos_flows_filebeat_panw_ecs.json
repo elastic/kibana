@@ -1,5 +1,5 @@
 {
-  "rule_id": "9d32e645-92e9-471a-8c02-25738d12c55d",
+  "rule_id": "f2d99c06-0a8f-470d-8da2-7c1ac2da0c85",
   "risk_score": 50,
   "description": "PAN-OS Flows [Filebeat PANW] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "panw.panos:* and event.category: \"network_traffic\"",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

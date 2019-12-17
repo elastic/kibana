@@ -1,5 +1,5 @@
 {
-  "rule_id": "fc2a4b2b-73de-4d03-837d-1d003fc6d219",
+  "rule_id": "f2076d0c-946e-462e-82ca-3e31f0128c89",
   "risk_score": 50,
   "description": "Sudo commands [Filebeat System] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "system.auth.sudo:*",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

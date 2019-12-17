@@ -110,6 +110,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           type,
           threats,
           references,
+          version: 1,
         });
         return transformOrError(createdRule);
       } catch (err) {

@@ -34,6 +34,7 @@ export const createRules = async ({
   to,
   type,
   references,
+  version,
 }: RuleParams) => {
   return alertsClient.create({
     data: {
@@ -60,6 +61,7 @@ export const createRules = async ({
         to,
         type,
         references,
+        version,
       },
       interval,
       enabled,

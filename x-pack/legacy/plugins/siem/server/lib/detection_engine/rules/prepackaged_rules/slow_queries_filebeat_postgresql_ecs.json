@@ -1,5 +1,5 @@
 {
-  "rule_id": "17dba43b-c0e5-439e-a79d-121b1e2a74bc",
+  "rule_id": "5f903032-56f2-48a8-8309-13a50ddb7c03",
   "risk_score": 50,
   "description": "Slow Queries [Filebeat PostgreSQL] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.duration>30000000",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

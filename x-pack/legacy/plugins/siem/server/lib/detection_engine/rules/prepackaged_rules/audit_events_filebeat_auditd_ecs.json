@@ -1,5 +1,5 @@
 {
-  "rule_id": "f9486a5d-86ed-46d3-9121-232ba8cd436e",
+  "rule_id": "bf86a2f5-24be-4beb-a9a9-582d6e5b47b5",
   "risk_score": 50,
   "description": "Audit Events [Filebeat Auditd] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.dataset:auditd.log",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

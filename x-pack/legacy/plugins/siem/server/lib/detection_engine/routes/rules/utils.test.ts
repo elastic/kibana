@@ -61,6 +61,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -105,6 +106,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -151,6 +153,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -197,6 +200,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -241,6 +245,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -288,6 +293,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -335,6 +341,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
 
@@ -382,6 +389,7 @@ describe('utils', () => {
         ],
         to: 'now',
         type: 'query',
+        version: 1,
       });
     });
   });
@@ -480,6 +488,7 @@ describe('utils', () => {
                 ],
               },
             ],
+            version: 1,
           },
         ],
       });
@@ -534,6 +543,7 @@ describe('utils', () => {
             ],
           },
         ],
+        version: 1,
       });
     });
 

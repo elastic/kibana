@@ -1,5 +1,5 @@
 {
-  "rule_id": "8278e750-62c7-4e0b-9f56-80840f809642",
+  "rule_id": "a5cced2a-1b49-442f-999a-86d184ff71e8",
   "risk_score": 50,
   "description": "Slow logs [Filebeat Redis] ECS",
   "immutable": true,
@@ -12,5 +12,6 @@
   "query": "event.dataset:redis.slowlog",
   "language": "kuery",
   "filters": [],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "d655f83e-67fa-4207-80db-d706787d558f",
+  "rule_id": "f67e7987-576f-452f-b5e7-bee948f0b3fc",
   "risk_score": 50,
   "description": "Santa Logs Search [Filebeat Santa] ECS",
   "immutable": true,
@@ -65,5 +65,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

@@ -1,5 +1,5 @@
 {
-  "rule_id": "302e12ca-38d0-49e8-8123-7b0e8f2807f7",
+  "rule_id": "9b8d84ed-6c73-4357-88d8-8c0f233a42fb",
   "risk_score": 50,
   "description": "Logs [Filebeat Redis] ECS",
   "immutable": true,
@@ -65,5 +65,6 @@
       }
     }
   ],
-  "enabled": false
+  "enabled": false,
+  "version": 1
 }

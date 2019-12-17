@@ -44,6 +44,7 @@ export interface RuleAlertParams {
   to: string;
   threats: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
+  version: number;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;

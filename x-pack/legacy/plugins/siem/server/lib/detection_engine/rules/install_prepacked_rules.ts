@@ -39,6 +39,7 @@ export const installPrepackagedRules = async (
       type,
       threats,
       references,
+      version,
     } = rule;
     createRules({
       alertsClient,
@@ -66,6 +67,7 @@ export const installPrepackagedRules = async (
       type,
       threats,
       references,
+      version,
     });
   });
 };

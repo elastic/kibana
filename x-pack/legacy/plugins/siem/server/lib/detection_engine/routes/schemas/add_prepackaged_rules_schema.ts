@@ -30,6 +30,7 @@ import {
   type,
   threats,
   references,
+  version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -41,6 +42,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *  - output_index is not allowed (and instead the space index must be used)
  *  - immutable defaults to true instead of to false
  *  - enabled defaults to false instead of true
+ *  - version is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
   description: description.required(),
@@ -69,4 +71,5 @@ export const addPrepackagedRulesSchema = Joi.object({
   type: type.required(),
   threats: threats.default([]),
   references: references.default([]),
+  version: version.required(),
 });
