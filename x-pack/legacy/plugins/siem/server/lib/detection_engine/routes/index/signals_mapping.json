@@ -104,9 +104,6 @@
               },
               "updated_by": {
                 "type": "keyword"
-              },
-              "version": {
-                "type": "keyword"
               }
             }
           },
