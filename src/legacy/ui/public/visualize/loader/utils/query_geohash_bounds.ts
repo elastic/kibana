@@ -24,7 +24,7 @@ import { toastNotifications } from 'ui/notify';
 import { AggConfig } from 'ui/vis';
 import { timefilter } from 'ui/timefilter';
 import { Vis } from '../../../vis';
-import { SearchSource, SearchSourceContract } from '../../../courier';
+import { SearchSourceContract } from '../../../courier/search_source/search_source';
 import { esFilters, Query } from '../../../../../../plugins/data/public';
 
 interface QueryGeohashBoundsParams {
@@ -48,6 +48,9 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
   });
 
   if (agg) {
+    /* eslint-disable */
+    const { SearchSource } = require('../../../courier/search_source/search_source');
+    /* eslint-enable */
     const searchSource = params.searchSource
       ? params.searchSource.createChild()
       : new SearchSource();

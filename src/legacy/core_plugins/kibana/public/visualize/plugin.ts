@@ -34,8 +34,6 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../p
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
@@ -154,8 +152,5 @@ export class VisualizePlugin implements Plugin {
       share,
       visualizations,
     };
-
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
-    embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 }

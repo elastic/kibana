@@ -6,6 +6,6 @@
 //   visChart__legend-isLoading
 
 @import './editor/index';
-@import './embeddable/index';
+@import '../../../visualizations/public/embeddable/index';
 @import './listing/index';
-@import './wizard/index';
+@import '../../../visualizations/public/wizard/index';

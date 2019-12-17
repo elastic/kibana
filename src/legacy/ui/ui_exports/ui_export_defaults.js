@@ -47,6 +47,7 @@ export const UI_EXPORT_DEFAULTS = {
 
   appExtensions: {
     fieldFormatEditors: ['ui/field_editor/components/field_format_editor/register'],
+    visEditorTypes: ['ui/vis/editors/default/default'],
     search: ['ui/courier/search_strategy/default_search_strategy'],
   },
 };

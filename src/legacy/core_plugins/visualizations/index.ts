@@ -25,9 +25,6 @@ export const visualizations: LegacyPluginInitializer = kibana =>
     id: 'visualizations',
     publicDir: resolve(__dirname, 'public'),
     require: [],
-    uiExports: {
-      interpreter: ['plugins/visualizations/expressions/boot'],
-    },
   });
 
 // eslint-disable-next-line import/no-default-export

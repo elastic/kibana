@@ -18,7 +18,6 @@
  */
 
 import { set } from 'lodash';
-// @ts-ignore
 import { createFilter } from '../../../core_plugins/visualizations/public';
 import { FormattedData } from './adapters';
 

@@ -73,3 +73,33 @@ export function getServices() {
 export function clearServices() {
   services = null;
 }
+// export legacy static dependencies
+export { getFromSavedObject } from 'ui/index_patterns';
+export { PersistedState } from 'ui/persisted_state';
+// @ts-ignore
+export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
+export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
+export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+export {
+  Container,
+  Embeddable,
+  EmbeddableFactory,
+  EmbeddableInput,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+} from '../../../../../plugins/embeddable/public';
+
+// export types
+export { AppState } from 'ui/state_management/app_state';
+export { VisType } from 'ui/vis';
+
+// export const
+export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';

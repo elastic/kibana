@@ -21,7 +21,9 @@ import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import '../saved_visualizations/saved_visualizations';
+import '../../../../visualizations/public/saved_visualizations/saved_visualizations';
+import { initVisEditorDirective } from './visualization_editor';
+import { initVisualizationDirective } from './visualization';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,9 +35,6 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 import { unhashUrl } from '../../../../../../plugins/kibana_utils/public';
-
-import { initVisEditorDirective } from './visualization_editor';
-import { initVisualizationDirective } from './visualization';
 
 import {
   absoluteToParsedUrl,

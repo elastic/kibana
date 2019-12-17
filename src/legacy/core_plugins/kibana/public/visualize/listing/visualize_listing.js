@@ -19,7 +19,7 @@
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { VisualizeListingTable } from './visualize_listing_table';
-import { NewVisModal } from '../wizard/new_vis_modal';
+import { NewVisModal } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
@@ -57,20 +57,15 @@ export function VisualizeListingController($injector, createNewVis) {
     toastNotifications,
     uiSettings,
     visualizations,
-    core: { docLinks, savedObjects },
+    core: { docLinks },
   } = getServices();
   const kbnUrl = $injector.get('kbnUrl');
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
-  this.showNewVisModal = false;
-  this.addBasePath = addBasePath;
-  this.uiSettings = uiSettings;
-  this.savedObjects = savedObjects;
-
   this.createNewVis = () => {
-    this.showNewVisModal = true;
+    visualizations.showNewVisModal();
   };
 
   this.editItem = ({ editUrl }) => {
@@ -83,7 +78,6 @@ export function VisualizeListingController($injector, createNewVis) {
   };
 
   this.closeNewVisModal = () => {
-    this.showNewVisModal = false;
     // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
     if (createNewVis) {
       kbnUrl.changePath(VisualizeConstants.LANDING_PAGE_PATH);
@@ -92,7 +86,7 @@ export function VisualizeListingController($injector, createNewVis) {
 
   if (createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
-    this.createNewVis();
+    visualizations.showNewVisModal();
   }
 
   // TODO: Extract this into an external service.

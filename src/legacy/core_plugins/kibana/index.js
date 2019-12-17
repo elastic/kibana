@@ -65,10 +65,7 @@ export default function(kibana) {
 
     uiExports: {
       hacks: ['plugins/kibana/discover', 'plugins/kibana/dev_tools', 'plugins/kibana/visualize'],
-      savedObjectTypes: [
-        'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
-      ],
+      savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
         title: 'Kibana',

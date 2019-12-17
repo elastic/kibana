@@ -24,8 +24,7 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { PersistedState } from 'ui/persisted_state';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { ExpressionFunction, Render } from 'src/plugins/expressions/public';
-import { npStart } from 'ui/new_platform';
-import { start as visualizations } from '../np_ready/public/legacy';
+import { getTypes, getIndexPatterns } from '../np_ready/public/services';
 
 interface Arguments {
   index?: string | null;
@@ -92,13 +91,12 @@ export const visualization = (): ExpressionFunctionVisualization => ({
   async fn(context, args, handlers) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private') as any;
-    const indexPatterns = npStart.plugins.data.indexPatterns;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const visConfigParams = args.visConfig ? JSON.parse(args.visConfig) : {};
     const schemas = args.schemas ? JSON.parse(args.schemas) : {};
-    const visType = visualizations.types.get(args.type || 'histogram') as any;
-    const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
+    const visType = getTypes().get(args.type || 'histogram') as any;
+    const indexPattern = args.index ? await getIndexPatterns().get(args.index) : null;
 
     const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
     const uiState = new PersistedState(uiStateParams);

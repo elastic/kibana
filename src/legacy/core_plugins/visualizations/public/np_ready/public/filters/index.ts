@@ -18,4 +18,4 @@
  */
 
 // @ts-ignore
-export * from './vis_filters';
+export { createFilter, createFiltersFromEvent, onBrushEvent } from './vis_filters';

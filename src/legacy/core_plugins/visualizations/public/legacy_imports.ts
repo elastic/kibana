@@ -26,5 +26,6 @@ export {
   setBounds,
 } from '../../../ui/public/agg_types/buckets/date_histogram';
 export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+export { SavedObjectRegistryProvider } from '../../../ui/public/saved_objects/saved_object_registry';
 export { I18nContext } from '../../../ui/public/i18n';
 import '../../../ui/public/directives/bind';

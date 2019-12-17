@@ -67,7 +67,7 @@ import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 import {
