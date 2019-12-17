@@ -5,32 +5,37 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
+import { IHttpFetchError } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { KFetchError } from 'ui/kfetch/kfetch_error';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+
 export function useHTTPRequest<Response>(
   pathname: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD',
   body?: string,
   decode: (response: any) => Response = response => response
 ) {
+  const fetch = useKibana().services.http?.fetch;
   const [response, setResponse] = useState<Response | null>(null);
-  const [error, setError] = useState<KFetchError | null>(null);
+  const [error, setError] = useState<IHttpFetchError | null>(null);
   const [request, makeRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: () =>
-        kfetch({
+      createPromise: () => {
+        if (!fetch) {
+          throw new Error('HTTP service is unavailable');
+        }
+        return fetch(pathname, {
           method,
-          pathname,
           body,
-        }),
+        });
+      },
       onResolve: resp => setResponse(decode(resp)),
       onReject: (e: unknown) => {
-        const err = e as KFetchError;
+        const err = e as IHttpFetchError;
         setError(err);
         toastNotifications.addWarning({
           title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
@@ -43,19 +48,19 @@ export function useHTTPRequest<Response>(
                   defaultMessage: `Error`,
                 })}
               </h5>
-              {err.res?.statusText} ({err.res?.status})
+              {err.response?.statusText} ({err.response?.status})
               <h5>
                 {i18n.translate('xpack.infra.useHTTPRequest.error.url', {
                   defaultMessage: `URL`,
                 })}
               </h5>
-              {err.res?.url}
+              {err.response?.url}
             </div>
           ),
         });
       },
     },
-    [pathname, body, method]
+    [pathname, body, method, decode, fetch]
   );
 
   const loading = useMemo(() => {
