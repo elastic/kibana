@@ -19,6 +19,7 @@ import {
   FIELD_ORIGIN,
   STYLE_TYPE,
   SOURCE_META_ID_ORIGIN,
+  SOURCE_FORMATTERS_ID_ORIGIN,
   LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
@@ -294,14 +295,17 @@ export class VectorStyle extends AbstractStyle {
     return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
   };
 
+  _getDynamicPropertyByFieldName(fieldName) {
+    const dynamicProps = this.getDynamicPropertiesArray();
+    return dynamicProps.find(dynamicProp => {
+      return fieldName === dynamicProp.getField().getName();
+    });
+  }
+
   _getFieldMeta = fieldName => {
     const fieldMetaFromLocalFeatures = _.get(this._descriptor, ['__styleMeta', fieldName]);
 
-    const dynamicProps = this.getDynamicPropertiesArray();
-    const dynamicProp = dynamicProps.find(dynamicProp => {
-      return fieldName === dynamicProp.getField().getName();
-    });
-
+    const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp || !dynamicProp.isFieldMetaEnabled()) {
       return fieldMetaFromLocalFeatures;
     }
@@ -311,8 +315,7 @@ export class VectorStyle extends AbstractStyle {
       dataRequestId = SOURCE_META_ID_ORIGIN;
     } else {
       const join = this._layer.getValidJoins().find(join => {
-        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
-        return !!matchingField;
+        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
       });
       if (join) {
         dataRequestId = join.getSourceMetaDataRequestId();
@@ -323,7 +326,7 @@ export class VectorStyle extends AbstractStyle {
       return fieldMetaFromLocalFeatures;
     }
 
-    const styleMetaDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+    const styleMetaDataRequest = this._layer._findDataRequestById(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return fieldMetaFromLocalFeatures;
     }
@@ -332,6 +335,37 @@ export class VectorStyle extends AbstractStyle {
     const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
+
+  _getFieldFormatter(fieldName) {
+    const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
+    if (!dynamicProp) {
+      return null;
+    }
+
+    let dataRequestId;
+    if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      dataRequestId = SOURCE_FORMATTERS_ID_ORIGIN;
+    } else {
+      const join = this._layer.getValidJoins().find(join => {
+        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
+      });
+      if (join) {
+        dataRequestId = join.getSourceFormattersDataRequestId();
+      }
+    }
+
+    if (!dataRequestId) {
+      return null;
+    }
+
+    const formattersDataRequest = this._layer._findDataRequestById(dataRequestId);
+    if (!formattersDataRequest || !formattersDataRequest.hasData()) {
+      return null;
+    }
+
+    const formatters = formattersDataRequest.getData();
+    return formatters[fieldName];
+  }
 
   _getStyleMeta = () => {
     return _.get(this._descriptor, '__styleMeta', {});
@@ -377,7 +411,7 @@ export class VectorStyle extends AbstractStyle {
 
   renderLegendDetails() {
     const formatField = async (fieldName, value) => {
-      const ff = await this._source.getFieldFormatter(fieldName);
+      const ff = this._getFieldFormatter(fieldName);
       return ff ? ff(value) : value;
     };
 
@@ -531,14 +565,10 @@ export class VectorStyle extends AbstractStyle {
         fieldName: fieldDescriptor.name,
       });
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
-      let matchingField = null;
-      const joins = this._layer.getValidJoins();
-      joins.find(join => {
-        const aggSource = join.getRightJoinSource();
-        matchingField = aggSource.getMetricFieldForName(fieldDescriptor.name);
-        return !!matchingField;
+      const join = this._layer.getValidJoins().find(join => {
+        return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
       });
-      return matchingField;
+      return join ? join.getMetricFieldForFieldName(fieldDescriptor.name) : null;
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
     }
