@@ -21,7 +21,7 @@ export const licenseCheck: UMLicenseCheck = license => {
       statusCode: 400,
     };
   }
-  if (!license.isOneOf(['basic', 'standard', 'gold', 'platinum', 'trial'])) {
+  if (!license.isOneOf(['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'])) {
     return {
       message: 'License not supported',
       statusCode: 401,

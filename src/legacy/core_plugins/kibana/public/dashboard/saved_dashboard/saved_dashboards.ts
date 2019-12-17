@@ -18,11 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import './saved_dashboard';
+import { npStart } from 'ui/new_platform';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectLoader } from 'ui/saved_objects';
+// @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { npStart } from '../../../../../ui/public/new_platform';
+import { createSavedDashboardClass } from './saved_dashboard';
 
 const module = uiModules.get('app/dashboard');
 
@@ -36,7 +38,15 @@ savedObjectManagementRegistry.register({
 });
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function(Private, SavedDashboard) {
-  const savedObjectClient = Private(SavedObjectsClientProvider);
-  return new SavedObjectLoader(SavedDashboard, savedObjectClient, npStart.core.chrome);
+module.service('savedDashboards', function() {
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const services = {
+    savedObjectsClient,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
+
+  const SavedDashboard = createSavedDashboardClass(services);
+  return new SavedObjectLoader(SavedDashboard, savedObjectsClient, npStart.core.chrome);
 });
