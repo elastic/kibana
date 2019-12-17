@@ -33,10 +33,10 @@ interface HtmlConvertOptions {
 }
 
 /** @internal **/
-export type HtmlContextTypeConvert = (value: any, options: HtmlConvertOptions) => string;
+export type HtmlContextTypeConvert = (value: any, options?: HtmlConvertOptions) => string;
 
 /** @internal **/
-export type TextContextTypeConvert = (value: any) => string;
+export type TextContextTypeConvert = (value: any, options?: Record<string, any>) => string;
 
 /** @internal **/
 export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;

@@ -134,7 +134,8 @@ export class UrlFormat extends FieldFormat {
 
   textConvert: TextContextTypeConvert = value => this.formatLabel(value);
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue, { parsedUrl, hit, field } = {}) => {
+  htmlConvert: HtmlContextTypeConvert = (rawValue, options = {}) => {
+    const { parsedUrl, hit, field } = options!;
     const url = escape(this.formatUrl(rawValue));
     const label = escape(this.formatLabel(rawValue, url));
 

@@ -27,7 +27,9 @@ const getConvertFn = (
   format: IFieldFormat,
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
-  const fallbackHtml: HtmlContextTypeConvert = (value, { field, hit } = {}) => {
+  const fallbackHtml: HtmlContextTypeConvert = (value, options = {}) => {
+    const { field, hit } = options!;
+
     const formatted = escape(format.convert(value, TEXT_CONTENT_TYPE, { field, hit }));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
