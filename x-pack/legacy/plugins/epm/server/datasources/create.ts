@@ -5,8 +5,9 @@
  */
 
 import fetch from 'node-fetch';
+import yaml from 'js-yaml';
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
+import { Asset, Datasource, Stream } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
@@ -40,10 +41,14 @@ export async function createDatasource(options: {
   const pkg = await Registry.fetchInfo(pkgkey);
 
   // Collect the config for each dataset
-  const inputs: string[] = [];
+  const streams: Stream[] = [];
   if (pkg.datasets) {
     for (const dataset of pkg.datasets) {
-      inputs.push(await getConfig(pkgkey, dataset));
+      streams.push({
+        id: dataset.name,
+        input: yaml.load(await getConfig(pkgkey, dataset)),
+        output_id: 'default',
+      });
     }
   }
 
@@ -56,7 +61,7 @@ export async function createDatasource(options: {
       datasets,
       toSave,
       request,
-      inputs,
+      streams,
     }),
   ]);
 
@@ -83,9 +88,9 @@ async function saveDatasourceReferences(options: {
   datasourceName: string;
   toSave: AssetReference[];
   request: Request;
-  inputs: string[];
+  streams: Stream[];
 }) {
-  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request, inputs } = options;
+  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request, streams } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -100,9 +105,9 @@ async function saveDatasourceReferences(options: {
     datasourceName,
     datasets,
     assets: toInstall,
+    streams,
   });
 
-  datasource.inputs = inputs;
   // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
   // or something similar, but it's a class not an object so many pieces are missing
   // we'd still need `user` from the request object, but that's not terrible
@@ -129,6 +134,7 @@ interface CreateFakeDatasource {
   datasourceName: string;
   datasets: Dataset[];
   assets: Asset[] | undefined;
+  streams: Stream[];
 }
 
 function createFakeDatasource({
@@ -136,22 +142,8 @@ function createFakeDatasource({
   datasourceName,
   datasets,
   assets = [],
+  streams,
 }: CreateFakeDatasource): Datasource {
-  const streams = datasets.map(dataset => ({
-    id: dataset.name,
-    input: {
-      type: InputType.Log,
-      config: { config: 'values', go: 'here' },
-      ingest_pipelines: ['string'],
-      id: 'string',
-      index_template: 'string',
-      ilm_policy: 'string',
-      fields: [{}],
-    },
-    config: { config: 'values', go: 'here' },
-    output_id: 'output_id',
-    processors: ['string'],
-  }));
   return {
     id: Registry.pkgToPkgKey(pkg),
     name: datasourceName,
