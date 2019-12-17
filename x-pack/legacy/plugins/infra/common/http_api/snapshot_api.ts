@@ -58,6 +58,8 @@ export const SnapshotRequestRT = rt.intersection([
     sourceId: rt.string,
   }),
   rt.partial({
+    accountId: rt.string,
+    region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
   }),
 ]);
