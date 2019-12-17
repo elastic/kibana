@@ -46,6 +46,11 @@ const IsAlertsSupported = props => {
   }
 
   const message = alertsMeta.message || clusterMeta.message;
+
+  if (!message || !message.length) {
+    return null;
+  }
+
   return (
     <EuiToolTip content={message} position="bottom">
       <EuiHealth color="subdued" data-test-subj="alertIcon">

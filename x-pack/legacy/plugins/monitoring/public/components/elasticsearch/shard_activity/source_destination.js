@@ -18,11 +18,13 @@ export const SourceDestination = props => {
       <EuiFlexItem grow={false}>
         <EuiIcon type="arrowRight" size="s" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={targetTransportAddress} position="bottom">
-          <EuiLink>{targetName}</EuiLink>
-        </EuiToolTip>
-      </EuiFlexItem>
+      {targetTransportAddress && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={targetTransportAddress} position="bottom">
+            <EuiLink>{targetName}</EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

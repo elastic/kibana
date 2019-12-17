@@ -54,6 +54,10 @@ export function AlertsIndicator({ alerts }) {
       }
     })();
 
+    if (!tooltipText) {
+      return null;
+    }
+
     return (
       <EuiToolTip content={tooltipText} position="bottom" trigger="hover">
         <EuiHealth color={severityIcon.color} data-test-subj="alertIcon">
