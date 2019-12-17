@@ -7,7 +7,7 @@
 const getParameterForList = (key: string, list: string[]) =>
   list.map(value => `&${key}=${value}`).reduce((prev: string, cur: string) => prev + cur, '');
 
-export const parameterizeValues = (obj: Record<string, string[]>) =>
-  Object.keys(obj)
-    .map(key => getParameterForList(key, obj[key]))
+export const parameterizeValues = (parameters: Record<string, string[]>) =>
+  Object.keys(parameters)
+    .map(key => getParameterForList(key, parameters[key]))
     .reduce((acc, cur) => acc + cur, '');
