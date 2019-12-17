@@ -28,7 +28,6 @@ import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
-import { createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -248,9 +247,10 @@ export function uiRenderMixin(kbnServer, server, config) {
         }
       )
     );
+    const { strict, warnLegacyBrowsers, header } = kbnServer.newPlatform.setup.core.http.csp;
 
     const response = h.view('ui_app', {
-      strictCsp: config.get('csp.strict'),
+      strictCsp: strict,
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
@@ -268,7 +268,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         csp: {
-          warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
+          warnLegacyBrowsers,
         },
         vars: await replaceInjectedVars(
           request,
@@ -285,8 +285,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       },
     });
 
-    const csp = createCSPRuleString(config.get('csp.rules'));
-    response.header('content-security-policy', csp);
+    response.header('content-security-policy', header);
 
     return response;
   }

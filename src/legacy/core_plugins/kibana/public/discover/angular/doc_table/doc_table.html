@@ -1,5 +1,4 @@
 <div
-  class="kbnDocTable__container"
   ng-if="hits.length"
   ng-class="{ loading: isLoading }"
 >
@@ -26,32 +25,34 @@
         ></tool-bar-pager-buttons>
       </div>
     </div>
-    <table class="kbnDocTable table" ng-if="indexPattern">
-      <thead
-        kbn-table-header
-        columns="columns"
-        index-pattern="indexPattern"
-        sort-order="sorting"
-        on-change-sort-order="onChangeSortOrder"
-        on-move-column="onMoveColumn"
-        on-remove-column="onRemoveColumn"
-      ></thead>
-      <tbody>
-        <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version+row._routing"
-          kbn-table-row="row"
+    <div class="kbnDocTable__container kbnDocTable__padBottom">
+      <table class="kbnDocTable table" ng-if="indexPattern">
+        <thead
+          kbn-table-header
           columns="columns"
-          sorting="sorting"
           index-pattern="indexPattern"
-          filter="filter"
-          filters="filters"
-          class="kbnDocTable__row"
-          on-add-column="onAddColumn"
+          sort-order="sorting"
+          on-change-sort-order="onChangeSortOrder"
+          on-move-column="onMoveColumn"
           on-remove-column="onRemoveColumn"
-        ></tr>
-      </tbody>
-    </table>
+        ></thead>
+        <tbody>
+          <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version+row._routing"
+            kbn-table-row="row"
+            columns="columns"
+            sorting="sorting"
+            index-pattern="indexPattern"
+            filter="filter"
+            filters="filters"
+            class="kbnDocTable__row"
+            on-add-column="onAddColumn"
+            on-remove-column="onRemoveColumn"
+          ></tr>
+        </tbody>
+      </table>
+    </div>
     <!-- ToolBarFooter -->
-    <div class="kuiBar kbnDocTable__bar">
+    <div class="kuiBar kbnDocTable__bar--footer">
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"

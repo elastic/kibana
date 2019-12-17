@@ -15,7 +15,6 @@ import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import 'plugins/security/services/shield_indices';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { SpacesManager } from '../../../../../spaces/public/lib';
 import { ROLES_PATH, CLONE_ROLES_PATH, EDIT_ROLES_PATH } from '../management_urls';
 import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
@@ -79,7 +78,7 @@ const routeDefinition = action => ({
     },
     spaces(spacesEnabled) {
       if (spacesEnabled) {
-        return new SpacesManager().getSpaces();
+        return kfetch({ method: 'get', pathname: '/api/spaces/space' });
       }
       return [];
     },
