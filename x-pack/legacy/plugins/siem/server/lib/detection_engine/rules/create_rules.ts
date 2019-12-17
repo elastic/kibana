@@ -42,6 +42,7 @@ export const createRules = async ({
       tags: addTags(tags, ruleId, immutable),
       alertTypeId: SIGNALS_ID,
       params: {
+        createdAt: new Date().toISOString(),
         description,
         ruleId,
         index,
@@ -60,6 +61,7 @@ export const createRules = async ({
         threats,
         to,
         type,
+        updatedAt: new Date().toISOString(),
         references,
         version,
       },

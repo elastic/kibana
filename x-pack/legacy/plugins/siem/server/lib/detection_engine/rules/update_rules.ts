@@ -125,6 +125,7 @@ export const updateRules = async ({
       threats,
       to,
       type,
+      updatedAt: new Date().toISOString(),
       references,
       version: calculateVersion(rule.params.version, version),
     }

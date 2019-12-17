@@ -89,10 +89,10 @@ describe('TaskManagerRunner', () => {
     expect(instance.state).toEqual({ hey: 'there' });
   });
 
-  test('reschedules tasks that have an interval', async () => {
+  test('reschedules tasks that have an schedule', async () => {
     const { runner, store } = testOpts({
       instance: {
-        interval: '10m',
+        schedule: { interval: '10m' },
         status: TaskStatus.Running,
         startedAt: new Date(),
       },
@@ -136,11 +136,11 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWithMatch(store.update, { runAt });
   });
 
-  test('tasks that return runAt override interval', async () => {
+  test('tasks that return runAt override the schedule', async () => {
     const runAt = minutesFromNow(_.random(5));
     const { runner, store } = testOpts({
       instance: {
-        interval: '20m',
+        schedule: { interval: '20m' },
       },
       definitions: {
         bar: {
@@ -164,7 +164,7 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       instance: {
         id,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -240,7 +240,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -369,7 +369,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: '1m',
+        schedule: { interval: '1m' },
         startedAt: new Date(),
       },
       definitions: {
@@ -405,7 +405,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -439,7 +439,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -471,7 +471,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -506,7 +506,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -541,7 +541,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -573,7 +573,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: '1m',
+        schedule: { interval: '1m' },
         startedAt: new Date(),
       },
       definitions: {
@@ -604,7 +604,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        schedule: undefined,
       },
       definitions: {
         bar: {
@@ -636,7 +636,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: `${intervalSeconds}s`,
+        schedule: { interval: `${intervalSeconds}s` },
         startedAt: new Date(),
       },
       definitions: {
@@ -752,7 +752,7 @@ describe('TaskManagerRunner', () => {
         onTaskEvent,
         instance: {
           id,
-          interval: '1m',
+          schedule: { interval: '1m' },
         },
         definitions: {
           bar: {
@@ -803,7 +803,7 @@ describe('TaskManagerRunner', () => {
         onTaskEvent,
         instance: {
           id,
-          interval: '1m',
+          schedule: { interval: '1m' },
           startedAt: new Date(),
         },
         definitions: {

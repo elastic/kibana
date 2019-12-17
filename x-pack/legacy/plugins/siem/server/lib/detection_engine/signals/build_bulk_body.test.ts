@@ -70,6 +70,8 @@ describe('buildBulkBody', () => {
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
     });
@@ -144,6 +146,8 @@ describe('buildBulkBody', () => {
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
     });
@@ -216,6 +220,8 @@ describe('buildBulkBody', () => {
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
     });
@@ -281,6 +287,8 @@ describe('buildBulkBody', () => {
           created_by: 'elastic',
           updated_by: 'elastic',
           version: 1,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
         },
       },
     });

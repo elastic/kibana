@@ -68,6 +68,8 @@ export const installPrepackagedRules = async (
       threats,
       references,
       version,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
   });
 };

@@ -23,6 +23,8 @@ describe('utils', () => {
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: true,
         false_positives: [],
@@ -70,6 +72,8 @@ describe('utils', () => {
       const { from, language, ...omitData } = transformAlertToRule(fullRule);
       expect(omitData).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: true,
         false_positives: [],
@@ -116,6 +120,8 @@ describe('utils', () => {
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: true,
         false_positives: [],
@@ -163,6 +169,8 @@ describe('utils', () => {
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: true,
         false_positives: [],
@@ -211,6 +219,8 @@ describe('utils', () => {
       const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
       expect(omitData).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         false_positives: [],
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -255,6 +265,8 @@ describe('utils', () => {
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       expect(ruleWithEnabledFalse).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: false,
         from: 'now-6m',
@@ -303,6 +315,8 @@ describe('utils', () => {
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       expect(ruleWithEnabledFalse).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: true,
         from: 'now-6m',
@@ -350,6 +364,8 @@ describe('utils', () => {
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual({
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         created_by: 'elastic',
         description: 'Detecting root and admin users',
         enabled: true,
@@ -450,6 +466,8 @@ describe('utils', () => {
         data: [
           {
             created_by: 'elastic',
+            created_at: '2019-12-13T16:40:33.400Z',
+            updated_at: '2019-12-13T16:40:33.400Z',
             description: 'Detecting root and admin users',
             enabled: true,
             false_positives: [],
@@ -505,6 +523,8 @@ describe('utils', () => {
       const output = transformOrError(getResult());
       expect(output).toEqual({
         created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
         description: 'Detecting root and admin users',
         enabled: true,
         false_positives: [],

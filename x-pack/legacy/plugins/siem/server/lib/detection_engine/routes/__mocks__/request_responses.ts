@@ -49,6 +49,8 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   false_positives: [],
   saved_id: 'some-id',
   max_signals: 100,
+  created_at: '2019-12-13T16:40:33.400Z',
+  updated_at: '2019-12-13T16:40:33.400Z',
 });
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -218,6 +220,8 @@ export const getResult = (): RuleAlertType => ({
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
   params: {
+    createdAt: '2019-12-13T16:40:33.400Z',
+    updatedAt: '2019-12-13T16:40:33.400Z',
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
