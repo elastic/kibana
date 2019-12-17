@@ -1,69 +1,55 @@
 [[document-data]]
-== Viewing Document Data
+== Viewing document data
 
-When you submit a search query, the 500 most recent documents that match the query
-are listed in the Documents table. You can configure the number of documents shown
-in the table by setting the `discover:sampleSize` property in <<advanced-options,
-Advanced Settings>>. By default, the table shows the localized version of the time
-field configured for the selected index pattern and the document `_source`. You can
-<<adding-columns, add fields to the Documents table>> from the Fields list.
-You can <<sorting, sort the listed documents>> by any indexed field that's included
-in the table.
-
-To view a document's field data, click the *Expand* button 
-image:images/ExpandButton.jpg[Expand Button] to the left of the document's table
-entry. 
-
-image::images/Expanded-Document.png[]
-
-To view the original JSON document (pretty-printed), click the *JSON* tab.
-
-To view the document data as a separate page, click the *View single document* 
-link. You can bookmark and share this link to provide direct access to a 
-particular document.
-
-To display or hide a field's column in the Documents table, click the
-image:images/add-column-button.png[Add Column] *Toggle column in table* button.
-
-To collapse the document details, click the *Collapse* button 
-image:images/CollapseButton.jpg[Collapse Button].
+When you submit a search query in *Discover*, the most recent documents that match the query
+are listed in the documents table.
+By default, the table includes columns for
+the time field and the document `_source`, which shows all fields and values in the document.
 
 [float]
 [[sorting]]
-=== Sorting the Document List
-You can sort the documents in the Documents table by the values in any indexed
-field. If a time field is configured for the current index pattern, the 
-documents are sorted in reverse chronological order by default.
+=== Modify the document table
 
-To change the sort order, hover over the name of the field you want to sort by
-and click the sort button. Click again to reverse the sort order.
+Use the following commands to
+tailor the documents table to suit your needs.
 
-[float]
-[[adding-columns]]
-=== Adding Field Columns to the Documents Table
-By default, the Documents table shows the localized version of the time field
-that's configured for the selected index pattern and the document `_source`. 
-You can add fields to the table from the Fields list or from a document's
-field data.
+[horizontal]
+Add a field column::
+Hover over the list of *Available fields* and then click *add* next to each field you want include as a column in the table.
+The first field you add replaces the `_source` column.
+Change sort order:: By default, columns are sorted by the values in the field.
+If a time field is configured for the current index pattern,
+the documents are sorted in reverse chronological order.
++
+To change the sort order, hover over the column
+and click image:images/sort-icon.png[].
+The first click sorts by ascending order, the second click sorts by descending order, and the third
+click removes the field from the sorted fields.
 
-To add a field column from the Fields list, hover over the field and click its
-*add* button.
-
-To add a field column from a document's field data, expand the document
-and click the field's
-image:images/add-column-button.png[Add Column] *Toggle column in table* button.
-
-Added field columns replace the `_source` column in the Documents table. The added
-fields are also added to the *Selected Fields* list.
-
-To rearrange the field columns, hover over the header of the column you want to move
-and click the *Move left* or *Move right* button.
-
-image:images/Discover-MoveColumn.jpg[Move Column]
+Move a field column:: Hover over the column header and click the move left (<<) or move right icon (>>).
+Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields*
+and then click *remove*.
+Or, use the (x) control in the column header.
 
 [float]
-[[removing-columns]]
-=== Removing Field Columns from the Documents Table
-To remove a field column from the Documents table, hover over the header of the 
-column you want to remove and click the *Remove* button 
-image:images/RemoveFieldButton.jpg[Remove Field Button].
+=== Drill down into field-level details
+To view the document data in either table or JSON format, click the expand icon (>).
+The expanded view provides these options for viewing your document:
+
+* View the events that surround your document.
+For example, you might want to see the 10 documents that occurred
+immediately before and after your event.
+
+* View the document data as a separate page. You can bookmark and
+share the link for direct access to a particular document.
+
+[role="screenshot"]
+image::images/Expanded-Document.png[]
+
+
+[float]
+=== Configure the number of documents to show
+
+By default, the documents table includes the 500 most recent documents that
+match the query. To change this number, set the `discover:sampleSize` property in <<advanced-options,
+Advanced Settings>>.
