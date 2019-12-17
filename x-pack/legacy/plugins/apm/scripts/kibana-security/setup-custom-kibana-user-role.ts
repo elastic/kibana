@@ -12,6 +12,7 @@ import fs from 'fs';
 import { union, difference, once } from 'lodash';
 import path from 'path';
 import { argv } from 'yargs';
+import Axios from 'axios';
 
 const config = yaml.safeLoad(
   fs.readFileSync(
@@ -49,21 +50,43 @@ const getKibanaBasePath = once(async () => {
 });
 
 init().catch(e => {
-  console.log(e);
+  if (e instanceof AbortError) {
+    console.error(e.message);
+  } else if (isAxiosError(e)) {
+    console.error(
+      `${e.config.method?.toUpperCase() || 'GET'} ${e.config.url} (Code: ${
+        e.response?.status
+      })`
+    );
+    if (e.response) {
+      console.error(
+        JSON.stringify(
+          { request: e.config, response: e.response.data },
+          null,
+          2
+        )
+      );
+    }
+  } else {
+    console.error(e);
+  }
 });
 
 async function init() {
-  const isLocally = KIBANA_BASE_URL.includes('localhost');
+  const version = await getKibanaVersion();
+  console.log(`Connected to Kibana ${version}`);
+
+  const isKibanaLocal = KIBANA_BASE_URL.startsWith('http://localhost');
 
   // kibana.index must be different from `.kibana`
-  if (isLocally && KIBANA_INDEX === '.kibana') {
+  if (isKibanaLocal && KIBANA_INDEX === '.kibana') {
     console.log(
       'kibana.dev.yml: Please use a custom "kibana.index". Example: "kibana.index: .kibana-john"'
     );
     return;
   }
 
-  if (isLocally && !KIBANA_INDEX.startsWith('.kibana')) {
+  if (isKibanaLocal && !KIBANA_INDEX.startsWith('.kibana')) {
     console.log(
       'kibana.dev.yml: "kibana.index" must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
     );
@@ -71,7 +94,7 @@ async function init() {
   }
 
   if (
-    isLocally &&
+    isKibanaLocal &&
     TASK_MANAGER_INDEX &&
     !TASK_MANAGER_INDEX.startsWith('.kibana')
   ) {
@@ -132,35 +155,18 @@ async function isSecurityEnabled() {
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
   const kibanaBasePath = await getKibanaBasePath();
-  const baseURL = KIBANA_BASE_URL + kibanaBasePath;
-  try {
-    const { data } = await axios.request({
-      ...options,
-      baseURL,
-      auth: {
-        username: ELASTICSEARCH_USERNAME,
-        password: ELASTICSEARCH_PASSWORD
-      },
-      headers: { 'kbn-xsrf': 'true', ...options.headers }
-    });
-    return data;
-  } catch (e) {
-    if (e.response) {
-      throw new Error(
-        JSON.stringify(
-          { request: e.config, response: e.response.data },
-          null,
-          2
-        )
-      );
-    }
+  const reqOptions = {
+    ...options,
+    baseURL: KIBANA_BASE_URL + kibanaBasePath,
+    auth: {
+      username: ELASTICSEARCH_USERNAME,
+      password: ELASTICSEARCH_PASSWORD
+    },
+    headers: { 'kbn-xsrf': 'true', ...options.headers }
+  };
 
-    if (e.errno === 'ECONNREFUSED') {
-      throw new Error(`Could not make request to: ${baseURL}/${options.url}`);
-    }
-
-    throw e;
-  }
+  const { data } = await axios.request(reqOptions);
+  return data;
 }
 
 async function createRole({
@@ -266,5 +272,45 @@ async function getRole(roleName: string) {
     }
 
     throw e;
+  }
+}
+
+async function getKibanaVersion() {
+  try {
+    const res: { version: { number: number } } = await callKibana({
+      method: 'GET',
+      url: `/api/status`
+    });
+    return res.version.number;
+  } catch (e) {
+    if (isAxiosError(e)) {
+      switch (e.response?.status) {
+        case 401:
+          throw new AbortError(
+            `Could not access Kibana with the provided credentials. Username: "${e.config.auth?.username}". Password: "${e.config.auth?.password}"`
+          );
+
+        case 404:
+          throw new AbortError(
+            `Could not get version on ${e.config.url} (Code: 404)`
+          );
+
+        default:
+          throw new AbortError(
+            `Cannot access Kibana on ${e.config.baseURL}. Please specify Kibana with: "--kibana-url <url>"`
+          );
+      }
+    }
+    throw e;
+  }
+}
+
+function isAxiosError(e: AxiosError | Error): e is AxiosError {
+  return 'isAxiosError' in e;
+}
+
+class AbortError extends Error {
+  constructor(message: string) {
+    super(message);
   }
 }
