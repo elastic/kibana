@@ -30,7 +30,7 @@ export function getVectorStyleLabel(styleName) {
       return i18n.translate('xpack.maps.styles.vector.orientationLabel', {
         defaultMessage: 'Symbol orientation',
       });
-    case VECTOR_STYLES.LABEL:
+    case VECTOR_STYLES.LABEL_TEXT:
       return i18n.translate('xpack.maps.styles.vector.labelLabel', {
         defaultMessage: 'Label',
       });

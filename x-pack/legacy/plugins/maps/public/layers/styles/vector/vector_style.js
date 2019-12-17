@@ -88,7 +88,7 @@ export class VectorStyle extends AbstractStyle {
       VECTOR_STYLES.ICON_ORIENTATION
     );
     this._labelStyleProperty = this._makeLabelProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL]
+      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
     );
     this._labelSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
@@ -674,7 +674,7 @@ export class VectorStyle extends AbstractStyle {
 
   _makeLabelProperty(descriptor) {
     if (!descriptor || !descriptor.options) {
-      return new StaticTextProperty({ value: '' }, VECTOR_STYLES.LABEL);
+      return new StaticTextProperty({ value: '' }, VECTOR_STYLES.LABEL_TEXT);
     } else if (descriptor.type === StaticStyleProperty.type) {
       return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL);
     } else if (descriptor.type === DynamicStyleProperty.type) {

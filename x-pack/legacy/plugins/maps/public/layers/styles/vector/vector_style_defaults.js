@@ -22,7 +22,7 @@ export const VECTOR_STYLES = {
   LINE_WIDTH: 'lineWidth',
   ICON_SIZE: 'iconSize',
   ICON_ORIENTATION: 'iconOrientation',
-  LABEL: 'label',
+  LABEL_TEXT: 'labelText',
   LABEL_COLOR: 'labelColor',
   LABEL_SIZE: 'labelSize',
 };
@@ -86,7 +86,7 @@ export function getDefaultStaticProperties(mapColors = []) {
         orientation: 0,
       },
     },
-    [VECTOR_STYLES.LABEL]: {
+    [VECTOR_STYLES.LABEL_TEXT]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         value: '',
@@ -165,7 +165,7 @@ export function getDefaultDynamicProperties() {
         },
       },
     },
-    [VECTOR_STYLES.LABEL]: {
+    [VECTOR_STYLES.LABEL_TEXT]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         field: undefined,
