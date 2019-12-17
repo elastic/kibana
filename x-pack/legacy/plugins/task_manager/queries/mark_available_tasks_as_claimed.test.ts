@@ -18,7 +18,7 @@ import {
   updateFields,
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  RecuringTaskWithInterval,
+  TaskWithSchedule,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
 } from './mark_available_tasks_as_claimed';
@@ -50,9 +50,9 @@ describe('mark_available_tasks_as_claimed', () => {
           // Either a task with idle status and runAt <= now or
           // status running or claiming with a retryAt <= now.
           shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-          // Either task has an interval or the attempts < the maximum configured
+          // Either task has an schedule or the attempts < the maximum configured
           shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
-            RecuringTaskWithInterval,
+            TaskWithSchedule,
             ...Object.entries(definitions).map(([type, { maxAttempts }]) =>
               taskWithLessThanMaxAttempts(type, maxAttempts || defaultMaxAttempts)
             )
@@ -100,11 +100,11 @@ describe('mark_available_tasks_as_claimed', () => {
                 ],
               },
             },
-            // Either task has an interval or the attempts < the maximum configured
+            // Either task has an recurring schedule or the attempts < the maximum configured
             {
               bool: {
                 should: [
-                  { exists: { field: 'task.interval' } },
+                  { exists: { field: 'task.schedule' } },
                   {
                     bool: {
                       must: [
