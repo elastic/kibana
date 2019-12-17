@@ -9,9 +9,6 @@ import {
   SavedObjectsBaseOptions,
   PluginInitializerContext,
   CoreSetup,
-  SavedObjectsLegacyService,
-  KibanaRequest,
-  LegacyRequest,
 } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { createConfig$ } from './config';
@@ -37,7 +34,6 @@ export interface PluginStartContract extends SavedObjectsSetup {
  * to function properly.
  */
 export interface LegacyAPI {
-  savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -48,7 +44,7 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup?: ReturnType<typeof setupSavedObjects>;
+  private savedObjectsSetup!: ReturnType<typeof setupSavedObjects>;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -66,7 +62,6 @@ export class Plugin {
     const config = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
-    const adminClusterClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
     const service = Object.freeze(
       new EncryptedSavedObjectsService(
@@ -76,19 +71,12 @@ export class Plugin {
       )
     );
 
+    this.savedObjectsSetup = setupSavedObjects({ service, savedObjects: core.savedObjects });
+
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-          this.savedObjectsSetup = setupSavedObjects({
-            adminClusterClient,
-            service,
-            savedObjects: legacyAPI.savedObjects,
-          });
-        },
-      },
+      __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
     };
   }
 
@@ -98,10 +86,6 @@ export class Plugin {
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        if (!this.savedObjectsSetup) {
-          throw new Error('Legacy SavedObjects API is not registered!');
-        }
-
         return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
       },
     };
