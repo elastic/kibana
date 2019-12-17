@@ -7,6 +7,7 @@ import React from 'react';
 import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import {
   UseField,
@@ -98,6 +99,12 @@ export const TextType = React.memo(({ field }: Props) => {
                   'Whether to index two-term word combinations into a separate field. Activating this will speed up phrase queries, but could slow down indexing.',
               }
             )}
+            docLink={{
+              text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesDocLinkText', {
+                defaultMessage: 'Index phrases documentation',
+              }),
+              href: documentationService.getIndexPhrasesLink(),
+            }}
             formFieldPath="index_phrases"
           />
 
@@ -113,6 +120,12 @@ export const TextType = React.memo(({ field }: Props) => {
                   'Whether to index prefixes of 2 and 5 characters into a separate field. Activating this will speed up prefix queries, but could slow down indexing.',
               }
             )}
+            docLink={{
+              text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesDocLinkText', {
+                defaultMessage: 'Index prefixes documentation',
+              }),
+              href: documentationService.getIndexPrefixesLink(),
+            }}
             defaultToggleValue={getDefaultToggleValue('indexPrefixes', field.source)}
           >
             <EuiFormRow
@@ -161,6 +174,12 @@ export const TextType = React.memo(({ field }: Props) => {
                   'The number of fake term positions which should be inserted between each element of an array of strings.',
               }
             )}
+            docLink={{
+              text: i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapDocLinkText', {
+                defaultMessage: 'Position increment gap documentation',
+              }),
+              href: documentationService.getPositionIncrementGapLink(),
+            }}
             defaultToggleValue={getDefaultToggleValue('position_increment_gap', field.source)}
           >
             <FormDataProvider pathsToWatch="index_options">

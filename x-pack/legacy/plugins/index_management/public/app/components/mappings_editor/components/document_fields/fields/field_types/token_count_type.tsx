@@ -7,6 +7,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, NumericField } from '../../../../shared_imports';
@@ -47,6 +48,12 @@ export const TokenCountType = ({ field }: Props) => {
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerSectionTitle', {
             defaultMessage: 'Analyzer',
           })}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerLinkText', {
+              defaultMessage: 'Analyzer documentation',
+            }),
+            href: documentationService.getAnalyzerLink(),
+          }}
           withToggle={false}
         >
           <AnalyzerParameter

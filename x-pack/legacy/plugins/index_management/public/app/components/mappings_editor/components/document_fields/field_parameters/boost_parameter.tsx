@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { getFieldConfig } from '../../../lib';
 import { UseField, RangeField } from '../../../shared_imports';
 import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   defaultToggleValue: boolean;
@@ -23,6 +24,12 @@ export const BoostParameter = ({ defaultToggleValue }: Props) => (
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldDescription', {
       defaultMessage: 'Mapping field-level query time boosting.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.boostDocLinkText', {
+        defaultMessage: 'Boost documentation',
+      }),
+      href: documentationService.getBoostLink(),
+    }}
     defaultToggleValue={defaultToggleValue}
   >
     {/* Boost level */}

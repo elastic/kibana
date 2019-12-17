@@ -42,6 +42,12 @@ export const FieldDataParameter = () => {
             'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
         }
       )}
+      docLink={{
+        text: i18n.translate('xpack.idxMgmt.mappingsEditor.fielddata.fieldDataDocLinkText', {
+          defaultMessage: 'Fielddata documentation',
+        }),
+        href: documentationService.getFielddataLink(),
+      }}
       formFieldPath="fielddata"
     >
       <FormDataProvider pathsToWatch="fielddata">

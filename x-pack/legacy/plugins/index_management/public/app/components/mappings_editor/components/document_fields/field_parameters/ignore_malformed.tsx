@@ -8,6 +8,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const IgnoreMalformedParameter = ({ description }: { description?: string }) => (
@@ -22,6 +23,12 @@ export const IgnoreMalformedParameter = ({ description }: { description?: string
             defaultMessage: 'Whether to ignore malformed data.',
           })
     }
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedDocLinkText', {
+        defaultMessage: 'Ignore malformed documentation',
+      }),
+      href: documentationService.getIgnoreMalformedLink(),
+    }}
     formFieldPath="ignore_malformed"
   />
 );

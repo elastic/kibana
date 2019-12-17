@@ -11,6 +11,9 @@ import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { configUtilsMock } from './actions_config.mock';
+import { getActionsConfigurationUtilities } from './actions_config';
+
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -25,6 +28,7 @@ const mockTaskManager = taskManagerMock.create();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+  actionsConfigUtils: configUtilsMock,
 };
 
 let actionsClient: ActionsClient;
@@ -189,6 +193,58 @@ describe('create()', () => {
         },
       ]
     `);
+  });
+
+  test('throws error creating action with disabled actionType', async () => {
+    const localConfigUtils = getActionsConfigurationUtilities({
+      enabled: true,
+      enabledActionTypes: ['some-not-ignored-action-type'],
+      whitelistedHosts: ['*'],
+    });
+
+    const localActionTypeRegistryParams = {
+      taskManager: mockTaskManager,
+      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+      actionsConfigUtils: localConfigUtils,
+    };
+
+    actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
+    actionsClient = new ActionsClient({
+      actionTypeRegistry,
+      savedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+    });
+
+    const savedObjectCreateResult = {
+      id: '1',
+      type: 'type',
+      attributes: {
+        name: 'my name',
+        actionTypeId: 'my-action-type',
+        config: {},
+      },
+      references: [],
+    };
+    actionTypeRegistry.register({
+      id: 'my-action-type',
+      name: 'My action type',
+      executor,
+    });
+    savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"action type \\"my-action-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
+    );
   });
 });
 

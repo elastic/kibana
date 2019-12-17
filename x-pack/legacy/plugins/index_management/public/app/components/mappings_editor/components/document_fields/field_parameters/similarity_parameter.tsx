@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
@@ -24,6 +25,12 @@ export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDescription', {
       defaultMessage: 'Which scoring algorithm or similarity should be used.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.similarityDocLinkText', {
+        defaultMessage: 'Similarity documentation',
+      }),
+      href: documentationService.getSimilarityLink(),
+    }}
     defaultToggleValue={defaultToggleValue}
   >
     <UseField
