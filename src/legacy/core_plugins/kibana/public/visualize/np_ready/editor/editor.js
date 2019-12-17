@@ -588,9 +588,10 @@ function VisualizeAppController(
                 getBasePath()
               );
               dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.NEW_VISUALIZATION_ID_PARAM,
-                savedVis.id
+                DashboardConstants.EMBEDDABLE_TYPE,
+                'visualization'
               );
+              dashboardParsedUrl.addQueryParameter(DashboardConstants.EMBEDDABLE_ID, savedVis.id);
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);

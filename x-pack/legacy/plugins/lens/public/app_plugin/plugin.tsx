@@ -41,7 +41,7 @@ import {
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
 import { EditorFrameStart } from '../types';
-import { addLensToDashboardUrl, getKibanaBasePathFromDashboardUrl } from './url_helper';
+import { getKibanaBasePathFromDashboardUrl, addEmbeddableToDashboardUrl } from './url_helper';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
@@ -116,7 +116,11 @@ export class AppPlugin {
             )}/lens/edit/${id}`;
             if (lensUrl) {
               window.history.pushState({}, '', lensUrl);
-              const dashboardParsedUrl = addLensToDashboardUrl(lastDashboardAbsoluteUrl, id);
+              const dashboardParsedUrl = addEmbeddableToDashboardUrl(
+                lastDashboardAbsoluteUrl,
+                id,
+                'lens'
+              );
               if (dashboardParsedUrl) {
                 window.history.pushState({}, '', dashboardParsedUrl);
               }

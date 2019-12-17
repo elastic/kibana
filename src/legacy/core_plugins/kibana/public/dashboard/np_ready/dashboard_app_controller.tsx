@@ -335,21 +335,12 @@ export class DashboardAppController {
           // This code needs to be replaced with a better mechanism for adding new embeddables of
           // any type from the add panel. Likely this will happen via creating a visualization "inline",
           // without navigating away from the UX.
-          if ($routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
-            container.addSavedObjectEmbeddable(
-              VISUALIZE_EMBEDDABLE_TYPE,
-              $routeParams[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]
-            );
-            kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-            kbnUrl.removeParam(DashboardConstants.NEW_VISUALIZATION_ID_PARAM);
-          }
-          if ($routeParams[DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM]) {
-            container.addSavedObjectEmbeddable(
-              LENS_EMBEDDABLE_TYPE,
-              $routeParams[DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM]
-            );
-            kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-            kbnUrl.removeParam(DashboardConstants.NEW_LENS_VISUALIZATION_ID_PARAM);
+          if ($routeParams[DashboardConstants.EMBEDDABLE_TYPE]) {
+            const type = $routeParams[DashboardConstants.EMBEDDABLE_TYPE];
+            const id = $routeParams[DashboardConstants.EMBEDDABLE_ID];
+            container.addSavedObjectEmbeddable(type, id);
+            kbnUrl.removeParam(DashboardConstants.EMBEDDABLE_TYPE);
+            kbnUrl.removeParam(DashboardConstants.EMBEDDABLE_ID);
           }
         }
 

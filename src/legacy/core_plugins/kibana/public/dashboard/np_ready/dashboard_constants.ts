@@ -19,10 +19,10 @@
 
 export const DashboardConstants = {
   ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
-  NEW_VISUALIZATION_ID_PARAM: 'addVisualization',
   LANDING_PAGE_PATH: '/dashboards',
   CREATE_NEW_DASHBOARD_URL: '/dashboard',
-  NEW_LENS_VISUALIZATION_ID_PARAM: 'addLens',
+  EMBEDDABLE_ID: 'embeddableId',
+  EMBEDDABLE_TYPE: 'embeddableType',
 };
 
 export function createDashboardEditUrl(id: string) {

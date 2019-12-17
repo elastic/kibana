@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { addLensToDashboardUrl, getKibanaBasePathFromDashboardUrl } from './url_helper';
+import { addEmbeddableToDashboardUrl, getKibanaBasePathFromDashboardUrl } from './url_helper';
 
 describe('Lens URL Helper', () => {
   it('getKibanaBasePathFromDashboardUrl', () => {
@@ -22,23 +22,28 @@ describe('Lens URL Helper', () => {
     expect(getKibanaBasePathFromDashboardUrl(url)).toBe(null);
   });
 
-  it('addLensToDashboardUrl', () => {
+  it('addEmbeddableToDashboardUrl', () => {
     const id = '123eb456cd';
+    const type = 'lens';
     let url =
-      "http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
-    expect(addLensToDashboardUrl(url, id)).toEqual(
-      `http://localhost:5601/lib/app/kibana#/dashboard?addLens=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
+      "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(addEmbeddableToDashboardUrl(url, id, type)).toEqual(
+      `http://localhost:5601/app/kibana#/dashboard?embeddableType=${type}&embeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
     );
 
     url =
-      "http://mybusiness.mydomain.com/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
-    expect(addLensToDashboardUrl(url, id)).toEqual(
-      `http://mybusiness.mydomain.com/lib/app/kibana#/dashboard?addLens=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
+      "http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
+    expect(addEmbeddableToDashboardUrl(url, id, type)).toEqual(
+      `http://mybusiness.mydomain.com/app/kibana#/dashboard?embeddableType=${type}&embeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
     );
 
     url = 'http://invalidUrl';
-    expect(addLensToDashboardUrl(url, id)).toBe(null);
+    expect(addEmbeddableToDashboardUrl(url, id, type)).toBe(null);
 
-    expect(addLensToDashboardUrl(undefined, id)).toBe(null);
+    url =
+      "http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()";
+    expect(addEmbeddableToDashboardUrl(url, id, type)).toBe(
+      `http://localhost:5601/app/kibana#/dashboard/777182?embeddableType=${type}&embeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()`
+    );
   });
 });
