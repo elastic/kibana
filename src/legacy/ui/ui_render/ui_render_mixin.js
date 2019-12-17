@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
+import { getApmConfig } from '../apm';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -180,14 +181,17 @@ export function uiRenderMixin(kbnServer, server, config) {
     includeUserProvidedConfig = true,
     injectedVarsOverrides = {},
   }) {
+    const appId = app.getId();
     const { http } = kbnServer.newPlatform.setup.core;
-    const { rendering } = kbnServer.newPlatform.__internals;
-    const provider = rendering.getRenderingProvider({
-      request: h.request,
-      uiSettings: h.request.getUiSettingsService(),
-      injectedVarsOverrides,
+    const { rendering, legacy } = kbnServer.newPlatform.__internals;
+    const content = await rendering.render(h.request, h.request.getUiSettingsService(), {
+      appId,
+      includeUserSettings: includeUserProvidedConfig,
+      injectedVarsOverrides: await legacy.getVars(appId, h.request, {
+        apmConfig: getApmConfig(app),
+        ...injectedVarsOverrides,
+      }),
     });
-    const content = await provider.render(app.getId(), { includeUserSettings: includeUserProvidedConfig });
 
     return h
       .response(content)

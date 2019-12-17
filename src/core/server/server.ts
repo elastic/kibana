@@ -149,7 +149,6 @@ export class Server {
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
-      legacy: this.legacy,
       legacyPlugins,
       plugins: pluginsSetup,
     });
@@ -221,13 +220,11 @@ export class Server {
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
         const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
-        const renderingProvider = await rendering.getRenderingProvider({
-          request: req,
-          uiSettings: uiSettingsClient,
-        });
 
         return {
-          rendering: renderingProvider,
+          rendering: {
+            render: rendering.render.bind(rendering, req, uiSettingsClient),
+          },
           savedObjects: {
             // Note: the client provider doesn't support new ES clients
             // emitted from adminClient$

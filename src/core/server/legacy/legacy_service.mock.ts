@@ -28,6 +28,7 @@ const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
   pluginExtendedConfig: {
     get: jest.fn(),
     has: jest.fn(),
+    set: jest.fn(),
   },
   disabledPluginSpecs: [],
   settings: {},

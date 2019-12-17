@@ -87,7 +87,7 @@ class Plugin {
         },
       },
       async (context, req, res) => {
-        const body = await context.core.rendering.render(req.params.id);
+        const body = await context.core.rendering.render({ appId: req.params.id } as any);
         return res.ok({
           body,
           headers: {

@@ -24,9 +24,7 @@ import { mockRenderingServiceParams } from './params';
 type IRenderingService = Pick<Service, keyof Service>;
 
 export const setupMock: jest.Mocked<RenderingServiceSetup> = {
-  getRenderingProvider: jest.fn().mockReturnValue({
-    render: jest.fn(),
-  }),
+  render: jest.fn(),
 };
 export const mockSetup = jest.fn().mockResolvedValue(setupMock);
 export const mockStart = jest.fn();

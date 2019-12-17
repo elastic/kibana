@@ -113,7 +113,6 @@ export interface Platform {
     mode: Readonly<EnvironmentMode>;
     packageInfo: Readonly<PackageInfo>;
   };
-  handledConfigPaths: UnwrapPromise<ReturnType<ConfigService['getUsedPaths']>>;
   setupDeps: {
     core: CoreSetup;
     plugins: PluginsSetup;
@@ -123,14 +122,14 @@ export interface Platform {
     plugins: Record<string, object>;
   };
   __internals: {
-    elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
+    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+    elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
+    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
     savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
-    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
-    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     rendering: LegacyServiceSetupDeps['core']['rendering'];
-    legacy: Pick<ILegacyService, 'injectUiAppVars' | 'getInjectedUiAppVars'>;
+    legacy: ILegacyService;
   };
   logger: LoggerFactory;
 }
@@ -144,7 +143,7 @@ export interface LegacyPlugins {
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
-    __internals: Omit<Platform['__internals'], 'savedObjectsClientProvider'>;
+    __internals: Platform['__internals'];
     env: Platform['env'];
     coreContext: {
       logger: Platform['logger'];
@@ -152,9 +151,6 @@ export default class KbnServer {
     setup: Platform['setupDeps'];
     start: Platform['startDeps'];
     stop: null;
-    params: {
-      handledConfigPaths: Platform['handledConfigPaths'];
-    };
   };
   public server: Server;
   public inject: Server['inject'];

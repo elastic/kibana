@@ -52,11 +52,11 @@ const rootDir = fromRoot('.');
 
 export default class KbnServer {
   /**
- * @param {Record<string, any>} settings
- * @param {KibanaConfig} config
- * @param {Platform} core
- * @param {LegacyPlugins} legacyPlugins
- */
+   * @param {Record<string, any>} settings
+   * @param {KibanaConfig} config
+   * @param {Platform} core
+   * @param {LegacyPlugins} legacyPlugins
+   */
   constructor(settings, config, core, legacyPlugins) {
     this.name = pkg.name;
     this.version = pkg.version;

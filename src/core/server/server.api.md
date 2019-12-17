@@ -798,11 +798,9 @@ export interface IndexSettingsDeprecationInfo {
     [indexName: string]: DeprecationInfo[];
 }
 
-// @public
-export interface IRenderingProvider {
-    render(pluginId?: string, options?: {
-        includeUserSettings?: boolean;
-    }): Promise<string>;
+// @public (undocumented)
+export interface IRenderOptions {
+    includeUserSettings?: boolean;
 }
 
 // @public
@@ -828,6 +826,11 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+
+// @public (undocumented)
+export interface IScopedRenderingClient {
+    render(options?: IRenderOptions): Promise<string>;
+}
 
 // @public
 export interface IUiSettingsClient {
@@ -1190,10 +1193,10 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface RenderingServiceSetup {
-    // Warning: (ae-forgotten-export) The symbol "RenderingProviderParams" needs to be exported by the entry point index.d.ts
-    getRenderingProvider: (params: RenderingProviderParams) => IRenderingProvider;
+    // Warning: (ae-forgotten-export) The symbol "LegacyRenderOptions" needs to be exported by the entry point index.d.ts
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
 }
 
 // @public
@@ -1203,7 +1206,7 @@ export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
-        rendering: IRenderingProvider;
+        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
         };

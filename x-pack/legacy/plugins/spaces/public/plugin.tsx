@@ -22,7 +22,7 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
   private spacesManager: SpacesManager | null = null;
 
   public async start(core: CoreStart) {
-    const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
+    const serverBasePath = core.http.basePath.get();
 
     this.spacesManager = new SpacesManager(serverBasePath, core.http);
     initSpacesNavControl(this.spacesManager, core);

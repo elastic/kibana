@@ -97,6 +97,7 @@ export class LegacyService implements CoreService {
     navLinks: Array<Record<string, unknown>>;
   };
   private settings?: Vars;
+  private defaultVars?: Vars;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -111,37 +112,19 @@ export class LegacyService implements CoreService {
     ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
   }
 
-  private getDefaultVars(): Vars {
-    const { server } = this.setupDeps!.core.http;
-    const { defaultInjectedVarProviders = [] } = this.legacyPlugins!.uiExports;
-    const config = (server as any).config();
-
-    return defaultInjectedVarProviders.reduce(
-      (vars, { fn, pluginSpec }) =>
-        mergeVars(fn(server, pluginSpec.readConfigValue(config, [])), vars),
-      {}
-    );
-  }
-
   private replaceVars(vars: Vars, request: LegacyRequest) {
     const { server } = this.setupDeps!.core.http;
     const { injectedVarsReplacers = [] } = this.legacyPlugins!.uiExports;
 
     return injectedVarsReplacers.reduce(
-      async (injected, replacer) => await replacer(injected, request, server),
-      vars
+      async (injected, replacer) => replacer(await injected, request, server),
+      Promise.resolve(vars)
     );
   }
 
-  public getInjectedUiAppVars(id: string) {
-    const { server } = this.setupDeps!.core.http;
-
-    return [...(this.varsInjectors.get(id) || [])].reduce(
-      async (promise, injector) => ({ ...(await promise), ...(await injector(server)) }),
-      Promise.resolve({} as Record<string, any>)
-    );
-  }
-
+  /**
+   * Inject UI app vars for a particular plugin
+   */
   public injectUiAppVars(id: string, injector: VarsInjector) {
     if (!this.varsInjectors.has(id)) {
       this.varsInjectors.set(id, new Set());
@@ -151,26 +134,34 @@ export class LegacyService implements CoreService {
   }
 
   /**
-   * Get the metadata variables for a particular plugin
+   * Get all the merged injected UI app vars for a particular plugin
    */
-  public async getVars(
-    id: string,
-    request: LegacyRequest,
-    pluginConfigs: Vars[],
-    injected: Vars = {}
-  ) {
+  public async getInjectedUiAppVars(id: string) {
+    if (!this.setupDeps) {
+      throw new Error(
+        'Legacy service has not been set up yet. Ensure LegacyService.setup() is called before LegacyService.getInjectedUiAppVars()'
+      );
+    }
+
+    const { server } = this.setupDeps!.core.http;
+
+    return [...(this.varsInjectors.get(id) || [])].reduce(
+      async (promise, injector) => ({ ...(await promise), ...(await injector(server)) }),
+      Promise.resolve<Record<string, any>>({})
+    );
+  }
+
+  /**
+   * Get the metadata vars for a particular plugin
+   */
+  public async getVars(id: string, request: LegacyRequest, injected: Vars = {}) {
     if (!this.setupDeps) {
       throw new Error(
         'Legacy service has not been set up yet. Ensure LegacyService.setup() is called before LegacyService.getVars()'
       );
     }
 
-    const vars = mergeVars(
-      this.getDefaultVars(),
-      ...pluginConfigs,
-      await this.getInjectedUiAppVars(id),
-      injected
-    );
+    const vars = mergeVars(this.defaultVars!, await this.getInjectedUiAppVars(id), injected);
 
     return this.replaceVars(vars, request);
   }
@@ -250,26 +241,36 @@ export class LegacyService implements CoreService {
 
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.log.debug('setting up legacy service');
+
     if (!this.hasDiscovered) {
       throw new Error(
         'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
       );
     }
-    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
 
+    const { server } = setupDeps.core.http;
+    const { defaultInjectedVarProviders = [] } = this.legacyPlugins!.uiExports;
+
+    // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
+    this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
     this.setupDeps = setupDeps;
+    this.defaultVars = defaultInjectedVarProviders.reduce(
+      (vars, { fn, pluginSpec }) =>
+        mergeVars(vars, fn(server, pluginSpec.readConfigValue(this.legacyRawConfig!, []))),
+      {}
+    );
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
+
     if (!setupDeps || !this.hasDiscovered) {
       throw new Error('Legacy service is not setup yet.');
     }
+
     this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-
     if (this.coreContext.env.isDevClusterMaster) {
       await this.createClusterManager(this.legacyRawConfig!);
     } else {

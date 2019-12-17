@@ -19,25 +19,17 @@
 
 import { mockCoreContext } from '../../core_context.mock';
 import { httpServiceMock } from '../../http/http_service.mock';
-import { httpServerMock } from '../../http/http_server.mocks';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 import { legacyServiceMock } from '../../legacy/legacy_service.mock';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 
 const context = mockCoreContext.create();
 const http = httpServiceMock.createSetupContract();
 const plugins = pluginServiceMock.createSetupContract();
-const legacy = legacyServiceMock.create();
 const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 
 export const mockRenderingServiceParams = context;
 export const mockRenderingSetupDeps = {
   http,
-  legacy,
   legacyPlugins,
   plugins,
-};
-export const mockRenderingProviderParams = {
-  request: httpServerMock.createKibanaRequest(),
-  uiSettings: uiSettingsServiceMock.createClient(),
 };

@@ -8,7 +8,7 @@
 
 ```typescript
 core: {
-        rendering: IRenderingProvider;
+        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
         };

@@ -19,27 +19,44 @@
 
 import { load } from 'cheerio';
 
-import { INJECTED_METADATA } from '../test_utils';
-import {
-  mockRenderingServiceParams,
-  mockRenderingSetupDeps,
-  mockRenderingProviderParams,
-} from './__mocks__/params';
+import { httpServerMock } from '../http/http_server.mocks';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { mockRenderingServiceParams, mockRenderingSetupDeps } from './__mocks__/params';
 import { RenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
+
+const INJECTED_METADATA = {
+  version: expect.any(String),
+  branch: expect.any(String),
+  buildNumber: expect.any(Number),
+  env: {
+    binDir: expect.any(String),
+    configDir: expect.any(String),
+    homeDir: expect.any(String),
+    logDir: expect.any(String),
+    packageInfo: {
+      branch: expect.any(String),
+      buildNum: expect.any(Number),
+      buildSha: expect.any(String),
+      version: expect.any(String),
+    },
+    pluginSearchPaths: expect.any(Array),
+    staticFilesDir: expect.any(String),
+  },
+  legacyMetadata: {
+    branch: expect.any(String),
+    buildNum: expect.any(Number),
+    buildSha: expect.any(String),
+    version: expect.any(String),
+  },
+};
+const { createKibanaRequest, createRawRequest } = httpServerMock;
 
 describe('RenderingService', () => {
   let service: RenderingService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRenderingProviderParams.uiSettings.getAll.mockResolvedValue({ all: 'settings' });
-    mockRenderingProviderParams.uiSettings.getUserProvided.mockResolvedValue({
-      providedBy: {
-        isOverridden: true,
-        value: 'user',
-      },
-    });
     service = new RenderingService(mockRenderingServiceParams);
   });
 
@@ -47,51 +64,100 @@ describe('RenderingService', () => {
     it('creates instance of RenderingServiceSetup', async () => {
       const rendering = await service.setup(mockRenderingSetupDeps);
 
-      expect(rendering.getRenderingProvider).toBeInstanceOf(Function);
+      expect(rendering.render).toBeInstanceOf(Function);
     });
 
-    describe('getRenderingProvider()', () => {
-      let rendering: RenderingServiceSetup;
+    describe('render()', () => {
+      let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      let render: RenderingServiceSetup['render'];
 
       beforeEach(async () => {
-        rendering = await service.setup(mockRenderingSetupDeps);
+        uiSettings = uiSettingsServiceMock.createClient();
+        uiSettings.getRegistered.mockReturnValue({
+          registered: { name: 'title' },
+        });
+        render = (await service.setup(mockRenderingSetupDeps)).render;
       });
 
-      it('creates rendering provider', async () => {
-        const provider = rendering.getRenderingProvider(mockRenderingProviderParams);
+      it('renders "core" page', async () => {
+        const content = await render(createKibanaRequest(), uiSettings);
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-        expect(provider.render).toBeInstanceOf(Function);
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
-      describe('render()', () => {
-        it('renders "core" page', async () => {
-          const { render } = rendering.getRenderingProvider(mockRenderingProviderParams);
-          const dom = load(await render());
-          const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+      it('renders "core" page driven by settings', async () => {
+        uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
+        const content = await render(createKibanaRequest(), uiSettings);
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-          expect(data).toMatchSnapshot(INJECTED_METADATA);
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "core" with excluded user settings', async () => {
+        const content = await render(createKibanaRequest(), uiSettings, {
+          includeUserSettings: false,
         });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-        it('renders with custom injectedVarsOverrides', async () => {
-          const { render } = rendering.getRenderingProvider({
-            ...mockRenderingProviderParams,
-            injectedVarsOverrides: {
-              fake: '__TEST_TOKEN__',
-            },
-          });
-          const dom = load(await render());
-          const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
 
-          expect(data).toMatchSnapshot(INJECTED_METADATA);
+      it('renders "core" from legacy request', async () => {
+        const content = await render(createRawRequest(), uiSettings);
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "legacy" page', async () => {
+        const content = await render(createRawRequest(), uiSettings, { appId: 'legacy' });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "legacy" with custom injectedVarsOverrides', async () => {
+        const content = await render(createRawRequest(), uiSettings, {
+          appId: 'legacy',
+          injectedVarsOverrides: {
+            fake: '__TEST_TOKEN__',
+          },
         });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-        it('renders with excluded user settings', async () => {
-          const { render } = rendering.getRenderingProvider(mockRenderingProviderParams);
-          const dom = load(await render(undefined, { includeUserSettings: false }));
-          const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
 
-          expect(data).toMatchSnapshot(INJECTED_METADATA);
+      it('renders "legacy" with excluded user settings', async () => {
+        const content = await render(createRawRequest(), uiSettings, {
+          appId: 'legacy',
+          includeUserSettings: false,
         });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "legacy" with excluded user settings and custom injectedVarsOverrides', async () => {
+        const content = await render(createRawRequest(), uiSettings, {
+          appId: 'legacy',
+          includeUserSettings: false,
+          injectedVarsOverrides: {
+            fake: '__TEST_TOKEN__',
+          },
+        });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
     });
   });

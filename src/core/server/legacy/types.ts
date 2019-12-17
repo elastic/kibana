@@ -41,7 +41,7 @@ type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
  * @deprecated
  */
 export interface VarsProvider {
-  fn: (server: Server, options: any) => Vars;
+  fn: (server: Server, configValue: any) => Vars;
   pluginSpec: {
     readConfigValue(config: any, key: string | string[]): any;
   };
@@ -51,7 +51,7 @@ export interface VarsProvider {
  * @internal
  * @deprecated
  */
-export type VarsInjector = (server: Server) => Promise<Vars>;
+export type VarsInjector = (server: Server) => Vars | Promise<Vars>;
 
 /**
  * @internal
@@ -61,7 +61,7 @@ export type VarsReplacer = (
   vars: Vars,
   request: LegacyRequest,
   server: InternalHttpServiceSetup['server']
-) => Promise<Vars>;
+) => Vars | Promise<Vars>;
 
 /**
  * @internal

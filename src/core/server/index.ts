@@ -41,7 +41,7 @@
 
 import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
 import { HttpServiceSetup } from './http';
-import { IRenderingProvider } from './rendering';
+import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
@@ -150,7 +150,7 @@ export {
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
-export { IRenderingProvider, RenderingServiceSetup } from './rendering';
+export { RenderingServiceSetup, IRenderOptions, IScopedRenderingClient } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -241,8 +241,8 @@ export {
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients:
- *    - {@link IRenderingProvider | rendering} - Rendering client
- *      which uses the credentials of the incoming request
+ *    - {@link IScopedRenderingClient | rendering} - Rendering client
+ *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
@@ -256,7 +256,7 @@ export {
  */
 export interface RequestHandlerContext {
   core: {
-    rendering: IRenderingProvider;
+    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
     };

@@ -23,7 +23,7 @@ import { CspOptions, InternalHttpServiceSetup, KibanaRequest, LegacyRequest } fr
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import { Env } from '../config';
 import { PluginsServiceSetup, DiscoveredPlugin } from '../plugins';
-import { ILegacyService, LegacyServiceDiscoverPlugins } from '../legacy';
+import { LegacyServiceDiscoverPlugins } from '../legacy';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -48,10 +48,9 @@ export interface RenderingMetadata {
     uiPlugins: Array<{
       id: string;
       plugin: DiscoveredPlugin;
-      config: unknown;
+      config?: Record<string, unknown>;
     }>;
     legacyMetadata: {
-      app: {};
       bundleId: string;
       nav: Array<Record<string, unknown>>;
       version: string;
@@ -72,29 +71,37 @@ export interface RenderingMetadata {
 /** @internal */
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
-  legacy: ILegacyService;
   legacyPlugins: LegacyServiceDiscoverPlugins;
   plugins: PluginsServiceSetup;
 }
 
-/** @internal */
-export interface RenderingProviderParams {
-  request: KibanaRequest | LegacyRequest;
-  uiSettings: IUiSettingsClient;
+/** @public */
+export interface IRenderOptions {
   /**
-   * @deprecated legacy
+   * Set whether to output user settings in the page metadata.
+   */
+  includeUserSettings?: boolean;
+}
+
+/** @deprecated for legacy use only, remove with ui_render_mixin */
+interface LegacyRenderOptions extends IRenderOptions {
+  /**
+   * Render the bootstrapped HTML content for an optional legacy bundle.
+   * Defaults to `core`.
+   */
+  appId?: string;
+
+  /**
+   * Inject custom vars into the page metadata.
    */
   injectedVarsOverrides?: Record<string, any>;
 }
 
-/**
- * @public
- * Provides a client for independently rendering HTML
- */
-export interface IRenderingProvider {
+/** @public */
+export interface IScopedRenderingClient {
   /**
    * Generate a KibanaResponse which renders an HTML page bootstrapped
-   * with the core bundle or the ID of another specified bundle.
+   * with the `core` bundle.
    * Intended as a response body for HTTP route handlers.
    *
    * * @example
@@ -103,25 +110,31 @@ export interface IRenderingProvider {
    *   { path: '/', validate: false },
    *   (context, request, response) =>
    *     response.ok({
-   *       headers: {
-   *         'content-security-policy': context.core.http.csp.directives,
-   *       },
    *       body: await context.core.rendering.render(),
+   *       headers: {
+   *         'content-security-policy': context.core.http.csp.header,
+   *       },
    *     })
    * );
    * ```
-   *
-   * @param pluginId Provide optional variables to inject in the page.
-   * @param injectedVarsOverrides Provide optional variables to inject in the page.
-   * @param includeUserProvidedConfig Optionally disable injecting user-provided settings in the page
    */
-  render(pluginId?: string, options?: { includeUserSettings?: boolean }): Promise<string>;
+  render(options?: IRenderOptions): Promise<string>;
 }
 
-/** @public */
+/** @internal */
 export interface RenderingServiceSetup {
   /**
-   * Generate a client for independently rendering HTML
+   * Generate a KibanaResponse which renders an HTML page bootstrapped
+   * with the `core` bundle or the ID of another specified legacy bundle.
+   *
+   * * @example
+   * ```ts
+   * const html = await rendering.render(request, uiSettings);
+   * ```
    */
-  getRenderingProvider: (params: RenderingProviderParams) => IRenderingProvider;
+  render<R extends KibanaRequest | LegacyRequest>(
+    request: R,
+    uiSettings: IUiSettingsClient,
+    options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions
+  ): Promise<string>;
 }
