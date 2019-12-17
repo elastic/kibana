@@ -10,8 +10,8 @@ import { LICENSE_STATUS_VALID, LICENSE_STATUS_INVALID } from '../../../../common
 
 describe('license_pre_routing_factory', () => {
   describe('#actionsFeaturePreRoutingFactory', () => {
-    let mockServer;
-    let mockLicenseCheckResults;
+    let mockServer: any;
+    let mockLicenseCheckResults: any;
 
     beforeEach(() => {
       mockServer = {
