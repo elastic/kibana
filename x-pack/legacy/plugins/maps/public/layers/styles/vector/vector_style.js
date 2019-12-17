@@ -410,9 +410,9 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderLegendDetails() {
-    const formatField = async (fieldName, value) => {
-      const ff = this._getFieldFormatter(fieldName);
-      return ff ? ff(value) : value;
+    const formatField = (fieldName, value) => {
+      const fieldFormatter = this._getFieldFormatter(fieldName);
+      return fieldFormatter ? fieldFormatter(value) : value;
     };
 
     const stylesPromise = this._getLegendDetailStyleProperties();
