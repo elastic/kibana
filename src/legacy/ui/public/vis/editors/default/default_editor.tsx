@@ -103,7 +103,7 @@ function DefaultEditor({
       resizerClassName={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
     >
       <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
-        <div className="visEditor__canvas" ref={visRef} />
+        <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
       </Panel>
 
       <Panel
