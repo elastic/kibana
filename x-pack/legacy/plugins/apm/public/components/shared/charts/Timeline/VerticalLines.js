@@ -22,7 +22,7 @@ class VerticalLines extends PureComponent {
 
     const markTimes = marks
       .filter(mark => mark.type !== 'error')
-      .map(({ us }) => us);
+      .map(({ offset }) => offset);
 
     return (
       <div

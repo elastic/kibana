@@ -28,7 +28,7 @@ export async function getTraceErrorsPerTransaction(
   const params = {
     index: indices['apm_oss.errorIndices'],
     body: {
-      size: 30,
+      size: 0,
       query: {
         bool: {
           filter: [

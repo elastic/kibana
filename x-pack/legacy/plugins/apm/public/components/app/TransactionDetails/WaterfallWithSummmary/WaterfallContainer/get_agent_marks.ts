@@ -9,7 +9,6 @@ import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction
 export interface AgentMark {
   name: string;
   offset: number;
-  type: 'agent';
 }
 
 export function getAgentMarks(transaction?: Transaction): AgentMark[] {
@@ -26,8 +25,7 @@ export function getAgentMarks(transaction?: Transaction): AgentMark[] {
   return Object.entries(transaction.transaction.marks.agent).map(
     ([name, ms]) => ({
       name,
-      offset: ms * 1000,
-      type: 'agent'
+      offset: ms * 1000
     })
   );
 }

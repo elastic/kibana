@@ -9,27 +9,29 @@ import React from 'react';
 import { Marker } from '../';
 
 describe('Marker', () => {
-  it('returns null when mark is empty', () => {
-    const component = shallow(<Marker mark={{}} x={10} />);
-    expect(component.isEmptyRender()).toBeTruthy();
-  });
-
   it('renders agent marker', () => {
     const mark = {
       name: 'agent',
-      us: 1000,
-      type: 'AGENT'
-    };
+      offset: 1000,
+      type: 'agentMark'
+    } as IWaterfallItemAgentMark;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
   });
 
   it('renders error marker', () => {
-    const mark = {
-      name: 'error',
-      us: 5000,
-      type: 'ERROR'
-    };
+    const mark = ({
+      error: {
+        trace: { id: '123' },
+        transaction: { id: '456' },
+        error: { grouping_key: '123' }
+      },
+      id: '123',
+      name: 'foo',
+      offset: 10000,
+      serviceColor: '#fff',
+      serviceName: 'bar'
+    } as unknown) as IWaterfallItemError;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
   });
