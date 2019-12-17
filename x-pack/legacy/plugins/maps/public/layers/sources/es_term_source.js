@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ES_SIZE_LIMIT, FIELD_ORIGIN, METRIC_TYPE } from '../../../common/constants';
+import { DEFAULT_ES_SIZE_LIMIT, FIELD_ORIGIN, METRIC_TYPE } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource } from './es_agg_source';
 
@@ -170,7 +170,7 @@ export class ESTermSource extends AbstractESAggSource {
         schema: 'segment',
         params: {
           field: this._termField.getName(),
-          size: ES_SIZE_LIMIT,
+          size: DEFAULT_ES_SIZE_LIMIT,
         },
       },
     ];

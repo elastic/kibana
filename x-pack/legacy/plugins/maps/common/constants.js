@@ -67,7 +67,8 @@ export const MAX_ZOOM = 24;
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
-export const ES_SIZE_LIMIT = 10000;
+export const DEFAULT_ES_SIZE_LIMIT = 10000;
+export const DEFAULT_MAX_BUCKETS_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';

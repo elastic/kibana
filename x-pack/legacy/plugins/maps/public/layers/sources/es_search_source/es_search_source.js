@@ -17,7 +17,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import {
   ES_SEARCH,
   ES_GEO_FIELD_TYPE,
-  ES_SIZE_LIMIT,
+  DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -249,8 +249,8 @@ export class ESSearchSource extends AbstractESSource {
       entitySplit: {
         terms: {
           field: topHitsSplitField,
-          size: ES_SIZE_LIMIT,
-          shard_size: ES_SIZE_LIMIT,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
         },
         aggs: {
           entityHits: {
@@ -272,7 +272,7 @@ export class ESSearchSource extends AbstractESSource {
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
     // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
-    const areEntitiesTrimmed = entityBuckets.length >= ES_SIZE_LIMIT;
+    const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
     entityBuckets.forEach(entityBucket => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
@@ -302,6 +302,15 @@ export class ESSearchSource extends AbstractESSource {
       docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
     };
     const geoField = await this._getGeoField();
+    const indexPattern = await this.getIndexPattern();
+
+    const resp = await kfetch({
+      pathname: `../${GIS_API_PATH}/indexSettings`,
+      query: {
+        index: indexPattern.title,
+      },
+    });
+    console.log(resp);
 
     let searchSource;
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
@@ -313,7 +322,7 @@ export class ESSearchSource extends AbstractESSource {
       );
       searchSource = await this._makeSearchSource(
         searchFilters,
-        ES_SIZE_LIMIT,
+        10000,
         initialSearchContext
       );
       searchSource.setField('source', false); // do not need anything from _source
@@ -322,7 +331,7 @@ export class ESSearchSource extends AbstractESSource {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
       searchSource = await this._makeSearchSource(
         searchFilters,
-        ES_SIZE_LIMIT,
+        10000,
         initialSearchContext
       );
       // Setting "fields" instead of "source: { includes: []}"

@@ -6,7 +6,7 @@
 
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import { ES_GEO_FIELD_TYPE, GEOJSON_FILE, ES_SIZE_LIMIT } from '../../../../common/constants';
+import { ES_GEO_FIELD_TYPE, GEOJSON_FILE, DEFAULT_ES_SIZE_LIMIT } from '../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
@@ -82,7 +82,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         addAndViewSource(null);
       } else {
         // Only turn on bounds filter for large doc counts
-        const filterByMapBounds = indexDataResp.docCount > ES_SIZE_LIMIT;
+        const filterByMapBounds = indexDataResp.docCount > DEFAULT_ES_SIZE_LIMIT;
         const source = new ESSearchSource(
           {
             id: uuid(),

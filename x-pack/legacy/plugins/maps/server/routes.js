@@ -414,6 +414,30 @@ export function initRoutes(server, licenseUid) {
     },
   });
 
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/indexSettings`,
+    handler: async (request, h) => {
+      const { server, query } = request;
+
+      if (!query.indexPatternTitle) {
+        return h.response().code(400);
+      }
+
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      try {
+        const resp = await callWithRequest(request, 'indices.getSettings', {
+          index: query.indexPatternTitle,
+          includeDefaults: true
+        });
+        console.log(JSON.stringify(resp, null, ' '));
+        return { };
+      } catch (error) {
+        return h.response().code(400);
+      }
+    },
+  });
+
   function checkEMSProxyConfig() {
     if (!mapConfig.proxyElasticMapsServiceInMaps) {
       server.log(
