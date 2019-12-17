@@ -97,7 +97,6 @@ export const FooterContainer = styled.div`
   bottom: 0;
   color: #666;
   left: 0;
-  padding: 8px;
   position: fixed;
   text-align: left;
   user-select: none;

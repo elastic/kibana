@@ -42,8 +42,6 @@ module.exports = {
         'block-scoped-var': 'error',
         camelcase: [ 'error', { properties: 'never', allow: ['^UNSAFE_'] } ],
         'consistent-return': 'off',
-        curly: [ 'error', 'multi-line' ],
-        'dot-location': [ 'error', 'property' ],
         'dot-notation': [ 'error', { allowKeywords: true } ],
         eqeqeq: [ 'error', 'allow-null' ],
         'guard-for-in': 'error',
@@ -86,7 +84,6 @@ module.exports = {
         'prefer-const': 'error',
         strict: [ 'error', 'never' ],
         'valid-typeof': 'error',
-        'eol-last': ['error', 'always'],
         yoda: 'off',
 
         'mocha/handle-done-callback': 'error',
