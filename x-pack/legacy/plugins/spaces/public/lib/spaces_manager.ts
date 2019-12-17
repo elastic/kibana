@@ -35,9 +35,6 @@ export class SpacesManager {
   }
 
   public getActiveSpace({ forceRefresh = false } = {}) {
-    if (this.isAnonymousPath()) {
-      throw new Error(`Cannot retrieve the active space for anonymous paths`);
-    }
     if (!forceRefresh && this.activeSpace$.value) {
       return Promise.resolve(this.activeSpace$.value);
     }
@@ -108,15 +105,7 @@ export class SpacesManager {
   }
 
   private async refreshActiveSpace() {
-    // Anonymous paths (such as login/logout) should not request the active space under any circumstances.
-    if (this.isAnonymousPath()) {
-      return;
-    }
     const activeSpace = await this.getActiveSpace({ forceRefresh: true });
     this.activeSpace$.next(activeSpace);
-  }
-
-  private isAnonymousPath() {
-    return this.http.anonymousPaths.isAnonymous(window.location.pathname);
   }
 }
