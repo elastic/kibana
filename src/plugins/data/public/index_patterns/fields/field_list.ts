@@ -29,7 +29,7 @@ export interface IFieldList extends Array<Field> {
   getByType: (type: Field['type']) => Field[];
   add: (field: FieldSpec) => void;
   remove: (field: IFieldType) => void;
-  update: (field: Field) => void;
+  update: (field: IFieldType) => void;
   /**
    * Get new `FieldList` based on matching partial `Field` properties
    */
