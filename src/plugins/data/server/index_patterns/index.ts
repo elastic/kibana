@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as indexPatternsUtils from './utils';
+import * as indexPatterns from './utils';
 
 export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
 export { IndexPatternsService } from './index_patterns_service';
-export { indexPatternsUtils };
+export { indexPatterns };

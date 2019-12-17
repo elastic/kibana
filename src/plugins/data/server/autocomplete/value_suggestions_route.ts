@@ -21,7 +21,7 @@ import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { APICaller, IRouter, KibanaRequest } from 'kibana/server';
 
-import { IFieldType, indexPatternsUtils, esFilters } from '../index';
+import { IFieldType, indexPatterns, esFilters } from '../index';
 
 export function registerValueSuggestionsRoute(
   router: IRouter,
@@ -57,12 +57,12 @@ export function registerValueSuggestionsRoute(
         terminate_after: await uiSettings.get<number>('kibana.autocompleteTerminateAfter'),
       };
 
-      const indexPattern = await indexPatternsUtils.findIndexPatternById(
+      const indexPattern = await indexPatterns.findIndexPatternById(
         context.core.savedObjects.client,
         index
       );
 
-      const field = indexPatternsUtils.getFieldByName(fieldName, indexPattern);
+      const field = indexPattern && indexPatterns.getFieldByName(fieldName, indexPattern);
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {

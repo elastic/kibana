@@ -22,16 +22,12 @@ import { IIndexPattern, IFieldType } from '../../common';
 
 export const getFieldByName = (
   fieldName: string,
-  indexPattern?: IIndexPattern
+  indexPattern: IIndexPattern
 ): IFieldType | undefined => {
-  if (indexPattern) {
-    const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
-    const field = fields && fields.find(f => f.name === fieldName);
+  const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
+  const field = fields && fields.find(f => f.name === fieldName);
 
-    if (field) {
-      return field;
-    }
-  }
+  return field;
 };
 
 export const findIndexPatternById = async (
