@@ -218,11 +218,6 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
-      validations: [
-        {
-          validator: nullValueValidateEmptyField,
-        },
-      ],
     },
   },
   null_value_numeric: {
