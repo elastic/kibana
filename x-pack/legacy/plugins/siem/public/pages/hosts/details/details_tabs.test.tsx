@@ -63,7 +63,7 @@ describe('body', () => {
               from={0}
               isInitializing={false}
               detailName={'host-1'}
-              setQuery={() => {}}
+              setQuery={jest.fn()}
               to={0}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}

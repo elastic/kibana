@@ -34,6 +34,8 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    created_at: alert.params.createdAt,
+    updated_at: alert.params.updatedAt,
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -60,6 +62,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     to: alert.params.to,
     type: alert.params.type,
     threats: alert.params.threats,
+    version: alert.params.version,
   });
 };
 
