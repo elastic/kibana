@@ -171,7 +171,7 @@ that feature would not take any effect.
 
 `logging.rotate.everyBytes:`:: [experimental] *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the
 limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
-this option should be at least greater than 1024.
+this option should be in the range of 102400 (100KB) to 1073741824 (1GB).
 
 `logging.rotate.keepFiles:`:: [experimental] *Default: 7* The number of most recent rotated log files to keep
 on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
