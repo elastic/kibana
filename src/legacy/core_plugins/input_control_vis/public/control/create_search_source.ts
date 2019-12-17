@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Class } from '@kbn/utility-types';
+
 import { esFilters, IIndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
 import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 
 export function createSearchSource(
-  SearchSource: Class<SearchSourceClass>,
-  initialState: SearchSourceFields,
+  SearchSource: SearchSourceClass,
+  initialState: SearchSourceFields | null,
   indexPattern: IIndexPattern,
   aggs: any,
   useTimeFilter: boolean,

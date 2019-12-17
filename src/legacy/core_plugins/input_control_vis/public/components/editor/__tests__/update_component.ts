@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { SearchSource as SearchSourceClass } from 'ui/courier';
-import { Class } from '@kbn/utility-types';
+import { ShallowWrapper, ReactWrapper } from 'enzyme';
 
-export { Vis, VisParams } from 'ui/vis';
-export { VisOptionsProps } from 'ui/vis/editors/default';
-export { ValidatedDualRange } from 'ui/validated_range';
-export { SearchSourceFields } from 'ui/courier/types';
-
-export type SearchSource = Class<SearchSourceClass>;
-export const SearchSource = SearchSourceClass;
+export const updateComponent = async (
+  component:
+    | ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
+    | ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
+) => {
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+};

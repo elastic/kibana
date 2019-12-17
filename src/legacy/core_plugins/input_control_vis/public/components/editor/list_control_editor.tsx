@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { PureComponent, ChangeEvent } from 'react';
+import React, { PureComponent, ChangeEvent, ComponentType } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -32,13 +32,18 @@ import {
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
+import {
+  IIndexPattern,
+  IFieldType,
+  IndexPatternSelect,
+} from '../../../../../../plugins/data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface ListControlEditorState {
   isLoadingFieldType: boolean;
   isStringField: boolean;
   prevFieldName: string;
+  IndexPatternSelect: ComponentType<IndexPatternSelect['props']> | null;
 }
 
 interface ListControlEditorProps {
@@ -75,15 +80,17 @@ export class ListControlEditor extends PureComponent<
 > {
   private isMounted: boolean = false;
 
-  state = {
+  state: ListControlEditorState = {
     isLoadingFieldType: true,
     isStringField: false,
     prevFieldName: this.props.controlParams.fieldName,
+    IndexPatternSelect: null,
   };
 
   componentDidMount() {
     this.isMounted = true;
     this.loadIsStringField();
+    this.getIndexPatternSelect();
   }
 
   componentWillUnmount() {
@@ -110,6 +117,13 @@ export class ListControlEditor extends PureComponent<
       this.loadIsStringField();
     }
   };
+
+  async getIndexPatternSelect() {
+    const [, { data }] = await this.props.deps.core.getStartServices();
+    this.setState({
+      IndexPatternSelect: data.ui.IndexPatternSelect,
+    });
+  }
 
   loadIsStringField = async () => {
     if (!this.props.controlParams.indexPattern || !this.props.controlParams.fieldName) {
@@ -272,15 +286,18 @@ export class ListControlEditor extends PureComponent<
     return options;
   };
 
-  async render() {
-    const [, { data }] = await this.props.deps.core.getStartServices();
+  render() {
+    if (this.state.IndexPatternSelect === null) {
+      return null;
+    }
+
     return (
       <>
         <IndexPatternSelectFormRow
           indexPatternId={this.props.controlParams.indexPattern}
           onChange={this.props.handleIndexPatternChange}
           controlIndex={this.props.controlIndex}
-          IndexPatternSelect={data.ui.IndexPatternSelect}
+          IndexPatternSelect={this.state.IndexPatternSelect}
         />
 
         <FieldSelect

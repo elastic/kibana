@@ -17,13 +17,30 @@
  * under the License.
  */
 
-import { SearchSource as SearchSourceClass } from 'ui/courier';
-import { Class } from '@kbn/utility-types';
+import { SearchSource } from '../../../legacy_imports';
 
-export { Vis, VisParams } from 'ui/vis';
-export { VisOptionsProps } from 'ui/vis/editors/default';
-export { ValidatedDualRange } from 'ui/validated_range';
-export { SearchSourceFields } from 'ui/courier/types';
-
-export type SearchSource = Class<SearchSourceClass>;
-export const SearchSource = SearchSourceClass;
+export const getSearchSourceMock = (esSearchResponse?: any): SearchSource =>
+  jest.fn().mockImplementation(() => ({
+    setParent: jest.fn(),
+    setField: jest.fn(),
+    fetch: jest.fn().mockResolvedValue(
+      esSearchResponse
+        ? esSearchResponse
+        : {
+            aggregations: {
+              termsAgg: {
+                buckets: [
+                  {
+                    key: 'Zurich Airport',
+                    doc_count: 691,
+                  },
+                  {
+                    key: 'Xi an Xianyang International Airport',
+                    doc_count: 526,
+                  },
+                ],
+              },
+            },
+          }
+    ),
+  }));

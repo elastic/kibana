@@ -20,13 +20,13 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { SearchSource as SearchSourceClass } from '../legacy_imports';
+import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import { IIndexPattern, IFieldType, TimefilterSetup } from '../../../../../plugins/data/public';
+import { IFieldType, TimefilterSetup } from '../../../../../plugins/data/public';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -132,12 +132,14 @@ export class ListControl extends Control<PhraseFilterManager> {
     }
 
     const fieldName = this.filterManager.fieldName;
-    const initialSearchSourceState = {
+    const initialSearchSourceState: SearchSourceFields = {
+      // Type property does not exist on SearchSourceFields
+      // @ts-ignore
       timeout: `${this.getInjectedVar('autocompleteTimeout')}ms`,
       terminate_after: this.getInjectedVar('autocompleteTerminateAfter'),
     };
     const aggs = termsAgg({
-      field: indexPattern.fields.byName[fieldName],
+      field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
       direction: 'desc',
       query,
@@ -216,7 +218,7 @@ export async function listControlFactory(
     controlParams.options.dynamicOptions = false;
   }
 
-  return new ListControl(
+  const listControl = new ListControl(
     controlParams,
     new PhraseFilterManager(
       controlParams.id,
@@ -228,4 +230,5 @@ export async function listControlFactory(
     SearchSource,
     deps
   );
+  return listControl;
 }

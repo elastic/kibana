@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Fragment, ChangeEvent } from 'react';
+import React, { PureComponent, Fragment, ChangeEvent, ComponentType } from 'react';
 
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,7 +24,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
+import {
+  IIndexPattern,
+  IFieldType,
+  IndexPatternSelect,
+} from '../../../../../../plugins/data/public';
+import { InputControlVisDependencies } from '../../plugin';
 
 interface RangeControlEditorProps {
   controlIndex: number;
@@ -37,68 +42,98 @@ interface RangeControlEditorProps {
     optionName: keyof ControlParamsOptions,
     event: ChangeEvent<HTMLInputElement>
   ) => void;
+  deps: InputControlVisDependencies;
+}
+
+interface RangeControlEditorState {
+  IndexPatternSelect: ComponentType<IndexPatternSelect['props']> | null;
 }
 
 function filterField(field: IFieldType) {
   return field.type === 'number';
 }
 
-export function RangeControlEditor(props: RangeControlEditorProps) {
-  const stepSizeId = `stepSize-${props.controlIndex}`;
-  const decimalPlacesId = `decimalPlaces-${props.controlIndex}`;
-  return (
-    <Fragment>
-      <IndexPatternSelectFormRow
-        indexPatternId={props.controlParams.indexPattern}
-        onChange={props.handleIndexPatternChange}
-        controlIndex={props.controlIndex}
-      />
+export class RangeControlEditor extends PureComponent<
+  RangeControlEditorProps,
+  RangeControlEditorState
+> {
+  state: RangeControlEditorState = {
+    IndexPatternSelect: null,
+  };
 
-      <FieldSelect
-        fieldName={props.controlParams.fieldName}
-        indexPatternId={props.controlParams.indexPattern}
-        filterField={filterField}
-        onChange={props.handleFieldNameChange}
-        getIndexPattern={props.getIndexPattern}
-        controlIndex={props.controlIndex}
-      />
+  componentDidMount() {
+    this.getIndexPatternSelect();
+  }
 
-      <EuiFormRow
-        id={stepSizeId}
-        label={
-          <FormattedMessage
-            id="inputControl.editor.rangeControl.stepSizeLabel"
-            defaultMessage="Step Size"
-          />
-        }
-      >
-        <EuiFieldNumber
-          value={props.controlParams.options.step}
-          onChange={event => {
-            props.handleNumberOptionChange(props.controlIndex, 'step', event);
-          }}
-          data-test-subj={`rangeControlSizeInput${props.controlIndex}`}
+  async getIndexPatternSelect() {
+    const [, { data }] = await this.props.deps.core.getStartServices();
+    this.setState({
+      IndexPatternSelect: data.ui.IndexPatternSelect,
+    });
+  }
+
+  render() {
+    const stepSizeId = `stepSize-${this.props.controlIndex}`;
+    const decimalPlacesId = `decimalPlaces-${this.props.controlIndex}`;
+    if (this.state.IndexPatternSelect === null) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <IndexPatternSelectFormRow
+          indexPatternId={this.props.controlParams.indexPattern}
+          onChange={this.props.handleIndexPatternChange}
+          controlIndex={this.props.controlIndex}
+          IndexPatternSelect={this.state.IndexPatternSelect}
         />
-      </EuiFormRow>
 
-      <EuiFormRow
-        id={decimalPlacesId}
-        label={
-          <FormattedMessage
-            id="inputControl.editor.rangeControl.decimalPlacesLabel"
-            defaultMessage="Decimal Places"
-          />
-        }
-      >
-        <EuiFieldNumber
-          min={0}
-          value={props.controlParams.options.decimalPlaces}
-          onChange={event => {
-            props.handleNumberOptionChange(props.controlIndex, 'decimalPlaces', event);
-          }}
-          data-test-subj={`rangeControlDecimalPlacesInput${props.controlIndex}`}
+        <FieldSelect
+          fieldName={this.props.controlParams.fieldName}
+          indexPatternId={this.props.controlParams.indexPattern}
+          filterField={filterField}
+          onChange={this.props.handleFieldNameChange}
+          getIndexPattern={this.props.getIndexPattern}
+          controlIndex={this.props.controlIndex}
         />
-      </EuiFormRow>
-    </Fragment>
-  );
+
+        <EuiFormRow
+          id={stepSizeId}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.rangeControl.stepSizeLabel"
+              defaultMessage="Step Size"
+            />
+          }
+        >
+          <EuiFieldNumber
+            value={this.props.controlParams.options.step}
+            onChange={event => {
+              this.props.handleNumberOptionChange(this.props.controlIndex, 'step', event);
+            }}
+            data-test-subj={`rangeControlSizeInput${this.props.controlIndex}`}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          id={decimalPlacesId}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.rangeControl.decimalPlacesLabel"
+              defaultMessage="Decimal Places"
+            />
+          }
+        >
+          <EuiFieldNumber
+            min={0}
+            value={this.props.controlParams.options.decimalPlaces}
+            onChange={event => {
+              this.props.handleNumberOptionChange(this.props.controlIndex, 'decimalPlaces', event);
+            }}
+            data-test-subj={`rangeControlDecimalPlacesInput${this.props.controlIndex}`}
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
 }

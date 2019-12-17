@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntlProps } from 'react-intl';
+import { IndexPatternSelect } from 'src/plugins/data/public';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;
-  IndexPatternSelect: any;
+  IndexPatternSelect: ComponentType<IndexPatternSelect['props']>;
 };
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {

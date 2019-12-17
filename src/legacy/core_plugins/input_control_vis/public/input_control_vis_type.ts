@@ -27,7 +27,7 @@ import { InputControlVisDependencies } from './plugin';
 
 export function createInputControlVisTypeDefinition(deps: InputControlVisDependencies) {
   const InputControlVisController = createInputControlVisController(deps);
-  const ControlsTab = getControlsTab(deps.core);
+  const ControlsTab = getControlsTab(deps);
 
   return {
     name: 'input_control_vis',

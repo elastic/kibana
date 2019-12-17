@@ -118,6 +118,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
             handleFieldNameChange={this.changeFieldName}
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
+            deps={this.props.deps}
           />
         );
         break;
