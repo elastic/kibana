@@ -19,14 +19,11 @@
 
 import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { APICaller, IRouter, KibanaRequest } from 'kibana/server';
+import { IRouter } from 'kibana/server';
 
 import { IFieldType, indexPatterns, esFilters } from '../index';
 
-export function registerValueSuggestionsRoute(
-  router: IRouter,
-  apiCaller: (request: KibanaRequest) => Promise<APICaller>
-) {
+export function registerValueSuggestionsRoute(router: IRouter) {
   router.post(
     {
       path: '/api/kibana/suggestions/values/{index}',
@@ -51,6 +48,7 @@ export function registerValueSuggestionsRoute(
       const { client: uiSettings } = context.core.uiSettings;
       const { field: fieldName, query, boolFilter } = request.body;
       const { index } = request.params;
+      const { dataClient } = context.core.elasticsearch;
 
       const autocompleteSearchOptions = {
         timeout: await uiSettings.get<number>('kibana.autocompleteTimeout'),
@@ -66,8 +64,7 @@ export function registerValueSuggestionsRoute(
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
 
       try {
-        const callCluster = await apiCaller(request);
-        const result = await callCluster('search', { index, body });
+        const result = await dataClient.callAsCurrentUser('search', { index, body });
 
         const buckets: any[] =
           get(result, 'aggregations.suggestions.buckets') ||

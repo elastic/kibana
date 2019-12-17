@@ -17,27 +17,11 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
-import {
-  APICaller,
-  CallAPIOptions,
-  CoreSetup,
-  ElasticsearchServiceSetup,
-  KibanaRequest,
-} from 'kibana/server';
+import { CoreSetup } from 'kibana/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
 
-const getAPICallerFn = (elasticsearch: ElasticsearchServiceSetup) => async (
-  request: KibanaRequest
-): Promise<APICaller> => {
-  const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-
-  return (endpoint: string, params?: Record<string, any>, options?: CallAPIOptions) =>
-    client.asScoped(request).callAsCurrentUser(endpoint, params, options);
-};
-
-export function registerRoutes({ http, elasticsearch }: CoreSetup): void {
+export function registerRoutes({ http }: CoreSetup): void {
   const router = http.createRouter();
 
-  registerValueSuggestionsRoute(router, getAPICallerFn(elasticsearch));
+  registerValueSuggestionsRoute(router);
 }
