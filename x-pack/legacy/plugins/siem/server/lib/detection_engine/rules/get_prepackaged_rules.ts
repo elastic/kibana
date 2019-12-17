@@ -21,8 +21,6 @@ export const validateAllPrepackagedRules = (
     if (validatedRule.error != null) {
       const ruleName = rule.name ? rule.name : '(rule_name unknown)';
       const ruleId = rule.rule_id ? rule.rule_id : '(rule_id unknown)';
-      // This error is intended to be for a programmer and will cause Kibana to crash on startup
-      // if you do not have valid rules or try to startup with invalid pre-packaged rules.
       throw new TypeError(
         `name: "${ruleName}", rule_id: "${ruleId}" within the folder rules/prepackaged_rules ` +
           `is not a valid detection engine rule. Expect the system ` +
