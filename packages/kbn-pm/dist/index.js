@@ -23296,11 +23296,10 @@ const CleanCommand = {
       const originalCwd = process.cwd();
 
       try {
-        for (const _ref of toDelete) {
-          const {
-            pattern,
-            cwd
-          } = _ref;
+        for (const {
+          pattern,
+          cwd
+        } of toDelete) {
           process.chdir(cwd);
           const promise = del__WEBPACK_IMPORTED_MODULE_1___default()(pattern);
           ora__WEBPACK_IMPORTED_MODULE_2___default.a.promise(promise, Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(originalCwd, Object(path__WEBPACK_IMPORTED_MODULE_3__["join"])(cwd, String(pattern))));
