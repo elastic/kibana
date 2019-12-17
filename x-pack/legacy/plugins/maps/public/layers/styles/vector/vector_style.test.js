@@ -96,7 +96,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'DYNAMIC',
       },
-      label: {
+      labelText: {
         options: {
           value: '',
         },
