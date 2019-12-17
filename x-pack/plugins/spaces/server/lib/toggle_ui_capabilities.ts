@@ -10,10 +10,10 @@ import { Space } from '../../common/model/space';
 
 export function toggleUICapabilities(
   features: Feature[],
-  capabilities: UICapabilities,
+  uiCapabilities: UICapabilities,
   activeSpace: Space
 ) {
-  const clonedCapabilities = _.cloneDeep(capabilities);
+  const clonedCapabilities = _.cloneDeep(uiCapabilities);
 
   toggleDisabledFeatures(features, clonedCapabilities, activeSpace);
 
@@ -22,18 +22,18 @@ export function toggleUICapabilities(
 
 function toggleDisabledFeatures(
   features: Feature[],
-  capabilities: UICapabilities,
+  uiCapabilities: UICapabilities,
   activeSpace: Space
 ) {
-  const disabledFeatureKeys = activeSpace.disabledFeatures;
+  const disabledFeatureKeys: string[] = activeSpace.disabledFeatures;
 
-  const disabledFeatures = disabledFeatureKeys
+  const disabledFeatures: Feature[] = disabledFeatureKeys
     .map(key => features.find(feature => feature.id === key))
     .filter(feature => typeof feature !== 'undefined') as Feature[];
 
-  const navLinks = capabilities.navLinks;
-  const catalogueEntries = capabilities.catalogue;
-  const managementItems = capabilities.management;
+  const navLinks: Record<string, boolean> = uiCapabilities.navLinks;
+  const catalogueEntries: Record<string, boolean> = uiCapabilities.catalogue;
+  const managementItems: Record<string, Record<string, boolean>> = uiCapabilities.management;
 
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
@@ -42,13 +42,13 @@ function toggleDisabledFeatures(
     }
 
     // Disable associated catalogue entries
-    const privilegeCatalogueEntries = feature.catalogue || [];
+    const privilegeCatalogueEntries: string[] = feature.catalogue || [];
     privilegeCatalogueEntries.forEach(catalogueEntryId => {
       catalogueEntries[catalogueEntryId] = false;
     });
 
     // Disable associated management items
-    const privilegeManagementSections = feature.management || {};
+    const privilegeManagementSections: Record<string, string[]> = feature.management || {};
     Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
       sectionItems.forEach(item => {
         if (
@@ -61,8 +61,8 @@ function toggleDisabledFeatures(
     });
 
     // Disable "sub features" that match the disabled feature
-    if (capabilities.hasOwnProperty(feature.id)) {
-      const capability = capabilities[feature.id];
+    if (uiCapabilities.hasOwnProperty(feature.id)) {
+      const capability = uiCapabilities[feature.id];
       Object.keys(capability).forEach(featureKey => {
         capability[featureKey] = false;
       });

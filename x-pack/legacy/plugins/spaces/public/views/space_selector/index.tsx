@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
 import chrome from 'ui/chrome';
@@ -13,20 +14,20 @@ import { uiModules } from 'ui/modules';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Space } from '../../../common/model/space';
 import { SpaceSelector } from './space_selector';
 
-import { start as spacesNPStart } from '../../legacy';
-
 const module = uiModules.get('spaces_selector', []);
-module.controller('spacesSelectorController', ($scope: any) => {
-  $scope.$$postDigest(async () => {
+module.controller(
+  'spacesSelectorController',
+  ($scope: any, spaces: Space[], serverBasePath: string) => {
     const domNode = document.getElementById('spaceSelectorRoot');
 
-    const { spacesManager } = await spacesNPStart;
+    const spacesManager = new SpacesManager(serverBasePath);
 
     render(
       <I18nContext>
-        <SpaceSelector spacesManager={spacesManager!} />
+        <SpaceSelector spaces={spaces} spacesManager={spacesManager} />
       </I18nContext>,
       domNode
     );
@@ -37,7 +38,7 @@ module.controller('spacesSelectorController', ($scope: any) => {
         unmountComponentAtNode(domNode);
       }
     });
-  });
-});
+  }
+);
 
 chrome.setVisible(false).setRootTemplate(template);

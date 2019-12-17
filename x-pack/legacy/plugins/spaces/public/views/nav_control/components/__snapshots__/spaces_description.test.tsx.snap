@@ -19,16 +19,6 @@ exports[`SpacesDescription renders without crashing 1`] = `
     key="manageSpacesButton"
   >
     <ManageSpacesButton
-      capabilities={
-        Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-          "spaces": Object {
-            "manage": true,
-          },
-        }
-      }
       onClick={[MockFunction]}
       size="s"
       style={

@@ -38,6 +38,7 @@ interface Props {
   onClose: () => void;
   savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
+  activeSpace: Space;
   toastNotifications: ToastNotifications;
 }
 
@@ -56,13 +57,12 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
   );
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('copySavedObjectsIntoSpace');
-    const getActiveSpace = spacesManager.getActiveSpace();
-    Promise.all([getSpaces, getActiveSpace])
-      .then(([allSpaces, activeSpace]) => {
+    spacesManager
+      .getSpaces('copySavedObjectsIntoSpace')
+      .then(response => {
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter(space => space.id !== activeSpace.id),
+          spaces: response,
         });
       })
       .catch(e => {
@@ -73,6 +73,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         });
       });
   }, [spacesManager, toastNotifications]);
+  const eligibleSpaces = spaces.filter(space => space.id !== props.activeSpace.id);
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
@@ -158,7 +159,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
 
     // Step 1a: assets loaded, but no spaces are available for copy.
-    if (spaces.length === 0) {
+    if (eligibleSpaces.length === 0) {
       return (
         <EuiEmptyPrompt
           body={
@@ -184,7 +185,11 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     // Step 2: Copy has not been initiated yet; User must fill out form to continue.
     if (!copyInProgress) {
       return (
-        <CopyToSpaceForm spaces={spaces} copyOptions={copyOptions} onUpdate={setCopyOptions} />
+        <CopyToSpaceForm
+          spaces={eligibleSpaces}
+          copyOptions={copyOptions}
+          onUpdate={setCopyOptions}
+        />
       );
     }
 
@@ -195,7 +200,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         copyInProgress={copyInProgress}
         conflictResolutionInProgress={conflictResolutionInProgress}
         copyResult={copyResult}
-        spaces={spaces}
+        spaces={eligibleSpaces}
         copyOptions={copyOptions}
         retries={retries}
         onRetriesChange={onRetriesChange}

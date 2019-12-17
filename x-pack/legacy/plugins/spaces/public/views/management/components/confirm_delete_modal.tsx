@@ -24,6 +24,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { ChangeEvent, Component } from 'react';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';
@@ -31,6 +32,7 @@ import { SpacesManager } from '../../../lib';
 interface Props {
   space: Space;
   spacesManager: SpacesManager;
+  spacesNavState: SpacesNavState;
   onCancel: () => void;
   onConfirm: () => void;
   intl: InjectedIntl;
@@ -40,7 +42,6 @@ interface State {
   confirmSpaceName: string;
   error: boolean | null;
   deleteInProgress: boolean;
-  isDeletingCurrentSpace: boolean;
 }
 
 class ConfirmDeleteModalUI extends Component<Props, State> {
@@ -48,23 +49,13 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
     confirmSpaceName: '',
     error: null,
     deleteInProgress: false,
-    isDeletingCurrentSpace: false,
   };
 
-  public componentDidMount() {
-    isCurrentSpace(this.props.space, this.props.spacesManager).then(result => {
-      this.setState({
-        isDeletingCurrentSpace: result,
-      });
-    });
-  }
-
   public render() {
-    const { space, onCancel, intl } = this.props;
-    const { isDeletingCurrentSpace } = this.state;
+    const { space, spacesNavState, onCancel, intl } = this.props;
 
     let warning = null;
-    if (isDeletingCurrentSpace) {
+    if (isDeletingCurrentSpace(space, spacesNavState)) {
       const name = (
         <span>
           (<strong>{space.name}</strong>)
@@ -195,7 +186,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
 
   private onConfirm = async () => {
     if (this.state.confirmSpaceName === this.props.space.name) {
-      const needsRedirect = this.state.isDeletingCurrentSpace;
+      const needsRedirect = isDeletingCurrentSpace(this.props.space, this.props.spacesNavState);
       const spacesManager = this.props.spacesManager;
 
       this.setState({
@@ -219,8 +210,8 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
   };
 }
 
-async function isCurrentSpace(space: Space, spacesManager: SpacesManager) {
-  return space.id === (await spacesManager.getActiveSpace()).id;
+function isDeletingCurrentSpace(space: Space, spacesNavState: SpacesNavState) {
+  return space.id === spacesNavState.getActiveSpace().id;
 }
 
 export const ConfirmDeleteModal = injectI18n(ConfirmDeleteModalUI);

@@ -6,6 +6,7 @@
 
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
@@ -17,6 +18,7 @@ interface Props {
   style?: 'button' | 'icon';
   space: Space;
   spacesManager: SpacesManager;
+  spacesNavState: SpacesNavState;
   onDelete: () => void;
   intl: InjectedIntl;
 }
@@ -79,11 +81,12 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
       return null;
     }
 
-    const { spacesManager } = this.props;
+    const { spacesNavState, spacesManager } = this.props;
 
     return (
       <ConfirmDeleteModal
         space={this.props.space}
+        spacesNavState={spacesNavState}
         spacesManager={spacesManager}
         onCancel={() => {
           this.setState({
@@ -96,7 +99,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
   };
 
   public deleteSpaces = async () => {
-    const { spacesManager, space, intl } = this.props;
+    const { spacesManager, space, spacesNavState, intl } = this.props;
 
     try {
       await spacesManager.deleteSpace(space);
@@ -136,6 +139,8 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
     if (this.props.onDelete) {
       this.props.onDelete();
     }
+
+    spacesNavState.refreshSpacesList();
   };
 }
 

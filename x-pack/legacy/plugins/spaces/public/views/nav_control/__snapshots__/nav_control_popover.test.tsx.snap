@@ -4,18 +4,25 @@ exports[`NavControlPopover renders without crashing 1`] = `
 <EuiPopover
   anchorPosition="downRight"
   button={
-    <EuiHeaderSectionItemButton
-      aria-controls="headerSpacesMenuList"
-      aria-expanded={false}
-      aria-haspopup="true"
-      aria-label="loading"
-      onClick={[Function]}
-      title="loading"
-    >
-      <EuiLoadingSpinner
-        size="m"
-      />
-    </EuiHeaderSectionItemButton>
+    <SpacesHeaderNavButton
+      linkIcon={
+        <SpaceAvatar
+          announceSpaceName={true}
+          className="spaceNavGraphic"
+          size="s"
+          space={
+            Object {
+              "disabledFeatures": Array [],
+              "id": "",
+              "name": "foo",
+            }
+          }
+        />
+      }
+      linkTitle="foo"
+      spaceSelectorShown={false}
+      toggleSpaceSelector={[Function]}
+    />
   }
   closePopover={[Function]}
   data-test-subj="spacesNavSelector"
@@ -29,16 +36,6 @@ exports[`NavControlPopover renders without crashing 1`] = `
   withTitle={true}
 >
   <SpacesDescription
-    capabilities={
-      Object {
-        "catalogue": Object {},
-        "management": Object {},
-        "navLinks": Object {},
-        "spaces": Object {
-          "manage": true,
-        },
-      }
-    }
     onManageSpacesClick={[Function]}
   />
 </EuiPopover>

@@ -33,7 +33,7 @@ const space: Space = {
   disabledFeatures: ['feature-1', 'feature-2'],
 };
 
-const capabilities = {
+const uiCapabilities = {
   navLinks: {},
   management: {},
   catalogue: {},
@@ -49,7 +49,7 @@ describe('EnabledFeatures', () => {
         <EnabledFeatures
           features={features}
           space={space}
-          capabilities={capabilities}
+          uiCapabilities={uiCapabilities}
           intl={null as any}
           onChange={jest.fn()}
         />
@@ -64,7 +64,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={space}
-        capabilities={capabilities}
+        uiCapabilities={uiCapabilities}
         intl={null as any}
         onChange={changeHandler}
       />
@@ -99,7 +99,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={space}
-        capabilities={capabilities}
+        uiCapabilities={uiCapabilities}
         intl={null as any}
         onChange={changeHandler}
       />

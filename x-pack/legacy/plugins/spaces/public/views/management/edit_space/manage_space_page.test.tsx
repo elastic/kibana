@@ -6,11 +6,13 @@
 jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
 }));
+import '../../../__mocks__/ui_capabilities';
 import '../../../__mocks__/xpack_info';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { SpacesNavState } from '../../nav_control';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { SectionPanel } from './section_panel';
@@ -27,18 +29,17 @@ describe('ManageSpacePage', () => {
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const spacesNavState: SpacesNavState = {
+      getActiveSpace: () => space,
+      refreshSpacesList: jest.fn(),
+    };
 
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesNavState={spacesNavState}
         intl={null as any}
-        capabilities={{
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          spaces: { manage: true },
-        }}
       />
     );
 
@@ -74,19 +75,17 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       disabledFeatures: [],
     });
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const spacesNavState: SpacesNavState = {
+      getActiveSpace: () => space,
+      refreshSpacesList: jest.fn(),
+    };
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesNavState={spacesNavState}
         intl={null as any}
-        capabilities={{
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          spaces: { manage: true },
-        }}
       />
     );
 
@@ -122,19 +121,17 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       disabledFeatures: [],
     });
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const spacesNavState: SpacesNavState = {
+      getActiveSpace: () => space,
+      refreshSpacesList: jest.fn(),
+    };
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesNavState={spacesNavState}
         intl={null as any}
-        capabilities={{
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          spaces: { manage: true },
-        }}
       />
     );
 
@@ -179,19 +176,17 @@ describe('ManageSpacePage', () => {
       initials: 'AB',
       disabledFeatures: [],
     });
-    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
+    const spacesNavState: SpacesNavState = {
+      getActiveSpace: () => space,
+      refreshSpacesList: jest.fn(),
+    };
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'my-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesNavState={spacesNavState}
         intl={null as any}
-        capabilities={{
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          spaces: { manage: true },
-        }}
       />
     );
 

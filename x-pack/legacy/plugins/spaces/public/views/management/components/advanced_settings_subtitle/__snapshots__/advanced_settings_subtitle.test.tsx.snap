@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedSettingsSubtitle renders as expected 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    color="primary"
+    iconType="spacesApp"
+    title={
+      <p>
+        <FormattedMessage
+          defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
+          id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
+          values={
+            Object {
+              "spaceName": <strong>
+                My Space
+              </strong>,
+            }
+          }
+        />
+      </p>
+    }
+  />
+</Fragment>
+`;

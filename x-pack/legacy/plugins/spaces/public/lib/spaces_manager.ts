@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Observable, BehaviorSubject } from 'rxjs';
-import { skipWhile } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
+import { EventEmitter } from 'events';
+import { kfetch } from 'ui/kfetch';
 import { SavedObjectsManagementRecord } from '../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../common/model/space';
 import { GetSpacePurpose } from '../../common/model/types';
@@ -13,57 +12,43 @@ import { CopySavedObjectsToSpaceResponse } from './copy_saved_objects_to_space/t
 import { ENTER_SPACE_PATH } from '../../common/constants';
 import { addSpaceIdToPath } from '../../../../../plugins/spaces/common';
 
-export class SpacesManager {
-  private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
-
-  public readonly onActiveSpaceChange$: Observable<Space>;
-
-  constructor(private readonly serverBasePath: string, private readonly http: HttpSetup) {
-    this.onActiveSpaceChange$ = this.activeSpace$
-      .asObservable()
-      .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
-
-    this.refreshActiveSpace();
+export class SpacesManager extends EventEmitter {
+  constructor(private readonly serverBasePath: string) {
+    super();
   }
 
   public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
-    return await this.http.get('/api/spaces/space', { query: { purpose } });
+    return await kfetch({ pathname: '/api/spaces/space', query: { purpose } });
   }
 
   public async getSpace(id: string): Promise<Space> {
-    return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
-  }
-
-  public getActiveSpace({ forceRefresh = false } = {}) {
-    if (!forceRefresh && this.activeSpace$.value) {
-      return Promise.resolve(this.activeSpace$.value);
-    }
-    return this.http.get('/internal/spaces/_active_space') as Promise<Space>;
+    return await kfetch({ pathname: `/api/spaces/space/${encodeURIComponent(id)}` });
   }
 
   public async createSpace(space: Space) {
-    await this.http.post(`/api/spaces/space`, {
+    return await kfetch({
+      pathname: `/api/spaces/space`,
+      method: 'POST',
       body: JSON.stringify(space),
     });
   }
 
   public async updateSpace(space: Space) {
-    await this.http.put(`/api/spaces/space/${encodeURIComponent(space.id)}`, {
+    return await kfetch({
+      pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
       query: {
         overwrite: true,
       },
+      method: 'PUT',
       body: JSON.stringify(space),
     });
-
-    const activeSpaceId = (await this.getActiveSpace()).id;
-
-    if (space.id === activeSpaceId) {
-      this.refreshActiveSpace();
-    }
   }
 
   public async deleteSpace(space: Space) {
-    await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`);
+    return await kfetch({
+      pathname: `/api/spaces/space/${encodeURIComponent(space.id)}`,
+      method: 'DELETE',
+    });
   }
 
   public async copySavedObjects(
@@ -72,7 +57,9 @@ export class SpacesManager {
     includeReferences: boolean,
     overwrite: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
-    return this.http.post('/api/spaces/_copy_saved_objects', {
+    return await kfetch({
+      pathname: `/api/spaces/_copy_saved_objects`,
+      method: 'POST',
       body: JSON.stringify({
         objects,
         spaces,
@@ -87,7 +74,9 @@ export class SpacesManager {
     retries: unknown,
     includeReferences: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
-    return this.http.post(`/api/spaces/_resolve_copy_saved_objects_errors`, {
+    return await kfetch({
+      pathname: `/api/spaces/_resolve_copy_saved_objects_errors`,
+      method: 'POST',
       body: JSON.stringify({
         objects,
         includeReferences,
@@ -104,8 +93,7 @@ export class SpacesManager {
     window.location.href = `${this.serverBasePath}/spaces/space_selector`;
   }
 
-  private async refreshActiveSpace() {
-    const activeSpace = await this.getActiveSpace({ forceRefresh: true });
-    this.activeSpace$.next(activeSpace);
+  public async requestRefresh() {
+    this.emit('request_refresh');
   }
 }

@@ -6,40 +6,30 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { Space } from '../../../../../common/model/space';
 
 interface Props {
-  getActiveSpace: () => Promise<Space>;
+  space: Space;
 }
 
-export const AdvancedSettingsSubtitle = (props: Props) => {
-  const [activeSpace, setActiveSpace] = useState<Space | null>(null);
-
-  useEffect(() => {
-    props.getActiveSpace().then(space => setActiveSpace(space));
-  }, [props]);
-
-  if (!activeSpace) return null;
-
-  return (
-    <Fragment>
-      <EuiSpacer size={'m'} />
-      <EuiCallOut
-        color="primary"
-        iconType="spacesApp"
-        title={
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
-              defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
-              values={{
-                spaceName: <strong>{activeSpace.name}</strong>,
-              }}
-            />
-          </p>
-        }
-      />
-    </Fragment>
-  );
-};
+export const AdvancedSettingsSubtitle = (props: Props) => (
+  <Fragment>
+    <EuiSpacer size={'m'} />
+    <EuiCallOut
+      color="primary"
+      iconType="spacesApp"
+      title={
+        <p>
+          <FormattedMessage
+            id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
+            defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
+            values={{
+              spaceName: <strong>{props.space.name}</strong>,
+            }}
+          />
+        </p>
+      }
+    />
+  </Fragment>
+);

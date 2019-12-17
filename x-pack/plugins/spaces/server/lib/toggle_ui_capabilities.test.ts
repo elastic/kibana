@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UICapabilities } from 'ui/capabilities';
 import { Feature } from '../../../../plugins/features/server';
 import { Space } from '../../common/model/space';
 import { toggleUICapabilities } from './toggle_ui_capabilities';
-import { Capabilities } from 'src/core/public';
 
 const features: Feature[] = [
   {
@@ -58,7 +58,7 @@ const features: Feature[] = [
   },
 ];
 
-const buildCapabilities = () =>
+const buildUiCapabilities = () =>
   Object.freeze({
     navLinks: {
       feature1: true,
@@ -89,7 +89,7 @@ const buildCapabilities = () =>
       foo: true,
       bar: true,
     },
-  }) as Capabilities;
+  }) as UICapabilities;
 
 describe('toggleUiCapabilities', () => {
   it('does not toggle capabilities when the space has no disabled features', () => {
@@ -99,9 +99,9 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: [],
     };
 
-    const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
-    expect(result).toEqual(buildCapabilities());
+    const uiCapabilities: UICapabilities = buildUiCapabilities();
+    const result = toggleUICapabilities(features, uiCapabilities, space);
+    expect(result).toEqual(buildUiCapabilities());
   });
 
   it('ignores unknown disabledFeatures', () => {
@@ -111,9 +111,9 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: ['i-do-not-exist'],
     };
 
-    const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
-    expect(result).toEqual(buildCapabilities());
+    const uiCapabilities: UICapabilities = buildUiCapabilities();
+    const result = toggleUICapabilities(features, uiCapabilities, space);
+    expect(result).toEqual(buildUiCapabilities());
   });
 
   it('disables the corresponding navLink, catalogue, management sections, and all capability flags for disabled features', () => {
@@ -123,10 +123,10 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: ['feature_2'],
     };
 
-    const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
+    const uiCapabilities: UICapabilities = buildUiCapabilities();
+    const result = toggleUICapabilities(features, uiCapabilities, space);
 
-    const expectedCapabilities = buildCapabilities();
+    const expectedCapabilities = buildUiCapabilities();
 
     expectedCapabilities.navLinks.feature2 = false;
     expectedCapabilities.catalogue.feature2Entry = false;
@@ -144,10 +144,10 @@ describe('toggleUiCapabilities', () => {
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     };
 
-    const capabilities = buildCapabilities();
-    const result = toggleUICapabilities(features, capabilities, space);
+    const uiCapabilities: UICapabilities = buildUiCapabilities();
+    const result = toggleUICapabilities(features, uiCapabilities, space);
 
-    const expectedCapabilities = buildCapabilities();
+    const expectedCapabilities = buildUiCapabilities();
 
     expectedCapabilities.feature_1.bar = false;
     expectedCapabilities.feature_1.foo = false;

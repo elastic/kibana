@@ -65,6 +65,28 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
             value=""
           />
         </EuiFormRow>
+        <EuiSpacer />
+        <EuiCallOut
+          color="warning"
+        >
+          <EuiText>
+            <FormattedMessage
+              defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
+              id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
+              values={
+                Object {
+                  "name": <span>
+                    (
+                    <strong>
+                      My Space
+                    </strong>
+                    )
+                  </span>,
+                }
+              }
+            />
+          </EuiText>
+        </EuiCallOut>
       </EuiText>
     </EuiModalBody>
     <EuiModalFooter>

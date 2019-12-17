@@ -33,13 +33,6 @@ const setup = async (opts: SetupOpts = {}) => {
   const onClose = jest.fn();
 
   const mockSpacesManager = spacesManagerMock.create();
-
-  mockSpacesManager.getActiveSpace.mockResolvedValue({
-    id: 'my-active-space',
-    name: 'my active space',
-    disabledFeatures: [],
-  });
-
   mockSpacesManager.getSpaces.mockResolvedValue(
     opts.mockSpaces || [
       {
@@ -86,6 +79,11 @@ const setup = async (opts: SetupOpts = {}) => {
     <CopySavedObjectsToSpaceFlyout
       savedObject={savedObjectToCopy}
       spacesManager={(mockSpacesManager as unknown) as SpacesManager}
+      activeSpace={{
+        id: 'my-active-space',
+        name: 'my active space',
+        disabledFeatures: [],
+      }}
       toastNotifications={(mockToastNotifications as unknown) as ToastNotifications}
       onClose={onClose}
     />
@@ -93,7 +91,6 @@ const setup = async (opts: SetupOpts = {}) => {
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender
-    await Promise.resolve();
     await Promise.resolve();
     wrapper.update();
   }

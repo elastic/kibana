@@ -31,8 +31,6 @@ import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
-import { initInternalSpacesApi } from './routes/api/internal';
-
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
  * to function properly.
@@ -118,12 +116,6 @@ export class Plugin {
       externalRouter,
       log: this.log,
       getSavedObjects: () => this.getLegacyAPI().savedObjects,
-      spacesService,
-    });
-
-    const internalRouter = core.http.createRouter();
-    initInternalSpacesApi({
-      internalRouter,
       spacesService,
     });
 

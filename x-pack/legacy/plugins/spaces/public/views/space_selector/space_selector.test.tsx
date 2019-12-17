@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../common/model/space';
 import { spacesManagerMock } from '../../lib/mocks';
 import { SpaceSelector } from './space_selector';
@@ -19,12 +19,42 @@ function getSpacesManager(spaces: Space[] = []) {
 test('it renders without crashing', () => {
   const spacesManager = getSpacesManager();
   const component = shallowWithIntl(
-    <SpaceSelector.WrappedComponent spacesManager={spacesManager as any} intl={null as any} />
+    <SpaceSelector.WrappedComponent
+      spaces={[]}
+      spacesManager={spacesManager as any}
+      intl={null as any}
+    />
   );
   expect(component).toMatchSnapshot();
 });
 
-test('it queries for spaces when loaded', () => {
+test('it uses the spaces on props, when provided', () => {
+  const spacesManager = getSpacesManager();
+
+  const spaces = [
+    {
+      id: 'space-1',
+      name: 'Space 1',
+      description: 'This is the first space',
+      disabledFeatures: [],
+    },
+  ];
+
+  const component = renderWithIntl(
+    <SpaceSelector.WrappedComponent
+      spaces={spaces}
+      spacesManager={spacesManager as any}
+      intl={null as any}
+    />
+  );
+
+  return Promise.resolve().then(() => {
+    expect(component.find('.spaceCard')).toHaveLength(1);
+    expect(spacesManager.getSpaces).toHaveBeenCalledTimes(0);
+  });
+});
+
+test('it queries for spaces when not provided on props', () => {
   const spaces = [
     {
       id: 'space-1',
