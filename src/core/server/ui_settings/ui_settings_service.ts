@@ -59,21 +59,21 @@ export class UiSettingsService
     this.overrides = await this.getOverrides(deps);
     return {
       register: this.register.bind(this),
-      asScopedToClient: await this.getScopedClient(),
+      asScopedToClient: this.getScopedClientAccessor(),
     };
   }
 
   public async start(): Promise<InternalUiSettingsServiceStart> {
     return {
-      asScopedToClient: await this.getScopedClient(),
+      asScopedToClient: this.getScopedClientAccessor(),
     };
   }
 
   public async stop() {}
 
-  private async getScopedClient(): Promise<
-    (savedObjectsClient: SavedObjectsClientContract) => UiSettingsClient
-  > {
+  private getScopedClientAccessor(): (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => UiSettingsClient {
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract) =>
       new UiSettingsClient({
