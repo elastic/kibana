@@ -40,7 +40,7 @@ export class SecurityNavControlService {
           !isAnonymousPath && showLinks && !this.navControlRegistered;
 
         if (shouldRegisterNavControl) {
-          const user = core.http.get('/api/security/v1/me', {
+          const user = core.http.get('/internal/security/me', {
             headers: {
               'kbn-system-api': true,
             },
