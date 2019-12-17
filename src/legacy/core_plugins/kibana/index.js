@@ -22,7 +22,6 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 
 import { migrations } from './migrations';
-import manageUuid from './server/lib/manage_uuid';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
@@ -325,8 +324,6 @@ export default function(kibana) {
 
     init: async function(server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
-      // uuid
-      await manageUuid(server);
       // routes
       scriptsApi(server);
       importApi(server);

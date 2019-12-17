@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import { UuidService, UuidServiceSetup } from './uuid_service';
 
-export class TopNavMenuExtensionsRegistry {
-  private menuItems: RegisteredTopNavMenuData[];
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<UuidServiceSetup> = {
+    getInstanceUuid: jest.fn().mockImplementation(() => 'uuid'),
+  };
+  return setupContract;
+};
 
-  constructor() {
-    this.menuItems = [];
-  }
+type UuidServiceContract = PublicMethodsOf<UuidService>;
+const createMock = () => {
+  const mocked: jest.Mocked<UuidServiceContract> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockResolvedValue(createSetupContractMock());
+  return mocked;
+};
 
-  /** @public **/
-  // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
-  public register(menuItem: RegisteredTopNavMenuData) {
-    this.menuItems.push(menuItem);
-  }
-
-  /** @internal **/
-  public getAll() {
-    return this.menuItems;
-  }
-
-  /** @internal **/
-  public clear() {
-    this.menuItems.length = 0;
-  }
-}
-
-export type TopNavMenuExtensionsRegistrySetup = Pick<TopNavMenuExtensionsRegistry, 'register'>;
+export const uuidServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

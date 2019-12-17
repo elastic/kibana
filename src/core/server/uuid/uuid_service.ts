@@ -17,30 +17,39 @@
  * under the License.
  */
 
-import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import { resolveInstanceUuid } from './resolve_uuid';
+import { CoreContext } from '../core_context';
+import { Logger } from '../logging';
+import { IConfigService } from '../config';
 
-export class TopNavMenuExtensionsRegistry {
-  private menuItems: RegisteredTopNavMenuData[];
-
-  constructor() {
-    this.menuItems = [];
-  }
-
-  /** @public **/
-  // Items registered into this registry will be appended to any TopNavMenu rendered in any application.
-  public register(menuItem: RegisteredTopNavMenuData) {
-    this.menuItems.push(menuItem);
-  }
-
-  /** @internal **/
-  public getAll() {
-    return this.menuItems;
-  }
-
-  /** @internal **/
-  public clear() {
-    this.menuItems.length = 0;
-  }
+/**
+ * APIs to access the application's instance uuid.
+ *
+ * @public
+ */
+export interface UuidServiceSetup {
+  /**
+   * Retrieve the Kibana instance uuid.
+   */
+  getInstanceUuid(): string;
 }
 
-export type TopNavMenuExtensionsRegistrySetup = Pick<TopNavMenuExtensionsRegistry, 'register'>;
+/** @internal */
+export class UuidService {
+  private readonly log: Logger;
+  private readonly configService: IConfigService;
+  private uuid: string = '';
+
+  constructor(core: CoreContext) {
+    this.log = core.logger.get('uuid');
+    this.configService = core.configService;
+  }
+
+  public async setup() {
+    this.uuid = await resolveInstanceUuid(this.configService, this.log);
+
+    return {
+      getInstanceUuid: () => this.uuid,
+    };
+  }
+}
