@@ -40,3 +40,5 @@ module.service('savedDashboards', function(Private, SavedDashboard) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   return new SavedObjectLoader(SavedDashboard, savedObjectClient, npStart.core.chrome);
 });
+
+// npSetup.plugins.savedObjects.register(toNewAPI(new SavedObjectLoader(SavedDashboard, savedObjectClient, npStart.core.chrome)));

@@ -61,6 +61,7 @@ uiModules
       ) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
+        // const service = npStart.plugins.savedObjects.get($routeParams.service);1
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
         /**
@@ -172,7 +173,7 @@ uiModules
             // Special handling for references which isn't within "attributes"
             createField(fields, obj.references, 'references');
 
-            if (service.Class) readObjectClass(fields, service.Class);
+            if (service.mapping) readObjectClass(fields, service.mapping);
 
             // sorts twice since we want numerical sort to prioritize over name,
             // and sortBy will do string comparison if trying to match against strings

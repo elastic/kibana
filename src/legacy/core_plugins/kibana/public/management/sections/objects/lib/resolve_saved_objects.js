@@ -25,6 +25,7 @@ async function getSavedObject(doc, services) {
     return;
   }
 
+  // TODO old service registry
   const obj = await service.get();
   obj.id = doc._id;
   obj.migrationVersion = doc._migrationVersion;
@@ -104,6 +105,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
   return newId;
 }
 
+// TODO support this through new registry
 async function importDocument(obj, doc, overwriteAll) {
   await obj.applyESResp({
     references: doc._references || [],

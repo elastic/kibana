@@ -1,0 +1,6 @@
+{
+  "id": "savedObjects",
+  "version": "kibana",
+  "server": false,
+  "ui": true
+}
