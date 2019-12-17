@@ -17,13 +17,13 @@ export const FIELD_MAPPINGS: Record<string, string> = {
   tags: 'tags',
 };
 
-const getFilterAggConditions = (obj: Record<string, any[]>, except: string) => {
+const getFilterAggConditions = (filterTerms: Record<string, any[]>, except: string) => {
   const filters: any[] = [];
 
-  Object.keys(obj).forEach((key: string) => {
+  Object.keys(filterTerms).forEach((key: string) => {
     if (key === except && FIELD_MAPPINGS[key]) return;
     filters.push(
-      ...obj[key].map(value => ({
+      ...filterTerms[key].map(value => ({
         term: {
           [FIELD_MAPPINGS[key]]: value,
         },
