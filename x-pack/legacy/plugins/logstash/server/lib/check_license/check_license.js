@@ -24,7 +24,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
-  const VALID_LICENSE_MODES = ['trial', 'standard', 'gold', 'platinum'];
+  const VALID_LICENSE_MODES = ['trial', 'standard', 'gold', 'platinum', 'enterprise'];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
