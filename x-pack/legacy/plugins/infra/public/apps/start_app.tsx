@@ -15,7 +15,6 @@ import { CoreStart } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import { I18nContext } from 'ui/i18n';
 import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
@@ -31,7 +30,6 @@ import { ROOT_ELEMENT_ID } from '../index';
 
 export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: ClientPlugins) {
   const history = createHashHistory();
-
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),
@@ -42,7 +40,7 @@ export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
     return (
-      <I18nContext>
+      <core.i18n.Context>
         <EuiErrorBoundary>
           <ReduxStoreProvider store={store}>
             <ReduxStateContextProvider>
@@ -58,7 +56,7 @@ export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins
             </ReduxStateContextProvider>
           </ReduxStoreProvider>
         </EuiErrorBoundary>
-      </I18nContext>
+      </core.i18n.Context>
     );
   };
 
