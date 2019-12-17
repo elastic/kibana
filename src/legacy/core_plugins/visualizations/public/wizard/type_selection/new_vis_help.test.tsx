@@ -55,7 +55,6 @@ describe('NewVisHelp', () => {
               stage: 'production',
             },
           ]}
-          addBasePath={(url: string) => `testbasepath${url}`}
         />
       )
     ).toMatchInlineSnapshot(`
