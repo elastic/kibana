@@ -1,0 +1,17 @@
+{
+  "rule_id": "7904fb20-172c-43fb-83e4-bfe27e3c702c",
+  "risk_score": 50,
+  "description": "Windows Persistence via BITS Jobs",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Persistence via BITS Jobs",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and (process.name:bitsadmin.exe or process.args:*Start-BitsTransfer*)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
