@@ -11,7 +11,6 @@ import { NormalizedField, Field as FieldType } from '../../../../types';
 import {
   UseField,
   UseMultiFields,
-  Field,
   FieldHook,
   FormDataProvider,
   RangeField,
@@ -27,6 +26,7 @@ import {
   SimilarityParameter,
   CopyToParameter,
   TermVectorParameter,
+  FieldDataParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -65,27 +65,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   }
 };
 
-const i18nTexts = {
-  rangeFieldLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
-    defaultMessage: 'Min/max frequency percentage',
-  }),
-  indexPrefixesRangeFieldLabel: i18n.translate(
-    'xpack.idxMgmt.mappingsEditor.indexPrefixesRangeFieldLabel',
-    {
-      defaultMessage: 'Min/max prefix length',
-    }
-  ),
-};
-
 export const TextType = React.memo(({ field }: Props) => {
-  const onFrequencyFilterChange = (minField: FieldHook, maxField: FieldHook) => ([
-    min,
-    max,
-  ]: any) => {
-    minField.setValue(min);
-    maxField.setValue(max);
-  };
-
   const onIndexPrefixesChanage = (minField: FieldHook, maxField: FieldHook) => ([
     min,
     max,
@@ -135,7 +115,12 @@ export const TextType = React.memo(({ field }: Props) => {
             )}
             defaultToggleValue={getDefaultToggleValue('indexPrefixes', field.source)}
           >
-            <EuiFormRow label={i18nTexts.indexPrefixesRangeFieldLabel} fullWidth>
+            <EuiFormRow
+              label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesRangeFieldLabel', {
+                defaultMessage: 'Min/max prefix length',
+              })}
+              fullWidth
+            >
               <UseMultiFields
                 fields={{
                   min: {
@@ -238,54 +223,7 @@ export const TextType = React.memo(({ field }: Props) => {
             defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
           />
 
-          {/* fielddata */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
-              defaultMessage: 'Fielddata',
-            })}
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
-              defaultMessage:
-                'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
-            })}
-            formFieldPath="fielddata"
-          >
-            {/* fielddata_frequency_filter */}
-            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
-              <UseMultiFields
-                fields={{
-                  min: {
-                    path: 'fielddata_frequency_filter.min',
-                    config: getFieldConfig('fielddata_frequency_filter', 'min'),
-                  },
-                  max: {
-                    path: 'fielddata_frequency_filter.max',
-                    config: getFieldConfig('fielddata_frequency_filter', 'max'),
-                  },
-                }}
-              >
-                {({ min, max }) => {
-                  return (
-                    <EuiDualRange
-                      min={0}
-                      max={100}
-                      value={[min.value as number, max.value as number]}
-                      onChange={onFrequencyFilterChange(min, max)}
-                      showInput
-                      fullWidth
-                    />
-                  );
-                }}
-              </UseMultiFields>
-            </EuiFormRow>
-
-            <EuiSpacer />
-
-            <UseField
-              path="fielddata_frequency_filter.min_segment_size"
-              config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
-              component={Field}
-            />
-          </EditFieldFormRow>
+          <FieldDataParameter />
 
           <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 

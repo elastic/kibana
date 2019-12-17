@@ -59,6 +59,10 @@ class DocumentationService {
   public getNullValueLink() {
     return `${this.esDocsBase}/null-value.html`;
   }
+
+  public getEnablingFielddataLink() {
+    return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
+  }
 }
 
 export const documentationService = new DocumentationService();

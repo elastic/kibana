@@ -43,3 +43,5 @@ export * from './type_parameter';
 export * from './ignore_z_value_parameter';
 
 export * from './orientation_parameter';
+
+export * from './fielddata_parameter';
