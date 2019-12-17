@@ -12,6 +12,7 @@ describe('License', () => {
   const basicLicense = licenseMock.create();
   const basicExpiredLicense = licenseMock.create({ license: { status: 'expired' } });
   const goldLicense = licenseMock.create({ license: { type: 'gold' } });
+  const enterpriseLicense = licenseMock.create({ license: { type: 'enterprise' } });
 
   const errorMessage = 'unavailable';
   const errorLicense = new License({ error: errorMessage, signature: '' });
@@ -52,6 +53,7 @@ describe('License', () => {
   it('isBasic', () => {
     expect(basicLicense.isBasic).toBe(true);
     expect(goldLicense.isBasic).toBe(false);
+    expect(enterpriseLicense.isBasic).toBe(false);
     expect(errorLicense.isBasic).toBe(false);
     expect(unavailableLicense.isBasic).toBe(false);
   });
@@ -59,6 +61,7 @@ describe('License', () => {
   it('isNotBasic', () => {
     expect(basicLicense.isNotBasic).toBe(false);
     expect(goldLicense.isNotBasic).toBe(true);
+    expect(enterpriseLicense.isNotBasic).toBe(true);
     expect(errorLicense.isNotBasic).toBe(false);
     expect(unavailableLicense.isNotBasic).toBe(false);
   });
@@ -106,6 +109,9 @@ describe('License', () => {
 
       expect(unavailableLicense.check('ccr', 'basic').state).toBe(LICENSE_CHECK_STATE.Unavailable);
       expect(unavailableLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Unavailable);
+
+      expect(enterpriseLicense.check('ccr', 'gold').state).toBe(LICENSE_CHECK_STATE.Valid);
+      expect(enterpriseLicense.check('ccr', 'enterprise').state).toBe(LICENSE_CHECK_STATE.Valid);
     });
 
     it('throws in case of unknown license type', () => {
