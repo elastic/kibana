@@ -81,8 +81,8 @@ describe('graphui-workspace', function() {
 
       expect(workspace.nodes.length).toEqual(2);
       expect(workspace.edges.length).toEqual(1);
-      expect(workspace.selectedNodes).toEqual(0);
-      expect(workspace.blacklistedNodes).toEqual(0);
+      expect(workspace.selectedNodes.length).toEqual(0);
+      expect(workspace.blacklistedNodes.length).toEqual(0);
 
       const nodeA = workspace.getNode(workspace.makeNodeId('field1', 'a'));
       expect(typeof nodeA).toBe('object');
