@@ -5,10 +5,8 @@
  */
 
 import { createSelector } from 'reselect';
-
-import { fromKueryExpression } from '@kbn/es-query';
-
 import { LogFilterState } from './reducer';
+import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
 export const selectLogFilterQuery = (state: LogFilterState) =>
   state.filterQuery ? state.filterQuery.query : null;
@@ -23,7 +21,7 @@ export const selectIsLogFilterQueryDraftValid = createSelector(
   filterQueryDraft => {
     if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
       try {
-        fromKueryExpression(filterQueryDraft.expression);
+        esKuery.fromKueryExpression(filterQueryDraft.expression);
       } catch (err) {
         return false;
       }

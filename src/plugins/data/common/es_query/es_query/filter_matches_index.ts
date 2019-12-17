@@ -25,8 +25,8 @@ import { Filter } from '../filters';
  * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
  * change.
  */
-export function filterMatchesIndex(filter: Filter, indexPattern: IIndexPattern | null) {
-  if (!filter.meta || !indexPattern) {
+export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern | null) {
+  if (!filter.meta?.key || !indexPattern) {
     return true;
   }
   return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);

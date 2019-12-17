@@ -18,16 +18,9 @@ import { ROUTES } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-}));
-
-jest.mock('ui/time_buckets', () => {});
-
 const { setup } = pageHelpers.watchList;
 
-describe.skip('<WatchList />', () => {
+describe('<WatchList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 
@@ -49,7 +42,6 @@ describe.skip('<WatchList />', () => {
         test('should display an empty prompt', async () => {
           const { component, exists } = await setup();
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -86,7 +78,6 @@ describe.skip('<WatchList />', () => {
 
           testBed = await setup();
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             testBed.component.update();
@@ -219,7 +210,6 @@ describe.skip('<WatchList />', () => {
               },
             });
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               confirmButton!.click();
               await nextTick();

@@ -19,12 +19,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -42,7 +37,7 @@ export const LoadingState = () => (
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="l"/>
+      <EuiLoadingSpinner size="l" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

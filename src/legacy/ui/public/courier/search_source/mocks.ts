@@ -36,21 +36,22 @@
  * under the License.
  */
 
-export const searchSourceMock = {
+import { SearchSourceContract } from './search_source';
+
+export const searchSourceMock: MockedKeys<SearchSourceContract> = {
   setPreferredSearchStrategyId: jest.fn(),
-  getPreferredSearchStrategyId: jest.fn(),
-  setFields: jest.fn(),
-  setField: jest.fn(),
+  setFields: jest.fn().mockReturnThis(),
+  setField: jest.fn().mockReturnThis(),
   getId: jest.fn(),
   getFields: jest.fn(),
   getField: jest.fn(),
   getOwnField: jest.fn(),
-  create: jest.fn(),
-  createCopy: jest.fn(),
-  createChild: jest.fn(),
+  create: jest.fn().mockReturnThis(),
+  createCopy: jest.fn().mockReturnThis(),
+  createChild: jest.fn().mockReturnThis(),
   setParent: jest.fn(),
-  getParent: jest.fn(),
-  fetch: jest.fn(),
+  getParent: jest.fn().mockReturnThis(),
+  fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
   destroy: jest.fn(),

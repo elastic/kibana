@@ -53,12 +53,16 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { created: false };
         }
+        const createAPIKeyResult = await securityPluginSetup.authc.createAPIKey(request, {
+          name: `source: alerting, generated uuid: "${uuid.v4()}"`,
+          role_descriptors: {},
+        });
+        if (!createAPIKeyResult) {
+          return { created: false };
+        }
         return {
           created: true,
-          result: (await securityPluginSetup.authc.createAPIKey(request, {
-            name: `source: alerting, generated uuid: "${uuid.v4()}"`,
-            role_descriptors: {},
-          }))!,
+          result: createAPIKeyResult,
         };
       },
     });

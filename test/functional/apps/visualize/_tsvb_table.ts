@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects }: FtrProviderContext) {
   const { visualBuilder, visualize } = getPageObjects(['visualBuilder', 'visualize']);
 
@@ -52,6 +51,15 @@ export default function({ getPageObjects }: FtrProviderContext) {
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
         const tableData = await visualBuilder.getViewTable();
         expect(isFieldForAggregationValid).to.be(true);
+        expect(tableData).to.be(EXPECTED);
+      });
+
+      it('should render correctly after saving', async () => {
+        const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+
+        await visualize.saveVisualizationExpectSuccessAndBreadcrumb('TSVB table saving test');
+
+        const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
       });
     });

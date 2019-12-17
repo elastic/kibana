@@ -6,16 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
-import styled, { createGlobalStyle } from 'styled-components';
-
-// SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
-// eslint-disable-next-line no-unused-expressions
-createGlobalStyle`
-  .euiPanel-loading-hide-border {
-    border: none;
-  }
-`;
+import styled from 'styled-components';
 
 const SpinnerFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
@@ -32,7 +23,7 @@ interface LoadingProps {
   position?: string;
 }
 
-export const LoadingPanel = pure<LoadingProps>(
+export const LoadingPanel = React.memo<LoadingProps>(
   ({
     height = 'auto',
     showBorder = true,

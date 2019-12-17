@@ -6,7 +6,6 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { AlertAction } from '../types';
 import { getDurationSchema } from '../lib';
 
 interface UpdateRequest extends Hapi.Request {
@@ -18,7 +17,11 @@ interface UpdateRequest extends Hapi.Request {
     name: string;
     tags: string[];
     interval: string;
-    actions: AlertAction[];
+    actions: Array<{
+      group: string;
+      id: string;
+      params: Record<string, any>;
+    }>;
     params: Record<string, any>;
     throttle: string | null;
   };

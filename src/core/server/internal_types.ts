@@ -21,19 +21,28 @@ import { InternalElasticsearchServiceSetup } from './elasticsearch';
 import { InternalHttpServiceSetup } from './http';
 import { InternalUiSettingsServiceSetup } from './ui_settings';
 import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
+import {
+  InternalSavedObjectsServiceStart,
+  InternalSavedObjectsServiceSetup,
+} from './saved_objects';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 /** @internal */
 export interface InternalCoreSetup {
+  capabilities: CapabilitiesSetup;
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
+  uuid: UuidServiceSetup;
 }
 
 /**
  * @internal
  */
 export interface InternalCoreStart {
-  savedObjects: SavedObjectsServiceStart;
+  capabilities: CapabilitiesStart;
+  savedObjects: InternalSavedObjectsServiceStart;
 }

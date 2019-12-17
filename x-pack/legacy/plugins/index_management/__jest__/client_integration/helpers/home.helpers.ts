@@ -105,7 +105,6 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     const { rows } = table.getMetaData('templateTable');
     const templateLink = findTestSubject(rows[index].reactWrapper, 'templateDetailsLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = templateLink.props();
       router.navigateTo(href!);

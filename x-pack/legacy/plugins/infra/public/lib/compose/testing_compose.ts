@@ -17,7 +17,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
-import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { InfraFrontendLibs } from '../lib';
 
@@ -27,7 +27,7 @@ export function compose(): InfraFrontendLibs {
     basePath: chrome.getBasePath(),
     xsrfToken: chrome.getXsrfToken(),
   });
-  const framework = new InfraKibanaFrameworkAdapter(infraModule, uiRoutes, timezoneProvider);
+  const framework = new KibanaFramework(infraModule, uiRoutes, timezoneProvider);
   const typeDefs = `
   Query {}
 `;

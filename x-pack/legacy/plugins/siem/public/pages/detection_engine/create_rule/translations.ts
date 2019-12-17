@@ -38,3 +38,11 @@ export const CONTINUE = i18n.translate(
     defaultMessage: 'Continue',
   }
 );
+
+export const UPDATE = i18n.translate('xpack.siem.detectionEngine.createRule.updateButtonTitle', {
+  defaultMessage: 'Update',
+});
+
+export const DELETE = i18n.translate('xpack.siem.detectionEngine.createRule.deleteDescription', {
+  defaultMessage: 'Delete',
+});

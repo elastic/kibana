@@ -6,10 +6,16 @@
 
 export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
 export const SET_BASE_PATH = 'SET_BASE_PATH';
+export const REFRESH_APP = 'REFRESH_APP';
 
 export interface PopoverState {
   id: string;
   open: boolean;
+}
+
+interface SetBasePathAction {
+  type: typeof SET_BASE_PATH;
+  payload: string;
 }
 
 interface SetIntegrationPopoverAction {
@@ -17,10 +23,15 @@ interface SetIntegrationPopoverAction {
   payload: PopoverState;
 }
 
-interface SetBasePathAction {
-  type: typeof SET_BASE_PATH;
-  payload: string;
+interface TriggerAppRefreshAction {
+  type: typeof REFRESH_APP;
+  payload: number;
 }
+
+export type UiActionTypes =
+  | SetIntegrationPopoverAction
+  | SetBasePathAction
+  | TriggerAppRefreshAction;
 
 export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegrationPopoverAction {
   return {
@@ -36,4 +47,9 @@ export function setBasePath(basePath: string): SetBasePathAction {
   };
 }
 
-export type UiActionTypes = SetIntegrationPopoverAction | SetBasePathAction;
+export function triggerAppRefresh(refreshTime: number): TriggerAppRefreshAction {
+  return {
+    type: REFRESH_APP,
+    payload: refreshTime,
+  };
+}

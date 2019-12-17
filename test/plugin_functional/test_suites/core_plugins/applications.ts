@@ -107,13 +107,13 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
     });
 
-    it('can navigate from NP apps to legacy apps', async () => {
+    it.skip('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
 
-    it('can navigate from legacy apps to NP apps', async () => {
+    it.skip('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
       await loadingScreenShown();
       await testSubjects.existOrFail('fooAppHome');

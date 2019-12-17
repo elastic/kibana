@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { uiTimefilterMock } from '../../../contexts/ui/__mocks__/mocks';
+import { uiTimefilterMock } from '../../../contexts/ui/__mocks__/mocks_jest';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
 import { TopNav } from './top_nav';

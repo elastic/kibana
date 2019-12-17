@@ -21,10 +21,8 @@ import _ from 'lodash';
 import { uiModules } from '../../modules';
 import { callEach } from '../../utils/function';
 
-uiModules.get('kibana')
-  .config(function ($provide) {
-
-    $provide.decorator('$rootScope', function ($delegate) {
+export function watchMultiDecorator($provide) {
+  $provide.decorator('$rootScope', function($delegate) {
     /**
      * Watch multiple expressions with a single callback. Along
      * with making code simpler it also merges all of the watcher
@@ -53,23 +51,30 @@ uiModules.get('kibana')
      * @param  {Function} fn - the callback function
      * @return {Function} - an unwatch function, just like the return value of $watch
      */
-      $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
-        if (!Array.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
-        if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
+    $delegate.constructor.prototype.$watchMulti = function(expressions, fn) {
+      if (!Array.isArray(expressions)) {
+        throw new TypeError('expected an array of expressions to watch');
+      }
 
-        const $scope = this;
-        const vals = new Array(expressions.length);
-        const prev = new Array(expressions.length);
-        let fire = false;
-        let init = 0;
-        const neededInits = expressions.length;
+      if (!_.isFunction(fn)) {
+        throw new TypeError('expected a function that is triggered on each watch');
+      }
+      const $scope = this;
+      const vals = new Array(expressions.length);
+      const prev = new Array(expressions.length);
+      let fire = false;
+      let init = 0;
+      const neededInits = expressions.length;
 
-        // first, register all of the multi-watchers
-        const unwatchers = expressions.map(function (expr, i) {
-          expr = normalizeExpression($scope, expr);
-          if (!expr) return;
+      // first, register all of the multi-watchers
+      const unwatchers = expressions.map(function(expr, i) {
+        expr = normalizeExpression($scope, expr);
+        if (!expr) return;
 
-          return expr.fn.call($scope, expr.get, function (newVal, oldVal) {
+        return expr.fn.call(
+          $scope,
+          expr.get,
+          function(newVal, oldVal) {
             if (newVal === oldVal) {
               init += 1;
             }
@@ -77,60 +82,69 @@ uiModules.get('kibana')
             vals[i] = newVal;
             prev[i] = oldVal;
             fire = true;
-          }, expr.deep);
-        });
+          },
+          expr.deep
+        );
+      });
 
-        // then, the watcher that checks to see if any of
-        // the other watchers triggered this cycle
-        let flip = false;
-        unwatchers.push($scope.$watch(function () {
-          if (init < neededInits) return init;
+      // then, the watcher that checks to see if any of
+      // the other watchers triggered this cycle
+      let flip = false;
+      unwatchers.push(
+        $scope.$watch(
+          function() {
+            if (init < neededInits) return init;
 
-          if (fire) {
-            fire = false;
-            flip = !flip;
+            if (fire) {
+              fire = false;
+              flip = !flip;
+            }
+            return flip;
+          },
+          function() {
+            if (init < neededInits) return false;
+
+            fn(vals.slice(0), prev.slice(0));
+            vals.forEach(function(v, i) {
+              prev[i] = v;
+            });
           }
-          return flip;
-        }, function () {
-          if (init < neededInits) return false;
+        )
+      );
 
-          fn(vals.slice(0), prev.slice(0));
-          vals.forEach(function (v, i) {
-            prev[i] = v;
-          });
-        }));
+      return _.partial(callEach, unwatchers);
+    };
 
-        return _.partial(callEach, unwatchers);
+    function normalizeExpression($scope, expr) {
+      if (!expr) return;
+      const norm = {
+        fn: $scope.$watch,
+        deep: false,
       };
 
-      function normalizeExpression($scope, expr) {
-        if (!expr) return;
-        const norm = {
-          fn: $scope.$watch,
-          deep: false
-        };
+      if (_.isFunction(expr)) return _.assign(norm, { get: expr });
+      if (_.isObject(expr)) return _.assign(norm, expr);
+      if (!_.isString(expr)) return;
 
-        if (_.isFunction(expr)) return _.assign(norm, { get: expr });
-        if (_.isObject(expr)) return _.assign(norm, expr);
-        if (!_.isString(expr)) return;
-
-        if (expr.substr(0, 2) === '[]') {
-          return _.assign(norm, {
-            fn: $scope.$watchCollection,
-            get: expr.substr(2)
-          });
-        }
-
-        if (expr.charAt(0) === '=') {
-          return _.assign(norm, {
-            deep: true,
-            get: expr.substr(1)
-          });
-        }
-
-        return _.assign(norm, { get: expr });
+      if (expr.substr(0, 2) === '[]') {
+        return _.assign(norm, {
+          fn: $scope.$watchCollection,
+          get: expr.substr(2),
+        });
       }
 
-      return $delegate;
-    });
+      if (expr.charAt(0) === '=') {
+        return _.assign(norm, {
+          deep: true,
+          get: expr.substr(1),
+        });
+      }
+
+      return _.assign(norm, { get: expr });
+    }
+
+    return $delegate;
   });
+}
+
+uiModules.get('kibana').config(watchMultiDecorator);

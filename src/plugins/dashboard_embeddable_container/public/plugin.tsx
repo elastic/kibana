@@ -22,24 +22,24 @@
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER, Plugin as EmbeddablePlugin } from './embeddable_plugin';
+import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import {
-  SavedObjectFinder as SavedObjectFinderUi,
+  SavedObjectFinderUi,
   SavedObjectFinderProps,
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
 
 interface SetupDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  embeddable: IEmbeddableSetup;
   uiActions: IUiActionsSetup;
 }
 
 interface StartDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
   uiActions: IUiActionsStart;
 }

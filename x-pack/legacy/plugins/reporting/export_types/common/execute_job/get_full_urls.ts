@@ -12,33 +12,43 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ServerFacade } from '../../../types';
+import { ServerFacade, ConditionalHeaders } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
-interface KeyedRelativeUrl {
-  relativeUrl: string;
+function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPNG {
+  return (job as JobDocPayloadPNG).relativeUrl !== undefined;
+}
+function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
+  return (job as JobDocPayloadPDF).objects !== undefined;
 }
 
-export async function getFullUrls({
+export async function getFullUrls<JobDocPayloadType>({
   job,
   server,
   ...mergeValues // pass-throughs
 }: {
-  job: JobDocPayloadPNG | JobDocPayloadPDF;
+  job: JobDocPayloadPDF | JobDocPayloadPNG;
   server: ServerFacade;
+  conditionalHeaders: ConditionalHeaders;
+  logo?: string;
 }) {
-  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
+  const config = server.config();
+
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    defaultBasePath: config.get('server.basePath'),
+    protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+    hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+    port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+  });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  if (job.relativeUrl) {
-    // single page (png)
+  if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
-  } else if (job.objects) {
-    // multi page (pdf)
-    relativeUrls = job.objects.map((obj: KeyedRelativeUrl) => obj.relativeUrl);
+  } else if (isPdfJob(job)) {
+    relativeUrls = job.objects.map(obj => obj.relativeUrl);
   } else {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
@@ -86,5 +96,5 @@ export async function getFullUrls({
     });
   });
 
-  return { job, urls, server, ...mergeValues };
+  return { job, server, urls, ...mergeValues };
 }

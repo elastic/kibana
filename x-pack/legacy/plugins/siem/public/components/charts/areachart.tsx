@@ -63,12 +63,15 @@ const checkIfAnyValidSeriesExist = (
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
 // https://ela.st/multi-areaseries
-export const AreaChartBaseComponent = React.memo<{
+export const AreaChartBaseComponent = ({
+  data,
+  ...chartConfigs
+}: {
   data: ChartSeriesData[];
   width: string | null | undefined;
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ data, ...chartConfigs }) => {
+}) => {
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = getAxisId(`group-${data[0].key}-x`);
@@ -113,14 +116,21 @@ export const AreaChartBaseComponent = React.memo<{
       </Chart>
     </div>
   ) : null;
-});
+};
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-export const AreaChart = React.memo<{
+export const AreaChartBase = React.memo(AreaChartBaseComponent);
+
+AreaChartBase.displayName = 'AreaChartBase';
+
+export const AreaChartComponent = ({
+  areaChart,
+  configs,
+}: {
   areaChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
-}>(({ areaChart, configs }) => {
+}) => {
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
 
@@ -128,7 +138,7 @@ export const AreaChart = React.memo<{
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <AreaChartBaseComponent
+          <AreaChartBase
             data={areaChart}
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
@@ -144,6 +154,10 @@ export const AreaChart = React.memo<{
       data={areaChart}
     />
   );
-});
+};
+
+AreaChartComponent.displayName = 'AreaChartComponent';
+
+export const AreaChart = React.memo(AreaChartComponent);
 
 AreaChart.displayName = 'AreaChart';

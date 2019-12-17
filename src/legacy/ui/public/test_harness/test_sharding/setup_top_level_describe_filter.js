@@ -53,7 +53,9 @@ export function setupTopLevelDescribeFilter(test) {
   const originalDescribe = window.describe;
 
   if (!originalDescribe) {
-    throw new TypeError('window.describe must be defined by mocha before test sharding can be setup');
+    throw new TypeError(
+      'window.describe must be defined by mocha before test sharding can be setup'
+    );
   }
 
   /**
@@ -85,7 +87,7 @@ export function setupTopLevelDescribeFilter(test) {
    */
   let describeCallDepth = 0;
 
-  const describeInterceptor = function (describeName, describeBody) {
+  const describeInterceptor = function(describeName, describeBody) {
     const context = this;
 
     const isTopLevelCall = describeCallDepth === 0;
@@ -118,6 +120,6 @@ export function setupTopLevelDescribeFilter(test) {
   Object.defineProperty(window, 'describe', {
     configurable: false,
     enumerable: true,
-    value: describeInterceptor
+    value: describeInterceptor,
   });
 }

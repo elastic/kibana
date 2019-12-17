@@ -38,7 +38,7 @@ import {
   stopReportManager,
   trackUiEvent,
 } from '../lens_ui_telemetry';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../index';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
 import { EditorFrameStart } from '../types';
 
@@ -50,6 +50,7 @@ export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
   dataShim: DataStart;
 }
+
 export class AppPlugin {
   private startDependencies: {
     data: DataPublicPluginStart;
@@ -72,7 +73,7 @@ export class AppPlugin {
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
-    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
+    editorFrameSetupInterface.registerDatasource(indexPattern);
 
     kibana_legacy.registerLegacyApp({
       id: 'lens',
@@ -81,7 +82,7 @@ export class AppPlugin {
         if (this.startDependencies === null) {
           throw new Error('mounted before start phase');
         }
-        const { data, dataShim, savedObjectsClient, editorFrame } = this.startDependencies;
+        const { data, savedObjectsClient, editorFrame } = this.startDependencies;
         addHelpMenuToAppChrome(context.core.chrome);
 
         const instance = editorFrame.createInstance({});
@@ -99,7 +100,6 @@ export class AppPlugin {
             <App
               core={context.core}
               data={data}
-              dataShim={dataShim}
               editorFrame={instance}
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}

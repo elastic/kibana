@@ -5,19 +5,29 @@
  */
 
 import { ReactElement } from 'react';
+import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import {
   basicJobValidation,
   basicDatafeedValidation,
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { JobCreatorType } from '../job_creator';
+import { JobCreator, JobCreatorType } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { cardinalityValidator, CardinalityValidatorResult } from './validators';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
 // after every keystroke
 const VALIDATION_DELAY_MS = 500;
+
+type AsyncValidatorsResult = Partial<CardinalityValidatorResult>;
+
+/**
+ * Union of possible validation results.
+ */
+export type JobValidationResult = BasicValidations & AsyncValidatorsResult;
 
 export interface ValidationSummary {
   basic: boolean;
@@ -47,6 +57,8 @@ export class JobValidator {
   private _lastJobConfig: string;
   private _lastDatafeedConfig: string;
   private _validateTimeout: ReturnType<typeof setTimeout> | null = null;
+  private _asyncValidators$: Array<Observable<AsyncValidatorsResult>> = [];
+  private _asyncValidatorsResult$: Observable<AsyncValidatorsResult>;
   private _existingJobsAndGroups: ExistingJobsAndGroups;
   private _basicValidations: BasicValidations = {
     jobId: { valid: true },
@@ -60,6 +72,14 @@ export class JobValidator {
     scrollSize: { valid: true },
   };
   private _validating: boolean = false;
+  private _basicValidationResult$ = new ReplaySubject<JobValidationResult>(2);
+
+  private _jobCreatorSubject$ = new Subject<JobCreator>();
+
+  /**
+   * Observable that combines basic and async validation results.
+   */
+  public validationResult$: Observable<JobValidationResult>;
 
   constructor(jobCreator: JobCreatorType, existingJobsAndGroups: ExistingJobsAndGroups) {
     this._jobCreator = jobCreator;
@@ -70,12 +90,43 @@ export class JobValidator {
       advanced: false,
     };
     this._existingJobsAndGroups = existingJobsAndGroups;
+
+    this._asyncValidators$ = [cardinalityValidator(this._jobCreatorSubject$)];
+
+    this._asyncValidatorsResult$ = combineLatest(this._asyncValidators$).pipe(
+      map(res => {
+        return res.reduce((acc, curr) => {
+          return {
+            ...acc,
+            ...(curr ? curr : {}),
+          };
+        }, {});
+      })
+    );
+
+    this.validationResult$ = combineLatest([
+      this._basicValidationResult$,
+      this._asyncValidatorsResult$,
+    ]).pipe(
+      map(([basicValidationResult, asyncValidatorsResult]) => {
+        return {
+          ...basicValidationResult,
+          ...asyncValidatorsResult,
+        };
+      }),
+      tap(latestValidationResult => {
+        this.latestValidationResult = latestValidationResult;
+      })
+    );
   }
+
+  latestValidationResult: JobValidationResult = this._basicValidations;
 
   public validate(callback: () => void, forceValidate: boolean = false) {
     this._validating = true;
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
+
     // only validate if the config has changed
     if (
       forceValidate ||
@@ -90,6 +141,9 @@ export class JobValidator {
       this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
+
+        this._jobCreatorSubject$.next(this._jobCreator);
+
         this._validating = false;
         this._validateTimeout = null;
         callback();
@@ -137,6 +191,8 @@ export class JobValidator {
     populateValidationMessages(idResults, this._basicValidations, jobConfig, datafeedConfig);
 
     this._validationSummary.basic = this._isOverallBasicValid();
+    // Update validation results subject
+    this._basicValidationResult$.next(this._basicValidations);
   }
 
   private _isOverallBasicValid() {

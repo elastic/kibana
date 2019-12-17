@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { queryHelpers, Matcher } from 'react-testing-library';
+import { queryHelpers } from '@testing-library/react';
 
 /**
  * 'react-testing-library provides 'queryByTestId()' to get
@@ -14,5 +14,5 @@ import { queryHelpers, Matcher } from 'react-testing-library';
  * @param {Matcher} id The 'data-test-subj' id.
  * @returns {HTMLElement | null}
  */
-export const queryByTestSubj = (container: HTMLElement, id: Matcher) =>
-  queryHelpers.queryByAttribute('data-test-subj', container, id);
+
+export const queryByTestSubj = queryHelpers.queryByAttribute.bind(null, 'data-test-subj');

@@ -22,9 +22,7 @@ import PropTypes from 'prop-types';
 import { createSelector } from 'reselect';
 
 import { Table } from './components/table';
-import {
-  getFieldFormat
-} from './lib';
+import { getFieldFormat } from './lib';
 
 export class IndexedFieldsTable extends Component {
   static propTypes = {
@@ -37,45 +35,49 @@ export class IndexedFieldsTable extends Component {
       getFieldInfo: PropTypes.func,
     }),
     fieldWildcardMatcher: PropTypes.func.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
-      fields: this.mapFields(this.props.fields)
+      fields: this.mapFields(this.props.fields),
     };
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.fields !== this.props.fields) {
       this.setState({
-        fields: this.mapFields(nextProps.fields)
+        fields: this.mapFields(nextProps.fields),
       });
     }
   }
 
   mapFields(fields) {
     const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
-    const sourceFilters = indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
+    const sourceFilters =
+      indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
-    return fields && fields
-      .map((field) => {
-        return {
-          ...field,
-          displayName: field.displayName,
-          routes: field.routes,
-          indexPattern: field.indexPattern,
-          format: getFieldFormat(indexPattern, field.name),
-          excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
-          info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field.name),
-        };
-      }) || [];
+    return (
+      (fields &&
+        fields.map(field => {
+          return {
+            ...field,
+            displayName: field.displayName,
+            routes: field.routes,
+            indexPattern: field.indexPattern,
+            format: getFieldFormat(indexPattern, field.name),
+            excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
+            info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field.name),
+          };
+        })) ||
+      []
+    );
   }
 
   getFilteredFields = createSelector(
-    (state) => state.fields,
+    state => state.fields,
     (state, props) => props.fieldFilter,
     (state, props) => props.indexedFieldTypeFilter,
     (fields, fieldFilter, indexedFieldTypeFilter) => {
@@ -93,9 +95,7 @@ export class IndexedFieldsTable extends Component {
   );
 
   render() {
-    const {
-      indexPattern,
-    } = this.props;
+    const { indexPattern } = this.props;
 
     const fields = this.getFilteredFields(this.state, this.props);
 

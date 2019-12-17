@@ -11,6 +11,8 @@ import { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
@@ -156,7 +158,6 @@ describe.skip('<RepositoryAdd />', () => {
           actions.selectRepositoryType(type);
           actions.clickNextButton();
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSubmitButton();
             await nextTick();
@@ -176,7 +177,6 @@ describe.skip('<RepositoryAdd />', () => {
             }
           });
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickBackButton();
             await nextTick(100);
@@ -217,7 +217,6 @@ describe.skip('<RepositoryAdd />', () => {
         form.setInputValue('locationInput', repository.settings.location);
         form.selectCheckBox('compressToggle');
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -251,7 +250,6 @@ describe.skip('<RepositoryAdd />', () => {
 
         httpRequestsMockHelpers.setSaveRepositoryResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -278,7 +276,6 @@ describe.skip('<RepositoryAdd />', () => {
         // Fill step 2
         form.setInputValue('locationInput', repository.settings.location);
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

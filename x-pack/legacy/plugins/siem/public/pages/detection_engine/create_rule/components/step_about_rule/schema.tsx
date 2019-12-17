@@ -5,16 +5,20 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-import {
-  FormSchema,
-  FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-import { fieldValidators } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+import { isEmpty } from 'lodash/fp';
+import React from 'react';
 
 import * as CreateRuleI18n from '../../translations';
+import { IMitreEnterpriseAttack } from '../../types';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  FormSchema,
+  ValidationFunc,
+  ERROR_CODE,
+} from '../shared_imports';
+import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
 
@@ -105,6 +109,37 @@ export const schema: FormSchema = {
       }
     ),
     labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
+  },
+  threats: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
+      {
+        defaultMessage: 'MITRE ATT&CK',
+      }
+    ),
+    labelAppend: <EuiText size="xs">{CreateRuleI18n.OPTIONAL_FIELD}</EuiText>,
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ value, path }] = args;
+          let hasError = false;
+          (value as IMitreEnterpriseAttack[]).forEach(v => {
+            if (isEmpty(v.tactic.name) || (v.tactic.name !== 'none' && isEmpty(v.techniques))) {
+              hasError = true;
+            }
+          });
+          return hasError
+            ? {
+                code: 'ERR_FIELD_MISSING',
+                path,
+                message: I18n.CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED,
+              }
+            : undefined;
+        },
+      },
+    ],
   },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,

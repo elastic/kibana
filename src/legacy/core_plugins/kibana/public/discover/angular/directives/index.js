@@ -17,16 +17,14 @@
  * under the License.
  */
 
-
 import '../../../../../../ui/public/render_complete/directive';
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
 import { DiscoverHistogram } from './histogram';
-import { getServices } from '../../kibana_services';
+import { getAngularModule, wrapInI18nContext } from '../../kibana_services';
 
-const { wrapInI18nContext, uiModules } = getServices();
-const app = uiModules.get('apps/discover', ['react']);
+const app = getAngularModule();
 
 app.directive('discoverNoResults', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverNoResults))

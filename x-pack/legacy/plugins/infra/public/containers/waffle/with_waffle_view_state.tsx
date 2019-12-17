@@ -5,7 +5,7 @@
  */
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   State,
   waffleOptionsActions,
@@ -56,7 +56,7 @@ const selectViewState = createSelector(
 );
 
 interface Props {
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 export const withWaffleViewState = connect(

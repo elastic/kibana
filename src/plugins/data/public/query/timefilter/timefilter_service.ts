@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from './index';
 
@@ -27,7 +27,7 @@ import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from
  */
 
 export interface TimeFilterServiceDependencies {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
 }
 

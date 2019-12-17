@@ -85,7 +85,7 @@ Say we're creating a plugin for rendering visualizations that allows new renderi
 export interface VizRenderContext {
   core: {
     i18n: I18nStart;
-    uiSettings: UISettingsClientContract;
+    uiSettings: IUiSettingsClient;
   }
   [contextName: string]: unknown;
 }

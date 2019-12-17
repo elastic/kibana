@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  TIME_RANGE_TYPE,
-  URL_TYPE
-} from './constants';
+import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 import chrome from 'ui/chrome';
 import rison from 'rison-node';
@@ -20,12 +17,11 @@ import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
-
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
   const kibanaSettings = {
-    queryFieldNames: []
+    queryFieldNames: [],
   };
 
   // Set the default type.
@@ -40,13 +36,15 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // For the Discover option, set the default index pattern to that
   // which matches the (first) index configured in the job datafeed.
   const datafeedConfig = job.datafeed_config;
-  if (indexPatterns !== undefined && indexPatterns.length > 0 &&
+  if (
+    indexPatterns !== undefined &&
+    indexPatterns.length > 0 &&
     datafeedConfig !== undefined &&
     datafeedConfig.indices !== undefined &&
-    datafeedConfig.indices.length > 0) {
-
+    datafeedConfig.indices.length > 0
+  ) {
     const datafeedIndex = datafeedConfig.indices[0];
-    let defaultIndexPattern = indexPatterns.find((indexPattern) => {
+    let defaultIndexPattern = indexPatterns.find(indexPattern => {
       return indexPattern.title === datafeedIndex;
     });
 
@@ -64,12 +62,12 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
     // as for other URLs we have no way of knowing how the field will be used in the URL.
     timeRange: {
       type: TIME_RANGE_TYPE.AUTO,
-      interval: ''
+      interval: '',
     },
     kibanaSettings,
     otherUrlSettings: {
-      urlValue: ''
-    }
+      urlValue: '',
+    },
   };
 }
 
@@ -86,7 +84,7 @@ export function getQueryEntityFieldNames(job) {
   detectors.forEach((detector, detectorIndex) => {
     const partitioningFields = getPartitioningFieldNames(job, detectorIndex);
 
-    partitioningFields.forEach((fieldName) => {
+    partitioningFields.forEach(fieldName => {
       if (entityFieldNames.indexOf(fieldName) === -1) {
         entityFieldNames.push(fieldName);
       }
@@ -99,7 +97,7 @@ export function getQueryEntityFieldNames(job) {
 export function isValidCustomUrlSettingsTimeRange(timeRangeSettings) {
   if (timeRangeSettings.type === TIME_RANGE_TYPE.INTERVAL) {
     const interval = parseInterval(timeRangeSettings.interval);
-    return (interval !== null);
+    return interval !== null;
   }
 
   return true;
@@ -123,12 +121,11 @@ export function buildCustomUrlFromSettings(settings) {
   } else {
     const urlToAdd = {
       url_name: settings.label,
-      url_value: settings.otherUrlSettings.urlValue
+      url_value: settings.otherUrlSettings.urlValue,
     };
 
     return Promise.resolve(urlToAdd);
   }
-
 }
 
 function buildDashboardUrlFromSettings(settings) {
@@ -137,8 +134,9 @@ function buildDashboardUrlFromSettings(settings) {
     const { dashboardId, queryFieldNames } = settings.kibanaSettings;
 
     const savedObjectsClient = chrome.getSavedObjectsClient();
-    savedObjectsClient.get('dashboard', dashboardId)
-      .then((response) => {
+    savedObjectsClient
+      .get('dashboard', dashboardId)
+      .then(response => {
         // Use the filters from the saved dashboard if there are any.
         let filters = [];
 
@@ -161,12 +159,12 @@ function buildDashboardUrlFromSettings(settings) {
           time: {
             from: '$earliest$',
             to: '$latest$',
-            mode: 'absolute'
-          }
+            mode: 'absolute',
+          },
         });
 
         const appState = {
-          filters
+          filters,
         };
 
         // To put entities in filters section would involve creating parameters of the form
@@ -192,7 +190,7 @@ function buildDashboardUrlFromSettings(settings) {
         const urlToAdd = {
           url_name: settings.label,
           url_value: urlValue,
-          time_range: TIME_RANGE_TYPE.AUTO
+          time_range: TIME_RANGE_TYPE.AUTO,
         };
 
         if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
@@ -201,12 +199,10 @@ function buildDashboardUrlFromSettings(settings) {
 
         resolve(urlToAdd);
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
-
   });
-
 }
 
 function buildDiscoverUrlFromSettings(settings) {
@@ -219,13 +215,13 @@ function buildDiscoverUrlFromSettings(settings) {
     time: {
       from: '$earliest$',
       to: '$latest$',
-      mode: 'absolute'
-    }
+      mode: 'absolute',
+    },
   });
 
   // Add the index pattern and query to the appState part of the URL.
   const appState = {
-    index: discoverIndexPatternId
+    index: discoverIndexPatternId,
   };
 
   // If partitioning field entities have been configured add tokens
@@ -258,7 +254,6 @@ function buildDiscoverUrlFromSettings(settings) {
   }
 
   return urlToAdd;
-
 }
 
 // Builds the query parameter for use in the _a AppState part of a Kibana Dashboard or Discover URL.
@@ -275,7 +270,7 @@ function buildAppStateQueryParam(queryFieldNames) {
 
     queryParam = {
       language: 'kuery',
-      query: queryString
+      query: queryString,
     };
   }
 
@@ -298,28 +293,23 @@ export function getTestUrl(job, customUrl) {
   const body = {
     query: {
       bool: {
-        must: [
-          { term: { job_id: job.job_id } },
-          { term: { result_type: 'record' } }
-        ]
-      }
+        must: [{ term: { job_id: job.job_id } }, { term: { result_type: 'record' } }],
+      },
     },
     size: 1,
     _source: {
-      excludes: []
+      excludes: [],
     },
-    sort: [
-      { record_score: { order: 'desc' } }
-    ]
+    sort: [{ record_score: { order: 'desc' } }],
   };
 
   return new Promise((resolve, reject) => {
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
-      body
+      body,
     })
-      .then((resp) => {
+      .then(resp => {
         if (resp.hits.total > 0) {
           const record = resp.hits.hits[0]._source;
           testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
@@ -327,48 +317,48 @@ export function getTestUrl(job, customUrl) {
         } else {
           // No anomalies yet for this job, so do a preview of the search
           // configured in the job datafeed to obtain sample docs.
-          mlJobService.searchPreview(job)
-            .then((response) => {
-              let testDoc;
-              const docTimeFieldName = job.data_description.time_field;
+          mlJobService.searchPreview(job).then(response => {
+            let testDoc;
+            const docTimeFieldName = job.data_description.time_field;
 
-              // Handle datafeeds which use aggregations or documents.
-              if (response.aggregations) {
-                // Create a dummy object which contains the fields necessary to build the URL.
-                const firstBucket = response.aggregations.buckets.buckets[0];
-                testDoc = {
-                  [docTimeFieldName]: firstBucket.key
-                };
+            // Handle datafeeds which use aggregations or documents.
+            if (response.aggregations) {
+              // Create a dummy object which contains the fields necessary to build the URL.
+              const firstBucket = response.aggregations.buckets.buckets[0];
+              testDoc = {
+                [docTimeFieldName]: firstBucket.key,
+              };
 
-                // Look for bucket aggregations which match the tokens in the URL.
-                urlValue.replace((/\$([^?&$\'"]{1,40})\$/g), (match, name) => {
-                  if (name !== 'earliest' && name !== 'latest' && firstBucket[name] !== undefined) {
-                    const tokenBuckets = firstBucket[name];
-                    if (tokenBuckets.buckets) {
-                      testDoc[name] = tokenBuckets.buckets[0].key;
-                    }
+              // Look for bucket aggregations which match the tokens in the URL.
+              urlValue.replace(/\$([^?&$\'"]{1,40})\$/g, (match, name) => {
+                if (name !== 'earliest' && name !== 'latest' && firstBucket[name] !== undefined) {
+                  const tokenBuckets = firstBucket[name];
+                  if (tokenBuckets.buckets) {
+                    testDoc[name] = tokenBuckets.buckets[0].key;
                   }
-                });
-
-              } else {
-                if (response.hits.total > 0) {
-                  testDoc = response.hits.hits[0]._source;
                 }
+              });
+            } else {
+              if (response.hits.total.value > 0) {
+                testDoc = response.hits.hits[0]._source;
               }
+            }
 
-              if (testDoc !== undefined) {
-                testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, testDoc, docTimeFieldName);
-              }
+            if (testDoc !== undefined) {
+              testUrl = replaceTokensInUrlValue(
+                customUrl,
+                bucketSpanSecs,
+                testDoc,
+                docTimeFieldName
+              );
+            }
 
-              resolve(testUrl);
-
-            });
+            resolve(testUrl);
+          });
         }
-
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
-
 }

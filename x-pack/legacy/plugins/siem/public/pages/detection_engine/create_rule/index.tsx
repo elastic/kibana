@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { HeaderPage } from '../../../components/header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
@@ -24,7 +25,16 @@ import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
+const ResizeEuiPanel = styled(EuiPanel)<{
+  height?: number;
+}>`
+  .euiAccordion__childWrapper {
+    height: ${props => (props.height !== -1 ? `${props.height}px !important` : 'auto')};
+  }
+`;
+
 export const CreateRuleComponent = React.memo(() => {
+  const [heightAccordion, setHeightAccordion] = useState(-1);
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep | null>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
@@ -34,16 +44,26 @@ export const CreateRuleComponent = React.memo(() => {
     [RuleStep.aboutRule]: { isValid: false, data: {} },
     [RuleStep.scheduleRule]: { isValid: false, data: {} },
   });
+  const [isStepRuleInEditView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
+    [RuleStep.defineRule]: false,
+    [RuleStep.aboutRule]: false,
+    [RuleStep.scheduleRule]: false,
+  });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
 
   const setStepData = (step: RuleStep, data: unknown, isValid: boolean) => {
-    stepsData.current[step] = { data, isValid };
+    stepsData.current[step] = { ...stepsData.current[step], data, isValid };
     if (isValid) {
       const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
       if ([0, 1].includes(stepRuleIdx)) {
-        openCloseAccordion(step);
-        openCloseAccordion(stepsRuleOrder[stepRuleIdx + 1]);
-        setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
+        setIsStepRuleInEditView({
+          ...isStepRuleInEditView,
+          [step]: true,
+        });
+        if (openAccordionId !== stepsRuleOrder[stepRuleIdx + 1]) {
+          openCloseAccordion(stepsRuleOrder[stepRuleIdx + 1]);
+          setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
+        }
       } else if (
         stepRuleIdx === 2 &&
         stepsData.current[RuleStep.defineRule].isValid &&
@@ -106,6 +126,7 @@ export const CreateRuleComponent = React.memo(() => {
 
   const manageAccordions = useCallback(
     (id: RuleStep, isOpen: boolean) => {
+      const activeRuleIdx = stepsRuleOrder.findIndex(step => step === openAccordionId);
       const stepRuleIdx = stepsRuleOrder.findIndex(step => step === id);
       const isLatestStepsRuleValid =
         stepRuleIdx === 0
@@ -114,23 +135,35 @@ export const CreateRuleComponent = React.memo(() => {
               .filter((stepRule, index) => index < stepRuleIdx)
               .every(stepRule => stepsData.current[stepRule].isValid);
 
-      if (
-        openAccordionId != null &&
-        openAccordionId !== id &&
-        !stepsData.current[openAccordionId].isValid &&
-        isOpen
-      ) {
+      if (stepRuleIdx < activeRuleIdx && !isOpen) {
         openCloseAccordion(id);
-      } else if (!isLatestStepsRuleValid && isOpen) {
-        openCloseAccordion(id);
-      } else if (openAccordionId != null && id !== openAccordionId && isOpen) {
-        openCloseAccordion(openAccordionId);
-        setOpenAccordionId(id);
-      } else if (openAccordionId == null && isOpen) {
-        setOpenAccordionId(id);
+      } else if (stepRuleIdx >= activeRuleIdx) {
+        if (
+          openAccordionId != null &&
+          openAccordionId !== id &&
+          !stepsData.current[openAccordionId].isValid &&
+          !isStepRuleInEditView[id] &&
+          isOpen
+        ) {
+          openCloseAccordion(id);
+        } else if (!isLatestStepsRuleValid && isOpen) {
+          openCloseAccordion(id);
+        } else if (id !== openAccordionId && isOpen) {
+          setOpenAccordionId(id);
+        }
       }
     },
-    [openAccordionId]
+    [isStepRuleInEditView, openAccordionId]
+  );
+
+  const manageIsEditable = useCallback(
+    (id: RuleStep) => {
+      setIsStepRuleInEditView({
+        ...isStepRuleInEditView,
+        [id]: false,
+      });
+    },
+    [isStepRuleInEditView]
   );
 
   if (isSaved && stepsData.current[RuleStep.scheduleRule].isValid) {
@@ -146,7 +179,7 @@ export const CreateRuleComponent = React.memo(() => {
           isLoading={isLoading}
           title={i18n.PAGE_TITLE}
         />
-        <EuiPanel>
+        <ResizeEuiPanel height={heightAccordion}>
           <EuiAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
@@ -154,11 +187,27 @@ export const CreateRuleComponent = React.memo(() => {
             paddingSize="xs"
             ref={defineRuleRef}
             onToggle={manageAccordions.bind(null, RuleStep.defineRule)}
+            extraAction={
+              stepsData.current[RuleStep.defineRule].isValid && (
+                <EuiButtonEmpty
+                  iconType="pencil"
+                  size="xs"
+                  onClick={manageIsEditable.bind(null, RuleStep.defineRule)}
+                >
+                  {`Edit`}
+                </EuiButtonEmpty>
+              )
+            }
           >
             <EuiHorizontalRule margin="xs" />
-            <StepDefineRule isLoading={isLoading} setStepData={setStepData} />
+            <StepDefineRule
+              isEditView={isStepRuleInEditView[RuleStep.defineRule]}
+              isLoading={isLoading}
+              setStepData={setStepData}
+              resizeParentContainer={height => setHeightAccordion(height)}
+            />
           </EuiAccordion>
-        </EuiPanel>
+        </ResizeEuiPanel>
         <EuiSpacer size="s" />
         <EuiPanel>
           <EuiAccordion
@@ -168,9 +217,24 @@ export const CreateRuleComponent = React.memo(() => {
             paddingSize="xs"
             ref={aboutRuleRef}
             onToggle={manageAccordions.bind(null, RuleStep.aboutRule)}
+            extraAction={
+              stepsData.current[RuleStep.aboutRule].isValid && (
+                <EuiButtonEmpty
+                  iconType="pencil"
+                  size="xs"
+                  onClick={manageIsEditable.bind(null, RuleStep.aboutRule)}
+                >
+                  {`Edit`}
+                </EuiButtonEmpty>
+              )
+            }
           >
             <EuiHorizontalRule margin="xs" />
-            <StepAboutRule isLoading={isLoading} setStepData={setStepData} />
+            <StepAboutRule
+              isEditView={isStepRuleInEditView[RuleStep.aboutRule]}
+              isLoading={isLoading}
+              setStepData={setStepData}
+            />
           </EuiAccordion>
         </EuiPanel>
         <EuiSpacer size="s" />
@@ -182,9 +246,24 @@ export const CreateRuleComponent = React.memo(() => {
             paddingSize="xs"
             ref={scheduleRuleRef}
             onToggle={manageAccordions.bind(null, RuleStep.scheduleRule)}
+            extraAction={
+              stepsData.current[RuleStep.scheduleRule].isValid && (
+                <EuiButtonEmpty
+                  iconType="pencil"
+                  size="xs"
+                  onClick={manageIsEditable.bind(null, RuleStep.scheduleRule)}
+                >
+                  {`Edit`}
+                </EuiButtonEmpty>
+              )
+            }
           >
             <EuiHorizontalRule margin="xs" />
-            <StepScheduleRule isLoading={isLoading} setStepData={setStepData} />
+            <StepScheduleRule
+              isEditView={isStepRuleInEditView[RuleStep.scheduleRule]}
+              isLoading={isLoading}
+              setStepData={setStepData}
+            />
           </EuiAccordion>
         </EuiPanel>
       </WrapperPage>

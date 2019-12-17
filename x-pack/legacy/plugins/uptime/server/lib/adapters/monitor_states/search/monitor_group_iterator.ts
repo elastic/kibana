@@ -97,9 +97,12 @@ export class MonitorGroupIterator {
     }
   }
 
-  //  Attempts to buffer more results fetching a single chunk.
-  // If trim is set to true, which is the default, it will delete all items in the buffer prior to the current item.
-  // to free up space.
+  /**
+   *  Attempts to buffer more results fetching a single chunk.
+   * If trim is set to true, which is the default, it will delete all items in the buffer prior to the current item.
+   * to free up space.
+   * @param size the number of items to chunk
+   */
   async attemptBufferMore(
     size: number = CHUNK_SIZE
   ): Promise<{ hasMore: boolean; gotHit: boolean }> {

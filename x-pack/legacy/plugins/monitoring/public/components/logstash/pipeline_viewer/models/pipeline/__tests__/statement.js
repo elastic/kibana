@@ -16,22 +16,20 @@ describe('Statement class', () => {
       source: {
         id: 'output',
         user: 'user',
-        password: 'password'
-      }
+        password: 'password',
+      },
     };
     vertex = {
       meta,
       id: 'statement_id',
       hasExplicitId: true,
-      stats: { }
+      stats: {},
     };
   });
 
   describe('Statement from constructor', () => {
     it('creates a new Statement instance', () => {
-      const statement = new Statement(
-        vertex
-      );
+      const statement = new Statement(vertex);
 
       expect(statement.id).to.be('statement_id');
       expect(statement.hasExplicitId).to.be(true);

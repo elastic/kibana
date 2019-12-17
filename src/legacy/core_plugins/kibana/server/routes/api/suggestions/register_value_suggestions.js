@@ -18,6 +18,7 @@
  */
 
 import { get, map } from 'lodash';
+import { abortableRequestHandler } from '../../../../../elasticsearch/lib/abortable_request_handler';
 
 export function registerValueSuggestions(server) {
   const serverConfig = server.config();
@@ -26,18 +27,22 @@ export function registerValueSuggestions(server) {
   server.route({
     path: '/api/kibana/suggestions/values/{index}',
     method: ['POST'],
-    handler: async function (req) {
+    handler: abortableRequestHandler(async function(signal, req) {
       const { index } = req.params;
       const { field: fieldName, query, boolFilter } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
 
       const savedObjectsClient = req.getSavedObjectsClient();
-      const savedObjectsResponse = await savedObjectsClient.find(
-        { type: 'index-pattern', fields: ['fields'], search: `"${index}"`, searchFields: ['title'] }
-      );
-      const indexPattern = savedObjectsResponse.total > 0 ? savedObjectsResponse.saved_objects[0] : null;
+      const savedObjectsResponse = await savedObjectsClient.find({
+        type: 'index-pattern',
+        fields: ['fields'],
+        search: `"${index}"`,
+        searchFields: ['title'],
+      });
+      const indexPattern =
+        savedObjectsResponse.total > 0 ? savedObjectsResponse.saved_objects[0] : null;
       const fields = indexPattern ? JSON.parse(indexPattern.attributes.fields) : null;
-      const field = fields ? fields.find((field) => field.name === fieldName) : fieldName;
+      const field = fields ? fields.find(field => field.name === fieldName) : fieldName;
 
       const body = getBody(
         { field, query, boolFilter },
@@ -46,16 +51,17 @@ export function registerValueSuggestions(server) {
       );
 
       try {
-        const response = await callWithRequest(req, 'search', { index, body });
-        const buckets = get(response, 'aggregations.suggestions.buckets')
-          || get(response, 'aggregations.nestedSuggestions.suggestions.buckets')
-          || [];
+        const response = await callWithRequest(req, 'search', { index, body }, { signal });
+        const buckets =
+          get(response, 'aggregations.suggestions.buckets') ||
+          get(response, 'aggregations.nestedSuggestions.suggestions.buckets') ||
+          [];
         const suggestions = map(buckets, 'key');
         return suggestions;
       } catch (error) {
         throw server.plugins.elasticsearch.handleESError(error);
       }
-    },
+    }),
   });
 }
 
@@ -98,7 +104,7 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
           },
           aggs: body.aggs,
         },
-      }
+      },
     };
   }
 

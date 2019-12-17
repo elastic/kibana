@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { hostsModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
@@ -46,7 +46,7 @@ interface QueryTabBodyProps {
 
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   skip: boolean;
   setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;

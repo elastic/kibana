@@ -5,21 +5,25 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
-import { RuleStep, RuleStepProps } from '../../types';
+import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
+import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../shared_imports';
 import { schema } from './schema';
 import * as I18n from './translations';
 
-export const StepScheduleRule = memo<RuleStepProps>(({ isLoading, setStepData }) => {
+export const StepScheduleRule = memo<RuleStepProps>(({ isEditView, isLoading, setStepData }) => {
+  const [myStepData, setMyStepData] = useState<ScheduleStepRule>({
+    enabled: true,
+    interval: '5m',
+    isNew: true,
+    from: '0m',
+  });
   const { form } = useForm({
     schema,
-    defaultValue: {
-      interval: '5m',
-      from: '0m',
-    },
+    defaultValue: myStepData,
     options: { stripEmptyFields: false },
   });
 
@@ -28,12 +32,15 @@ export const StepScheduleRule = memo<RuleStepProps>(({ isLoading, setStepData })
       const { isValid: newIsValid, data } = await form.submit();
       if (newIsValid) {
         setStepData(RuleStep.scheduleRule, { ...data, enabled }, newIsValid);
+        setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
       }
     },
     [form]
   );
 
-  return (
+  return isEditView && myStepData != null ? (
+    <StepRuleDescription schema={schema} data={myStepData} />
+  ) : (
     <>
       <Form form={form} data-test-subj="stepScheduleRule">
         <UseField

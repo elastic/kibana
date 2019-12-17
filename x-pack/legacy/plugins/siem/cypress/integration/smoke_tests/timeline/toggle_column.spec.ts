@@ -73,7 +73,7 @@ describe('toggle column in timeline', () => {
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
   });
 
-  it.skip('adds the _id field to the timeline via drag and drop', () => {
+  it('adds the _id field to the timeline via drag and drop', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();

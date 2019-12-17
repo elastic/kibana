@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
 import { Feature } from '../../../../../plugins/features/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -13,7 +12,7 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
 
   describe('/api/features', () => {
     describe('with the "global all" privilege', () => {

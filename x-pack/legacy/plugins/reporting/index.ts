@@ -13,14 +13,13 @@ import { registerRoutes } from './server/routes';
 import {
   LevelLogger,
   checkLicenseFactory,
-  createQueueFactory,
-  exportTypesRegistryFactory,
+  getExportTypesRegistry,
   runValidations,
 } from './server/lib';
 import { config as reportingConfig } from './config';
 import { logConfiguration } from './log_configuration';
 import { createBrowserDriverFactory } from './server/browsers';
-import { getReportingUsageCollector } from './server/usage';
+import { registerReportingUsageCollector } from './server/usage';
 import { ReportingConfigOptions, ReportingPluginSpecOptions, ServerFacade } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
@@ -74,21 +73,23 @@ export const reporting = (kibana: any) => {
     // TODO: Decouple Hapi: Build a server facade object based on the server to
     // pass through to the libs. Do not pass server directly
     async init(server: ServerFacade) {
+      const exportTypesRegistry = getExportTypesRegistry();
+
       let isCollectorReady = false;
       // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(
-        getReportingUsageCollector(server, () => isCollectorReady)
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      registerReportingUsageCollector(
+        usageCollection,
+        server,
+        () => isCollectorReady,
+        exportTypesRegistry
       );
 
       const logger = LevelLogger.createForServer(server, [PLUGIN_ID]);
-      const [exportTypesRegistry, browserFactory] = await Promise.all([
-        exportTypesRegistryFactory(server),
-        createBrowserDriverFactory(server),
-      ]);
-      server.expose('exportTypesRegistry', exportTypesRegistry);
+      const browserDriverFactory = await createBrowserDriverFactory(server);
 
       logConfiguration(server, logger);
-      runValidations(server, logger, browserFactory);
+      runValidations(server, logger, browserDriverFactory);
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
       mirrorPluginStatus(xpackMainPlugin, this);
@@ -102,11 +103,8 @@ export const reporting = (kibana: any) => {
       // Post initialization of the above code, the collector is now ready to fetch its data
       isCollectorReady = true;
 
-      server.expose('browserDriverFactory', browserFactory);
-      server.expose('queue', createQueueFactory(server));
-
       // Reporting routes
-      registerRoutes(server, logger);
+      registerRoutes(server, exportTypesRegistry, browserDriverFactory, logger);
     },
 
     deprecations({ unused }: any) {

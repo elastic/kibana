@@ -19,7 +19,7 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { EventsTable, TimelineBody } from '../styles';
+import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
@@ -27,6 +27,7 @@ import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
+import { useTimelineTypeContext } from '../timeline_context';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -80,56 +81,67 @@ export const Body = React.memo<BodyProps>(
     toggleColumn,
     updateNote,
   }) => {
+    const timelineTypeContext = useTimelineTypeContext();
+
     const columnWidths = columnHeaders.reduce(
       (totalWidth, header) => totalWidth + header.width,
-      getActionsColumnWidth(isEventViewer)
+      getActionsColumnWidth(isEventViewer, timelineTypeContext.showCheckboxes)
     );
 
     return (
-      <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
-        <EventsTable
-          data-test-subj="events-table"
-          // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-          style={{ minWidth: columnWidths + 'px' }}
-        >
-          <ColumnHeaders
-            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            isEventViewer={isEventViewer}
-            onColumnRemoved={onColumnRemoved}
-            onColumnResized={onColumnResized}
-            onColumnSorted={onColumnSorted}
-            onFilterChange={onFilterChange}
-            onUpdateColumns={onUpdateColumns}
-            showEventsSelect={false}
-            sort={sort}
-            timelineId={id}
-            toggleColumn={toggleColumn}
-          />
+      <>
+        <TimelineBody data-test-subj="timeline-body" bodyHeight={height}>
+          <EventsTable
+            data-test-subj="events-table"
+            // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+            style={{ minWidth: columnWidths + 'px' }}
+          >
+            <ColumnHeaders
+              actionsColumnWidth={getActionsColumnWidth(
+                isEventViewer,
+                timelineTypeContext.showCheckboxes
+              )}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              isEventViewer={isEventViewer}
+              onColumnRemoved={onColumnRemoved}
+              onColumnResized={onColumnResized}
+              onColumnSorted={onColumnSorted}
+              onFilterChange={onFilterChange}
+              onUpdateColumns={onUpdateColumns}
+              showEventsSelect={false}
+              sort={sort}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+            />
 
-          <Events
-            actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
-            addNoteToEvent={addNoteToEvent}
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            columnRenderers={columnRenderers}
-            data={data}
-            eventIdToNoteIds={eventIdToNoteIds}
-            getNotesByIds={getNotesByIds}
-            id={id}
-            isEventViewer={isEventViewer}
-            onColumnResized={onColumnResized}
-            onPinEvent={onPinEvent}
-            onUpdateColumns={onUpdateColumns}
-            onUnPinEvent={onUnPinEvent}
-            pinnedEventIds={pinnedEventIds}
-            rowRenderers={rowRenderers}
-            toggleColumn={toggleColumn}
-            updateNote={updateNote}
-          />
-        </EventsTable>
-      </TimelineBody>
+            <Events
+              actionsColumnWidth={getActionsColumnWidth(
+                isEventViewer,
+                timelineTypeContext.showCheckboxes
+              )}
+              addNoteToEvent={addNoteToEvent}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              columnRenderers={columnRenderers}
+              data={data}
+              eventIdToNoteIds={eventIdToNoteIds}
+              getNotesByIds={getNotesByIds}
+              id={id}
+              isEventViewer={isEventViewer}
+              onColumnResized={onColumnResized}
+              onPinEvent={onPinEvent}
+              onUpdateColumns={onUpdateColumns}
+              onUnPinEvent={onUnPinEvent}
+              pinnedEventIds={pinnedEventIds}
+              rowRenderers={rowRenderers}
+              toggleColumn={toggleColumn}
+              updateNote={updateNote}
+            />
+          </EventsTable>
+        </TimelineBody>
+        <TimelineBodyGlobalStyle />
+      </>
     );
   }
 );

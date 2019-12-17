@@ -53,7 +53,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -151,7 +151,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'Test rate limit',
+              name: 'Test rate limit',
               actionTypeId: 'test.rate-limit',
               config: {},
             })
@@ -344,7 +344,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.authorization',
             })
             .expect(200);
@@ -532,6 +532,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);

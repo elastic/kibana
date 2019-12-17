@@ -19,7 +19,7 @@ import { TIMELINE_DATA_PROVIDERS } from '../timeline/selectors';
 
 /** Opens the timeline's Field Browser */
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click();
+  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };

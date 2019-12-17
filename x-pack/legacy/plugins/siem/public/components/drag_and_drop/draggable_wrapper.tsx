@@ -34,6 +34,10 @@ export const useDraggablePortalContext = () => useContext(DraggablePortalContext
 const Wrapper = styled.div`
   display: inline-block;
   max-width: 100%;
+
+  [data-rbd-placeholder-context-id] {
+    display: none !important;
+  }
 `;
 
 Wrapper.displayName = 'Wrapper';
@@ -92,7 +96,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         &,
         & .euiBadge,
         & .euiBadge__text {
-          cursor: move; //Fallback for IE11
+          cursor: move; /* Fallback for IE11 */
           cursor: grab;
         }
       }
@@ -270,6 +274,8 @@ export const DraggableWrapper = connect(null, {
   registerProvider: dragAndDropActions.registerProvider,
   unRegisterProvider: dragAndDropActions.unRegisterProvider,
 })(DraggableWrapperComponent);
+
+DraggableWrapper.displayName = 'DraggableWrapper';
 
 /**
  * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging

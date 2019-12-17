@@ -4,26 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan } from './configs';
+import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan, CustomSettings } from './configs';
 import { Aggregation, Field } from '../../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE, CREATED_BY_LABEL, SHARED_RESULTS_INDEX_NAME } from './util/constants';
+import {
+  JOB_TYPE,
+  CREATED_BY_LABEL,
+  SHARED_RESULTS_INDEX_NAME,
+} from '../../../../../../common/constants/new_job';
 import { isSparseDataJob } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
+import { Calendar } from '../../../../../../common/types/calendars';
+import { mlCalendarService } from '../../../../services/calendar_service';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: IndexPattern;
-  protected _savedSearch: SavedSearch;
+  protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
+  protected _calendars: Calendar[];
   protected _datafeed_config: Datafeed;
   protected _detectors: Detector[];
   protected _influencers: string[];
@@ -40,12 +48,17 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
     this._indexPatternTitle = indexPattern.title;
 
     this._job_config = createEmptyJob();
+    this._calendars = [];
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers;
@@ -188,12 +201,12 @@ export class JobCreator {
     this._job_config.groups = groups;
   }
 
-  public get calendars(): string[] {
-    return this._job_config.calendars || [];
+  public get calendars(): Calendar[] {
+    return this._calendars;
   }
 
-  public set calendars(calendars: string[]) {
-    this._job_config.calendars = calendars;
+  public set calendars(calendars: Calendar[]) {
+    this._calendars = calendars;
   }
 
   public set modelPlot(enable: boolean) {
@@ -358,6 +371,20 @@ export class JobCreator {
     });
   }
 
+  /**
+   * Extends assigned calendars with created job id.
+   * @private
+   */
+  private async _updateCalendars() {
+    if (this._calendars.length === 0) {
+      return;
+    }
+
+    for (const calendar of this._calendars) {
+      await mlCalendarService.assignNewJobId(calendar, this.jobId);
+    }
+  }
+
   public setTimeRange(start: number, end: number) {
     this._start = start;
     this._end = end;
@@ -441,6 +468,8 @@ export class JobCreator {
   public async createJob(): Promise<object> {
     try {
       const { success, resp } = await mlJobService.saveNewJob(this._job_config);
+      await this._updateCalendars();
+
       if (success === true) {
         return resp;
       } else {
@@ -486,7 +515,10 @@ export class JobCreator {
     this._stopAllRefreshPolls.stop = true;
   }
 
-  private _setCustomSetting(setting: string, value: string | object | null) {
+  private _setCustomSetting(
+    setting: keyof CustomSettings,
+    value: CustomSettings[keyof CustomSettings] | null
+  ) {
     if (value === null) {
       // if null is passed in, delete the custom setting
       if (
@@ -507,12 +539,15 @@ export class JobCreator {
           [setting]: value,
         };
       } else {
+        // @ts-ignore
         this._job_config.custom_settings[setting] = value;
       }
     }
   }
 
-  private _getCustomSetting(setting: string): string | object | null {
+  private _getCustomSetting(
+    setting: keyof CustomSettings
+  ): CustomSettings[keyof CustomSettings] | null {
     if (
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
@@ -528,6 +563,14 @@ export class JobCreator {
 
   public get createdBy(): CREATED_BY_LABEL | null {
     return this._getCustomSetting('created_by') as CREATED_BY_LABEL | null;
+  }
+
+  public set customUrls(customUrls: UrlConfig[] | null) {
+    this._setCustomSetting('custom_urls', customUrls);
+  }
+
+  public get customUrls(): UrlConfig[] | null {
+    return this._getCustomSetting('custom_urls') as UrlConfig[] | null;
   }
 
   public get formattedJobJson() {

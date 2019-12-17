@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './telemetry';
+export { registerFileUploadUsageCollector } from './file_upload_usage_collector';

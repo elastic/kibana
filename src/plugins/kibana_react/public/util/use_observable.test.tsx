@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { renderHook, act } from 'react-hooks-testing-library';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { Subject } from 'rxjs';
 import { useObservable } from './use_observable';
 

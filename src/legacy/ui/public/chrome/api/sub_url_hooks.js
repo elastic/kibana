@@ -19,20 +19,23 @@
 
 import url from 'url';
 
-import {
-  getUnhashableStatesProvider,
-  unhashUrl,
-} from '../../state_management/state_hashing';
+import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+import { toastNotifications } from '../../notify/toasts';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private, $location) => {
-    const getUnhashableStates = Private(getUnhashableStatesProvider);
     const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
     function updateSubUrls() {
       const urlWithHashes = window.location.href;
-      const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-      internals.trackPossibleSubUrl(urlWithStates);
+      let urlWithStates;
+      try {
+        urlWithStates = unhashUrl(urlWithHashes);
+      } catch (e) {
+        toastNotifications.addDanger(e.message);
+      }
+
+      internals.trackPossibleSubUrl(urlWithStates || urlWithHashes);
     }
 
     function onRouteChange($event) {

@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../../../src/legacy/core_plugins/data/public';
 import {
   esFilters,
+  IIndexPattern,
   Query,
   FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { QueryBar } from '../../../../../components/query_bar';
@@ -28,14 +28,15 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 export interface FieldValueQueryBar {
   filters: esFilters.Filter[];
   query: Query;
-  saved_id: string;
+  saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
   isLoading: boolean;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
+  resizeParentContainer?: (height: number) => void;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
@@ -60,7 +61,9 @@ export const QueryBarDefineRule = ({
   idAria,
   indexPattern,
   isLoading = false,
+  resizeParentContainer,
 }: QueryBarDefineRuleProps) => {
+  const [originalHeight, setOriginalHeight] = useState(-1);
   const [savedQuery, setSavedQuery] = useState<SavedQuery | null>(null);
   const [queryDraft, setQueryDraft] = useState<Query>({ query: '', language: 'kuery' });
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -165,6 +168,27 @@ export const QueryBarDefineRule = ({
     [field.value]
   );
 
+  const onMutation = (event: unknown, observer: unknown) => {
+    if (resizeParentContainer != null) {
+      const suggestionContainer = document.getElementById('kbnTypeahead__items');
+      if (suggestionContainer != null) {
+        const box = suggestionContainer.getBoundingClientRect();
+        const accordionContainer = document.getElementById('define-rule');
+        if (accordionContainer != null) {
+          const accordionBox = accordionContainer.getBoundingClientRect();
+          if (originalHeight === -1 || accordionBox.height < originalHeight + box.height) {
+            resizeParentContainer(originalHeight + box.height - 100);
+          }
+          if (originalHeight === -1) {
+            setOriginalHeight(accordionBox.height);
+          }
+        }
+      } else {
+        resizeParentContainer(-1);
+      }
+    }
+  };
+
   return (
     <StyledEuiFormRow
       label={field.label}
@@ -176,18 +200,27 @@ export const QueryBarDefineRule = ({
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
-      <QueryBar
-        indexPattern={indexPattern}
-        isLoading={isLoading}
-        isRefreshPaused={false}
-        filterQuery={queryDraft}
-        filterManager={filterManager}
-        filters={filterManager.getFilters() || []}
-        onChangedQuery={onChangedQuery}
-        onSubmitQuery={onSubmitQuery}
-        savedQuery={savedQuery}
-        onSavedQuery={onSavedQuery}
-      />
+      <EuiMutationObserver
+        observerOptions={{ subtree: true, attributes: true, childList: true }}
+        onMutation={onMutation}
+      >
+        {mutationRef => (
+          <div ref={mutationRef}>
+            <QueryBar
+              indexPattern={indexPattern}
+              isLoading={isLoading}
+              isRefreshPaused={false}
+              filterQuery={queryDraft}
+              filterManager={filterManager}
+              filters={filterManager.getFilters() || []}
+              onChangedQuery={onChangedQuery}
+              onSubmitQuery={onSubmitQuery}
+              savedQuery={savedQuery}
+              onSavedQuery={onSavedQuery}
+            />
+          </div>
+        )}
+      </EuiMutationObserver>
     </StyledEuiFormRow>
   );
 };

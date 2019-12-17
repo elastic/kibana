@@ -19,14 +19,14 @@
 
 import { fetchProvider } from './fetch';
 
-export function makeKQLUsageCollector(server) {
+export function makeKQLUsageCollector(usageCollection, server) {
   const index = server.config().get('kibana.index');
   const fetch = fetchProvider(index);
-  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
+  const kqlUsageCollector = usageCollection.makeUsageCollector({
     type: 'kql',
     fetch,
     isReady: () => true,
   });
 
-  server.usage.collectorSet.register(kqlUsageCollector);
+  usageCollection.registerCollector(kqlUsageCollector);
 }

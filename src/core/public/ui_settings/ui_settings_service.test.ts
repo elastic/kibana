@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { MockUiSettingsApi, MockUiSettingsClient } from './ui_settings_service.test.mocks';
+import * as Rx from 'rxjs';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
@@ -30,53 +29,27 @@ const defaultDeps = {
   injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
 };
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
-describe('#setup', () => {
-  it('returns an instance of UiSettingsClient', () => {
-    const setup = new UiSettingsService().setup(defaultDeps);
-    expect(setup).toBeInstanceOf(MockUiSettingsClient);
-  });
-
-  it('constructs UiSettingsClient and UiSettingsApi', () => {
-    new UiSettingsService().setup(defaultDeps);
-
-    expect(MockUiSettingsApi).toMatchSnapshot('UiSettingsApi args');
-    expect(MockUiSettingsClient).toMatchSnapshot('UiSettingsClient args');
-  });
-
-  it('passes the uiSettings loading count to the loading count api', () => {
-    new UiSettingsService().setup(defaultDeps);
-
-    expect(httpSetup.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
-  });
-});
-
-describe('#start', () => {
-  it('returns an instance of UiSettingsClient', () => {
-    const uiSettings = new UiSettingsService();
-    uiSettings.setup(defaultDeps);
-    const start = uiSettings.start();
-    expect(start).toBeInstanceOf(MockUiSettingsClient);
-  });
-});
-
 describe('#stop', () => {
   it('runs fine if service never set up', () => {
     const service = new UiSettingsService();
     expect(() => service.stop()).not.toThrowError();
   });
 
-  it('stops the uiSettingsClient and uiSettingsApi', () => {
+  it('stops the uiSettingsClient and uiSettingsApi', async () => {
     const service = new UiSettingsService();
+    let loadingCount$: Rx.Observable<unknown>;
+    defaultDeps.http.addLoadingCount.mockImplementation(obs$ => (loadingCount$ = obs$));
     const client = service.setup(defaultDeps);
-    const [[{ api }]] = MockUiSettingsClient.mock.calls;
-    jest.spyOn(client, 'stop');
-    jest.spyOn(api, 'stop');
+
     service.stop();
-    expect(api.stop).toHaveBeenCalledTimes(1);
-    expect(client.stop).toHaveBeenCalledTimes(1);
+
+    await expect(
+      Rx.combineLatest(
+        client.getUpdate$(),
+        client.getSaved$(),
+        client.getUpdateErrors$(),
+        loadingCount$!
+      ).toPromise()
+    ).resolves.toBe(undefined);
   });
 });

@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AutoSizer } from '../../components/auto_sizer';
@@ -56,7 +55,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage = pure(() => (
+export const HomePage: React.FC = () => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
@@ -115,7 +114,7 @@ export const HomePage = pure(() => (
                     path={`/:pageName(${SiemPageName.timelines})`}
                     render={() => <Timelines />}
                   />
-                  <Route path="/link-to" component={LinkToPage} />
+                  <Route path="/link-to" render={props => <LinkToPage {...props} />} />
                   <Route
                     path="/ml-hosts"
                     render={({ location, match }) => (
@@ -128,7 +127,7 @@ export const HomePage = pure(() => (
                       <MlNetworkConditionalContainer location={location} url={match.url} />
                     )}
                   />
-                  <Route component={NotFoundPage} />
+                  <Route render={() => <NotFoundPage />} />
                 </Switch>
               </DragDropContextWrapper>
             )}
@@ -141,5 +140,6 @@ export const HomePage = pure(() => (
       </WrappedByAutoSizer>
     )}
   </AutoSizer>
-));
+);
+
 HomePage.displayName = 'HomePage';

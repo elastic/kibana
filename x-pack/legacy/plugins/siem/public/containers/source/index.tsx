@@ -9,7 +9,7 @@ import { get, keyBy, pick, set } from 'lodash/fp';
 import { Query } from 'react-apollo';
 import React, { useEffect, useState } from 'react';
 import memoizeOne from 'memoize-one';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -52,7 +52,7 @@ export const getAllFieldsByName = (
 interface WithSourceArgs {
   indicesExist: boolean;
   browserFields: BrowserFields;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface WithSourceProps {
@@ -61,7 +61,7 @@ interface WithSourceProps {
 }
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): StaticIndexPattern =>
+  (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
       ? {
           fields: fields.map(field => pick(['name', 'searchable', 'type', 'aggregatable'], field)),
@@ -70,7 +70,7 @@ export const getIndexFields = memoizeOne(
       : { fields: [], title }
 );
 
-const getBrowserFields = memoizeOne(
+export const getBrowserFields = memoizeOne(
   (fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
@@ -118,7 +118,7 @@ export const useWithSource = (sourceId: string, indices: string[]) => {
   const [loading, updateLoading] = useState(false);
   const [indicesExist, setIndicesExist] = useState<boolean | undefined | null>(undefined);
   const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
-  const [indexPattern, setIndexPattern] = useState<StaticIndexPattern | null>(null);
+  const [indexPattern, setIndexPattern] = useState<IIndexPattern | null>(null);
   const [errorMessage, updateErrorMessage] = useState<string | null>(null);
 
   const apolloClient = useApolloClient();

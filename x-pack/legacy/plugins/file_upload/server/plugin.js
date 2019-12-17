@@ -5,16 +5,13 @@
  */
 
 import { getImportRouteHandler } from './routes/file_upload';
-import { getTelemetry, initTelemetry } from './telemetry/telemetry';
 import { MAX_BYTES } from '../common/constants/file_import';
-
-const TELEMETRY_TYPE = 'fileUploadTelemetry';
+import { registerFileUploadUsageCollector } from './telemetry';
 
 export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
     const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;
     const getSavedObjectsRepository = __LEGACY.savedObjects.getSavedObjectsRepository;
-    const makeUsageCollector = __LEGACY.usage.collectorSet.makeUsageCollector;
 
     // Set up route
     __LEGACY.route({
@@ -23,14 +20,12 @@ export class FileUploadPlugin {
       handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
       config: {
         payload: { maxBytes: MAX_BYTES },
-      }
+      },
     });
 
-    // Make usage collector
-    makeUsageCollector({
-      type: TELEMETRY_TYPE,
-      isReady: () => true,
-      fetch: async () => (await getTelemetry(elasticsearchPlugin, getSavedObjectsRepository)) || initTelemetry()
+    registerFileUploadUsageCollector(plugins.usageCollection, {
+      elasticsearchPlugin,
+      getSavedObjectsRepository,
     });
   }
 }

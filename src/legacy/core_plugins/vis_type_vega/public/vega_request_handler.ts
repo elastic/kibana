@@ -49,7 +49,7 @@ export function createVegaRequestHandler({
     timeCache.setTimeRange(timeRange);
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
-    const filtersDsl = esQuery.buildEsQuery(null, query, filters, esQueryConfigs);
+    const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
     const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
     return vp.parseAsync();

@@ -11,6 +11,8 @@ import { PolicyForm } from '../../public/app/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.policyEdit;
 const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 
@@ -43,7 +45,6 @@ describe.skip('<PolicyEdit />', () => {
 
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();
@@ -64,7 +65,6 @@ describe.skip('<PolicyEdit />', () => {
     test('should use the same Form component as the "<PolicyAdd />" section', async () => {
       testBedPolicyAdd = await setupPolicyAdd();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBedPolicyAdd.component.update();
@@ -108,7 +108,6 @@ describe.skip('<PolicyEdit />', () => {
       it('should send the correct payload with changed values', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

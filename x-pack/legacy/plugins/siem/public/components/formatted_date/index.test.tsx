@@ -38,7 +38,8 @@ describe('formatted_date', () => {
           .format(config.dateFormat);
 
       test('renders correctly against snapshot', () => {
-        const wrapper = shallow(<PreferenceFormattedDate value={isoDate} />);
+        mockUseKibanaUiSetting.mockImplementation(() => [null]);
+        const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(toJson(wrapper)).toMatchSnapshot();
       });
 

@@ -132,12 +132,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/eui_utils/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
@@ -164,20 +158,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/graph/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/index_management/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/infra/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
@@ -214,53 +195,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
       },
-    },
-    {
-      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-
-    /**
-     * Prettier
-     */
-    {
-      files: [
-        '.eslintrc.js',
-        'packages/kbn-utility-types/**/*',
-        'packages/kbn-eslint-plugin-eslint/**/*',
-        'packages/kbn-config-schema/**/*',
-        'packages/kbn-pm/**/*',
-        'packages/kbn-es/**/*',
-        'packages/elastic-datemath/**/*',
-        'packages/kbn-i18n/**/*',
-        'packages/kbn-dev-utils/**/*',
-        'packages/kbn-plugin-helpers/**/*',
-        'packages/kbn-plugin-generator/**/*',
-        'packages/kbn-test-subj-selector/**/*',
-        'packages/kbn-test/**/*',
-        'packages/kbn-eslint-import-resolver-kibana/**/*',
-        'src/legacy/server/saved_objects/**/*',
-        'x-pack/legacy/plugins/apm/**/*',
-        'x-pack/legacy/plugins/canvas/**/*',
-        '**/*.{ts,tsx}',
-        'src/legacy/core_plugins/metrics/**/*.js',
-      ],
-      plugins: ['prettier'],
-      rules: Object.assign(
-        {
-          'prettier/prettier': [
-            'error',
-            {
-              endOfLine: 'auto',
-            },
-          ],
-        },
-        require('eslint-config-prettier').rules,
-        require('eslint-config-prettier/react').rules
-      ),
     },
 
     /**
@@ -323,7 +257,8 @@ module.exports = {
                   'src/legacy/**/*',
                   'x-pack/**/*',
                   '!x-pack/**/*.test.*',
-                  'src/plugins/**/(public|server)/**/*',
+                  '!x-pack/test/**/*',
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'src/core/(public|server)/**/*',
                 ],
                 from: [
@@ -337,18 +272,58 @@ module.exports = {
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
                   '!src/core/server/types.ts',
+                  '!src/core/server/test_utils.ts',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/types',
                   '!src/core/server/*.test.mocks.ts',
 
-                  'src/plugins/**/public/**/*',
-                  '!src/plugins/**/public/index.{js,ts,tsx}',
-
-                  'src/plugins/**/server/**/*',
-                  '!src/plugins/**/server/index.{js,ts,tsx}',
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+                errorMessage: 'Plugins may only import from top-level public and server modules.',
+              },
+              {
+                target: [
+                  '(src|x-pack)/plugins/**/*',
+                  '!(src|x-pack)/plugins/*/server/**/*',
+
+                  'src/legacy/core_plugins/**/*',
+                  '!src/legacy/core_plugins/*/server/**/*',
+                  '!src/legacy/core_plugins/*/index.{js,ts,tsx}',
+
+                  'x-pack/legacy/plugins/**/*',
+                  '!x-pack/legacy/plugins/*/server/**/*',
+                  '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+                ],
+                from: [
+                  'src/core/server',
+                  'src/core/server/**/*',
+                  '(src|x-pack)/plugins/*/server/**/*',
+                ],
+                errorMessage:
+                  'Server modules cannot be imported into client modules or shared modules.',
+              },
+              {
+                target: ['src/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
+                errorMessage: 'The core cannot depend on any plugins.',
+              },
+              {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['ui/**/*', 'uiExports/**/*'],
+                errorMessage: 'Plugins cannot import legacy UI code.',
               },
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
@@ -710,8 +685,6 @@ module.exports = {
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
-        // This will be turned on after bug fixes are mostly completed
-        // 'arrow-body-style': ['warn', 'as-needed'],
         complexity: 'warn',
         // This will be turned on after bug fixes are mostly completed
         // 'consistent-return': 'warn',
@@ -741,7 +714,6 @@ module.exports = {
         'no-extra-bind': 'error',
         'no-extra-boolean-cast': 'error',
         'no-extra-label': 'error',
-        'no-floating-decimal': 'error',
         'no-func-assign': 'error',
         'no-implicit-globals': 'error',
         'no-implied-eval': 'error',
@@ -782,8 +754,6 @@ module.exports = {
         'prefer-spread': 'error',
         // This style will be turned on after most bugs are fixed
         // 'prefer-template': 'warn',
-        // This style will be turned on after most bugs are fixed
-        // quotes: ['warn', 'single', { avoidEscape: true }],
         'react/boolean-prop-naming': 'error',
         'react/button-has-type': 'error',
         'react/forbid-dom-props': 'error',
@@ -819,13 +789,10 @@ module.exports = {
         'react/jsx-sort-default-props': 'error',
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
-        'react/jsx-tag-spacing': 'error',
         // might be introduced after the other warns are fixed
         'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
-        'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',
-        'template-curly-spacing': 'error',
         'vars-on-top': 'error',
       },
     },
@@ -860,8 +827,6 @@ module.exports = {
     {
       files: ['x-pack/legacy/plugins/monitoring/**/*.js'],
       rules: {
-        'block-spacing': ['error', 'always'],
-        curly: ['error', 'all'],
         'no-unused-vars': ['error', { args: 'all', argsIgnorePattern: '^_' }],
         'no-else-return': 'error',
       },
@@ -878,7 +843,6 @@ module.exports = {
       files: ['x-pack/legacy/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
-        curly: ['error', 'all'],
 
         // module importing
         'import/order': [
@@ -896,7 +860,6 @@ module.exports = {
         'react/self-closing-comp': 'error',
         'react/sort-comp': 'error',
         'react/jsx-boolean-value': 'error',
-        'react/jsx-wrap-multilines': 'error',
         'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
         'react/forbid-elements': [
           'error',
@@ -971,6 +934,18 @@ module.exports = {
       excludedFiles: 'src/legacy/core_plugins/metrics/index.js',
       rules: {
         'import/no-default-export': 'error',
+      },
+    },
+
+    /**
+     * Prettier disables all conflicting rules, listing as last override so it takes precedence
+     */
+    {
+      files: ['**/*'],
+      rules: {
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
   ],

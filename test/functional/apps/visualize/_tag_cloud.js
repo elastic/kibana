@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
   const inspector = getService('inspector');
@@ -28,11 +28,11 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
 
-  describe('tag cloud chart', function () {
+  describe('tag cloud chart', function() {
     const vizName1 = 'Visualization tagCloud';
     const termsField = 'machine.ram';
 
-    before(async function () {
+    before(async function() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickTagCloud');
@@ -51,18 +51,23 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
     });
 
-
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct tag cloud data', async function () {
+    it('should show correct tag cloud data', async function() {
       const data = await PageObjects.visualize.getTextTag();
       log.debug(data);
-      expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
+      expect(data).to.eql([
+        '32,212,254,720',
+        '21,474,836,480',
+        '20,401,094,656',
+        '19,327,352,832',
+        '18,253,611,008',
+      ]);
     });
 
-    it('should collapse the sidebar', async function () {
+    it('should collapse the sidebar', async function() {
       const editorSidebar = await find.byCssSelector('.collapsible-sidebar');
       await PageObjects.visualize.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
@@ -72,8 +77,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickEditorSidebarCollapse();
     });
 
-
-    it('should still show all tags after sidebar has been collapsed', async function () {
+    it('should still show all tags after sidebar has been collapsed', async function() {
       await PageObjects.visualize.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
@@ -82,43 +86,51 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
       const data = await PageObjects.visualize.getTextTag();
       log.debug(data);
-      expect(data).to.eql(['32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008']);
+      expect(data).to.eql([
+        '32,212,254,720',
+        '21,474,836,480',
+        '20,401,094,656',
+        '19,327,352,832',
+        '18,253,611,008',
+      ]);
     });
 
-    it('should still show all tags after browser was resized very small', async function () {
+    it('should still show all tags after browser was resized very small', async function() {
       await browser.setWindowSize(200, 200);
       await PageObjects.common.sleep(1000);
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.sleep(1000);
       const data = await PageObjects.visualize.getTextTag();
-      expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
+      expect(data).to.eql([
+        '32,212,254,720',
+        '21,474,836,480',
+        '20,401,094,656',
+        '19,327,352,832',
+        '18,253,611,008',
+      ]);
     });
 
-    it('should save and load', async function () {
+    it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
-
-
-    it('should show the tags and relative size', function () {
-      return PageObjects.visualize.getTextSizes()
-        .then(function (results) {
-          log.debug('results here ' + results);
-          expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
-        });
+    it('should show the tags and relative size', function() {
+      return PageObjects.visualize.getTextSizes().then(function(results) {
+        log.debug('results here ' + results);
+        expect(results).to.eql(['72px', '63px', '25px', '32px', '18px']);
+      });
     });
 
-
-    it('should show correct data', async function () {
-      const expectedTableData =  [
-        [ '32,212,254,720', '737' ],
-        [ '21,474,836,480', '728' ],
-        [ '20,401,094,656', '687' ],
-        [ '19,327,352,832', '695' ],
-        [ '18,253,611,008', '679' ]
+    it('should show correct data', async function() {
+      const expectedTableData = [
+        ['32,212,254,720', '737'],
+        ['21,474,836,480', '728'],
+        ['20,401,094,656', '687'],
+        ['19,327,352,832', '695'],
+        ['18,253,611,008', '679'],
       ];
 
       await inspector.open();
@@ -126,8 +138,8 @@ export default function ({ getService, getPageObjects }) {
       await inspector.expectTableData(expectedTableData);
     });
 
-    describe('formatted field', function () {
-      before(async function () {
+    describe('formatted field', function() {
+      before(async function() {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -136,13 +148,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToApp('visualize');
-        await PageObjects.visualize.loadSavedVisualization(vizName1, { navigateToVisualize: false });
+        await PageObjects.visualize.loadSavedVisualization(vizName1, {
+          navigateToVisualize: false,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visualize.waitForVisualization();
       });
 
-      after(async function () {
+      after(async function() {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
@@ -153,20 +167,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.controlChangeSave();
       });
 
-      it('should format tags with field formatter', async function () {
+      it('should format tags with field formatter', async function() {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
-        expect(data).to.eql([ '30GB', '20GB', '19GB', '18GB', '17GB' ]);
+        expect(data).to.eql(['30GB', '20GB', '19GB', '18GB', '17GB']);
       });
 
-      it('should apply filter with unformatted value', async function () {
+      it('should apply filter with unformatted value', async function() {
         await PageObjects.visualize.selectTagCloudTag('30GB');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const data = await PageObjects.visualize.getTextTag();
-        expect(data).to.eql([ '30GB' ]);
+        expect(data).to.eql(['30GB']);
       });
-
     });
-
   });
 }

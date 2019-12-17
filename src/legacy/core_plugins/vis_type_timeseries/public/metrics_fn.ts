@@ -20,12 +20,10 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { PersistedState } from 'ui/persisted_state';
-import chrome from 'ui/chrome';
-
 import { ExpressionFunction, KibanaContext, Render } from '../../../../plugins/expressions/public';
 
 // @ts-ignore
-import { createMetricsRequestHandler } from './request_handler';
+import { metricsRequestHandler } from './request_handler';
 
 const name = 'tsvb';
 type Context = KibanaContext | null;
@@ -68,8 +66,6 @@ export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Argu
     },
   },
   async fn(context: Context, args: Arguments) {
-    const uiSettings = chrome.getUiSettingsClient();
-    const metricsRequestHandler = createMetricsRequestHandler(uiSettings);
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
     const uiState = new PersistedState(uiStateParams);

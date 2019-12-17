@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, nodeTypes, KueryNode } from '../kuery';
 import { IIndexPattern } from '../../index_patterns';
 import { Query } from '../../query/types';
 
 export function buildQueryFromKuery(
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   queries: Query[] = [],
   allowLeadingWildcards: boolean = false,
   dateFormatTZ?: string
@@ -35,22 +35,20 @@ export function buildQueryFromKuery(
 }
 
 function buildQuery(
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   queryASTs: KueryNode[],
   config: Record<string, any> = {}
 ) {
-  const compoundQueryAST: KueryNode = nodeTypes.function.buildNode('and', queryASTs);
-  const kueryQuery: Record<string, any> = toElasticsearchQuery(
-    compoundQueryAST,
-    indexPattern,
-    config
-  );
+  const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
+  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
 
-  return {
-    must: [],
-    filter: [],
-    should: [],
-    must_not: [],
-    ...kueryQuery.bool,
-  };
+  return Object.assign(
+    {
+      must: [],
+      filter: [],
+      should: [],
+      must_not: [],
+    },
+    kueryQuery.bool
+  );
 }

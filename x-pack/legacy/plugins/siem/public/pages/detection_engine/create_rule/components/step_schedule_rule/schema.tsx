@@ -8,9 +8,8 @@ import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema } from '../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
-
 import * as CreateRuleI18n from '../../translations';
+import { FormSchema } from '../shared_imports';
 
 export const schema: FormSchema = {
   interval: {

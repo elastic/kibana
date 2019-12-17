@@ -12,6 +12,8 @@ import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
 import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
 import { REPOSITORY_EDIT } from './helpers/constant';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 
@@ -39,7 +41,6 @@ describe.skip('<RepositoryEdit />', () => {
       });
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();
@@ -79,7 +80,6 @@ describe.skip('<RepositoryEdit />', () => {
       });
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         await nextTick();
         testBed.component.update();

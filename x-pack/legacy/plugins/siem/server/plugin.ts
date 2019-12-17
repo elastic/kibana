@@ -4,27 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, EnvironmentMode, PluginInitializerContext, Logger } from 'src/core/server';
-import { ServerFacade } from './types';
-import { initServerWithKibana } from './kibana.index';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
+import { PluginSetupContract as FeaturesSetupContract } from '../../../../plugins/features/server';
+import { initServer } from './init_server';
+import { compose } from './lib/compose/kibana';
+import {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  timelineSavedObjectType,
+} from './saved_objects';
+
+export interface PluginsSetup {
+  features: FeaturesSetupContract;
+}
 
 export class Plugin {
-  name = 'siem';
-  private mode: EnvironmentMode;
-  private logger: Logger;
+  readonly name = 'siem';
+  private readonly logger: Logger;
+  private context: PluginInitializerContext;
 
-  constructor({ env, logger }: PluginInitializerContext) {
-    this.logger = logger.get('plugins', this.name);
-    this.mode = env.mode;
+  constructor(context: PluginInitializerContext) {
+    this.context = context;
+    this.logger = context.logger.get('plugins', this.name);
 
-    this.logger.info('NP plugin initialized');
+    this.logger.debug('Shim plugin initialized');
   }
 
-  public setup(core: CoreSetup, dependencies: {}, __legacy: ServerFacade) {
-    this.logger.info('NP plugin setup');
+  public setup(core: CoreSetup, plugins: PluginsSetup) {
+    this.logger.debug('Shim plugin setup');
 
-    initServerWithKibana(__legacy, this.logger, this.mode);
+    plugins.features.registerFeature({
+      id: this.name,
+      name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
+        defaultMessage: 'SIEM',
+      }),
+      icon: 'securityAnalyticsApp',
+      navLinkId: 'siem',
+      app: ['siem', 'kibana'],
+      catalogue: ['siem'],
+      privileges: {
+        all: {
+          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          savedObject: {
+            all: [
+              'alert',
+              'action',
+              'action_task_params',
+              noteSavedObjectType,
+              pinnedEventSavedObjectType,
+              timelineSavedObjectType,
+            ],
+            read: ['config'],
+          },
+          ui: ['show'],
+        },
+        read: {
+          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          savedObject: {
+            all: ['alert', 'action', 'action_task_params'],
+            read: [
+              'config',
+              noteSavedObjectType,
+              pinnedEventSavedObjectType,
+              timelineSavedObjectType,
+            ],
+          },
+          ui: ['show'],
+        },
+      },
+    });
 
-    this.logger.info('NP plugin setup complete');
+    const libs = compose(core, this.context.env);
+    initServer(libs);
   }
 }

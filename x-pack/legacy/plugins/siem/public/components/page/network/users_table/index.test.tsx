@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
@@ -13,6 +13,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
@@ -31,6 +32,7 @@ describe('Users Table Component', () => {
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
@@ -55,7 +57,7 @@ describe('Users Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(UsersTableComponent)'))).toMatchSnapshot();
     });
   });
 

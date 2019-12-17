@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -14,8 +14,9 @@ import { Direction } from '../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../public/containers/source/mock';
 import { Sort } from '../sort';
 import { TestProviders } from '../../../../mock/test_providers';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
-import { ColumnHeaders } from '.';
+import { ColumnHeadersComponent } from '.';
 
 jest.mock('../../../resize_handle/is_resizing', () => ({
   ...jest.requireActual('../../../resize_handle/is_resizing'),
@@ -26,6 +27,8 @@ jest.mock('../../../resize_handle/is_resizing', () => ({
 }));
 
 describe('ColumnHeaders', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     const sort: Sort = {
       columnId: 'fooColumn',
@@ -34,7 +37,7 @@ describe('ColumnHeaders', () => {
 
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <ColumnHeaders
+        <ColumnHeadersComponent
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
@@ -54,7 +57,7 @@ describe('ColumnHeaders', () => {
     test('it renders the field browser', () => {
       const wrapper = mount(
         <TestProviders>
-          <ColumnHeaders
+          <ColumnHeadersComponent
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
@@ -81,7 +84,7 @@ describe('ColumnHeaders', () => {
     test('it renders every column header', () => {
       const wrapper = mount(
         <TestProviders>
-          <ColumnHeaders
+          <ColumnHeadersComponent
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
@@ -110,7 +113,7 @@ describe('ColumnHeaders', () => {
     test('it disables dragging during a column resize', () => {
       const wrapper = mount(
         <TestProviders>
-          <ColumnHeaders
+          <ColumnHeadersComponent
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}

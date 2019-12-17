@@ -9,7 +9,6 @@ import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authe
 import { defineSAMLRoutes } from './saml';
 import { ConfigType } from '../../config';
 import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
-import { LegacyAPI } from '../../plugin';
 
 import {
   elasticsearchServiceMock,
@@ -36,13 +35,13 @@ describe('SAML authentication routes', () => {
       config: { authc: { providers: ['saml'] } } as ConfigType,
       authc,
       authz: authorizationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
+      csp: httpServiceMock.createSetupContract().csp,
     });
   });
 
   describe('Assertion consumer service endpoint', () => {
-    let routeHandler: RequestHandler<any, any, any>;
-    let routeConfig: RouteConfig<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
         ([{ path }]) => path === '/api/security/saml/callback'

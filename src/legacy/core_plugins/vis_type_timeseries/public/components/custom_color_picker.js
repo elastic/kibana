@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import {
   ColorWrap as colorWrap,
@@ -32,16 +32,11 @@ import ChromePointer from 'react-color/lib/components/chrome/ChromePointer';
 import ChromePointerCircle from 'react-color/lib/components/chrome/ChromePointerCircle';
 import CompactColor from 'react-color/lib/components/compact/CompactColor';
 import color from 'react-color/lib/helpers/color';
-import shallowCompare from 'react-addons-shallow-compare';
 
-class CustomColorPickerUI extends Component {
+class CustomColorPickerUI extends PureComponent {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(nextProps, nextState);
   }
 
   handleChange(data) {

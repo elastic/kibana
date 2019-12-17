@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { Job, Datafeed, Detector } from '../configs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import {
@@ -20,7 +19,7 @@ import {
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../index';
-import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
   let field = newJobCapsService.getFieldById(id);
@@ -120,10 +119,9 @@ function getDetectors(job: Job, datafeed: Datafeed) {
   ) {
     // distinct count detector, field has been removed.
     // determine field from datafeed aggregations
-    const field = idx<Datafeed, string>(
-      datafeed,
-      _ => _.aggregations.buckets.aggregations.dc_region.cardinality.field
-    );
+    const field = datafeed?.aggregations?.buckets?.aggregations?.dc_region?.cardinality
+      ?.field as string;
+
     if (field !== undefined) {
       detectors = [
         {
@@ -193,10 +191,9 @@ function processFieldlessAggs(detectors: Detector[]) {
 export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   const detectors = job.analysis_config.detectors;
 
-  const distinctCountField = idx<Datafeed, string>(
-    datafeed,
-    _ => _.aggregations.buckets.aggregations.dc_region.cardinality.field
-  );
+  const distinctCountField = datafeed?.aggregations?.buckets?.aggregations?.dc_region?.cardinality
+    ?.field as string;
+
   // if distinctCountField is undefined, and any detectors contain a sparse data function
   // return true
   if (distinctCountField === undefined) {
@@ -229,6 +226,8 @@ function stashCombinedJob(
     mlJobService.tempJobCloningObjects.start = jobCreator.start;
     mlJobService.tempJobCloningObjects.end = jobCreator.end;
   }
+
+  mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
 }
 
 export function convertToMultiMetricJob(jobCreator: JobCreatorType) {

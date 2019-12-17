@@ -23,7 +23,8 @@ import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
-import { Config, ConfigPath, ConfigService, Env, ObjectToConfigAdapter } from '../config';
+import { ConfigPath, ConfigService, Env } from '../config';
+import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { coreMock } from '../mocks';
 import { loggingServiceMock } from '../logging/logging_service.mock';
@@ -38,11 +39,12 @@ import { DiscoveredPlugin } from './types';
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
-let config$: BehaviorSubject<Config>;
+let config$: BehaviorSubject<Record<string, any>>;
 let configService: ConfigService;
 let coreId: symbol;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
+
 const setupDeps = coreMock.createInternalSetup();
 const logger = loggingServiceMock.create();
 
@@ -108,10 +110,9 @@ describe('PluginsService', () => {
     coreId = Symbol('core');
     env = Env.createDefault(getEnvOptions());
 
-    config$ = new BehaviorSubject<Config>(
-      new ObjectToConfigAdapter({ plugins: { initialize: true } })
-    );
-    configService = new ConfigService(config$, env, logger);
+    config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
+    const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
+    configService = new ConfigService(rawConfigService, env, logger);
     await configService.setSchema(config.path, config.schema);
     pluginsService = new PluginsService({ coreId, env, logger, configService });
 
@@ -387,6 +388,40 @@ describe('PluginsService', () => {
       await pluginsService.discover();
       expect(configService.setSchema).toBeCalledWith('path', configSchema);
     });
+
+    it('registers plugin config deprecation provider in config service', async () => {
+      const configSchema = schema.string();
+      jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
+      jest.spyOn(configService, 'addDeprecationProvider');
+
+      const deprecationProvider = () => [];
+      jest.doMock(
+        join('path-with-provider', 'server'),
+        () => ({
+          config: {
+            schema: configSchema,
+            deprecations: deprecationProvider,
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([
+          createPlugin('some-id', {
+            path: 'path-with-provider',
+            configPath: 'config-path',
+          }),
+        ]),
+      });
+      await pluginsService.discover();
+      expect(configService.addDeprecationProvider).toBeCalledWith(
+        'config-path',
+        deprecationProvider
+      );
+    });
   });
 
   describe('#generateUiPluginsConfigs()', () => {
@@ -498,9 +533,7 @@ describe('PluginsService', () => {
 
         mockPluginSystem.uiPlugins.mockReturnValue(new Map());
 
-        config$.next(
-          new ObjectToConfigAdapter({ plugins: { initialize: true }, plugin1: { enabled: false } })
-        );
+        config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
 
         await pluginsService.discover();
         const { uiPlugins } = await pluginsService.setup({} as any);

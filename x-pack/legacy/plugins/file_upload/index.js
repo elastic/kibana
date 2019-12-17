@@ -16,13 +16,16 @@ export const fileUpload = kibana => {
     },
     savedObjectSchemas: {
       'file-upload-telemetry': {
-        isNamespaceAgnostic: true
-      }
+        isNamespaceAgnostic: true,
+      },
     },
 
     init(server) {
       const coreSetup = server.newPlatform.setup.core;
-      const pluginsSetup = {};
+      const { usageCollection } = server.newPlatform.setup.plugins;
+      const pluginsSetup = {
+        usageCollection,
+      };
 
       // legacy dependencies
       const __LEGACY = {
@@ -31,16 +34,11 @@ export const fileUpload = kibana => {
           elasticsearch: server.plugins.elasticsearch,
         },
         savedObjects: {
-          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository
+          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
-        usage: {
-          collectorSet: {
-            makeUsageCollector: server.usage.collectorSet.makeUsageCollector
-          }
-        }
       };
 
       new FileUploadPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
-    }
+    },
   });
 };

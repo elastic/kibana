@@ -68,6 +68,7 @@ declare module '@elastic/eui' {
     rowProps?: any;
     cellProps?: any;
     responsive?: boolean;
+    itemIdToExpandedRowMap?: any;
   };
   export const EuiInMemoryTable: React.FC<EuiInMemoryTableProps>;
 }

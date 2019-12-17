@@ -7,7 +7,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { logFilterActions, logFilterSelectors, State } from '../../store';
 import { FilterQuery } from '../../store/local/log_filter';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
@@ -16,7 +16,7 @@ import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 
 interface WithLogFilterProps {
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 export const withLogFilter = connect(

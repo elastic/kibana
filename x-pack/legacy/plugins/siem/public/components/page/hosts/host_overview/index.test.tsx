@@ -14,27 +14,6 @@ import { mockData } from './mock';
 import { mockAnomalies } from '../../../ml/mock';
 
 describe('Host Summary Component', () => {
-  // this is just a little hack to silence a warning that we'll get until react
-  // fixes this: https://github.com/facebook/react/pull/14853
-  // For us that mean we need to upgrade to 16.9.0
-  // and we will be able to do that when we are in master
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/Warning.*not wrapped in act/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
-  afterAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = originalError;
-  });
-
   describe('rendering', () => {
     test('it renders the default Host Summary', () => {
       const wrapper = shallow(
@@ -52,7 +31,7 @@ describe('Host Summary Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('HostOverview'))).toMatchSnapshot();
     });
   });
 });

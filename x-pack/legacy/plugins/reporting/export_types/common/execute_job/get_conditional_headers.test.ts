@@ -28,7 +28,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -45,7 +45,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -66,7 +66,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -83,7 +83,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -98,7 +98,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -121,7 +121,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -138,7 +138,7 @@ describe('conditions', () => {
     };
 
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -154,7 +154,7 @@ test('uses basePath from job when creating saved object service', async () => {
   };
 
   const { conditionalHeaders } = await getConditionalHeaders({
-    job: {} as JobDocPayload,
+    job: {} as JobDocPayload<any>,
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
@@ -181,7 +181,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   };
 
   const { conditionalHeaders } = await getConditionalHeaders({
-    job: {} as JobDocPayload,
+    job: {} as JobDocPayload<any>,
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
@@ -204,7 +204,7 @@ describe('config formatting', () => {
   test(`lowercases server.host`, async () => {
     mockServer = createMockServer({ settings: { 'server.host': 'COOL-HOSTNAME' } });
     const { conditionalHeaders } = await getConditionalHeaders({
-      job: {} as JobDocPayload,
+      job: {} as JobDocPayload<any>,
       filteredHeaders: {},
       server: mockServer,
     });

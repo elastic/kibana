@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshot reducer appends a current error to existing errors list 1`] = `
+Object {
+  "count": Object {
+    "down": 0,
+    "mixed": 0,
+    "total": 0,
+    "up": 0,
+  },
+  "errors": Array [
+    [Error: I couldn't get your data because the server denied the request],
+  ],
+  "loading": false,
+}
+`;
+
+exports[`snapshot reducer changes the count when a snapshot fetch succeeds 1`] = `
+Object {
+  "count": Object {
+    "down": 15,
+    "mixed": 0,
+    "total": 25,
+    "up": 10,
+  },
+  "errors": Array [],
+  "loading": false,
+}
+`;
+
+exports[`snapshot reducer sets the state's status to loading during a fetch 1`] = `
+Object {
+  "count": Object {
+    "down": 0,
+    "mixed": 0,
+    "total": 0,
+    "up": 0,
+  },
+  "errors": Array [],
+  "loading": true,
+}
+`;
+
+exports[`snapshot reducer updates existing state 1`] = `
+Object {
+  "count": Object {
+    "down": 1,
+    "mixed": 0,
+    "total": 4,
+    "up": 3,
+  },
+  "errors": Array [],
+  "loading": true,
+}
+`;

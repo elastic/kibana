@@ -5,16 +5,11 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseToolkit } from 'hapi';
+import { schema as kbnSchema } from '@kbn/config-schema';
 import { runHttpQuery } from 'apollo-server-core';
 import { UptimeCorePlugins, UptimeCoreSetup } from './adapter_types';
-import {
-  UMBackendFrameworkAdapter,
-  UMFrameworkRequest,
-  UMFrameworkResponse,
-  UMFrameworkRouteOptions,
-} from './adapter_types';
-import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
+import { UMBackendFrameworkAdapter } from './adapter_types';
+import { UMRouteDefinition } from '../../../rest_api';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
   constructor(
@@ -25,11 +20,22 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
     this.plugins = plugins;
   }
 
-  public registerRoute<
-    RouteRequest extends UMFrameworkRequest,
-    RouteResponse extends UMFrameworkResponse
-  >(route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    this.server.route(route);
+  public registerRoute({ handler, method, options, path, validate }: UMRouteDefinition) {
+    const routeDefinition = {
+      path,
+      validate,
+      options,
+    };
+    switch (method) {
+      case 'GET':
+        this.server.route.get(routeDefinition, handler);
+        break;
+      case 'POST':
+        this.server.route.post(routeDefinition, handler);
+        break;
+      default:
+        throw new Error(`Handler for method ${method} is not defined`);
+    }
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
@@ -43,37 +49,47 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         tags: ['access:uptime'],
       },
     };
-    this.server.route({
-      options: options.route,
-      handler: async (request: Request, h: ResponseToolkit) => {
+    this.server.route.post(
+      {
+        path: routePath,
+        validate: {
+          body: kbnSchema.object({
+            operationName: kbnSchema.nullable(kbnSchema.string()),
+            query: kbnSchema.string(),
+            variables: kbnSchema.recordOf(kbnSchema.string(), kbnSchema.any()),
+          }),
+        },
+        options: {
+          tags: ['access:uptime'],
+        },
+      },
+      async (context, request, resp): Promise<any> => {
         try {
-          const { method } = request;
-          const query =
-            method === 'post'
-              ? (request.payload as Record<string, any>)
-              : (request.query as Record<string, any>);
+          const query = request.body as Record<string, any>;
 
           const graphQLResponse = await runHttpQuery([request], {
-            method: method.toUpperCase(),
+            method: 'POST',
             options: options.graphQLOptions,
             query,
           });
 
-          return h.response(graphQLResponse).type('application/json');
+          return resp.ok({
+            body: graphQLResponse,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
         } catch (error) {
           if (error.isGraphQLError === true) {
-            return h
-              .response(error.message)
-              .code(error.statusCode)
-              .type('application/json');
+            return resp.internalError({
+              body: { message: error.message },
+              headers: { 'content-type': 'application/json' },
+            });
           }
-          return h.response(error).type('application/json');
+          return resp.internalError();
         }
-      },
-      method: ['get', 'post'],
-      path: options.path || DEFAULT_GRAPHQL_PATH,
-      vhost: undefined,
-    });
+      }
+    );
   }
 
   public getSavedObjectsClient() {

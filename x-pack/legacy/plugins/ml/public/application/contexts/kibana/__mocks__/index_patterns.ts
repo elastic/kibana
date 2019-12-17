@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatterns } from 'ui/index_patterns';
+import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
 
 export const indexPatternsMock = (new (class {
   fieldFormats = [];
@@ -18,4 +18,4 @@ export const indexPatternsMock = (new (class {
   getIds = jest.fn();
   getTitles = jest.fn();
   make = jest.fn();
-})() as unknown) as IndexPatterns;
+})() as unknown) as IndexPatternsContract;

@@ -8,6 +8,7 @@ import { Legacy } from 'kibana';
 import { Root } from 'joi';
 import mappings from './mappings.json';
 import { init } from './server';
+import { WhitelistedHosts, EnabledActionTypes } from './server/actions_config';
 
 export {
   ActionsPlugin,
@@ -33,15 +34,19 @@ export function actions(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(false),
+          enabled: Joi.boolean().default(true),
           whitelistedHosts: Joi.array()
             .items(
               Joi.string()
                 .hostname()
-                .allow('*')
+                .allow(WhitelistedHosts.Any)
             )
             .sparse(false)
-            .default([]),
+            .default([WhitelistedHosts.Any]),
+          enabledActionTypes: Joi.array()
+            .items(Joi.string())
+            .sparse(false)
+            .default([EnabledActionTypes.Any]),
         })
         .default();
     },

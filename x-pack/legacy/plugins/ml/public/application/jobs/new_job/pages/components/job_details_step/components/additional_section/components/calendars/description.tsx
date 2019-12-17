@@ -7,7 +7,10 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { metadata } from 'ui/metadata';
+
+const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-calendars.html`;
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -18,16 +21,26 @@ export const Description: FC = memo(({ children }) => {
   );
   return (
     <EuiDescribedFormGroup
-      idAria="description"
+      idAria="calendars_description"
       title={<h3>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"
-          defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
+          defaultMessage="Contains a list of scheduled events that you want to ignore, such as planned system outages or public holidays. {learnMoreLink}"
+          values={{
+            learnMoreLink: (
+              <EuiLink href={docsUrl} target="_blank">
+                <FormattedMessage
+                  id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.learnMoreLinkText"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       }
     >
-      <EuiFormRow label={title} describedByIds={['description']}>
+      <EuiFormRow describedByIds={['calendars_description']}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

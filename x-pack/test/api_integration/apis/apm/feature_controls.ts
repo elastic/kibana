@@ -5,14 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
   const log = getService('log');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
@@ -39,7 +38,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
   const endpoints: Endpoint[] = [
     {
-      req: { url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D` },
+      // this doubles as a smoke test for the _debug query parameter
+      req: {
+        url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D_debug=true`,
+      },
       expectForbidden: expect404,
       expectResponse: expect200,
     },

@@ -32,7 +32,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
     };
   }
 
-  public async componentWillMount() {
+  public async UNSAFE_componentWillMount() {
     if (this.state.loading === true) {
       try {
         await this.props.beatsContainer.reload();

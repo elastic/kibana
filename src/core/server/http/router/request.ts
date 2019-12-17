@@ -20,23 +20,32 @@
 import { Url } from 'url';
 import { Request } from 'hapi';
 
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { ObjectType, Type, TypeOf } from '@kbn/config-schema';
 
+import { Stream } from 'stream';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
+import { RouteMethod, RouteSchemas, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 
 const requestSymbol = Symbol('request');
 
 /**
+ * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
+ * @public
+ */
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+  ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
+  : Required<RouteConfigOptions<Method>>;
+
+/**
  * Request specific route information exposed to a handler.
  * @public
  * */
-export interface KibanaRequestRoute {
+export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
-  method: RouteMethod | 'patch' | 'options';
-  options: Required<RouteConfigOptions>;
+  method: Method;
+  options: KibanaRequestRouteOptions<Method>;
 }
 
 /**
@@ -50,17 +59,22 @@ export interface LegacyRequest extends Request {} // eslint-disable-line @typesc
  * Kibana specific abstraction for an incoming request.
  * @public
  */
-export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+export class KibanaRequest<
+  Params = unknown,
+  Query = unknown,
+  Body = unknown,
+  Method extends RouteMethod = any
+> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    * @internal
    */
-  public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-    req: Request,
-    routeSchemas?: RouteSchemas<P, Q, B>,
-    withoutSecretHeaders: boolean = true
-  ) {
+  public static from<
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders: boolean = true) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
       req,
@@ -77,7 +91,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * received in the route handler.
    * @internal
    */
-  private static validate<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  private static validate<
+    P extends ObjectType,
+    Q extends ObjectType,
+    B extends ObjectType | Type<Buffer> | Type<Stream>
+  >(
     req: Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined
   ): {
@@ -113,7 +131,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
-  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
    * Readonly copy of incoming request headers.
    * @remarks
@@ -148,15 +166,28 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
     this.socket = new KibanaSocket(request.raw.req.socket);
   }
 
-  private getRouteInfo() {
+  private getRouteInfo(): KibanaRequestRoute<Method> {
     const request = this[requestSymbol];
+    const method = request.method as Method;
+    const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
+
+    const options = ({
+      authRequired: request.route.settings.auth !== false,
+      tags: request.route.settings.tags || [],
+      body: ['get', 'options'].includes(method)
+        ? undefined
+        : {
+            parse,
+            maxBytes,
+            accepts: allow,
+            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+          },
+    } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+
     return {
       path: request.path,
-      method: request.method,
-      options: {
-        authRequired: request.route.settings.auth !== false,
-        tags: request.route.settings.tags || [],
-      },
+      method,
+      options,
     };
   }
 }

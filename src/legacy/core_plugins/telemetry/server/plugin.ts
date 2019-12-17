@@ -18,8 +18,20 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Server } from 'hapi';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
+import {
+  registerUiMetricUsageCollector,
+  registerTelemetryUsageCollector,
+  registerLocalizationUsageCollector,
+  registerTelemetryPluginUsageCollector,
+} from './collectors';
+
+export interface PluginsSetup {
+  usageCollection: UsageCollectionSetup;
+}
 
 export class TelemetryPlugin {
   private readonly currentKibanaVersion: string;
@@ -28,9 +40,15 @@ export class TelemetryPlugin {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { usageCollection }: PluginsSetup, server: Server) {
     const currentKibanaVersion = this.currentKibanaVersion;
+
     registerCollection();
     registerRoutes({ core, currentKibanaVersion });
+
+    registerTelemetryPluginUsageCollector(usageCollection, server);
+    registerLocalizationUsageCollector(usageCollection, server);
+    registerTelemetryUsageCollector(usageCollection, server);
+    registerUiMetricUsageCollector(usageCollection, server);
   }
 }

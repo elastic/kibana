@@ -6,11 +6,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled, { createGlobalStyle } from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
@@ -26,8 +24,7 @@ const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
 const searchOrFilterPopoverWidth = '352px';
 
 // SIDE EFFECT: the following creates a global class selector
-// eslint-disable-next-line no-unused-expressions
-createGlobalStyle`
+const SearchOrFilterGlobalStyle = createGlobalStyle`
   .${timelineSelectModeItemsClassName} {
     width: 350px !important;
   }
@@ -49,7 +46,7 @@ interface Props {
   filterQueryDraft: KueryFilterQuery;
   from: number;
   fromStr: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   kqlMode: KqlMode;
   timelineId: string;
@@ -86,7 +83,7 @@ const ModeFlexItem = styled(EuiFlexItem)`
 
 ModeFlexItem.displayName = 'ModeFlexItem';
 
-export const SearchOrFilter = pure<Props>(
+export const SearchOrFilter = React.memo<Props>(
   ({
     applyKqlFilterQuery,
     browserFields,
@@ -110,48 +107,51 @@ export const SearchOrFilter = pure<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => (
-    <SearchOrFilterContainer>
-      <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
-        <ModeFlexItem grow={false}>
-          <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
-            <EuiSuperSelect
-              data-test-subj="timeline-select-search-or-filter"
-              hasDividers={true}
-              itemLayoutAlign="top"
-              itemClassName={timelineSelectModeItemsClassName}
-              onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
-              options={options}
-              popoverClassName={searchOrFilterPopoverClassName}
-              valueOfSelected={kqlMode}
+    <>
+      <SearchOrFilterContainer>
+        <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
+          <ModeFlexItem grow={false}>
+            <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
+              <EuiSuperSelect
+                data-test-subj="timeline-select-search-or-filter"
+                hasDividers={true}
+                itemLayoutAlign="top"
+                itemClassName={timelineSelectModeItemsClassName}
+                onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
+                options={options}
+                popoverClassName={searchOrFilterPopoverClassName}
+                valueOfSelected={kqlMode}
+              />
+            </EuiToolTip>
+          </ModeFlexItem>
+          <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
+            <QueryBarTimeline
+              applyKqlFilterQuery={applyKqlFilterQuery}
+              browserFields={browserFields}
+              dataProviders={dataProviders}
+              filters={filters}
+              filterQuery={filterQuery}
+              filterQueryDraft={filterQueryDraft}
+              from={from}
+              fromStr={fromStr}
+              kqlMode={kqlMode}
+              indexPattern={indexPattern}
+              isRefreshPaused={isRefreshPaused}
+              refreshInterval={refreshInterval}
+              savedQueryId={savedQueryId}
+              setFilters={setFilters}
+              setKqlFilterQueryDraft={setKqlFilterQueryDraft}
+              setSavedQueryId={setSavedQueryId}
+              timelineId={timelineId}
+              to={to}
+              toStr={toStr}
+              updateReduxTime={updateReduxTime}
             />
-          </EuiToolTip>
-        </ModeFlexItem>
-        <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
-          <QueryBarTimeline
-            applyKqlFilterQuery={applyKqlFilterQuery}
-            browserFields={browserFields}
-            dataProviders={dataProviders}
-            filters={filters}
-            filterQuery={filterQuery}
-            filterQueryDraft={filterQueryDraft}
-            from={from}
-            fromStr={fromStr}
-            kqlMode={kqlMode}
-            indexPattern={indexPattern}
-            isRefreshPaused={isRefreshPaused}
-            refreshInterval={refreshInterval}
-            savedQueryId={savedQueryId}
-            setFilters={setFilters}
-            setKqlFilterQueryDraft={setKqlFilterQueryDraft}
-            setSavedQueryId={setSavedQueryId}
-            timelineId={timelineId}
-            to={to}
-            toStr={toStr}
-            updateReduxTime={updateReduxTime}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </SearchOrFilterContainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SearchOrFilterContainer>
+      <SearchOrFilterGlobalStyle />
+    </>
   )
 );
 
