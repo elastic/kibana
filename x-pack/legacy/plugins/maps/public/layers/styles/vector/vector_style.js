@@ -315,8 +315,7 @@ export class VectorStyle extends AbstractStyle {
       dataRequestId = SOURCE_META_ID_ORIGIN;
     } else {
       const join = this._layer.getValidJoins().find(join => {
-        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
-        return !!matchingField;
+        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
       });
       if (join) {
         dataRequestId = join.getSourceMetaDataRequestId();
@@ -349,8 +348,7 @@ export class VectorStyle extends AbstractStyle {
       dataRequestId = SOURCE_FORMATTERS_ID_ORIGIN;
     } else {
       const join = this._layer.getValidJoins().find(join => {
-        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
-        return !!matchingField;
+        return join.getRightJoinSource().hasMatchingMetricField(fieldName);
       });
       if (join) {
         dataRequestId = join.getSourceFormattersDataRequestId();
@@ -575,14 +573,10 @@ export class VectorStyle extends AbstractStyle {
         fieldName: fieldDescriptor.name,
       });
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
-      let matchingField = null;
-      const joins = this._layer.getValidJoins();
-      joins.find(join => {
-        const aggSource = join.getRightJoinSource();
-        matchingField = aggSource.getMetricFieldForName(fieldDescriptor.name);
-        return !!matchingField;
+      const join = this._layer.getValidJoins().find(join => {
+        return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
       });
-      return matchingField;
+      return join ? join.getMetricFieldForFieldName(fieldDescriptor.name) : null;
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
     }
