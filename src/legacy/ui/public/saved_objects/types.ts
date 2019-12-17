@@ -30,7 +30,7 @@ export interface SavedObject {
   creationOpts: (opts: SavedObjectCreationOpts) => Record<string, unknown>;
   defaults: any;
   delete?: () => Promise<{}>;
-  destroy?: () => void;
+  destroy: () => void;
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;

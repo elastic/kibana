@@ -64,19 +64,13 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  try {
-    await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-    await hydrateIndexPattern();
-    if (injectReferences && resp.references && resp.references.length > 0) {
-      injectReferences(savedObject, resp.references);
-    }
-    if (typeof config.afterESResp === 'function') {
-      savedObject = await config.afterESResp(savedObject);
-    }
-    return savedObject;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e);
-    throw e;
+  await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
+  await hydrateIndexPattern();
+  if (injectReferences && resp.references && resp.references.length > 0) {
+    injectReferences(savedObject, resp.references);
   }
+  if (typeof config.afterESResp === 'function') {
+    savedObject = await config.afterESResp(savedObject);
+  }
+  return savedObject;
 }

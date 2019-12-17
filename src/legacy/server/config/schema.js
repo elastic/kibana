@@ -69,9 +69,6 @@ export default () =>
     }),
 
     server: Joi.object({
-      uuid: Joi.string()
-        .guid()
-        .default(),
       name: Joi.string().default(os.hostname()),
       defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
       customResponseHeaders: Joi.object()
@@ -111,6 +108,7 @@ export default () =>
       socketTimeout: HANDLED_IN_NEW_PLATFORM,
       ssl: HANDLED_IN_NEW_PLATFORM,
       compression: HANDLED_IN_NEW_PLATFORM,
+      uuid: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
     uiSettings: HANDLED_IN_NEW_PLATFORM,
