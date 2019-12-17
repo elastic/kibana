@@ -8,16 +8,19 @@ import { Store, createStore } from 'redux';
 import { CameraAction } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
-import { rasterToWorld } from './selectors';
+import { inverseProjectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../lib/vector2';
 
-describe('rasterToWorld', () => {
+describe('inverseProjectionMatrix', () => {
   let store: Store<CameraState, CameraAction>;
   let compare: (worldPosition: [number, number], expectedRasterPosition: [number, number]) => void;
   beforeEach(() => {
     store = createStore(cameraReducer, undefined);
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
-      const [worldX, worldY] = applyMatrix3(rasterPosition, rasterToWorld(store.getState()));
+      const [worldX, worldY] = applyMatrix3(
+        rasterPosition,
+        inverseProjectionMatrix(store.getState())
+      );
       expect(worldX).toBeCloseTo(expectedWorldPosition[0]);
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);
     };

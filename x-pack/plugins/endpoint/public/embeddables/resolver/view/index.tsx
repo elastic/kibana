@@ -33,7 +33,7 @@ const Diagnostic = styled(
 
     const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
-    const rasterToWorld = useSelector(selectors.rasterToWorld);
+    const inverseProjectionMatrix = useSelector(selectors.inverseProjectionMatrix);
 
     const worldPositionFromClientPosition = useCallback(
       (clientPosition: Vector2): Vector2 | null => {
@@ -45,10 +45,10 @@ const Diagnostic = styled(
             clientPosition[0] - elementBoundingClientRect.x,
             clientPosition[1] - elementBoundingClientRect.y,
           ],
-          rasterToWorld
+          inverseProjectionMatrix
         );
       },
-      [rasterToWorld, elementBoundingClientRect]
+      [inverseProjectionMatrix, elementBoundingClientRect]
     );
 
     useEffect(() => {

@@ -8,7 +8,7 @@ import { CameraAction } from './action';
 import { cameraReducer } from './reducer';
 import { createStore, Store } from 'redux';
 import { CameraState, AABB } from '../../types';
-import { viewableBoundingBox, rasterToWorld } from './selectors';
+import { viewableBoundingBox, inverseProjectionMatrix } from './selectors';
 import { userScaled, expectVectorsToBeClose } from './test_helpers';
 import { applyMatrix3 } from '../../lib/vector2';
 
@@ -68,13 +68,16 @@ describe('zooming', () => {
       );
     });
     it('the raster position 200, 50 should map to the world position 50, 50', () => {
-      expectVectorsToBeClose(applyMatrix3([200, 50], rasterToWorld(store.getState())), [50, 50]);
+      expectVectorsToBeClose(applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())), [
+        50,
+        50,
+      ]);
     });
     describe('when the user has moved their mouse to the raster position 200, 50', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userFocusedOnWorldCoordinates',
-          payload: applyMatrix3([200, 50], rasterToWorld(store.getState())),
+          payload: applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())),
         };
         store.dispatch(action);
       });
@@ -93,10 +96,10 @@ describe('zooming', () => {
           store.dispatch(action);
         });
         it('the raster position 200, 50 should map to the world position 50, 50', () => {
-          expectVectorsToBeClose(applyMatrix3([200, 50], rasterToWorld(store.getState())), [
-            50,
-            50,
-          ]);
+          expectVectorsToBeClose(
+            applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())),
+            [50, 50]
+          );
         });
       });
     });
@@ -112,7 +115,10 @@ describe('zooming', () => {
         })
       );
       it('should be centered on 100, 0', () => {
-        const worldCenterPoint = applyMatrix3([150, 100], rasterToWorld(store.getState()));
+        const worldCenterPoint = applyMatrix3(
+          [150, 100],
+          inverseProjectionMatrix(store.getState())
+        );
         expect(worldCenterPoint[0]).toBeCloseTo(100);
         expect(worldCenterPoint[1]).toBeCloseTo(0);
       });
@@ -121,7 +127,10 @@ describe('zooming', () => {
           userScaled(store, [2, 2]);
         });
         it('should be centered on 100, 0', () => {
-          const worldCenterPoint = applyMatrix3([150, 100], rasterToWorld(store.getState()));
+          const worldCenterPoint = applyMatrix3(
+            [150, 100],
+            inverseProjectionMatrix(store.getState())
+          );
           expect(worldCenterPoint[0]).toBeCloseTo(100);
           expect(worldCenterPoint[1]).toBeCloseTo(0);
         });

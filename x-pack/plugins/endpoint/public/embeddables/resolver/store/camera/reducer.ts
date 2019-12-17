@@ -6,7 +6,7 @@
 
 import { Reducer } from 'redux';
 import { applyMatrix3 } from '../../lib/vector2';
-import { userIsPanning, translation, projectionMatrix, rasterToWorld } from './selectors';
+import { userIsPanning, translation, projectionMatrix, inverseProjectionMatrix } from './selectors';
 import { clamp } from '../../lib/math';
 
 import { CameraState, ResolverAction } from '../../types';
@@ -43,7 +43,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
         state.latestFocusedWorldCoordinates,
         projectionMatrix(state)
       );
-      const matrix = rasterToWorld(stateWithNewScaling);
+      const matrix = inverseProjectionMatrix(stateWithNewScaling);
       const worldCoordinateThereNow = applyMatrix3(rasterOfLastFocusedWorldCoordinates, matrix);
       const delta = [
         worldCoordinateThereNow[0] - state.latestFocusedWorldCoordinates[0],

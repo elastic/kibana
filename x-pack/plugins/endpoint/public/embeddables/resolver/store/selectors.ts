@@ -12,7 +12,10 @@ export const projectionMatrix = composeSelectors(
   cameraSelectors.projectionMatrix
 );
 
-export const rasterToWorld = composeSelectors(cameraStateSelector, cameraSelectors.rasterToWorld);
+export const inverseProjectionMatrix = composeSelectors(
+  cameraStateSelector,
+  cameraSelectors.inverseProjectionMatrix
+);
 
 export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale);
 

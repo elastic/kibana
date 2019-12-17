@@ -25,7 +25,7 @@ interface RasterCameraProperties {
 
 export function viewableBoundingBox(state: CameraState): AABB {
   const { renderWidth, renderHeight } = rasterCameraProperties(state);
-  const matrix = rasterToWorld(state);
+  const matrix = inverseProjectionMatrix(state);
   return {
     minimum: applyMatrix3([0, renderHeight], matrix),
     maximum: applyMatrix3([renderWidth, 0], matrix),
@@ -97,7 +97,7 @@ export function translation(state: CameraState): Vector2 {
   }
 }
 
-export const rasterToWorld: (state: CameraState) => Matrix3 = state => {
+export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state => {
   const {
     renderWidth,
     renderHeight,
