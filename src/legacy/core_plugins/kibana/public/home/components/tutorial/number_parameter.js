@@ -21,16 +21,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export function NumberParameter({ id, label, value, setParameter }) {
-  const handleChange = (evt) => {
+  const handleChange = evt => {
     setParameter(id, parseFloat(evt.target.value));
   };
 
   return (
     <div className="visEditorSidebar__formRow">
-      <label
-        className="visEditorSidebar__formLabel"
-        htmlFor={id}
-      >
+      <label className="visEditorSidebar__formLabel" htmlFor={id}>
         {label}
       </label>
       <div className="visEditorSidebar__formControl kuiFieldGroupSection--wide">

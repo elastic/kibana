@@ -113,20 +113,15 @@ export const OverviewPage = ({
         const ast = esKuery.fromKueryExpression(combinedFilterString);
         const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
-        if (filterQueryString) {
-          store.dispatch(
-            setEsKueryString(
-              JSON.stringify(
-                esKuery.toElasticsearchQuery(
-                  esKuery.fromKueryExpression(filterQueryString),
-                  staticIndexPattern
-                )
+        const searchDSL: string = filterQueryString
+          ? JSON.stringify(
+              esKuery.toElasticsearchQuery(
+                esKuery.fromKueryExpression(filterQueryString),
+                staticIndexPattern
               )
             )
-          );
-        } else {
-          store.dispatch(setEsKueryString(''));
-        }
+          : '';
+        store.dispatch(setEsKueryString(searchDSL));
       }
     }
   } catch (e) {

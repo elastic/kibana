@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { DeleteRuleModal } from './delete_rule_modal';
 
 describe('DeleteRuleModal', () => {
-
   const deleteRuleAtIndex = jest.fn(() => {});
 
   const requiredProps = {
@@ -24,12 +22,9 @@ describe('DeleteRuleModal', () => {
       ...requiredProps,
     };
 
-    const component = shallowWithIntl(
-      <DeleteRuleModal {...props} />
-    );
+    const component = shallowWithIntl(<DeleteRuleModal {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders modal after clicking delete rule link', () => {
@@ -41,7 +36,6 @@ describe('DeleteRuleModal', () => {
     wrapper.find('EuiLink').simulate('click');
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
-
   });
 
   test('renders as delete button after opening and closing modal', () => {
@@ -55,7 +49,5 @@ describe('DeleteRuleModal', () => {
     instance.closeModal();
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
-
   });
-
 });

@@ -12,6 +12,5 @@ import { getApiPath } from '../../helper';
  */
 export const getTelemetryOverviewPageLogger = (xsrf: string, basePath?: string) => async () => {
   const path = getApiPath('/api/uptime/logOverview', basePath);
-  console.log(path);
   await fetch(path, { method: 'POST', headers: { 'kbn-xsrf': xsrf } });
 };

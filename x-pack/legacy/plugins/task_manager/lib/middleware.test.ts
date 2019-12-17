@@ -37,7 +37,7 @@ const getMockConcreteTaskInstance = () => {
     sequenceNumber: 1,
     primaryTerm: 1,
     attempts: 0,
-    status: 'idle',
+    status: TaskStatus.Idle,
     runAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
     scheduledAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
     startedAt: null,

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios from 'axios';
 import { getApiPath } from '../../helper';
 
 /**
@@ -12,7 +11,6 @@ import { getApiPath } from '../../helper';
  * @returns a function that can log page loads
  */
 export const getTelemetryMonitorPageLogger = (xsrf: string, basePath?: string) => async () => {
-  await axios.post(getApiPath('/api/uptime/logMonitor', basePath), undefined, {
-    headers: { 'kbn-xsrf': xsrf },
-  });
+  const path = getApiPath('/api/uptime/logMonitor', basePath);
+  await fetch(path, { method: 'POST', headers: { 'kbn-xsrf': xsrf } });
 };

@@ -124,6 +124,11 @@ export const RENOVATE_CONFIG = {
   rebaseStalePrs: false,
 
   /**
+   * Disable automatic rebase on conflicts with the base branch
+   */
+  rebaseConflictedPrs: false,
+
+  /**
    * Disable semantic commit formating
    */
   semanticCommits: false,

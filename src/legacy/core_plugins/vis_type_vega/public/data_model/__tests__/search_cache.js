@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import { SearchCache } from '../search_cache';
 
 describe(`SearchCache`, () => {
-
   class FauxEs {
     constructor() {
       // contains all request batches, separated by 0
@@ -69,5 +68,4 @@ describe(`SearchCache`, () => {
     expect(res).to.eql([expected1, expected3, expected2]);
     expect(sc._es.searches).to.eql([request1, request2, request3]);
   });
-
 });

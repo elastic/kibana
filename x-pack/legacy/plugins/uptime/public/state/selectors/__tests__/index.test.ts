@@ -21,6 +21,7 @@ describe('state selectors', () => {
     },
     monitor: {
       monitorDetailsList: [],
+      monitorLocationsList: new Map(),
       loading: false,
       errors: [],
     },
@@ -34,7 +35,7 @@ describe('state selectors', () => {
       errors: [],
       loading: false,
     },
-    ui: { basePath: 'yyz', integrationsPopoverOpen: null, lastRefresh: 125 },
+    ui: { basePath: 'yyz', esKuery: '', integrationsPopoverOpen: null, lastRefresh: 125 },
   };
 
   it('selects base path from state', () => {

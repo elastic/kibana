@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
 
@@ -25,10 +26,16 @@ export const getIdError = ({
   }
 };
 
+export const transformTags = (tags: string[]): string[] => {
+  return tags.filter(tag => !tag.startsWith(INTERNAL_IDENTIFIER));
+};
+
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    created_at: alert.params.createdAt,
+    updated_at: alert.params.updatedAt,
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -51,7 +58,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
-    tags: alert.tags,
+    tags: transformTags(alert.tags),
     to: alert.params.to,
     type: alert.params.type,
     threats: alert.params.threats,
