@@ -94,11 +94,11 @@ export abstract class FieldFormat {
    *                    injecting into the DOM or a DOM attribute
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
+  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE, options?: any): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
-      return converter.call(this, value);
+      return converter.call(this, value, options);
     }
 
     return value;
@@ -184,7 +184,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
+  static from(convertFn: TextContextTypeConvert): IFieldFormatType {
     return createCustomFieldFormat(convertFn);
   }
 

@@ -42,7 +42,7 @@ export class SourceFormat extends FieldFormat {
 
   textConvert: TextContextTypeConvert = value => JSON.stringify(value);
 
-  htmlConvert: HtmlContextTypeConvert = (value, field, hit) => {
+  htmlConvert: HtmlContextTypeConvert = (value, { field, hit }) => {
     if (!field) {
       const converter = this.getConverterFor('text') as Function;
 

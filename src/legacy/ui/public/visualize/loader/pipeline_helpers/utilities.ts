@@ -45,13 +45,8 @@ const getConfig = (key: string, defaultOverride?: any): any =>
   npStart.core.uiSettings.get(key, defaultOverride);
 const DefaultFieldFormat = FieldFormat.from(identity);
 
-const getFieldFormat = (id?: IFieldFormatId, params: Record<string, any> = {}): FieldFormat => {
+const getFieldFormat = (id?: IFieldFormatId, params: object = {}): FieldFormat => {
   const fieldFormats = npStart.plugins.data.fieldFormats;
-
-  params.parsedUrl = {
-    origin: window.location.origin,
-    pathname: window.location.pathname,
-  };
 
   if (id) {
     const Format = fieldFormats.getType(id);
@@ -103,6 +98,7 @@ export const getFormat: FormatFactory = mapping => {
     return new DefaultFieldFormat();
   }
   const { id } = mapping;
+
   if (id === 'range') {
     const RangeFormat = FieldFormat.from((range: any) => {
       const format = getFieldFormat(id, mapping.params);
@@ -145,13 +141,16 @@ export const getFormat: FormatFactory = mapping => {
           if (val === '__missing__') {
             return params.missingBucketLabel;
           }
-          const parsedUrl = {
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-            basePath: npStart.core.http.basePath,
+
+          const options = {
+            parsedUrl: {
+              origin: window.location.origin,
+              pathname: window.location.pathname,
+              basePath: npStart.core.http.basePath,
+            },
           };
           // @ts-ignore
-          return format.convert(val, undefined, undefined, parsedUrl);
+          return format.convert(val, options);
         };
       },
       convert: (val: string, type: string) => {
@@ -159,16 +158,22 @@ export const getFormat: FormatFactory = mapping => {
         if (val === '__other__') {
           return params.otherBucketLabel;
         }
+
         if (val === '__missing__') {
           return params.missingBucketLabel;
         }
-        const parsedUrl = {
-          origin: window.location.origin,
-          pathname: window.location.pathname,
-          basePath: npStart.core.http.basePath,
+
+        const options = {
+          type,
+          parsedUrl: {
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            basePath: npStart.core.http.basePath,
+          },
         };
+
         // @ts-ignore
-        return format.convert(val, type, undefined, parsedUrl);
+        return format.convert(val, options);
       },
     } as FieldFormat;
   } else {

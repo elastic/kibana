@@ -33,7 +33,8 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
       origin: window.location.origin,
       pathname: window.location.pathname,
     };
-    return field.format.getConverterFor(type)(val, field, hit, parsedUrl);
+    const options = { field, hit, parsedUrl };
+    return field.format.getConverterFor(type)(val, options);
   }
 
   function formatHit(hit: Record<string, any>, type: string = 'html') {

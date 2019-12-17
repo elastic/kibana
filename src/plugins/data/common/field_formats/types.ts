@@ -23,13 +23,15 @@ export type ContentType = 'html' | 'text';
 /** @public **/
 export { IFieldFormat } from './field_format';
 
+interface HtmlConvertOptions {
+  field?: any;
+  hit?: Record<string, any>;
+  meta?: any;
+  parsedUrl?: any;
+}
+
 /** @internal **/
-export type HtmlContextTypeConvert = (
-  value: any,
-  field?: any,
-  hit?: Record<string, any>,
-  meta?: any
-) => string;
+export type HtmlContextTypeConvert = (value: any, options: HtmlConvertOptions) => string;
 
 /** @internal **/
 export type TextContextTypeConvert = (value: any) => string;

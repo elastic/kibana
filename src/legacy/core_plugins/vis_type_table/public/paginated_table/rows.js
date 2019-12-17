@@ -70,9 +70,19 @@ export function KbnRows($compile) {
           $cell = $cellContent = createCell();
         }
 
+        const htmlConvertType = 'html';
+        const options = {
+          parsedUrl: {
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+          },
+        };
+
         // An AggConfigResult can "enrich" cell contents by applying a field formatter,
         // which we want to do if possible.
-        contents = contentsIsDefined ? column.formatter.convert(contents, 'html') : '';
+        contents = contentsIsDefined
+          ? column.formatter.convert(contents, htmlConvertType, options)
+          : '';
 
         if (_.isObject(contents)) {
           if (contents.attr) {
