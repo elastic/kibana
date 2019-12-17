@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiButton } from '@elastic/eui';
+import { EuiPopover, EuiButton } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
