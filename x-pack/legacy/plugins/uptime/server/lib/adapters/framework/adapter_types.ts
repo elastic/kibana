@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { ObjectType } from '@kbn/config-schema';
-import { UMRouteDefinition } from '../../../rest_api';
+import { UMKibanaRoute } from '../../../rest_api';
 
 export interface UMFrameworkRouteOptions<
   P extends ObjectType,
@@ -54,6 +54,6 @@ export interface UptimeCorePlugins {
 }
 
 export interface UMBackendFrameworkAdapter {
-  registerRoute(route: UMRouteDefinition): void;
+  registerRoute(route: UMKibanaRoute): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
 }

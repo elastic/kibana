@@ -4,25 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'kibana/server';
-import { ObjectType } from '@kbn/config-schema';
 import { UMServerLibs } from '../lib/lib';
-import { UMRestApiRouteCreator, UMRouteDefinition } from './types';
+import { UptimeRoute, UMRestApiRouteFactory, UMRouteHandler } from './types';
 
 export const createRouteWithAuth = (
   libs: UMServerLibs,
-  routeCreator: UMRestApiRouteCreator
-): UMRouteDefinition => {
+  routeCreator: UMRestApiRouteFactory
+): UptimeRoute => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
-  const licenseCheckHandler: RequestHandler<ObjectType, ObjectType, ObjectType> = async (
-    context,
-    request,
-    response
-  ) => {
+  const licenseCheckHandler: UMRouteHandler = async (customParams, context, request, response) => {
     const { statusCode, message } = libs.license(context.licensing.license);
     if (statusCode === 200) {
-      return await handler(context, request, response);
+      return await handler(customParams, context, request, response);
     }
     switch (statusCode) {
       case 400:

@@ -9,14 +9,14 @@ import { schema as kbnSchema } from '@kbn/config-schema';
 import { runHttpQuery } from 'apollo-server-core';
 import { UptimeCoreSetup } from './adapter_types';
 import { UMBackendFrameworkAdapter } from './adapter_types';
-import { UMRouteDefinition } from '../../../rest_api';
+import { UMKibanaRoute } from '../../../rest_api';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
   constructor(private readonly server: UptimeCoreSetup) {
     this.server = server;
   }
 
-  public registerRoute({ handler, method, options, path, validate }: UMRouteDefinition) {
+  public registerRoute({ handler, method, options, path, validate }: UMKibanaRoute) {
     const routeDefinition = {
       path,
       validate,

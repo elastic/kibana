@@ -6,9 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
-import { UMRestApiRouteCreator } from '../types';
+import { UMRestApiRouteFactory } from '../types';
 
-export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
+export const createGetAllRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/pings',
   validate: {
@@ -25,21 +25,11 @@ export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => 
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (
-    {
-      core: {
-        elasticsearch: {
-          dataClient: { callAsCurrentUser },
-        },
-      },
-    },
-    request,
-    response
-  ): Promise<any> => {
+  handler: async ({ callES }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;
 
     const result = await libs.pings.getAll({
-      callES: callAsCurrentUser,
+      callES,
       dateRangeStart,
       dateRangeEnd,
       monitorId,

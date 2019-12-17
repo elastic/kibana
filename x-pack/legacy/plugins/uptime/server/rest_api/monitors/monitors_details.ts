@@ -6,9 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
-import { UMRestApiRouteCreator } from '../types';
+import { UMRestApiRouteFactory } from '../types';
 
-export const createGetMonitorDetailsRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
+export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/monitor/details',
   validate: {
@@ -19,22 +19,12 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteCreator = (libs: UMServ
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (
-    {
-      core: {
-        elasticsearch: {
-          dataClient: { callAsCurrentUser },
-        },
-      },
-    },
-    request,
-    response
-  ): Promise<any> => {
+  handler: async ({ callES }, _context, request, response): Promise<any> => {
     const { monitorId } = request.query;
 
     return response.ok({
       body: {
-        ...(await libs.monitors.getMonitorDetails({ callES: callAsCurrentUser, monitorId })),
+        ...(await libs.monitors.getMonitorDetails({ callES, monitorId })),
       },
     });
   },
