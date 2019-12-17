@@ -131,9 +131,9 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
           savedSearchId: opts.savedSearchId,
           version: 1,
         },
-        // @ts-ignore
-        afterESResp: (savedObject: SavedObject) =>
-          _afterEsResp(savedObject as VisSavedObject, services),
+        afterESResp: (savedObject: SavedObject) => {
+          return _afterEsResp(savedObject as VisSavedObject, services) as Promise<SavedObject>;
+        },
       });
       this.showInRecentlyAccessed = true;
       this.getFullPath = () => {

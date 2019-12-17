@@ -66,7 +66,8 @@ export interface SavedObjectKibanaServices {
 }
 
 export interface SavedObjectConfig {
-  afterESResp?: (savedObject: SavedObject) => SavedObject;
+  // is only used by visualize
+  afterESResp?: (savedObject: SavedObject) => Promise<SavedObject>;
   clearSavedIndexPattern?: boolean;
   defaults?: any;
   extractReferences?: (opts: {
