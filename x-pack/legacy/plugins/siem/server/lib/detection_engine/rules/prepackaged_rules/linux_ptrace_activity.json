@@ -1,0 +1,28 @@
+{
+  "rule_id": "36e9db74-b926-4ba0-84e7-7079416da2a4",
+  "risk_score": 50,
+  "description": "Linux: Ptrace Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Ptrace Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: ptrace",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

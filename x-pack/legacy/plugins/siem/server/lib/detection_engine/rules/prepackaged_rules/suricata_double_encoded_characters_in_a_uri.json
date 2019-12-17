@@ -1,0 +1,17 @@
+{
+  "rule_id": "22dd4622-f06c-4bcd-9ae2-636674700db9",
+  "risk_score": 50,
+  "description": "Suricata Double Encoded Characters in a URI",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Double Encoded Characters in a URI",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610092 or 2610093 or 2610094 or 2610095)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

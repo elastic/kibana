@@ -1,0 +1,17 @@
+{
+  "rule_id": "e8ae8891-8da6-4111-b846-9f4bc18af058",
+  "risk_score": 50,
+  "description": "Windows Persistence via Modification of Existing Service",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Persistence via Modification of Existing Service",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and process.args:*sc*config*binpath* and (process.name:cmd.exe or process.name:powershell.exe or process.name:sc.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

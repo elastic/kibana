@@ -1,0 +1,38 @@
+{
+  "rule_id": "2c5f2136-66fd-4720-bb35-9c51d75099f8",
+  "risk_score": 50,
+  "description": "(Search) Windows 10",
+  "immutable": true,
+  "interval": "5m",
+  "name": "(Search) Windows 10",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "agent.hostname": {
+            "query": "LAPTOP-CQNI37L2",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.provider": {
+            "query": "Microsoft-Windows-Sysmon",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

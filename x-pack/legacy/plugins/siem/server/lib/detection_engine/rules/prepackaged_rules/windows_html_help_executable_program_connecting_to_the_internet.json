@@ -1,0 +1,17 @@
+{
+  "rule_id": "b3fa2ef6-39b9-47d6-b3a7-c6b4ca526098",
+  "risk_score": 50,
+  "description": "Windows: HTML Help executable Program Connecting to the Internet",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows: HTML Help executable Program Connecting to the Internet",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:hh.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

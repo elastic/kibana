@@ -1,0 +1,17 @@
+{
+  "rule_id": "10fda2cb-cdc1-4257-85de-8761b5604ef8",
+  "risk_score": 50,
+  "description": "Suricata Commonly Abused DNS Domain Detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Commonly Abused DNS Domain Detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature:(TGI* and *HUNT* and *Abused* and *TLD*) and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

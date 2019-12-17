@@ -1,0 +1,38 @@
+{
+  "rule_id": "94fbec78-93db-4b6a-bf42-832caefc247d",
+  "risk_score": 50,
+  "description": "Linux: Nmap Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Nmap Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: nmap",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

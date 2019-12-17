@@ -1,0 +1,17 @@
+{
+  "rule_id": "6ef3fd3a-d288-4f0b-ae27-88d59de45086",
+  "risk_score": 50,
+  "description": "Windows: Powershell Connecting to the Internet",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows: Powershell Connecting to the Internet",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:powershell.exe and event.action:\"Network connection detected (rule: NetworkConnect)\"  and not destination.ip:169.254.169.254/32 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

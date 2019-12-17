@@ -1,0 +1,17 @@
+{
+  "rule_id": "49b2f530-35b6-4351-a189-e283d9858122",
+  "risk_score": 50,
+  "description": "Network - Telnet Port Activity\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - Telnet Port Activity\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:23",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

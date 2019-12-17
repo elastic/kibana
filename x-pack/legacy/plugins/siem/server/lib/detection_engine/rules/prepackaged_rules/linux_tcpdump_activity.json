@@ -1,0 +1,28 @@
+{
+  "rule_id": "78fad444-567a-461c-a63c-e3e9613ba655",
+  "risk_score": 50,
+  "description": "Linux: Tcpdump Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Tcpdump Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: tcpdump",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

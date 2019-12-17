@@ -1,0 +1,37 @@
+{
+  "rule_id": "ecf157e4-39e1-401a-bebc-4f2c824544e8",
+  "risk_score": 50,
+  "description": "Windows net command activity by the SYSTEM account",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows net command activity by the SYSTEM account",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "user.name:SYSTEM",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match_phrase": {
+                "process.name": "net.exe"
+              }
+            },
+            {
+              "match_phrase": {
+                "process.name": "net1.exe"
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

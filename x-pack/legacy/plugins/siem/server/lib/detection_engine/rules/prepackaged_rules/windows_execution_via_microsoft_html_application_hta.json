@@ -1,0 +1,17 @@
+{
+  "rule_id": "3182aa58-4a92-4175-9bfa-d4c6d4e477a5",
+  "risk_score": 50,
+  "description": "Windows Execution via Microsoft HTML Application (HTA)",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Execution via Microsoft HTML Application (HTA)",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and (process.parent.args:*mshta* or process.args:*mshta*)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

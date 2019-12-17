@@ -1,0 +1,38 @@
+{
+  "rule_id": "3b2c41ab-5939-4eab-aafc-ed11beb55cef",
+  "risk_score": 50,
+  "description": "Linux: Mknod Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Mknod Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: mknod",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

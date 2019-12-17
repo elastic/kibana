@@ -1,0 +1,17 @@
+{
+  "rule_id": "2288c216-7dca-46d0-b4e9-50d01ad4bf49",
+  "risk_score": 50,
+  "description": "Windows Execution via Compiled HTML File",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Execution via Compiled HTML File",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and process.name:hh.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -1,0 +1,38 @@
+{
+  "rule_id": "6e35a211-2997-4246-b44d-012e9f1d9457",
+  "risk_score": 50,
+  "description": "Linux: Rawshark Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Rawshark Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: rawshark",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

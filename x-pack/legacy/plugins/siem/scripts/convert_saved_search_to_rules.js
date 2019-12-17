@@ -73,8 +73,10 @@ const walk = dir => {
 
 //clean up the file system characters
 const cleanupFileName = file => {
-  return path
-    .basename(file, path.extname(file))
+  const fileWithoutSpecialChars = file
+    .trim()
+    .replace(/\./g, '')
+    .replace(/\//g, '')
     .replace(/\s+/g, '_')
     .replace(/,/g, '')
     .replace(/\[/g, '')
@@ -87,6 +89,10 @@ const cleanupFileName = file => {
     .replace(/-/g, '')
     .replace(/__/g, '_')
     .toLowerCase();
+  return path.basename(
+    fileWithoutSpecialChars.trim(),
+    path.extname(fileWithoutSpecialChars.trim())
+  );
 };
 
 async function main() {
@@ -145,6 +151,12 @@ async function main() {
     ) => {
       const fileToWrite = cleanupFileName(_file);
 
+      // remove meta value from the filter
+      const filterWithoutMeta = filter.map(filterValue => {
+        delete filterValue.meta;
+        delete filterValue.$state;
+        return filterValue;
+      });
       const outputMessage = {
         rule_id: uuid.v4(),
         risk_score: RISK_SCORE,
@@ -158,7 +170,7 @@ async function main() {
         to: TO,
         query,
         language,
-        filters: filter,
+        filters: filterWithoutMeta,
         enabled: ENABLED,
         version: 1,
         // comment these in if you want to use these for input output, otherwise

@@ -1,0 +1,17 @@
+{
+  "rule_id": "26836832-c00a-460e-8158-1a2f1dce82e5",
+  "risk_score": 50,
+  "description": "Windows Registry Query, Network",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Registry Query, Network",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code: 1 and process.name:reg.exe and process.args:*query* and process.args:*reg*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

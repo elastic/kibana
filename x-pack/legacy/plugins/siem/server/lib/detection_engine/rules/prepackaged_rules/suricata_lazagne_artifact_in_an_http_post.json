@@ -1,0 +1,17 @@
+{
+  "rule_id": "a1683773-c53b-4a4d-83c1-b9ba8ba2224d",
+  "risk_score": 50,
+  "description": "Suricata LaZagne Artifact in an HTTP POST",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata LaZagne Artifact in an HTTP POST",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610149 or 2610150)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

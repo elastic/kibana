@@ -1,0 +1,28 @@
+{
+  "rule_id": "d5c04a36-e0b2-4f6c-a362-90a80c1067d5",
+  "risk_score": 50,
+  "description": "Windows Netcat network activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Netcat network activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:ncat.exe",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "connected-to",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

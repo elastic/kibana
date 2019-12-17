@@ -1,0 +1,38 @@
+{
+  "rule_id": "d150f1b8-d174-4940-ae16-2189ec1435bf",
+  "risk_score": 50,
+  "description": "Linux: Kernel Module Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Kernel Module Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: (insmod or kmod or modprobe or rmod)",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

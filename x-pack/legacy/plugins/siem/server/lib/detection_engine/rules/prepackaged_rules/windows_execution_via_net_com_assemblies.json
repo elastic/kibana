@@ -1,0 +1,17 @@
+{
+  "rule_id": "6d22690f-cfbb-401f-bbe6-a8a8728b95e8",
+  "risk_score": 50,
+  "description": "Windows Execution via .NET COM Assemblies",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Execution via .NET COM Assemblies",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and (process.name:regasm.exe or process.name:regsvcs.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

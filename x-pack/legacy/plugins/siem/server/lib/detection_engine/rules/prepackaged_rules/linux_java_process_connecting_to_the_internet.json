@@ -1,0 +1,58 @@
+{
+  "rule_id": "ee459cc3-8b47-43d1-80ae-550c4e15e461",
+  "risk_score": 50,
+  "description": "Linux: Java Process Connecting to the Internet",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Java Process Connecting to the Internet",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "not destination.ip: 10.0.0.0/8 and not 172.16.0.0/12",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "process.name": {
+            "query": "java",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "socket_opened",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "destination.ip": {
+            "query": "127.0.0.1",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "destination.ip": {
+            "query": "::1",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

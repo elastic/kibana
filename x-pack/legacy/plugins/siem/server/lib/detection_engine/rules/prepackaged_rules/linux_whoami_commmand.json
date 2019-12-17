@@ -1,0 +1,38 @@
+{
+  "rule_id": "df709c92-4725-442d-8e98-cf8291940d15",
+  "risk_score": 50,
+  "description": "Linux: Whoami Commmand",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Whoami Commmand",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: whoami",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

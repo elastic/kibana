@@ -1,0 +1,28 @@
+{
+  "rule_id": "4f230395-d5b5-43d3-90cc-8fc1cde9234c",
+  "risk_score": 50,
+  "description": "Windows image load from a temp directory",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows image load from a temp directory",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "file.path:Temp",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Image loaded (rule: ImageLoad)",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

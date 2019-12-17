@@ -1,0 +1,17 @@
+{
+  "rule_id": "711b1a13-d981-499e-9164-838bf6a189a4",
+  "risk_score": 50,
+  "description": "Windows Priv Escalation via Accessibility Features",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Priv Escalation via Accessibility Features",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and process.parent.name:winlogon.exe and (process.name:atbroker.exe or process.name:displayswitch.exe or process.name:magnify.exe or process.name:narrator.exe or process.name:osk.exe or process.name:sethc.exe or process.name:utilman.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

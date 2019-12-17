@@ -1,0 +1,17 @@
+{
+  "rule_id": "27cb5798-bd0f-48bf-87d1-1307d58b4f3c",
+  "risk_score": 50,
+  "description": "Windows Process Discovery via Tasklist Command",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Process Discovery via Tasklist Command",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and process.name:tasklist.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

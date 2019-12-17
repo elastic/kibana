@@ -1,0 +1,17 @@
+{
+  "rule_id": "a6213ab8-ff41-45f1-8ebf-8c269aefdc5c",
+  "risk_score": 50,
+  "description": "Suricata Directory Reversal Characters in an HTTP Request",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Directory Reversal Characters in an HTTP Request",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610161 or 2610162)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

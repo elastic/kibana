@@ -1,0 +1,17 @@
+{
+  "rule_id": "a6085687-7bc3-4f76-8778-b7de5591d47d",
+  "risk_score": 50,
+  "description": "Linux ld.so process activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux ld.so process activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:ld.so",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

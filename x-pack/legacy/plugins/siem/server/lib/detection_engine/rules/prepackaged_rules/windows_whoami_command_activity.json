@@ -1,0 +1,28 @@
+{
+  "rule_id": "00c87ab5-905d-4f69-85fc-6dabdbce76e8",
+  "risk_score": 50,
+  "description": "Windows whoami command activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows whoami command activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:whoami.exe",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Process Create (rule: ProcessCreate)",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

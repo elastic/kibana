@@ -1,0 +1,17 @@
+{
+  "rule_id": "3d321fe5-18df-48de-967f-03a5af2af6d6",
+  "risk_score": 50,
+  "description": "Windows Execution via Trusted Developer Utilities",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Execution via Trusted Developer Utilities",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and (process.name:MSBuild.exe or process.name:msxsl.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

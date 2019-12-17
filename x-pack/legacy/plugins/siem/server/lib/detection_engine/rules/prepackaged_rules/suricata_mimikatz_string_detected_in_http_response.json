@@ -1,0 +1,17 @@
+{
+  "rule_id": "79b82714-7cf7-4e84-bbb2-cbfe2dac440b",
+  "risk_score": 50,
+  "description": "Suricata Mimikatz String Detected in HTTP Response",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Mimikatz String Detected in HTTP Response",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610144 or 2610145 or 2610146 or 2610147 or 2610148)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

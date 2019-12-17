@@ -1,0 +1,17 @@
+{
+  "rule_id": "e5e668d4-7239-4a58-86e6-5628f9214449",
+  "risk_score": 50,
+  "description": "Windows Persistence via Netshell Helper DLL",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Persistence via Netshell Helper DLL",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and process.name:netsh.exe and process.args:*helper*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

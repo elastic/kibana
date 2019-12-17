@@ -1,0 +1,28 @@
+{
+  "rule_id": "5de2e497-87dc-41fd-8176-a41a1fac4c63",
+  "risk_score": 50,
+  "description": "Linux: Web Download",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Web Download",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: curl or wget",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "socket_opened",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

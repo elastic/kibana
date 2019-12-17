@@ -1,0 +1,17 @@
+{
+  "rule_id": "7b143643-cb56-4ec7-8814-03d64322fe08",
+  "risk_score": 50,
+  "description": "Windows Remote Management Execution",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Remote Management Execution",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(process.name:wsmprovhost.exe or process.name:winrm.cmd) and (process.args:*Enable-PSRemoting -Force* or process.args:*Invoke-Command -computer_name* or process.args:*wmic*node*process call create*)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

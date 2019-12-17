@@ -1,0 +1,38 @@
+{
+  "rule_id": "3bc27a45-bb67-4593-a26e-8a2558a61812",
+  "risk_score": 50,
+  "description": "Linux: Process Started in Temp Directory",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Process Started in Temp Directory",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.working_directory: /tmp",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

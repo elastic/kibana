@@ -1,0 +1,17 @@
+{
+  "rule_id": "5d7d27fb-11d4-4bab-9c0a-301ec599b250",
+  "risk_score": 50,
+  "description": "Linux lzop activity - possible @JulianRunnels",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux lzop activity - possible @JulianRunnels",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:lzop",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

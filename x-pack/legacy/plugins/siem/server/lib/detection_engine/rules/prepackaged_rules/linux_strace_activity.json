@@ -1,0 +1,38 @@
+{
+  "rule_id": "793ea302-362b-4be0-8f78-d68cfa43d386",
+  "risk_score": 50,
+  "description": "Linux: Strace Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Strace Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: strace",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

@@ -1,0 +1,38 @@
+{
+  "rule_id": "8d2b7a3d-dd90-483e-b096-f89a43ebbc36",
+  "risk_score": 50,
+  "description": "Linux: Iodine Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Iodine Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: (iodine or iodined)",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

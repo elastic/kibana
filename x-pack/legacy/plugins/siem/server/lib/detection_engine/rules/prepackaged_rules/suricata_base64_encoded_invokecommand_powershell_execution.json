@@ -1,0 +1,17 @@
+{
+  "rule_id": "b98e5a20-e06a-4f1c-8e76-b713dbce4686",
+  "risk_score": 50,
+  "description": "Suricata Base64 Encoded Invoke-Command Powershell Execution",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Base64 Encoded Invoke-Command Powershell Execution",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

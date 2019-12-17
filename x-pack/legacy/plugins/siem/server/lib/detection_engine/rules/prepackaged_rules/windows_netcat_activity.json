@@ -1,0 +1,28 @@
+{
+  "rule_id": "05fedf6f-ff1a-4ff1-8989-1ae5d309bcbf",
+  "risk_score": 50,
+  "description": "Windows Netcat activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Netcat activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:ncat.exe",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Process Create (rule: ProcessCreate)",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

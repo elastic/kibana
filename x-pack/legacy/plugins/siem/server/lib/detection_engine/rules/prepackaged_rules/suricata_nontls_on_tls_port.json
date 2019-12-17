@@ -1,0 +1,17 @@
+{
+  "rule_id": "505e5f10-2fb9-4a88-a83d-00c82d7fff92",
+  "risk_score": 50,
+  "description": "Suricata non-TLS on TLS Port",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-TLS on TLS Port",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610004 and (event.module:suricata and event.kind:alert) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

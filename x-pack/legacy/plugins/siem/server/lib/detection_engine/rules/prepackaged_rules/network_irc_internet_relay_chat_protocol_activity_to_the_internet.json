@@ -1,0 +1,17 @@
+{
+  "rule_id": "72f70b9d-968e-4aee-8581-eb6f00c268d3",
+  "risk_score": 50,
+  "description": "Network - IRC (Internet Relay Chat) Protocol Activity to the Internet\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - IRC (Internet Relay Chat) Protocol Activity to the Internet\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(destination.port:6665 or destination.port:6666 or destination.port:6667 or destination.port:6668 or destination.port:6669) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

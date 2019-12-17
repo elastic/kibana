@@ -1,0 +1,17 @@
+{
+  "rule_id": "66a0259c-1f90-4e68-8900-68896c60e70a",
+  "risk_score": 50,
+  "description": "Network - Proxy Port Activity to the Internet\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - Proxy Port Activity to the Internet\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(destination.port:8080 or destination.port:3128) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

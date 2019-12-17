@@ -1,0 +1,17 @@
+{
+  "rule_id": "0ce56c68-1808-413c-abbc-e8437bd1505f",
+  "risk_score": 50,
+  "description": "Linux Network - Anomalous Process Using HTTP/S Ports",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux Network - Anomalous Process Using HTTP/S Ports",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(destination.port:443 or destination.port:80) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16 and not process.name:curl and not process.name:http and not process.name:https and not process.name:nginx and not process.name:packetbeat and not process.name:python2 and not process.name:snapd and not process.name:wget",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

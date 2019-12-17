@@ -1,0 +1,38 @@
+{
+  "rule_id": "5d5d8389-db69-44df-bb9d-028378e2d865",
+  "risk_score": 50,
+  "description": "Linux: Nping Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Nping Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: nmap",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

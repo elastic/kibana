@@ -1,0 +1,48 @@
+{
+  "rule_id": "53d6147a-f282-4be1-b906-ea4726cbd844",
+  "risk_score": 50,
+  "description": "Linux unusual shell activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux unusual shell activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:*sh",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "process.name": {
+            "query": "bash",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "process.executable": {
+            "query": "/bin/dash",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "process.name": {
+            "query": "ReportCrash",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

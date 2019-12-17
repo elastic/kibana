@@ -1,0 +1,17 @@
+{
+  "rule_id": "74384ca5-5cb8-43ca-853f-b2d5b5e660db",
+  "risk_score": 50,
+  "description": "Network - RPC (Remote Procedure Call) to the Internet\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - RPC (Remote Procedure Call) to the Internet\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:135 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -1,0 +1,28 @@
+{
+  "rule_id": "fe347251-f353-4e14-8aff-a93c32856c2f",
+  "risk_score": 50,
+  "description": "Windows nmap scan activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows nmap scan activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:nmap.exe",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Network connection detected (rule: NetworkConnect)",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

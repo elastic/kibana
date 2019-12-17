@@ -1,0 +1,38 @@
+{
+  "rule_id": "33c8c2da-ee7b-4992-b931-8ac5c7771e8b",
+  "risk_score": 50,
+  "description": "Linux: Hping Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Hping Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: hping",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

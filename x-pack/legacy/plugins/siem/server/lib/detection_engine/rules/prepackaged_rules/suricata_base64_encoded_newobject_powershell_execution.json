@@ -1,0 +1,17 @@
+{
+  "rule_id": "6a20ba5e-c4a0-4c20-8696-e33467ccd66b",
+  "risk_score": 50,
+  "description": "Suricata Base64 Encoded New-Object Powershell Execution",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Base64 Encoded New-Object Powershell Execution",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610188 or 2610189 or 2610190 or 2610191 or 2610192 or 2610193)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

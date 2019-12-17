@@ -1,0 +1,17 @@
+{
+  "rule_id": "116dc257-426a-443b-a8ed-909bdf326769",
+  "risk_score": 50,
+  "description": "Windows Scheduled Task Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Scheduled Task Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and (process.name:schtasks.exe or process.name:taskeng.exe) or (event.code:1 and process.name:svchost.exe and not process.parent.executable: \"C:\\Windows\\System32\\services.exe\" )",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

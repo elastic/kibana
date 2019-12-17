@@ -1,0 +1,17 @@
+{
+  "rule_id": "f237ae6d-efe7-43a9-a62a-7e92794ff797",
+  "risk_score": 50,
+  "description": "Suricata Directory Traversal in Downloaded Zip File",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Directory Traversal in Downloaded Zip File",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610085 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

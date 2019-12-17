@@ -1,0 +1,17 @@
+{
+  "rule_id": "ee621b4e-ccb3-4a34-9fc1-2d726c7d62d6",
+  "risk_score": 50,
+  "description": "Suricata Possible Cobalt Strike Malleable C2 Null Response",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Possible Cobalt Strike Malleable C2 Null Response",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610202 or 2610203)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
