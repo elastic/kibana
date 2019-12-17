@@ -137,12 +137,6 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(createMockResponse([]))
       .mockResolvedValueOnce(createMockResponse([]));
 
-    // const { act } = mountHook(
-    //   ({ intervalSize }) => useLogSummary('SOURCE_ID', 100000, intervalSize, null),
-    //   Identity,
-    //
-    // );
-
     const { waitForNextUpdate, rerender } = renderHook(
       ({ intervalSize }) => useLogSummary('SOURCE_ID', 100000, intervalSize, null),
       {
