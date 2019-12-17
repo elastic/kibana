@@ -17,7 +17,7 @@ export class PulsePocPlugin {
       const checks = readdirSync(channelPath)
         .filter((fileName: string) => fileName.startsWith('check_'))
         .map((fileName: string) => {
-          const id = fileName.slice(6, -3);
+          const id = fileName.slice(6, -3); // removes the "check_" and ".ts" from the filename
           const checkFilePath = resolve(channelPath, fileName);
           const check = require(checkFilePath).check;
           return { id, check };
@@ -35,6 +35,9 @@ export class PulsePocPlugin {
     logger.info(
       `Starting up POC pulse service, which wouldn't actually be part of Kibana in reality`
     );
+    // trying to make sure this works
+    logger.info(`We have ${this.channels.length} telemetry channels registered`);
+    this.channels.forEach((channelItem, index) => logger.info(`${index} and id ${channelItem.id}`));
 
     const router = core.http.createRouter();
 
