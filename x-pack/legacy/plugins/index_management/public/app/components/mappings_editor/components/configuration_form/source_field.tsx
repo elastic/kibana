@@ -17,6 +17,8 @@ import {
   ToggleField,
   ComboBoxField,
   FieldHook,
+  VALIDATION_TYPES,
+  FieldValidateResponse,
 } from '../../shared_imports';
 import { ComboBoxOption } from '../../types';
 
@@ -63,6 +65,16 @@ const ComboBoxFields = ({ field }: { field: FieldHook }) => {
         noSuggestions: false,
         options,
         onCreateOption: (searchValue: string) => {
+          const { isValid } = field.validate({
+            value: searchValue,
+            validationType: VALIDATION_TYPES.ARRAY_ITEM,
+          }) as FieldValidateResponse;
+
+          if (!isValid) {
+            // Return false to explicitly reject the user's input.
+            return false;
+          }
+
           setValue([...(field.value as ComboBoxOption[]), searchValue]);
 
           setOptions([
