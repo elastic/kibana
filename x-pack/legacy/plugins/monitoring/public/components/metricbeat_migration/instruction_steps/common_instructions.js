@@ -6,31 +6,32 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiCallOut,
-  EuiSpacer,
-  EuiText,
-  EuiLink
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { formatTimestampToDuration } from '../../../../common';
 
-export const MIGRATION_STATUS_LABEL = i18n.translate('xpack.monitoring.metricbeatMigration.migrationStatus', {
-  defaultMessage: `Migration status`
-});
+export const MIGRATION_STATUS_LABEL = i18n.translate(
+  'xpack.monitoring.metricbeatMigration.migrationStatus',
+  {
+    defaultMessage: `Migration status`,
+  }
+);
 
-export const MONITORING_STATUS_LABEL = i18n.translate('xpack.monitoring.metricbeatMigration.monitoringStatus', {
-  defaultMessage: `Monitoring status`
-});
+export const MONITORING_STATUS_LABEL = i18n.translate(
+  'xpack.monitoring.metricbeatMigration.monitoringStatus',
+  {
+    defaultMessage: `Monitoring status`,
+  }
+);
 
 export function getSecurityStep(url) {
   return (
     <Fragment>
-      <EuiSpacer size="m"/>
+      <EuiSpacer size="m" />
       <EuiCallOut
         color="warning"
         iconType="help"
-        title={(
+        title={
           <EuiText>
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.securitySetup"
@@ -39,21 +40,18 @@ export function getSecurityStep(url) {
                 link: (
                   <Fragment>
                     {` `}
-                    <EuiLink
-                      href={url}
-                      target="_blank"
-                    >
+                    <EuiLink href={url} target="_blank">
                       <FormattedMessage
                         id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                         defaultMessage="additional setup"
                       />
                     </EuiLink>
                   </Fragment>
-                )
+                ),
               }}
             />
           </EuiText>
-        )}
+        }
       />
     </Fragment>
   );
@@ -68,14 +66,16 @@ export function getMigrationStatusStep(product) {
         <EuiCallOut
           size="s"
           color="warning"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.isInternalCollectorStatusTitle', {
-            defaultMessage: `No monitoring data detected, but we’ll continue checking.`,
-          })}
+          title={i18n.translate(
+            'xpack.monitoring.metricbeatMigration.isInternalCollectorStatusTitle',
+            {
+              defaultMessage: `No monitoring data detected, but we’ll continue checking.`,
+            }
+          )}
         />
-      )
+      ),
     };
-  }
-  else if (product.isPartiallyMigrated || product.isFullyMigrated) {
+  } else if (product.isPartiallyMigrated || product.isFullyMigrated) {
     return {
       title: MIGRATION_STATUS_LABEL,
       status: 'complete',
@@ -84,16 +84,16 @@ export function getMigrationStatusStep(product) {
           size="s"
           color="success"
           title={i18n.translate('xpack.monitoring.metricbeatMigration.fullyMigratedStatusTitle', {
-            defaultMessage: 'Congratulations!'
+            defaultMessage: 'Congratulations!',
           })}
         >
           <p>
             {i18n.translate('xpack.monitoring.metricbeatMigration.fullyMigratedStatusDescription', {
-              defaultMessage: 'Metricbeat is shipping monitoring data.'
+              defaultMessage: 'Metricbeat is shipping monitoring data.',
             })}
           </p>
         </EuiCallOut>
-      )
+      ),
     };
   }
 
@@ -108,16 +108,19 @@ export function getDisableStatusStep(product, meta) {
     // and this is most likely temporary so we want to be defensive and not error out
     // and hopefully wait for the next check and this state will be self-corrected.
     if (product) {
-      const lastInternallyCollectedTimestamp = product.lastInternallyCollectedTimestamp || product.lastTimestamp;
-      const secondsSinceLastInternalCollectionLabel =
-        formatTimestampToDuration(lastInternallyCollectedTimestamp, CALCULATE_DURATION_SINCE);
+      const lastInternallyCollectedTimestamp =
+        product.lastInternallyCollectedTimestamp || product.lastTimestamp;
+      const secondsSinceLastInternalCollectionLabel = formatTimestampToDuration(
+        lastInternallyCollectedTimestamp,
+        CALCULATE_DURATION_SINCE
+      );
       lastInternallyCollectedMessage = i18n.translate(
         'xpack.monitoring.metricbeatMigration.disableInternalCollection.partiallyMigratedStatusDescription',
         {
           defaultMessage: 'Last self monitoring was {secondsSinceLastInternalCollectionLabel} ago.',
           values: {
-            secondsSinceLastInternalCollectionLabel
-          }
+            secondsSinceLastInternalCollectionLabel,
+          },
         }
       );
     }
@@ -129,25 +132,27 @@ export function getDisableStatusStep(product, meta) {
         <EuiCallOut
           size="s"
           color="warning"
-          title={i18n.translate('xpack.monitoring.metricbeatMigration.partiallyMigratedStatusTitle',
+          title={i18n.translate(
+            'xpack.monitoring.metricbeatMigration.partiallyMigratedStatusTitle',
             {
-              defaultMessage: `Data is still coming from self monitoring`
+              defaultMessage: `Data is still coming from self monitoring`,
             }
           )}
         >
           <p>
-            {i18n.translate('xpack.monitoring.metricbeatMigration.partiallyMigratedStatusDescription', {
-              defaultMessage: `It can take up to {secondsAgo} seconds to detect data.`,
-              values: {
-                secondsAgo: meta.secondsAgo
+            {i18n.translate(
+              'xpack.monitoring.metricbeatMigration.partiallyMigratedStatusDescription',
+              {
+                defaultMessage: `It can take up to {secondsAgo} seconds to detect data.`,
+                values: {
+                  secondsAgo: meta.secondsAgo,
+                },
               }
-            })}
+            )}
           </p>
-          <p>
-            {lastInternallyCollectedMessage}
-          </p>
+          <p>{lastInternallyCollectedMessage}</p>
         </EuiCallOut>
-      )
+      ),
     };
   }
 
@@ -161,16 +166,20 @@ export function getDisableStatusStep(product, meta) {
         title={i18n.translate(
           'xpack.monitoring.metricbeatMigration.disableInternalCollection.fullyMigratedStatusTitle',
           {
-            defaultMessage: 'Congratulations!'
+            defaultMessage: 'Congratulations!',
           }
         )}
       >
         <p>
-          {i18n.translate('xpack.monitoring.metricbeatMigration.disableInternalCollection.fullyMigratedStatusDescription', {
-            defaultMessage: 'We are not seeing any documents from self monitoring. Migration complete!'
-          })}
+          {i18n.translate(
+            'xpack.monitoring.metricbeatMigration.disableInternalCollection.fullyMigratedStatusDescription',
+            {
+              defaultMessage:
+                'We are not seeing any documents from self monitoring. Migration complete!',
+            }
+          )}
         </p>
       </EuiCallOut>
-    )
+    ),
   };
 }

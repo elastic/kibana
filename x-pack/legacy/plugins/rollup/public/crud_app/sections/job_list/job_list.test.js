@@ -9,26 +9,25 @@ import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
 jest.mock('ui/new_platform');
-
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
   breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
+  getInjected: key => {
     if (key === 'uiCapabilities') {
       return {
         navLinks: {},
         management: {},
-        catalogue: {}
+        catalogue: {},
       };
     }
-  }
+  },
 }));
 
 jest.mock('../../services', () => {
   const services = require.requireActual('../../services');
   return {
     ...services,
-    getRouterLinkProps: (link) => ({ href: link }),
+    getRouterLinkProps: link => ({ href: link }),
   };
 });
 
@@ -38,7 +37,7 @@ const defaultProps = {
   refreshJobs: () => {},
   openDetailPanel: () => {},
   hasJobs: false,
-  isLoading: false
+  isLoading: false,
 };
 
 const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
@@ -68,17 +67,21 @@ describe('<JobList />', () => {
     const { exists, find } = initTestBed({
       jobLoadError: {
         status: 400,
-        data: { statusCode: 400, error: 'Houston we got a problem.' }
-      }
+        data: { statusCode: 400, error: 'Houston we got a problem.' },
+      },
     });
 
     it('should display a callout with the status and the message', () => {
       expect(exists('jobListError')).toBeTruthy();
-      expect(find('jobListError').find('EuiText').text()).toEqual('400 Houston we got a problem.');
+      expect(
+        find('jobListError')
+          .find('EuiText')
+          .text()
+      ).toEqual('400 Houston we got a problem.');
     });
   });
 
-  describe('when the user does not have the permission to access it', () =>  {
+  describe('when the user does not have the permission to access it', () => {
     const { exists } = initTestBed({ jobLoadError: { status: 403 } });
 
     it('should render a callout message', () => {

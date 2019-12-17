@@ -27,12 +27,12 @@ export class FieldChooser extends Component {
     onSelectField: PropTypes.func.isRequired,
     prompt: PropTypes.string,
     dataTestSubj: PropTypes.string,
-  }
+  };
 
   static defaultProps = {
     prompt: 'Search',
-    dataTestSubj: 'rollupJobFieldChooser'
-  }
+    dataTestSubj: 'rollupJobFieldChooser',
+  };
 
   constructor(props) {
     super(props);
@@ -43,7 +43,7 @@ export class FieldChooser extends Component {
     };
   }
 
-  onSearch = (e) => {
+  onSearch = e => {
     this.setState({
       searchValue: e.target.value,
     });
@@ -74,7 +74,7 @@ export class FieldChooser extends Component {
 
     const { isOpen, searchValue } = this.state;
 
-    const getRowProps = (item) => {
+    const getRowProps = item => {
       return {
         onClick: () => {
           onSelectField(item);
@@ -89,11 +89,15 @@ export class FieldChooser extends Component {
         return !selectedFieldNames.includes(name);
       });
 
-      const searchedItems = searchValue ? unselectedFields.filter(item => {
-        const normalizedSearchValue = searchValue.trim().toLowerCase();
-        return item.name.toLowerCase().includes(normalizedSearchValue) ||
-          item.type.toLowerCase().includes(normalizedSearchValue);
-      }) : unselectedFields;
+      const searchedItems = searchValue
+        ? unselectedFields.filter(item => {
+            const normalizedSearchValue = searchValue.trim().toLowerCase();
+            return (
+              item.name.toLowerCase().includes(normalizedSearchValue) ||
+              item.type.toLowerCase().includes(normalizedSearchValue)
+            );
+          })
+        : unselectedFields;
 
       return (
         <EuiFlyout
@@ -137,10 +141,7 @@ export class FieldChooser extends Component {
     };
     return (
       <Fragment>
-        <EuiButton
-          onClick={this.onButtonClick}
-          data-test-subj="rollupJobShowFieldChooserButton"
-        >
+        <EuiButton onClick={this.onButtonClick} data-test-subj="rollupJobShowFieldChooserButton">
           {buttonLabel}
         </EuiButton>
 

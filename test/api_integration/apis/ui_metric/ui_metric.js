@@ -20,11 +20,11 @@
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const createStatsMetric = (eventName) => ({
+  const createStatsMetric = eventName => ({
     key: ReportManager.createMetricKey({ appName: 'myApp', type: METRIC_TYPE.CLICK, eventName }),
     eventName,
     appName: 'myApp',
@@ -32,21 +32,21 @@ export default function ({ getService }) {
     stats: { sum: 1, avg: 1, min: 1, max: 1 },
   });
 
-  const createUserAgentMetric = (appName) => ({
+  const createUserAgentMetric = appName => ({
     key: ReportManager.createMetricKey({ appName, type: METRIC_TYPE.USER_AGENT }),
     appName,
     type: METRIC_TYPE.USER_AGENT,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
   });
 
   describe('ui_metric API', () => {
-
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
       const uiStatsMetric = createStatsMetric('myEvent');
       const report = {
         uiStatsMetrics: {
           [uiStatsMetric.key]: uiStatsMetric,
-        }
+        },
       };
       await supertest
         .post('/api/ui_metric/report')
@@ -74,7 +74,7 @@ export default function ({ getService }) {
         uiStatsMetrics: {
           [uiStatsMetric1.key]: uiStatsMetric1,
           [uiStatsMetric2.key]: uiStatsMetric2,
-        }
+        },
       };
       await supertest
         .post('/api/ui_metric/report')
@@ -91,4 +91,3 @@ export default function ({ getService }) {
     });
   });
 }
-
