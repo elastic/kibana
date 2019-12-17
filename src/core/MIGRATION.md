@@ -64,7 +64,7 @@ We'll start with an overview of how plugins work in the new platform, and we'll 
 
 Plugins in the new platform are not especially novel or complicated to describe. Our intention wasn't to build some clever system that magically solved problems through abstractions and layers of obscurity, and we wanted to make sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
-New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories.
+New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories. _See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ### Architecture
 
@@ -109,7 +109,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 ```
 
-**[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
+**[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way. _See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ```ts
 import { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
@@ -215,7 +215,7 @@ These are the contracts exposed by the core services for each lifecycle event:
 
 Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `start`.
 
-Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
+Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all first-party Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
 
 **foobar plugin.ts:**
 
@@ -1094,6 +1094,8 @@ Plugins should not ever import code from deeply inside another plugin (eg. `my_p
 The benefit of this approach is that the details of where code lives and whether it is accessible in multiple runtimes is an implementation detail of the plugin itself. A plugin consumer that is writing client-side code only ever needs to concern themselves with the client-side contracts being exposed, and the same can be said for server-side contracts on the server.
 
 A plugin author that decides some set of code should diverge from having a single "common" definition can now safely change the implementation details without impacting downstream consumers.
+
+_See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ### When does code go into a plugin, core, or packages?
 
