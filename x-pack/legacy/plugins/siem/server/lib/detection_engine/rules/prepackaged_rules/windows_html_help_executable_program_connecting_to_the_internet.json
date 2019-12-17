@@ -1,5 +1,5 @@
 {
-  "rule_id": "b3fa2ef6-39b9-47d6-b3a7-c6b4ca526098",
+  "rule_id": "b29ee2be-bf99-446c-ab1a-2dc0183394b8",
   "risk_score": 50,
   "description": "Windows: HTML Help executable Program Connecting to the Internet",
   "immutable": true,

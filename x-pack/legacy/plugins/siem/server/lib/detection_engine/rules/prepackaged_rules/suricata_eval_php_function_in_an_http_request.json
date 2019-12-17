@@ -1,5 +1,5 @@
 {
-  "rule_id": "084f131e-0d11-43b9-824b-049611569da4",
+  "rule_id": "8c77b4ed-4e98-438b-adb0-d645d4a4ea26",
   "risk_score": 50,
   "description": "Suricata eval PHP Function in an HTTP Request",
   "immutable": true,

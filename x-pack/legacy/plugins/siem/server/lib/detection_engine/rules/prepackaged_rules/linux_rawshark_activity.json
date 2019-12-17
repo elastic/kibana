@@ -1,5 +1,5 @@
 {
-  "rule_id": "6e35a211-2997-4246-b44d-012e9f1d9457",
+  "rule_id": "30eb2b9d-b53b-4ba5-bfab-7119a8b84029",
   "risk_score": 50,
   "description": "Linux: Rawshark Activity",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,9 +32,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.dataset",
+        "value": "process",
+        "params": {
+          "query": "process"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
       "query": {
         "match": {
           "event.dataset": {
@@ -30,6 +57,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

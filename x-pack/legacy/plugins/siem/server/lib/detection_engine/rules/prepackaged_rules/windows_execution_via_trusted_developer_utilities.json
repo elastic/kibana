@@ -1,5 +1,5 @@
 {
-  "rule_id": "3d321fe5-18df-48de-967f-03a5af2af6d6",
+  "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae1",
   "risk_score": 50,
   "description": "Windows Execution via Trusted Developer Utilities",
   "immutable": true,

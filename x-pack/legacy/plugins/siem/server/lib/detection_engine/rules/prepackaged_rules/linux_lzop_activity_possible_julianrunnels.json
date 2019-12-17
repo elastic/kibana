@@ -1,5 +1,5 @@
 {
-  "rule_id": "5d7d27fb-11d4-4bab-9c0a-301ec599b250",
+  "rule_id": "d89b05b1-9b2b-45ea-9876-4a74550af6a6",
   "risk_score": 50,
   "description": "Linux lzop activity - possible @JulianRunnels",
   "immutable": true,

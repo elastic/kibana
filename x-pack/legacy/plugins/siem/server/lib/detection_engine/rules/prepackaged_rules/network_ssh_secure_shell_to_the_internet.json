@@ -1,5 +1,5 @@
 {
-  "rule_id": "8fc23666-2ead-452b-984d-3c62ca70f865",
+  "rule_id": "6f1500bc-62d7-4eb9-8601-7485e87da2f4",
   "risk_score": 50,
   "description": "Network - SSH (Secure Shell) to the Internet\t",
   "immutable": true,

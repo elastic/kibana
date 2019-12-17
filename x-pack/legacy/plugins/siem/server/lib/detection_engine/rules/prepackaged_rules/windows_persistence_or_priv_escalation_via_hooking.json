@@ -1,5 +1,5 @@
 {
-  "rule_id": "bd9ed23c-baed-4981-b623-f1f92fd73155",
+  "rule_id": "015f070d-cf70-437c-99d1-472e31d36b03",
   "risk_score": 50,
   "description": "Windows Persistence or Priv Escalation via Hooking",
   "immutable": true,

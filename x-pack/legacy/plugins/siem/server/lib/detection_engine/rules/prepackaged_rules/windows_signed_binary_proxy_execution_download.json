@@ -1,5 +1,5 @@
 {
-  "rule_id": "8ea5174b-cf10-4c1e-9850-0563d53af6de",
+  "rule_id": "68ecc190-cce2-4021-b976-c7c846ac0a00",
   "risk_score": 50,
   "description": "Windows Signed Binary Proxy Execution Download",
   "immutable": true,

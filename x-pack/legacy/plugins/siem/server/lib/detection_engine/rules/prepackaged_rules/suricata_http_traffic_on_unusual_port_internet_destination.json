@@ -1,5 +1,5 @@
 {
-  "rule_id": "93007a8d-443e-452d-bb9f-37c4ef0ac852",
+  "rule_id": "43795909-913c-419d-8355-7f2880694bec",
   "risk_score": 50,
   "description": "Suricata HTTP Traffic On Unusual Port, Internet Destination",
   "immutable": true,

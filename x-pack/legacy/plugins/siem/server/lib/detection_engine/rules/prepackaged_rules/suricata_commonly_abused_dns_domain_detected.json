@@ -1,5 +1,5 @@
 {
-  "rule_id": "10fda2cb-cdc1-4257-85de-8761b5604ef8",
+  "rule_id": "1844dfe1-b05e-4ca6-b367-6b9e3a1fe227",
   "risk_score": 50,
   "description": "Suricata Commonly Abused DNS Domain Detected",
   "immutable": true,

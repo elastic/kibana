@@ -1,5 +1,5 @@
 {
-  "rule_id": "03ef1aca-2fdf-4fb4-8c98-d1ebbbfc08f9",
+  "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
   "risk_score": 50,
   "description": "Windows Defense evasion via Filter Manager",
   "immutable": true,

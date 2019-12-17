@@ -1,5 +1,5 @@
 {
-  "rule_id": "e5e668d4-7239-4a58-86e6-5628f9214449",
+  "rule_id": "d7c2561d-2758-46ad-b5a9-247efb9eea21",
   "risk_score": 50,
   "description": "Windows Persistence via Netshell Helper DLL",
   "immutable": true,

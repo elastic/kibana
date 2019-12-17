@@ -1,5 +1,5 @@
 {
-  "rule_id": "8898b37c-c058-4c04-bf90-e8eb9f1a2f52",
+  "rule_id": "256e9e8b-8366-4f23-8cbe-c9eb5ba25633",
   "risk_score": 50,
   "description": "Suricata non-SSH Traffic on Port 22",
   "immutable": true,

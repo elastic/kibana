@@ -1,5 +1,5 @@
 {
-  "rule_id": "75a348c9-6ebb-436a-a85c-be1f24c99740",
+  "rule_id": "8e792144-39a6-4a63-9779-2f12719dc132",
   "risk_score": 50,
   "description": "Powershell network connection",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Network connection detected (rule: NetworkConnect)",
+        "params": {
+          "query": "Network connection detected (rule: NetworkConnect)"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,9 +32,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": true,
+        "type": "phrase",
+        "key": "destination.ip",
+        "value": "169.254.169.254",
+        "params": {
+          "query": "169.254.169.254"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
       "query": {
         "match": {
           "destination.ip": {
@@ -30,6 +57,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

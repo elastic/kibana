@@ -1,5 +1,5 @@
 {
-  "rule_id": "37dbeae5-cba3-4c8b-b19b-8c0b082000a8",
+  "rule_id": "cec5eb81-6e01-40e5-a1bf-bf175cce4eb4",
   "risk_score": 50,
   "description": "Windows Management Instrumentation (WMI) Execution",
   "immutable": true,

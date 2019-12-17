@@ -1,5 +1,5 @@
 {
-  "rule_id": "505e5f10-2fb9-4a88-a83d-00c82d7fff92",
+  "rule_id": "b060c87f-af49-40eb-acee-561a1f1331aa",
   "risk_score": 50,
   "description": "Suricata non-TLS on TLS Port",
   "immutable": true,

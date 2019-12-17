@@ -1,5 +1,5 @@
 {
-  "rule_id": "32c6c2d8-c429-4f57-b34f-7dffc31dd908",
+  "rule_id": "87ec6396-9ac4-4706-bcf0-2ebb22002f43",
   "risk_score": 50,
   "description": "Network - FTP (File Transfer Protocol) Activity to the Internet\t",
   "immutable": true,

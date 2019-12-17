@@ -1,5 +1,5 @@
 {
-  "rule_id": "e2584126-5a96-4048-bf75-ab0773a9a286",
+  "rule_id": "6ea71ff0-9e95-475b-9506-2580d1ce6154",
   "risk_score": 50,
   "description": "Network - DNS Directly to the Internet\t",
   "immutable": true,

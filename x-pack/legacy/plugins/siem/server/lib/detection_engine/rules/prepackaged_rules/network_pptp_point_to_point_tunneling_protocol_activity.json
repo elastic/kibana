@@ -1,5 +1,5 @@
 {
-  "rule_id": "ee66387c-add2-4139-b490-f3cbf3c240ed",
+  "rule_id": "d2053495-8fe7-4168-b3df-dad844046be3",
   "risk_score": 50,
   "description": "Network - PPTP (Point to Point Tunneling Protocol) Activity\t",
   "immutable": true,

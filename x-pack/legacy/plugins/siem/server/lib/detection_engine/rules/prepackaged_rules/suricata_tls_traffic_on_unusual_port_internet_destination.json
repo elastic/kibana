@@ -1,5 +1,5 @@
 {
-  "rule_id": "1effcf9a-aaf9-4a3f-9753-9171375b2e77",
+  "rule_id": "6c1db8ba-db4b-4513-a0e3-b3c857ba8b05",
   "risk_score": 50,
   "description": "Suricata TLS Traffic on Unusual Port, Internet Destination",
   "immutable": true,

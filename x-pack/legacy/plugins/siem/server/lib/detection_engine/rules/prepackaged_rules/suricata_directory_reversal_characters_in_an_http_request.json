@@ -1,5 +1,5 @@
 {
-  "rule_id": "a6213ab8-ff41-45f1-8ebf-8c269aefdc5c",
+  "rule_id": "c0ca8090-60f8-4458-befe-c43687b648a3",
   "risk_score": 50,
   "description": "Suricata Directory Reversal Characters in an HTTP Request",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "02ed5ac4-fceb-470c-8199-a91115f12a2c",
+  "rule_id": "fd4a992d-6130-4802-9ff8-829b89ae801f",
   "risk_score": 50,
   "description": "Windows Persistence via Application Shimming",
   "immutable": true,

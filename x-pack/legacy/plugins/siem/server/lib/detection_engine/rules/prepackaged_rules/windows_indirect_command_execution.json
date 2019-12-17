@@ -1,5 +1,5 @@
 {
-  "rule_id": "9547b936-2ff8-4fac-9da9-45ffe85da3cc",
+  "rule_id": "ff969842-c573-4e69-8e12-02fb303290f2",
   "risk_score": 50,
   "description": "Windows Indirect Command Execution",
   "immutable": true,

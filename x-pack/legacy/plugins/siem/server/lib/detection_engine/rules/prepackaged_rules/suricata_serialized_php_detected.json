@@ -1,5 +1,5 @@
 {
-  "rule_id": "0a971411-6a1a-44c5-b70d-b99851196205",
+  "rule_id": "3baa5b65-d11e-40fb-a9b4-6b2a6a062d48",
   "risk_score": 50,
   "description": "Suricata Serialized PHP Detected",
   "immutable": true,

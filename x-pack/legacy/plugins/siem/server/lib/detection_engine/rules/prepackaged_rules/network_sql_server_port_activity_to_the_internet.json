@@ -1,5 +1,5 @@
 {
-  "rule_id": "69ad9c14-d679-4907-a677-7d3295cf14d4",
+  "rule_id": "139c7458-566a-410c-a5cd-f80238d6a5cd",
   "risk_score": 50,
   "description": "Network - SQL Server Port Activity to the Internet\t",
   "immutable": true,

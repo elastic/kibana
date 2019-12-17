@@ -1,5 +1,5 @@
 {
-  "rule_id": "3bc27a45-bb67-4593-a26e-8a2558a61812",
+  "rule_id": "df959768-b0c9-4d45-988c-5606a2be8e5a",
   "risk_score": 50,
   "description": "Linux: Process Started in Temp Directory",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.dataset",
+        "value": "process",
+        "params": {
+          "query": "process"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.dataset": {
@@ -20,9 +32,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -30,6 +57,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "rule_id": "019ed38e-38ff-450f-9efb-1a0f968c9d91",
+  "rule_id": "738ee70b-7d0f-438f-98ac-a393df58c58f",
   "risk_score": 50,
   "description": "Suricata IMAP Traffic on Unusual Port, internet Destination",
   "immutable": true,

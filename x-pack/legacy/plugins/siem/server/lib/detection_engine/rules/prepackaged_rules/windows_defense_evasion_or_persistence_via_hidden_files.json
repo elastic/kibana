@@ -1,5 +1,5 @@
 {
-  "rule_id": "9d1aeafb-efbc-4924-b596-33add263e3d5",
+  "rule_id": "340a0063-baba-447b-8396-26a5cc1eb684",
   "risk_score": 50,
   "description": "Windows Defense Evasion or Persistence via Hidden Files",
   "immutable": true,

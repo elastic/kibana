@@ -1,5 +1,5 @@
 {
-  "rule_id": "5de2e497-87dc-41fd-8176-a41a1fac4c63",
+  "rule_id": "e8ec93a6-49d2-4467-8c12-81c435fcc519",
   "risk_score": 50,
   "description": "Linux: Web Download",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "socket_opened",
+        "params": {
+          "query": "socket_opened"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,6 +32,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

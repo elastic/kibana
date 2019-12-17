@@ -1,5 +1,5 @@
 {
-  "rule_id": "3f28971e-0fe4-48b1-b916-0901533ae64e",
+  "rule_id": "87e77fb6-b555-43be-adc5-f57c6aaf7cd0",
   "risk_score": 50,
   "description": "Suricata RPC Traffic on HTTP Ports",
   "immutable": true,

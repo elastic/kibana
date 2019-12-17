@@ -1,5 +1,5 @@
 {
-  "rule_id": "a1683773-c53b-4a4d-83c1-b9ba8ba2224d",
+  "rule_id": "c6e6f16f-66de-43d5-8ab7-599af536dedf",
   "risk_score": 50,
   "description": "Suricata LaZagne Artifact in an HTTP POST",
   "immutable": true,

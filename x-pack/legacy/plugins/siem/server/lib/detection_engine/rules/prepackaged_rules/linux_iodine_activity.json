@@ -1,5 +1,5 @@
 {
-  "rule_id": "8d2b7a3d-dd90-483e-b096-f89a43ebbc36",
+  "rule_id": "041d4d41-9589-43e2-ba13-5680af75ebc2",
   "risk_score": 50,
   "description": "Linux: Iodine Activity",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.dataset",
+        "value": "process",
+        "params": {
+          "query": "process"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.dataset": {
@@ -20,9 +32,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -30,6 +57,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

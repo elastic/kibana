@@ -1,5 +1,5 @@
 {
-  "rule_id": "3182aa58-4a92-4175-9bfa-d4c6d4e477a5",
+  "rule_id": "b007cc82-c522-48d1-b7a7-53f63c50c494",
   "risk_score": 50,
   "description": "Windows Execution via Microsoft HTML Application (HTA)",
   "immutable": true,

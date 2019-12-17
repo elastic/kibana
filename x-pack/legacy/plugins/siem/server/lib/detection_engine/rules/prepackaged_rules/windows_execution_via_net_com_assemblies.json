@@ -1,5 +1,5 @@
 {
-  "rule_id": "6d22690f-cfbb-401f-bbe6-a8a8728b95e8",
+  "rule_id": "5c12412f-602c-4120-8c4f-69d723dbba04",
   "risk_score": 50,
   "description": "Windows Execution via .NET COM Assemblies",
   "immutable": true,

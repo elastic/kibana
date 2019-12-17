@@ -1,5 +1,5 @@
 {
-  "rule_id": "020e750b-1152-4494-9405-cd4d1b9eeb05",
+  "rule_id": "0f09845b-2ec8-4770-8155-7df3d4e402cc",
   "risk_score": 50,
   "description": "Windows Burp CE activity",
   "immutable": true,

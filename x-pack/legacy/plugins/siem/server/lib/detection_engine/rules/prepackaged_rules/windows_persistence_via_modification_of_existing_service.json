@@ -1,5 +1,5 @@
 {
-  "rule_id": "e8ae8891-8da6-4111-b846-9f4bc18af058",
+  "rule_id": "3bb04809-84ab-4487-bd99-ccc58675bd40",
   "risk_score": 50,
   "description": "Windows Persistence via Modification of Existing Service",
   "immutable": true,

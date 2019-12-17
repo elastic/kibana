@@ -1,5 +1,5 @@
 {
-  "rule_id": "afa504f1-46a0-4878-ab0b-c0b4db76948f",
+  "rule_id": "b1adc850-0fe3-4dac-94d3-6f240071f83a",
   "risk_score": 50,
   "description": "Suricata FTP Traffic on Unusual Port, Internet Destination",
   "immutable": true,

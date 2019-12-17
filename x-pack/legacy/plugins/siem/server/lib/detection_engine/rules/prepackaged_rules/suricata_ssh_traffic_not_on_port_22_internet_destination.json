@@ -1,5 +1,5 @@
 {
-  "rule_id": "59135ddf-2f5f-46f1-a7f5-af4cb5de54fe",
+  "rule_id": "82265eef-1212-4c4f-af04-f977a3060592",
   "risk_score": 50,
   "description": "Suricata SSH Traffic Not on Port 22, Internet Destination",
   "immutable": true,

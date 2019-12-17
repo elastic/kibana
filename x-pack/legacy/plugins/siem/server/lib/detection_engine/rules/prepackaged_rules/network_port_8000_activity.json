@@ -1,5 +1,5 @@
 {
-  "rule_id": "49750aa0-9225-46f9-9def-c701bf457b01",
+  "rule_id": "9c5f8092-e3f7-4eda-b9d3-56eed28fb157",
   "risk_score": 50,
   "description": "Network - Port 8000 Activity",
   "immutable": true,

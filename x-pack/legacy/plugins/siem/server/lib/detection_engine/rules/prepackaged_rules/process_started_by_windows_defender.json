@@ -1,5 +1,5 @@
 {
-  "rule_id": "e6e11af4-9643-4abf-9b8d-9e50fb74a7e8",
+  "rule_id": "b3da3321-417d-494b-854c-b40369e063f0",
   "risk_score": 50,
   "description": "Process started by Windows Defender",
   "immutable": true,

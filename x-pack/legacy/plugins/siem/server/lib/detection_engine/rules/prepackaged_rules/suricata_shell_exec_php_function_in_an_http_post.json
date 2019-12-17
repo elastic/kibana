@@ -1,5 +1,5 @@
 {
-  "rule_id": "24069f0b-c876-45de-8e8d-cffd2afc5ed1",
+  "rule_id": "082fca48-4707-485a-aedb-340ee77e0687",
   "risk_score": 50,
   "description": "Suricata shell_exec PHP Function in an HTTP POST",
   "immutable": true,

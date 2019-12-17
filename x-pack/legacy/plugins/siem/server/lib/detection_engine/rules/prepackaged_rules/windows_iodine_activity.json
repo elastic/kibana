@@ -1,5 +1,5 @@
 {
-  "rule_id": "92ee6af7-28d7-4901-8d79-667561009de2",
+  "rule_id": "fcbbf0b2-99c5-4c7f-8411-dc9ee392e43f",
   "risk_score": 50,
   "description": "Windows Iodine activity",
   "immutable": true,

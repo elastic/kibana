@@ -1,5 +1,5 @@
 {
-  "rule_id": "49b2f530-35b6-4351-a189-e283d9858122",
+  "rule_id": "34fde489-94b0-4500-a76f-b8a157cf9269",
   "risk_score": 50,
   "description": "Network - Telnet Port Activity\t",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "aa8b6da7-2e48-4b2e-8b51-13bff2585b87",
+  "rule_id": "67c7d28e-8be4-49ae-9c89-5c328ea245dc",
   "risk_score": 50,
   "description": "Suricata non-DNS Traffic on TCP Port 53",
   "immutable": true,

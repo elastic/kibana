@@ -1,5 +1,5 @@
 {
-  "rule_id": "c75a90c2-172c-4c64-b1c6-a9769ad086f7",
+  "rule_id": "a839a360-94ae-4219-b1cc-458d836333a7",
   "risk_score": 50,
   "description": "Suricata Double Encoded Characters in an HTTP POST",
   "immutable": true,

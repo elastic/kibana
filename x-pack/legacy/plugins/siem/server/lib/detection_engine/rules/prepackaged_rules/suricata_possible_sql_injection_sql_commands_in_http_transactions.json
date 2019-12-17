@@ -1,5 +1,5 @@
 {
-  "rule_id": "ecb3759c-bf5c-4b23-94ab-59de47f2d7ba",
+  "rule_id": "cdfbcd5e-1d8e-47e6-b3f2-b09bce780640",
   "risk_score": 50,
   "description": "Suricata Possible SQL Injection - SQL Commands in HTTP Transactions",
   "immutable": true,

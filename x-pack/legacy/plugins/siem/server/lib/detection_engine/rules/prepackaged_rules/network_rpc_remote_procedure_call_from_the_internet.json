@@ -1,5 +1,5 @@
 {
-  "rule_id": "f13c51f8-63e1-44b3-8d2e-db18faecae3f",
+  "rule_id": "143cb236-0956-4f42-a706-814bcaa0cf5a",
   "risk_score": 50,
   "description": "Network - RPC (Remote Procedure Call) from the Internet\t",
   "immutable": true,

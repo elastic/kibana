@@ -1,5 +1,5 @@
 {
-  "rule_id": "13bdede0-35c0-4583-afa6-feffe87c0dbf",
+  "rule_id": "241b6a1d-4f73-4b68-bd98-22e909681930",
   "risk_score": 50,
   "description": "Suricata non-IMAP Traffic on Port 1443 (IMAP)",
   "immutable": true,

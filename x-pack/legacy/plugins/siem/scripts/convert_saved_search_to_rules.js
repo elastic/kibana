@@ -153,8 +153,7 @@ async function main() {
 
       // remove meta value from the filter
       const filterWithoutMeta = filter.map(filterValue => {
-        delete filterValue.meta;
-        delete filterValue.$state;
+        filterValue.$state;
         return filterValue;
       });
       const outputMessage = {

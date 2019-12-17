@@ -1,5 +1,5 @@
 {
-  "rule_id": "6ef3fd3a-d288-4f0b-ae27-88d59de45086",
+  "rule_id": "a8cfa646-e4d8-48b5-884e-6204ba77fc8d",
   "risk_score": 50,
   "description": "Windows: Powershell Connecting to the Internet",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "b98e5a20-e06a-4f1c-8e76-b713dbce4686",
+  "rule_id": "6ff01a30-95dd-471c-b61d-0fd9ee2d0a20",
   "risk_score": 50,
   "description": "Suricata Base64 Encoded Invoke-Command Powershell Execution",
   "immutable": true,

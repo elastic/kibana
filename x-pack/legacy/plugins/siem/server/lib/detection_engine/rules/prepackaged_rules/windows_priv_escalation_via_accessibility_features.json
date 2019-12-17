@@ -1,5 +1,5 @@
 {
-  "rule_id": "711b1a13-d981-499e-9164-838bf6a189a4",
+  "rule_id": "7405ddf1-6c8e-41ce-818f-48bea6bcaed8",
   "risk_score": 50,
   "description": "Windows Priv Escalation via Accessibility Features",
   "immutable": true,

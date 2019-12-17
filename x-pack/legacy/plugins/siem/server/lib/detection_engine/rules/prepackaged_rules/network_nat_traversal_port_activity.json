@@ -1,5 +1,5 @@
 {
-  "rule_id": "080ad18e-89e5-4dcf-bb93-18c1beaf5023",
+  "rule_id": "a9cb3641-ff4b-4cdc-a063-b4b8d02a67c7",
   "risk_score": 50,
   "description": "Network - NAT Traversal Port Activity\t",
   "immutable": true,

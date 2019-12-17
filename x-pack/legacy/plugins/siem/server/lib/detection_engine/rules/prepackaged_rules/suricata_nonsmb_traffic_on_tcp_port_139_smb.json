@@ -1,5 +1,5 @@
 {
-  "rule_id": "66158168-bc5b-41b7-83df-3b60c370fd03",
+  "rule_id": "c259ab53-4b1a-42f6-b204-fe057c521515",
   "risk_score": 50,
   "description": "Suricata non-SMB Traffic on TCP Port 139 (SMB)",
   "immutable": true,

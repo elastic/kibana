@@ -1,5 +1,5 @@
 {
-  "rule_id": "ecf157e4-39e1-401a-bebc-4f2c824544e8",
+  "rule_id": "c3f5dc81-a8b4-4144-95a7-d0a818d7355d",
   "risk_score": 50,
   "description": "Windows net command activity by the SYSTEM account",
   "immutable": true,
@@ -13,6 +13,19 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "type": "phrases",
+        "key": "process.name",
+        "value": "net.exe, net1.exe",
+        "params": [
+          "net.exe",
+          "net1.exe"
+        ],
+        "alias": null,
+        "negate": false,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "bool": {
           "should": [
@@ -29,6 +42,9 @@
           ],
           "minimum_should_match": 1
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

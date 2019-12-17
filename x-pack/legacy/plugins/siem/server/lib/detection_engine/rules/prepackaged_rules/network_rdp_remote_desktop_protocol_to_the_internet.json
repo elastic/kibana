@@ -1,5 +1,5 @@
 {
-  "rule_id": "1778c080-fc34-4d9b-8241-8b89386eba9b",
+  "rule_id": "e56993d2-759c-4120-984c-9ec9bb940fd5",
   "risk_score": 50,
   "description": "Network - RDP (Remote Desktop Protocol) to the Internet\t",
   "immutable": true,

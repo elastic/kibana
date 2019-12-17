@@ -1,5 +1,5 @@
 {
-  "rule_id": "2f34a14e-4c11-4b6f-a4bb-de46cf5daab6",
+  "rule_id": "7edadee3-98ae-472c-b1c4-8c0a2c4877cc",
   "risk_score": 50,
   "description": "Windows: Background Intelligent Transfer Service (BITS) Connecting to the Internet",
   "immutable": true,

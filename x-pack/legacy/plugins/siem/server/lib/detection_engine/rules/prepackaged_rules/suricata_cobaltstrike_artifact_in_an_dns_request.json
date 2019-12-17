@@ -1,5 +1,5 @@
 {
-  "rule_id": "cc81aa43-6c54-4ea6-a553-f16db0038a90",
+  "rule_id": "481ef0f5-beda-4fa2-8bfb-039c95500deb",
   "risk_score": 50,
   "description": "Suricata CobaltStrike Artifact in an DNS Request",
   "immutable": true,

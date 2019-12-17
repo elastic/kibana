@@ -1,5 +1,5 @@
 {
-  "rule_id": "d5c04a36-e0b2-4f6c-a362-90a80c1067d5",
+  "rule_id": "ebdc4b6f-7fdb-4c21-bbd6-59e1ed11024a",
   "risk_score": 50,
   "description": "Windows Netcat network activity",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "connected-to",
+        "params": {
+          "query": "connected-to"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,6 +32,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

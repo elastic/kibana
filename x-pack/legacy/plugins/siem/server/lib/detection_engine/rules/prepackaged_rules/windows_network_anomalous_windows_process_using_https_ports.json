@@ -1,5 +1,5 @@
 {
-  "rule_id": "a783a79d-14a1-4bb3-bbcb-ea6e16c7c723",
+  "rule_id": "b486fa9e-e6c7-44a1-b07d-7d5f07f21ce1",
   "risk_score": 50,
   "description": "Windows Network - Anomalous Windows Process Using HTTP/S Ports",
   "immutable": true,

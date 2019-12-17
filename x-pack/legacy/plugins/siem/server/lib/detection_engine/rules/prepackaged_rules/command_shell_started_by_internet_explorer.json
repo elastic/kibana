@@ -1,5 +1,5 @@
 {
-  "rule_id": "b52f7c26-780b-49df-b5d5-266614d1c0d7",
+  "rule_id": "a0b554d2-85ed-4998-ada3-4ca58b508b35",
   "risk_score": 50,
   "description": "Command shell started by Internet Explorer",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "process.name",
+        "value": "cmd.exe",
+        "params": {
+          "query": "cmd.exe"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "process.name": {
@@ -20,9 +32,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Process Create (rule: ProcessCreate)",
+        "params": {
+          "query": "Process Create (rule: ProcessCreate)"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -30,6 +57,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

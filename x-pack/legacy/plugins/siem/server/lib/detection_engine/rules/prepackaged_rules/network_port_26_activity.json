@@ -1,5 +1,5 @@
 {
-  "rule_id": "3094b73d-e134-4216-b822-c9c1ba54e24f",
+  "rule_id": "d7e62693-aab9-4f66-a21a-3d79ecdd603d",
   "risk_score": 50,
   "description": "Network - Port 26 Activity\t",
   "immutable": true,

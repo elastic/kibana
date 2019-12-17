@@ -1,5 +1,5 @@
 {
-  "rule_id": "041620a7-2d38-41dc-888b-d92c880b39d2",
+  "rule_id": "bc913943-e1f9-4bf5-a593-caca7c2eb0c3",
   "risk_score": 50,
   "description": "Windows Data Compression Using Powershell",
   "immutable": true,

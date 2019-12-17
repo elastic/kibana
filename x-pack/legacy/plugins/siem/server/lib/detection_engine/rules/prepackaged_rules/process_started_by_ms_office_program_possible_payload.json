@@ -1,5 +1,5 @@
 {
-  "rule_id": "6bec5df6-3f2c-4897-94a5-17c3eebc46c9",
+  "rule_id": "3181b814-08e3-43f9-b77a-a2530603b131",
   "risk_score": 50,
   "description": "Process started by MS Office program - possible payload",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Process Create (rule: ProcessCreate)",
+        "params": {
+          "query": "Process Create (rule: ProcessCreate)"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,6 +32,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

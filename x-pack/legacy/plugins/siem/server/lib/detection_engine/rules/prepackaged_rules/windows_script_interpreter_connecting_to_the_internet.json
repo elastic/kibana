@@ -1,5 +1,5 @@
 {
-  "rule_id": "9a6428b8-b315-48a0-9a98-3f565152d3b1",
+  "rule_id": "2cc4597c-b0c9-4481-b1a6-e6c05cfc9f02",
   "risk_score": 50,
   "description": "Windows: Script Interpreter Connecting to the Internet",
   "immutable": true,

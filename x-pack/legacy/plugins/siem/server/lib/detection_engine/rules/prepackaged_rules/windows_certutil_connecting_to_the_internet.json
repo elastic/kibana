@@ -1,5 +1,5 @@
 {
-  "rule_id": "62ebf43d-c8a3-49de-a95a-a031b259d76a",
+  "rule_id": "1a2cf526-6784-4c51-a2b9-f0adcc05d85c",
   "risk_score": 50,
   "description": "Windows: Certutil Connecting to the Internet",
   "immutable": true,

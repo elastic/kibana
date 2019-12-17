@@ -1,5 +1,5 @@
 {
-  "rule_id": "0ce56c68-1808-413c-abbc-e8437bd1505f",
+  "rule_id": "be40c674-1799-4a00-934d-0b2d54495913",
   "risk_score": 50,
   "description": "Linux Network - Anomalous Process Using HTTP/S Ports",
   "immutable": true,

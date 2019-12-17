@@ -1,5 +1,5 @@
 {
-  "rule_id": "7654bbf7-86e3-4712-af09-7c3b61db266f",
+  "rule_id": "3ad49c61-7adc-42c1-b788-732eda2f5abf",
   "risk_score": 50,
   "description": "Network - VNC (Virtual Network Computing) To the Internet\t",
   "immutable": true,

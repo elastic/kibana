@@ -1,5 +1,5 @@
 {
-  "rule_id": "14cee744-da0e-4b8f-933c-83ba1219dca0",
+  "rule_id": "ee2b07ec-94dd-48b2-b46b-7bef47cc43fc",
   "risk_score": 50,
   "description": "Suricata non-FTP Traffic on Port 21",
   "immutable": true,

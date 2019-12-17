@@ -1,5 +1,5 @@
 {
-  "rule_id": "37c7904d-cbc1-40c7-a796-29f0783c2ae8",
+  "rule_id": "b9074c74-6d23-4b07-927e-cc18b318a088",
   "risk_score": 50,
   "description": "Windows Registry Query, Local",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "27cb5798-bd0f-48bf-87d1-1307d58b4f3c",
+  "rule_id": "cc16f774-59f9-462d-8b98-d27ccd4519ec",
   "risk_score": 50,
   "description": "Windows Process Discovery via Tasklist Command",
   "immutable": true,

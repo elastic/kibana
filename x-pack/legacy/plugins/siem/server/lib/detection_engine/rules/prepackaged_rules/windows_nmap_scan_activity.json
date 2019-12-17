@@ -1,5 +1,5 @@
 {
-  "rule_id": "fe347251-f353-4e14-8aff-a93c32856c2f",
+  "rule_id": "54413985-a3da-4f45-b238-75afb65a1bae",
   "risk_score": 50,
   "description": "Windows nmap scan activity",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "alias": null,
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Network connection detected (rule: NetworkConnect)",
+        "params": {
+          "query": "Network connection detected (rule: NetworkConnect)"
+        },
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,6 +32,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

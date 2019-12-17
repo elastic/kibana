@@ -1,5 +1,5 @@
 {
-  "rule_id": "5d87e7d3-8f6a-468f-ab84-d64c71a1ee6f",
+  "rule_id": "231876e7-4d1f-4d63-a47c-47dd1acdc1cb",
   "risk_score": 50,
   "description": "Linux: Shell Activity By Web Server",
   "immutable": true,

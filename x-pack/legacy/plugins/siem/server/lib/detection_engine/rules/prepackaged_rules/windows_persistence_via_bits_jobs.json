@@ -1,5 +1,5 @@
 {
-  "rule_id": "b79e0875-eee9-4775-ab7c-770794d20553",
+  "rule_id": "7904fb20-172c-43fb-83e4-bfe27e3c702c",
   "risk_score": 50,
   "description": "Windows Persistence via BITS Jobs",
   "immutable": true,

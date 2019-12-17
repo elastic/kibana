@@ -1,5 +1,5 @@
 {
-  "rule_id": "ddc98179-5c99-4213-8b87-3605aa427fc3",
+  "rule_id": "89f9a4b0-9f8f-4ee0-8823-c4751a6d6696",
   "risk_score": 50,
   "description": "Windows: Command Prompt Connecting to the Internet",
   "immutable": true,

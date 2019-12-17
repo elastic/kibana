@@ -1,5 +1,5 @@
 {
-  "rule_id": "2288c216-7dca-46d0-b4e9-50d01ad4bf49",
+  "rule_id": "e3343ab9-4245-4715-b344-e11c56b0a47f",
   "risk_score": 50,
   "description": "Windows Execution via Compiled HTML File",
   "immutable": true,

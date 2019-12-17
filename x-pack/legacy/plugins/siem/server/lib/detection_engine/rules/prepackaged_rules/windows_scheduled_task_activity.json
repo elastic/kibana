@@ -1,5 +1,5 @@
 {
-  "rule_id": "116dc257-426a-443b-a8ed-909bdf326769",
+  "rule_id": "a1abd54d-3021-4f21-b2d1-0c6bc5c4051f",
   "risk_score": 50,
   "description": "Windows Scheduled Task Activity",
   "immutable": true,

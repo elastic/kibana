@@ -1,5 +1,5 @@
 {
-  "rule_id": "5bccf938-8cc3-470f-b0d2-0f461ac167e4",
+  "rule_id": "f2728299-167a-489c-913c-2e0955ac3c40",
   "risk_score": 50,
   "description": "Windows Execution via Connection Manager",
   "immutable": true,

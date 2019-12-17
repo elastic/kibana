@@ -1,5 +1,5 @@
 {
-  "rule_id": "22dd4622-f06c-4bcd-9ae2-636674700db9",
+  "rule_id": "1ed4d2d1-330c-4c7d-b32d-2d8805437946",
   "risk_score": 50,
   "description": "Suricata Double Encoded Characters in a URI",
   "immutable": true,

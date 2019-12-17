@@ -1,5 +1,5 @@
 {
-  "rule_id": "7b143643-cb56-4ec7-8814-03d64322fe08",
+  "rule_id": "ced66221-3e07-40ee-8588-5f107e7d50d8",
   "risk_score": 50,
   "description": "Windows Remote Management Execution",
   "immutable": true,

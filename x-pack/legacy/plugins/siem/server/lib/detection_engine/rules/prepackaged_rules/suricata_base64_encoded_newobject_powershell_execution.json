@@ -1,5 +1,5 @@
 {
-  "rule_id": "6a20ba5e-c4a0-4c20-8696-e33467ccd66b",
+  "rule_id": "d14d5401-0f7a-4933-b816-1b8f823e3d84",
   "risk_score": 50,
   "description": "Suricata Base64 Encoded New-Object Powershell Execution",
   "immutable": true,

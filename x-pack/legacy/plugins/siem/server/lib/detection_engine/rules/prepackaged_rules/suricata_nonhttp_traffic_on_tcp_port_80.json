@@ -1,5 +1,5 @@
 {
-  "rule_id": "e5eab8a9-dbc3-453d-bbbd-1df8ef8f78f8",
+  "rule_id": "70f9bd9f-accc-4da8-8674-38992096ddba",
   "risk_score": 50,
   "description": "Suricata non-HTTP Traffic on TCP Port 80",
   "immutable": true,

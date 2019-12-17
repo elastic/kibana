@@ -1,5 +1,5 @@
 {
-  "rule_id": "222b2c7e-0a2a-42d7-8b08-1d359fe98e03",
+  "rule_id": "7d2c38d7-ede7-4bdf-b140-445906e6c540",
   "risk_score": 50,
   "description": "Network - Tor Activity to the Internet\t",
   "immutable": true,

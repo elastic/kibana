@@ -1,5 +1,5 @@
 {
-  "rule_id": "c2eb194b-4eda-407c-964a-4a6122d292d0",
+  "rule_id": "fb02b8d3-71ee-4af1-bacd-215d23f17efa",
   "risk_score": 50,
   "description": "Windows: Register Server Program Connecting to the Internet",
   "immutable": true,

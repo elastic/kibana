@@ -1,5 +1,5 @@
 {
-  "rule_id": "0d56ce59-d4c5-4598-be60-868169838e8d",
+  "rule_id": "07979a67-ab4d-460f-9ff3-bf1352de6762",
   "risk_score": 50,
   "description": "Windows Defense Evasion via Windows Event Log Tools",
   "immutable": true,

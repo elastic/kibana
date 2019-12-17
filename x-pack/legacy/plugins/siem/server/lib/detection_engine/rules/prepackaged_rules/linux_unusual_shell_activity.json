@@ -1,5 +1,5 @@
 {
-  "rule_id": "53d6147a-f282-4be1-b906-ea4726cbd844",
+  "rule_id": "4cc78842-f8a9-4a20-b703-a596c4f24e4f",
   "risk_score": 50,
   "description": "Linux unusual shell activity",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": true,
+        "type": "phrase",
+        "key": "process.name",
+        "value": "bash",
+        "params": {
+          "query": "bash"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "process.name": {
@@ -20,9 +32,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": true,
+        "type": "phrase",
+        "key": "process.executable",
+        "value": "/bin/dash",
+        "params": {
+          "query": "/bin/dash"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
       "query": {
         "match": {
           "process.executable": {
@@ -30,9 +57,24 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     },
     {
+      "meta": {
+        "negate": true,
+        "type": "phrase",
+        "key": "process.name",
+        "value": "ReportCrash",
+        "params": {
+          "query": "ReportCrash"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index"
+      },
       "query": {
         "match": {
           "process.name": {
@@ -40,6 +82,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

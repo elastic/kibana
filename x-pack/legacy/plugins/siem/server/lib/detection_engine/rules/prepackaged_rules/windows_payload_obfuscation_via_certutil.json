@@ -1,5 +1,5 @@
 {
-  "rule_id": "7838a4d9-1760-4fb4-abee-4c1311114ebd",
+  "rule_id": "ce7c270c-c69b-47dd-8c21-60a35e92f372",
   "risk_score": 50,
   "description": "Windows Payload Obfuscation via Certutil",
   "immutable": true,

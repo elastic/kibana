@@ -1,5 +1,5 @@
 {
-  "rule_id": "1d2a3188-46e2-4583-8748-775b2bced960",
+  "rule_id": "deeae336-4ff7-4cf8-ae5b-18bce05da02e",
   "risk_score": 50,
   "description": "Suricata DNS Traffic on Unusual TCP Port",
   "immutable": true,

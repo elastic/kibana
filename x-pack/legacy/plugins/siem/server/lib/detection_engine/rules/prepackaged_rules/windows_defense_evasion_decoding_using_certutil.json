@@ -1,5 +1,5 @@
 {
-  "rule_id": "13a85a44-7aae-46bb-9d1c-e778ca740783",
+  "rule_id": "d9642bf2-87d0-45c2-8781-2bd2017cdbb8",
   "risk_score": 50,
   "description": "Windows Defense Evasion - Decoding Using Certutil",
   "immutable": true,

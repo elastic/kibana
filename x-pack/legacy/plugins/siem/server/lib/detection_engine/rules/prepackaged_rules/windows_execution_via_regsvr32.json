@@ -1,5 +1,5 @@
 {
-  "rule_id": "6cbcade9-c722-4952-8f9c-797d3a4a8381",
+  "rule_id": "b7333d08-be4b-4cb4-b81e-924ae37b3143",
   "risk_score": 50,
   "description": "Windows Execution via Regsvr32",
   "immutable": true,

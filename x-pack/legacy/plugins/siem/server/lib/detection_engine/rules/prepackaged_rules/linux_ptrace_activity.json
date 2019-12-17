@@ -1,5 +1,5 @@
 {
-  "rule_id": "36e9db74-b926-4ba0-84e7-7079416da2a4",
+  "rule_id": "1bff9259-e160-4920-bf72-4c96b6dbb7af",
   "risk_score": 50,
   "description": "Linux: Ptrace Activity",
   "immutable": true,
@@ -13,6 +13,18 @@
   "language": "kuery",
   "filters": [
     {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
       "query": {
         "match": {
           "event.action": {
@@ -20,6 +32,9 @@
             "type": "phrase"
           }
         }
+      },
+      "$state": {
+        "store": "appState"
       }
     }
   ],

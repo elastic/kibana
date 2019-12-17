@@ -1,5 +1,5 @@
 {
-  "rule_id": "fcf0d82a-adc3-438f-8bd7-41d3b253e012",
+  "rule_id": "1b62e8af-c10d-4708-9a74-118cb1c9ed8a",
   "risk_score": 50,
   "description": "Suricata Mimikatz Artifacts in an HTTP POST",
   "immutable": true,

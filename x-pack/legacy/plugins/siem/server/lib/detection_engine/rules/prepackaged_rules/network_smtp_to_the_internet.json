@@ -1,5 +1,5 @@
 {
-  "rule_id": "97561562-2263-4a4a-8dbd-7bb4b3f1327d",
+  "rule_id": "67a9beba-830d-4035-bfe8-40b7e28f8ac4",
   "risk_score": 50,
   "description": "Network - SMTP to the Internet\t",
   "immutable": true,

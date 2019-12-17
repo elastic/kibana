@@ -1,5 +1,5 @@
 {
-  "rule_id": "ee621b4e-ccb3-4a34-9fc1-2d726c7d62d6",
+  "rule_id": "6099a760-7293-4e26-8aa8-b984abb32ac6",
   "risk_score": 50,
   "description": "Suricata Possible Cobalt Strike Malleable C2 Null Response",
   "immutable": true,

@@ -1,5 +1,5 @@
 {
-  "rule_id": "56f9f573-9191-443d-85fa-c8cf9ee99092",
+  "rule_id": "c82b2bd8-d701-420c-ba43-f11a155b681a",
   "risk_score": 50,
   "description": "Network - SMB (Windows File Sharing) Activity to the Internet\t",
   "immutable": true,

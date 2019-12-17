@@ -1,5 +1,5 @@
 {
-  "rule_id": "2b0dad04-4d78-4b67-a567-d6499599716d",
+  "rule_id": "f7f038f4-b97a-4d0c-b3b6-d5fa1ad15951",
   "risk_score": 50,
   "description": "Suricata Windows Executable Served by JPEG Web Content",
   "immutable": true,

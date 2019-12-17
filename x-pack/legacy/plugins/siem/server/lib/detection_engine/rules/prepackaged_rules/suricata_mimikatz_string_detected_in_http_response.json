@@ -1,5 +1,5 @@
 {
-  "rule_id": "79b82714-7cf7-4e84-bbb2-cbfe2dac440b",
+  "rule_id": "2b365d3a-11a3-4bec-9698-b36c908f46ff",
   "risk_score": 50,
   "description": "Suricata Mimikatz String Detected in HTTP Response",
   "immutable": true,

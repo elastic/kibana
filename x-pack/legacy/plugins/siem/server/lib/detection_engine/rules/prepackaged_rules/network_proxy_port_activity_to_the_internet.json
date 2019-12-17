@@ -1,5 +1,5 @@
 {
-  "rule_id": "66a0259c-1f90-4e68-8900-68896c60e70a",
+  "rule_id": "ad0e5e75-dd89-4875-8d0a-dfdc1828b5f3",
   "risk_score": 50,
   "description": "Network - Proxy Port Activity to the Internet\t",
   "immutable": true,

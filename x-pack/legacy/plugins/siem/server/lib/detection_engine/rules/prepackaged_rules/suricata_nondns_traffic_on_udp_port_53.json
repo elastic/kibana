@@ -1,5 +1,5 @@
 {
-  "rule_id": "ed39ff6f-232c-4440-8608-31ba7d073bf8",
+  "rule_id": "ba6dea7f-ba98-4a86-b570-d05d85472e79",
   "risk_score": 50,
   "description": "Suricata non-DNS Traffic on UDP Port 53",
   "immutable": true,

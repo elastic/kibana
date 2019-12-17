@@ -1,5 +1,5 @@
 {
-  "rule_id": "f237ae6d-efe7-43a9-a62a-7e92794ff797",
+  "rule_id": "d5d990bc-303c-4241-8138-6ba3cf2ee93e",
   "risk_score": 50,
   "description": "Suricata Directory Traversal in Downloaded Zip File",
   "immutable": true,

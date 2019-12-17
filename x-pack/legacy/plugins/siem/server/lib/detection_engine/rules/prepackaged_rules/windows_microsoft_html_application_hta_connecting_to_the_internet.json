@@ -1,5 +1,5 @@
 {
-  "rule_id": "a998ef31-f60e-455c-9d61-692d09ee0f63",
+  "rule_id": "b084514b-e8ba-4bc4-bc2b-50fe145a4215",
   "risk_score": 50,
   "description": "Windows: Microsoft HTML Application (HTA) Connecting to the Internet",
   "immutable": true,

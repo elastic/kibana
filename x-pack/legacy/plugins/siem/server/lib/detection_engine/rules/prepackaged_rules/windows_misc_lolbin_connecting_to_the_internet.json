@@ -1,5 +1,5 @@
 {
-  "rule_id": "ebe4963b-2523-4f17-ad13-18fc45c3850a",
+  "rule_id": "63e65ec3-43b1-45b0-8f2d-45b34291dc44",
   "risk_score": 50,
   "description": "Windows: Misc LOLBin Connecting to the Internet",
   "immutable": true,
