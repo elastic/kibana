@@ -9,6 +9,7 @@
       "src/plugins/data"
     ],
     "embeddableApi": "src/plugins/embeddable",
+    "embeddableExamples": "examples/embeddable_examples",
     "share": "src/plugins/share",
     "esUi": "src/plugins/es_ui_shared",
     "devTools": "src/plugins/dev_tools",

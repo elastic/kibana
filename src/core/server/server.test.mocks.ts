@@ -69,3 +69,9 @@ export const mockEnsureValidConfiguration = jest.fn();
 jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
+
+import { uuidServiceMock } from './uuid/uuid_service.mock';
+export const mockUuidService = uuidServiceMock.create();
+jest.doMock('./uuid/uuid_service', () => ({
+  UuidService: jest.fn(() => mockUuidService),
+}));
