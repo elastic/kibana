@@ -17,9 +17,25 @@
  * under the License.
  */
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import './saved_dashboards';
+import { npSetup } from 'ui/new_platform';
 
-SavedObjectRegistryProvider.register(savedDashboards => {
-  return savedDashboards;
-});
+const customExtension = {
+  id: 'registered-prop',
+  label: 'Registered Button',
+  description: 'Registered Demo',
+  run() {},
+  testId: 'demoRegisteredNewButton',
+};
+
+npSetup.plugins.navigation.registerMenuItem(customExtension);
+
+const customDiscoverExtension = {
+  id: 'registered-discover-prop',
+  label: 'Registered Discover Button',
+  description: 'Registered Discover Demo',
+  run() {},
+  testId: 'demoDiscoverRegisteredNewButton',
+  appName: 'discover',
+};
+
+npSetup.plugins.navigation.registerMenuItem(customDiscoverExtension);
