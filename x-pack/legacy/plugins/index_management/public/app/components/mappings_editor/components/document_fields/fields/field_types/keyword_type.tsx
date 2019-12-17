@@ -72,11 +72,7 @@ export const KeywordType = ({ field }: Props) => {
           }}
           defaultToggleValue={getDefaultToggleValue('normalizer', field.source)}
         >
-          {isOn =>
-            isOn === true && (
-              <UseField path="normalizer" config={getFieldConfig('normalizer')} component={Field} />
-            )
-          }
+          <UseField path="normalizer" config={getFieldConfig('normalizer')} component={Field} />
         </EditFieldFormRow>
       </EditFieldSection>
 
