@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import {
   FilterManager as QueryFilterManager,
-  IIndexPattern,
+  IndexPattern,
   esFilters,
 } from '../../../../../../plugins/data/public';
 
@@ -29,7 +29,7 @@ export abstract class FilterManager {
   constructor(
     public controlId: string,
     public fieldName: string,
-    public indexPattern: IIndexPattern,
+    public indexPattern: IndexPattern,
     public queryFilter: QueryFilterManager
   ) {}
 
@@ -45,7 +45,7 @@ export abstract class FilterManager {
 
   abstract getValueFromFilterBar(): any;
 
-  getIndexPattern(): IIndexPattern {
+  getIndexPattern(): IndexPattern {
     return this.indexPattern;
   }
 

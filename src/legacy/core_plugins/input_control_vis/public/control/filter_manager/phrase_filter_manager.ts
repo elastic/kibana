@@ -23,7 +23,7 @@ import { FilterManager } from './filter_manager';
 import {
   esFilters,
   IFieldType,
-  IIndexPattern,
+  IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
 
@@ -31,7 +31,7 @@ export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
-    indexPattern: IIndexPattern,
+    indexPattern: IndexPattern,
     queryFilter: QueryFilterManager
   ) {
     super(controlId, fieldName, indexPattern, queryFilter);

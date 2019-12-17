@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { IFieldList, Field, IFieldType } from '../../public';
+import { IFieldList } from '../../public';
 
 export interface IIndexPattern {
   fields: IFieldList;
   title: string;
   id?: string;
   type?: string;
-  flattenHit: any;
-  formatField: any;
-  formatHit: any;
   timeFieldName?: string;
-  typeMeta: any;
-  metaFields: string[];
   fieldFormatMap?: Record<
     string,
     {
@@ -37,48 +32,4 @@ export interface IIndexPattern {
       params: unknown;
     }
   >;
-  routes: {
-    edit: string;
-    addField: string;
-    indexedFields: string;
-    scriptedFields: string;
-    sourceFilters: string;
-  };
-  addScriptedField: (
-    name: string,
-    script: string,
-    fieldType: string | undefined,
-    lang: string
-  ) => Promise<void | Error>;
-  removeScriptedField: (field: IFieldType) => Promise<void | Error>;
-  create: (allowOverride?: boolean) => Promise<string | false>;
-  destroy: () => Promise<{}> | undefined;
-  getComputedFields: () => {
-    storedFields: string[];
-    scriptFields: any;
-    docvalueFields: Array<{
-      field: any;
-      format: string;
-    }>;
-  };
-  getFieldByName: (name: string) => void | Field;
-  getNonScriptedFields: () => IFieldList;
-  getScriptedFields: () => IFieldList;
-  getSourceFiltering: () => {
-    excludes: any[];
-  };
-  getTimeField: () => Field | undefined;
-  init: (forceFieldRefresh?: boolean) => Promise<this>;
-  isTimeBased: () => boolean;
-  isTimeBasedWildcard: () => boolean;
-  isTimeNanosBased: () => boolean;
-  isWildcard: () => boolean;
-  popularizeField: (fieldName: string, unit?: number) => Promise<void | Error>;
-  prepBody: () => {
-    [key: string]: any;
-  };
-  refreshFields: () => Promise<void | Error | never[]>;
-  save: (saveAttempts?: number) => Promise<void | Error>;
-  toJSON: () => string | undefined;
-  toString: () => string;
 }

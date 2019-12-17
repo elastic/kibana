@@ -49,7 +49,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  IIndexPattern,
+  IndexPattern,
   RequestAdapter,
 } from '../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -66,7 +66,7 @@ interface SearchScope extends ng.IScope {
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: any[];
-  indexPattern?: IIndexPattern;
+  indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
 }
@@ -76,7 +76,7 @@ interface SearchEmbeddableConfig {
   $compile: ng.ICompileService;
   savedSearch: SavedSearch;
   editUrl: string;
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
 }

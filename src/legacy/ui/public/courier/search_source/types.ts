@@ -17,8 +17,7 @@
  * under the License.
  */
 import { NameList } from 'elasticsearch';
-import { IIndexPattern } from 'src/plugins/data/public';
-import { esFilters, Query } from '../../../../../plugins/data/public';
+import { esFilters, Query, IndexPattern } from '../../../../../plugins/data/public';
 
 export type EsQuerySearchAfter = [string | number, string | number];
 
@@ -45,7 +44,7 @@ export interface SearchSourceFields {
   source?: NameList;
   version?: boolean;
   fields?: NameList;
-  index?: IIndexPattern;
+  index?: IndexPattern;
   searchAfter?: EsQuerySearchAfter;
 }
 

@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { RangeFilterManager } from './range_filter_manager';
 import {
   esFilters,
-  IIndexPattern,
+  IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
 
@@ -34,7 +34,7 @@ describe('RangeFilterManager', function() {
     const fieldMock = {
       name: 'field1',
     };
-    const indexPatternMock: IIndexPattern = {
+    const indexPatternMock: IndexPattern = {
       id: indexPatternId,
       fields: {
         getByName: (name: any) => {
@@ -44,7 +44,7 @@ describe('RangeFilterManager', function() {
           return fields[name];
         },
       },
-    } as IIndexPattern;
+    } as IndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;
     beforeEach(() => {
@@ -74,7 +74,7 @@ describe('RangeFilterManager', function() {
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IIndexPattern,
+        indexPattern: IndexPattern,
         queryFilter: QueryFilterManager
       ) {
         super(id, fieldName, indexPattern, queryFilter);
@@ -90,7 +90,7 @@ describe('RangeFilterManager', function() {
       }
     }
 
-    const indexPatternMock: IIndexPattern = {} as IIndexPattern;
+    const indexPatternMock: IndexPattern = {} as IndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersRangeFilterManager;
     beforeEach(() => {

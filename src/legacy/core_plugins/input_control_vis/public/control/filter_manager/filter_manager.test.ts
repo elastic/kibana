@@ -23,7 +23,7 @@ import { FilterManager } from './filter_manager';
 import { coreMock } from '../../../../../../core/public/mocks';
 import {
   esFilters,
-  IIndexPattern,
+  IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
 
@@ -43,7 +43,7 @@ describe('FilterManager', function() {
   const controlId = 'control1';
 
   describe('findFilters', function() {
-    const indexPatternMock = {} as IIndexPattern;
+    const indexPatternMock = {} as IndexPattern;
     let kbnFilters: esFilters.Filter[];
     const queryFilterMock = new QueryFilterManager(setupMock.uiSettings);
     queryFilterMock.getAppFilters = () => kbnFilters;

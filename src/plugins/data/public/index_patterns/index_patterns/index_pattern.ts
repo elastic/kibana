@@ -306,11 +306,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false }) as IFieldList;
+    return this.fields.getWhere({ scripted: false });
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true }) as IFieldList;
+    return this.fields.getWhere({ scripted: true });
   }
 
   isTimeBased(): boolean {

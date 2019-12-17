@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 import {
   esFilters,
-  IIndexPattern,
+  IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
@@ -37,7 +37,7 @@ describe('PhraseFilterManager', function() {
         convert: (value: any) => value,
       },
     };
-    const indexPatternMock: IIndexPattern = {
+    const indexPatternMock: IndexPattern = {
       id: indexPatternId,
       fields: {
         getByName: (name: any) => {
@@ -45,7 +45,7 @@ describe('PhraseFilterManager', function() {
           return fields[name];
         },
       },
-    } as IIndexPattern;
+    } as IndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
     beforeEach(() => {
@@ -93,7 +93,7 @@ describe('PhraseFilterManager', function() {
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IIndexPattern,
+        indexPattern: IndexPattern,
         queryFilter: QueryFilterManager
       ) {
         super(id, fieldName, indexPattern, queryFilter);
@@ -109,7 +109,7 @@ describe('PhraseFilterManager', function() {
       }
     }
 
-    const indexPatternMock: IIndexPattern = {} as IIndexPattern;
+    const indexPatternMock: IndexPattern = {} as IndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersPhraseFilterManager;
     beforeEach(() => {

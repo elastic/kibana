@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { esFilters, IIndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
+import { esFilters, IndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
 import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 
 export function createSearchSource(
   SearchSource: SearchSourceClass,
   initialState: SearchSourceFields | null,
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   aggs: any,
   useTimeFilter: boolean,
   filters: esFilters.PhraseFilter[] = [],

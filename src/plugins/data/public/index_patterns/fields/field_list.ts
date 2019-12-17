@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { findIndex } from 'lodash';
+import { findIndex, where } from 'lodash';
 import { IndexPattern } from '../index_patterns';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
@@ -30,6 +30,10 @@ export interface IFieldList extends Array<Field> {
   add: (field: FieldSpec) => void;
   remove: (field: IFieldType) => void;
   update: (field: Field) => void;
+  /**
+   * Get new `FieldList` based on matching partial `Field` properties
+   */
+  getWhere: (condition: Partial<Field>) => IFieldList;
 }
 
 export class FieldList extends Array<Field> implements IFieldList {
@@ -52,6 +56,10 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.shortDotsEnable = shortDotsEnable;
 
     specs.map(field => this.add(field));
+  }
+
+  getWhere(condition: Partial<Field>): IFieldList {
+    return new FieldList(this.indexPattern, where(this, condition), this.shortDotsEnable);
   }
 
   getByName = (name: Field['name']) => this.byName.get(name);
