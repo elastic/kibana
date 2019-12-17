@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiBasicTable,
   // @ts-ignore
@@ -15,14 +15,11 @@ import {
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import { AgentEvent, Agent } from '../../../../common/types/domain_data';
-import { usePagination } from '../../../hooks/use_pagination';
-import { SearchBar } from '../../../components/search_bar';
-import { useDebounce } from '../../../hooks/use_debounce';
-import { useLibs } from '../../../hooks/use_libs';
+import { useLibs, usePagination, useDebounce } from '../../../hooks';
+import { SearchBar } from '../../../components';
 
 const DEBOUNCE_SEARCH_MS = 300;
 
@@ -97,7 +94,7 @@ function useGetAgentEvents(
   return { ...state, refresh: fetchAgentEvents };
 }
 
-export const AgentEventsTable: FC<{ agent: Agent }> = ({ agent }) => {
+export const AgentEventsTable: React.FC<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
 

@@ -64,9 +64,9 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     if (this.cachedIndexPattern) {
       return this.cachedIndexPattern;
     }
-    const res = await this.api.get<any>(
-      `/api/index_patterns/_fields_for_wildcard?pattern=${this.indexPatternName}`
-    );
+    const res = await this.api.get<any>(`/api/index_patterns/_fields_for_wildcard`, {
+      query: { pattern: this.indexPatternName },
+    });
     if (isEmpty(res.fields)) {
       return;
     }

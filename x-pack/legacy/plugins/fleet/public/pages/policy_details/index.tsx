@@ -7,7 +7,6 @@ import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -15,25 +14,28 @@ import {
   EuiCallOut,
   EuiText,
   EuiSpacer,
-  EuiEmptyPrompt,
-  EuiButton,
   EuiTitle,
   EuiHealth,
+  EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
-import {
-  DEFAULT_AGENTS_PAGE_SIZE,
-  AGENTS_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants/agent';
 import { Datasource } from '../../../common/types/domain_data';
-import { Loading } from '../../components/loading';
-import { ConnectedLink } from '../../components/navigation/connected_link';
-import { useLibs } from '../../hooks/use_libs';
-import { useGetPolicy, PolicyRefreshContext } from './hooks/use_policy';
-import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks/use_agent_status';
-import { DonutChart } from './components/donut_chart';
-import { EditPolicyFlyout } from './components/edit_policy';
+import { Loading, ConnectedLink } from '../../components';
+import { useLibs, sendRequest } from '../../hooks';
+import {
+  useGetPolicy,
+  PolicyRefreshContext,
+  useGetAgentStatus,
+  AgentStatusRefreshContext,
+} from './hooks';
+import {
+  DatasourcesTable,
+  DonutChart,
+  EditPolicyFlyout,
+  AssignDatasourcesFlyout,
+} from './components';
 
 export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
@@ -50,7 +52,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
     params: { policyId },
   },
 }) => {
-  const { framework } = useLibs();
+  const { framework, httpClient } = useLibs();
   const { policy, isLoading, error, refreshPolicy } = useGetPolicy(policyId);
   const {
     result: agentStatus,
@@ -59,12 +61,52 @@ export const PolicyDetailsPage: React.FC<Props> = ({
     refreshAgentStatus,
   } = useGetAgentStatus(policyId);
 
-  // Edit policy flyout state
+  // Unassign data sources states
+  const [isUnassignLoading, setIsUnassignLoading] = useState<boolean>(false);
+  const [selectedDatasources, setSelectedDatasources] = useState<string[]>([]);
+
+  // Flyout states
   const [isEditPolicyFlyoutOpen, setIsEditPolicyFlyoutOpen] = useState<boolean>(false);
+  const [isDatasourcesFlyoutOpen, setIsDatasourcesFlyoutOpen] = useState<boolean>(false);
 
   const refreshData = () => {
     refreshPolicy();
     refreshAgentStatus();
+  };
+
+  const unassignSelectedDatasources = async () => {
+    setIsUnassignLoading(true);
+    const { error: unassignError } = await sendRequest(httpClient, {
+      path: `/api/ingest/policies/${policyId}/removeDatasources`,
+      method: 'post',
+      body: {
+        datasources: selectedDatasources,
+      },
+    });
+    setIsUnassignLoading(false);
+    if (unassignError) {
+      framework.notifications.addDanger(
+        i18n.translate('xpack.fleet.policyDetails.unassignDatasources.errorNotificationTitle', {
+          defaultMessage:
+            'Error unassigning {count, plural, one {data source} other {# data sources}}',
+          values: {
+            count: selectedDatasources.length,
+          },
+        })
+      );
+    } else {
+      framework.notifications.addSuccess(
+        i18n.translate('xpack.fleet.policyDetails.unassignDatasources.successNotificationTitle', {
+          defaultMessage:
+            'Successfully unassigned {count, plural, one {data source} other {# data sources}}',
+          values: {
+            count: selectedDatasources.length,
+          },
+        })
+      );
+      setSelectedDatasources([]);
+      refreshData();
+    }
   };
 
   if (isLoading) {
@@ -114,6 +156,16 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                 refreshData();
               }}
               policy={policy}
+            />
+          ) : null}
+          {isDatasourcesFlyoutOpen ? (
+            <AssignDatasourcesFlyout
+              policyId={policy.id}
+              existingDatasources={(policy.datasources || []).map(ds => ds.id)}
+              onClose={() => {
+                setIsDatasourcesFlyoutOpen(false);
+                refreshData();
+              }}
             />
           ) : null}
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -284,7 +336,8 @@ export const PolicyDetailsPage: React.FC<Props> = ({
             </h3>
           </EuiTitle>
           <EuiSpacer size="l" />
-          <EuiInMemoryTable
+          <DatasourcesTable
+            datasources={policy.datasources}
             message={
               !policy.datasources || policy.datasources.length === 0 ? (
                 <EuiEmptyPrompt
@@ -300,81 +353,58 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                     <EuiButton
                       fill
                       iconType="plusInCircle"
-                      href={`${window.location.origin}${framework.info.basePath}/app/epm`}
+                      onClick={() => setIsDatasourcesFlyoutOpen(true)}
                     >
                       <FormattedMessage
-                        id="xpack.fleet.policyDetails.addDatasourceButtonText"
-                        defaultMessage="Add a data source"
+                        id="xpack.fleet.policyDetails.assignDatasourcesButtonText"
+                        defaultMessage="Assign data sources"
                       />
                     </EuiButton>
                   }
                 />
               ) : null
             }
-            itemId="id"
-            items={policy.datasources}
-            columns={[
-              {
-                field: 'name',
-                name: i18n.translate('xpack.fleet.policyList.datasourcesTable.ameColumnTitle', {
-                  defaultMessage: 'Name/ID',
-                }),
-              },
-              {
-                field: 'package.title',
-                name: i18n.translate(
-                  'xpack.fleet.policyList.datasourcesTable.packageNameColumnTitle',
-                  {
-                    defaultMessage: 'Package',
-                  }
-                ),
-              },
-              {
-                field: 'package.version',
-                name: i18n.translate(
-                  'xpack.fleet.policyList.datasourcesTable.packageVersionColumnTitle',
-                  {
-                    defaultMessage: 'Version',
-                  }
-                ),
-              },
-              {
-                field: 'streams',
-                name: i18n.translate(
-                  'xpack.fleet.policyList.datasourcesTable.streamsCountColumnTitle',
-                  {
-                    defaultMessage: 'Streams',
-                  }
-                ),
-                render: (streams: Datasource['streams']) => (streams ? streams.length : 0),
-              },
-            ]}
-            sorting={{
-              field: 'name',
-              direction: 'asc',
-            }}
-            pagination={{
-              initialPageSize: DEFAULT_AGENTS_PAGE_SIZE,
-              pageSizeOptions: AGENTS_PAGE_SIZE_OPTIONS,
-            }}
             search={{
               toolsRight: [
                 <EuiButton
                   fill
                   iconType="plusInCircle"
-                  href={`${window.location.origin}${framework.info.basePath}/app/epm`}
+                  onClick={() => setIsDatasourcesFlyoutOpen(true)}
                 >
                   <FormattedMessage
-                    id="xpack.fleet.policyDetails.addDatasourceButtonText"
-                    defaultMessage="Add a data source"
+                    id="xpack.fleet.policyDetails.assignDatasourcesButtonText"
+                    defaultMessage="Assign data sources"
                   />
                 </EuiButton>,
               ],
+              toolsLeft: selectedDatasources.length
+                ? [
+                    <EuiButton
+                      color="danger"
+                      disabled={isUnassignLoading}
+                      isLoading={isUnassignLoading}
+                      onClick={unassignSelectedDatasources}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.unassignDatasourcesButtonLabel"
+                        defaultMessage="Unassign {count, plural, one {# data source} other {# data sources}}"
+                        values={{
+                          count: selectedDatasources.length,
+                        }}
+                      />
+                    </EuiButton>,
+                  ]
+                : null,
               box: {
                 incremental: true,
                 schema: true,
               },
             }}
+            selection={{
+              onSelectionChange: (selection: Datasource[]) =>
+                setSelectedDatasources(selection.map(ds => ds.id)),
+            }}
+            isSelectable={true}
           />
         </Layout>
       </AgentStatusRefreshContext.Provider>

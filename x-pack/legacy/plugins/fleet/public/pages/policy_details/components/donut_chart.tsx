@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import * as d3 from 'd3';
+import d3 from 'd3';
 import { EuiFlexItem } from '@elastic/eui';
 
 interface DonutChartProps {

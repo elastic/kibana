@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React, { Fragment, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -14,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useState } from 'react';
 import { ManualEnrollmentInstructions, ManualEnrollmentSteps } from '../';
 import { EnrollmentApiKey } from '../../../../../../common/types/domain_data';
 import * as MAC_COMMANDS from './mac_commands';
