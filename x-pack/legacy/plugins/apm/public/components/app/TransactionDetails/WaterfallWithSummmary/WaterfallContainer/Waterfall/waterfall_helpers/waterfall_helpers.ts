@@ -25,7 +25,7 @@ interface IWaterfallIndex {
 }
 
 interface IWaterfallGroup {
-  [key: string]: IWaterfallTraceItem[];
+  [key: string]: IWaterfallItem[];
 }
 
 export interface IWaterfall {
@@ -73,19 +73,18 @@ interface IWaterfallItemBase {
   childIds?: Array<IWaterfallItemBase['id']>;
 }
 
-interface IWaterfallItemTransaction extends IWaterfallItemBase {
+export interface IWaterfallItemTransaction extends IWaterfallItemBase {
   transaction: Transaction;
   docType: 'transaction';
   errorCount: number;
 }
 
-interface IWaterfallItemSpan extends IWaterfallItemBase {
+export interface IWaterfallItemSpan extends IWaterfallItemBase {
   span: Span;
   docType: 'span';
 }
 
-export interface IWaterfallItemAgentMark
-  extends Pick<IWaterfallItemBase, 'id' | 'name' | 'offset'> {
+export interface IWaterfallItemAgentMark extends IWaterfallItemBase {
   docType: 'agentMark';
 }
 
@@ -96,12 +95,11 @@ export interface IWaterfallItemError extends Omit<IWaterfallItemBase, 'name'> {
   serviceColor?: string;
 }
 
-type IWaterfallTraceItem =
+export type IWaterfallItem =
   | IWaterfallItemSpan
   | IWaterfallItemTransaction
-  | IWaterfallItemError;
-
-export type IWaterfallItem = IWaterfallTraceItem | IWaterfallItemAgentMark;
+  | IWaterfallItemError
+  | IWaterfallItemAgentMark;
 
 function getTransactionItem(
   transaction: Transaction,
@@ -153,28 +151,24 @@ function getErrorItem(error: APMError): IWaterfallItemError {
 }
 
 function getAgentMarks(transaction?: Transaction): IWaterfallItemAgentMark[] {
-  if (
-    !(
-      transaction &&
-      transaction.transaction.marks &&
-      transaction.transaction.marks.agent
-    )
-  ) {
+  const agent = transaction?.transaction.marks?.agent;
+  if (!agent) {
     return [];
   }
-  return Object.entries(transaction.transaction.marks.agent).map(
-    ([name, ms]) => ({
-      id: name,
-      name,
-      offset: ms * 1000,
-      docType: 'agentMark'
-    })
+  return Object.entries(agent).map(
+    ([name, ms]) =>
+      ({
+        id: name,
+        name,
+        offset: ms * 1000,
+        docType: 'agentMark'
+      } as IWaterfallItemAgentMark)
   );
 }
 
 export function getClockSkew(
-  item: IWaterfallTraceItem,
-  parentItem?: IWaterfallTraceItem
+  item: IWaterfallItem,
+  parentItem?: IWaterfallItem
 ) {
   if (!parentItem) {
     return 0;
@@ -201,21 +195,24 @@ export function getClockSkew(
     }
     case 'error':
       return parentItem.skew;
+    case 'agentMark':
+      return 0;
   }
 }
 
 export function getOrderedWaterfallItems(
   childrenByParentId: IWaterfallGroup,
-  entryTransactionItem: IWaterfallTraceItem
+  entryTransactionItem: IWaterfallItem
 ) {
   const visitedWaterfallItemSet = new Set();
   function getSortedChildren(
-    item: IWaterfallTraceItem,
-    parentItem?: IWaterfallTraceItem
+    item: IWaterfallItem,
+    parentItem?: IWaterfallItem
   ): IWaterfallItem[] {
     if (visitedWaterfallItemSet.has(item)) {
       return [];
     }
+
     visitedWaterfallItemSet.add(item);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
@@ -244,7 +241,7 @@ function getTraceRoot(childrenByParentId: IWaterfallGroup) {
 function getServices(items: IWaterfallItem[]) {
   const serviceNames = (items.filter(
     item => item.docType !== 'agentMark'
-  ) as IWaterfallTraceItem[]).map(item => item.serviceName);
+  ) as IWaterfallItem[]).map(item => item.serviceName);
 
   return uniq(serviceNames);
 }
@@ -272,7 +269,7 @@ function getDuration(items: IWaterfallItem[]) {
 
   const traceItems = items.filter(
     item => item.docType !== 'agentMark' && item.docType !== 'error'
-  ) as IWaterfallTraceItem[];
+  ) as IWaterfallItem[];
 
   const timestampStart = traceItems[0].timestamp;
   const timestampEnd = Math.max(
@@ -311,7 +308,7 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems: IWaterfallTraceItem[] = trace.items.map(traceItem => {
+  const waterfallItems: IWaterfallItem[] = trace.items.map(traceItem => {
     const docType = traceItem.processor.event;
     switch (docType) {
       case 'span':
@@ -348,6 +345,7 @@ export function getWaterfall(
   const services = getServices(orderedItems);
   const serviceColors = getServiceColors(services);
 
+  // the agentMarks should be added direct inside orderedItems, as it doesnt have parent-child relationship
   const agentMarks = getAgentMarks(entryTransaction);
   orderedItems.push(...agentMarks);
 
