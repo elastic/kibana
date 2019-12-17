@@ -8,7 +8,7 @@ import React from 'react';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../components/alerts_viewer';
-import { HostsComponentsQueryProps } from './types';
+import { AlertsComponentQueryProps } from './types';
 
 export const filterAlertsHosts: esFilters.Filter = {
   query: {
@@ -33,7 +33,7 @@ export const filterAlertsHosts: esFilters.Filter = {
       '{"bool":{"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1},"minimum_should_match": 1}',
   },
 };
-export const HostAlertsQueryTabBody = React.memo((alertsProps: HostsComponentsQueryProps) => (
+export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => (
   <AlertsView {...alertsProps} pageFilters={filterAlertsHosts} />
 ));
 

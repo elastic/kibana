@@ -26,6 +26,7 @@ import {
 
 const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
+    defaultFilters,
     deleteQuery,
     filterQuery,
     from,
@@ -96,7 +97,7 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}
-          render={() => <HostAlertsQueryTabBody {...tabProps} />}
+          render={() => <HostAlertsQueryTabBody {...tabProps} defaultFilters={defaultFilters} />}
         />
       </Switch>
     );

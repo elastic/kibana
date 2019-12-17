@@ -54,15 +54,18 @@ export const AlertsTable = React.memo(
     endDate,
     startDate,
     pageFilters,
+    defaultFilters,
   }: {
     endDate: number;
     startDate: number;
     pageFilters: esFilters.Filter;
+    defaultFilters?: esFilters.Filter[];
   }) => {
     const alertsFilter = useMemo(() => [filter, pageFilters], [filter, pageFilters]);
     return (
       <StatefulEventsViewer
         pageFilters={alertsFilter}
+        defaultFilters={defaultFilters}
         defaultModel={alertsDefaultModel}
         end={endDate}
         id={ALERTS_TABLE_ID}

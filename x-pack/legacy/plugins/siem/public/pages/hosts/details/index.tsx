@@ -10,7 +10,6 @@ import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
 
-import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
@@ -35,14 +34,13 @@ import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsComponentProps, HostDetailsProps } from './types';
 import { type } from './utils';
-import { filterAlertsHosts as filterAlertsHostDetails } from '../navigation';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -66,52 +64,37 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
-    const { tabName } = useParams();
-
-    const hostDetailsFilters = React.useMemo(() => {
-      const defaultFilters = [
-        {
-          meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'host.name',
-            value: detailName,
-            params: {
-              query: detailName,
-            },
-          },
-          query: {
-            match: {
-              'host.name': {
-                query: detailName,
-                type: 'phrase',
-              },
-            },
-          },
-        },
-        ...filters,
-      ];
-
-      if (tabName === 'alerts') {
-        return defaultFilters.length > 0
-          ? [...defaultFilters, filterAlertsHostDetails]
-          : [filterAlertsHostDetails];
-      }
-
-      return defaultFilters;
-    }, [tabName]);
 
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
+            const defaultFilters: esFilters.Filter = {
+              meta: {
+                alias: null,
+                negate: false,
+                disabled: false,
+                type: 'phrase',
+                key: 'host.name',
+                value: detailName,
+                params: {
+                  query: detailName,
+                },
+              },
+              query: {
+                match: {
+                  'host.name': {
+                    query: detailName,
+                    type: 'phrase',
+                  },
+                },
+              },
+            };
             const filterQuery = convertToBuildEsQuery({
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters: hostDetailsFilters,
+              filters: [defaultFilters, ...filters],
             });
 
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -209,6 +192,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   <HostDetailsTabs
                     isInitializing={isInitializing}
                     deleteQuery={deleteQuery}
+                    defaultFilters={[defaultFilters]}
                     to={to}
                     from={from}
                     detailName={detailName}

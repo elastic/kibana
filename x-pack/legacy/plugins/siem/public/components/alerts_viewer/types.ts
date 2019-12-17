@@ -22,4 +22,5 @@ export interface AlertsComponentsQueryProps
     | 'updateDateRange'
   > {
   pageFilters: esFilters.Filter;
+  defaultFilters?: esFilters.Filter[];
 }

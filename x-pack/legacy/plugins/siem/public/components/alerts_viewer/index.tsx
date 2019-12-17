@@ -17,6 +17,7 @@ import { AlertsTable } from './alerts_table';
 
 const AlertsOverTimeManage = manageQuery(AlertsOverTimeHistogram);
 export const AlertsView = ({
+  defaultFilters,
   deleteQuery,
   endDate,
   filterQuery,
@@ -51,7 +52,12 @@ export const AlertsView = ({
       )}
     </AlertsOverTimeQuery>
     <EuiSpacer size="l" />
-    <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+    <AlertsTable
+      endDate={endDate}
+      startDate={startDate}
+      pageFilters={pageFilters}
+      defaultFilters={defaultFilters}
+    />
   </>
 );
 
