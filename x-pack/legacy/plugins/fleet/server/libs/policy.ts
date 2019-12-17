@@ -16,7 +16,7 @@ export class PolicyLib {
     return flatten(
       datasources.map((ds: Datasource) => {
         return ds.streams.map(stream => ({
-          ...stream.config,
+          ...stream.input,
           id: stream.id,
           type: stream.input.type as any,
           output: { use_output: stream.output_id },

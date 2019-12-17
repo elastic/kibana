@@ -50,8 +50,6 @@ export interface Datasource extends SavedObjectAttributes {
   package: Package;
   read_alias?: string;
   streams: Stream[];
-  // TODO: These are the input parts of the streams. To be remove again when we have the streams
-  inputs: string[];
 }
 
 /**

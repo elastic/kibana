@@ -44,11 +44,14 @@ export async function createDatasource(options: {
   const streams: Stream[] = [];
   if (pkg.datasets) {
     for (const dataset of pkg.datasets) {
-      streams.push({
-        id: dataset.name,
-        input: yaml.load(await getConfig(pkgkey, dataset)),
-        output_id: 'default',
-      });
+      const input = yaml.load(await getConfig(pkgkey, dataset));
+      if (input) {
+        streams.push({
+          id: dataset.name,
+          input,
+          output_id: 'default',
+        });
+      }
     }
   }
 
@@ -178,7 +181,7 @@ async function ingestDatasourceCreate({
   const url = `${origin}${basePath}${apiPath}`;
   const body = { datasource };
   delete request.headers['transfer-encoding'];
-  return fetch(url, {
+  await fetch(url, {
     method: 'post',
     body: JSON.stringify(body),
     headers: {
@@ -187,7 +190,7 @@ async function ingestDatasourceCreate({
       // the main (only?) one we want is `authorization`
       ...request.headers,
     },
-  }).then(response => response.json());
+  });
 }
 
 async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
