@@ -9,6 +9,7 @@ import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
+import { applyMatrix3 } from '../lib/vector2';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 
@@ -218,8 +219,8 @@ function useAutoUpdatingClientRect(): [DOMRect | undefined, (node: Element | nul
 
 const DiagnosticDot = styled(
   React.memo(({ className, worldPosition }: { className?: string; worldPosition: Vector2 }) => {
-    const worldToRaster = useSelector(selectors.worldToRaster);
-    const [left, top] = worldToRaster(worldPosition);
+    const projectionMatrix = useSelector(selectors.projectionMatrix);
+    const [left, top] = applyMatrix3(worldPosition, projectionMatrix);
     const style = {
       left: (left - 20).toString() + 'px',
       top: (top - 20).toString() + 'px',

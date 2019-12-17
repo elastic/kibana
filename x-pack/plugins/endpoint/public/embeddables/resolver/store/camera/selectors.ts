@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2, CameraState, AABB } from '../../types';
+import { Vector2, CameraState, AABB, Matrix3 } from '../../types';
 import { subtract, divide, add, applyMatrix3 } from '../../lib/vector2';
 import { multiply, add as addMatrix } from '../../lib/matrix3';
 import {
@@ -49,9 +49,8 @@ function rasterCameraProperties(state: CameraState): RasterCameraProperties {
 
 /**
  * https://en.wikipedia.org/wiki/Orthographic_projection
- *
  */
-export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => Vector2 = state => {
+export const projectionMatrix: (state: CameraState) => Matrix3 = state => {
   const {
     renderWidth,
     renderHeight,
@@ -61,7 +60,7 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
     clippingPlaneBottom,
   } = rasterCameraProperties(state);
 
-  const projection = multiply(
+  return multiply(
     // 5. convert from 0->2 to 0->rasterWidth (or height)
     scalingTransformation([renderWidth / 2, renderHeight / 2]),
     addMatrix(
@@ -84,25 +83,19 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
       )
     )
   );
-
-  // TODO this no longer needs to be a function, just a matrix now
-  return worldPosition => {
-    return applyMatrix3(worldPosition, projection);
-  };
 };
 
 export function translation(state: CameraState): Vector2 {
-  if (state.currentPanningOffset !== null && state.panningOrigin !== null) {
+  if (state.panning) {
     return add(
       state.translationNotCountingCurrentPanning,
-      divide(subtract(state.currentPanningOffset, state.panningOrigin), state.scaling)
+      divide(subtract(state.panning.currentOffset, state.panning.origin), state.scaling)
     );
   } else {
     return state.translationNotCountingCurrentPanning;
   }
 }
 
-// TODO, can we generically invert this matrix from worldToRaster?
 export const rasterToWorld: (
   state: CameraState
 ) => (rasterPosition: Vector2) => Vector2 = state => {
@@ -158,4 +151,4 @@ export const rasterToWorld: (
 
 export const scale = (state: CameraState): Vector2 => state.scaling;
 
-export const userIsPanning = (state: CameraState): boolean => state.panningOrigin !== null;
+export const userIsPanning = (state: CameraState): boolean => state.panning !== undefined;

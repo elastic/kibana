@@ -7,7 +7,10 @@
 import * as cameraSelectors from './camera/selectors';
 import { ResolverState } from '../types';
 
-export const worldToRaster = composeSelectors(cameraStateSelector, cameraSelectors.worldToRaster);
+export const projectionMatrix = composeSelectors(
+  cameraStateSelector,
+  cameraSelectors.projectionMatrix
+);
 
 export const rasterToWorld = composeSelectors(cameraStateSelector, cameraSelectors.rasterToWorld);
 

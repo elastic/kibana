@@ -5,7 +5,8 @@
  */
 
 import { Reducer } from 'redux';
-import { userIsPanning, translation, worldToRaster, rasterToWorld } from './selectors';
+import { applyMatrix3 } from '../../lib/vector2';
+import { userIsPanning, translation, projectionMatrix, rasterToWorld } from './selectors';
 import { clamp } from '../../lib/math';
 
 import { CameraState, ResolverAction } from '../../types';
@@ -15,8 +16,6 @@ function initialState(): CameraState {
     scaling: [1, 1] as const,
     rasterSize: [0, 0] as const,
     translationNotCountingCurrentPanning: [0, 0] as const,
-    panningOrigin: null,
-    currentPanningOffset: null,
     latestFocusedWorldCoordinates: null,
   };
 }
@@ -40,8 +39,9 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     };
     // TODO, test that asserts that this behavior doesn't happen when user is panning
     if (state.latestFocusedWorldCoordinates !== null && userIsPanning(state) === false) {
-      const rasterOfLastFocusedWorldCoordinates = worldToRaster(state)(
-        state.latestFocusedWorldCoordinates
+      const rasterOfLastFocusedWorldCoordinates = applyMatrix3(
+        state.latestFocusedWorldCoordinates,
+        projectionMatrix(state)
       );
       const worldCoordinateThereNow = rasterToWorld(stateWithNewScaling)(
         rasterOfLastFocusedWorldCoordinates
@@ -69,8 +69,10 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   } else if (action.type === 'userStartedPanning') {
     return {
       ...state,
-      panningOrigin: action.payload,
-      currentPanningOffset: action.payload,
+      panning: {
+        origin: action.payload,
+        currentOffset: action.payload,
+      },
     };
   } else if (action.type === 'userContinuedPanning') {
     // TODO make these offsets be in world coordinates as well
@@ -78,8 +80,10 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       return {
         // This logic means, if the user calls `userContinuedPanning` without starting panning first, we start automatically basically?
         ...state,
-        panningOrigin: state.panningOrigin === null ? action.payload : state.panningOrigin,
-        currentPanningOffset: action.payload,
+        panning: {
+          origin: state.panning ? state.panning.origin : action.payload,
+          currentOffset: action.payload,
+        },
       };
     } else {
       return state;
@@ -89,8 +93,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       return {
         ...state,
         translationNotCountingCurrentPanning: translation(state),
-        panningOrigin: null,
-        currentPanningOffset: null,
+        panning: undefined,
       };
     } else {
       return state;
@@ -98,8 +101,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   } else if (action.type === 'userCanceledPanning') {
     return {
       ...state,
-      panningOrigin: null,
-      currentPanningOffset: null,
+      panning: undefined,
     };
   } else if (action.type === 'userSetRasterSize') {
     return {
