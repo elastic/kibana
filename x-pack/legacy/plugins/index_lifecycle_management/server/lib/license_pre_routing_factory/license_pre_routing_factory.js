@@ -8,7 +8,7 @@ import { once } from 'lodash';
 import { wrapCustomError } from '../error_wrappers';
 import { PLUGIN_ID } from '../../../common/constants';
 
-export const licensePreRoutingFactory = once((server) => {
+export const licensePreRoutingFactory = once(server => {
   const xpackMainPlugin = server.plugins.xpack_main;
 
   // License checking and enable/disable logic
@@ -25,4 +25,3 @@ export const licensePreRoutingFactory = once((server) => {
 
   return licensePreRouting;
 });
-

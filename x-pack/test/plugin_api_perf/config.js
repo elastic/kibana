@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder

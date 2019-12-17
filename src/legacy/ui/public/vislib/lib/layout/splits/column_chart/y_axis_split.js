@@ -27,14 +27,14 @@ import d3 from 'd3';
 
 // render and get bounding box width
 export function yAxisSplit(selection) {
-
-  selection.each(function () {
+  selection.each(function() {
     const div = d3.select(this);
     let rows;
 
-    div.selectAll('.y-axis-div')
+    div
+      .selectAll('.y-axis-div')
       .append('div')
-      .data(function (d) {
+      .data(function(d) {
         rows = d.rows ? d.rows.length : 1;
         return d.rows ? d.rows : [d];
       })

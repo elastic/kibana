@@ -13,10 +13,7 @@ import {
   addSpritesheetToMap,
 } from './utils';
 import { getGlyphUrl, isRetina } from '../../../meta';
-import {
-  DECIMAL_DEGREES_PRECISION,
-  ZOOM_PRECISION,
-} from '../../../../common/constants';
+import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import chrome from 'ui/chrome';
@@ -150,7 +147,7 @@ export class MBMapContainer extends React.Component {
       });
       mbMap.on('load', () => {
         emptyImage = new Image();
-        // eslint-disable-next-line max-len
+
         emptyImage.src =
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
         emptyImage.crossOrigin = 'anonymous';

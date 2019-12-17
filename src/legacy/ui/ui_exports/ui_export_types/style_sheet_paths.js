@@ -49,7 +49,7 @@ function getStyleSheetPath(pluginSpec, localPath, theme) {
     urlImports: {
       urlBase: `built_assets/css/${getUrlBase(pluginSpec)}`,
       publicDir: pluginSpec.getPublicDir(),
-    }
+    },
   };
 }
 
@@ -60,7 +60,9 @@ function normalize(localPath, type, pluginSpec) {
 
   if (!OK_EXTNAMES.includes(extname)) {
     throw new Error(
-      `[plugin:${pluginId}] uiExports.styleSheetPaths supported extensions [${OK_EXTNAMES.join(', ')}], got "${extname}"`
+      `[plugin:${pluginId}] uiExports.styleSheetPaths supported extensions [${OK_EXTNAMES.join(
+        ', '
+      )}], got "${extname}"`
     );
   }
 
