@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { LocationMap } from '../location_map';
-import { MonitorStatusBar } from '../monitor_status_bar';
+import { MonitorStatusBar } from './monitor_status_bar';
 
 interface MonitorStatusBarProps {
   monitorId: string;

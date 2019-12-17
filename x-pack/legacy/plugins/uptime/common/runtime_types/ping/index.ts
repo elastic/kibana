@@ -3,6 +3,3 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export { MonitorSSLCertificate } from './monitor_ssl_certificate';
-export { MonitorStatusBar, MonitorStatusBarComponent } from './monitor_status_bar';

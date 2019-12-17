@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './monitor';
-export * from './snapshot';
-export * from './monitorStatus';
+export * from './details';
+export * from './locations';

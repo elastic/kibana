@@ -8,31 +8,35 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React from 'react';
-import { Ping } from '../../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
-import { monitorStatusBarQuery } from '../../../queries';
-import { EmptyStatusBar } from '../empty_status_bar';
-import { convertMicrosecondsToMilliseconds } from '../../../lib/helper';
+import React, { useEffect } from 'react';
+import { Ping } from '../../../../../common/graphql/types';
+import { UptimeGraphQLQueryProps } from '../../../higher_order';
+import { EmptyStatusBar } from './empty_status_bar';
+import { convertMicrosecondsToMilliseconds } from '../../../../lib/helper';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
 
 interface MonitorStatusBarQueryResult {
-  monitorStatus?: Ping[];
+  monitorStatus?: Ping;
 }
 
 interface MonitorStatusBarProps {
   monitorId: string;
+  loadMonitorStatus: any;
 }
 
 type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQueryResult>;
 
-export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
-  if (data?.monitorStatus?.length) {
-    const { monitor, timestamp, tls } = data.monitorStatus[0];
+export const MonitorStatusBarComponent = ({ data, monitorId, loadMonitorStatus }: Props) => {
+  useEffect(() => {
+    loadMonitorStatus();
+  }, []);
+
+  if (data?.monitorStatus) {
+    const { monitor, timestamp, tls } = data.monitorStatus;
     const duration: number | undefined = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
-    const full = get<string>(data.monitorStatus[0], 'url.full');
+    const full = get<string>(data.monitorStatus, 'url.full');
 
     return (
       <>
@@ -74,7 +78,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   return <EmptyStatusBar message={labels.loadingMessage} monitorId={monitorId} />;
 };
 
-export const MonitorStatusBar = withUptimeGraphQL<
-  MonitorStatusBarQueryResult,
-  MonitorStatusBarProps
->(MonitorStatusBarComponent, monitorStatusBarQuery);
+// export const MonitorStatusBar = withUptimeGraphQL<
+//   MonitorStatusBarQueryResult,
+//   MonitorStatusBarProps
+// >(MonitorStatusBarComponent, monitorStatusBarQuery);

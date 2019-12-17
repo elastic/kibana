@@ -19,13 +19,13 @@ export interface UMPingsAdapter {
     location?: string | null
   ): Promise<PingResults>;
 
-  getLatestMonitorDocs(
+  getLatestMonitorStatus(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     monitorId?: string | null,
     location?: string | null
-  ): Promise<Ping[]>;
+  ): Promise<Ping>;
 
   getPingHistogram(
     request: any,

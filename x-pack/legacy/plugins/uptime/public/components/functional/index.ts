@@ -6,14 +6,13 @@
 
 export { DonutChart } from './charts/donut_chart';
 export { EmptyState } from './empty_state';
-export { EmptyStatusBar } from './empty_status_bar';
+export { EmptyStatusBar, MonitorStatusBar } from './monitor_status_details';
 export { FilterGroup } from './filter_group';
 export { IntegrationLink } from './integration_link';
 export { KueryBar } from './kuery_bar';
 export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
 export { MonitorPageTitle } from './monitor_page_title';
-export { MonitorStatusBar } from './monitor_status_bar';
 export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_callout';
 export { PingList } from './ping_list';
 export { Snapshot } from './snapshot';

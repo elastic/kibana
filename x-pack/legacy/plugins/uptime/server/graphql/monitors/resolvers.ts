@@ -9,12 +9,10 @@ import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
   FilterBar,
   GetFilterBarQueryArgs,
-  GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
   GetMonitorPageTitleQueryArgs,
   MonitorChart,
   MonitorPageTitle,
-  Ping,
   GetSnapshotHistogramQueryArgs,
 } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
@@ -22,13 +20,6 @@ import { CreateUMGraphQLResolvers, UMContext } from '../types';
 import { HistogramResult } from '../../../common/domain_types';
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
-
-export type UMLatestMonitorsResolver = UMResolver<
-  Ping[] | Promise<Ping[]>,
-  any,
-  GetLatestMonitorsQueryArgs,
-  UMContext
->;
 
 export type UMGetMonitorChartsResolver = UMResolver<
   any | Promise<any>,
@@ -44,7 +35,7 @@ export type UMGetFilterBarResolver = UMResolver<
   UMContext
 >;
 
-export type UMGetMontiorPageTitleResolver = UMResolver<
+export type UMGetMonitorPageTitleResolver = UMResolver<
   MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
   any,
   GetMonitorPageTitleQueryArgs,
@@ -64,9 +55,8 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   Query: {
     getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
-    getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
-    getMonitorPageTitle: UMGetMontiorPageTitleResolver;
+    getMonitorPageTitle: UMGetMonitorPageTitleResolver;
   };
 } => ({
   Query: {
@@ -94,19 +84,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         monitorId,
         dateRangeStart,
         dateRangeEnd,
-        location
-      );
-    },
-    async getLatestMonitors(
-      resolver,
-      { dateRangeStart, dateRangeEnd, monitorId, location },
-      { req }
-    ): Promise<Ping[]> {
-      return await libs.pings.getLatestMonitorDocs(
-        req,
-        dateRangeStart,
-        dateRangeEnd,
-        monitorId,
         location
       );
     },

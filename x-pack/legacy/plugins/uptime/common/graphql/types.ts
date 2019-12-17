@@ -738,16 +738,6 @@ export interface GetMonitorChartsDataQueryArgs {
 
   location?: string | null;
 }
-export interface GetLatestMonitorsQueryArgs {
-  /** The lower limit of the date range. */
-  dateRangeStart: string;
-  /** The upper limit of the date range. */
-  dateRangeEnd: string;
-  /** Optional: a specific monitor ID filter. */
-  monitorId?: string | null;
-  /** Optional: a specific instance location filter. */
-  location?: string | null;
-}
 export interface GetFilterBarQueryArgs {
   dateRangeStart: string;
 

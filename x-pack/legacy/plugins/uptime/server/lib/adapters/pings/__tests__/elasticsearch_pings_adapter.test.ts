@@ -438,7 +438,7 @@ describe('ElasticsearchPingsAdapter class', () => {
                   },
                 },
                 {
-                  term: { 'monitor.id': 'testmonitor' },
+                  term: { 'monitor.id': 'testMonitor' },
                 },
               ],
             },
@@ -476,7 +476,7 @@ describe('ElasticsearchPingsAdapter class', () => {
                         _source: {
                           '@timestamp': 123456,
                           monitor: {
-                            id: 'testmonitor',
+                            id: 'testMonitor',
                           },
                         },
                       },
@@ -492,17 +492,17 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('returns data in expected shape', async () => {
       database.search = getLatestSearchMock;
-      const result = await adapter.getLatestMonitorDocs(
+      const result = await adapter.getLatestMonitorStatus(
         serverRequest,
         'now-1h',
         'now',
-        'testmonitor'
+        'testMonitor'
       );
       expect(result).toHaveLength(1);
-      expect(result[0].timestamp).toBe(123456);
-      expect(result[0].monitor).not.toBeFalsy();
+      expect(result.timestamp).toBe(123456);
+      expect(result.monitor).not.toBeFalsy();
       // @ts-ignore monitor will be defined
-      expect(result[0].monitor.id).toBe('testmonitor');
+      expect(result.monitor.id).toBe('testMonitor');
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetLatestSearchParams);
     });
   });

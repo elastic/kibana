@@ -113,13 +113,13 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
    * @param dateRangeEnd timestamp bounds
    * @param monitorId optional limit to monitorId
    */
-  public async getLatestMonitorDocs(
+  public async getLatestMonitorStatus(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     monitorId?: string | null,
     location?: string | null
-  ): Promise<Ping[]> {
+  ): Promise<Ping> {
     // TODO: Write tests for this function
     const params = {
       index: INDEX_NAMES.HEARTBEAT,

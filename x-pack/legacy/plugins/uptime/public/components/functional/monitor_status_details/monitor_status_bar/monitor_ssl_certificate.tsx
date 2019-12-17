@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
-import { PingTls } from '../../../../common/graphql/types';
+import { PingTls } from '../../../../../common/graphql/types';
 
 interface Props {
   /**

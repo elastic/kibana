@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 
 const MapPanel = styled.div`
-  height: 400px;
+  height: 360px;
   width: 520px;
 `;
 
