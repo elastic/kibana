@@ -35,6 +35,10 @@ import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/pu
 import { ManagementStart } from '../../../../plugins/management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import {
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart,
+} from '../../../../plugins/navigation/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -44,6 +48,7 @@ export interface PluginsSetup {
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
+  navigation: NavigationPublicPluginSetup;
   dev_tools: DevToolsSetup;
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
@@ -59,6 +64,7 @@ export interface PluginsStart {
   home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
+  navigation: NavigationPublicPluginStart;
   dev_tools: DevToolsStart;
   kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;

@@ -85,7 +85,7 @@ Object {
       },
     };
     const updatedDoc = extractReferences(doc);
-    /* eslint-disable max-len */
+
     expect(updatedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -101,7 +101,6 @@ Object {
   ],
 }
 `);
-    /* eslint-enable max-len */
   });
 });
 

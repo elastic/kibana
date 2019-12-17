@@ -17,9 +17,6 @@
  * under the License.
  */
 
-/* eslint max-len: 0 */
-/* eslint quotes: 0 */
-
 import { i18n } from '@kbn/i18n';
 
 export const getSavedObjects = () => [
