@@ -35,7 +35,7 @@ function allSeriesContainKey(seriesList, key) {
  */
 async function pairwiseReduce(left, right, fn) {
   if (left.list.length !== right.list.length) {
-    throw new Error ('Unable to pairwise reduce seriesLists, number of series are not the same');
+    throw new Error('Unable to pairwise reduce seriesLists, number of series are not the same');
   }
 
   let pairwiseField = 'label';
@@ -45,18 +45,22 @@ async function pairwiseReduce(left, right, fn) {
   const indexedList = _.indexBy(right.list, pairwiseField);
 
   // ensure seriesLists contain same pairwise labels
-  left.list.forEach((leftSeries) => {
+  left.list.forEach(leftSeries => {
     if (!indexedList[leftSeries[pairwiseField]]) {
-      const rightSeriesLabels = right.list.map((rightSeries) => {
-        return `"${rightSeries[pairwiseField]}"`;
-      }).join(',');
-      throw new Error (`Matching series could not be found for "${leftSeries[pairwiseField]}" in [${rightSeriesLabels}]`);
+      const rightSeriesLabels = right.list
+        .map(rightSeries => {
+          return `"${rightSeries[pairwiseField]}"`;
+        })
+        .join(',');
+      throw new Error(
+        `Matching series could not be found for "${leftSeries[pairwiseField]}" in [${rightSeriesLabels}]`
+      );
     }
   });
 
   // pairwise reduce seriesLists
   const pairwiseSeriesList = { type: 'seriesList', list: [] };
-  left.list.forEach(async (leftSeries) => {
+  left.list.forEach(async leftSeries => {
     const first = { type: 'seriesList', list: [leftSeries] };
     const second = { type: 'seriesList', list: [indexedList[leftSeries[pairwiseField]]] };
     const reducedSeriesList = await reduce([first, second], fn);
@@ -84,7 +88,7 @@ async function reduce(argsPromises, fn) {
   let argument = args.shift();
 
   if (seriesList.type !== 'seriesList') {
-    throw new Error ('input must be a seriesList');
+    throw new Error('input must be a seriesList');
   }
 
   if (_.isObject(argument) && argument.type === 'seriesList') {
@@ -95,12 +99,9 @@ async function reduce(argsPromises, fn) {
     }
   }
 
-
   function reduceSeries(series) {
-    return _.reduce(series, function (destinationObject, argument, i, p) {
-
-      let output = _.map(destinationObject.data, function (point, index) {
-
+    return _.reduce(series, function(destinationObject, argument, i, p) {
+      let output = _.map(destinationObject.data, function(point, index) {
         const value = point[1];
 
         if (value == null) {
@@ -120,19 +121,17 @@ async function reduce(argsPromises, fn) {
       // Output = single series
 
       output = {
-        data: output
+        data: output,
       };
       output = _.defaults(output, destinationObject);
       return output;
-
     });
-
   }
 
   let reduced;
 
   if (argument != null) {
-    reduced = _.map(seriesList.list, function (series) {
+    reduced = _.map(seriesList.list, function(series) {
       return reduceSeries([series].concat(argument));
     });
   } else {

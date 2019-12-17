@@ -27,13 +27,13 @@ export const inputControlVis = () => ({
     types: [],
   },
   help: i18n.translate('inputControl.function.help', {
-    defaultMessage: 'Input control visualization'
+    defaultMessage: 'Input control visualization',
   }),
   args: {
     visConfig: {
       types: ['string'],
       default: '"{}"',
-    }
+    },
   },
   fn(context, args) {
     const params = JSON.parse(args.visConfig);
@@ -42,10 +42,10 @@ export const inputControlVis = () => ({
       as: 'visualization',
       value: {
         visType: 'input_control_vis',
-        visConfig: params
-      }
+        visConfig: params,
+      },
     };
-  }
+  },
 });
 
 functionsRegistry.register(inputControlVis);

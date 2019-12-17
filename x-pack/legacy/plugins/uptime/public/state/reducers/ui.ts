@@ -11,6 +11,7 @@ import {
   setBasePath,
   triggerAppRefresh,
   setFilters,
+  UiPayload,
 } from '../actions/ui';
 
 export interface UiState {
@@ -26,8 +27,6 @@ const initialState: UiState = {
   lastRefresh: Date.now(),
   filters: new Map(),
 };
-
-type UiPayload = PopoverState & string & boolean & number & Map<string, string[]>;
 
 export const uiReducer = handleActions<UiState, UiPayload>(
   {

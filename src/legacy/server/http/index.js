@@ -28,7 +28,7 @@ import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupDefaultRouteProvider } from './setup_default_route_provider';
 import { setupXsrf } from './xsrf';
 
-export default async function (kbnServer, server, config) {
+export default async function(kbnServer, server, config) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
@@ -38,7 +38,7 @@ export default async function (kbnServer, server, config) {
   await registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
-  server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
+  server.decorate('server', 'exposeStaticDir', function(routePath, dirPath) {
     this.route({
       path: routePath,
       method: 'GET',
@@ -46,19 +46,19 @@ export default async function (kbnServer, server, config) {
         directory: {
           path: dirPath,
           listing: false,
-          lookupCompressed: true
-        }
+          lookupCompressed: true,
+        },
       },
-      config: { auth: false }
+      config: { auth: false },
     });
   });
 
   // helper for creating view managers for servers
-  server.decorate('server', 'setupViews', function (path, engines) {
+  server.decorate('server', 'setupViews', function(path, engines) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ pug: require('pug') }, engines || {})
+      engines: _.assign({ pug: require('pug') }, engines || {}),
     });
   });
 
@@ -74,7 +74,7 @@ export default async function (kbnServer, server, config) {
     if (response.isBoom) {
       response.output.headers = {
         ...response.output.headers,
-        ...customHeaders
+        ...customHeaders,
       };
     } else {
       Object.keys(customHeaders).forEach(name => {
@@ -90,13 +90,13 @@ export default async function (kbnServer, server, config) {
     method: 'GET',
     async handler(req, h) {
       return h.redirect(await req.getDefaultRoute());
-    }
+    },
   });
 
   server.route({
     method: 'GET',
     path: '/{p*}',
-    handler: function (req, h) {
+    handler: function(req, h) {
       const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         throw Boom.notFound();
@@ -104,12 +104,14 @@ export default async function (kbnServer, server, config) {
 
       const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return h
-        .redirect(format({
-          search: req.url.search,
-          pathname: pathPrefix + path.slice(0, -1),
-        }))
+        .redirect(
+          format({
+            search: req.url.search,
+            pathname: pathPrefix + path.slice(0, -1),
+          })
+        )
         .permanent(true);
-    }
+    },
   });
 
   // Expose static assets

@@ -11,31 +11,24 @@ import { ToolsControl } from './tools_control';
 const defaultProps = {
   initiateDraw: () => {},
   cancelDraw: () => {},
-  geoFields: [{
-    geoFieldName: 'location',
-    geoFieldType: 'geo_point',
-    indexPatternTitle: 'my_index',
-    indexPatternId: '1'
-  }],
+  geoFields: [
+    {
+      geoFieldName: 'location',
+      geoFieldType: 'geo_point',
+      indexPatternTitle: 'my_index',
+      indexPatternId: '1',
+    },
+  ],
 };
 
 test('renders', async () => {
-  const component = shallow(
-    <ToolsControl
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<ToolsControl {...defaultProps} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('Should render cancel button when drawing', async () => {
-  const component = shallow(
-    <ToolsControl
-      {...defaultProps}
-      isDrawingFilter
-    />
-  );
+  const component = shallow(<ToolsControl {...defaultProps} isDrawingFilter />);
 
   expect(component).toMatchSnapshot();
 });

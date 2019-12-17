@@ -30,7 +30,8 @@ export const gaugeDefinition = {
   title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
   description: i18n.translate('kbnVislibVisTypes.gauge.gaugeDescription', {
-    defaultMessage: 'Gauges indicate the status of a metric. Use it to show how a metric\'s value relates to reference threshold values.'
+    defaultMessage:
+      "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",
   }),
   visConfig: {
     defaults: {
@@ -51,12 +52,12 @@ export const gaugeDefinition = {
         colorsRange: [
           { from: 0, to: 50 },
           { from: 50, to: 75 },
-          { from: 75, to: 100 }
+          { from: 75, to: 100 },
         ],
         invertColors: false,
         labels: {
           show: true,
-          color: 'black'
+          color: 'black',
         },
         scale: {
           show: true,
@@ -74,8 +75,8 @@ export const gaugeDefinition = {
           bgColor: true,
           subText: '',
           fontSize: 60,
-        }
-      }
+        },
+      },
     },
   },
   visualization: vislibVisController,
@@ -89,21 +90,29 @@ export const gaugeDefinition = {
         title: i18n.translate('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
         aggFilter: [
-          '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-          '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
+          '!std_dev',
+          '!geo_centroid',
+          '!percentiles',
+          '!percentile_ranks',
+          '!derivative',
+          '!serial_diff',
+          '!moving_avg',
+          '!cumulative_sum',
+          '!geo_bounds',
+        ],
+        defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split group' }),
+        title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', {
+          defaultMessage: 'Split group',
+        }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-      }
-    ])
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+      },
+    ]),
   },
-  useCustomNoDataScreen: true
+  useCustomNoDataScreen: true,
 };

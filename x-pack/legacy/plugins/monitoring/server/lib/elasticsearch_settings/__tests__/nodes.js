@@ -15,10 +15,10 @@ describe('Elasticsearch Nodes Settings', () => {
           elasticsearch: {
             getCluster() {
               return { callWithRequest: () => Promise.resolve(response) };
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     };
   };
 
@@ -33,10 +33,10 @@ describe('Elasticsearch Nodes Settings', () => {
       nodes: {
         node01abc: {
           settings: {
-            xpack: { monitoring: { collection: { interval: -1 } } }
-          }
-        }
-      }
+            xpack: { monitoring: { collection: { interval: -1 } } },
+          },
+        },
+      },
     });
     const result = await checkNodesSettings(mockReq);
 
@@ -45,8 +45,8 @@ describe('Elasticsearch Nodes Settings', () => {
       reason: {
         context: 'nodeId: node01abc',
         data: -1,
-        property: 'xpack.monitoring.collection.interval'
-      }
+        property: 'xpack.monitoring.collection.interval',
+      },
     });
   });
 
@@ -55,10 +55,10 @@ describe('Elasticsearch Nodes Settings', () => {
       nodes: {
         node02def: {
           settings: {
-            xpack: { monitoring: { exporters: { myExporter01: {} } } }
-          }
-        }
-      }
+            xpack: { monitoring: { exporters: { myExporter01: {} } } },
+          },
+        },
+      },
     });
     const result = await checkNodesSettings(mockReq);
 
@@ -67,8 +67,8 @@ describe('Elasticsearch Nodes Settings', () => {
       reason: {
         context: 'nodeId: node02def',
         data: 'Remote exporters indicate a possible misconfiguration: myExporter01',
-        property: 'xpack.monitoring.exporters'
-      }
+        property: 'xpack.monitoring.exporters',
+      },
     });
   });
 
@@ -77,10 +77,10 @@ describe('Elasticsearch Nodes Settings', () => {
       nodes: {
         node02def: {
           settings: {
-            xpack: { monitoring: { enabled: 'false' } }
-          }
-        }
-      }
+            xpack: { monitoring: { enabled: 'false' } },
+          },
+        },
+      },
     });
     const result = await checkNodesSettings(mockReq);
 
@@ -89,8 +89,8 @@ describe('Elasticsearch Nodes Settings', () => {
       reason: {
         context: 'nodeId: node02def',
         data: 'false',
-        property: 'xpack.monitoring.enabled'
-      }
+        property: 'xpack.monitoring.enabled',
+      },
     });
   });
 
@@ -99,10 +99,10 @@ describe('Elasticsearch Nodes Settings', () => {
       nodes: {
         node02def: {
           settings: {
-            xpack: { monitoring: { enabled: false } }
-          }
-        }
-      }
+            xpack: { monitoring: { enabled: false } },
+          },
+        },
+      },
     });
     const result = await checkNodesSettings(mockReq);
 
@@ -111,8 +111,8 @@ describe('Elasticsearch Nodes Settings', () => {
       reason: {
         context: 'nodeId: node02def',
         data: 'false', // data property must always be string, per propTypes
-        property: 'xpack.monitoring.enabled'
-      }
+        property: 'xpack.monitoring.enabled',
+      },
     });
   });
 });

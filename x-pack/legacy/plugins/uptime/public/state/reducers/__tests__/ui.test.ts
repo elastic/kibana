@@ -49,7 +49,17 @@ describe('ui reducer', () => {
 
   it('updates the refresh value', () => {
     const action = triggerAppRefresh(125) as Action<never>;
-    expect(uiReducer(undefined, action)).toMatchSnapshot();
+    expect(
+      uiReducer(
+        {
+          basePath: 'abc',
+          integrationsPopoverOpen: null,
+          lastRefresh: 125,
+          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
+        },
+        action
+      )
+    ).toMatchSnapshot();
   });
 
   it('updates the filter value', () => {

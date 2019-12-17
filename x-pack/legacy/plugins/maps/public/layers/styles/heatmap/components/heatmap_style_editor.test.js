@@ -12,13 +12,9 @@ import { HeatmapStyleEditor } from './heatmap_style_editor';
 describe('HeatmapStyleEditor', () => {
   test('is rendered', () => {
     const component = shallow(
-      <HeatmapStyleEditor
-        colorRampName="Blues"
-        onHeatmapColorChange={() => {}}
-      />
+      <HeatmapStyleEditor colorRampName="Blues" onHeatmapColorChange={() => {}} />
     );
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 });

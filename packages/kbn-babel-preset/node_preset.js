@@ -20,21 +20,19 @@
 module.exports = (_, options = {}) => {
   const overrides = [];
   if (!process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER) {
-    overrides.push(
-      {
-        test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
-        plugins: [
-          [
-            require.resolve('babel-plugin-filter-imports'),
-            {
-              imports: {
-                perf_hooks: ['performance'],
-              },
+    overrides.push({
+      test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
+      plugins: [
+        [
+          require.resolve('babel-plugin-filter-imports'),
+          {
+            imports: {
+              perf_hooks: ['performance'],
             },
-          ],
+          },
         ],
-      }
-    );
+      ],
+    });
   }
 
   return {

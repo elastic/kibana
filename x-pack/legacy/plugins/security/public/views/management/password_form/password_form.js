@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 import template from './password_form.html';
 
 const module = uiModules.get('security', ['kibana']);
-module.directive('kbnPasswordForm', function () {
+module.directive('kbnPasswordForm', function() {
   return {
     template,
     scope: {
@@ -17,7 +17,7 @@ module.directive('kbnPasswordForm', function () {
     restrict: 'E',
     replace: true,
     controllerAs: 'passwordController',
-    controller: function () {
+    controller: function() {
       this.confirmation = null;
     },
   };

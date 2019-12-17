@@ -22,7 +22,7 @@ import d3 from 'd3';
 import chrome from '../../../chrome';
 import { createColorPalette } from './color_palette';
 
-const standardizeColor = (color) => d3.rgb(color).toString();
+const standardizeColor = color => d3.rgb(color).toString();
 
 const config = chrome.getUiSettingsClient();
 
@@ -36,7 +36,6 @@ function getConfigColorMapping() {
  * Provides functions to interact with the lookup table
  */
 class MappedColors {
-
   constructor() {
     this.oldMap = {};
     this.mapping = {};
@@ -62,7 +61,7 @@ class MappedColors {
     const oldColors = _.values(this.oldMap);
 
     const keysToMap = [];
-    _.each(keys, (key) => {
+    _.each(keys, key => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
       if (configMapping[key]) delete this.mapping[key];
 
@@ -77,7 +76,11 @@ class MappedColors {
     });
 
     // Generate a color palette big enough that all new keys can have unique color values
-    const allColors = _(this.mapping).values().union(configColors).union(oldColors).value();
+    const allColors = _(this.mapping)
+      .values()
+      .union(configColors)
+      .union(oldColors)
+      .value();
     const colorPalette = createColorPalette(allColors.length + keysToMap.length);
     let newColors = _.difference(colorPalette, allColors);
 

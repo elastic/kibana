@@ -23,4 +23,10 @@ export interface UMMonitorsAdapter {
     dateEnd: string,
     location?: string
   ): Promise<any>;
+  getMonitorLocations(
+    request: any,
+    monitorId: string,
+    dateStart: string,
+    dateEnd: string
+  ): Promise<any>;
 }

@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, createContext } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import { metadata } from 'ui/metadata';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import {
   CoreStart,
-  LegacyCoreStart,
   Plugin,
   CoreSetup,
-  PluginInitializerContext
+  PluginInitializerContext,
+  PackageInfo
 } from '../../../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { KibanaCoreContextProvider } from '../../../observability/public';
+import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
@@ -25,7 +25,7 @@ import { px, unit, units } from '../style/variables';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { getRoutes } from '../components/app/Main/route_config';
+import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
@@ -34,8 +34,7 @@ import { setReadonlyBadge } from './updateBadge';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
-import { stackVersionFromLegacyMetadata } from './stackVersionFromLegacyMetadata';
+import { ApmPluginContext } from '../context/ApmPluginContext';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -45,7 +44,7 @@ const MainContainer = styled.main`
   height: 100%;
 `;
 
-const App = ({ routes }: { routes: BreadcrumbRoute[] }) => {
+const App = () => {
   return (
     <MainContainer data-test-subj="apmMainContainer">
       <UpdateBreadcrumbs routes={routes} />
@@ -63,11 +62,8 @@ export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
+  data: DataPublicPluginSetup;
   home: HomePublicPluginSetup;
-}
-
-export interface ApmPluginStartDeps {
-  data: DataPublicPluginStart;
 }
 
 export interface ConfigSchema {
@@ -78,27 +74,14 @@ export interface ConfigSchema {
   };
 }
 
-// These are to be used until we switch over all our context handling to
-// kibana_react
-export const PluginsContext = createContext<
-  ApmPluginStartDeps & { apm: { config: ConfigSchema; stackVersion: string } }
->(
-  {} as ApmPluginStartDeps & {
-    apm: { config: ConfigSchema; stackVersion: string };
-  }
-);
-export function usePlugins() {
-  return useContext(PluginsContext);
-}
-
 export class ApmPlugin
-  implements
-    Plugin<
-      ApmPluginSetup,
-      ApmPluginStart,
-      ApmPluginSetupDeps,
-      ApmPluginStartDeps
-    > {
+  implements Plugin<ApmPluginSetup, ApmPluginStart, ApmPluginSetupDeps, {}> {
+  // When we switch over from the old platform to new platform the plugins will
+  // be coming from setup instead of start, since that's where we do
+  // `core.application.register`. During the transitions we put plugins on an
+  // instance property so we can use it in start.
+  setupPlugins: ApmPluginSetupDeps = {} as ApmPluginSetupDeps;
+
   constructor(
     // @ts-ignore Not using initializerContext now, but will be once NP
     // migration is complete.
@@ -108,10 +91,12 @@ export class ApmPlugin
   // Take the DOM element as the constructor, so we can mount the app.
   public setup(_core: CoreSetup, plugins: ApmPluginSetupDeps) {
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    this.setupPlugins = plugins;
   }
 
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+  public start(core: CoreStart) {
     const i18nCore = core.i18n;
+    const plugins = this.setupPlugins;
 
     // Once we're actually an NP plugin we'll get the config from the
     // initializerContext like:
@@ -124,40 +109,41 @@ export class ApmPlugin
     // Once we're actually an NP plugin we'll get the package info from the
     // initializerContext like:
     //
-    //     const stackVersion = this.initializerContext.env.packageInfo.branch
+    //     const packageInfo = this.initializerContext.env.packageInfo
     //
     // Until then we use a shim to get it from legacy metadata:
-    const stackVersion = stackVersionFromLegacyMetadata;
-
-    const pluginsForContext = { ...plugins, apm: { config, stackVersion } };
-
-    const routes = getRoutes(config);
+    const packageInfo = metadata as PackageInfo;
 
     // render APM feedback link in global help menu
     setHelpExtension(core);
     setReadonlyBadge(core);
     toggleAppLinkInNav(core, config);
 
+    const apmPluginContextValue = {
+      config,
+      core,
+      packageInfo,
+      plugins
+    };
+
     ReactDOM.render(
-      <KibanaCoreContextProvider core={core as LegacyCoreStart}>
-        <PluginsContext.Provider value={pluginsForContext}>
-          <i18nCore.Context>
-            <Router history={history}>
-              <LocationProvider>
-                <MatchedRouteProvider routes={routes}>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App routes={routes} />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </MatchedRouteProvider>
-              </LocationProvider>
-            </Router>
-          </i18nCore.Context>
-        </PluginsContext.Provider>
-      </KibanaCoreContextProvider>,
+      <ApmPluginContext.Provider value={apmPluginContextValue}>
+        <i18nCore.Context>
+          <Router history={history}>
+            <LocationProvider>
+              <MatchedRouteProvider routes={routes}>
+                <UrlParamsProvider>
+                  <LoadingIndicatorProvider>
+                    <LicenseProvider>
+                      <App />
+                    </LicenseProvider>
+                  </LoadingIndicatorProvider>
+                </UrlParamsProvider>
+              </MatchedRouteProvider>
+            </LocationProvider>
+          </Router>
+        </i18nCore.Context>
+      </ApmPluginContext.Provider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );
 

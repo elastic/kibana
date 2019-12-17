@@ -15,5 +15,10 @@ export const isIntegrationsPopupOpen = ({ ui: { integrationsPopoverOpen } }: App
 export const getFilters = ({ ui: { filters } }: AppState) => filters;
 
 // Monitor Selectors
-export const getMonitorDetails = (state: AppState, summary: any) =>
-  state.monitor.monitorDetailsList[summary.monitor_id];
+export const getMonitorDetails = (state: AppState, summary: any) => {
+  return state.monitor.monitorDetailsList[summary.monitor_id];
+};
+
+export const getMonitorLocations = (state: AppState, monitorId: string) => {
+  return state.monitor.monitorLocationsList?.get(monitorId);
+};

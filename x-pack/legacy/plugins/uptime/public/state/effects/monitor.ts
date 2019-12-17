@@ -10,8 +10,11 @@ import {
   FETCH_MONITOR_DETAILS,
   FETCH_MONITOR_DETAILS_SUCCESS,
   FETCH_MONITOR_DETAILS_FAIL,
+  FETCH_MONITOR_LOCATIONS,
+  FETCH_MONITOR_LOCATIONS_SUCCESS,
+  FETCH_MONITOR_LOCATIONS_FAIL,
 } from '../actions/monitor';
-import { fetchMonitorDetails } from '../api';
+import { fetchMonitorDetails, fetchMonitorLocations } from '../api';
 import { getBasePath } from '../selectors';
 import { MonitorDetailsActionPayload } from '../actions/types';
 
@@ -32,6 +35,18 @@ function* monitorDetailsEffect(action: Action<any>) {
   }
 }
 
+function* monitorLocationsEffect(action: Action<any>) {
+  const payload = action.payload;
+  try {
+    const basePath = yield select(getBasePath);
+    const response = yield call(fetchMonitorLocations, { basePath, ...payload });
+    yield put({ type: FETCH_MONITOR_LOCATIONS_SUCCESS, payload: response });
+  } catch (error) {
+    yield put({ type: FETCH_MONITOR_LOCATIONS_FAIL, payload: error.message });
+  }
+}
+
 export function* fetchMonitorDetailsEffect() {
   yield takeLatest(FETCH_MONITOR_DETAILS, monitorDetailsEffect);
+  yield takeLatest(FETCH_MONITOR_LOCATIONS, monitorLocationsEffect);
 }

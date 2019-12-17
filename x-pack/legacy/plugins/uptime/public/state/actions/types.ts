@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface QueryParams {
+  dateStart: string;
+  dateEnd: string;
+  filters?: string;
+  statusFilter?: string;
+}
+
 export interface MonitorDetailsActionPayload {
   monitorId: string;
   dateStart: string;

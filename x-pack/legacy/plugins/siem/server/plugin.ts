@@ -45,17 +45,24 @@ export class Plugin {
       catalogue: ['siem'],
       privileges: {
         all: {
-          api: ['siem'],
+          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
-            all: [noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType],
+            all: [
+              'alert',
+              'action',
+              'action_task_params',
+              noteSavedObjectType,
+              pinnedEventSavedObjectType,
+              timelineSavedObjectType,
+            ],
             read: ['config'],
           },
           ui: ['show'],
         },
         read: {
-          api: ['siem'],
+          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
-            all: [],
+            all: ['alert', 'action', 'action_task_params'],
             read: [
               'config',
               noteSavedObjectType,

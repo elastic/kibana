@@ -50,8 +50,14 @@ Object {
 
 exports[`ui reducer updates the refresh value 1`] = `
 Object {
-  "basePath": "",
-  "filters": Map {},
+  "basePath": "abc",
+  "filters": Map {
+    "observer.geo.name" => Array [
+      "Tokyo",
+      "London",
+      "Karachi",
+    ],
+  },
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }

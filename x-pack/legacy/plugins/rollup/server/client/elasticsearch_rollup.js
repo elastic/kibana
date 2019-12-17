@@ -16,12 +16,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=indexPattern%>/_rollup/data',
         req: {
           indexPattern: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.search = ca({
@@ -30,13 +30,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=index%>/_rollup_search',
         req: {
           index: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   rollup.fieldCapabilities = ca({
@@ -45,21 +45,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=indexPattern%>/_field_caps?fields=*',
         req: {
           indexPattern: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.jobs = ca({
     urls: [
       {
         fmt: '/_rollup/job/_all',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.job = ca({
@@ -68,12 +68,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.startJob = ca({
@@ -82,32 +82,32 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_rollup/job/<%=id%>/_start',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   rollup.stopJob = ca({
     params: {
       waitForCompletion: {
         type: 'boolean',
-        name: 'wait_for_completion'
-      }
+        name: 'wait_for_completion',
+      },
     },
     urls: [
       {
         fmt: '/_rollup/job/<%=id%>/_stop',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   rollup.deleteJob = ca({
@@ -116,12 +116,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   rollup.createJob = ca({
@@ -130,13 +130,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 };
-
