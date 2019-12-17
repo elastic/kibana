@@ -225,7 +225,21 @@ function isBeatFromAPM(bucket) {
   return get(beatType, 'buckets[0].key') === 'apm-server';
 }
 
+function isSecurityDisabled(xpackMainPlugin) {
+  const xpackInfo = xpackMainPlugin && xpackMainPlugin.info;
+  // we assume that `xpack.isAvailable()` always returns `true` because we're inside x-pack
+  // if for whatever reason it returns `false`, `isSecurityDisabled()` would also return `false`
+  // which would result in follow-up behavior assuming security is enabled. This is intentional,
+  // because it results in more defensive behavior.
+  const securityInfo = xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security');
+  return securityInfo && securityInfo.isEnabled() === false;
+}
+
 async function hasNecessaryPermissions(req) {
+  if (isSecurityDisabled(req.server.plugins.xpack_main)) {
+    return true;
+  }
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   const response = await callWithRequest(req, 'transport.request', {
     method: 'POST',
