@@ -8,6 +8,8 @@ import {
   bucketSpan,
   categoriesMessageField,
   getJobId,
+  LogEntryCategoriesJobType,
+  logEntryCategoriesJobTypes,
   partitionField,
 } from '../../../../common/log_analysis';
 
@@ -21,22 +23,19 @@ import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml
 import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
 import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
 
-const jobTypes = ['log-entry-categories-count' as const];
 const moduleId = 'logs_ui_categories';
 
-type JobType = typeof jobTypes[0];
-
 const getJobIds = (spaceId: string, sourceId: string) =>
-  jobTypes.reduce(
+  logEntryCategoriesJobTypes.reduce(
     (accumulatedJobIds, jobType) => ({
       ...accumulatedJobIds,
       [jobType]: getJobId(spaceId, sourceId, jobType),
     }),
-    {} as Record<JobType, string>
+    {} as Record<LogEntryCategoriesJobType, string>
   );
 
 const getJobSummary = async (spaceId: string, sourceId: string) => {
-  const response = await callJobsSummaryAPI(spaceId, sourceId, jobTypes);
+  const response = await callJobsSummaryAPI(spaceId, sourceId, logEntryCategoriesJobTypes);
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
   return response.filter(jobSummary => jobIds.includes(jobSummary.id));
@@ -83,7 +82,7 @@ const setUpModule = async (
 };
 
 const cleanUpModule = async (spaceId: string, sourceId: string) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, jobTypes);
+  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryCategoriesJobTypes);
 };
 
 const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceConfiguration) => {
@@ -103,9 +102,9 @@ const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceCon
   ]);
 };
 
-export const logEntryCategoriesModule: ModuleDescriptor<JobType> = {
+export const logEntryCategoriesModule: ModuleDescriptor<LogEntryCategoriesJobType> = {
   moduleId,
-  jobTypes,
+  jobTypes: logEntryCategoriesJobTypes,
   bucketSpan,
   getJobIds,
   getJobSummary,

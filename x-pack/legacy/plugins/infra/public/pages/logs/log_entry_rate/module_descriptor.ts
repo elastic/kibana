@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bucketSpan, getJobId, partitionField } from '../../../../common/log_analysis';
+import {
+  bucketSpan,
+  getJobId,
+  LogEntryRateJobType,
+  logEntryRateJobTypes,
+  partitionField,
+} from '../../../../common/log_analysis';
 
 import {
   ModuleDescriptor,
@@ -16,22 +22,19 @@ import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml
 import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
 import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
 
-const jobTypes = ['log-entry-rate' as const];
 const moduleId = 'logs_ui_analysis';
 
-type JobType = typeof jobTypes[0];
-
 const getJobIds = (spaceId: string, sourceId: string) =>
-  jobTypes.reduce(
+  logEntryRateJobTypes.reduce(
     (accumulatedJobIds, jobType) => ({
       ...accumulatedJobIds,
       [jobType]: getJobId(spaceId, sourceId, jobType),
     }),
-    {} as Record<JobType, string>
+    {} as Record<LogEntryRateJobType, string>
   );
 
 const getJobSummary = async (spaceId: string, sourceId: string) => {
-  const response = await callJobsSummaryAPI(spaceId, sourceId, jobTypes);
+  const response = await callJobsSummaryAPI(spaceId, sourceId, logEntryRateJobTypes);
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
   return response.filter(jobSummary => jobIds.includes(jobSummary.id));
@@ -78,7 +81,7 @@ const setUpModule = async (
 };
 
 const cleanUpModule = async (spaceId: string, sourceId: string) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, jobTypes);
+  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryRateJobTypes);
 };
 
 const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceConfiguration) => {
@@ -94,9 +97,9 @@ const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceCon
   ]);
 };
 
-export const logEntryRateModule: ModuleDescriptor<JobType> = {
+export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {
   moduleId,
-  jobTypes,
+  jobTypes: logEntryRateJobTypes,
   bucketSpan,
   getJobIds,
   getJobSummary,

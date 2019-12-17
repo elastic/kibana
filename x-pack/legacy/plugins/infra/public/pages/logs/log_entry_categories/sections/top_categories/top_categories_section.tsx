@@ -8,6 +8,7 @@ import { EuiLoadingSpinner, EuiSpacer, EuiTitle, EuiFlexGroup, EuiFlexItem } fro
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import { LogEntryCategory } from '../../../../../../common/http_api/log_analysis';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
@@ -18,9 +19,9 @@ export const TopCategoriesSection: React.FunctionComponent<{
   jobId: string;
   onRequestRecreateMlJob: () => void;
   timeRange: TimeRange;
-}> = ({ jobId, onRequestRecreateMlJob, timeRange }) => {
-  const isLoading = false;
-
+  isLoading: boolean;
+  topCategories: LogEntryCategory[];
+}> = ({ isLoading, jobId, onRequestRecreateMlJob, timeRange, topCategories }) => {
   return (
     <>
       <EuiFlexGroup alignItems="center">
@@ -38,7 +39,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
-        <TopCategoriesTable />
+        <TopCategoriesTable topCategories={topCategories} />
       </LoadingOverlayWrapper>
     </>
   );

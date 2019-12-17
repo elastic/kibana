@@ -12,56 +12,67 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
-  getLogEntryRateRequestPayloadRT,
-  getLogEntryRateSuccessReponsePayloadRT,
-  GetLogEntryRateSuccessResponsePayload,
+  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
+  getLogEntryCategoriesRequestPayloadRT,
+  getLogEntryCategoriesSuccessReponsePayloadRT,
 } from '../../../../common/http_api/log_analysis';
 import { throwErrors } from '../../../../common/runtime_types';
 import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
 
 const anyObject = schema.object({}, { allowUnknowns: true });
 
-export const initGetLogEntryRateRoute = ({ framework, logEntryRateAnalysis }: InfraBackendLibs) => {
+export const initGetLogEntryCategoriesRoute = ({
+  framework,
+  logEntryCategoriesAnalysis,
+}: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
-      path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
+      path: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
       validate: {
         // short-circuit forced @kbn/config-schema validation so we can do io-ts validation
         body: anyObject,
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          getLogEntryRateRequestPayloadRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const {
+        data: {
+          categoryCount,
+          sourceId,
+          timeRange: { startTime, endTime },
+          // bucketDuration,
+          // datasets,
+        },
+      } = pipe(
+        getLogEntryCategoriesRequestPayloadRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const logEntryRateBuckets = await logEntryRateAnalysis.getLogEntryRateBuckets(
+      try {
+        const topLogEntryCategories = await logEntryCategoriesAnalysis.getTopLogEntryCategories(
           requestContext,
           request,
-          payload.data.sourceId,
-          payload.data.timeRange.startTime,
-          payload.data.timeRange.endTime,
-          payload.data.bucketDuration
+          sourceId,
+          startTime,
+          endTime,
+          categoryCount
         );
 
         return response.ok({
-          body: getLogEntryRateSuccessReponsePayloadRT.encode({
+          body: getLogEntryCategoriesSuccessReponsePayloadRT.encode({
             data: {
-              bucketDuration: payload.data.bucketDuration,
-              histogramBuckets: logEntryRateBuckets,
-              totalNumberOfLogEntries: getTotalNumberOfLogEntries(logEntryRateBuckets),
+              // bucketDuration,
+              categories: topLogEntryCategories,
             },
           }),
         });
       } catch (e) {
         const { statusCode = 500, message = 'Unknown error occurred' } = e;
+
         if (e instanceof NoLogAnalysisResultsIndexError) {
           return response.notFound({ body: { message } });
         }
+
         return response.customError({
           statusCode,
           body: { message },
@@ -71,13 +82,13 @@ export const initGetLogEntryRateRoute = ({ framework, logEntryRateAnalysis }: In
   );
 };
 
-const getTotalNumberOfLogEntries = (
-  logEntryRateBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets']
-) => {
-  return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
-    const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
-      return (partitionsTotal += partition.numberOfLogEntries);
-    }, 0);
-    return (sumNumberOfLogEntries += sumPartitions);
-  }, 0);
-};
+// const getTotalNumberOfLogEntries = (
+//   logEntryRateBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets']
+// ) => {
+//   return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
+//     const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
+//       return (partitionsTotal += partition.numberOfLogEntries);
+//     }, 0);
+//     return (sumNumberOfLogEntries += sumPartitions);
+//   }, 0);
+// };

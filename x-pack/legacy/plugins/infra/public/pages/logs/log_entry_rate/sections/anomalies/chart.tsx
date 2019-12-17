@@ -25,8 +25,8 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { MLSeverityScoreCategories } from '../../../../../../common/log_analysis';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
-import { MLSeverityScoreCategories } from '../helpers/data_formatters';
 
 export const AnomaliesChart: React.FunctionComponent<{
   chartId: string;

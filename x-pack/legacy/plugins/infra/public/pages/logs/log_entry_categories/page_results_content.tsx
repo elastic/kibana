@@ -18,8 +18,9 @@ import {
 // import numeral from '@elastic/numeral';
 // import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 // import { bucketSpan } from '../../../../common/log_analysis';
@@ -35,6 +36,8 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
+import { useLogEntryCategoriesResults } from './use_log_entry_categories_results';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -51,7 +54,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     viewSetupForReconfiguration,
     // viewSetupForUpdate,
     jobIds,
-    // sourceConfiguration: { sourceId },
+    sourceConfiguration: { sourceId },
   } = useLogEntryCategoriesModuleContext();
 
   const {
@@ -74,12 +77,29 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   //   [queryTimeRange.value.endTime, queryTimeRange.value.startTime]
   // );
 
-  // const { getLogEntryRate, isLoading, logEntryRate } = useLogEntryRateResults({
-  //   sourceId,
-  //   startTime: queryTimeRange.value.startTime,
-  //   endTime: queryTimeRange.value.endTime,
-  //   bucketDuration,
-  // });
+  const { services } = useKibana<{}>();
+
+  const showLoadDataErrorNotification = useCallback(
+    (error: Error) => {
+      // eslint-disable-next-line no-unused-expressions
+      services.notifications?.toasts.addError(error, {
+        title: loadDataErrorTitle,
+      });
+    },
+    [services.notifications]
+  );
+
+  const {
+    getTopLogEntryCategories,
+    isLoading,
+    topLogEntryCategories,
+  } = useLogEntryCategoriesResults({
+    sourceId,
+    startTime: queryTimeRange.value.startTime,
+    endTime: queryTimeRange.value.endTime,
+    categoriesCount: 25,
+    onGetTopLogEntryCategoriesError: showLoadDataErrorNotification,
+  });
 
   // const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
   //   logEntryRate,
@@ -132,9 +152,9 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
 
-  // useEffect(() => {
-  //   getLogEntryRate();
-  // }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
+  useEffect(() => {
+    getTopLogEntryCategories();
+  }, [getTopLogEntryCategories, queryTimeRange.lastChangedTime]);
 
   useInterval(() => {
     fetchJobStatus();
@@ -174,9 +194,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <EuiPanel paddingSize="l">
               <TopCategoriesSection
+                isLoading={isLoading}
                 jobId={jobIds['log-entry-categories-count']}
                 onRequestRecreateMlJob={viewSetupForReconfiguration}
                 timeRange={queryTimeRange.value}
+                topCategories={topLogEntryCategories}
               />
               {/* {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
             <LogRateResults
@@ -234,3 +256,10 @@ export const ResultsContentPage = euiStyled(EuiPage)`
     flex-basis: auto !important;
   }
 `;
+
+const loadDataErrorTitle = i18n.translate(
+  'xpack.infra.logs.logEntryCategories.loadDataErrorTitle',
+  {
+    defaultMessage: 'Failed to load category data',
+  }
+);
