@@ -18,3 +18,4 @@
  */
 
 export { TimelionFunctionInterface, TimelionFunctionConfig } from './lib/classes/timelion_function';
+export { TimelionRequestQuery } from './routes/run';
