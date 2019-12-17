@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Categorize log entries and detect count anomalies",
+  "description": "Logs UI: Detects anomalies in count of log entries by category",
   "groups": ["logs-ui"],
   "analysis_config": {
     "bucket_span": "15m",
@@ -8,7 +8,7 @@
     "detectors": [
       {
         "by_field_name": "mlcategory",
-        "detector_description": "count by mlcategory",
+        "detector_description": "count by learned log entry category",
         "function": "count",
         "partition_field_name": "event.dataset",
         "use_null": true
