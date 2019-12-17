@@ -95,7 +95,7 @@ const fullyMatchingIds = async (
 export const mostRecentCheckGroups = async (
   queryContext: QueryContext,
   potentialMatchMonitorIDs: string[]
-) => {
+): Promise<any> => {
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
     body: {
@@ -134,5 +134,5 @@ export const mostRecentCheckGroups = async (
     },
   };
 
-  return await queryContext.database.search(queryContext.request, params);
+  return await queryContext.search(params);
 };
