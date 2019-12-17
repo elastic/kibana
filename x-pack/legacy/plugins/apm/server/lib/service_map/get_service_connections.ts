@@ -51,7 +51,7 @@ export async function getServiceConnections({
             field: TRACE_ID,
             order: { _key: 'asc' as const },
             size: traceIds.length,
-            execution_hint: 'map'
+            execution_hint: 'map' as const
           },
           aggs: {
             connections: {

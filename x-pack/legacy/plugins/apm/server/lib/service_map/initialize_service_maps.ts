@@ -50,7 +50,9 @@ export async function initializeServiceMaps(server: Server) {
     return await taskManager.ensureScheduled({
       id: SERVICE_MAP_TASK_ID,
       taskType: SERVICE_MAP_TASK_TYPE,
-      interval: '1m',
+      schedule: {
+        interval: '1m'
+      },
       scope: ['apm'],
       params: {},
       state: {}
