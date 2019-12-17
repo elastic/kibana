@@ -19198,8 +19198,8 @@ const handleArgs = (file, args, options = {}) => {
 		reject: true,
 		cleanup: true,
 		all: false,
-		windowsHide: true,
-		...options
+		...options,
+		windowsHide: true
 	};
 
 	options.env = getEnv(options);

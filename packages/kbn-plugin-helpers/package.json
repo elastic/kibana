@@ -17,7 +17,7 @@
     "argv-split": "^2.0.1",
     "commander": "^3.0.0",
     "del": "^5.1.0",
-    "execa": "^3.4.0",
+    "execa": "^3.2.0",
     "globby": "^8.0.1",
     "gulp-babel": "^8.0.0",
     "gulp-rename": "1.4.0",

@@ -167,7 +167,7 @@
     "elasticsearch": "^16.5.0",
     "elasticsearch-browser": "^16.5.0",
     "encode-uri-query": "1.0.1",
-    "execa": "^3.4.0",
+    "execa": "^3.2.0",
     "expiry-js": "0.1.7",
     "fast-deep-equal": "^3.1.1",
     "file-loader": "4.2.0",
