@@ -33,6 +33,7 @@ import {
   listActionTypesRoute,
   getExecuteActionRoute,
 } from './routes';
+import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -69,6 +70,9 @@ export class Plugin {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
+    // Register license checker
+    plugins.license.registerLicenseChecker();
+
     // Encrypted attributes
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
@@ -101,13 +105,13 @@ export class Plugin {
     });
 
     // Routes
-    core.http.route(createActionRoute);
-    core.http.route(deleteActionRoute);
-    core.http.route(getActionRoute);
-    core.http.route(findActionRoute);
-    core.http.route(updateActionRoute);
-    core.http.route(listActionTypesRoute);
-    core.http.route(getExecuteActionRoute(actionExecutor));
+    core.http.route(extendRouteWithLicenseCheck(createActionRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(deleteActionRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(getActionRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(findActionRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(updateActionRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(listActionTypesRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(getExecuteActionRoute(actionExecutor), plugins));
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
