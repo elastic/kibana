@@ -5,6 +5,9 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+
+import { useUiSetting } from '../../lib/kibana';
 import {
   checkIfAllValuesAreZero,
   defaultChartHeight,
@@ -14,10 +17,14 @@ import {
   SeriesType,
   WrappedByAutoSizer,
   ChartSeriesData,
+  useTheme,
 } from './common';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/charts', () => {
   return {
+    ...jest.requireActual('@elastic/charts'),
     getSpecId: jest.fn(() => {}),
   };
 });
@@ -177,6 +184,25 @@ describe('checkIfAllValuesAreZero', () => {
 
     it(`should return true`, () => {
       expect(result).toBeTruthy();
+    });
+  });
+
+  describe('useTheme', () => {
+    it('merges our spacing with the default theme', () => {
+      const { result } = renderHook(() => useTheme());
+
+      expect(result.current).toEqual(
+        expect.objectContaining({ chartMargins: expect.objectContaining({ top: 4, bottom: 0 }) })
+      );
+    });
+
+    it('returns a different theme depending on user settings', () => {
+      const { result: defaultResult } = renderHook(() => useTheme());
+      (useUiSetting as jest.Mock).mockImplementation(() => true);
+
+      const { result: darkResult } = renderHook(() => useTheme());
+
+      expect(defaultResult.current).not.toMatchObject(darkResult.current);
     });
   });
 });
