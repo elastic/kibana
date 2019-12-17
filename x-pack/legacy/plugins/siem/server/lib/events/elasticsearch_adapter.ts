@@ -32,7 +32,7 @@ import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
-import { TermAggregation, SearchHit } from '../types';
+import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
 import { buildLastEventTimeQuery } from './query.last_event_time.dsl';
@@ -214,7 +214,7 @@ export const formatEventsData = (
 export const formatTimelineData = (
   dataFields: readonly string[],
   ecsFields: readonly string[],
-  hit: EventHit | SearchHit,
+  hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
 ) =>
   uniq([...ecsFields, ...dataFields]).reduce<TimelineEdges>(

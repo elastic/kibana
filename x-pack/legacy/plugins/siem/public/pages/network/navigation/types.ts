@@ -52,7 +52,6 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
   NetworkRouteType.flows &
-  NetworkRouteType.dns &
   NetworkRouteType.http &
   NetworkRouteType.tls &
   NetworkRouteType.alerts;

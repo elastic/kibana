@@ -284,10 +284,6 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
   'system.auth.ssh.method': 'system.auth.ssh.method',
 };
 
-export const observerFieldsMap: Readonly<Record<string, string>> = {
-  'observer.name': 'observer.name',
-};
-
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',

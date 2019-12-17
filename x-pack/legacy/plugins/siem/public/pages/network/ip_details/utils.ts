@@ -40,17 +40,16 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
       },
     ];
   }
-  if (params.tabName != null) {
-    const tabName = get('tabName', params);
-    if (!tabName) return breadcrumb;
 
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: TabNameMappedToI18nKey[params.tabName],
-        href: '',
-      },
-    ];
-  }
+  const tabName = get('tabName', params);
+  if (!tabName) return breadcrumb;
+
+  breadcrumb = [
+    ...breadcrumb,
+    {
+      text: TabNameMappedToI18nKey[tabName],
+      href: '',
+    },
+  ];
   return breadcrumb;
 };

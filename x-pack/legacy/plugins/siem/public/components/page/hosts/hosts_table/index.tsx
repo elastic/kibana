@@ -57,7 +57,6 @@ interface HostsTableDispatchProps {
   updateHostsSort: ActionCreator<{
     hostsType: hostsModel.HostsType;
     sort: HostsSortField;
-    tableType: hostsModel.HostsTableType;
   }>;
   updateTableActivePage: ActionCreator<{
     activePage: number;
@@ -127,7 +126,6 @@ const HostsTableComponent = React.memo<HostsTableProps>(
             updateHostsSort({
               sort,
               hostsType: type,
-              tableType,
             });
           }
         }

@@ -20,7 +20,6 @@ export enum NetworkType {
 
 export enum NetworkTableType {
   alerts = 'alerts',
-  anomalies = 'anomalies',
   dns = 'dns',
   http = 'http',
   topCountriesDestination = 'topCountriesDestination',
