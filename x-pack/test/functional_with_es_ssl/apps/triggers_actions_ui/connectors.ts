@@ -141,7 +141,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const deleteConnectorBtn = await testSubjects.find('deleteConnector');
       await deleteConnectorBtn.click();
 
-      await find.byCssSelector('[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)');
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
@@ -180,7 +180,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const bulkDeleteBtn = await testSubjects.find('bulkDelete');
       await bulkDeleteBtn.click();
 
-      await find.byCssSelector('[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)');
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
