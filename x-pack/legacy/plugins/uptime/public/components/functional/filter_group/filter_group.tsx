@@ -5,7 +5,7 @@
  */
 
 import { EuiFilterGroup } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
@@ -21,7 +21,7 @@ interface FilterBarQueryResult {
 interface FilterBarDropdownsProps {
   currentFilter: string;
   onFilterUpdate: (kuery: string) => void;
-  setFilters: Function;
+  setFilters: (filters: Map<string, string[]>) => any;
 }
 
 type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
@@ -68,7 +68,9 @@ export const FilterGroupComponent = ({
 
   const getSelectedItems = (fieldName: string) => filterKueries.get(fieldName) || [];
 
-  setFilters(filterKueries);
+  useEffect(() => {
+    setFilters(filterKueries);
+  }, [filterKueries]);
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {
