@@ -11,6 +11,10 @@ import { UMRestApiRouteCreator } from '../types';
 const stringToArray = (locations: string | string[] | undefined) =>
   locations ? (Array.isArray(locations) ? locations : [locations]) : [];
 
+const arrayOrStringType = schema.maybe(
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+);
+
 export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/filters',
@@ -19,10 +23,10 @@ export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLi
       dateRangeStart: schema.string(),
       dateRangeEnd: schema.string(),
       search: schema.maybe(schema.string()),
-      locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-      schemes: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-      ports: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-      tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      locations: arrayOrStringType,
+      schemes: arrayOrStringType,
+      ports: arrayOrStringType,
+      tags: arrayOrStringType,
     }),
   },
   options: {
