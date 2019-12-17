@@ -605,7 +605,7 @@ export enum InfraSnapshotMetricType {
   rdsQueriesExecuted = 'rdsQueriesExecuted',
   rdsActiveTransactions = 'rdsActiveTransactions',
   rdsLatency = 'rdsLatency',
-  sqsMessagesVisible = 'sqsOldestMessage',
+  sqsMessagesVisible = 'sqsMessagesVisible',
   sqsMessagesDelayed = 'sqsMessagesDelayed',
   sqsMessagesSent = 'sqsMessagesSent',
   sqsMessagesEmpty = 'sqsMessagesEmpty',
