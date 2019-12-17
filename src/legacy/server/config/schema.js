@@ -22,7 +22,6 @@ import os from 'os';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
-import { DEFAULT_CSP_RULES, DEFAULT_CSP_STRICT, DEFAULT_CSP_WARN_LEGACY_BROWSERS } from '../csp';
 
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
@@ -51,13 +50,7 @@ export default () =>
       exclusive: Joi.boolean().default(false),
     }).default(),
 
-    csp: Joi.object({
-      rules: Joi.array()
-        .items(Joi.string())
-        .default(DEFAULT_CSP_RULES),
-      strict: Joi.boolean().default(DEFAULT_CSP_STRICT),
-      warnLegacyBrowsers: Joi.boolean().default(DEFAULT_CSP_WARN_LEGACY_BROWSERS),
-    }).default(),
+    csp: HANDLED_IN_NEW_PLATFORM,
 
     cpu: Joi.object({
       cgroup: Joi.object({
@@ -76,9 +69,6 @@ export default () =>
     }),
 
     server: Joi.object({
-      uuid: Joi.string()
-        .guid()
-        .default(),
       name: Joi.string().default(os.hostname()),
       defaultRoute: Joi.string().regex(/^\//, `start with a slash`),
       customResponseHeaders: Joi.object()
@@ -118,6 +108,7 @@ export default () =>
       socketTimeout: HANDLED_IN_NEW_PLATFORM,
       ssl: HANDLED_IN_NEW_PLATFORM,
       compression: HANDLED_IN_NEW_PLATFORM,
+      uuid: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
     uiSettings: HANDLED_IN_NEW_PLATFORM,
@@ -153,7 +144,11 @@ export default () =>
           .keys({
             enabled: Joi.boolean().default(false),
             everyBytes: Joi.number()
-              .greater(1024)
+              // > 100KB
+              .greater(102399)
+              // < 1GB
+              .less(1073741825)
+              // 10MB
               .default(10485760),
             keepFiles: Joi.number()
               .greater(2)

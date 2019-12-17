@@ -916,7 +916,6 @@
     "embeddableApi.samples.contactCard.displayName": "連絡先カード",
     "embeddableApi.samples.filterableContainer.displayName": "フィルター可能なダッシュボード",
     "embeddableApi.samples.filterableEmbeddable.displayName": "フィルター可能",
-    "embeddableApi.samples.helloworld.displayName": "こんにちは",
     "embeddableApi.panel.enhancedDashboardPanelAriaLabel": "ダッシュボードパネル: {title}",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel": "{title} のパネルオプション",
     "embeddableApi.panel.dashboardPanelAriaLabel": "ダッシュボードパネル",
