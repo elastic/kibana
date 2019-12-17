@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../../../../src/legacy/ui/public/courier';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../../src/legacy/ui/public/courier';
 import { esFilters } from '../../../../../src/plugins/data/public';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
 
 export const license = {};
-export const setLicenseId = latestLicenseId => license.id = latestLicenseId;
+export const setLicenseId = latestLicenseId => (license.id = latestLicenseId);
 
 export let indexPatternService;
 export const initServicesAndConstants = ({ indexPatterns }) => {
@@ -26,9 +29,10 @@ export async function fetchSearchSourceAndRecordWithInspector({
   inspectorAdapters,
   abortSignal,
 }) {
-  const inspectorRequest = inspectorAdapters.requests.start(
-    requestName,
-    { id: requestId, description: requestDesc });
+  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
+    id: requestId,
+    description: requestDesc,
+  });
   let resp;
   try {
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
@@ -36,10 +40,8 @@ export async function fetchSearchSourceAndRecordWithInspector({
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest
-      .stats(getResponseInspectorStats(searchSource, resp))
-      .ok({ json: resp });
-  } catch(error) {
+    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+  } catch (error) {
     inspectorRequest.error({ error });
     throw error;
   }

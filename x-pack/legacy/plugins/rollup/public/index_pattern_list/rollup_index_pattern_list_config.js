@@ -17,11 +17,11 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
   getIndexPatternTags = indexPattern => {
     return isRollup(indexPattern)
       ? [
-        {
-          key: 'rollup',
-          name: 'Rollup',
-        },
-      ]
+          {
+            key: 'rollup',
+            name: 'Rollup',
+          },
+        ]
       : [];
   };
 

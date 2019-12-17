@@ -15,7 +15,10 @@ import '../account/account';
 import { Path } from 'plugins/xpack_main/services/path';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
-import { chromeHeaderNavControlsRegistry, NavControlSide } from 'ui/registry/chrome_header_nav_controls';
+import {
+  chromeHeaderNavControlsRegistry,
+  NavControlSide,
+} from 'ui/registry/chrome_header_nav_controls';
 import { SecurityNavControl } from './nav_control_component';
 
 chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl) => ({
@@ -29,7 +32,7 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl) => ({
     const props = {
       user: ShieldUser.getCurrent(),
       editProfileUrl: chrome.addBasePath(`${kbnBaseUrl}#/account`),
-      logoutUrl: chrome.addBasePath(`/logout`)
+      logoutUrl: chrome.addBasePath(`/logout`),
     };
 
     props.user.$promise.then(() => {
@@ -43,5 +46,5 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl) => ({
     });
 
     return () => ReactDOM.unmountComponentAtNode(el);
-  }
+  },
 }));

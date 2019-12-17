@@ -25,6 +25,8 @@
 export interface LegacyConfig {
   get<T>(key?: string): T;
   has(key: string): boolean;
+  set(key: string, value: any): void;
+  set(config: Record<string, any>): void;
 }
 
 /**

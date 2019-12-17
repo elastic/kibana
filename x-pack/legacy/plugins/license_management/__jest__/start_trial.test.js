@@ -13,7 +13,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('basic'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -23,7 +23,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('gold'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -34,7 +34,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('trial'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -44,7 +44,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -54,7 +54,27 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum', 0),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
+      },
+      StartTrial
+    );
+    expect(rendered.html()).toMatchSnapshot();
+  });
+  test('should not display for active enterprise license', () => {
+    const rendered = getComponent(
+      {
+        license: createMockLicense('enterprise'),
+        trialStatus: { canStartTrial: true },
+      },
+      StartTrial
+    );
+    expect(rendered.isEmptyRender()).toBeTruthy();
+  });
+  test('should display for expired enterprise license', () => {
+    const rendered = getComponent(
+      {
+        license: createMockLicense('enterprise', 0),
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -67,7 +87,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('basic'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );
@@ -77,7 +97,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('gold'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );
@@ -87,7 +107,17 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
+      },
+      StartTrial
+    );
+    expect(rendered.isEmptyRender()).toBeTruthy();
+  });
+  test('should not display for enterprise license', () => {
+    const rendered = getComponent(
+      {
+        license: createMockLicense('enterprise'),
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );
@@ -98,7 +128,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('gold'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );

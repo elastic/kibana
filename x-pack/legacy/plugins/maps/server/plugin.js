@@ -29,18 +29,18 @@ export class MapPlugin {
         all: {
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern']
+            read: ['index-pattern'],
           },
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
           savedObject: {
             all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query']
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
           },
           ui: ['show'],
         },
-      }
+      },
     });
 
     licensing.license$.subscribe(license => {
@@ -52,7 +52,7 @@ export class MapPlugin {
     });
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
-      defaultMessage: 'Map'
+      defaultMessage: 'Map',
     });
     __LEGACY.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
@@ -60,8 +60,8 @@ export class MapPlugin {
       {
         path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
         label: sampleDataLinkLabel,
-        icon: APP_ICON
-      }
+        icon: APP_ICON,
+      },
     ]);
 
     __LEGACY.replacePanelInSampleDatasetDashboard({
@@ -71,7 +71,7 @@ export class MapPlugin {
       embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
       embeddableType: 'map',
       embeddableConfig: {
-        isLayerTOCOpen: false
+        isLayerTOCOpen: false,
       },
     });
 
@@ -81,8 +81,8 @@ export class MapPlugin {
       {
         path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
         label: sampleDataLinkLabel,
-        icon: APP_ICON
-      }
+        icon: APP_ICON,
+      },
     ]);
 
     __LEGACY.replacePanelInSampleDatasetDashboard({
@@ -92,7 +92,7 @@ export class MapPlugin {
       embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
-        isLayerTOCOpen: true
+        isLayerTOCOpen: true,
       },
     });
 
@@ -101,8 +101,8 @@ export class MapPlugin {
       {
         path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
         label: sampleDataLinkLabel,
-        icon: APP_ICON
-      }
+        icon: APP_ICON,
+      },
     ]);
     __LEGACY.replacePanelInSampleDatasetDashboard({
       sampleDataId: 'logs',
@@ -111,7 +111,7 @@ export class MapPlugin {
       embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
-        isLayerTOCOpen: false
+        isLayerTOCOpen: false,
       },
     });
 
@@ -122,8 +122,7 @@ export class MapPlugin {
     return {
       getMapConfig() {
         return __LEGACY.mapConfig();
-      }
+      },
     };
-
   }
 }
