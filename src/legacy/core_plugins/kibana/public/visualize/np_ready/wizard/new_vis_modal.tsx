@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics/src';
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 import { VisType } from '../../legacy_imports';
 import { VisualizeConstants } from '../visualize_constants';
