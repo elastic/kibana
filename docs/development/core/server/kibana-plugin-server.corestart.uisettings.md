@@ -4,6 +4,7 @@
 
 ## CoreStart.uiSettings property
 
+[UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md)
 
 <b>Signature:</b>
 

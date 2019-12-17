@@ -574,9 +574,6 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
-    // Warning: (ae-forgotten-export) The symbol "UiSettingsServiceStart" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "UiSettingsServiceStart"
-    // 
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
 }
@@ -1825,6 +1822,11 @@ export interface UiSettingsParams {
 // @public (undocumented)
 export interface UiSettingsServiceSetup {
     register(settings: Record<string, UiSettingsParams>): void;
+}
+
+// @public (undocumented)
+export interface UiSettingsServiceStart {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 
 // @public

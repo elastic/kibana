@@ -204,6 +204,7 @@ export {
   UiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   UserProvidedValues,
 } from './ui_settings';
 
