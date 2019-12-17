@@ -4,40 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import * as Rx from 'rxjs';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { SpaceAvatar } from '../../components';
 import { spacesManagerMock } from '../../lib/mocks';
 import { SpacesManager } from '../../lib';
-import { SpacesHeaderNavButton } from './components/spaces_header_nav_button';
 import { NavControlPopover } from './nav_control_popover';
+import { EuiHeaderSectionItemButton } from '@elastic/eui';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
-    const activeSpace = {
-      space: { id: '', name: 'foo', disabledFeatures: [] },
-      valid: true,
-    };
-
     const spacesManager = spacesManagerMock.create();
 
     const wrapper = shallow(
       <NavControlPopover
-        activeSpace={activeSpace}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'downRight'}
-        buttonClass={SpacesHeaderNavButton}
+        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
       />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders a SpaceAvatar with the active space', async () => {
-    const activeSpace = {
-      space: { id: 'foo-space', name: 'foo', disabledFeatures: [] },
-      valid: true,
-    };
-
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue([
       {
@@ -51,23 +42,27 @@ describe('NavControlPopover', () => {
         disabledFeatures: [],
       },
     ]);
+    spacesManager.onActiveSpaceChange$ = Rx.of({
+      id: 'foo-space',
+      name: 'foo',
+      disabledFeatures: [],
+    });
 
-    const wrapper = mount<any, any>(
+    const wrapper = mountWithIntl(
       <NavControlPopover
-        activeSpace={activeSpace}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         anchorPosition={'rightCenter'}
-        buttonClass={SpacesHeaderNavButton}
+        capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
       />
     );
 
-    return new Promise(resolve => {
-      setTimeout(() => {
-        expect(wrapper.state().spaces).toHaveLength(2);
-        wrapper.update();
-        expect(wrapper.find(SpaceAvatar)).toHaveLength(1);
-        resolve();
-      }, 20);
-    });
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    // Wait for `getSpaces` promise to resolve
+    await Promise.resolve();
+    await Promise.resolve();
+    wrapper.update();
+
+    expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
   });
 });

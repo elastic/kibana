@@ -105,12 +105,22 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                           {/* Title */}
                           <EuiTitle size="m">
                             <h2>
-                              {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
-                                defaultMessage: "Edit field '{fieldName}'",
-                                values: {
-                                  fieldName: limitStringLength(field.source.name),
-                                },
-                              })}
+                              {isMultiField
+                                ? i18n.translate(
+                                    'xpack.idxMgmt.mappingsEditor.editMultiFieldTitle',
+                                    {
+                                      defaultMessage: "Edit multi-field '{fieldName}'",
+                                      values: {
+                                        fieldName: limitStringLength(field.source.name),
+                                      },
+                                    }
+                                  )
+                                : i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
+                                    defaultMessage: "Edit field '{fieldName}'",
+                                    values: {
+                                      fieldName: limitStringLength(field.source.name),
+                                    },
+                                  })}
                             </h2>
                           </EuiTitle>
 

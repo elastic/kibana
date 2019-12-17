@@ -27,7 +27,6 @@ import {
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import { start as navigation } from '../../../navigation/public/legacy';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 
@@ -62,6 +61,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     data,
     npData: npStart.plugins.data,
     embeddables,
-    navigation,
+    navigation: npStart.plugins.navigation,
   });
 })();
