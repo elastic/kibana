@@ -5,10 +5,12 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
@@ -27,10 +29,10 @@ import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
+import { filterAlertsNetwork } from './navigation/alerts_query_tab_body';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
 
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
@@ -49,6 +51,14 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     capabilitiesFetched,
   }) => {
     const core = useKibanaCore();
+    const { tabName } = useParams();
+
+    const networkFilters = useMemo(() => {
+      if (tabName === 'alerts') {
+        return filters.length > 0 ? [...filters, filterAlertsNetwork] : [filterAlertsNetwork];
+      }
+      return filters;
+    }, [tabName]);
 
     return (
       <>
@@ -58,7 +68,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters,
+              filters: networkFilters,
             });
 
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (

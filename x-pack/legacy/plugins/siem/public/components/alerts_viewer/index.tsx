@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { noop } from 'lodash/fp';
 import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { manageQuery } from '../page/manage_query';
 import { AlertsOverTimeHistogram } from '../page/hosts/alerts_over_time';
-import { AlertsComponentsQueryProps, AlertsComponentPageFilterDsl } from './types';
+import { AlertsComponentsQueryProps } from './types';
 import { AlertsOverTimeQuery } from '../../containers/alerts/alerts_over_time';
 import { hostsModel } from '../../store/model';
 import { AlertsTable } from './alerts_table';
@@ -24,8 +25,8 @@ export const AlertsView = ({
   setQuery,
   startDate,
   type,
-  updateDateRange = () => {},
-}: AlertsComponentsQueryProps & { pageFilters: AlertsComponentPageFilterDsl }) => (
+  updateDateRange = noop,
+}: AlertsComponentsQueryProps) => (
   <>
     <AlertsOverTimeQuery
       endDate={endDate}

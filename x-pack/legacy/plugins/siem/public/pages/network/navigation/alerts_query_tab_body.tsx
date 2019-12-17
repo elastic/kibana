@@ -5,39 +5,62 @@
  */
 
 import React from 'react';
+
+import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
 
+export const filterAlertsNetwork: esFilters.Filter = {
+  query: {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    {
+                      exists: {
+                        field: 'source.ip',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      exists: {
+                        field: 'destination.ip',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  },
+  meta: {
+    alias: '',
+    disabled: false,
+    key: 'bool',
+    negate: false,
+    type: 'custom',
+    value:
+      '{"bool":{"filter":[{"bool":{"should":[{"bool":{"should":[{"exists":{"field": "source.ip"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field": "destination.ip"}}],"minimum_should_match":1}}],"minimum_should_match":1}}]}}',
+  },
+};
+
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
-  <AlertsView
-    {...alertsProps}
-    pageFilters={[
-      {
-        bool: {
-          should: [
-            {
-              exists: {
-                field: 'source.ip',
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-      {
-        bool: {
-          should: [
-            {
-              exists: {
-                field: 'destination.ip',
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    ]}
-  />
+  <AlertsView {...alertsProps} pageFilters={filterAlertsNetwork} />
 ));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

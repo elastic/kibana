@@ -39,6 +39,24 @@ export const buildAlertsHistogramQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  match: {
+                    'event.kind': 'alert',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
       range: {
         [timestamp]: {
           gte: from,

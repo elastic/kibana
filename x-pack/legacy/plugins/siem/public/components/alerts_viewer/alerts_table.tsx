@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { esFilters } from 'src/plugins/data/common/es_query';
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import { StatefulEventsViewer } from '../events_viewer';
 import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';
-import { AlertsComponentPageFilterDsl } from './types';
 
 export interface OwnProps {
   end: number;
@@ -19,38 +18,36 @@ export interface OwnProps {
 }
 
 const ALERTS_TABLE_ID = 'timeline-alerts-table';
-const filter: esFilters.Filter[] = [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'event.kind',
-      params: {
-        query: 'alert',
-      },
-    },
-    query: {
-      bool: {
-        filter: [
-          {
-            bool: {
-              should: [
-                {
-                  match: {
-                    'event.kind': 'alert',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
+const filter: esFilters.Filter = {
+  meta: {
+    alias: null,
+    negate: false,
+    disabled: false,
+    type: 'phrase',
+    key: 'event.kind',
+    params: {
+      query: 'alert',
     },
   },
-];
+  query: {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              {
+                match: {
+                  'event.kind': 'alert',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  },
+};
 
 export const AlertsTable = React.memo(
   ({
@@ -60,20 +57,12 @@ export const AlertsTable = React.memo(
   }: {
     endDate: number;
     startDate: number;
-    pageFilters: AlertsComponentPageFilterDsl;
+    pageFilters: esFilters.Filter;
   }) => {
+    const alertsFilter = useMemo(() => [filter, pageFilters], [filter, pageFilters]);
     return (
       <StatefulEventsViewer
-        pageFilters={[
-          {
-            meta: { ...filter[0].meta },
-            query: {
-              bool: {
-                filter: [...filter[0].query.bool.filter, ...pageFilters],
-              },
-            },
-          },
-        ]}
+        pageFilters={alertsFilter}
         defaultModel={alertsDefaultModel}
         end={endDate}
         id={ALERTS_TABLE_ID}
