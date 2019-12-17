@@ -123,7 +123,7 @@ export interface Dataset {
   title: string;
   name: string;
   release: string;
-  ingeset_pipeline: string;
+  ingest_pipeline: string;
   vars: VarsEntry[];
   type: string;
   // This is for convenience and not in the output from the registry. When creating a dataset, this info should be added.

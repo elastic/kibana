@@ -12,7 +12,7 @@ import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
-import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
+import { installPipelinesForDataset } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { installTemplates } from '../lib/elasticsearch/template/install';
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
@@ -29,31 +29,49 @@ export async function createDatasource(options: {
 }) {
   const { savedObjectsClient, callCluster, pkgkey, datasets, datasourceName, request } = options;
 
-  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-  if (packageInfo.status !== InstallationStatus.installed) {
+  const epmPackageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
+  if (epmPackageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
   }
-  const datasetNames = datasets.map(d => d.name);
-  const toSave = await installPipelines({ pkgkey, datasetNames, callCluster });
+
+  const registryPackageInfo = await Registry.fetchInfo(pkgkey);
+  // Pick the full dataset definition for each dataset name that has been requested
+  // from the package information from the registry.
+  // Requested dataset names that don't exist in the package will be silently ignored.
+  const datasetsRequestedNames = datasets.map(d => d.name);
+  const datasetsRequested = registryPackageInfo.datasets?.filter(packageDataset => {
+    return datasetsRequestedNames.includes(packageDataset.name);
+  });
+
+  if (datasetsRequested) {
+    datasetsRequested.forEach(async dataset => {
+      if (dataset.ingest_pipeline) {
+        await installPipelinesForDataset({
+          pkgkey,
+          dataset,
+          callCluster,
+          datasourceName,
+          packageName: registryPackageInfo.name,
+        });
+      }
+    });
+  }
+  const toSave = await installTemplates(registryPackageInfo, callCluster);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
-  const pkg = await Registry.fetchInfo(pkgkey);
 
   const streams = await getStreams(pkgkey, datasets);
 
-  await Promise.all([
-    installTemplates(pkg, callCluster),
-    saveDatasourceReferences({
-      savedObjectsClient,
-      pkg,
-      datasourceName,
-      datasets,
-      toSave,
-      request,
-      streams,
-    }),
-  ]);
+  // await saveDatasourceReferences({
+  //   savedObjectsClient,
+  //   pkg: registryPackageInfo,
+  //   datasourceName,
+  //   datasets,
+  //   toSave,
+  //   request,
+  //   streams,
+  // });
 
   return toSave;
 }
