@@ -182,14 +182,14 @@ export class VectorStyleEditor extends Component {
     const labelEditor = (
       <VectorStyleLabelEditor
         handlePropertyChange={this.props.handlePropertyChange}
-        styleProperty={this.props.styleProperties.label}
+        styleProperty={this.props.styleProperties.labelText}
         fields={this.state.fields}
-        defaultStaticStyleOptions={this.state.defaultStaticProperties.label.options}
-        defaultDynamicStyleOptions={this.state.defaultDynamicProperties.label.options}
+        defaultStaticStyleOptions={this.state.defaultStaticProperties.labelText.options}
+        defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelText.options}
       />
     );
 
-    if (!this.props.styleProperties.label.isComplete()) {
+    if (!this.props.styleProperties.labelText.isComplete()) {
       return (
         <Fragment>
           {labelEditor}

@@ -814,6 +814,7 @@ export class VectorLayer extends AbstractLayer {
   getMbLayerIds() {
     return [
       this._getMbPointLayerId(),
+      this._getMbTextLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
@@ -821,13 +822,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   ownsMbLayerId(mbLayerId) {
-    return (
-      this._getMbPointLayerId() === mbLayerId ||
-      this._getMbTextLayerId() === mbLayerId ||
-      this._getMbLineLayerId() === mbLayerId ||
-      this._getMbPolygonLayerId() === mbLayerId ||
-      this._getMbSymbolLayerId() === mbLayerId
-    );
+    return this.getMbLayerIds().includes(mbLayerId);
   }
 
   ownsMbSourceId(mbSourceId) {

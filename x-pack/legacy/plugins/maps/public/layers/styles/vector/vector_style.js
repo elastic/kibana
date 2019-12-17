@@ -676,10 +676,10 @@ export class VectorStyle extends AbstractStyle {
     if (!descriptor || !descriptor.options) {
       return new StaticTextProperty({ value: '' }, VECTOR_STYLES.LABEL_TEXT);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL);
+      return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicTextProperty(descriptor.options, VECTOR_STYLES.LABEL, field);
+      return new DynamicTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT, field);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
