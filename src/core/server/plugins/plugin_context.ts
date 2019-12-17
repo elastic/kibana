@@ -200,6 +200,11 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
-    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
+    savedObjects: {
+      getScopedClient: deps.savedObjects.getScopedClient,
+    },
+    uiSettings: {
+      asScopedToClient: deps.uiSettings.asScopedToClient,
+    },
   };
 }
