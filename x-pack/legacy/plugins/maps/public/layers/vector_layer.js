@@ -13,6 +13,7 @@ import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
   SOURCE_META_ID_ORIGIN,
+  SOURCE_FORMATTERS_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE,
@@ -24,7 +25,11 @@ import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
-import { canSkipSourceUpdate, canSkipStyleMetaUpdate } from './util/can_skip_fetch';
+import {
+  canSkipSourceUpdate,
+  canSkipStyleMetaUpdate,
+  canSkipFormattersUpdate,
+} from './util/can_skip_fetch';
 import { assignFeatureIds } from './util/assign_feature_ids';
 import {
   getFillFilterExpression,
@@ -286,6 +291,7 @@ export class VectorLayer extends AbstractLayer {
   async _syncJoins(syncContext) {
     const joinSyncs = this.getValidJoins().map(async join => {
       await this._syncJoinStyleMeta(syncContext, join);
+      await this._syncJoinFormatters(syncContext, join);
       return this._syncJoin({ join, ...syncContext });
     });
 
@@ -355,7 +361,7 @@ export class VectorLayer extends AbstractLayer {
     registerCancelCallback,
     dataFilters,
   }) {
-    const requestToken = Symbol(`layer-source-data:${this.getId()}`);
+    const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
 
@@ -465,7 +471,7 @@ export class VectorLayer extends AbstractLayer {
       return;
     }
 
-    const requestToken = Symbol(`layer-${this.getId()}-style-meta`);
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName();
@@ -484,12 +490,84 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
+  async _syncSourceFormatters(syncContext) {
+    if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+      return;
+    }
+
+    return this._syncFormatters({
+      source: this._source,
+      dataRequestId: SOURCE_FORMATTERS_ID_ORIGIN,
+      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE;
+      }),
+      ...syncContext,
+    });
+  }
+
+  async _syncJoinFormatters(syncContext, join) {
+    const joinSource = join.getRightJoinSource();
+    return this._syncFormatters({
+      source: joinSource,
+      dataRequestId: join.getSourceFormattersDataRequestId(),
+      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+        const matchingField = joinSource.getMetricFieldForName(
+          dynamicStyleProp.getField().getName()
+        );
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
+      }),
+      ...syncContext,
+    });
+  }
+
+  async _syncFormatters({
+    source,
+    dataRequestId,
+    dynamicStyleProps,
+    startLoading,
+    stopLoading,
+    onLoadError,
+  }) {
+    if (dynamicStyleProps.length === 0) {
+      return;
+    }
+
+    const fieldNames = dynamicStyleProps.map(dynamicStyleProp => {
+      return dynamicStyleProp.getField().getName();
+    });
+    const nextMeta = {
+      fieldNames: _.uniq(fieldNames).sort(),
+    };
+    const prevDataRequest = this._findDataRequestForSource(dataRequestId);
+    const canSkipUpdate = canSkipFormattersUpdate({ prevDataRequest, nextMeta });
+    if (canSkipUpdate) {
+      return;
+    }
+
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
+    try {
+      startLoading(dataRequestId, requestToken, nextMeta);
+
+      const formatters = {};
+      const promises = dynamicStyleProps.map(async dynamicStyleProp => {
+        const fieldName = dynamicStyleProp.getField().getName();
+        formatters[fieldName] = await source.getFieldFormatter(fieldName);
+      });
+      await Promise.all(promises);
+
+      stopLoading(dataRequestId, requestToken, formatters, nextMeta);
+    } catch (error) {
+      onLoadError(dataRequestId, requestToken, error.message);
+    }
+  }
+
   async syncData(syncContext) {
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
 
     await this._syncSourceStyleMeta(syncContext);
+    await this._syncSourceFormatters(syncContext);
     const sourceResult = await this._syncSource(syncContext);
     if (
       !sourceResult.featureCollection ||

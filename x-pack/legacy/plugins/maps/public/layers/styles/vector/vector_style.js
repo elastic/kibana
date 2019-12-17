@@ -19,6 +19,7 @@ import {
   FIELD_ORIGIN,
   STYLE_TYPE,
   SOURCE_META_ID_ORIGIN,
+  SOURCE_FORMATTERS_ID_ORIGIN,
   LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
@@ -334,6 +335,42 @@ export class VectorStyle extends AbstractStyle {
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
 
+  _getFieldFormatter = fieldName => {
+    const dynamicProps = this.getDynamicPropertiesArray();
+    const dynamicProp = dynamicProps.find(dynamicProp => {
+      return fieldName === dynamicProp.getField().getName();
+    });
+
+    if (!dynamicProp) {
+      return null;
+    }
+
+    let dataRequestId;
+    if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
+      dataRequestId = SOURCE_FORMATTERS_ID_ORIGIN;
+    } else {
+      const join = this._layer.getValidJoins().find(join => {
+        const matchingField = join.getRightJoinSource().getMetricFieldForName(fieldName);
+        return !!matchingField;
+      });
+      if (join) {
+        dataRequestId = join.getSourceFormattersDataRequestId();
+      }
+    }
+
+    if (!dataRequestId) {
+      return null;
+    }
+
+    const formattersDataRequest = this._layer._findDataRequestForSource(dataRequestId);
+    if (!formattersDataRequest || !formattersDataRequest.hasData()) {
+      return null;
+    }
+
+    const formatters = formattersDataRequest.getData();
+    return formatters[fieldName];
+  };
+
   _getStyleMeta = () => {
     return _.get(this._descriptor, '__styleMeta', {});
   };
@@ -382,7 +419,7 @@ export class VectorStyle extends AbstractStyle {
       const promises = styles.map(async style => {
         return {
           label: await style.getField().getLabel(),
-          fieldFormatter: await this._source.getFieldFormatter(style.getField().getName()),
+          fieldFormatter: this._getFieldFormatter(style.getField().getName()),
           meta: this._getFieldMeta(style.getField().getName()),
           style,
         };
