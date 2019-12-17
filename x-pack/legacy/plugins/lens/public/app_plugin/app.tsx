@@ -331,7 +331,11 @@ export function App({
                     lastKnownDoc: newDoc,
                   }));
                   if (docId !== id) {
-                    redirectTo(id, addToDashMode);
+                    if (!!addToDashMode) {
+                      redirectTo(id, addToDashMode);
+                    } else {
+                      redirectTo(id);
+                    }
                   }
                 })
                 .catch(() => {
