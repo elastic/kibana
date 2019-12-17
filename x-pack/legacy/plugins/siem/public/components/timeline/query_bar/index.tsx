@@ -93,7 +93,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
     const kibana = useKibana();
-    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings!));
+    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
     const savedQueryServices = useSavedQueryServices();
 

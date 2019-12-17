@@ -55,7 +55,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         <WithSource sourceId={sourceId}>
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings!),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
               filters,

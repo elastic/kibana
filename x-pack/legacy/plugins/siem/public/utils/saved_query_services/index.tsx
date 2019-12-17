@@ -14,7 +14,7 @@ import { useKibana } from '../../lib/kibana';
 
 export const useSavedQueryServices = () => {
   const kibana = useKibana();
-  const client = kibana.services.savedObjects!.client;
+  const client = kibana.services.savedObjects.client;
 
   const [savedQueryService, setSavedQueryService] = useState<SavedQueryService>(
     createSavedQueryService(client)

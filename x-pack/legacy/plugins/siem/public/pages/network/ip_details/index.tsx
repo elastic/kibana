@@ -82,7 +82,7 @@ export const IPDetailsComponent = ({
         {({ indicesExist, indexPattern }) => {
           const ip = decodeIpv6(detailName);
           const filterQuery = convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings!),
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
             indexPattern,
             queries: [query],
             filters,

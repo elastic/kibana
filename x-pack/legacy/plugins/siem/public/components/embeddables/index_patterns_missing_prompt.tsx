@@ -13,7 +13,7 @@ import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {
-  const docLinks = useKibana().services.docLinks!;
+  const docLinks = useKibana().services.docLinks;
 
   return (
     <EuiEmptyPrompt

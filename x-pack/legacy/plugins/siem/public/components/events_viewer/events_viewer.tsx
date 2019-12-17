@@ -93,7 +93,7 @@ export const EventsViewer = React.memo<Props>(
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     const kibana = useKibana();
     const combinedQueries = combineQueries({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings!),
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,

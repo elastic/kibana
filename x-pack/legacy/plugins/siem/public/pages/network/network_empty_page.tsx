@@ -14,7 +14,7 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 
 export const NetworkEmptyPage = React.memo(() => {
-  const docLinks = useKibana().services.docLinks!;
+  const docLinks = useKibana().services.docLinks;
 
   return (
     <EmptyPage

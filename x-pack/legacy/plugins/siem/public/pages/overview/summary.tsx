@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../lib/kibana';
 
 export const Summary = React.memo(() => {
-  const docLinks = useKibana().services.docLinks!;
+  const docLinks = useKibana().services.docLinks;
 
   return (
     <EuiFlexItem>

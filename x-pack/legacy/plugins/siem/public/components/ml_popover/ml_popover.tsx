@@ -101,7 +101,7 @@ export const MlPopover = React.memo(() => {
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const capabilities = useContext(MlCapabilitiesContext);
-  const docLinks = useKibana().services.docLinks!;
+  const docLinks = useKibana().services.docLinks;
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (job: SiemJob, latestTimestampMs: number, enable: boolean) => {

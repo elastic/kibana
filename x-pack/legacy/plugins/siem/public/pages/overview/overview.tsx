@@ -24,7 +24,7 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 
 export const OverviewComponent = React.memo(() => {
-  const docLinks = useKibana().services.docLinks!;
+  const docLinks = useKibana().services.docLinks;
   const dateEnd = Date.now();
   const dateRange = moment.duration(24, 'hours').asMilliseconds();
   const dateStart = dateEnd - dateRange;
