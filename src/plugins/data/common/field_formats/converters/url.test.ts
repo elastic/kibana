@@ -170,63 +170,69 @@ describe('UrlFormat', () => {
   describe('whitelist', () => {
     test('should assume a relative url if the value is not in the whitelist without a base path', () => {
       const url = new UrlFormat({});
-      const parsedUrl = {
-        origin: 'http://kibana',
-        basePath: '',
-      };
       const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
+      const options = {
+        parsedUrl: {
+          origin: 'http://kibana',
+          basePath: '',
+        },
+      };
 
-      expect(converter('www.elastic.co', null, null, parsedUrl)).toBe(
+      expect(converter('www.elastic.co', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>'
       );
 
-      expect(converter('elastic.co', null, null, parsedUrl)).toBe(
+      expect(converter('elastic.co', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a></span>'
       );
 
-      expect(converter('elastic', null, null, parsedUrl)).toBe(
+      expect(converter('elastic', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a></span>'
       );
 
-      expect(converter('ftp://elastic.co', null, null, parsedUrl)).toBe(
+      expect(converter('ftp://elastic.co', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a></span>'
       );
     });
 
     test('should assume a relative url if the value is not in the whitelist with a basepath', () => {
       const url = new UrlFormat({});
-      const parsedUrl = {
-        origin: 'http://kibana',
-        basePath: '/xyz',
-      };
       const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
+      const options = {
+        parsedUrl: {
+          origin: 'http://kibana',
+          basePath: '/xyz',
+        },
+      };
 
-      expect(converter('www.elastic.co', null, null, parsedUrl)).toBe(
+      expect(converter('www.elastic.co', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/xyz/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>'
       );
 
-      expect(converter('elastic.co', null, null, parsedUrl)).toBe(
+      expect(converter('elastic.co', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/xyz/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a></span>'
       );
 
-      expect(converter('elastic', null, null, parsedUrl)).toBe(
+      expect(converter('elastic', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/xyz/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a></span>'
       );
 
-      expect(converter('ftp://elastic.co', null, null, parsedUrl)).toBe(
+      expect(converter('ftp://elastic.co', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana/xyz/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a></span>'
       );
     });
 
     test('should rely on parsedUrl', () => {
       const url = new UrlFormat({});
-      const parsedUrl = {
-        origin: 'http://kibana.host.com',
-        basePath: '/abc',
-      };
       const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
+      const options = {
+        parsedUrl: {
+          origin: 'http://kibana.host.com',
+          basePath: '/abc',
+        },
+      };
 
-      expect(converter('../app/kibana', null, null, parsedUrl)).toBe(
+      expect(converter('../app/kibana', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/abc/app/../app/kibana" target="_blank" rel="noopener noreferrer">../app/kibana</a></span>'
       );
     });
@@ -245,53 +251,55 @@ describe('UrlFormat', () => {
 
     test('should support multiple types of relative urls', () => {
       const url = new UrlFormat({});
-      const parsedUrl = {
-        origin: 'http://kibana.host.com',
-        pathname: '/nbc/app/kibana#/discover',
-        basePath: '/nbc',
-      };
       const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
+      const options = {
+        parsedUrl: {
+          origin: 'http://kibana.host.com',
+          pathname: '/nbc/app/kibana#/discover',
+          basePath: '/nbc',
+        },
+      };
 
-      expect(converter('#/foo', null, null, parsedUrl)).toBe(
+      expect(converter('#/foo', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
       );
 
-      expect(converter('/nbc/app/kibana#/discover', null, null, parsedUrl)).toBe(
+      expect(converter('/nbc/app/kibana#/discover', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover" target="_blank" rel="noopener noreferrer">/nbc/app/kibana#/discover</a></span>'
       );
 
-      expect(converter('../foo/bar', null, null, parsedUrl)).toBe(
+      expect(converter('../foo/bar', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a></span>'
       );
     });
 
     test('should support multiple types of urls w/o basePath', () => {
       const url = new UrlFormat({});
-      const parsedUrl = {
-        origin: 'http://kibana.host.com',
-        pathname: '/app/kibana',
-      };
       const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
+      const options = {
+        parsedUrl: {
+          origin: 'http://kibana.host.com',
+          pathname: '/app/kibana',
+        },
+      };
 
-      expect(converter('10.22.55.66', null, null, parsedUrl)).toBe(
+      expect(converter('10.22.55.66', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>'
       );
 
-      expect(
-        converter('http://www.domain.name/app/kibana#/dashboard/', null, null, parsedUrl)
-      ).toBe(
+      expect(converter('http://www.domain.name/app/kibana#/dashboard/', options)).toBe(
         '<span ng-non-bindable><a href="http://www.domain.name/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/kibana#/dashboard/</a></span>'
       );
 
-      expect(converter('/app/kibana', null, null, parsedUrl)).toBe(
+      expect(converter('/app/kibana', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/app/kibana" target="_blank" rel="noopener noreferrer">/app/kibana</a></span>'
       );
 
-      expect(converter('kibana#/dashboard/', null, null, parsedUrl)).toBe(
+      expect(converter('kibana#/dashboard/', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">kibana#/dashboard/</a></span>'
       );
 
-      expect(converter('#/dashboard/', null, null, parsedUrl)).toBe(
+      expect(converter('#/dashboard/', options)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>'
       );
     });
