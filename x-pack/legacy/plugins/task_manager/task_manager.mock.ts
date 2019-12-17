@@ -13,6 +13,7 @@ const createTaskManagerMock = () => {
     ensureScheduled: jest.fn(),
     schedule: jest.fn(),
     fetch: jest.fn(),
+    runNow: jest.fn(),
     remove: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
