@@ -25,15 +25,20 @@ import { BaseLogger } from './logger';
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
 let logger: BaseLogger;
+const factory = {
+  get: jest.fn().mockImplementation(() => logger),
+};
+
 const timestamp = new Date(2012, 1, 1);
 beforeEach(() => {
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
 
   appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
-  logger = new BaseLogger(context, LogLevel.All, appenderMocks);
+  logger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
 });
 
 afterEach(() => {
+  jest.resetAllMocks();
   jest.restoreAllMocks();
 });
 
@@ -263,8 +268,22 @@ test('`log()` just passes the record to all appenders.', () => {
   }
 });
 
+test('`get()` calls the logger factory with proper context and return the result', () => {
+  logger.get('sub', 'context');
+  expect(factory.get).toHaveBeenCalledTimes(1);
+  expect(factory.get).toHaveBeenCalledWith(context, 'sub', 'context');
+
+  factory.get.mockClear();
+  factory.get.mockImplementation(() => 'some-logger');
+
+  const childLogger = logger.get('other', 'sub');
+  expect(factory.get).toHaveBeenCalledTimes(1);
+  expect(factory.get).toHaveBeenCalledWith(context, 'other', 'sub');
+  expect(childLogger).toEqual('some-logger');
+});
+
 test('logger with `Off` level does not pass any records to appenders.', () => {
-  const turnedOffLogger = new BaseLogger(context, LogLevel.Off, appenderMocks);
+  const turnedOffLogger = new BaseLogger(context, LogLevel.Off, appenderMocks, factory);
   turnedOffLogger.trace('trace-message');
   turnedOffLogger.debug('debug-message');
   turnedOffLogger.info('info-message');
@@ -278,7 +297,7 @@ test('logger with `Off` level does not pass any records to appenders.', () => {
 });
 
 test('logger with `All` level passes all records to appenders.', () => {
-  const catchAllLogger = new BaseLogger(context, LogLevel.All, appenderMocks);
+  const catchAllLogger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
 
   catchAllLogger.trace('trace-message');
   for (const appenderMock of appenderMocks) {
@@ -348,7 +367,7 @@ test('logger with `All` level passes all records to appenders.', () => {
 });
 
 test('passes log record to appenders only if log level is supported.', () => {
-  const warnLogger = new BaseLogger(context, LogLevel.Warn, appenderMocks);
+  const warnLogger = new BaseLogger(context, LogLevel.Warn, appenderMocks, factory);
 
   warnLogger.trace('trace-message');
   warnLogger.debug('debug-message');

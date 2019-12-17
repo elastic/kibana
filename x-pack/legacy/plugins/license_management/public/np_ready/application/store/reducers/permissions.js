@@ -8,20 +8,23 @@ import { handleActions } from 'redux-actions';
 
 import { permissionsSuccess, permissionsError, permissionsLoading } from '../actions/permissions';
 
-export const permissions = handleActions({
-  [permissionsLoading](state, { payload }) {
-    return {
-      loading: payload,
-    };
+export const permissions = handleActions(
+  {
+    [permissionsLoading](state, { payload }) {
+      return {
+        loading: payload,
+      };
+    },
+    [permissionsSuccess](state, { payload }) {
+      return {
+        hasPermission: payload,
+      };
+    },
+    [permissionsError](state, { payload }) {
+      return {
+        error: payload,
+      };
+    },
   },
-  [permissionsSuccess](state, { payload }) {
-    return {
-      hasPermission: payload,
-    };
-  },
-  [permissionsError](state, { payload }) {
-    return {
-      error: payload,
-    };
-  },
-}, {});
+  {}
+);

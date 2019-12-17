@@ -11,11 +11,11 @@
     "chalk": "^2.4.2",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
-    "execa": "^3.2.0",
+    "execa": "^3.4.0",
     "getopts": "^2.2.4",
     "glob": "^7.1.2",
     "node-fetch": "^2.6.0",
-    "simple-git": "^1.91.0",
+    "simple-git": "^1.129.0",
     "tar-fs": "^1.16.3",
     "tree-kill": "^1.2.1",
     "yauzl": "^2.10.0"

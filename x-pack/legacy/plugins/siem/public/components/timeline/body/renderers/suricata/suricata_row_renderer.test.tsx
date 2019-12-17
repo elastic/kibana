@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -14,8 +14,10 @@ import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData } from '../../../../../mock';
 import { TestProviders } from '../../../../../mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('suricata_row_renderer', () => {
+  const mount = useMountAppended();
   let nonSuricata: Ecs;
   let suricata: Ecs;
 

@@ -7,12 +7,14 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { Package } from './package';
 
 describe('Package', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -54,7 +56,7 @@ describe('Package', () => {
     });
 
     test('it returns just the package name', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -71,7 +73,7 @@ describe('Package', () => {
     });
 
     test('it returns just the package name and package summary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -88,7 +90,7 @@ describe('Package', () => {
     });
 
     test('it returns just the package name, package summary, package version', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package

@@ -19,6 +19,7 @@ const testWidth = 640;
 const usersViewing = ['elastic'];
 
 const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('ui/new_platform');
 jest.mock('../../../lib/compose/kibana_core');
 mockUseKibanaCore.mockImplementation(() => ({
   uiSettings: mockUiSettings,

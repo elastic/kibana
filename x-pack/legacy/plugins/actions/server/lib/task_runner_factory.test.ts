@@ -34,7 +34,7 @@ beforeAll(() => {
     state: {},
     attempts: 0,
     ownerId: '',
-    status: 'running' as TaskStatus,
+    status: TaskStatus.Running,
     startedAt: new Date(),
     scheduledAt: new Date(),
     retryAt: new Date(Date.now() + 5 * 60 * 1000),
