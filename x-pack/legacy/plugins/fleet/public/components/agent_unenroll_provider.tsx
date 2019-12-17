@@ -8,7 +8,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useLibs } from '../hooks/use_libs';
+import { useLibs } from '../hooks';
 
 interface Props {
   children: (unenrollAgents: UnenrollAgents) => React.ReactElement;
@@ -101,7 +101,7 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
     } catch (e) {
       libs.framework.notifications.addDanger(
         i18n.translate('xpack.fleet.unenrollAgents.fatalErrorNotificationTitle', {
-          defaultMessage: 'Fatal error unenrolling agents',
+          defaultMessage: 'Error unenrolling agents',
         })
       );
     }

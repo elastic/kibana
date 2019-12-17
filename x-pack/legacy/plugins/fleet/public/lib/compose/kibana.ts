@@ -57,6 +57,8 @@ export function compose(): FrontendLibs {
     agents,
     policies,
     enrollmentApiKeys,
+    httpClient: api,
   };
+
   return libs;
 }

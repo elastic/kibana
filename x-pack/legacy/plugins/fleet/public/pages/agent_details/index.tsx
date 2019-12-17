@@ -3,19 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React, { useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useInterval from '@use-it/interval';
-import React, { FC, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
-import { Loading } from '../../components/loading';
-import { AgentEventsTable } from './components/agent_events_table';
-import { AgentDetailSection } from './components/details_section';
-import { AgentRefreshContext, useGetAgent } from './hooks/use_agent';
+import { Loading } from '../../components';
+import { AgentEventsTable, AgentDetailSection } from './components';
+import { useGetAgent, AgentRefreshContext } from './hooks';
 
-export const Layout: FC = ({ children }) => (
+export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
     <EuiPageContent>{children}</EuiPageContent>
   </EuiPageBody>
@@ -25,7 +24,7 @@ type Props = RouteComponentProps<{
   agentId: string;
 }>;
 
-export const AgentDetailsPage: FC<Props> = ({
+export const AgentDetailsPage: React.FC<Props> = ({
   match: {
     params: { agentId },
   },

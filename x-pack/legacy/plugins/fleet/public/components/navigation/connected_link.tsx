@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-
 import { EuiLink } from '@elastic/eui';
 import { Link, withRouter } from 'react-router-dom';
 

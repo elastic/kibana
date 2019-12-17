@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React, { Fragment, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,11 +23,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useState } from 'react';
 import { Policy } from '../../../../common/types/domain_data';
-import { useLibs } from '../../../hooks/use_libs';
-import { EnrollmentApiKeysTable } from './enrollment_api_keys';
-import { useEnrollmentApiKey, useEnrollmentApiKeys } from './enrollment_api_keys/hooks';
+import { useLibs } from '../../../hooks';
+import {
+  EnrollmentApiKeysTable,
+  useEnrollmentApiKey,
+  useEnrollmentApiKeys,
+} from './enrollment_api_keys';
 import {
   ContainerEnrollmentInstructions,
   ShellEnrollmentInstructions,

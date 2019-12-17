@@ -15,8 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useInput } from '../../../../hooks/use_input';
-import { useLibs } from '../../../../hooks/use_libs';
+import { useInput, useLibs } from '../../../../hooks';
 import { usePolicies } from './hooks';
 
 export const CreateApiKeyForm: React.FC<{ onChange: () => void }> = ({ onChange }) => {

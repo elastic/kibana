@@ -11,16 +11,18 @@ import {
   ReturnTypeDelete,
 } from '../../common/return_types';
 import { RestAPIAdapter } from './adapters/rest_api/adapter_types';
-import { Pagination } from '../hooks/use_pagination';
 import { EnrollmentApiKey } from '../../common/types/domain_data';
+import { Pagination } from '../hooks';
 
 export class EnrollmentApiKeyLib {
   constructor(private readonly rest: RestAPIAdapter) {}
 
   public async listKeys(pagination: Pagination) {
     return await this.rest.get<ReturnTypeList<EnrollmentApiKey>>('/api/fleet/enrollment-api-keys', {
-      page: pagination.currentPage,
-      perPage: pagination.pageSize,
+      query: {
+        page: pagination.currentPage,
+        perPage: pagination.pageSize,
+      },
     });
   }
 
@@ -38,8 +40,10 @@ export class EnrollmentApiKeyLib {
     return await this.rest.post<ReturnTypeCreate<EnrollmentApiKey>>(
       `/api/fleet/enrollment-api-keys`,
       {
-        name: data.name,
-        policy_id: data.policyId,
+        body: {
+          name: data.name,
+          policy_id: data.policyId,
+        },
       }
     );
   }

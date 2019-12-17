@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
-import {
-  // @ts-ignore
-  EuiSuggest,
-} from '@elastic/eui';
-import { useDebounce } from '../hooks/use_debounce';
-import { useLibs } from '../hooks/use_libs';
+import React, { useState, useEffect } from 'react';
+// @ts-ignore
+import { EuiSuggest } from '@elastic/eui';
+import { useDebounce, useLibs } from '../hooks';
 
 const DEBOUNCE_SEARCH_MS = 150;
 
@@ -32,7 +29,7 @@ interface Props {
   onChange: (newValue: string) => void;
 }
 
-export const SearchBar: FC<Props> = ({ value, fieldPrefix, onChange }) => {
+export const SearchBar: React.FC<Props> = ({ value, fieldPrefix, onChange }) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
   const onAutocompleteClick = (suggestion: Suggestion) => {

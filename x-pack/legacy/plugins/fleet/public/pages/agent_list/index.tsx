@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React, { useEffect, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -24,16 +25,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useInterval from '@use-it/interval';
-import React, { useEffect, useState } from 'react';
 import { AGENT_POLLING_INTERVAL } from '../../../common/constants/agent';
 import { Agent, Policy } from '../../../common/types/domain_data';
-import { AgentHealth } from '../../components/agent_health';
-import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
-import { ConnectedLink } from '../../components/navigation/connected_link';
-import { SearchBar } from '../../components/search_bar';
-import { useLibs } from '../../hooks/use_libs';
-import { usePagination } from '../../hooks/use_pagination';
-import { AgentEnrollmentFlyout } from './components/agent_enrollment';
+import { AgentHealth, AgentUnenrollProvider, ConnectedLink, SearchBar } from '../../components';
+import { useLibs, usePagination } from '../../hooks';
+import { AgentEnrollmentFlyout } from './components';
 
 export const AgentListPage: React.FC<{}> = () => {
   const libs = useLibs();

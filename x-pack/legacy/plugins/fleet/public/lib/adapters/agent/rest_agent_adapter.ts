@@ -39,7 +39,13 @@ export class RestAgentAdapter extends AgentAdapter {
   }> {
     const { total, list } = await this.REST.get<ReturnTypeList<AgentEvent>>(
       `/api/fleet/agents/${id}/events`,
-      { page, per_page: perPage, kuery: kuery !== '' ? kuery : undefined }
+      {
+        query: {
+          page,
+          perPage,
+          kuery: kuery !== '' ? kuery : undefined,
+        },
+      }
     );
 
     return {
@@ -66,10 +72,12 @@ export class RestAgentAdapter extends AgentAdapter {
   ): Promise<ReturnTypeList<Agent>> {
     try {
       return await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', {
-        page,
-        perPage,
-        kuery: kuery !== '' ? kuery : undefined,
-        showInactive,
+        query: {
+          page,
+          perPage,
+          kuery: kuery !== '' ? kuery : undefined,
+          showInactive,
+        },
       });
     } catch (e) {
       return {
@@ -91,19 +99,19 @@ export class RestAgentAdapter extends AgentAdapter {
   }
 
   public async update(id: string, beatData: Partial<Agent>): Promise<boolean> {
-    await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/fleet/agents/${id}`, beatData);
+    await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/fleet/agents/${id}`, { body: beatData });
     return true;
   }
 
   public async unenrollByIds(ids: string[]): Promise<ReturnTypeBulkUnenroll> {
     return await this.REST.post<ReturnTypeBulkUnenroll>(`/api/fleet/agents/unenroll`, {
-      ids,
+      body: { ids },
     });
   }
 
   public async unenrollByKuery(kuery: string): Promise<ReturnTypeBulkUnenroll> {
     return await this.REST.post<ReturnTypeBulkUnenroll>(`/api/fleet/agents/unenroll`, {
-      kuery,
+      body: { kuery },
     });
   }
 }
