@@ -32,7 +32,11 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('./kibana_services', () => {
-  return { license: { id: 'foobarlicenseid' } };
+  return {
+    getLicenseId() {
+      return 'foobarlicenseid';
+    },
+  };
 });
 
 describe('default use without proxy', () => {
