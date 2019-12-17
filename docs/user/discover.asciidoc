@@ -3,12 +3,10 @@
 
 [partintro]
 --
-Use *Discover* to drill down into and understand your data, so you can determine the best way
-to visualize it. This saves you time
-in creating your visualizations and helps you build better dashboards.
-
-[role="screenshot"]
-image::images/Discover-Start.png[Discover]
+When you know what your data includes, you can create visualizations
+that best display that data and build better dashboards.
+*Discover* enables you to explore your data, find
+hidden insights and relationships, and get answers to your questions.
 
 With *Discover*, you can:
 
@@ -17,12 +15,15 @@ With *Discover*, you can:
 * Get field-level details about the documents that match your search
 * View the events that occurred just before and after a document
 
+[role="screenshot"]
+image::images/Discover-Start.png[Discover]
+
 
 [float]
 === Set up your index pattern
 
-The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>
-to define the data to work with. The current index pattern is in the upper left.
+The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>, which
+defines the data you want to explore and visualize. The current index pattern is in the upper left.
 If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
 which has a pre-built index pattern.
 
@@ -44,7 +45,7 @@ which offers a simplified query syntax.
 For example, if
 you search for `day_of_week : Friday`, you'll get a list of all documents
 in which `day_of_week` is set to `Friday`. If you prefer
-<<lucene-query, Lucene query syntax>>, you can switch to it from the KQL menu.
+<<lucene-query, Lucene query syntax>>, you can access it from the KQL menu.
 
 [float]
 === Filter your search results
@@ -54,7 +55,7 @@ When you click on a name in the field list, you'll see
 the top five values for the field, the number of documents that contain the field,
 and the percentage of documents that contain each value. From this view, you can
 use the (+) magnifier icon to quickly find all
-documents that have that value or (-) to exclude all
+documents that have that value, or (-) to exclude all
 documents with that value. For more filter options, see <<field-filter, filtering by field>>.
 
 [role="screenshot"]
@@ -66,8 +67,8 @@ image::images/filter-field.png[height=317]
 
 The sortable documents table
 lists the documents that match your search.
-By default, the table includes columns for the time field and the document `_source`,
-To zero in on specific a field, click *add* next to the field name in the left sidebar.
+By default, the table includes columns for the time field and the document `_source`.
+To zero in on a specific field, click *add* next to the field name in the left sidebar.
 For example, if you add the `currency`, `customer_last_name`, and `day_of_week` fields,
 the document table includes columns for those three fields.
 
@@ -83,7 +84,7 @@ is present.  See <<document-data, Viewing document data>> for details.
 === View a document in context
 
 Suppose you're troubleshooting your data, and you've narrowed down your results to a single document.
-Now you want to to see the documents that occurred just before and after the
+Now you want to to see the events that occurred just before and after the
 document that you are looking at. You can do that by expanding the document and
 clicking <<document-context, View surrounding documents>>.
 

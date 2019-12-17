@@ -35,9 +35,9 @@ display.
 [[change-context-size]]
 === Change the number of surrounding documents
 
-By default, the five newer and older
+By default, the five newest and oldest
 documents are listed. To increase the number of documents that surround the anchor document,
-click *Load*.  Five documents are added with each click, but you can change this number in Advanced Settings.
+click *Load*.  Five documents are added with each click.
 
 [float]
 [[configure-context-ContextView]]

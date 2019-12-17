@@ -1,12 +1,11 @@
 [[field-filter]]
 == Filtering by field
 
-You can narrow your search results to a
-smaller set of data and then use that subset for analysis.
+*Discover* offers
+various types of filters, so you can restrict your documents to the exact data you want.
 For example, you might look at the results for a
 particular period of time. Or, you might include&mdash;or exclude&mdash;
-all HTTP redirects that come from a specific IP and port. *Discover* offers
-various types of filters, so you can restrict your documents to the exact data you want.
+all HTTP redirects that come from a specific IP and port.
 
 [float]
 === Add a filter
@@ -23,7 +22,7 @@ that contain each value.
 image::images/filter-field.png[height=317]
 
 . Use the image:images/PositiveFilter.jpg[Positive Filter] icon to
-show only documents that contain that value
+show only documents that contain that value,
 or image:images/NegativeFilter.jpg[Negative Filter] to exclude all documents with that value.
 +
 If there is no data to display, you might need to set a <<set-time-filter, date time filter>>.
@@ -43,9 +42,8 @@ the document table, hover over the field, and click the *Filter for field presen
 [float]
 === Filter by condition
 
-An important filter option is to apply a condition.
-For example, you might filter for sales that
-equal to or are in between certain values.
+You can filter using advanced criteria,
+such as if a value is equal to or in between certain values.
 
 . Click *Add Filter*.
 
@@ -72,7 +70,7 @@ as selections if you are filtering against an aggregatable field.
 . Click *Save* to apply the filter to your search.
 +
 NOTE: If you are experiencing long-running queries as a result of the value suggestions, you can
-turn off the suggestions by setting `filterEditor:suggestValues`, to `false`
+turn off the suggestions by setting `filterEditor:suggestValues` to `false`
 in <<advanced-options,
 Advanced Settings>>.
 
@@ -80,15 +78,13 @@ Advanced Settings>>.
 [[filter-pinning]]
 === Edit, disable, and delete filters
 
-To modify a filter, click on it, and then select one of the following actions.
-To apply an action to all applied filters,
-click the *Actions* icon, and then select the action.
+To modify a filter, click its tag, and then select one of the following actions.
 
 *Pin across all apps*::
-Persist filter
+Persist the filter
 when you switch contexts in Kibana. For example, you can pin a filter
 in *Discover* and it remains in place when you switch to *Visualize*.
-A filter is based on a particular index field--if the indices being
+A filter is based on a particular index field&mdash;if the indices being
 searched do not contain the field in a pinned filter, it has no effect.
 
 *Edit filter*::
@@ -97,7 +93,7 @@ filter definition and label.
 
 *Exclude results*::
 Switch from a positive
-filter to a negative filter and vice versa.
+filter to a negative filter, and vice versa.
 
 *Temporarily disable*::
 Disable the filter without
@@ -106,10 +102,15 @@ removing it. Click again to reenable the filter.
 *Delete*::
 Delete the filter.
 
+To apply an action to all filters,
+click the *Actions* icon, and then select the action.
+
+
 
 [float]
 [[filter-edit]]
 === Modify the filter query
+
 You can directly modify
 the query that filters your search results.  This enables you
 to create more complex filters using multiple fields.
@@ -122,9 +123,9 @@ to create more complex filters using multiple fields.
 image::images/edit_filter_query_json.png[]
 +
 ////
-For example, you could use a
-{ref}/query-dsl-bool-query.html[bool query] to create a filter for the
-sample log data that displays the hits that originated from Canada or China that resulted in a 404 error:
+For example, if you are using the sample log data, you can use the
+{ref}/query-dsl-bool-query.html[bool query] to create a filter
+that displays the hits that originated from Canada or China that resulted in a 404 error:
 +
 ==========
 [source,json]

@@ -4,19 +4,19 @@
 When you submit a search query in *Discover*, the most recent documents that match the query
 are listed in the documents table.
 By default, the table includes columns for
-the time field and the document _source, which shows all fields and values in the document.
+the time field and the document `_source`, which shows all fields and values in the document.
 
 [float]
 [[sorting]]
-=== Add and remove fields from the document table
+=== Modify the document table
 
 Use the following commands to
-tailor the documents table to show specific field.
+tailor the documents table to suit your needs.
 
 [horizontal]
 Add a field column::
 Hover over the list of *Available fields* and then click *add* next to each field you want include as a column in the table.
-The first field you add replaces the _source column.
+The first field you add replaces the `_source` column.
 Change sort order:: By default, columns are sorted by the values in the field.
 If a time field is configured for the current index pattern,
 the documents are sorted in reverse chronological order.
@@ -28,17 +28,15 @@ click removes the field from the sorted fields.
 
 Move a field column:: Hover over the column header and click the move left (<<) or move right icon (>>).
 Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields*
-and then click *remove* next to each.
-Or, use the control in the column header.
+and then click *remove*.
+Or, use the (x) control in the column header.
 
 [float]
 === Drill down into field-level details
-To view the document data in either Table for JSON format, click the expand icon (>).
+To view the document data in either table or JSON format, click the expand icon (>).
 The expanded view provides these options for viewing your document:
 
-* For filtering options, hover over a row in the Table view.
-
-* To view the events that surround your document, click <<document-context, Context view>>
+* View the events that surround your document.
 For example, you might want to see the 10 documents that occurred
 immediately before and after your event.
 
