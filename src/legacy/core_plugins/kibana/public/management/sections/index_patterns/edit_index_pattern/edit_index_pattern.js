@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import './index_header';
 import './create_edit_field';
+import { map } from 'rxjs/operators';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
@@ -40,8 +41,9 @@ import { I18nContext } from 'ui/i18n';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import {
-  createStore,
+  createStateContainer,
   syncState,
+  SyncStrategy
 } from '../../../../../../../../plugins/kibana_utils/public';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
@@ -183,26 +185,26 @@ uiRoutes
           .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
-  },
-});
+  });
 
 uiModules
   .get('apps/management')
   .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, Promise, config, indexPatterns, Private, confirmModal) {
-    const store = createStore(
+    const stateContainer = createStateContainer(
       {
         tab: 'indexedFields',
         fieldFilter: '',
         indexedFieldTypeFilter: '',
-        scriptedFieldLanguageFilter: '' }
+        scriptedFieldLanguageFilter: '' },
+      {}
     );
     Object.defineProperty($scope, 'state', {
       get() {
-        return store.get();
+        return stateContainer.get();
       },
     });
-    const stateContainerSub = store.state$.subscribe(s => {
+    const stateContainerSub = stateContainer.state$.subscribe(s => {
       handleTabChange($scope, s.tab);
       $scope.fieldFilter = s.fieldFilter;
       handleFieldFilterChange(s.fieldFilter);
@@ -212,28 +214,28 @@ uiModules
         $scope.$apply();
       }
     });
-    handleTabChange($scope, store.get().tab);
+    handleTabChange($scope, stateContainer.get().tab);
 
     $scope.crazyBatchUpdate = () => {
-      store.set({ ...store.get(), tab: 'indexedFiles' });
-      store.set({ ...store.get() });
-      store.set({ ...store.get(), fieldFilter: 'BATCH!' });
+      stateContainer.set({ ...stateContainer.get(), tab: 'indexedFiles' });
+      stateContainer.set({ ...stateContainer.get() });
+      stateContainer.set({ ...stateContainer.get(), fieldFilter: 'BATCH!' });
     };
 
     $scope.$$postDigest(() => {
       // 1. the simplest use case
-      $scope.destroyStateSync = syncState({
-        syncKey: '_s',
-        store,
-      });
-
+      // $scope.destroyStateSync = syncState({
+      //   syncKey: '_s',
+      //   stateContainer,
+      // });
+      //
       // 2. conditionally picking sync strategy
       // $scope.destroyStateSync = syncState({
       //   syncKey: '_s',
-      //   store,
-      //   syncStrategy: config.get('state:storeInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
+      //   stateContainer,
+      //   syncStrategy: config.get('state:stateContainerInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
       // });
-
+      //
       // 3. implementing custom sync strategy
       // const localStorageSyncStrategy = {
       //   toStorage: (syncKey, state) => localStorage.setItem(syncKey, JSON.stringify(state)),
@@ -241,52 +243,62 @@ uiModules
       // };
       // $scope.destroyStateSync = syncState({
       //   syncKey: '_s',
-      //   store,
+      //   stateContainer,
       //   syncStrategy: localStorageSyncStrategy
       // });
-
+      //
       // 4. syncing only part of state
+      // const stateToStorage = (s) => ({ tab: s.tab });
       // $scope.destroyStateSync = syncState({
       //   syncKey: '_s',
-      //   store,
-      //   toStorageMapper: s => ({ tab: s.tab })
+      //   stateContainer: {
+      //     get: () => stateToStorage(stateContainer.get()),
+      //     set: stateContainer.set(({ tab }) => ({ ...stateContainer.get(), tab }),
+      //     state$: stateContainer.state$.pipe(map(stateToStorage))
+      //   }
       // });
-
+      //
       // 5. transform state before serialising
       // this could be super useful for backward compatibility
+      // const stateToStorage = (s) => ({ t: s.tab });
       // $scope.destroyStateSync = syncState({
       //   syncKey: '_s',
-      //   store,
-      //   toStorageMapper: s => ({ t: s.tab }),
-      //   fromStorageMapper: s => ({ tab: s.t })
+      //   stateContainer: {
+      //     get: () => stateToStorage(stateContainer.get()),
+      //     set: ({ t }) => stateContainer.set({ ...stateContainer.get(), tab: t }),
+      //     state$: stateContainer.state$.pipe(map(stateToStorage))
+      //   }
       // });
-
+      //
       // 6. multiple different sync configs
-      // $scope.destroyStateSync = syncState([
-      //   {
-      //     syncKey: '_a',
-      //     store,
-      //     syncStrategy: SyncStrategy.Url,
-      //     toStorageMapper: s => ({ t: s.tab }),
-      //     fromStorageMapper: s => ({ tab: s.t })
-      //   },
-      //   {
-      //     syncKey: '_b',
-      //     store,
-      //     syncStrategy: SyncStrategy.HashedUrl,
-      //     toStorageMapper: state => ({ f: state.fieldFilter, i: state.indexedFieldTypeFilter, l: state.scriptedFieldLanguageFilter }),
-      //     fromStorageMapper: storageState => (
-      //       {
-      //         fieldFilter: storageState.f || '',
-      //         indexedFieldTypeFilter: storageState.i || '',
-      //         scriptedFieldLanguageFilter: storageState.l || ''
-      //       }
-      //     ),
-      //   },
-      // ]);
+      const stateAToStorage = s => ({ t: s.tab });
+      const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
+      $scope.destroyStateSync = syncState([
+        {
+          syncKey: '_a',
+          syncStrategy: SyncStrategy.Url,
+          stateContainer: {
+            get: () => stateAToStorage(stateContainer.get()),
+            set: s => stateContainer.set(({ ...stateContainer.get(), tab: s.t })),
+            state$: stateContainer.state$.pipe(map(stateAToStorage))
+          },
+        },
+        {
+          syncKey: '_b',
+          syncStrategy: SyncStrategy.HashedUrl,
+          stateContainer: {
+            get: () => stateBToStorage(stateContainer.get()),
+            set: s => stateContainer.set({
+              ...stateContainer.get(),
+              fieldFilter: s.f || '',
+              indexedFieldTypeFilter: s.i || '',
+              scriptedFieldLanguageFilter: s.l || ''
+            }),
+            state$: stateContainer.state$.pipe(map(stateBToStorage))
+          },
+        },
+      ]);
     });
-
-    const indexPatternListProvider = Private(IndexPatternListFactory)();
 
     $scope.fieldWildcardMatcher = (...args) => fieldWildcardMatcher(...args, config.get('metaFields'));
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
@@ -332,11 +344,11 @@ uiModules
     };
 
     $scope.changeFilter = function (filter, val) {
-      store.set({ ...store.get(), [filter]: val || '' }); // null causes filter to check for null explicitly
+      stateContainer.set({ ...stateContainer.get(), [filter]: val || '' }); // null causes filter to check for null explicitly
     };
 
     $scope.changeTab = function (obj) {
-      store.set({ ...store.get(), tab: obj.index });
+      stateContainer.set({ ...stateContainer.get(), tab: obj.index });
     };
 
     $scope.$watchCollection('indexPattern.fields', function () {
@@ -409,8 +421,8 @@ uiModules
     };
 
     $scope.onFieldFilterInputChange = function (fieldFilter) {
-      store.set({
-        ...store.get(),
+      stateContainer.set({
+        ...stateContainer.get(),
         fieldFilter,
       });
     };
@@ -419,7 +431,7 @@ uiModules
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
-        indexPatternListProvider
+        $scope.indexPatternListProvider
       );
       if ($scope.fieldFilter === undefined) {
         return;

@@ -29,3 +29,4 @@ export * from './storage';
 export * from './storage/hashed_item_store';
 export * from './state_management/state_hash';
 export * from './state_management/url';
+export * from './state_sync';

@@ -19,19 +19,14 @@
 
 import { format as formatUrl, parse as _parseUrl } from 'url';
 // @ts-ignore
-import rison from 'rison-node';
+import rison, { RisonValue } from 'rison-node';
 // @ts-ignore
 import encodeUriQuery from 'encode-uri-query';
 import { createBrowserHistory } from 'history';
 import { stringify as _stringifyQueryString, ParsedUrlQuery } from 'querystring';
-import { BaseState } from '../store/sync';
-
-// TODO: NP, Typescriptify, Simplify
-import {
-  createStateHash,
-  isStateHash,
-  HashedItemStoreSingleton,
-} from '../../../../legacy/ui/public/state_management/state_storage';
+import { BaseState } from '../state_sync';
+import { createStateHash, isStateHash } from '../state_management/state_hash';
+import { hashedItemStore } from '../storage/hashed_item_store';
 
 export const parseUrl = (url: string) => _parseUrl(url, true);
 export const parseUrlHash = (url: string) => parseUrl(parseUrl(url).hash!.slice(1));
@@ -63,9 +58,9 @@ export function getStatesFromUrl(url: string = window.location.href): Record<str
   try {
     Object.entries(query).forEach(([q, value]) => {
       if (isStateHash(value as string)) {
-        decoded[q] = JSON.parse(HashedItemStoreSingleton.getItem(value)!);
+        decoded[q] = JSON.parse(hashedItemStore.getItem(value as string)!);
       } else {
-        decoded[q] = rison.decode(query[q]);
+        decoded[q] = rison.decode(query[q] as string) as BaseState;
       }
     });
   } catch (e) {
@@ -115,12 +110,12 @@ export function setStateToUrl<T extends BaseState>(
   if (useHash) {
     const stateJSON = JSON.stringify(state);
     const stateHash = createStateHash(stateJSON, (hashKey: string) =>
-      HashedItemStoreSingleton.getItem(hashKey)
+      hashedItemStore.getItem(hashKey)
     );
-    HashedItemStoreSingleton.setItem(stateHash, stateJSON);
+    hashedItemStore.setItem(stateHash, stateJSON);
     encoded = stateHash;
   } else {
-    encoded = rison.encode(state);
+    encoded = rison.encode(state as RisonValue);
   }
 
   const searchQueryString = stringifyQueryString({ ...hash.query, [key]: encoded });
@@ -216,7 +211,5 @@ export const createUrlControls = (): IUrlControls => {
       history.push(location);
     }
     return getCurrentUrl();
-
-    return newUrl;
   }
 };

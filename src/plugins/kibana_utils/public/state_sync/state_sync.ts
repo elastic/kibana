@@ -20,28 +20,25 @@
 import { MonoTypeOperatorFunction, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, skip, startWith } from 'rxjs/operators';
 import { createUrlControls, getStateFromUrl, IUrlControls, setStateToUrl } from '../url';
+import { BaseStateContainer } from '../state_containers/types';
 
 /**
  * Configuration of StateSync utility
- * State - interface for application provided state
- * StorageState - interface for the transformed State which will be passed into SyncStrategy for serialising and persisting
- * (see toStorageMapper, fromStorageMapper)
+ * State - interface for application provided state to sync with storage
  */
-export interface IStateSyncConfig<
-  State extends BaseState = BaseState,
-  StorageState extends BaseState = BaseState
-> {
+export type BaseState = Record<string, unknown>;
+export interface IStateSyncConfig<State extends BaseState = BaseState> {
   /**
    * Storage key to use for syncing,
    * e.g. syncKey '_a' should sync state to ?_a query param
    */
   syncKey: string;
   /**
-   * Store to keep in sync with storage, have to implement IStore interface
-   * The idea is that ./store/create_store.ts should be used as a state container,
+   * State container to keep in sync with storage, have to implement BaseStateContainer interface
+   * The idea is that ./state_containers/ should be used as a state container,
    * but it is also possible to implement own custom container for advanced use cases
    */
-  store: IStore<State>;
+  stateContainer: BaseStateContainer<State>;
   /**
    * Sync strategy to use,
    * Sync strategy is responsible for serialising / deserialising and persisting / retrieving stored state
@@ -57,57 +54,10 @@ export interface IStateSyncConfig<
   syncStrategy?: SyncStrategy | ISyncStrategy;
 
   /**
-   * These mappers are needed to transform application state to a different shape we want to store
-   * Some use cases:
-   *
-   * 1. Pick some specific parts of the state to persist.
-   *
-   * Having state in shape of:
-   * type State = {a: string, b: string};
-   *
-   * Passing toStorageMapper as:
-   * toStorageMapper: (state) => ({b: state.b})
-   *
-   * Will result in storing only `b`
-   *
-   * 2. Original state keys are too long and we want to give them a shorter name to persist in the url/storage
-   *
-   * Having state in shape of:
-   * type State = { someVeryLongAndReasonableName: string };
-   *
-   * Passing toStorageMapper as:
-   * toStorageMapper: (state) => ({s: state.someVeryLongAndReasonableName})
-   *
-   * Will result in having a bit shorter and nicer url (someVeryLongAndReasonableName -> s)
-   *
-   * In this case it is also mandatory to have fromStorageMapper which should mirror toStorageMapper:
-   * fromStorageMapper: (storageState) => ({someVeryLongAndReasonableName: state.s})
-   *
-   * 3. Use different sync strategies for different state slices
-   *
-   * We could have multiple SyncStorageConfigs for a state container,
-   * These mappers allow to pick slices of state we want to use in this particular configuration.
-   * For example: we can setup a slice of state to be stored in the URL as expanded state
-   * and then different slice of the same state as HashedURL (just by using different strategies).
-   *
-   * 4. Backward compatibility
-   *
-   * Assume in v1 state was:
-   * type State = {a: string}; // v1
-   * in v2 'a' was renamed into 'b'
-   * type State = {b: string}; // v2
-   *
-   * To make sure old urls are still working we could have fromStorageMapper:
-   * fromStorageMapper: (storageState) => ({b: storageState.b || storageState.a})
-   */
-  toStorageMapper?: (state: State) => StorageState;
-  fromStorageMapper?: (storageState: StorageState) => Partial<State>;
-
-  /**
    * During app bootstrap we could have default app state and data in storage to be out of sync,
    * initialTruthSource indicates who's values to consider as source of truth
    *
-   * InitialTruthSource.Store - Application state take priority over storage state
+   * InitialTruthSource.StateContainer - Application state take priority over storage state
    * InitialTruthSource.Storage (default) - Storage state take priority over Application state
    * InitialTruthSource.None - skip initial syncing do nothing
    */
@@ -115,27 +65,15 @@ export interface IStateSyncConfig<
 }
 
 /**
- * To use stateSync util application have to pass state container which implements IStore interface.
- * The idea is that ./store/create_store.ts should be used as a state container by default,
- * but it is also possible to implement own custom container for advanced use cases
- */
-export type BaseState = Record<string, unknown>;
-export interface IStore<State extends BaseState = BaseState> {
-  get: () => State;
-  set: (state: State) => void;
-  state$: Observable<State>;
-}
-
-/**
  * During app bootstrap we could have default app state and data in storage to be out of sync,
  * initialTruthSource indicates who's values to consider as source of truth
  *
- * InitialTruthSource.Store - Application state take priority over storage state
+ * InitialTruthSource.StateContainer - Application state take priority over storage state
  * InitialTruthSource.Storage (default) - Storage state take priority over Application state
  * InitialTruthSource.None - skip initial syncing do nothing
  */
 export enum InitialTruthSource {
-  Store,
+  StateContainer,
   Storage,
   None,
 }
@@ -164,20 +102,20 @@ export enum SyncStrategy {
  *
  * For an example take a look at already implemented URL sync strategies
  */
-interface ISyncStrategy<StorageState extends BaseState = BaseState> {
+interface ISyncStrategy<State extends BaseState = BaseState> {
   /**
    * Take in a state object, should serialise and persist
    */
   // TODO: replace sounds like something url specific ...
-  toStorage: (syncKey: string, state: StorageState, opts: { replace: boolean }) => Promise<void>;
+  toStorage: (syncKey: string, state: State, opts: { replace: boolean }) => Promise<void>;
   /**
    * Should retrieve state from the storage and deserialize it
    */
-  fromStorage: (syncKey: string) => Promise<StorageState>;
+  fromStorage: (syncKey: string) => Promise<State>;
   /**
    * Should notify when the storage has changed
    */
-  storageChange$?: (syncKey: string) => Observable<StorageState>;
+  storageChange$?: (syncKey: string) => Observable<State>;
 }
 
 /**
@@ -237,95 +175,84 @@ const createStrategies: () => {
 };
 
 /**
- * Utility for syncing application state wrapped in IStore container
+ * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
- *
- * Minimal usage example:
- *
- * ```
- * type State = {tab: string};
- * const store: IStore<State> = createStore({tab: 'indexedFields'})
- *
- * syncState({
- *   syncKey: '_s',
- *   store: store
- * })
- * ```
- * Now State will be synced with url:
- * * url will be updated on any store change
- * * store will be updated on any url change
- *
- * By default SyncStrategy.Url is used, which serialises state in rison format
- *
- * The same example with different syncStrategy depending on kibana config:
- *
- * ```
- * syncState({
- *   syncKey: '_s',
- *   store: store,
- *   syncStrategy: config.get('state:storeInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
- * })
- * ```
- *
- * If there are multiple state containers:
- * ```
- * type State1 = {tab: string};
- * const store1: IStore<State> = createStore({tab: 'indexedFields'})
- *
- * type State2 = {filter: string};
- * const store2: IStore<State> = createStore({filter: 'filter1'})
- *
- * syncState([
- *  {
- *    syncKey: '_g',
- *    store: store1
- *  },
- *  {
- *    syncKey: '_a',
- *    store: store2
- *  }
- * ])
- * ```
- *
- * If we want to sync only a slice of state
- *
- *  ```
- * type State = {tab: string, filter: string};
- * const store: IStore<State> = createStore({tab: 'indexedFields', filter: 'filter1'})
- *
- * syncState({
- *   syncKey: '_s',
- *   store: store,
- *   toStorageMapper: (state) => ({tab: state.tab})
- * })
- * ```
- *
- * Only tab slice will be synced to storage. Updates to filter slice will be ignored
- *
- * Similar way we could use different sync strategies for different slices.
- * E.g: to put into url an expanded 'tab' slice, but hashed 'filter' slice
- * ```
- * syncState([{
- *   syncKey: '_t',
- *   store: store,
- *   toStorageMapper: (state) => ({tab: state.tab}),
- *   syncStrategy: SyncStrategy.Url
- *   },
- *   {
- *   syncKey: '_f',
- *   store: store,
- *   toStorageMapper: (state) => ({filter: state.filter}),
- *   syncStrategy: SyncStrategy.HashedUrl
- *  }
- * }])
- * ```
- *
- * syncState returns destroy function
- * ```
- * const destroy = syncState();
- * destroy(); // stops listening for state and storage updates
- * ```
  */
+// 1. the simplest use case
+// $scope.destroyStateSync = syncState({
+//   syncKey: '_s',
+//   stateContainer,
+// });
+//
+// 2. conditionally picking sync strategy
+// $scope.destroyStateSync = syncState({
+//   syncKey: '_s',
+//   stateContainer,
+//   syncStrategy: config.get('state:stateContainerInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
+// });
+//
+// 3. implementing custom sync strategy
+// const localStorageSyncStrategy = {
+//   toStorage: (syncKey, state) => localStorage.setItem(syncKey, JSON.stringify(state)),
+//   fromStorage: (syncKey) => localStorage.getItem(syncKey) ? JSON.parse(localStorage.getItem(syncKey)) : null
+// };
+// $scope.destroyStateSync = syncState({
+//   syncKey: '_s',
+//   stateContainer,
+//   syncStrategy: localStorageSyncStrategy
+// });
+//
+// 4. syncing only part of state
+// const stateToStorage = (s) => ({ tab: s.tab });
+// $scope.destroyStateSync = syncState({
+//   syncKey: '_s',
+//   stateContainer: {
+//     get: () => stateToStorage(stateContainer.get()),
+//     set: stateContainer.set(({ tab }) => ({ ...stateContainer.get(), tab }),
+//       state$: stateContainer.state$.pipe(map(stateToStorage))
+// }
+// });
+//
+// 5. transform state before serialising
+// this could be super useful for backward compatibility
+// const stateToStorage = (s) => ({ t: s.tab });
+// $scope.destroyStateSync = syncState({
+//   syncKey: '_s',
+//   stateContainer: {
+//     get: () => stateToStorage(stateContainer.get()),
+//     set: ({ t }) => stateContainer.set({ ...stateContainer.get(), tab: t }),
+//     state$: stateContainer.state$.pipe(map(stateToStorage))
+//   }
+// });
+//
+// 6. multiple different sync configs
+// const stateAToStorage = s => ({ t: s.tab });
+// const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
+// $scope.destroyStateSync = syncState([
+//   {
+//     syncKey: '_a',
+//     syncStrategy: SyncStrategy.Url,
+//     stateContainer: {
+//       get: () => stateAToStorage(stateContainer.get()),
+//       set: s => stateContainer.set(({ ...stateContainer.get(), tab: s.t })),
+//       state$: stateContainer.state$.pipe(map(stateAToStorage))
+//     },
+//   },
+//   {
+//     syncKey: '_b',
+//     syncStrategy: SyncStrategy.HashedUrl,
+//     stateContainer: {
+//       get: () => stateBToStorage(stateContainer.get()),
+//       set: s => stateContainer.set({
+//         ...stateContainer.get(),
+//         fieldFilter: s.f || '',
+//         indexedFieldTypeFilter: s.i || '',
+//         scriptedFieldLanguageFilter: s.l || ''
+//       }),
+//       state$: stateContainer.state$.pipe(map(stateBToStorage))
+//     },
+//   },
+// ]);
 export type DestroySyncStateFnType = () => void;
 export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): DestroySyncStateFnType {
   const stateSyncConfigs = Array.isArray(config) ? config : [config];
@@ -334,9 +261,6 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
   const syncStrategies = createStrategies();
 
   stateSyncConfigs.forEach(stateSyncConfig => {
-    const toStorageMapper = stateSyncConfig.toStorageMapper || (s => s);
-    const fromStorageMapper = stateSyncConfig.fromStorageMapper || (s => s);
-
     const { toStorage, fromStorage, storageChange$ } = isSyncStrategy(stateSyncConfig.syncStrategy)
       ? stateSyncConfig.syncStrategy
       : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.Url];
@@ -349,10 +273,7 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
       }
 
       if (storageState) {
-        stateSyncConfig.store.set({
-          ...stateSyncConfig.store.get(),
-          ...fromStorageMapper(storageState),
-        });
+        stateSyncConfig.stateContainer.set(storageState);
         return true;
       }
 
@@ -361,20 +282,16 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
 
     // returned boolean indicates if update happen
     const updateStorage = async ({ replace = false } = {}): Promise<boolean> => {
-      const newStorageState = toStorageMapper(stateSyncConfig.store.get());
+      const newStorageState = stateSyncConfig.stateContainer.get();
       await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
       return true;
     };
 
     // subscribe to state and storage updates
     subscriptions.push(
-      stateSyncConfig.store.state$
+      stateSyncConfig.stateContainer.state$
         .pipe(
-          map(toStorageMapper),
-          distinctUntilChangedWithInitialValue(
-            toStorageMapper(stateSyncConfig.store.get()),
-            shallowEqual
-          )
+          distinctUntilChangedWithInitialValue(stateSyncConfig.stateContainer.get(), shallowEqual)
         )
         .subscribe(() => {
           updateStorage();
@@ -388,7 +305,7 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
       );
     }
 
-    // initial syncing of store state and storage state
+    // initial syncing of stateContainer state and storage state
     const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
     if (initialTruthSource === InitialTruthSource.Storage) {
       updateState().then(hasUpdated => {
@@ -398,7 +315,7 @@ export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): Destro
           updateStorage({ replace: true });
         }
       });
-    } else if (initialTruthSource === InitialTruthSource.Store) {
+    } else if (initialTruthSource === InitialTruthSource.StateContainer) {
       updateStorage({ replace: true });
     }
   });

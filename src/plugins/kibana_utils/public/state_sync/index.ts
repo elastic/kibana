@@ -17,9 +17,19 @@
  * under the License.
  */
 
-export const HashedItemStoreSingleton: any;
-export function isStateHash(value: string): boolean;
-export function createStateHash(
-  value: string,
-  existingJsonProvider: (key: string) => string
-): string;
+import {
+  syncState,
+  SyncStrategy,
+  InitialTruthSource,
+  IStateSyncConfig,
+  DestroySyncStateFnType,
+  BaseState,
+} from './state_sync';
+export {
+  syncState,
+  SyncStrategy,
+  InitialTruthSource,
+  IStateSyncConfig,
+  DestroySyncStateFnType,
+  BaseState,
+};
