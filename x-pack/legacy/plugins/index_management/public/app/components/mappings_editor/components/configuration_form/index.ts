@@ -5,4 +5,4 @@
  */
 
 export { ConfigurationForm } from './configuration_form';
-export { CONFIGURATION_FIELDS } from './dynamic_mapping_form';
+export { CONFIGURATION_FIELDS } from './configuration_form_schema';
