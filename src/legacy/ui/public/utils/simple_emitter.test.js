@@ -35,7 +35,7 @@ describe('SimpleEmitter class', () => {
     expect(emitter).toHaveProperty('removeAllListeners');
   });
 
-  describe('#listenerCount',  () => {
+  describe('#listenerCount', () => {
     it('counts all event listeners without any arg', () => {
       expect(emitter.listenerCount()).toBe(0);
       emitter.on('a', () => {});
@@ -111,9 +111,9 @@ describe('SimpleEmitter class', () => {
   });
 
   describe('#emit', () => {
-    it('calls the handlers in the order they were defined',  () => {
+    it('calls the handlers in the order they were defined', () => {
       let i = 0;
-      const incr =  () => ++i;
+      const incr = () => ++i;
       const one = sinon.spy(incr);
       const two = sinon.spy(incr);
       const three = sinon.spy(incr);
@@ -139,14 +139,17 @@ describe('SimpleEmitter class', () => {
       expect(four.returned(4)).toBeDefined();
     });
 
-    it('always emits the handlers that were initially registered',  () => {
+    it('always emits the handlers that were initially registered', () => {
       const destructive = sinon.spy(() => {
         emitter.removeAllListeners();
         expect(emitter.listenerCount()).toBe(0);
       });
       const stub = sinon.stub();
 
-      emitter.on('run', destructive).on('run', stub).emit('run');
+      emitter
+        .on('run', destructive)
+        .on('run', stub)
+        .emit('run');
 
       expect(destructive).toHaveProperty('callCount', 1);
       expect(stub).toHaveProperty('callCount', 1);
@@ -164,7 +167,7 @@ describe('SimpleEmitter class', () => {
 
     it('uses the SimpleEmitter as the this context', () => {
       emitter
-        .on('a', function () {
+        .on('a', function() {
           expect(this).toBe(emitter);
         })
         .emit('a');

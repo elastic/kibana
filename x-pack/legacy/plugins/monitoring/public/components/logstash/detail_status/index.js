@@ -17,69 +17,69 @@ export function DetailStatus({ stats }) {
     pipeline,
     queue_type: queueType,
     version,
-    uptime
+    uptime,
   } = stats;
 
   const firstMetrics = [
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.transportAddressLabel', {
-        defaultMessage: 'Transport Address'
+        defaultMessage: 'Transport Address',
       }),
       value: httpAddress,
-      'data-test-subj': 'httpAddress'
+      'data-test-subj': 'httpAddress',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.eventsReceivedLabel', {
-        defaultMessage: 'Events Received'
+        defaultMessage: 'Events Received',
       }),
       value: formatMetric(events.in, '0.[0]a'),
-      'data-test-subj': 'eventsIn'
+      'data-test-subj': 'eventsIn',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.eventsEmittedLabel', {
-        defaultMessage: 'Events Emitted'
+        defaultMessage: 'Events Emitted',
       }),
       value: formatMetric(events.out, '0.[0]a'),
-      'data-test-subj': 'eventsOut'
+      'data-test-subj': 'eventsOut',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.configReloadsLabel', {
-        defaultMessage: 'Config Reloads'
+        defaultMessage: 'Config Reloads',
       }),
       value: reloads.successes,
-      'data-test-subj': 'numReloads'
+      'data-test-subj': 'numReloads',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.pipelineWorkersLabel', {
-        defaultMessage: 'Pipeline Workers'
+        defaultMessage: 'Pipeline Workers',
       }),
       value: pipeline.workers,
-      'data-test-subj': 'pipelineWorkers'
+      'data-test-subj': 'pipelineWorkers',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.batchSizeLabel', {
-        defaultMessage: 'Batch Size'
+        defaultMessage: 'Batch Size',
       }),
       value: pipeline.batch_size,
-      'data-test-subj': 'pipelineBatchSize'
-    }
+      'data-test-subj': 'pipelineBatchSize',
+    },
   ];
 
   const lastMetrics = [
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.versionLabel', {
-        defaultMessage: 'Version'
+        defaultMessage: 'Version',
       }),
       value: version,
-      'data-test-subj': 'version'
+      'data-test-subj': 'version',
     },
     {
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.uptimeLabel', {
-        defaultMessage: 'Uptime'
+        defaultMessage: 'Uptime',
       }),
       value: formatMetric(uptime, 'time_since'),
-      'data-test-subj': 'uptime'
-    }
+      'data-test-subj': 'uptime',
+    },
   ];
 
   // make queueType conditional
@@ -87,18 +87,13 @@ export function DetailStatus({ stats }) {
   if (queueType) {
     metrics.push({
       label: i18n.translate('xpack.monitoring.logstash.detailStatus.queueTypeLabel', {
-        defaultMessage: 'Queue Type'
+        defaultMessage: 'Queue Type',
       }),
       value: queueType,
-      'data-test-subj': 'queueType'
+      'data-test-subj': 'queueType',
     });
   }
   metrics.push(...lastMetrics);
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="logstashDetailStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} data-test-subj="logstashDetailStatus" />;
 }

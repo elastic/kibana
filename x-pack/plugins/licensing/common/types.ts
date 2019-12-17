@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Observable } from 'rxjs';
 
 export enum LICENSE_CHECK_STATE {
   Unavailable = 'UNAVAILABLE',
@@ -17,7 +16,8 @@ export enum LICENSE_TYPE {
   standard = 20,
   gold = 30,
   platinum = 40,
-  trial = 50,
+  enterprise = 50,
+  trial = 60,
 }
 
 /** @public */
@@ -57,6 +57,11 @@ export interface PublicLicense {
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    */
   type: LicenseType;
+  /**
+   * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   * @deprecated use 'type' instead
+   */
+  mode: LicenseType;
 }
 
 /**
@@ -120,6 +125,12 @@ export interface ILicense {
   type?: LicenseType;
 
   /**
+   * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   * @deprecated use 'type' instead.
+   */
+  mode?: LicenseType;
+
+  /**
    * Signature of the license content.
    */
   signature: string;
@@ -172,16 +183,4 @@ export interface ILicense {
    * @param name the name of the feature to interact with
    */
   getFeature(name: string): LicenseFeature;
-}
-
-/** @public */
-export interface LicensingPluginSetup {
-  /**
-   * Steam of licensing information {@link ILicense}.
-   */
-  license$: Observable<ILicense>;
-  /**
-   * Triggers licensing information re-fetch.
-   */
-  refresh(): Promise<ILicense>;
 }

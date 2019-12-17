@@ -10,11 +10,8 @@ import { isSystemApiRequest } from 'ui/system_api';
 import { npSetup } from 'ui/new_platform';
 
 const module = uiModules.get('security', []);
-module.config(($httpProvider) => {
-  $httpProvider.interceptors.push((
-    $q,
-  ) => {
-
+module.config($httpProvider => {
+  $httpProvider.interceptors.push($q => {
     const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
 
     function interceptorFactory(responseHandler) {
@@ -28,7 +25,7 @@ module.config(($httpProvider) => {
 
     return {
       response: interceptorFactory(_.identity),
-      responseError: interceptorFactory($q.reject)
+      responseError: interceptorFactory($q.reject),
     };
   });
 });

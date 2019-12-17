@@ -6,11 +6,9 @@
 
 import chrome from 'ui/chrome';
 
-chrome
-  .setVisible(false)
-  .setRootController('logout', ($window) => {
-    $window.sessionStorage.clear();
+chrome.setVisible(false).setRootController('logout', $window => {
+  $window.sessionStorage.clear();
 
-    // Redirect user to the server logout endpoint to complete logout.
-    $window.location.href = chrome.addBasePath(`/api/security/logout${$window.location.search}`);
-  });
+  // Redirect user to the server logout endpoint to complete logout.
+  $window.location.href = chrome.addBasePath(`/api/security/logout${$window.location.search}`);
+});

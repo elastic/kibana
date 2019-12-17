@@ -76,7 +76,7 @@ function updateObjectsTable($scope, $injector) {
           }}
         />
       </I18nContext>,
-      node,
+      node
     );
   });
 }
@@ -93,17 +93,16 @@ uiRoutes
     requireUICapability: 'management.kibana.objects',
   })
   .when('/management/kibana/objects/:service', {
-    redirectTo: '/management/kibana/objects'
+    redirectTo: '/management/kibana/objects',
   });
 
-uiModules.get('apps/management')
-  .directive('kbnManagementObjects', function () {
-    return {
-      restrict: 'E',
-      controllerAs: 'managementObjectsController',
-      controller: function ($scope, $injector) {
-        updateObjectsTable($scope, $injector);
-        $scope.$on('$destroy', destroyObjectsTable);
-      }
-    };
-  });
+uiModules.get('apps/management').directive('kbnManagementObjects', function() {
+  return {
+    restrict: 'E',
+    controllerAs: 'managementObjectsController',
+    controller: function($scope, $injector) {
+      updateObjectsTable($scope, $injector);
+      $scope.$on('$destroy', destroyObjectsTable);
+    },
+  };
+});
