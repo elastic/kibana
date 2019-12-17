@@ -82,25 +82,40 @@ export class PolicyLib {
       kuery?: string;
       page?: number;
       perPage?: number;
+      withDatasources?: boolean;
     } = {
       page: 1,
       perPage: 20,
+      withDatasources: true,
     }
   ): Promise<{ items: Policy[]; total: number; page: number; perPage: number }> {
     const response = await this.adapter.list(user, options);
 
-    const dataSourcesIds = unique(flatten(response.items.map(policy => policy.datasources || [])));
+    if (options.withDatasources) {
+      const dataSourcesIds = unique(
+        flatten(response.items.map(policy => policy.datasources || []))
+      );
+      const datasources: Datasource[] = await this.libs.datasources.getByIDs(user, dataSourcesIds);
 
-    const datasources: Datasource[] = await this.libs.datasources.getByIDs(user, dataSourcesIds);
+      return {
+        ...response,
+        items: response.items.map(policy => {
+          return {
+            ...policy,
+            datasources: (policy.datasources || []).map(id => {
+              return datasources.find(ds => ds.id === id);
+            }),
+          } as Policy;
+        }),
+      };
+    }
 
     return {
       ...response,
       items: response.items.map(policy => {
         return {
           ...policy,
-          datasources: (policy.datasources || []).map(id => {
-            return datasources.find(ds => ds.id === id);
-          }),
+          datasources: undefined,
         } as Policy;
       }),
     };

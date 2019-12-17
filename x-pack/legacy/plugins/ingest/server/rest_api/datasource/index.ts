@@ -35,10 +35,25 @@ export const createGETDatasourceRoute = (libs: ServerLibs) => ({
   config: {},
   handler: (async (
     request: FrameworkRequest<{ params: { datasourceId: string } }>
-  ): Promise<ReturnTypeGet<any>> => {
+  ): Promise<ReturnTypeGet<(Datasource & { policies: string[] }) | null>> => {
     const datasource = await libs.datasources.get(request.user, request.params.datasourceId);
-
-    return { item: datasource, success: true };
+    if (datasource) {
+      const policies = await libs.policy.list(request.user, {
+        kuery: `policies.datasources:"${datasource.id}"`,
+        page: 1,
+        perPage: 10000,
+        withDatasources: false,
+      });
+      return {
+        item: {
+          ...datasource,
+          policies: policies.items.map(p => p.id),
+        },
+        success: true,
+      };
+    } else {
+      return { item: null, success: false };
+    }
   }) as FrameworkRouteHandler,
 });
 
@@ -56,7 +71,9 @@ export const createGETDatasourcesRoute = (libs: ServerLibs) => ({
       },
     },
   },
-  handler: async (request: FrameworkRequest<any>): Promise<ReturnTypeList<Datasource>> => {
+  handler: async (
+    request: FrameworkRequest<any>
+  ): Promise<ReturnTypeList<Datasource & { policies: string[] }>> => {
     // TODO fix for types that broke in TS 3.7
     const query: {
       page: string;
@@ -64,13 +81,36 @@ export const createGETDatasourcesRoute = (libs: ServerLibs) => ({
       kuery: string;
       showInactive: string;
     } = request.query as any;
+
     const { items, total, page, perPage } = await libs.datasources.list(request.user, {
       page: parseInt(query.page, 10),
       perPage: parseInt(query.perPage, 10),
       kuery: query.kuery,
     });
 
-    return { list: items, success: true, total, page, perPage };
+    const list: Array<Datasource & { policies: string[] }> = [];
+
+    // TODO: this could be optimized so that it is not sequentially blocking
+    for (const ds of items) {
+      const policies = await libs.policy.list(request.user, {
+        kuery: `policies.datasources:"${ds.id}"`,
+        page: 1,
+        perPage: 10000,
+        withDatasources: false,
+      });
+      list.push({
+        ...ds,
+        policies: policies.items.map(p => p.id),
+      });
+    }
+
+    return {
+      list,
+      success: true,
+      total,
+      page,
+      perPage,
+    };
   },
 });
 
