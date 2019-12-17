@@ -69,6 +69,8 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
     });
@@ -142,6 +144,8 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
     });
@@ -213,6 +217,8 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
         },
       },
     });
@@ -277,6 +283,8 @@ describe('buildBulkBody', () => {
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
         },
       },
     });
