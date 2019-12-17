@@ -7,9 +7,7 @@ if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by
 default it is in `$KIBANA_HOME/config`. By default, with package distributions
 (Debian or RPM), it is in `/etc/kibana`.
 
-The default settings configure Kibana to run on `localhost:5601`. To change the
-host or port number, or connect to Elasticsearch running on a different machine,
-you'll need to update your `kibana.yml` file. You can also enable SSL and set a
+The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
 variety of other options. Finally, environment variables can be injected into
 configuration using `${MY_ENV_VAR}` syntax.
 
@@ -34,7 +32,7 @@ with Kibana.
 
 `csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
-support for older, less safe browsers like Internet Explorer. 
+support for older, less safe browsers like Internet Explorer.
 See <<csp-strict-mode, Content Security Policy>> for more information.
 
 `csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
@@ -67,7 +65,7 @@ connects to this Kibana instance.
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List
 of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 headers, set this value to [] (an empty list).
-Removing the `authorization` header from being whitelisted means that you cannot 
+Removing the `authorization` header from being whitelisted means that you cannot
 use <<basic-authentication, basic authentication>> in Kibana.
 
 `elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait
@@ -131,11 +129,11 @@ store saved searches, visualizations and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 +
-When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, 
-you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles 
-to grant access to {kib}. 
-You must create custom roles that authorize the user for that specific tenant. 
-Although multi-tenant installations are supported, the recommended approach 
+When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`,
+you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles
+to grant access to {kib}.
+You must create custom roles that authorize the user for that specific tenant.
+Although multi-tenant installations are supported, the recommended approach
 to securing access to {kib} segments is to grant users access to specific spaces.
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
@@ -265,7 +263,7 @@ specifies the default route when opening Kibana. You can use this setting to
 modify the landing page when opening Kibana. Supported on {ece}.
 
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
-back end server.
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server.
 
 `server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes
 for incoming server requests.
@@ -278,7 +276,7 @@ setting specifies the port to use.
 
 `server.rewriteBasePath:`:: *Default: false* Deprecated setting that specifies if Kibana should
 rewrite requests that are prefixed with `server.basePath`, or require that they
-are rewritten by your reverse proxy. 
+are rewritten by your reverse proxy.
 
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
 inactive socket.
