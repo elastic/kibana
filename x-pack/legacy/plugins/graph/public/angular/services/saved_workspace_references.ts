@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
 import { SavedWorkspace } from './saved_workspace';
 
 export function extractReferences({
