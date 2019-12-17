@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center; // Corrects horizontal centering in IE11
+  align-self: center; /* Corrects horizontal centering in IE11 */
 `;
 
 EmptyPrompt.displayName = 'EmptyPrompt';
