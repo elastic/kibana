@@ -47,7 +47,7 @@ import {
 
 import { ChartTooltip } from '../components/chart_tooltip';
 import {
-  jobSelectServiceFactory,
+  getJobSelectService$,
   setGlobalState,
   getSelectedJobIds,
 } from '../components/job_selector/job_select_service_utils';
@@ -187,11 +187,8 @@ export class TimeSeriesExplorer extends React.Component {
 
   constructor(props) {
     super(props);
-    const { jobSelectService$, unsubscribeFromGlobalState } = jobSelectServiceFactory(
-      props.globalState
-    );
+    const jobSelectService$ = getJobSelectService$(props.globalState);
     this.jobSelectService$ = jobSelectService$;
-    this.unsubscribeFromGlobalState = unsubscribeFromGlobalState;
   }
 
   resizeRef = createRef();
@@ -1175,7 +1172,6 @@ export class TimeSeriesExplorer extends React.Component {
   componentWillUnmount() {
     this.subscriptions.unsubscribe();
     this.resizeChecker.destroy();
-    this.unsubscribeFromGlobalState();
   }
 
   render() {

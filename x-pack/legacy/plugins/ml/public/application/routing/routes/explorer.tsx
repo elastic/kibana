@@ -50,12 +50,12 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
 
   return (
     <PageLoader context={context}>
-      <ExplorerStateManager />
+      <ExplorerUrlStateManager />
     </PageLoader>
   );
 };
 
-const ExplorerStateManager: FC = () => {
+const ExplorerUrlStateManager: FC = () => {
   const appState = useUrlState('_a');
   const globalState = useUrlState('_g');
 

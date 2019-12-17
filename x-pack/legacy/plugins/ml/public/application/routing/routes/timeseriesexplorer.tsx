@@ -6,7 +6,6 @@
 
 import React, { FC, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { decode } from 'rison-node';
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 
@@ -20,6 +19,7 @@ import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { mlJobService } from '../../services/job_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
 import { subscribeAppStateToObservable } from '../../util/app_state_utils';
+import { useUrlState } from '../../util/url_state';
 import { interval$ } from '../../components/controls/select_interval';
 import { severity$ } from '../../components/controls/select_severity';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
@@ -44,93 +44,76 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
   });
-  const { _a, _g } = queryString.parse(location.search);
-  let appState: any = {};
-  let globalState: any = {};
-  try {
-    appState = decode(_a);
-    globalState = decode(_g);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Could not parse global or app state');
-  }
-  if (appState.mlTimeSeriesExplorer === undefined) {
-    appState.mlTimeSeriesExplorer = {};
-  }
-  globalState.fetch = () => {};
-  globalState.on = () => {};
-  globalState.off = () => {};
-  globalState.save = () => {};
 
   return (
     <PageLoader context={context}>
-      <TimeSeriesExplorerWrapper {...{ appState, globalState, config }} />
+      <TimeSeriesExplorerUrlStateManager config={config} />
     </PageLoader>
   );
 };
 
-class AppState {
-  fetch() {}
-  on() {}
-  off() {}
-  save() {}
-}
+const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
+  const appState = useUrlState('_a');
+  const globalState = useUrlState('_g');
 
-const TimeSeriesExplorerWrapper: FC<{ globalState: any; appState: any; config: any }> = ({
-  globalState,
-  appState,
-  config,
-}) => {
-  if (globalState.time) {
+  if (appState.get('mlTimeSeriesExplorer') === undefined) {
+    appState.set('mlTimeSeriesExplorer', {});
+  }
+
+  const globalStateTime = globalState.get('time');
+  if (globalStateTime) {
     timefilter.setTime({
-      from: globalState.time.from,
-      to: globalState.time.to,
+      from: globalStateTime.from,
+      to: globalStateTime.to,
     });
   }
 
   const subscriptions = new Subscription();
   subscriptions.add(
-    subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => {})
+    subscribeAppStateToObservable(appState, 'mlSelectInterval', interval$, () => {})
   );
   subscriptions.add(
-    subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => {})
+    subscribeAppStateToObservable(appState, 'mlSelectSeverity', severity$, () => {})
   );
 
   const appStateHandler = (action: string, payload: any) => {
+    const mlTimeSeriesExplorer = appState.get('mlTimeSeriesExplorer');
     switch (action) {
       case APP_STATE_ACTION.CLEAR:
-        delete appState.mlTimeSeriesExplorer.detectorIndex;
-        delete appState.mlTimeSeriesExplorer.entities;
-        delete appState.mlTimeSeriesExplorer.forecastId;
+        delete mlTimeSeriesExplorer.detectorIndex;
+        delete mlTimeSeriesExplorer.entities;
+        delete mlTimeSeriesExplorer.forecastId;
         break;
 
       case APP_STATE_ACTION.GET_DETECTOR_INDEX:
-        return appState.mlTimeSeriesExplorer.detectorIndex;
+        return mlTimeSeriesExplorer.detectorIndex;
       case APP_STATE_ACTION.SET_DETECTOR_INDEX:
-        appState.mlTimeSeriesExplorer.detectorIndex = payload;
+        mlTimeSeriesExplorer.detectorIndex = payload;
         break;
 
       case APP_STATE_ACTION.GET_ENTITIES:
-        return appState.mlTimeSeriesExplorer.entities;
+        return mlTimeSeriesExplorer.entities;
       case APP_STATE_ACTION.SET_ENTITIES:
-        appState.mlTimeSeriesExplorer.entities = payload;
+        mlTimeSeriesExplorer.entities = payload;
         break;
 
       case APP_STATE_ACTION.GET_FORECAST_ID:
-        return appState.mlTimeSeriesExplorer.forecastId;
+        return mlTimeSeriesExplorer.forecastId;
       case APP_STATE_ACTION.SET_FORECAST_ID:
-        appState.mlTimeSeriesExplorer.forecastId = payload;
+        mlTimeSeriesExplorer.forecastId = payload;
         break;
 
       case APP_STATE_ACTION.GET_ZOOM:
-        return appState.mlTimeSeriesExplorer.zoom;
+        return mlTimeSeriesExplorer.zoom;
       case APP_STATE_ACTION.SET_ZOOM:
-        appState.mlTimeSeriesExplorer.zoom = payload;
+        mlTimeSeriesExplorer.zoom = payload;
         break;
       case APP_STATE_ACTION.UNSET_ZOOM:
-        delete appState.mlTimeSeriesExplorer.zoom;
+        delete mlTimeSeriesExplorer.zoom;
         break;
     }
+
+    appState.set('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
   };
 
   useEffect(() => {
