@@ -24,6 +24,10 @@ export class AbstractStyleProperty {
     return true;
   }
 
+  formatField(value) {
+    return value;
+  }
+
   getStyleName() {
     return this._styleName;
   }

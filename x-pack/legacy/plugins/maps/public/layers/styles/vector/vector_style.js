@@ -336,7 +336,7 @@ export class VectorStyle extends AbstractStyle {
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
 
-  _getFieldFormatter(fieldName) {
+  _getFieldFormatter = fieldName => {
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp) {
       return null;
@@ -410,13 +410,8 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderLegendDetails() {
-    const formatField = (fieldName, value) => {
-      const fieldFormatter = this._getFieldFormatter(fieldName);
-      return fieldFormatter ? fieldFormatter(value) : value;
-    };
-
     const stylesPromise = this._getLegendDetailStyleProperties();
-    return <VectorStyleLegend formatField={formatField} stylesPromise={stylesPromise} />;
+    return <VectorStyleLegend stylesPromise={stylesPromise} />;
   }
 
   _getFeatureStyleParams() {
@@ -581,7 +576,7 @@ export class VectorStyle extends AbstractStyle {
       return new StaticSizeProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicSizeProperty(descriptor.options, styleName, field, this._getFieldMeta);
+      return new DynamicSizeProperty(descriptor.options, styleName, field, this._getFieldMeta, this._getFieldFormatter);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
@@ -594,7 +589,7 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicColorProperty(descriptor.options, styleName, field, this._getFieldMeta);
+      return new DynamicColorProperty(descriptor.options, styleName, field, this._getFieldMeta, this._getFieldFormatter);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }

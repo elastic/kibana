@@ -14,10 +14,11 @@ import React from 'react';
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field, getFieldMeta) {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
     super(options, styleName);
     this._field = field;
     this._getFieldMeta = getFieldMeta;
+    this._getFieldFormatter = getFieldFormatter;
   }
 
   getFieldMeta() {
@@ -113,7 +114,17 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  renderLegendDetailRow(formatField) {
-    return <DynamicLegendRow style={this} formatField={formatField} />;
+  formatField(value) {
+    if (this.getField()) {
+      const fieldName = this.getField().getName();
+      const fieldFormatter = this._getFieldFormatter(fieldName);
+      return fieldFormatter ? fieldFormatter(value) : value;
+    } else {
+      return value;
+    }
+  }
+
+  renderLegendDetailRow() {
+    return <DynamicLegendRow style={this} />;
   }
 }

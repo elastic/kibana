@@ -10,12 +10,6 @@ import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_ro
 import { getVectorStyleLabel } from '../../components/get_vector_style_label';
 
 const EMPTY_VALUE = '';
-function formatValue(fieldFormatter, fieldName, value) {
-  if (!fieldFormatter || value === EMPTY_VALUE) {
-    return value;
-  }
-  return fieldFormatter(fieldName, value);
-}
 
 export class DynamicLegendRow extends React.Component {
   constructor() {
@@ -47,6 +41,13 @@ export class DynamicLegendRow extends React.Component {
     this._loadParams();
   }
 
+  _formatValue(value) {
+    if (value === EMPTY_VALUE) {
+      return value;
+    }
+    return this.props.style.formatField(value);
+  }
+
   render() {
     const fieldMeta = this.props.style.getFieldMeta();
 
@@ -54,14 +55,13 @@ export class DynamicLegendRow extends React.Component {
     let maxLabel = EMPTY_VALUE;
     if (fieldMeta) {
       const range = { min: fieldMeta.min, max: fieldMeta.max };
-      const fieldName = this.props.style.getField().getName();
-      const min = formatValue(this.props.formatField, fieldName, _.get(range, 'min', EMPTY_VALUE));
+      const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
       minLabel =
         this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange
           ? `< ${min}`
           : min;
 
-      const max = formatValue(this.props.formatField, fieldName, _.get(range, 'max', EMPTY_VALUE));
+      const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
       maxLabel =
         this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange
           ? `> ${max}`
