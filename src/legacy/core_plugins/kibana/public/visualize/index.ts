@@ -30,6 +30,7 @@ import {
 } from './legacy_imports';
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
+import { start as navigation } from '../../../navigation/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
 /**
@@ -63,6 +64,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   instance.start(npStart.core, {
     ...npStart.plugins,
     embeddables,
+    navigation,
     visualizations,
   });
 })();

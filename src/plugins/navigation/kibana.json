@@ -1,7 +1,0 @@
-{
-  "id": "navigation",
-  "version": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["data"]
-}

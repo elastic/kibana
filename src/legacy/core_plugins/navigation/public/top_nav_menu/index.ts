@@ -16,29 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
 
-export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
-
-const createSetupContract = (): jest.Mocked<Setup> => {
-  const setupContract = {
-    registerMenuItem: jest.fn(),
-  };
-
-  return setupContract;
-};
-
-const createStartContract = (): jest.Mocked<Start> => {
-  const startContract = {
-    ui: {
-      TopNavMenu: jest.fn(),
-    },
-  };
-  return startContract;
-};
-
-export const navigationPluginMock = {
-  createSetupContract,
-  createStartContract,
-};
+export { TopNavMenu } from './top_nav_menu';
+export { TopNavMenuData } from './top_nav_menu_data';
+export * from './top_nav_menu_extensions_registry';

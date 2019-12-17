@@ -21,7 +21,6 @@
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../../../plugins/embeddable/public/mocks';
-import { navigationPluginMock } from '../../../../../plugins/navigation/public/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { inspectorPluginMock } from '../../../../../plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mocks';
@@ -31,7 +30,6 @@ import { usageCollectionPluginMock } from '../../../../../plugins/usage_collecti
 export const pluginsMock = {
   createSetup: () => ({
     data: dataPluginMock.createSetupContract(),
-    navigation: navigationPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
@@ -40,7 +38,6 @@ export const pluginsMock = {
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
-    navigation: navigationPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
