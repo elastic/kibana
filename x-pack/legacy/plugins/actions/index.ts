@@ -42,7 +42,7 @@ export function actions(kibana: any) {
                 .allow(WhitelistedHosts.Any)
             )
             .sparse(false)
-            .default([]),
+            .default([WhitelistedHosts.Any]),
           enabledActionTypes: Joi.array()
             .items(Joi.string())
             .sparse(false)
