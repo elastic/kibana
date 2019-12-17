@@ -48,7 +48,7 @@ const nullValueValidateEmptyField = emptyField(
   i18n.translate(
     'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
     {
-      defaultMessage: 'Specify a null value.',
+      defaultMessage: 'Null value is required.',
     }
   )
 );
@@ -61,7 +61,7 @@ const indexOptionsConfig = {
   }),
   type: FIELD_TYPES.SUPER_SELECT,
   helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
-    defaultMessage: 'Information that should be stored in the index.',
+    defaultMessage: 'Information to store in the index.',
   }),
 };
 
@@ -221,6 +221,11 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
+      validations: [
+        {
+          validator: nullValueValidateEmptyField,
+        },
+      ],
     },
   },
   null_value_numeric: {
@@ -281,7 +286,7 @@ export const PARAMETERS_DEFINITION = {
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.copyToIsRequiredErrorMessage',
               {
-                defaultMessage: 'Specify a copy value.',
+                defaultMessage: 'Copy to is required.',
               }
             )
           ),
@@ -501,7 +506,7 @@ export const PARAMETERS_DEFINITION = {
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.normalizerIsRequiredErrorMessage',
               {
-                defaultMessage: 'Give a name to the normalizer.',
+                defaultMessage: 'Normalizer name is required.',
               }
             )
           ),
@@ -513,6 +518,9 @@ export const PARAMETERS_DEFINITION = {
           }),
         },
       ],
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.normalizerHelpText', {
+        defaultMessage: 'The name of the normalizer defined in your index settings.',
+      }),
     },
   },
   index_options: {
@@ -662,9 +670,6 @@ export const PARAMETERS_DEFINITION = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityLabel', {
         defaultMessage: 'Similarity algorithm',
       }),
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityHelpText', {
-        defaultMessage: 'Defaults to BM25.',
-      }),
     },
   },
   split_queries_on_whitespace: {
@@ -683,6 +688,16 @@ export const PARAMETERS_DEFINITION = {
       }),
       formatters: [toInt],
       validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.ignoreAboveIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Character length limit is required.',
+              }
+            )
+          ),
+        },
         {
           validator: (({ value }: ValidationFuncArg<any, number>) => {
             if ((value as number) < 0) {

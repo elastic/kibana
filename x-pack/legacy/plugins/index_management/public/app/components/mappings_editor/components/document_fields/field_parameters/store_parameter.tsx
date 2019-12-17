@@ -16,8 +16,7 @@ export const StoreParameter = () => (
       defaultMessage: 'Store field value',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.storeFieldValueFieldDescription', {
-      defaultMessage:
-        'Whether the field value should be stored and retrieved separately from the _source field.',
+      defaultMessage: 'Store and retrieve the field value separate from the _source field.',
     })}
     formFieldPath="store"
   />

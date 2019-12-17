@@ -10,18 +10,18 @@ import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 
-export const EagerGlobalOrdinalsParameter = () => (
+export const SplitQueriesOnWhitespaceParameter = () => (
   <EditFieldFormRow
-    title={i18n.translate('xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldTitle', {
-      defaultMessage: 'Allow eager global ordinals',
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle', {
+      defaultMessage: 'Split queries on whitespace',
     })}
     description={i18n.translate(
-      'xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldDescription',
+      'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceDescription',
       {
         defaultMessage:
-          'Load global ordinals on refresh. This is useful on fields that are frequently used for terms aggregations.',
+          'Full text queries will split the input on whitespace when building a query for this field.',
       }
     )}
-    formFieldPath="eager_global_ordinals"
+    formFieldPath="split_queries_on_whitespace"
   />
 );

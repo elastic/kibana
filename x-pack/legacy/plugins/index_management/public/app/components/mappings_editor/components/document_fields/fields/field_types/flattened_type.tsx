@@ -17,6 +17,7 @@ import {
   EagerGlobalOrdinalsParameter,
   NullValueParameter,
   SimilarityParameter,
+  SplitQueriesOnWhitespaceParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -86,23 +87,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
             />
           </EditFieldFormRow>
 
-          {/* split_queries_on_whitespace */}
-          <EditFieldFormRow
-            title={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle',
-              {
-                defaultMessage: 'Split queries on whitespace',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceDescription',
-              {
-                defaultMessage:
-                  'Whether full text queries should split the input on whitespace when building a query for this field.',
-              }
-            )}
-            formFieldPath="split_queries_on_whitespace"
-          />
+          <SplitQueriesOnWhitespaceParameter />
 
           <SimilarityParameter
             defaultToggleValue={getDefaultToggleValue('similarity', field.source)}

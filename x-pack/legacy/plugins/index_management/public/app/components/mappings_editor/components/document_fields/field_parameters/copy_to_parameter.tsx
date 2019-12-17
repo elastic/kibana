@@ -22,7 +22,7 @@ export const CopyToParameter = ({ defaultToggleValue }: Props) => (
       defaultMessage: 'Copy to',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldDescription', {
-      defaultMessage: 'Whether to copy the values of multiple fields into a group field.',
+      defaultMessage: 'Copy the values of multiple fields into a group field.',
     })}
     defaultToggleValue={defaultToggleValue}
   >

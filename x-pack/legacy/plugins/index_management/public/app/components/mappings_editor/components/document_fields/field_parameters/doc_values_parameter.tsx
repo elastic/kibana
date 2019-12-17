@@ -19,11 +19,11 @@ export const DocValuesParameter = ({
 }) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldTitle', {
-      defaultMessage: 'Save doc values',
+      defaultMessage: 'Use doc values',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldDescription', {
       defaultMessage:
-        'Whether to store fields on disk in a column-stride fashion, so that it can later be used for sorting, aggregations, or scripting.',
+        'Store fields on disk in a column-stride fashion for use in sorting, aggregations, and scripting.',
     })}
     formFieldPath="doc_values"
     configPath={configPath}

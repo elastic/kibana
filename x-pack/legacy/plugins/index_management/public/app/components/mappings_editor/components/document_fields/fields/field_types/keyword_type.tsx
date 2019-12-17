@@ -7,6 +7,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
@@ -21,6 +22,7 @@ import {
   NormsParameter,
   SimilarityParameter,
   CopyToParameter,
+  SplitQueriesOnWhitespaceParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -31,12 +33,10 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
     case 'ignore_above': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
+    case 'normalizer':
     case 'copy_to':
     case 'null_value': {
       return field.null_value !== undefined;
-    }
-    case 'normalizer': {
-      return field.normalizer === undefined;
     }
     default:
       return false;
@@ -59,15 +59,15 @@ export const KeywordType = ({ field }: Props) => {
         {/* normalizer */}
         <EditFieldFormRow
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
-            defaultMessage: 'Use index default normalizer',
+            defaultMessage: 'Use normalizer',
           })}
           description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
-            defaultMessage: 'How to pre-process the keyword prior to indexing.',
+            defaultMessage: 'Process the keyword prior to indexing. ',
           })}
           defaultToggleValue={getDefaultToggleValue('normalizer', field.source)}
         >
           {isOn =>
-            isOn === false && (
+            isOn === true && (
               <UseField path="normalizer" config={getFieldConfig('normalizer')} component={Field} />
             )
           }
@@ -86,7 +86,8 @@ export const KeywordType = ({ field }: Props) => {
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription',
               {
-                defaultMessage: 'Do not index any string longer than this value.',
+                defaultMessage:
+                  'Strings longer than this value will not be indexed. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
               }
             )}
             defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
@@ -106,23 +107,7 @@ export const KeywordType = ({ field }: Props) => {
             defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
 
-          {/* split_queries_on_whitespace */}
-          <EditFieldFormRow
-            title={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle',
-              {
-                defaultMessage: 'Split queries on whitespace',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldDescription',
-              {
-                defaultMessage:
-                  'Whether full text queries should split the input on whitespace when building a query for this field.',
-              }
-            )}
-            formFieldPath="split_queries_on_whitespace"
-          />
+          <SplitQueriesOnWhitespaceParameter />
 
           <DocValuesParameter />
 
