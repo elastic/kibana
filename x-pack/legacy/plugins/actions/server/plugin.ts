@@ -56,7 +56,7 @@ export class Plugin {
   private defaultKibanaIndex?: string;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get('plugins', 'actions');
     this.config$ = initializerContext.config.create();
     this.kibana$ = initializerContext.config.kibana$;
   }
