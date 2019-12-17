@@ -43,9 +43,8 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
         state.latestFocusedWorldCoordinates,
         projectionMatrix(state)
       );
-      const worldCoordinateThereNow = rasterToWorld(stateWithNewScaling)(
-        rasterOfLastFocusedWorldCoordinates
-      );
+      const matrix = rasterToWorld(stateWithNewScaling);
+      const worldCoordinateThereNow = applyMatrix3(rasterOfLastFocusedWorldCoordinates, matrix);
       const delta = [
         worldCoordinateThereNow[0] - state.latestFocusedWorldCoordinates[0],
         worldCoordinateThereNow[1] - state.latestFocusedWorldCoordinates[1],

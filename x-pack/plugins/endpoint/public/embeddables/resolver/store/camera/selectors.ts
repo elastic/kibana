@@ -25,9 +25,10 @@ interface RasterCameraProperties {
 
 export function viewableBoundingBox(state: CameraState): AABB {
   const { renderWidth, renderHeight } = rasterCameraProperties(state);
+  const matrix = rasterToWorld(state);
   return {
-    minimum: rasterToWorld(state)([0, renderHeight]),
-    maximum: rasterToWorld(state)([renderWidth, 0]),
+    minimum: applyMatrix3([0, renderHeight], matrix),
+    maximum: applyMatrix3([renderWidth, 0], matrix),
   };
 }
 
@@ -96,9 +97,7 @@ export function translation(state: CameraState): Vector2 {
   }
 }
 
-export const rasterToWorld: (
-  state: CameraState
-) => (rasterPosition: Vector2) => Vector2 = state => {
+export const rasterToWorld: (state: CameraState) => Matrix3 = state => {
   const {
     renderWidth,
     renderHeight,
@@ -108,11 +107,9 @@ export const rasterToWorld: (
     clippingPlaneBottom,
   } = rasterCameraProperties(state);
 
-  // TODO, define screen, raster, and world coordinates
-
   const [translationX, translationY] = translation(state);
 
-  const projection = addMatrix(
+  return addMatrix(
     // 4. Translate for the 'camera'
     // prettier-ignore
     [
@@ -142,11 +139,6 @@ export const rasterToWorld: (
       )
     )
   );
-
-  // TODO, this no longer needs to be a function, can just be a matrix
-  return rasterPosition => {
-    return applyMatrix3(rasterPosition, projection);
-  };
 };
 
 export const scale = (state: CameraState): Vector2 => state.scaling;

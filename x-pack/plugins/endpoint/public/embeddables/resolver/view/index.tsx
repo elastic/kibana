@@ -40,10 +40,13 @@ const Diagnostic = styled(
         if (elementBoundingClientRect === undefined) {
           return null;
         }
-        return rasterToWorld([
-          clientPosition[0] - elementBoundingClientRect.x,
-          clientPosition[1] - elementBoundingClientRect.y,
-        ]);
+        return applyMatrix3(
+          [
+            clientPosition[0] - elementBoundingClientRect.x,
+            clientPosition[1] - elementBoundingClientRect.y,
+          ],
+          rasterToWorld
+        );
       },
       [rasterToWorld, elementBoundingClientRect]
     );

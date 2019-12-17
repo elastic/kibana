@@ -9,6 +9,7 @@ import { CameraAction } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { rasterToWorld } from './selectors';
+import { applyMatrix3 } from '../../lib/vector2';
 
 describe('rasterToWorld', () => {
   let store: Store<CameraState, CameraAction>;
@@ -16,7 +17,7 @@ describe('rasterToWorld', () => {
   beforeEach(() => {
     store = createStore(cameraReducer, undefined);
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
-      const [worldX, worldY] = rasterToWorld(store.getState())(rasterPosition);
+      const [worldX, worldY] = applyMatrix3(rasterPosition, rasterToWorld(store.getState()));
       expect(worldX).toBeCloseTo(expectedWorldPosition[0]);
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);
     };
