@@ -22,6 +22,7 @@ export function createActionTypeRegistry(): {
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.create(),
     taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+    actionsConfigUtils: configUtilsMock,
   });
   registerBuiltInActionTypes({
     logger,
