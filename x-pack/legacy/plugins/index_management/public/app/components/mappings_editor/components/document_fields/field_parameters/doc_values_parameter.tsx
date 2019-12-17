@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 
 type DocValuesParameterNames = 'doc_values' | 'doc_values_binary';
 
@@ -25,6 +26,12 @@ export const DocValuesParameter = ({
       defaultMessage:
         'Store fields on disk in a column-stride fashion for use in sorting, aggregations, and scripting.',
     })}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesDocLinkText', {
+        defaultMessage: 'Doc values documentation',
+      }),
+      href: documentationService.getDocValuesLink(),
+    }}
     formFieldPath="doc_values"
     configPath={configPath}
   />

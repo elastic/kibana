@@ -14,6 +14,7 @@ import { UseField } from '../../../shared_imports';
 import { ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
 import { ComboBoxOption } from '../../../types';
 import { getFieldConfig } from '../../../lib';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   defaultValue: string;
@@ -40,6 +41,12 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription', {
         defaultMessage: 'The date format(s) that can be parsed.',
       })}
+      docLink={{
+        text: i18n.translate('xpack.idxMgmt.mappingsEditor.formatDocLinkText', {
+          defaultMessage: 'Format documentation',
+        }),
+        href: documentationService.getFormatLink(),
+      }}
       defaultToggleValue={defaultToggleValue}
     >
       <UseField path="format" config={getFieldConfig('format')}>

@@ -6,6 +6,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
@@ -78,6 +79,15 @@ export const FlattenedType = React.memo(({ field }: Props) => {
                   'Prevent leaf values from being indexed if they are beyond a certain length. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
               }
             )}
+            docLink={{
+              text: i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.flattened.ignoreAboveDocLinkText',
+                {
+                  defaultMessage: 'Ignore above documentation',
+                }
+              ),
+              href: documentationService.getIgnoreAboveLink(),
+            }}
             defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
           >
             <UseField
