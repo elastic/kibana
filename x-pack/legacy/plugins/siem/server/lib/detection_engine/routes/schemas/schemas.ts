@@ -78,3 +78,5 @@ export const threats = Joi.array().items(
     techniques: threat_techniques.required(),
   })
 );
+
+export const version = Joi.number().min(1);

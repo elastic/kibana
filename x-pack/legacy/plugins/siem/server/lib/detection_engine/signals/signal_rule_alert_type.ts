@@ -53,6 +53,7 @@ export const signalRulesAlertType = ({
         type: schema.string(),
         updatedAt: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        version: schema.number({ defaultValue: 1 }),
       }),
     },
     async executor({ alertId, services, params }) {

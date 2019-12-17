@@ -78,6 +78,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(rule).toEqual(expected);
     });
@@ -139,6 +140,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(omitData).toEqual(expected);
     });
@@ -202,6 +204,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(rule).toEqual(expected);
     });
@@ -265,6 +268,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(rule).toEqual(expected);
     });
@@ -326,6 +330,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(omitData).toEqual(expected);
     });
@@ -390,6 +395,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
@@ -454,6 +460,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
@@ -518,6 +525,7 @@ describe('utils', () => {
         timeline_id: 'some-timeline-id',
         to: 'now',
         type: 'query',
+        version: 1,
       };
       expect(rule).toEqual(expected);
     });
@@ -631,6 +639,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        version: 1,
       };
       expect(output).toEqual({
         data: [expected],
@@ -702,6 +711,7 @@ describe('utils', () => {
         },
         saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
+        version: 1,
       };
       expect(output).toEqual(expected);
     });
