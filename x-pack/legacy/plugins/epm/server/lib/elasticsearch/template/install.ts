@@ -26,6 +26,7 @@ export async function installTemplates(pkg: RegistryPackage, callCluster: CallES
   // If no datasets exist in this package, no templates have to be installed.
   if (!pkg.datasets) return;
   return pkg.datasets.map(async dataset => {
+    dataset.package = pkg.name;
     // Fetch all field definition files for this dataset
     const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
     // Merge all the fields of a dataset together and create an Elasticsearch index template
