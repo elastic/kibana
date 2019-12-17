@@ -40,10 +40,10 @@ export async function createDatasource(options: {
   const pkg = await Registry.fetchInfo(pkgkey);
 
   // Collect the config for each dataset
-  const configs: string[] = [];
+  const inputs: string[] = [];
   if (pkg.datasets) {
     for (const dataset of pkg.datasets) {
-      configs.push(await getConfig(pkgkey, dataset));
+      inputs.push(await getConfig(pkgkey, dataset));
     }
   }
 
@@ -56,6 +56,7 @@ export async function createDatasource(options: {
       datasets,
       toSave,
       request,
+      inputs,
     }),
   ]);
 
@@ -82,8 +83,9 @@ async function saveDatasourceReferences(options: {
   datasourceName: string;
   toSave: AssetReference[];
   request: Request;
+  inputs: string[];
 }) {
-  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request } = options;
+  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request, inputs } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -99,6 +101,8 @@ async function saveDatasourceReferences(options: {
     datasets,
     assets: toInstall,
   });
+
+  datasource.inputs = inputs;
   // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
   // or something similar, but it's a class not an object so many pieces are missing
   // we'd still need `user` from the request object, but that's not terrible
