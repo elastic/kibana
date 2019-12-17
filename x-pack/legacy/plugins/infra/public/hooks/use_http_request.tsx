@@ -17,13 +17,14 @@ export function useHTTPRequest<Response>(
   decode: (response: any) => Response = response => response
 ) {
   const kibana = useKibana();
+  const fetch = kibana.services.http?.fetch;
+  const toasts = kibana.notifications.toasts;
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<IHttpFetchError | null>(null);
   const [request, makeRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {
-        const fetch = kibana.services.http?.fetch;
         if (!fetch) {
           throw new Error('HTTP service is unavailable');
         }
@@ -36,7 +37,7 @@ export function useHTTPRequest<Response>(
       onReject: (e: unknown) => {
         const err = e as IHttpFetchError;
         setError(err);
-        kibana.notifications.toasts.warning({
+        toasts.warning({
           title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
             defaultMessage: `Error while fetching resource`,
           }),
@@ -59,7 +60,7 @@ export function useHTTPRequest<Response>(
         });
       },
     },
-    [pathname, body, method, decode, kibana]
+    [pathname, body, method, fetch, toasts]
   );
 
   const loading = useMemo(() => {
