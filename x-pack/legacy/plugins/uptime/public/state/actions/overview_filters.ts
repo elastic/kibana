@@ -13,12 +13,12 @@ export const FETCH_OVERVIEW_FILTERS_SUCCESS = 'FETCH_OVERVIEW_FILTERS_SUCCESS';
 export interface GetOverviewFiltersPayload {
   dateRangeStart: string;
   dateRangeEnd: string;
+  locations: string[];
+  ports: string[];
+  schemes: string[];
   search?: string;
-  schemes?: string[];
-  ports?: string[];
-  tags?: string[];
-  locations?: string[];
   statusFilter?: string;
+  tags: string[];
 }
 
 interface GetOverviewFiltersFetchAction {
@@ -42,26 +42,10 @@ export type OverviewFiltersAction =
   | GetOverviewFiltersFailAction;
 
 export const fetchOverviewFilters = (
-  dateRangeStart: string,
-  dateRangeEnd: string,
-  search?: string,
-  statusFilter?: string,
-  schemes?: string[],
-  locations?: string[],
-  ports?: string[],
-  tags?: string[]
+  payload: GetOverviewFiltersPayload
 ): GetOverviewFiltersFetchAction => ({
   type: FETCH_OVERVIEW_FILTERS,
-  payload: {
-    dateRangeStart,
-    dateRangeEnd,
-    search,
-    statusFilter,
-    locations,
-    ports,
-    schemes,
-    tags,
-  },
+  payload,
 });
 
 export const fetchOverviewFiltersFail = (error: Error): GetOverviewFiltersFailAction => ({

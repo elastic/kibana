@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
 import { OverviewFilters } from '../../../../common/runtime_types';
-import { fetchOverviewFilters } from '../../../state/actions';
+import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
 import { AppState } from '../../../state';
 import { useUrlParams } from '../../../hooks';
 import { parseFiltersMap } from './parse_filter_map';
@@ -175,16 +175,16 @@ export const Container: React.FC<Props> = ({
   const { filters: urlFilters } = getUrlParams();
   useEffect(() => {
     const filterSelections = parseFiltersMap(urlFilters, filterWhitelist);
-    loadFilterGroup(
+    loadFilterGroup({
       dateRangeStart,
       dateRangeEnd,
-      esKuery,
+      locations: filterSelections.locations ?? [],
+      ports: filterSelections.ports ?? [],
+      schemes: filterSelections.schemes ?? [],
+      search: esKuery,
       statusFilter,
-      filterSelections.schemes ?? [],
-      filterSelections.locations ?? [],
-      filterSelections.ports ?? [],
-      filterSelections.tags ?? []
-    );
+      tags: filterSelections.tags ?? [],
+    });
   }, [dateRangeStart, dateRangeEnd, esKuery, filters, statusFilter]);
   return (
     <PresentationalComponent
@@ -207,29 +207,7 @@ const mapStateToProps = ({
 });
 
 const mapDispatchToProps = (dispatch: any): DispatchProps => ({
-  loadFilterGroup: (
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    search?: string,
-    statusFilter?: string,
-    schemes?: string[],
-    locations?: string[],
-    ports?: string[],
-    tags?: string[]
-  ) => {
-    return dispatch(
-      fetchOverviewFilters(
-        dateRangeStart,
-        dateRangeEnd,
-        search,
-        statusFilter,
-        schemes,
-        locations,
-        ports,
-        tags
-      )
-    );
-  },
+  loadFilterGroup: (payload: GetOverviewFiltersPayload) => dispatch(fetchOverviewFilters(payload)),
 });
 
 export const FilterGroup = connect<StoreProps, DispatchProps, OwnProps>(

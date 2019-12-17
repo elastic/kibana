@@ -18,7 +18,6 @@ export const fetchOverviewFilters = async ({
   basePath,
   dateRangeStart,
   dateRangeEnd,
-  // TODO: cause searches to narrow available filter options
   search,
   schemes,
   locations,
@@ -27,10 +26,10 @@ export const fetchOverviewFilters = async ({
 }: ApiRequest) => {
   const url = getApiPath(`/api/uptime/filters`, basePath);
   const filterParams =
-    parameterizeValues('schemes', schemes ?? []) +
-    parameterizeValues('locations', locations ?? []) +
-    parameterizeValues('ports', ports ?? []) +
-    parameterizeValues('tags', tags ?? []);
+    parameterizeValues('schemes', schemes) +
+    parameterizeValues('locations', locations) +
+    parameterizeValues('ports', ports) +
+    parameterizeValues('tags', tags);
 
   const requiredParams = `?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
   const searchParam = search ? `&search=${search}` : '';
