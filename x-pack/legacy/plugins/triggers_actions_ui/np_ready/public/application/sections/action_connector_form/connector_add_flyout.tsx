@@ -17,7 +17,7 @@ import {
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm } from './action_connector_form';
-import { ActionType } from '../../../types';
+import { ActionType, ActionConnector } from '../../../types';
 import { useAppDependencies } from '../../app_dependencies';
 
 export const ConnectorAddFlyout = () => {
@@ -46,7 +46,11 @@ export const ConnectorAddFlyout = () => {
     currentForm = <ActionTypeMenu onActionTypeChange={onActionTypeChange} />;
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
-    const initialConnector = { actionTypeId: actionType.id, config: {}, secrets: {} };
+    const initialConnector = {
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    } as ActionConnector;
 
     currentForm = (
       <ActionConnectorForm

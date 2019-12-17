@@ -382,7 +382,17 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 <EuiText size="m">{headers[key]}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon iconType="cross" onClick={() => removeHeader(key)} />
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.deleteHeaderButton',
+                    {
+                      defaultMessage: 'Delete',
+                      description: 'Delete HTTP header',
+                    }
+                  )}
+                  iconType="cross"
+                  onClick={() => removeHeader(key)}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           );

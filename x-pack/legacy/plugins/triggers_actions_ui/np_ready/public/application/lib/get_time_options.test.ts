@@ -26,7 +26,7 @@ describe('get_time_options', () => {
     ]);
   });
 
-  test('if ', () => {
+  test('if getTimeFieldOptions return only date type fields', () => {
     const timeOnlyTypeFields = getTimeFieldOptions(
       [
         { type: 'date', name: 'order_date' },
