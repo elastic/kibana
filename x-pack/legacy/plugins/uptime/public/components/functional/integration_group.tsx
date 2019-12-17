@@ -39,7 +39,7 @@ export const IntegrationGroup = ({
   isLogsAvailable,
   summary,
 }: IntegrationGroupProps) => {
-  const domain = summary?.state?.url?.domain;
+  const domain = summary?.state?.url?.domain || '';
   const checks = summary?.state?.checks || [];
   const podUid = checks[0]?.kubernetes?.pod?.uid;
   const containerId = checks[0]?.container?.id;
