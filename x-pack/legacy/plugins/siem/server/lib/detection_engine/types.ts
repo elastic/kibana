@@ -45,6 +45,7 @@ export interface RuleAlertParams {
   to: string;
   threats: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
+  version: number;
   updatedAt: string;
 }
 
