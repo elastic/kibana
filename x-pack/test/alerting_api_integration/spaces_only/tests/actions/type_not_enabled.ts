@@ -34,7 +34,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         statusCode: 400,
         error: 'Bad Request',
         message:
-          'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledTypes',
+          'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
     });
 
@@ -52,7 +52,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         retry: false,
         actionId: PREWRITTEN_ACTION_ID,
         message:
-          'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledTypes',
+          'action type "test.not-enabled" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
       });
     });
 

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, fromNullable, isSome, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
+import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
 import { URL } from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -48,29 +48,18 @@ function whitelistingErrorMessage(field: WhitelistingField, value: string) {
 function disabledActionTypeErrorMessage(actionType: string) {
   return i18n.translate('xpack.actions.disabledActionTypeError', {
     defaultMessage:
-      'action type "{actionType}" is not enabled in the Kibana config xpack.actions.enabledTypes',
+      'action type "{actionType}" is not enabled in the Kibana config xpack.actions.enabledActionTypes',
     values: {
       actionType,
     },
   });
 }
 
-function doesValueWhitelistAnyHostname(whitelistedHostname: string): boolean {
-  return whitelistedHostname === WhitelistedHosts.Any;
-}
-
 function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string): boolean {
-  return (
-    Array.isArray(whitelistedHosts) &&
-    isSome(
-      fromNullable(
-        whitelistedHosts.find(
-          whitelistedHostname =>
-            doesValueWhitelistAnyHostname(whitelistedHostname) || whitelistedHostname === hostname
-        )
-      )
-    )
-  );
+  const whitelisted = new Set(whitelistedHosts);
+  if (whitelisted.has(WhitelistedHosts.Any)) return true;
+  if (whitelisted.has(hostname)) return true;
+  return false;
 }
 
 function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
@@ -82,12 +71,12 @@ function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boo
   );
 }
 
-function isActionTypeEnabledinConfig(
-  { enabledTypes }: ActionsConfigType,
+function isActionTypeEnabledInConfig(
+  { enabledActionTypes }: ActionsConfigType,
   actionType: string
 ): boolean {
-  const enabled = new Set(enabledTypes);
-  if (enabled.has('*')) return true;
+  const enabled = new Set(enabledActionTypes);
+  if (enabled.has(EnabledActionTypes.Any)) return true;
   if (enabled.has(actionType)) return true;
   return false;
 }
@@ -97,7 +86,7 @@ export function getActionsConfigurationUtilities(
 ): ActionsConfigurationUtilities {
   const isWhitelistedHostname = curry(isWhitelisted)(config);
   const isWhitelistedUri = curry(isWhitelistedHostnameInUri)(config);
-  const isActionTypeEnabled = curry(isActionTypeEnabledinConfig)(config);
+  const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   return {
     isWhitelistedHostname,
     isWhitelistedUri,

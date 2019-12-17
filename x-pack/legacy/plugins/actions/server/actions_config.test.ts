@@ -11,12 +11,18 @@ import {
   EnabledActionTypes,
 } from './actions_config';
 
+const DefaultActionsConfig: ActionsConfigType = {
+  enabled: false,
+  whitelistedHosts: [],
+  enabledActionTypes: [],
+};
+
 describe('ensureWhitelistedUri', () => {
   test('returns true when "any" hostnames are allowed', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [WhitelistedHosts.Any],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(
       getActionsConfigurationUtilities(config).ensureWhitelistedUri(
@@ -26,7 +32,7 @@ describe('ensureWhitelistedUri', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the whitelist', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureWhitelistedUri(
         'https://github.com/elastic/kibana'
@@ -37,7 +43,7 @@ describe('ensureWhitelistedUri', () => {
   });
 
   test('throws when the uri cannot be parsed as a valid URI', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureWhitelistedUri('github.com/elastic')
     ).toThrowErrorMatchingInlineSnapshot(
@@ -49,7 +55,7 @@ describe('ensureWhitelistedUri', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: ['github.com'],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(
       getActionsConfigurationUtilities(config).ensureWhitelistedUri(
@@ -64,7 +70,7 @@ describe('ensureWhitelistedHostname', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [WhitelistedHosts.Any],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(
       getActionsConfigurationUtilities(config).ensureWhitelistedHostname('github.com')
@@ -72,7 +78,7 @@ describe('ensureWhitelistedHostname', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the whitelist', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureWhitelistedHostname('github.com')
     ).toThrowErrorMatchingInlineSnapshot(
@@ -84,7 +90,7 @@ describe('ensureWhitelistedHostname', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: ['github.com'],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(
       getActionsConfigurationUtilities(config).ensureWhitelistedHostname('github.com')
@@ -97,7 +103,7 @@ describe('isWhitelistedUri', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [WhitelistedHosts.Any],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
@@ -105,14 +111,14 @@ describe('isWhitelistedUri', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the whitelist', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
     ).toEqual(false);
   });
 
   test('throws when the uri cannot be parsed as a valid URI', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(getActionsConfigurationUtilities(config).isWhitelistedUri('github.com/elastic')).toEqual(
       false
     );
@@ -122,7 +128,7 @@ describe('isWhitelistedUri', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: ['github.com'],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(
       getActionsConfigurationUtilities(config).isWhitelistedUri('https://github.com/elastic/kibana')
@@ -135,7 +141,7 @@ describe('isWhitelistedHostname', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [WhitelistedHosts.Any],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
       true
@@ -143,7 +149,7 @@ describe('isWhitelistedHostname', () => {
   });
 
   test('throws when the hostname in the requested uri is not in the whitelist', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
       false
     );
@@ -153,7 +159,7 @@ describe('isWhitelistedHostname', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: ['github.com'],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isWhitelistedHostname('github.com')).toEqual(
       true
@@ -166,7 +172,7 @@ describe('isActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: ['ignore', EnabledActionTypes.Any],
+      enabledActionTypes: ['ignore', EnabledActionTypes.Any],
     };
     expect(getActionsConfigurationUtilities(config).isActionTypeEnabled('foo')).toEqual(true);
   });
@@ -175,7 +181,7 @@ describe('isActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: [],
+      enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isActionTypeEnabled('foo')).toEqual(false);
   });
@@ -184,7 +190,7 @@ describe('isActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: ['foo'],
+      enabledActionTypes: ['foo'],
     };
     expect(getActionsConfigurationUtilities(config).isActionTypeEnabled('bar')).toEqual(false);
   });
@@ -193,7 +199,7 @@ describe('isActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: ['ignore', 'foo'],
+      enabledActionTypes: ['ignore', 'foo'],
     };
     expect(getActionsConfigurationUtilities(config).isActionTypeEnabled('foo')).toEqual(true);
   });
@@ -204,17 +210,17 @@ describe('ensureActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: ['ignore', EnabledActionTypes.Any],
+      enabledActionTypes: ['ignore', EnabledActionTypes.Any],
     };
     expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
   });
 
   test('throws when no actionType is not allowed', () => {
-    const config: ActionsConfigType = { enabled: false, whitelistedHosts: [], enabledTypes: [] };
+    const config: ActionsConfigType = DefaultActionsConfig;
     expect(() =>
       getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledTypes"`
+      `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
   });
 
@@ -222,12 +228,12 @@ describe('ensureActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: ['ignore'],
+      enabledActionTypes: ['ignore'],
     };
     expect(() =>
       getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledTypes"`
+      `"action type \\"foo\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
   });
 
@@ -235,7 +241,7 @@ describe('ensureActionTypeEnabled', () => {
     const config: ActionsConfigType = {
       enabled: false,
       whitelistedHosts: [],
-      enabledTypes: ['ignore', 'foo'],
+      enabledActionTypes: ['ignore', 'foo'],
     };
     expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
   });
