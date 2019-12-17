@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { PureComponent, Fragment, ChangeEvent, ComponentType } from 'react';
+import React, { Component, Fragment, ChangeEvent, ComponentType } from 'react';
 
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -53,7 +53,7 @@ function filterField(field: IFieldType) {
   return field.type === 'number';
 }
 
-export class RangeControlEditor extends PureComponent<
+export class RangeControlEditor extends Component<
   RangeControlEditorProps,
   RangeControlEditorState
 > {
