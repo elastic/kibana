@@ -190,6 +190,7 @@ export class Server {
     await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();
+    await this.uiSettings.stop();
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {

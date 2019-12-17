@@ -22,6 +22,7 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './types';
+import { UiSettingsService } from './ui_settings_service';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {
@@ -60,8 +61,21 @@ const createStartMock = () => {
   return mocked;
 };
 
+type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
+const createMock = () => {
+  const mocked: jest.Mocked<UiSettingsServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.setup.mockResolvedValue(createSetupMock());
+  mocked.start.mockResolvedValue(createStartMock());
+  return mocked;
+};
+
 export const uiSettingsServiceMock = {
   createSetupContract: createSetupMock,
   createStartContract: createStartMock,
   createClient: createClientMock,
+  create: createMock,
 };
