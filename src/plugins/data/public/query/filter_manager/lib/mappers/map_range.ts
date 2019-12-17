@@ -18,13 +18,13 @@
  */
 
 import { get, has } from 'lodash';
-import { esFilters } from '../../../../../common';
+import { esFilters, TEXT_CONTENT_TYPE } from '../../../../../common';
 
 const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: esFilters.FilterValueFormatter) => {
     let displayValue = `${left} to ${right}`;
     if (formatter) {
-      const convert = formatter.getConverterFor('text');
+      const convert = formatter.getConverterFor(TEXT_CONTENT_TYPE);
       displayValue = `${convert(left)} to ${convert(right)}`;
     }
     return displayValue;

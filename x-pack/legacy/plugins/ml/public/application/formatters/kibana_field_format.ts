@@ -9,9 +9,11 @@
  * field to format the value of a field.
  */
 
+import { TEXT_CONTENT_TYPE } from '../../../../../../../src/plugins/data/public';
+
 export function kibanaFieldFormat(value: any, fieldFormat: any) {
   if (fieldFormat !== undefined && fieldFormat !== null) {
-    return fieldFormat.convert(value, 'text');
+    return fieldFormat.convert(value, TEXT_CONTENT_TYPE);
   } else {
     return value;
   }

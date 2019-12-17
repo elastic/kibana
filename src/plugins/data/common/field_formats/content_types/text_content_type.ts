@@ -21,7 +21,7 @@ import { isFunction } from 'lodash';
 import { IFieldFormat, TextContextTypeConvert } from '../types';
 import { asPrettyString } from '../utils';
 
-export const TEXT_CONTEXT_TYPE = 'text';
+export const TEXT_CONTENT_TYPE = 'text';
 
 export const setup = (
   format: IFieldFormat,

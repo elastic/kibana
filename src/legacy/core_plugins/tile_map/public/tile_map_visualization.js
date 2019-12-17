@@ -23,6 +23,7 @@ import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { npStart } from 'ui/new_platform';
 import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+import { TEXT_CONTENT_TYPE } from '../../../../plugins/data/public';
 
 export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
@@ -170,13 +171,13 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       const boundTooltipFormatter = tooltipFormatter.bind(
         null,
         metricLabel,
-        metricFormat.getConverterFor('text')
+        metricFormat.getConverterFor(TEXT_CONTENT_TYPE)
       );
 
       return {
         label: metricLabel,
         valueFormatter: this._geoJsonFeatureCollectionAndMeta
-          ? metricFormat.getConverterFor('text')
+          ? metricFormat.getConverterFor(TEXT_CONTENT_TYPE)
           : null,
         tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
         mapType: newParams.mapType,

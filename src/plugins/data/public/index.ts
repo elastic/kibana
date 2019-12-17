@@ -81,7 +81,8 @@ export {
   SourceFormat,
   StaticLookupFormat,
   StringFormat,
-  TEXT_CONTEXT_TYPE, // only used in agg_types
+  TEXT_CONTENT_TYPE, // only used in agg_types
+  HTML_CONTENT_TYPE,
   TruncateFormat,
   UrlFormat,
   // index patterns

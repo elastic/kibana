@@ -19,7 +19,7 @@
 
 import { SourceFormat } from './source';
 import { HtmlContextTypeConvert } from '../types';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { HTML_CONTENT_TYPE } from '../content_types';
 
 describe('Source Format', () => {
   let convertHtml: Function;
@@ -27,7 +27,7 @@ describe('Source Format', () => {
   beforeEach(() => {
     const source = new SourceFormat({}, jest.fn());
 
-    convertHtml = source.getConverterFor(HTML_CONTEXT_TYPE) as HtmlContextTypeConvert;
+    convertHtml = source.getConverterFor(HTML_CONTENT_TYPE) as HtmlContextTypeConvert;
   });
 
   test('should use the text content type if a field is not passed', () => {

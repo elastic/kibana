@@ -28,12 +28,12 @@ import {
 import {
   htmlContentTypeSetup,
   textContentTypeSetup,
-  TEXT_CONTEXT_TYPE,
-  HTML_CONTEXT_TYPE,
+  TEXT_CONTENT_TYPE,
+  HTML_CONTENT_TYPE,
 } from './content_types';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
-const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
+const DEFAULT_CONTENT_TYPE = TEXT_CONTENT_TYPE;
 
 export abstract class FieldFormat {
   /**
@@ -94,7 +94,7 @@ export abstract class FieldFormat {
    *                    injecting into the DOM or a DOM attribute
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE, options?: any): string {
+  convert(value: any, contentType: ContentType = DEFAULT_CONTENT_TYPE, options?: any): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
@@ -111,7 +111,7 @@ export abstract class FieldFormat {
    * @public
    */
   getConverterFor(
-    contentType: ContentType = DEFAULT_CONTEXT_TYPE
+    contentType: ContentType = DEFAULT_CONTENT_TYPE
   ): FieldFormatConvertFunction | null {
     if (!this.convertObject) {
       this.convertObject = this.setupContentType();
@@ -190,8 +190,8 @@ export abstract class FieldFormat {
 
   setupContentType(): FieldFormatConvert {
     return {
-      [TEXT_CONTEXT_TYPE]: textContentTypeSetup(this, this.textConvert),
-      [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
+      [TEXT_CONTENT_TYPE]: textContentTypeSetup(this, this.textConvert),
+      [HTML_CONTENT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
 

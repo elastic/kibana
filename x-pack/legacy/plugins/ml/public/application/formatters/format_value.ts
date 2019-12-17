@@ -12,6 +12,7 @@
  */
 
 import moment from 'moment';
+import { TEXT_CONTENT_TYPE } from '../../../../../../../src/plugins/data/public';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
@@ -90,7 +91,7 @@ function formatSingleValue(
     return moment(utcMoment.valueOf()).format('HH:mm');
   } else {
     if (fieldFormat !== undefined) {
-      return fieldFormat.convert(value, 'text');
+      return fieldFormat.convert(value, TEXT_CONTENT_TYPE);
     } else {
       // If no Kibana FieldFormat object provided,
       // format the value depending on its magnitude.
@@ -98,7 +99,7 @@ function formatSingleValue(
       if (absValue >= 10000 || absValue === Math.floor(absValue)) {
         // Output 0 decimal places if whole numbers or >= 10000
         if (fieldFormat !== undefined) {
-          return fieldFormat.convert(value, 'text');
+          return fieldFormat.convert(value, TEXT_CONTENT_TYPE);
         } else {
           return Number(value.toFixed(0));
         }

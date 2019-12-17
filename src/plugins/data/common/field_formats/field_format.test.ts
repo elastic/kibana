@@ -20,6 +20,7 @@
 import { constant, trimRight, trimLeft, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
+import { HTML_CONTENT_TYPE, TEXT_CONTENT_TYPE } from '../';
 
 const getTestFormat = (
   _params?: Record<string, any>,
@@ -82,46 +83,48 @@ describe('FieldFormat class', () => {
     describe('#getConverterFor', () => {
       test('returns a converter for a specific content type', () => {
         const f = getTestFormat();
-        const htmlConverter = f.getConverterFor('html');
-        const textConverter = f.getConverterFor('text');
+        const htmlConverter = f.getConverterFor(HTML_CONTENT_TYPE);
+        const textConverter = f.getConverterFor(TEXT_CONTENT_TYPE);
 
-        expect(htmlConverter && typeof htmlConverter('')).toBe('string');
-        expect(textConverter && typeof textConverter('')).toBe('string');
+        expect(htmlConverter && typeof htmlConverter('', {})).toBe('string');
+        expect(textConverter && typeof textConverter('', {})).toBe('string');
       });
     });
 
     describe('#_convert, the instance method or methods used to format values', () => {
       test('can be a function, which gets converted to a text and html converter', () => {
         const f = getTestFormat(undefined, () => 'formatted');
-        const text = f.getConverterFor('text');
-        const html = f.getConverterFor('html');
+        const text = f.getConverterFor(TEXT_CONTENT_TYPE);
+        const html = f.getConverterFor(HTML_CONTENT_TYPE);
 
         expect(text).not.toBe(html);
-        expect(text && text('formatted')).toBe('formatted');
-        expect(html && html('formatted')).toBe('<span ng-non-bindable>formatted</span>');
+        expect(text && text('formatted', {})).toBe('formatted');
+        expect(html && html('formatted', {})).toBe('<span ng-non-bindable>formatted</span>');
       });
 
       test('can be an object, with separate text and html converter', () => {
         const f = getTestFormat(undefined, constant('formatted text'), constant('formatted html'));
-        const text = f.getConverterFor('text');
-        const html = f.getConverterFor('html');
+        const text = f.getConverterFor(TEXT_CONTENT_TYPE);
+        const html = f.getConverterFor(HTML_CONTENT_TYPE);
 
         expect(text).not.toBe(html);
-        expect(text && text('formatted text')).toBe('formatted text');
-        expect(html && html('formatted html')).toBe('<span ng-non-bindable>formatted html</span>');
+        expect(text && text('formatted text', {})).toBe('formatted text');
+        expect(html && html('formatted html', {})).toBe(
+          '<span ng-non-bindable>formatted html</span>'
+        );
       });
 
       test('does not escape the output of the text converter', () => {
         const f = getTestFormat(undefined, constant('<script>alert("xxs");</script>'));
 
-        expect(f.convert('', 'text')).toContain('<');
+        expect(f.convert('', TEXT_CONTENT_TYPE)).toContain('<');
       });
 
       test('does escape the output of the text converter if used in an html context', () => {
         const f = getTestFormat(undefined, constant('<script>alert("xxs");</script>'));
 
         const expected = trimRight(
-          trimLeft(f.convert('', 'html'), '<span ng-non-bindable>'),
+          trimLeft(f.convert('', HTML_CONTENT_TYPE), '<span ng-non-bindable>'),
           '</span>'
         );
 
@@ -131,8 +134,8 @@ describe('FieldFormat class', () => {
       test('does not escape the output of an html specific converter', () => {
         const f = getTestFormat(undefined, constant('<img>'), constant('<img>'));
 
-        expect(f.convert('', 'text')).toBe('<img>');
-        expect(f.convert('', 'html')).toBe('<span ng-non-bindable><img></span>');
+        expect(f.convert('', TEXT_CONTENT_TYPE)).toBe('<img>');
+        expect(f.convert('', HTML_CONTENT_TYPE)).toBe('<span ng-non-bindable><img></span>');
       });
     });
 
@@ -146,7 +149,7 @@ describe('FieldFormat class', () => {
       test('formats a value as html, when specified via second param', () => {
         const f = getTestFormat(undefined, constant('text'), constant('html'));
 
-        expect(f.convert('val', 'html')).toBe('<span ng-non-bindable>html</span>');
+        expect(f.convert('val', HTML_CONTENT_TYPE)).toBe('<span ng-non-bindable>html</span>');
       });
 
       test('formats a value as " - " when no value is specified', () => {

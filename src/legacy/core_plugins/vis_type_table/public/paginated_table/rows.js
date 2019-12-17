@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
+import { HTML_CONTENT_TYPE } from '../../../../../plugins/data/public';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 export function KbnRows($compile) {
@@ -70,18 +71,16 @@ export function KbnRows($compile) {
           $cell = $cellContent = createCell();
         }
 
-        const htmlConvertType = 'html';
         const options = {
           parsedUrl: {
             origin: window.location.origin,
             pathname: window.location.pathname,
           },
         };
-
         // An AggConfigResult can "enrich" cell contents by applying a field formatter,
         // which we want to do if possible.
         contents = contentsIsDefined
-          ? column.formatter.convert(contents, htmlConvertType, options)
+          ? column.formatter.convert(contents, HTML_CONTENT_TYPE, options)
           : '';
 
         if (_.isObject(contents)) {

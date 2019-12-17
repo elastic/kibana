@@ -29,7 +29,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpRange } from './create_filter/ip_range';
 import {
   KBN_FIELD_TYPES,
-  TEXT_CONTEXT_TYPE,
+  TEXT_CONTENT_TYPE,
   FieldFormat,
 } from '../../../../../plugins/data/public';
 
@@ -54,7 +54,7 @@ export const ipRangeBucketAgg = new BucketAggType({
   getFormat(agg) {
     const fieldFormats = npStart.plugins.data.fieldFormats;
     const formatter = agg.fieldOwnFormatter(
-      TEXT_CONTEXT_TYPE,
+      TEXT_CONTENT_TYPE,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
     );
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {

@@ -22,6 +22,7 @@ import React, { Component } from 'react';
 import { isColorDark } from '@elastic/eui';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { HTML_CONTENT_TYPE, TEXT_CONTENT_TYPE } from '../../../../../plugins/data/public';
 
 import { MetricVisValue } from './metric_vis_value';
 
@@ -84,7 +85,7 @@ export class MetricVisComponent extends Component {
     return isColorDark(parseInt(color[1]), parseInt(color[2]), parseInt(color[3]));
   }
 
-  _getFormattedValue = (fieldFormatter, value, format = 'text') => {
+  _getFormattedValue = (fieldFormatter, value, format = TEXT_CONTENT_TYPE) => {
     if (isNaN(value)) return '-';
     return fieldFormatter.convert(value, format);
   };
@@ -119,7 +120,7 @@ export class MetricVisComponent extends Component {
         if (isPercentageMode) {
           value = (value - min) / (max - min);
         }
-        value = this._getFormattedValue(formatter, value, 'html');
+        value = this._getFormattedValue(formatter, value, HTML_CONTENT_TYPE);
 
         if (bucketColumnId) {
           const bucketValue = this._getFormattedValue(bucketFormatter, row[bucketColumnId]);

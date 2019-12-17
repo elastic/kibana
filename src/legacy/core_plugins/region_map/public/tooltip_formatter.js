@@ -19,6 +19,7 @@
 
 import $ from 'jquery';
 import template from './tooltip.html';
+import { TEXT_CONTENT_TYPE } from '../../../../plugins/data/public';
 
 export const TileMapTooltipFormatter = $injector => {
   const $rootScope = $injector.get('$rootScope');
@@ -45,7 +46,9 @@ export const TileMapTooltipFormatter = $injector => {
     if (metric) {
       $tooltipScope.details.push({
         label: metricName,
-        value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
+        value: fieldFormatter
+          ? fieldFormatter.convert(metric.value, TEXT_CONTENT_TYPE)
+          : metric.value,
       });
     }
 

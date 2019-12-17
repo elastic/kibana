@@ -19,15 +19,16 @@
 import { escape, isFunction } from 'lodash';
 import { IFieldFormat, HtmlContextTypeConvert } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
+import { TEXT_CONTENT_TYPE } from './';
 
-export const HTML_CONTEXT_TYPE = 'html';
+export const HTML_CONTENT_TYPE = 'html';
 
 const getConvertFn = (
   format: IFieldFormat,
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const fallbackHtml: HtmlContextTypeConvert = (value, { field, hit }) => {
-    const formatted = escape(format.convert(value, 'text', { field, hit }));
+    const formatted = escape(format.convert(value, TEXT_CONTENT_TYPE, { field, hit }));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
       ? formatted

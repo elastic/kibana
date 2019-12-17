@@ -27,7 +27,7 @@ import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_r
 
 import {
   KBN_FIELD_TYPES,
-  TEXT_CONTEXT_TYPE,
+  TEXT_CONTENT_TYPE,
   FieldFormat,
 } from '../../../../../plugins/data/public';
 
@@ -51,7 +51,7 @@ export const dateRangeBucketAgg = new BucketAggType({
     const fieldFormats = npStart.plugins.data.fieldFormats;
 
     const formatter = agg.fieldOwnFormatter(
-      TEXT_CONTEXT_TYPE,
+      TEXT_CONTENT_TYPE,
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
     );
     const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {

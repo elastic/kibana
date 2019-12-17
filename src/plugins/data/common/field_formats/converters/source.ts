@@ -24,6 +24,7 @@ import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { TEXT_CONTENT_TYPE } from '../content_types';
 
 const templateHtml = `
   <dl class="source truncate-by-height">
@@ -44,7 +45,7 @@ export class SourceFormat extends FieldFormat {
 
   htmlConvert: HtmlContextTypeConvert = (value, { field, hit }) => {
     if (!field) {
-      const converter = this.getConverterFor('text') as Function;
+      const converter = this.getConverterFor(TEXT_CONTENT_TYPE) as Function;
 
       return escape(converter(value));
     }

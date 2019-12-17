@@ -24,6 +24,7 @@ import { Vis } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { HTML_CONTENT_TYPE } from '../../../../../plugins/data/public';
 
 describe('AggConfig', function() {
   let indexPattern;
@@ -477,8 +478,8 @@ describe('AggConfig', function() {
 
     it('returns the html converter if "html" is passed in', function() {
       const field = indexPattern.fields.getByName('bytes');
-      expect(vis.aggs.aggs[0].fieldFormatter('html').toString()).to.be(
-        field.format.getConverterFor('html').toString()
+      expect(vis.aggs.aggs[0].fieldFormatter(HTML_CONTENT_TYPE).toString()).to.be(
+        field.format.getConverterFor(HTML_CONTENT_TYPE).toString()
       );
     });
   });

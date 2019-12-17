@@ -28,6 +28,7 @@ import { I18nContext } from 'ui/i18n';
 import { Label } from './label';
 import { TagCloud } from './tag_cloud';
 import { FeedbackMessage } from './feedback_message';
+import { TEXT_CONTENT_TYPE } from '../../../../../plugins/data/public';
 
 const MAX_TAG_COUNT = 200;
 
@@ -129,7 +130,7 @@ export class TagCloudVisualization {
       const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
       const metric = row[metricColumn];
       return {
-        displayText: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
+        displayText: bucketFormatter ? bucketFormatter.convert(tag, TEXT_CONTENT_TYPE) : tag,
         rawText: tag,
         value: metric,
         meta: {

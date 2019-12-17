@@ -21,6 +21,7 @@ import handlebars from 'handlebars/dist/handlebars';
 import { isNumber } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
+import { TEXT_CONTENT_TYPE } from '../../../../../../plugins/data/public';
 
 export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   const fieldFormats = npStart.plugins.data.fieldFormats;
@@ -53,7 +54,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
       value = val;
     } else {
       try {
-        value = formatter.convert(val, 'text');
+        value = formatter.convert(val, TEXT_CONTENT_TYPE);
       } catch (e) {
         value = val;
       }

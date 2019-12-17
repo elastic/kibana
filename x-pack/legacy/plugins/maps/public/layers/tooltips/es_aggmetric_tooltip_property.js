@@ -6,6 +6,7 @@
 
 import { ESTooltipProperty } from './es_tooltip_property';
 import { METRIC_TYPE } from '../../../common/constants';
+import { HTML_CONTENT_TYPE } from '../../../../../../../src/plugins/data/public';
 
 export class ESAggMetricTooltipProperty extends ESTooltipProperty {
   constructor(propertyKey, propertyName, rawValue, indexPattern, metricField) {
@@ -33,7 +34,7 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     if (!indexPatternField) {
       return this._rawValue;
     }
-    const htmlConverter = indexPatternField.format.getConverterFor('html');
+    const htmlConverter = indexPatternField.format.getConverterFor(HTML_CONTENT_TYPE);
 
     return htmlConverter
       ? htmlConverter(this._rawValue)

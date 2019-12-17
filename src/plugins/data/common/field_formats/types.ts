@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { TEXT_CONTENT_TYPE, HTML_CONTENT_TYPE } from './content_types';
+
 /** @public **/
 export type ContentType = 'html' | 'text';
 
@@ -41,8 +43,8 @@ export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTyp
 
 /** @internal **/
 export interface FieldFormatConvert {
-  text: TextContextTypeConvert;
-  html: HtmlContextTypeConvert;
+  [TEXT_CONTENT_TYPE]: TextContextTypeConvert;
+  [HTML_CONTENT_TYPE]: HtmlContextTypeConvert;
 }
 
 /** @public **/

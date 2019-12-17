@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
+import { HTML_CONTENT_TYPE, TEXT_CONTENT_TYPE } from '../../';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
@@ -26,7 +27,12 @@ const partialFormattedCache = new WeakMap();
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
 export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any) {
-  function convert(hit: Record<string, any>, val: any, fieldName: string, type: string = 'html') {
+  function convert(
+    hit: Record<string, any>,
+    val: any,
+    fieldName: string,
+    type = HTML_CONTENT_TYPE
+  ) {
     const field = indexPattern.fields.getByName(fieldName);
     if (!field) return defaultFormat.convert(val, type);
     const parsedUrl = {
@@ -37,8 +43,8 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     return field.format.getConverterFor(type)(val, options);
   }
 
-  function formatHit(hit: Record<string, any>, type: string = 'html') {
-    if (type === 'text') {
+  function formatHit(hit: Record<string, any>, type = HTML_CONTENT_TYPE) {
+    if (type === TEXT_CONTENT_TYPE) {
       // formatHit of type text is for react components to get rid of <span ng-non-bindable>
       // since it's currently just used at the discover's doc view table, caching is not necessary
       const flattened = indexPattern.flattenHit(hit);

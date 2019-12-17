@@ -19,6 +19,7 @@ import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
 import { ES_GEO_FIELD_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
+import { TEXT_CONTENT_TYPE } from '../../../../../../../src/plugins/data/public';
 
 export class AbstractESSource extends AbstractVectorSource {
   static icon = 'logoElasticsearch';
@@ -288,7 +289,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    return fieldFromIndexPattern.format.getConverterFor('text');
+    return fieldFromIndexPattern.format.getConverterFor(TEXT_CONTENT_TYPE);
   }
 
   async loadStylePropsMeta(

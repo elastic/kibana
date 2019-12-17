@@ -18,13 +18,13 @@
  */
 
 import { UrlFormat } from './url';
-import { TEXT_CONTEXT_TYPE, HTML_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTENT_TYPE, HTML_CONTENT_TYPE } from '../content_types';
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {
     const url = new UrlFormat({});
 
-    expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+    expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
       '<span ng-non-bindable><a href="http://elastic.co" target="_blank" rel="noopener noreferrer">http://elastic.co</a></span>'
     );
   });
@@ -32,7 +32,7 @@ describe('UrlFormat', () => {
   test('outputs an <audio> if type === "audio"', () => {
     const url = new UrlFormat({ type: 'audio' });
 
-    expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+    expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
       '<span ng-non-bindable><audio controls preload="none" src="http://elastic.co"></span>'
     );
   });
@@ -41,7 +41,7 @@ describe('UrlFormat', () => {
     test('default', () => {
       const url = new UrlFormat({ type: 'img' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
@@ -50,7 +50,7 @@ describe('UrlFormat', () => {
     test('with correct width and height set', () => {
       const url = new UrlFormat({ type: 'img', width: '12', height: '55' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>'
       );
@@ -59,7 +59,7 @@ describe('UrlFormat', () => {
     test('with correct width and height set if no width specified', () => {
       const url = new UrlFormat({ type: 'img', height: '55' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>'
       );
@@ -68,7 +68,7 @@ describe('UrlFormat', () => {
     test('with correct width and height set if no height specified', () => {
       const url = new UrlFormat({ type: 'img', width: '22' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>'
       );
@@ -77,7 +77,7 @@ describe('UrlFormat', () => {
     test('only accepts valid numbers for width', () => {
       const url = new UrlFormat({ type: 'img', width: 'not a number' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
@@ -86,7 +86,7 @@ describe('UrlFormat', () => {
     test('only accepts valid numbers for height', () => {
       const url = new UrlFormat({ type: 'img', height: 'not a number' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
@@ -97,7 +97,7 @@ describe('UrlFormat', () => {
     test('accepts a template', () => {
       const url = new UrlFormat({ urlTemplate: 'http://{{ value }}' });
 
-      expect(url.convert('url', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('url', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><a href="http://url" target="_blank" rel="noopener noreferrer">http://url</a></span>'
       );
     });
@@ -105,7 +105,7 @@ describe('UrlFormat', () => {
     test('only outputs the url if the contentType === "text"', () => {
       const url = new UrlFormat({});
 
-      expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('url');
+      expect(url.convert('url', TEXT_CONTENT_TYPE)).toBe('url');
     });
   });
 
@@ -116,7 +116,7 @@ describe('UrlFormat', () => {
         urlTemplate: 'http://www.{{value}}.com',
       });
 
-      expect(url.convert('php', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('php', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><a href="http://www.php.com" target="_blank" rel="noopener noreferrer">extension: php</a></span>'
       );
     });
@@ -124,7 +124,7 @@ describe('UrlFormat', () => {
     test('uses the label template for text formating', () => {
       const url = new UrlFormat({ labelTemplate: 'external {{value }}' });
 
-      expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('external url');
+      expect(url.convert('url', TEXT_CONTENT_TYPE)).toBe('external url');
     });
 
     test('can use the raw value', () => {
@@ -132,7 +132,7 @@ describe('UrlFormat', () => {
         labelTemplate: 'external {{value}}',
       });
 
-      expect(url.convert('url?', TEXT_CONTEXT_TYPE)).toBe('external url?');
+      expect(url.convert('url?', TEXT_CONTENT_TYPE)).toBe('external url?');
     });
 
     test('can use the url', () => {
@@ -141,7 +141,7 @@ describe('UrlFormat', () => {
         labelTemplate: 'external {{url}}',
       });
 
-      expect(url.convert('url?', TEXT_CONTEXT_TYPE)).toBe('external http://google.com/url%3F');
+      expect(url.convert('url?', TEXT_CONTENT_TYPE)).toBe('external http://google.com/url%3F');
     });
   });
 
@@ -149,20 +149,20 @@ describe('UrlFormat', () => {
     test('ignores unknown variables', () => {
       const url = new UrlFormat({ urlTemplate: '{{ not really a var }}' });
 
-      expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('');
+      expect(url.convert('url', TEXT_CONTENT_TYPE)).toBe('');
     });
 
     test('does not allow executing code in variable expressions', () => {
       const url = new UrlFormat({ urlTemplate: '{{ (__dirname = true) && value }}' });
 
-      expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('');
+      expect(url.convert('url', TEXT_CONTENT_TYPE)).toBe('');
     });
 
     describe('', () => {
       test('does not get values from the prototype chain', () => {
         const url = new UrlFormat({ urlTemplate: '{{ toString }}' });
 
-        expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('');
+        expect(url.convert('url', TEXT_CONTENT_TYPE)).toBe('');
       });
     });
   });
@@ -174,7 +174,7 @@ describe('UrlFormat', () => {
         origin: 'http://kibana',
         basePath: '',
       };
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
+      const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
 
       expect(converter('www.elastic.co', null, null, parsedUrl)).toBe(
         '<span ng-non-bindable><a href="http://kibana/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>'
@@ -199,7 +199,7 @@ describe('UrlFormat', () => {
         origin: 'http://kibana',
         basePath: '/xyz',
       };
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
+      const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
 
       expect(converter('www.elastic.co', null, null, parsedUrl)).toBe(
         '<span ng-non-bindable><a href="http://kibana/xyz/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>'
@@ -224,7 +224,7 @@ describe('UrlFormat', () => {
         origin: 'http://kibana.host.com',
         basePath: '/abc',
       };
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
+      const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
 
       expect(converter('../app/kibana', null, null, parsedUrl)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/abc/app/../app/kibana" target="_blank" rel="noopener noreferrer">../app/kibana</a></span>'
@@ -234,11 +234,11 @@ describe('UrlFormat', () => {
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 
-      expect(url.convert('../app/kibana', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('../app/kibana', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable>../app/kibana</span>'
       );
 
-      expect(url.convert('http://www.elastic.co', HTML_CONTEXT_TYPE)).toBe(
+      expect(url.convert('http://www.elastic.co', HTML_CONTENT_TYPE)).toBe(
         '<span ng-non-bindable><a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a></span>'
       );
     });
@@ -250,7 +250,7 @@ describe('UrlFormat', () => {
         pathname: '/nbc/app/kibana#/discover',
         basePath: '/nbc',
       };
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
+      const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
 
       expect(converter('#/foo', null, null, parsedUrl)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
@@ -271,7 +271,7 @@ describe('UrlFormat', () => {
         origin: 'http://kibana.host.com',
         pathname: '/app/kibana',
       };
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
+      const converter = url.getConverterFor(HTML_CONTENT_TYPE) as Function;
 
       expect(converter('10.22.55.66', null, null, parsedUrl)).toBe(
         '<span ng-non-bindable><a href="http://kibana.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>'

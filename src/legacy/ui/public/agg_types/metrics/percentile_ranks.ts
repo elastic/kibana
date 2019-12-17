@@ -25,7 +25,11 @@ import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_respons
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import {
+  FIELD_FORMAT_IDS,
+  KBN_FIELD_TYPES,
+  TEXT_CONTENT_TYPE,
+} from '../../../../../plugins/data/public';
 
 // required by the values editor
 
@@ -44,7 +48,7 @@ const valueProps = {
 
     return i18n.translate('common.ui.aggTypes.metrics.percentileRanks.valuePropsLabel', {
       defaultMessage: 'Percentile rank {format} of "{label}"',
-      values: { format: format.convert(this.key, 'text'), label },
+      values: { format: format.convert(this.key, TEXT_CONTENT_TYPE), label },
     });
   },
 };

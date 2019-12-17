@@ -6,7 +6,8 @@
 
 import { TooltipProperty } from './tooltip_property';
 import _ from 'lodash';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters, HTML_CONTENT_TYPE } from '../../../../../../../src/plugins/data/public';
+
 export class ESTooltipProperty extends TooltipProperty {
   constructor(propertyKey, propertyName, rawValue, indexPattern) {
     super(propertyKey, propertyName, rawValue);
@@ -22,7 +23,7 @@ export class ESTooltipProperty extends TooltipProperty {
     if (!field) {
       return _.escape(this._rawValue);
     }
-    const htmlConverter = field.format.getConverterFor('html');
+    const htmlConverter = field.format.getConverterFor(HTML_CONTENT_TYPE);
     return htmlConverter ? htmlConverter(this._rawValue) : field.format.convert(this._rawValue);
   }
 
