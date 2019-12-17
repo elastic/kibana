@@ -42,8 +42,8 @@ export async function createDatasource(options: {
 
   // Collect the config for each dataset
   const streams: Stream[] = [];
-  if (pkg.datasets) {
-    for (const dataset of pkg.datasets) {
+  if (datasets) {
+    for (const dataset of datasets) {
       const input = yaml.load(await getConfig(pkgkey, dataset));
       if (input) {
         streams.push({
