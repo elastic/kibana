@@ -42,6 +42,7 @@ export interface AggregationOptionsByType {
     size?: number;
     missing?: string;
     order?: SortOptions;
+    execution_hint?: 'map' | 'global_ordinals';
   };
   date_histogram: {
     field: string;
