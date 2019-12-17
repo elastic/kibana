@@ -48,11 +48,7 @@ export default class Legend extends PureComponent {
         fontSize={fontSize}
         {...rest}
       >
-        {indicator ? (
-          indicator({ color, radius })
-        ) : (
-          <Indicator color={color} radius={radius} />
-        )}
+        {indicator ? indicator() : <Indicator color={color} radius={radius} />}
         {text}
       </Container>
     );
