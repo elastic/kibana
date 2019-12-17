@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
 import { isEqual } from 'lodash';
 // @ts-ignore
 import queryString from 'query-string';
@@ -78,13 +77,11 @@ export const useUrlState = (accessor: string): UrlState => {
   };
 
   // check if the accessor is present, if not, initialize it with an empty object.
-  useEffect(() => {
-    const urlState = getStateFromUrl();
-    if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-      urlState[accessor] = {};
-    }
+  const urlState = getStateFromUrl();
+  if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+    urlState[accessor] = {};
     persistStateToUrl(urlState);
-  }, []);
+  }
 
   const get = (attribute: string) => {
     return getNestedProperty(getStateFromUrl(), `${accessor}.${attribute}`);

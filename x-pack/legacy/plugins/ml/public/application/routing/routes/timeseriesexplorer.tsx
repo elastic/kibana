@@ -68,14 +68,6 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
     });
   }
 
-  const subscriptions = new Subscription();
-  subscriptions.add(
-    subscribeAppStateToObservable(appState, 'mlSelectInterval', interval$, () => {})
-  );
-  subscriptions.add(
-    subscribeAppStateToObservable(appState, 'mlSelectSeverity', severity$, () => {})
-  );
-
   const appStateHandler = (action: string, payload: any) => {
     const mlTimeSeriesExplorer = appState.get('mlTimeSeriesExplorer');
     switch (action) {
@@ -117,13 +109,25 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
   };
 
   useEffect(() => {
+    const subscriptions = new Subscription();
+    subscriptions.add(
+      subscribeAppStateToObservable(appState, 'mlSelectInterval', interval$, () => {})
+    );
+    subscriptions.add(
+      subscribeAppStateToObservable(appState, 'mlSelectSeverity', severity$, () => {})
+    );
+
     return () => {
       subscriptions.unsubscribe();
     };
-  });
+  }, []);
 
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+
+  if (appState.get('mlTimeSeriesExplorer') === undefined) {
+    return null;
+  }
 
   return (
     <TimeSeriesExplorer
