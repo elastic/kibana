@@ -18,6 +18,7 @@ import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../../components';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 import { AdvancedRuleEditor } from './rule_editor_panel/advanced_rule_editor';
+import { EuiComboBox } from '@elastic/eui';
 
 jest.mock('../../../../../lib/roles_api', () => {
   return {
@@ -28,7 +29,110 @@ jest.mock('../../../../../lib/roles_api', () => {
 });
 
 describe('EditRoleMappingPage', () => {
-  // Omitting basic create/update/delete tests as they are covered in the functional test suite.
+  it('allows a role mapping to be created', async () => {
+    const roleMappingsAPI = ({
+      saveRoleMapping: jest.fn().mockResolvedValue(null),
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+        canUseInlineScripts: true,
+        canUseStoredScripts: true,
+      }),
+    } as unknown) as RoleMappingsAPI;
+
+    const wrapper = mountWithIntl(<EditRoleMappingPage roleMappingsAPI={roleMappingsAPI} />);
+
+    await nextTick();
+    wrapper.update();
+
+    findTestSubject(wrapper, 'roleMappingFormNameInput').simulate('change', {
+      target: { value: 'my-role-mapping' },
+    });
+
+    (wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="roleMappingFormRoleComboBox"]')
+      .props() as any).onChange([{ label: 'foo_role' }]);
+
+    findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
+
+    findTestSubject(wrapper, 'saveRoleMappingButton').simulate('click');
+
+    expect(roleMappingsAPI.saveRoleMapping).toHaveBeenCalledWith({
+      name: 'my-role-mapping',
+      enabled: true,
+      roles: ['foo_role'],
+      role_templates: [],
+      rules: {
+        all: [{ field: { username: '*' } }],
+      },
+      metadata: {},
+    });
+  });
+
+  it('allows a role mapping to be updated', async () => {
+    const roleMappingsAPI = ({
+      saveRoleMapping: jest.fn().mockResolvedValue(null),
+      getRoleMapping: jest.fn().mockResolvedValue({
+        name: 'foo',
+        role_templates: [
+          {
+            template: { id: 'foo' },
+          },
+        ],
+        enabled: true,
+        rules: {
+          any: [{ field: { 'metadata.someCustomOption': [false, true, 'asdf'] } }],
+        },
+        metadata: {
+          foo: 'bar',
+          bar: 'baz',
+        },
+      }),
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+        canUseInlineScripts: true,
+        canUseStoredScripts: true,
+      }),
+    } as unknown) as RoleMappingsAPI;
+
+    const wrapper = mountWithIntl(
+      <EditRoleMappingPage name="foo" roleMappingsAPI={roleMappingsAPI} />
+    );
+
+    await nextTick();
+    wrapper.update();
+
+    findTestSubject(wrapper, 'switchToRolesButton').simulate('click');
+
+    (wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="roleMappingFormRoleComboBox"]')
+      .props() as any).onChange([{ label: 'foo_role' }]);
+
+    findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
+    wrapper.find('button[id="addRuleOption"]').simulate('click');
+
+    findTestSubject(wrapper, 'saveRoleMappingButton').simulate('click');
+
+    expect(roleMappingsAPI.saveRoleMapping).toHaveBeenCalledWith({
+      name: 'foo',
+      enabled: true,
+      roles: ['foo_role'],
+      role_templates: [],
+      rules: {
+        any: [
+          { field: { 'metadata.someCustomOption': [false, true, 'asdf'] } },
+          { field: { username: '*' } },
+        ],
+      },
+      metadata: {
+        foo: 'bar',
+        bar: 'baz',
+      },
+    });
+  });
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
     const roleMappingsAPI = ({

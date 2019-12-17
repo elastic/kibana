@@ -214,6 +214,7 @@ export class MappingInfoPanel extends Component<Props, State> {
               onClick={() => {
                 this.onRolesModeChange('roles');
               }}
+              data-test-subj="switchToRolesButton"
             >
               <Fragment>
                 <FormattedMessage
