@@ -70,11 +70,8 @@ const ExplorerStateManager: FC = () => {
       appState.set('mlExplorerFilter', {});
     }
 
-    appState.save();
-
     const subscriptions = new Subscription();
 
-    globalState.fetch();
     const globalStateTime = globalState.get('time');
     if (globalStateTime) {
       timefilter.setTime({
@@ -95,10 +92,7 @@ const ExplorerStateManager: FC = () => {
     // subscribe to it and update the actual URL appState on changes.
     subscriptions.add(
       explorerService.appState$.subscribe((appStateIn: ExplorerAppState) => {
-        appState.fetch();
-        appState.set('mlExplorerFilter', appStateIn.mlExplorerFilter);
-        appState.set('mlExplorerSwimlane', appStateIn.mlExplorerSwimlane);
-        appState.save();
+        appState.set(appStateIn);
       })
     );
 

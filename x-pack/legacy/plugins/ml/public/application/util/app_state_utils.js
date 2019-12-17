@@ -13,13 +13,10 @@ function hasEqualKeys(a, b) {
 }
 
 export function initializeAppState(appState, stateName, defaultState) {
-  appState.fetch();
-
   // Store the state to the AppState so that it's
   // restored on page refresh.
   if (appState.get(stateName) === undefined) {
     appState.set(stateName, cloneDeep(defaultState));
-    appState.save();
   }
 
   // if defaultState isn't defined or if defaultState matches the current value
@@ -36,11 +33,12 @@ export function initializeAppState(appState, stateName, defaultState) {
   // - if defaultState is an object, check if current appState has the same keys.
   // - if it's not an object, check if defaultState and current appState are of the same type.
   if (
-    (typeof defaultState === 'object' && !hasEqualKeys(defaultState, appState.get(stateName))) ||
+    (typeof defaultState === 'object' &&
+      typeof appState.get(stateName) === 'object' &&
+      !hasEqualKeys(defaultState, appState.get(stateName))) ||
     typeof defaultState !== typeof appState.get(stateName)
   ) {
     appState.set(stateName, cloneDeep(defaultState));
-    appState.save();
   }
 
   return appState;
@@ -57,9 +55,7 @@ export function subscribeAppStateToObservable(appState, appStateName, o$, callba
   o$.next(appState.get(appStateName));
 
   const subscription = o$.pipe(distinctUntilChanged()).subscribe(payload => {
-    appState.fetch();
     appState.set(appStateName, payload);
-    appState.save();
     if (typeof callback === 'function') {
       callback(payload);
     }

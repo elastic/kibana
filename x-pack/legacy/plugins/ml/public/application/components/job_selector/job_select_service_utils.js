@@ -52,10 +52,6 @@ export const getJobSelectService$ = globalState => {
 };
 
 function loadJobIdsFromGlobalState(globalState) {
-  // jobIds, groups
-  // fetch to get the latest state
-  globalState.fetch();
-
   const jobIds = [];
   let groups = [];
 
@@ -107,18 +103,15 @@ function loadJobIdsFromGlobalState(globalState) {
 // a global `skipRefresh` to control when Single Metric Viewer should
 // skip updates triggered by timefilter.
 export function setGlobalStateSkipRefresh(globalState, skipRefresh) {
-  globalState.fetch();
   let ml = globalState.get('ml');
   if (ml === undefined) {
     ml = {};
   }
   ml.skipRefresh = skipRefresh;
   globalState.set('ml', ml);
-  globalState.save();
 }
 
 export function setGlobalState(globalState, { selectedIds, selectedGroups, skipRefresh }) {
-  globalState.fetch();
   let ml = globalState.get('ml');
   if (ml === undefined) {
     ml = {};
@@ -127,7 +120,6 @@ export function setGlobalState(globalState, { selectedIds, selectedGroups, skipR
   ml.groups = selectedGroups || [];
   ml.skipRefresh = !!skipRefresh;
   globalState.set('ml', ml);
-  globalState.save();
 }
 
 // called externally to retrieve the selected jobs ids

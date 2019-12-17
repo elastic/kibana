@@ -43,6 +43,7 @@
     "@storybook/react": "^5.2.6",
     "@storybook/theming": "^5.2.6",
     "@testing-library/react": "^9.3.2",
+    "@testing-library/react-hooks": "^3.2.1",
     "@testing-library/jest-dom": "4.2.0",
     "@types/angular": "^1.6.56",
     "@types/archiver": "^3.0.0",
