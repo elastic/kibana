@@ -20,7 +20,7 @@ import { LogTimeControls } from '../../../components/logging/log_time_controls';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogFilterState } from '../../../containers/logs/log_filter';
-import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { LogPositionState } from '../../../containers/logs/log_position';
 import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 
@@ -54,6 +54,10 @@ export const LogsToolbar = () => {
     goToPreviousHighlight,
     goToNextHighlight,
   } = useContext(LogHighlightsState.Context);
+  const [
+    { visibleMidpointTime, isAutoReloading },
+    { jumpToTargetPositionTime, startLiveStreaming, stopLiveStreaming },
+  ] = useContext(LogPositionState.Context);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -114,26 +118,16 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <WithLogPosition resetOnUnmount>
-            {({
-              visibleMidpointTime,
-              isAutoReloading,
-              jumpToTargetPositionTime,
-              startLiveStreaming,
-              stopLiveStreaming,
-            }) => (
-              <LogTimeControls
-                currentTime={visibleMidpointTime}
-                isLiveStreaming={isAutoReloading}
-                jumpToTime={jumpToTargetPositionTime}
-                startLiveStreaming={() => {
-                  startLiveStreaming();
-                  setSurroundingLogsId(null);
-                }}
-                stopLiveStreaming={stopLiveStreaming}
-              />
-            )}
-          </WithLogPosition>
+          <LogTimeControls
+            currentTime={visibleMidpointTime}
+            isLiveStreaming={isAutoReloading}
+            jumpToTime={jumpToTargetPositionTime}
+            startLiveStreaming={() => {
+              startLiveStreaming();
+              setSurroundingLogsId(null);
+            }}
+            stopLiveStreaming={stopLiveStreaming}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </Toolbar>

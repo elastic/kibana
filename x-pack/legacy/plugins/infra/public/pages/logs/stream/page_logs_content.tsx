@@ -21,14 +21,13 @@ import {
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
 import { WithLogMinimapUrlState } from '../../../containers/logs/with_log_minimap';
-import { WithLogPositionUrlState } from '../../../containers/logs/with_log_position';
-import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { LogPositionState } from '../../../containers/logs/log_position';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../../containers/logs/with_stream_items';
 import { Source } from '../../../containers/source';
 
 import { LogsToolbar } from './page_toolbar';
-import { LogHighlightsBridge, LogHighlightsState } from '../../../containers/logs/log_highlights';
+import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { source, sourceId, version } = useContext(Source.Context);
@@ -47,110 +46,91 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
+  const [
+    { isAutoReloading, targetPosition, visibleMidpointTime, visibleTimeInterval },
+    { reportVisiblePositions, jumpToTargetPosition, stopLiveStreaming },
+  ] = useContext(LogPositionState.Context);
   return (
     <>
-      <LogHighlightsBridge />
-      <WithLogPositionUrlState />
       <WithLogMinimapUrlState />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
-      <WithLogPosition>
-        {({ jumpToTargetPosition, stopLiveStreaming }) =>
-          flyoutVisible ? (
-            <LogEntryFlyout
-              setFilter={applyLogFilterQuery}
-              setTarget={(timeKey, flyoutItemId) => {
-                jumpToTargetPosition(timeKey);
-                setSurroundingLogsId(flyoutItemId);
-                stopLiveStreaming();
-              }}
-              setFlyoutVisibility={setFlyoutVisibility}
-              flyoutItem={flyoutItem}
-              loading={isLoading}
-            />
-          ) : null
-        }
-      </WithLogPosition>
+      {flyoutVisible ? (
+        <LogEntryFlyout
+          setFilter={applyLogFilterQuery}
+          setTarget={(timeKey, flyoutItemId) => {
+            jumpToTargetPosition(timeKey);
+            setSurroundingLogsId(flyoutItemId);
+            stopLiveStreaming();
+          }}
+          setFlyoutVisibility={setFlyoutVisibility}
+          flyoutItem={flyoutItem}
+          loading={isLoading}
+        />
+      ) : null}
       <PageContent key={`${sourceId}-${version}`}>
-        <WithLogPosition>
+        <WithStreamItems>
           {({
-            isAutoReloading,
-            jumpToTargetPosition,
-            reportVisiblePositions,
-            targetPosition,
-            scrollLockLiveStreaming,
-            scrollUnlockLiveStreaming,
-            isScrollLocked,
+            currentHighlightKey,
+            hasMoreAfterEnd,
+            hasMoreBeforeStart,
+            isLoadingMore,
+            isReloading,
+            items,
+            lastLoadedTime,
+            fetchNewerEntries,
           }) => (
-            <WithStreamItems>
-              {({
-                currentHighlightKey,
-                hasMoreAfterEnd,
-                hasMoreBeforeStart,
-                isLoadingMore,
-                isReloading,
-                items,
-                lastLoadedTime,
-                fetchNewerEntries,
-              }) => (
-                <ScrollableLogTextStreamView
-                  columnConfigurations={(source && source.configuration.logColumns) || []}
-                  hasMoreAfterEnd={hasMoreAfterEnd}
-                  hasMoreBeforeStart={hasMoreBeforeStart}
-                  isLoadingMore={isLoadingMore}
-                  isReloading={isReloading}
-                  isStreaming={isAutoReloading}
-                  items={items}
-                  jumpToTarget={jumpToTargetPosition}
-                  lastLoadedTime={lastLoadedTime}
-                  loadNewerItems={fetchNewerEntries}
-                  reportVisibleInterval={reportVisiblePositions}
-                  scale={textScale}
-                  target={targetPosition}
-                  wrap={textWrap}
-                  setFlyoutItem={setFlyoutId}
-                  setFlyoutVisibility={setFlyoutVisibility}
-                  highlightedItem={surroundingLogsId ? surroundingLogsId : null}
-                  currentHighlightKey={currentHighlightKey}
-                  scrollLock={{
-                    enable: scrollLockLiveStreaming,
-                    disable: scrollUnlockLiveStreaming,
-                    isEnabled: isScrollLocked,
-                  }}
-                />
-              )}
-            </WithStreamItems>
+            <ScrollableLogTextStreamView
+              columnConfigurations={(source && source.configuration.logColumns) || []}
+              hasMoreAfterEnd={hasMoreAfterEnd}
+              hasMoreBeforeStart={hasMoreBeforeStart}
+              isLoadingMore={isLoadingMore}
+              isReloading={isReloading}
+              isStreaming={isAutoReloading}
+              items={items}
+              jumpToTarget={jumpToTargetPosition}
+              lastLoadedTime={lastLoadedTime}
+              loadNewerItems={fetchNewerEntries}
+              reportVisibleInterval={reportVisiblePositions}
+              scale={textScale}
+              target={targetPosition}
+              wrap={textWrap}
+              setFlyoutItem={setFlyoutId}
+              setFlyoutVisibility={setFlyoutVisibility}
+              highlightedItem={surroundingLogsId ? surroundingLogsId : null}
+              currentHighlightKey={currentHighlightKey}
+              scrollLock={{
+                enable: () => {}, // scrollLockLiveStreaming,
+                disable: () => {}, // scrollUnlockLiveStreaming,
+                isEnabled: false, // isScrollLocked,
+              }}
+            />
           )}
-        </WithLogPosition>
+        </WithStreamItems>
+
         <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
               <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
                   {({ buckets }) => (
-                    <WithLogPosition>
-                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
-                        <WithStreamItems>
-                          {({ isReloading }) => (
-                            <LogMinimap
-                              height={height}
-                              width={width}
-                              highlightedInterval={isReloading ? null : visibleTimeInterval}
-                              intervalSize={intervalSize}
-                              jumpToTarget={jumpToTargetPosition}
-                              summaryBuckets={buckets}
-                              summaryHighlightBuckets={
-                                logSummaryHighlights.length > 0
-                                  ? logSummaryHighlights[0].buckets
-                                  : []
-                              }
-                              target={visibleMidpointTime}
-                            />
-                          )}
-                        </WithStreamItems>
+                    <WithStreamItems>
+                      {({ isReloading }) => (
+                        <LogMinimap
+                          height={height}
+                          width={width}
+                          highlightedInterval={isReloading ? null : visibleTimeInterval}
+                          intervalSize={intervalSize}
+                          jumpToTarget={jumpToTargetPosition}
+                          summaryBuckets={buckets}
+                          summaryHighlightBuckets={
+                            logSummaryHighlights.length > 0 ? logSummaryHighlights[0].buckets : []
+                          }
+                          target={visibleMidpointTime}
+                        />
                       )}
-                    </WithLogPosition>
+                    </WithStreamItems>
                   )}
                 </WithSummary>
               </LogPageMinimapColumn>

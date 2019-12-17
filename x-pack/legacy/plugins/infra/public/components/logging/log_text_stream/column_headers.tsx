@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { transparentize } from 'polished';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
@@ -21,28 +21,26 @@ import {
   LogEntryColumnWidths,
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
-import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { LogPositionState } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../utils/formatters/datetime';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
 }> = ({ columnConfigurations, columnWidths }) => {
+  const [{ firstVisiblePosition }] = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map(columnConfiguration => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
-            <WithLogPosition key={columnConfiguration.timestampColumn.id}>
-              {({ firstVisiblePosition }) => (
-                <LogColumnHeader
-                  columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
-                  data-test-subj="logColumnHeader timestampLogColumnHeader"
-                >
-                  {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
-                </LogColumnHeader>
-              )}
-            </WithLogPosition>
+            <LogColumnHeader
+              key={columnConfiguration.timestampColumn.id}
+              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+              data-test-subj="logColumnHeader timestampLogColumnHeader"
+            >
+              {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
+            </LogColumnHeader>
           );
         } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
           return (
