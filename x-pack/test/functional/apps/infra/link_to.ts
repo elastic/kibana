@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
       const expectedSearchString =
         "logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194))&sourceId=default";
-      const expectedRedirect = `/logs/stream?${expectedSearchString}`;
+      const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToActualUrl(
         'infraOps',
@@ -32,7 +32,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();
         const [, currentHash] = decodeURIComponent(currentUrl).split('#');
-        expect(currentHash).to.contain(expectedRedirect);
+        // Account for unpredictable location of the g parameter in the search string
+        expect(currentHash.slice(0, 13)).to.be(expectedRedirectPath);
+        expect(currentHash.slice(13)).to.contain(expectedSearchString);
       });
     });
   });
