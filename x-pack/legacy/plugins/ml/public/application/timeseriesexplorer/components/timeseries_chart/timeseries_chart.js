@@ -52,6 +52,7 @@ import {
   highlightFocusChartAnnotation,
   unhighlightFocusChartAnnotation,
 } from './timeseries_chart_annotations';
+import { TEXT_CONTENT_TYPE } from '../../../../../../../../../src/plugins/data/public';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -338,7 +339,7 @@ const TimeseriesChartIntl = injectI18n(
         .append('text')
         .text(d => {
           if (fieldFormat !== undefined) {
-            return fieldFormat.convert(d, 'text');
+            return fieldFormat.convert(d, TEXT_CONTENT_TYPE);
           } else {
             return focusYScale.tickFormat()(d);
           }
@@ -633,7 +634,7 @@ const TimeseriesChartIntl = injectI18n(
         (focusForecastData !== undefined && focusForecastData.length > 0)
       ) {
         if (this.fieldFormat !== undefined) {
-          this.focusYAxis.tickFormat(d => this.fieldFormat.convert(d, 'text'));
+          this.focusYAxis.tickFormat(d => this.fieldFormat.convert(d, TEXT_CONTENT_TYPE));
         } else {
           // Use default tick formatter.
           this.focusYAxis.tickFormat(null);
