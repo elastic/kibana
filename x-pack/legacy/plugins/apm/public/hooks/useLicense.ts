@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum LICENSE_TYPE {
-  BASIC,
-  FULL, // >= platinum
+import { useContext } from 'react';
+import { LicenseContext } from '../context/LicenseContext';
+
+export function useLicense() {
+  return useContext(LicenseContext);
 }
