@@ -41,7 +41,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetLogEntryRateRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
-  initIndexPatternsValidateRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
