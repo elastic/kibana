@@ -25,7 +25,6 @@ export default function(kibana) {
         description: 'This is a sample plugin for the functional tests.',
         main: 'plugins/kbn_tp_top_nav/app',
       },
-      hacks: ['plugins/kbn_tp_top_nav/initialize'],
     },
   });
 }

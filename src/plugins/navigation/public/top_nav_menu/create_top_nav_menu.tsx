@@ -20,14 +20,11 @@
 import React from 'react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import { TopNavMenuData } from './top_nav_menu_data';
 
-export function createTopNav(data: DataPublicPluginStart, extraConfig: RegisteredTopNavMenuData[]) {
+export function createTopNav(data: DataPublicPluginStart, extraConfig: TopNavMenuData[]) {
   return (props: TopNavMenuProps) => {
-    const relevantConfig = extraConfig.filter(
-      dataItem => dataItem.appName === undefined || dataItem.appName === props.appName
-    );
-    const config = (props.config || []).concat(relevantConfig);
+    const config = (props.config || []).concat(extraConfig);
 
     return <TopNavMenu {...props} data={data} config={config} />;
   };

@@ -18,8 +18,17 @@
  */
 
 import React from 'react';
-import './initialize';
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
+
+const customExtension = {
+  id: 'registered-prop',
+  label: 'Registered Button',
+  description: 'Registered Demo',
+  run() {},
+  testId: 'demoRegisteredNewButton',
+};
+
+npSetup.plugins.navigation.registerMenuItem(customExtension);
 
 export const AppWithTopNav = () => {
   const { TopNavMenu } = npStart.plugins.navigation.ui;
