@@ -5,10 +5,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { toastNotifications } from 'ui/notify';
 import { IHttpFetchError } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -18,13 +16,14 @@ export function useHTTPRequest<Response>(
   body?: string,
   decode: (response: any) => Response = response => response
 ) {
-  const fetch = useKibana().services.http?.fetch;
+  const kibana = useKibana();
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<IHttpFetchError | null>(null);
   const [request, makeRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {
+        const fetch = kibana.services.http?.fetch;
         if (!fetch) {
           throw new Error('HTTP service is unavailable');
         }
@@ -37,11 +36,11 @@ export function useHTTPRequest<Response>(
       onReject: (e: unknown) => {
         const err = e as IHttpFetchError;
         setError(err);
-        toastNotifications.addWarning({
+        kibana.notifications.toasts.warning({
           title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
             defaultMessage: `Error while fetching resource`,
           }),
-          text: toMountPoint(
+          body: (
             <div>
               <h5>
                 {i18n.translate('xpack.infra.useHTTPRequest.error.status', {
@@ -60,7 +59,7 @@ export function useHTTPRequest<Response>(
         });
       },
     },
-    [pathname, body, method, decode, fetch]
+    [pathname, body, method, decode, kibana]
   );
 
   const loading = useMemo(() => {

@@ -7,11 +7,12 @@
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import React, { useCallback, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { useSavedView } from '../../hooks/use_saved_view';
 import { SavedViewCreateModal } from './create_modal';
 import { SavedViewListFlyout } from './view_list_flyout';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+
 interface Props<ViewState> {
   viewType: string;
   viewState: ViewState;
@@ -20,6 +21,7 @@ interface Props<ViewState> {
 }
 
 export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
+  const kibana = useKibana();
   const {
     views,
     saveView,
@@ -77,11 +79,11 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
 
   useEffect(() => {
     if (errorOnCreate) {
-      toastNotifications.addWarning(getErrorToast('create', errorOnCreate)!);
+      kibana.notifications.toasts.warning(getErrorToast('create', errorOnCreate)!);
     } else if (errorOnFind) {
-      toastNotifications.addWarning(getErrorToast('find', errorOnFind)!);
+      kibana.notifications.toasts.warning(getErrorToast('find', errorOnFind)!);
     }
-  }, [errorOnCreate, errorOnFind]);
+  }, [errorOnCreate, errorOnFind, kibana]);
 
   return (
     <>
