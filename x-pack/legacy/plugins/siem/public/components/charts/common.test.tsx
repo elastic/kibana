@@ -11,17 +11,14 @@ import {
   getChartHeight,
   getChartWidth,
   getSeriesStyle,
-  getTheme,
   SeriesType,
   WrappedByAutoSizer,
   ChartSeriesData,
 } from './common';
-import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
 
 jest.mock('@elastic/charts', () => {
   return {
     getSpecId: jest.fn(() => {}),
-    mergeWithDefaultTheme: jest.fn(),
   };
 });
 
@@ -54,21 +51,6 @@ describe('getSeriesStyle', () => {
       expect(JSON.stringify(key)).toEqual(JSON.stringify(expectedKey));
       expect(value).toEqual(color);
     });
-  });
-});
-
-describe('getTheme', () => {
-  it('should merge custom theme with default theme', () => {
-    const defaultTheme = {
-      chartMargins: { bottom: 0, left: 0, right: 0, top: 4 },
-      chartPaddings: { bottom: 0, left: 0, right: 0, top: 0 },
-      scales: {
-        barsPadding: 0.05,
-      },
-    };
-    getTheme();
-    expect((mergeWithDefaultTheme as jest.Mock).mock.calls[0][0]).toMatchObject(defaultTheme);
-    expect((mergeWithDefaultTheme as jest.Mock).mock.calls[0][1]).toEqual(LIGHT_THEME);
   });
 });
 

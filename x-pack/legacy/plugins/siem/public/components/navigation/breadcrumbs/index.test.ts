@@ -19,9 +19,6 @@ jest.mock('ui/chrome', () => ({
   breadcrumbs: {
     set: jest.fn(),
   },
-  getUiSettingsClient: () => ({
-    get: jest.fn(),
-  }),
 }));
 
 jest.mock('../../search_bar', () => ({
