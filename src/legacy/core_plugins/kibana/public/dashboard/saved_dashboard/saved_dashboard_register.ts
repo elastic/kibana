@@ -17,26 +17,9 @@
  * under the License.
  */
 
-import { SavedObject } from 'ui/saved_objects/types';
-import { SearchSourceContract } from '../../../../../ui/public/courier';
-import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import './saved_dashboards';
 
-export interface SavedObjectDashboard extends SavedObject {
-  id?: string;
-  copyOnSave: boolean;
-  timeRestore: boolean;
-  timeTo?: string;
-  timeFrom?: string;
-  title: string;
-  description?: string;
-  panelsJSON: string;
-  optionsJSON?: string;
-  // TODO: write a migration to rid of this, it's only around for bwc.
-  uiStateJSON?: string;
-  lastSavedTitle: string;
-  searchSource: SearchSourceContract;
-  destroy: () => void;
-  refreshInterval?: RefreshInterval;
-  getQuery(): Query;
-  getFilters(): esFilters.Filter[];
-}
+SavedObjectRegistryProvider.register((savedDashboards: any) => {
+  return savedDashboards;
+});

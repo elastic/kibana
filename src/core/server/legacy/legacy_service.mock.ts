@@ -17,9 +17,23 @@
  * under the License.
  */
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import './saved_dashboards';
+import { LegacyServiceDiscoverPlugins } from './legacy_service';
 
-SavedObjectRegistryProvider.register(savedDashboards => {
-  return savedDashboards;
-});
+const createDiscoverMock = () => {
+  const setupContract: DeeplyMockedKeys<LegacyServiceDiscoverPlugins> = {
+    pluginSpecs: [],
+    disabledPluginSpecs: [],
+    uiExports: {} as any,
+    settings: {},
+    pluginExtendedConfig: {
+      get: jest.fn(),
+      has: jest.fn(),
+      set: jest.fn(),
+    } as any,
+  };
+  return setupContract;
+};
+
+export const legacyServiceMock = {
+  createDiscover: createDiscoverMock,
+};
