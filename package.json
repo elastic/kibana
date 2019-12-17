@@ -110,8 +110,8 @@
     ]
   },
   "dependencies": {
-    "@babel/core": "^7.7.5",
-    "@babel/register": "^7.7.4",
+    "@babel/core": "^7.5.5",
+    "@babel/register": "^7.7.0",
     "@elastic/charts": "^14.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
@@ -156,7 +156,7 @@
     "color": "1.0.3",
     "commander": "3.0.2",
     "compare-versions": "3.5.1",
-    "core-js": "^3.5.0",
+    "core-js": "^3.2.1",
     "css-loader": "2.1.1",
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.17",
@@ -275,9 +275,9 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@babel/parser": "^7.7.5",
-    "@babel/plugin-syntax-dynamic-import": "^7.7.4",
-    "@babel/types": "^7.7.4",
+    "@babel/parser": "^7.5.5",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/types": "^7.5.5",
     "@elastic/elasticsearch": "^7.4.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
@@ -298,7 +298,7 @@
     "@testing-library/react-hooks": "^3.2.1",
     "@types/angular": "^1.6.56",
     "@types/angular-mocks": "^1.7.0",
-    "@types/babel__core": "^7.1.3",
+    "@types/babel__core": "^7.1.2",
     "@types/bluebird": "^3.1.1",
     "@types/boom": "^7.2.0",
     "@types/chance": "^1.0.0",
