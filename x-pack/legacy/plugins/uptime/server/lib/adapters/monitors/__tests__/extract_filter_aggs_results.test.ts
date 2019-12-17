@@ -5,6 +5,7 @@
  */
 
 import { extractFilterAggsResults } from '../extract_filter_aggs_results';
+
 describe('extractFilterAggsResults', () => {
   it('extracts the bucket values of the expected filter fields', () => {
     expect(
