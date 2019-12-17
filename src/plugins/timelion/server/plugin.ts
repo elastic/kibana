@@ -31,6 +31,7 @@ import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
 import { validateEsRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
+import { ConfigManager } from './lib/config_manager';
 
 /**
  * Describes public Timelion plugin contract returned at the `setup` stage.
@@ -51,11 +52,7 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
-    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
-    const esShardTimeout = globalConfig.elasticsearch.shardTimeout.asMilliseconds();
-    const allowedGraphiteUrls = config.graphiteUrls || [];
+    const configManager = new ConfigManager(this.initializerContext.config);
 
     const functions = loadFunctions('series_functions');
 
@@ -77,8 +74,7 @@ export class Plugin {
     const router = core.http.createRouter();
 
     const deps = {
-      esShardTimeout,
-      allowedGraphiteUrls,
+      configManager,
       functions,
       getFunction,
       logger,

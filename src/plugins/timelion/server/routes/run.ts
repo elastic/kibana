@@ -27,6 +27,7 @@ import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore
 import getTlConfig from '../handlers/lib/tl_config';
 import { TimelionFunctionInterface } from '../types';
+import { ConfigManager } from '../lib/config_manager';
 
 const timelionDefaults = getNamespacesSettings();
 
@@ -59,13 +60,11 @@ export function runRoute(
   {
     logger,
     getFunction,
-    allowedGraphiteUrls,
-    esShardTimeout,
+    configManager,
   }: {
     logger: Logger;
     getFunction: (name: string) => TimelionFunctionInterface;
-    allowedGraphiteUrls: string[];
-    esShardTimeout: number;
+    configManager: ConfigManager;
   }
 ) {
   router.post(
@@ -113,8 +112,8 @@ export function runRoute(
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
           getFunction,
-          allowedGraphiteUrls,
-          esShardTimeout,
+          allowedGraphiteUrls: configManager.getGraphiteUrls(),
+          esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
           esDataClient: () => context.core.elasticsearch.dataClient,
         });

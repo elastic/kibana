@@ -45,7 +45,7 @@ export default new Datasource('worldbank', {
     The worldbank provides mostly yearly data, and often has no data for the current year.
     Try {offsetQuery} if you get no data for recent time ranges.`,
     values: {
-      worldbankUrl: 'http://data.worldbank.org/',
+      worldbankUrl: 'https://api.worldbank.org/v2/',
       offsetQuery: 'offset=-1y',
     },
   }),
@@ -53,7 +53,7 @@ export default new Datasource('worldbank', {
     // http://api.worldbank.org/en/countries/ind;chn/indicators/DPANUSSPF?date=2000:2006&MRV=5
 
     const config = _.defaults(args.byName, {
-      code: 'countries/wld/indicators/SP.POP.TOTL',
+      code: 'country/all/indicator/SP.POP.TOTL',
     });
 
     const time = {
@@ -62,7 +62,7 @@ export default new Datasource('worldbank', {
     };
 
     const URL =
-      'http://api.worldbank.org/' +
+      'https://api.worldbank.org/v2/' +
       config.code +
       '?date=' +
       time.min +

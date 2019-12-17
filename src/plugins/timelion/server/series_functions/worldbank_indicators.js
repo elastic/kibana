@@ -54,7 +54,7 @@ export default new Datasource('worldbank_indicators', {
     mostly yearly data, and often has no data for the current year. Try {offsetQuery} if you get no data for recent
     time ranges.`,
     values: {
-      worldbankUrl: 'http://data.worldbank.org/',
+      worldbankUrl: 'https://api.worldbank.org/v2/',
       offsetQuery: 'offset=-1y',
     },
   }),
@@ -66,7 +66,7 @@ export default new Datasource('worldbank_indicators', {
 
     const countries = config.country.split(':');
     const seriesLists = _.map(countries, function(country) {
-      const code = 'countries/' + country + '/indicators/' + config.indicator;
+      const code = 'country/' + country + '/indicator/' + config.indicator;
       const wbArgs = [code];
       wbArgs.byName = { code: code };
       return worldbank.timelionFn(wbArgs, tlConfig);
