@@ -18,7 +18,7 @@ import {
   updateFields,
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithRecurringSchedule,
+  TaskWithSchedule,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
 } from './mark_available_tasks_as_claimed';
@@ -52,7 +52,7 @@ describe('mark_available_tasks_as_claimed', () => {
           shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
           // Either task has an schedule or the attempts < the maximum configured
           shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
-            TaskWithRecurringSchedule,
+            TaskWithSchedule,
             ...Object.entries(definitions).map(([type, { maxAttempts }]) =>
               taskWithLessThanMaxAttempts(type, maxAttempts || defaultMaxAttempts)
             )
