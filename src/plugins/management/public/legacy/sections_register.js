@@ -20,33 +20,41 @@
 import { ManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
 
-export const management = new ManagementSection('management', {
-  display: i18n.translate('common.ui.management.displayName', {
-    defaultMessage: 'Management',
-  }),
-});
+export const management = capabilities => {
+  const main = new ManagementSection(
+    'management',
+    {
+      display: i18n.translate('management.displayName', {
+        defaultMessage: 'Management',
+      }),
+    },
+    capabilities
+  );
 
-management.register('data', {
-  display: i18n.translate('common.ui.management.connectDataDisplayName', {
-    defaultMessage: 'Connect Data',
-  }),
-  order: 0,
-});
+  main.register('data', {
+    display: i18n.translate('management.connectDataDisplayName', {
+      defaultMessage: 'Connect Data',
+    }),
+    order: 0,
+  });
 
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20,
-  icon: 'logoElasticsearch',
-});
+  main.register('elasticsearch', {
+    display: 'Elasticsearch',
+    order: 20,
+    icon: 'logoElasticsearch',
+  });
 
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-  icon: 'logoKibana',
-});
+  main.register('kibana', {
+    display: 'Kibana',
+    order: 30,
+    icon: 'logoKibana',
+  });
 
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-  icon: 'logoLogstash',
-});
+  main.register('logstash', {
+    display: 'Logstash',
+    order: 30,
+    icon: 'logoLogstash',
+  });
+
+  return main;
+};
