@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
@@ -54,14 +54,17 @@ export const MatrixHistogram = ({
     if (totalCount >= 0 && loadingInitial) {
       setLoadingInitial(false);
     }
-  }, [loading]);
+  }, [loading, loadingInitial, totalCount]);
+
+  const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+  const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
   return (
     <Panel
       data-test-subj={`${dataKey}Panel`}
       loading={loading}
-      onMouseEnter={() => setShowInspect(true)}
-      onMouseLeave={() => setShowInspect(false)}
+      onMouseEnter={handleOnMouseEnter}
+      onMouseLeave={handleOnMouseLeave}
     >
       <HeaderSection
         id={id}

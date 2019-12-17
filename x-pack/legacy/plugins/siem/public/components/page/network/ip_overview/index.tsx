@@ -7,7 +7,7 @@
 import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
@@ -139,11 +139,12 @@ export const IpOverview = React.memo<IpOverviewProps>(
         { title: i18n.REPUTATION, description: reputationRenderer(ip) },
       ],
     ];
+
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
+
     return (
-      <OverviewWrapper
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
-      >
+      <OverviewWrapper onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <InspectButton
           queryId={id}
           show={showInspect}
