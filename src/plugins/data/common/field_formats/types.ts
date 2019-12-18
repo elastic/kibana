@@ -27,7 +27,7 @@ interface HtmlConvertOptions {
   field?: any;
   hit?: Record<string, any>;
   meta?: any;
-  parsedUrl?: any;
+  [propName: string]: any;
 }
 
 /** @internal **/
