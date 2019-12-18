@@ -17,8 +17,9 @@ export const setAppDependencies = (deps: AppDependencies) => {
 
 export const useAppDependencies = () => {
   if (!DependenciesContext) {
-    throw new Error(`The app dependencies Context hasn't been set.
-    Use the "setAppDependencies()" method when bootstrapping the app.`);
+    throw new Error(
+      `The app dependencies Context hasn't been set. Use the "setAppDependencies()" method when bootstrapping the app.`
+    );
   }
   return useContext<AppDependencies>(DependenciesContext);
 };
