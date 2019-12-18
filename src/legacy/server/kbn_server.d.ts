@@ -46,7 +46,8 @@ import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 import { HomeServerPluginSetup } from '../../plugins/home/server';
 
-export type KibanaConfig = LegacyConfig;
+// lot of legacy code was assuming this type only had these two methods
+export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
 
 export interface UiApp {
   getId(): string;

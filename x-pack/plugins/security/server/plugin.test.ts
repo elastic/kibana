@@ -54,6 +54,17 @@ describe('Security Plugin', () => {
                     "secureCookies": true,
                   },
                   "license": Object {
+                    "features$": Observable {
+                      "_isScalar": false,
+                      "operator": MapOperator {
+                        "project": [Function],
+                        "thisArg": undefined,
+                      },
+                      "source": Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      },
+                    },
                     "getFeatures": [Function],
                     "isEnabled": [Function],
                   },

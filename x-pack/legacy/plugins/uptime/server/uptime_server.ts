@@ -7,10 +7,12 @@
 import { makeExecutableSchema } from 'graphql-tools';
 import { DEFAULT_GRAPHQL_PATH, resolvers, typeDefs } from './graphql';
 import { UMServerLibs } from './lib/lib';
-import { createRouteWithAuth, restApiRoutes } from './rest_api';
+import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 
 export const initUptimeServer = (libs: UMServerLibs) => {
-  restApiRoutes.forEach(route => libs.framework.registerRoute(createRouteWithAuth(libs, route)));
+  restApiRoutes.forEach(route =>
+    libs.framework.registerRoute(uptimeRouteWrapper(createRouteWithAuth(libs, route)))
+  );
 
   const graphQLSchema = makeExecutableSchema({
     resolvers: resolvers.map(createResolversFn => createResolversFn(libs)),

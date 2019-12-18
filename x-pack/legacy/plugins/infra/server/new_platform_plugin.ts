@@ -25,6 +25,7 @@ import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
 import { APP_ID } from '../index';
+import { InfraStaticSourceConfiguration } from './lib/sources/types';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -33,6 +34,13 @@ export interface KbnServer extends Server {
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
   defaultMessage: 'Logs',
 });
+
+export interface InfraPluginSetup {
+  defineInternalSourceConfiguration: (
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) => void;
+}
 
 const DEFAULT_CONFIG: InfraConfig = {
   enabled: true,
@@ -117,5 +125,11 @@ export class InfraServerPlugin {
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    return {
+      defineInternalSourceConfiguration(sourceId, sourceProperties) {
+        sources.defineInternalSourceConfiguration(sourceId, sourceProperties);
+      },
+    } as InfraPluginSetup;
   }
 }
