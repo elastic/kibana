@@ -24,6 +24,7 @@ Object {
       "name": "GET /api",
     },
   },
+  "errorCount": 1,
   "errorCountByTransactionId": Object {
     "myTransactionId1": 2,
     "myTransactionId2": 3,
@@ -672,6 +673,7 @@ Object {
       "name": "Api::ProductsController#index",
     },
   },
+  "errorCount": 0,
   "errorCountByTransactionId": Object {
     "myTransactionId1": 2,
     "myTransactionId2": 3,

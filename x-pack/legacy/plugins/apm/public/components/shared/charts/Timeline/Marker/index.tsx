@@ -24,12 +24,15 @@ const MarkerContainer = styled.div`
   bottom: 0;
 `;
 
-export const Marker: React.FC<Props> = ({ mark, x }) => (
-  <MarkerContainer style={{ left: px(x) }}>
-    {mark.docType === 'agentMark' ? (
-      <AgentMarker mark={mark} />
-    ) : (
-      <ErrorMarker mark={mark} />
-    )}
-  </MarkerContainer>
-);
+export const Marker: React.FC<Props> = ({ mark, x }) => {
+  const legendWidth = 11;
+  return (
+    <MarkerContainer style={{ left: px(x - legendWidth / 2) }}>
+      {mark.docType === 'agentMark' ? (
+        <AgentMarker mark={mark} />
+      ) : (
+        <ErrorMarker mark={mark} />
+      )}
+    </MarkerContainer>
+  );
+};
