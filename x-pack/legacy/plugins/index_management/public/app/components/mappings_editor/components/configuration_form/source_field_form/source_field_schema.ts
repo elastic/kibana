@@ -42,13 +42,13 @@ export const sourceFieldSchema: FormSchema<SourceField> = {
     },
   },
   includes: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.excludeSourceFieldsLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.includeSourceFieldsLabel', {
       defaultMessage: 'Include fields',
     }),
     ...fieldPathComboBoxConfig,
   },
   excludes: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.includeSourceFieldsLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.excludeSourceFieldsLabel', {
       defaultMessage: 'Exclude fields',
     }),
     ...fieldPathComboBoxConfig,
