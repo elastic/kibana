@@ -150,7 +150,7 @@ export const getFormat: FormatFactory = mapping => {
             },
           };
           // @ts-ignore
-          return format.convert(val, options);
+          return format.convert(val, undefined, options);
         };
       },
       convert: (val: string, type: string) => {
@@ -164,7 +164,6 @@ export const getFormat: FormatFactory = mapping => {
         }
 
         const options = {
-          type,
           parsedUrl: {
             origin: window.location.origin,
             pathname: window.location.pathname,
@@ -173,7 +172,7 @@ export const getFormat: FormatFactory = mapping => {
         };
 
         // @ts-ignore
-        return format.convert(val, options);
+        return format.convert(val, type, options);
       },
     } as FieldFormat;
   } else {
