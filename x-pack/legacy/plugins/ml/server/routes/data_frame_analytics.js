@@ -4,171 +4,298 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestFactory } from '../client/call_with_request_factory';
-import { wrapError } from '../client/errors';
+import { schema } from '@kbn/config-schema';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
+import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { dataAnalyticsJobConfigSchema } from '../new_platform/data_analytics_schema';
 
-export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
-  route({
-    method: 'GET',
-    path: '/api/ml/data_frame/analytics',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.getDataFrameAnalytics').catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
+  async function dfAnalyticsGetAllHandler(context, request, response) {
+    try {
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
 
-  route({
-    method: 'GET',
-    path: '/api/ml/data_frame/analytics/{analyticsId}',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics',
+      validate: {
+        params: schema.object({ analyticsId: schema.maybe(schema.string()) }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsGetAllHandler)
+  );
+
+  async function dfAnalyticsGetSingleJobHandler(context, request, response) {
+    try {
       const { analyticsId } = request.params;
-      return callWithRequest('ml.getDataFrameAnalytics', { analyticsId }).catch(resp =>
-        wrapError(resp)
-      );
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
-
-  route({
-    method: 'GET',
-    path: '/api/ml/data_frame/analytics/_stats',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.getDataFrameAnalyticsStats').catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
-
-  route({
-    method: 'GET',
-    path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { analyticsId } = request.params;
-      return callWithRequest('ml.getDataFrameAnalyticsStats', { analyticsId }).catch(resp =>
-        wrapError(resp)
-      );
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
-
-  route({
-    method: 'PUT',
-    path: '/api/ml/data_frame/analytics/{analyticsId}',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { analyticsId } = request.params;
-      return callWithRequest('ml.createDataFrameAnalytics', {
-        body: request.payload,
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
         analyticsId,
-      }).catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+      });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
 
-  route({
-    method: 'POST',
-    path: '/api/ml/data_frame/_evaluate',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.evaluateDataFrameAnalytics', {
-        body: request.payload,
-      }).catch(resp => wrapError(resp));
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}',
+      validate: {
+        params: schema.object({ analyticsId: schema.string() }),
+      },
     },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsGetSingleJobHandler)
+  );
 
-  route({
-    method: 'POST',
-    path: '/api/ml/data_frame/analytics/_explain',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.estimateDataFrameAnalyticsMemoryUsage', {
-        body: request.payload,
-      }).catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+  async function dfAnalyticsGetAllStatsHandler(context, request, response) {
+    try {
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.getDataFrameAnalyticsStats');
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
 
-  route({
-    method: 'DELETE',
-    path: '/api/ml/data_frame/analytics/{analyticsId}',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/_stats',
+      validate: false,
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsGetAllStatsHandler)
+  );
+
+  async function dfAnalyticsGetSingleJobStatsHandler(context, request, response) {
+    try {
       const { analyticsId } = request.params;
-      return callWithRequest('ml.deleteDataFrameAnalytics', { analyticsId }).catch(resp =>
-        wrapError(resp)
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.getDataFrameAnalyticsStats', {
+        analyticsId,
+      });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
+
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
+      validate: {
+        params: schema.object({ analyticsId: schema.string() }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsGetSingleJobStatsHandler)
+  );
+
+  async function dfAnalyticsCreateJobHandler(context, request, response) {
+    try {
+      const { analyticsId } = request.params;
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.createDataFrameAnalytics', {
+        body: request.body,
+        analyticsId,
+      });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
+
+  router.put(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}',
+      validate: {
+        params: schema.object({
+          analyticsId: schema.string(),
+        }),
+        body: schema.object({ ...dataAnalyticsJobConfigSchema }, { allowUnknowns: true }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsCreateJobHandler)
+  );
+
+  async function dfAnalyticsEvaluateHandler(context, request, response) {
+    try {
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.evaluateDataFrameAnalytics', {
+        body: request.body,
+      });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
+
+  router.post(
+    {
+      path: '/api/ml/data_frame/_evaluate',
+      validate: {
+        body: schema.object({}, { allowUnknowns: true }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsEvaluateHandler)
+  );
+
+  async function dfAnalyticsExplainHandler(context, request, response) {
+    try {
+      const results = await context.ml.mlClient.callAsCurrentUser(
+        'ml.estimateDataFrameAnalyticsMemoryUsage',
+        {
+          body: request.body,
+        }
       );
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
 
-  route({
-    method: 'POST',
-    path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/_explain',
+      validate: {
+        body: schema.object({}, { allowUnknowns: true }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsExplainHandler)
+  );
+
+  async function dfAnalyticsDeleteJobHandler(context, request, response) {
+    try {
+      const { analyticsId } = request.params;
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
+        analyticsId,
+      });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
+
+  router.delete(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}',
+      validate: {
+        params: schema.object({
+          analyticsId: schema.string(),
+        }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsDeleteJobHandler)
+  );
+
+  async function dfAnalyticsStartJobHandler(context, request, response) {
+    try {
+      const { analyticsId } = request.params;
+      const results = await context.ml.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
+        analyticsId,
+      });
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
+
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
+      validate: {
+        params: schema.object({
+          analyticsId: schema.string(),
+        }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsStartJobHandler)
+  );
+
+  async function dfAnalyticsStopJobHandler(context, request, response) {
+    try {
       const options = {
         analyticsId: request.params.analyticsId,
       };
 
-      return callWithRequest('ml.startDataFrameAnalytics', options).catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
-
-  route({
-    method: 'POST',
-    path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const options = {
-        analyticsId: request.params.analyticsId,
-      };
-
-      if (request.query.force !== undefined) {
-        options.force = request.query.force;
+      if (request.url?.query?.force !== undefined) {
+        options.force = request.url.query.force;
       }
 
-      return callWithRequest('ml.stopDataFrameAnalytics', options).catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+      const results = await context.ml.mlClient.callAsCurrentUser(
+        'ml.stopDataFrameAnalytics',
+        options
+      );
+      return response.ok({
+        body: { ...results },
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
 
-  route({
-    method: 'GET',
-    path: '/api/ml/data_frame/analytics/{analyticsId}/messages',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(callWithRequest);
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
+      validate: {
+        params: schema.object({
+          analyticsId: schema.string(),
+          force: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsStopJobHandler)
+  );
+
+  async function dfAnalyticsGetMessagesHandler(context, request, response) {
+    try {
       const { analyticsId } = request.params;
-      return getAnalyticsAuditMessages(analyticsId).catch(resp => wrapError(resp));
+      const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(
+        context.ml.mlClient.callAsCurrentUser
+      );
+
+      const results = await getAnalyticsAuditMessages(analyticsId);
+      return response.ok({
+        body: results,
+      });
+    } catch (e) {
+      // Case: default
+      return response.internalError({ body: e });
+    }
+  }
+
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/messages',
+      validate: {
+        params: schema.object({ analyticsId: schema.string() }),
+      },
     },
-    config: {
-      ...commonRouteConfig,
-    },
-  });
+    licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsGetMessagesHandler)
+  );
 }
