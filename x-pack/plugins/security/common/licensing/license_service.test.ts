@@ -5,13 +5,13 @@
  */
 
 import { of, BehaviorSubject } from 'rxjs';
-import { ILicense } from '../../../licensing/public';
+import { licensingMock } from '../../../licensing/public/mocks';
 import { SecurityLicenseService } from './license_service';
 
 describe('license features', function() {
   it('should display error when ES is unavailable', () => {
     const serviceSetup = new SecurityLicenseService().setup({
-      license$: of((undefined as unknown) as ILicense),
+      license$: of(undefined as any),
     });
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
@@ -25,8 +25,10 @@ describe('license features', function() {
   });
 
   it('should display error when X-Pack is unavailable', () => {
+    const rawLicenseMock = licensingMock.createLicenseMock();
+    rawLicenseMock.isAvailable = false;
     const serviceSetup = new SecurityLicenseService().setup({
-      license$: of(getMockRawLicense({ isAvailable: false })),
+      license$: of(rawLicenseMock),
     });
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
@@ -40,7 +42,9 @@ describe('license features', function() {
   });
 
   it('should notify consumers of licensed feature changes', () => {
-    const rawLicense$ = new BehaviorSubject(getMockRawLicense({ isAvailable: false }));
+    const rawLicenseMock = licensingMock.createLicenseMock();
+    rawLicenseMock.isAvailable = false;
+    const rawLicense$ = new BehaviorSubject(rawLicenseMock);
     const serviceSetup = new SecurityLicenseService().setup({
       license$: rawLicense$,
     });
@@ -63,7 +67,7 @@ describe('license features', function() {
         ]
       `);
 
-      rawLicense$.next(getMockRawLicense({ isAvailable: true }));
+      rawLicense$.next(licensingMock.createLicenseMock());
       expect(subscriptionHandler).toHaveBeenCalledTimes(2);
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
