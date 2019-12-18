@@ -5,9 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_providers';
 
-export function initEditorConfig() {
+export function initEditorConfig(editorConfigProviders) {
   // Limit agg params based on rollup capabilities
   editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
     if (indexPattern.type !== 'rollup') {
