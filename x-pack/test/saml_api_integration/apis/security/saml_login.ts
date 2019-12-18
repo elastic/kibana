@@ -150,6 +150,39 @@ export default function({ getService }: FtrProviderContext) {
           '/api/security/saml/start?redirectURLFragment=%23%2Fworkpad'
         );
       });
+
+      it('does not send URL fragments that exceed size limit to the server', async () => {
+        const response = await supertest.get('/api/security/saml/capture-url-fragment').expect(200);
+
+        const kibanaBaseURL = url.format({ ...config.get('servers.kibana'), auth: false });
+        const dom = new JSDOM(response.text, {
+          url: kibanaBaseURL,
+          runScripts: 'dangerously',
+          resources: 'usable',
+          beforeParse(window) {
+            // JSDOM doesn't support changing of `window.location` and throws an exception if script
+            // tries to do that and we have to workaround this behaviour. We also need to wait until our
+            // script is loaded and executed, __isScriptExecuted__ is used exactly for that.
+            (window as Record<string, any>).__isScriptExecuted__ = new Promise(resolve => {
+              const hash = '#/workpad'.repeat(10);
+              Object.defineProperty(window, 'location', {
+                value: {
+                  hash,
+                  href: `${kibanaBaseURL}/api/security/saml/capture-url-fragment${hash}`,
+                  replace(newLocation: string) {
+                    this.href = newLocation;
+                    resolve();
+                  },
+                },
+              });
+            });
+          },
+        });
+
+        await (dom.window as Record<string, any>).__isScriptExecuted__;
+
+        expect(dom.window.location.href).to.be('/api/security/saml/start?redirectURLFragment=');
+      });
     });
 
     describe('initiating handshake', () => {

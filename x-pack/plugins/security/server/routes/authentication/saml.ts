@@ -12,7 +12,14 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
+export function defineSAMLRoutes({
+  router,
+  logger,
+  authc,
+  csp,
+  basePath,
+  config,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/security/saml/capture-url-fragment',
@@ -43,11 +50,15 @@ export function defineSAMLRoutes({ router, logger, authc, csp, basePath }: Route
       options: { authRequired: false },
     },
     (context, request, response) => {
+      // NodeJS limits the maximum size of the Request-Line + all HTTP headers to 8KB.
+      // See https://nodejs.org/api/cli.html#cli_max_http_header_size_size.
+      const maxRedirectURLSize = config.authc.saml?.maxRedirectURLSize.getValueInBytes() ?? 4096;
       return response.custom(
         createCustomResourceResponse(
           `
+          const hash = encodeURIComponent(window.location.hash);
           window.location.replace(
-            '${basePath.serverBasePath}/api/security/saml/start?redirectURLFragment=' + encodeURIComponent(window.location.hash)
+            '${basePath.serverBasePath}/api/security/saml/start?redirectURLFragment=' + (hash.length < ${maxRedirectURLSize} ? hash : '')
           );
         `,
           'text/javascript',
