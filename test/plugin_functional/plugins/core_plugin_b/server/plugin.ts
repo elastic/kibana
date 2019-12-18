@@ -38,9 +38,9 @@ export class CorePluginBPlugin implements Plugin {
 
     router.post(
       {
-        path: '/core_plugin_b/:id',
+        path: '/core_plugin_b',
         validate: {
-          params: schema.object({ id: schema.string() }),
+          query: schema.object({ id: schema.string() }),
           body: ({ ok, fail }, { bar, baz } = {}) => {
             if (typeof bar === 'string' && bar === baz) {
               return ok({ bar, baz });
@@ -51,7 +51,7 @@ export class CorePluginBPlugin implements Plugin {
         },
       },
       async (context, req, res) => {
-        return res.ok({ body: `ID: ${req.params.id} - ${req.body.bar.toUpperCase()}` });
+        return res.ok({ body: `ID: ${req.query.id} - ${req.body.bar.toUpperCase()}` });
       }
     );
   }
