@@ -28,15 +28,10 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 
 import Log from '../log';
 import Worker from './worker';
-import { Config } from '../../legacy/server/config/config';
 
 process.env.kbnWorkerType = 'managr';
 
 export default class ClusterManager {
-  static create(opts, settings = {}, basePathProxy) {
-    return new ClusterManager(opts, Config.withDefaultSchema(settings), basePathProxy);
-  }
-
   constructor(opts, config, basePathProxy) {
     this.log = new Log(opts.quiet, opts.silent);
     this.addedCount = 0;

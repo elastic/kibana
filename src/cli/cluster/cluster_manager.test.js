@@ -53,7 +53,7 @@ describe('CLI cluster manager', () => {
   });
 
   test('has two workers', () => {
-    const manager = ClusterManager.create({});
+    const manager = new ClusterManager({});
 
     expect(manager.workers).toHaveLength(2);
     for (const worker of manager.workers) expect(worker).toBeInstanceOf(Worker);
@@ -63,7 +63,7 @@ describe('CLI cluster manager', () => {
   });
 
   test('delivers broadcast messages to other workers', () => {
-    const manager = ClusterManager.create({});
+    const manager = new ClusterManager({});
 
     for (const worker of manager.workers) {
       Worker.prototype.start.call(worker); // bypass the debounced start method
@@ -88,7 +88,7 @@ describe('CLI cluster manager', () => {
     test('correctly configures `BasePathProxy`.', async () => {
       const basePathProxyMock = { start: jest.fn() };
 
-      ClusterManager.create({}, {}, basePathProxyMock);
+      new ClusterManager({}, {}, basePathProxyMock);
 
       expect(basePathProxyMock.start).toHaveBeenCalledWith({
         shouldRedirectFromOldBasePath: expect.any(Function),
@@ -103,7 +103,7 @@ describe('CLI cluster manager', () => {
       beforeEach(async () => {
         const basePathProxyMock = { start: jest.fn() };
 
-        clusterManager = ClusterManager.create({}, {}, basePathProxyMock);
+        clusterManager = new ClusterManager({}, {}, basePathProxyMock);
 
         jest.spyOn(clusterManager.server, 'on');
         jest.spyOn(clusterManager.server, 'off');
