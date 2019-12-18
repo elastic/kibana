@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import {
-  MetricsExplorerMetric,
-  MetricsExplorerAggregation,
-} from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { isDisplayable } from '../../utils/is_displayable';
 
@@ -61,7 +58,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     .filter(field => isDisplayable(field))
     .map(field => ({ label: field.name, value: field.name }));
   const selectedOptions = options.metrics
-    .filter(m => m.aggregation !== MetricsExplorerAggregation.count)
+    .filter(m => m.aggregation !== 'count')
     .map(metric => ({
       label: metric.field || '',
       value: metric.field || '',
@@ -74,7 +71,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
 
   return (
     <EuiComboBox
-      isDisabled={options.aggregation === MetricsExplorerAggregation.count}
+      isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}
       fullWidth
       options={comboOptions}
