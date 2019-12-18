@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -27,7 +27,7 @@ export interface ColumnTypes {
   ran: string;
   lookedBackTo: string;
   status: string;
-  response: string | undefined;
+  response?: string | undefined;
 }
 
 export interface PageTypes {
@@ -36,12 +36,12 @@ export interface PageTypes {
 }
 
 export interface SortTypes {
-  field: string;
-  direction: string;
+  field: keyof ColumnTypes;
+  direction: 'asc' | 'desc';
 }
 
 export const ActivityMonitor = React.memo(() => {
-  const sampleTableData = [
+  const sampleTableData: ColumnTypes[] = [
     {
       id: 1,
       rule: {
@@ -278,13 +278,20 @@ export const ActivityMonitor = React.memo(() => {
   // const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
+  const handleChange = useCallback(
+    ({ page, sort }: { page?: PageTypes; sort?: SortTypes }) => {
+      setPageState(page!);
+      setSortState(sort!);
+    },
+    [setPageState, setSortState]
+  );
+
   return (
     <>
       <EuiSpacer />
 
       <EuiPanel>
         <HeaderSection title="Activity monitor" />
-
         <UtilityBar border>
           <UtilityBarSection>
             <UtilityBarGroup>
@@ -302,16 +309,15 @@ export const ActivityMonitor = React.memo(() => {
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
-
+        {
+          // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
+        }
         <EuiBasicTable
           columns={columns}
           isSelectable
           itemId="id"
           items={sampleTableData}
-          onChange={({ page, sort }: { page: PageTypes; sort: SortTypes }) => {
-            setPageState(page);
-            setSortState(sort);
-          }}
+          onChange={handleChange}
           pagination={{
             pageIndex: pageState.index,
             pageSize: pageState.size,
@@ -321,7 +327,7 @@ export const ActivityMonitor = React.memo(() => {
           selection={{
             selectable: (item: ColumnTypes) => item.status !== 'Completed',
             selectableMessage: (selectable: boolean) =>
-              selectable ? undefined : 'Completed runs cannot be acted upon',
+              selectable ? '' : 'Completed runs cannot be acted upon',
             onSelectionChange: (selectedItems: ColumnTypes[]) => {
               // setSelectedState(selectedItems);
             },

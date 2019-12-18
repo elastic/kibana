@@ -35,11 +35,9 @@ export const search = {
     incremental: true,
     placeholder: i18n.SEARCH_PLACEHOLDER,
     schema: {
-      user: {
-        type: 'string',
-      },
-      note: {
-        type: 'string',
+      fields: {
+        user: 'string',
+        note: 'string',
       },
     },
   },

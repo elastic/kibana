@@ -12,7 +12,6 @@ import {
   EuiPageHeaderSection,
   EuiHideFor,
   EuiTitle,
-  EuiPageContent,
 } from '@elastic/eui';
 import { InventoryMetric } from '../../../../common/inventory_models/types';
 import { useNodeDetails } from '../../../containers/node_details/use_node_details';
@@ -20,13 +19,13 @@ import { InfraNodeType, InfraTimerangeInput } from '../../../graphql/types';
 import { MetricsSideNav } from './side_nav';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { MetricsTimeControls } from './time_controls';
-import { NodeDetails } from './node_details';
 import { SideNavContext, NavItem } from '../lib/side_nav_context';
 import { PageBody } from './page_body';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { MetricsTimeInput } from '../containers/with_metrics_time';
 import { InfraMetadata } from '../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
+import { MetadataContext } from '../../../pages/metrics/containers/metadata_context';
 
 interface Props {
   name: string;
@@ -100,14 +99,13 @@ export const NodeDetailsPage = (props: Props) => {
                     </MetricsTitleTimeRangeContainer>
                   </EuiPageHeaderSection>
                 </EuiPageHeader>
-                <NodeDetails metadata={props.metadata} />
-                <EuiPageContentWithRelative>
-                  <SideNavContext.Provider
-                    value={{
-                      items: props.sideNav,
-                      addNavItem: props.addNavItem,
-                    }}
-                  >
+                <SideNavContext.Provider
+                  value={{
+                    items: props.sideNav,
+                    addNavItem: props.addNavItem,
+                  }}
+                >
+                  <MetadataContext.Provider value={props.metadata}>
                     <PageBody
                       loading={metrics.length > 0 && props.isAutoReloading ? false : loading}
                       refetch={refetch}
@@ -117,8 +115,8 @@ export const NodeDetailsPage = (props: Props) => {
                       isLiveStreaming={props.isAutoReloading}
                       stopLiveStreaming={() => props.setAutoReload(false)}
                     />
-                  </SideNavContext.Provider>
-                </EuiPageContentWithRelative>
+                  </MetadataContext.Provider>
+                </SideNavContext.Provider>
               </EuiPageBody>
             </MetricsDetailsPageColumn>
           );
@@ -127,10 +125,6 @@ export const NodeDetailsPage = (props: Props) => {
     </EuiPage>
   );
 };
-
-const EuiPageContentWithRelative = euiStyled(EuiPageContent)`
-  position: relative;
-`;
 
 const MetricsDetailsPageColumn = euiStyled.div`
   flex: 1 0 0%;

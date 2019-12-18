@@ -49,6 +49,7 @@ import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
 import { CapabilitiesService } from './capabilities';
+import { UuidService } from './uuid';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -64,6 +65,7 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
+  private readonly uuid: UuidService;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -82,6 +84,7 @@ export class Server {
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
+    this.uuid = new UuidService(core);
   }
 
   public async setup() {
@@ -105,6 +108,8 @@ export class Server {
         [this.legacy.legacyId, [...pluginDependencies.keys()]],
       ]),
     });
+
+    const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -134,6 +139,7 @@ export class Server {
       http: httpSetup,
       uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,
+      uuid: uuidSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
