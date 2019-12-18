@@ -43,8 +43,8 @@ export async function createDatasource(options: {
     return datasetsRequestedNames.includes(packageDataset.name);
   });
 
-  let templateRefs: any[] = [];
-  let pipelineRefs: any[] = [];
+  const templateRefs: Array<Promise<AssetReference>> = [];
+  const pipelineRefs: Array<Promise<AssetReference[]>> = [];
 
   if (datasetsRequested) {
     datasetsRequested.forEach(dataset => {
@@ -55,7 +55,7 @@ export async function createDatasource(options: {
         datasourceName
       );
       if (templateRef) {
-        templateRefs.push(templateRef);
+        templateRefs.push(templateRef as Promise<AssetReference>); // Typescript thinks this may still be undefined here
       }
       if (dataset.ingest_pipeline) {
         const pipelineRefArray = installPipelinesForDataset({
@@ -65,16 +65,16 @@ export async function createDatasource(options: {
           datasourceName,
           packageName: registryPackageInfo.name,
         });
-        pipelineRefs = pipelineRefs.concat(pipelineRefArray);
+        pipelineRefs.push(pipelineRefArray);
       }
     });
   }
   // the promises from template installation resolve to template references
-  templateRefs = await Promise.all(templateRefs);
+  const templatesToSave = await Promise.all(templateRefs);
   // the promises from pipeline installation resolve to arrays of pipeline references
-  pipelineRefs = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
+  const pipelinesToSave = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
 
-  const toSave = templateRefs.concat(pipelineRefs);
+  const toSave = templatesToSave.concat(pipelinesToSave);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);

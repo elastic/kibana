@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dataset, ElasticsearchAssetType } from '../../../../common/types';
+import { AssetReference, Dataset, ElasticsearchAssetType } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { CallESAsCurrentUser } from '../../cluster_access';
 
@@ -47,7 +47,7 @@ export async function installPipelinesForDataset({
   dataset: Dataset;
   datasourceName: string;
   packageName: string;
-}): Promise<any[]> {
+}): Promise<AssetReference[]> {
   const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
     isDatasetPipeline(entry, dataset.name)
   );
@@ -96,7 +96,7 @@ async function installPipeline({
 }: {
   callCluster: CallESAsCurrentUser;
   pipeline: any;
-}): Promise<any> {
+}): Promise<AssetReference> {
   const callClusterParams: {
     method: string;
     path: string;
