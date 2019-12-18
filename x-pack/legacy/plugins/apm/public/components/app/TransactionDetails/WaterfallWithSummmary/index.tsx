@@ -5,30 +5,29 @@
  */
 
 import {
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
   EuiPanel,
   EuiSpacer,
-  EuiEmptyPrompt,
-  EuiTitle,
-  EuiPagination
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React, { useState, useEffect } from 'react';
-import { sum } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
-import { TransactionTabs } from './TransactionTabs';
-import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { px, units } from '../../../../style/variables';
 import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
+import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
-import { units, px } from '../../../../style/variables';
+import { TransactionTabs } from './TransactionTabs';
+import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const PaginationContainer = styled.div`
   margin-left: ${px(units.quarter)};
@@ -140,7 +139,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       <EuiSpacer size="s" />
 
       <TransactionSummary
-        errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
+        errorCount={waterfall.errorCount}
         totalDuration={waterfall.traceRootDuration}
         transaction={entryTransaction}
       />

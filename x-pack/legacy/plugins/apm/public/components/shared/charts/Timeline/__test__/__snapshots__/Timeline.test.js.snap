@@ -534,7 +534,7 @@ exports[`Timeline should render with data 1`] = `
             <styled.div
               style={
                 Object {
-                  "left": "500px",
+                  "left": "494.5px",
                 }
               }
             >
@@ -542,7 +542,7 @@ exports[`Timeline should render with data 1`] = `
                 className="c0"
                 style={
                   Object {
-                    "left": "500px",
+                    "left": "494.5px",
                   }
                 }
               >
@@ -586,7 +586,7 @@ exports[`Timeline should render with data 1`] = `
             <styled.div
               style={
                 Object {
-                  "left": "545px",
+                  "left": "539.5px",
                 }
               }
             >
@@ -594,7 +594,7 @@ exports[`Timeline should render with data 1`] = `
                 className="c0"
                 style={
                   Object {
-                    "left": "545px",
+                    "left": "539.5px",
                   }
                 }
               >
@@ -638,7 +638,7 @@ exports[`Timeline should render with data 1`] = `
             <styled.div
               style={
                 Object {
-                  "left": "905px",
+                  "left": "899.5px",
                 }
               }
             >
@@ -646,7 +646,7 @@ exports[`Timeline should render with data 1`] = `
                 className="c0"
                 style={
                   Object {
-                    "left": "905px",
+                    "left": "899.5px",
                   }
                 }
               >

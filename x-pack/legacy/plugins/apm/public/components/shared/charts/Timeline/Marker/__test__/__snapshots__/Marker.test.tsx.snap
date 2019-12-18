@@ -4,7 +4,7 @@ exports[`Marker renders agent marker 1`] = `
 <styled.div
   style={
     Object {
-      "left": "10px",
+      "left": "4.5px",
     }
   }
 >
@@ -25,7 +25,7 @@ exports[`Marker renders error marker 1`] = `
 <styled.div
   style={
     Object {
-      "left": "10px",
+      "left": "4.5px",
     }
   }
 >

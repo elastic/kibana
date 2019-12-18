@@ -138,14 +138,10 @@ describe('waterfall_helpers', () => {
       const agentMarks = waterfall.orderedItems.filter(
         item => item.docType === 'agentMark'
       );
-      const errors = waterfall.orderedItems.filter(
-        item => item.docType === 'error'
-      );
-
       expect(waterfall.orderedItems.length).toBe(7);
       expect(waterfall.orderedItems[0].id).toBe('myTransactionId1');
       expect(agentMarks.length).toEqual(0);
-      expect(errors.length).toEqual(1);
+      expect(waterfall.errorCount).toEqual(1);
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -166,14 +162,11 @@ describe('waterfall_helpers', () => {
       const agentMarks = waterfall.orderedItems.filter(
         item => item.docType === 'agentMark'
       );
-      const errors = waterfall.orderedItems.filter(
-        item => item.docType === 'error'
-      );
 
       expect(waterfall.orderedItems.length).toBe(7);
       expect(waterfall.orderedItems[0].id).toBe('myTransactionId2');
       expect(agentMarks.length).toEqual(3);
-      expect(errors.length).toEqual(0);
+      expect(waterfall.errorCount).toEqual(0);
       expect(waterfall).toMatchSnapshot();
     });
 

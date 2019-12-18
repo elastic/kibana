@@ -13,7 +13,8 @@ import {
   uniq,
   zipObject,
   isEmpty,
-  first
+  first,
+  sum
 } from 'lodash';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
@@ -41,6 +42,7 @@ export interface IWaterfall {
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
   errorCountByTransactionId: TraceAPIResponse['errorsPerTransaction'];
+  errorCount: number;
   serviceColors: IServiceColors;
 }
 
@@ -316,6 +318,7 @@ export function getWaterfall(
       itemsById: {},
       getTransactionById: () => undefined,
       errorCountByTransactionId: errorsPerTransaction,
+      errorCount: sum(Object.values(errorsPerTransaction)),
       serviceColors: {}
     };
   }
@@ -350,9 +353,11 @@ export function getWaterfall(
   const getTransactionById = createGetTransactionById(itemsById);
 
   // Add the service color into the error waterfall item
-  (orderedItems.filter(
+  const waterfallErrors = orderedItems.filter(
     item => item.docType === 'error'
-  ) as IWaterfallItemError[]).map(error => {
+  ) as IWaterfallItemError[];
+
+  waterfallErrors.map(error => {
     error.serviceColor = serviceColors[error.serviceName];
     return error;
   });
@@ -366,6 +371,7 @@ export function getWaterfall(
     itemsById,
     getTransactionById,
     errorCountByTransactionId: errorsPerTransaction,
+    errorCount: waterfallErrors.length,
     serviceColors
   };
 }
