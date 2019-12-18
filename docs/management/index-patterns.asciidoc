@@ -1,21 +1,22 @@
 [[index-patterns]]
 == Creating an index pattern
 
-An index pattern tells {kib} which {es} indices contain the data that you want to work with.
-Once you’ve created an index pattern, you're ready to analyze your data, including:
+To explore and visualize data in {kib}, you must create an index pattern.
+An index pattern tells {kib} which {es} indices contain the data that
+you want to work with.
+Once you create an index pattern, you're ready to:
 
-* Interactively exploring your data in <<discover, Discover>>.
-* Presenting your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
-* Showing off your data in a <<canvas, Canvas>> presentation.
-* If your data includes geo data, visualizing it with <<maps, Maps>>.
+* Interactively explore your data in <<discover, Discover>>.
+* Present your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
+* Show off your data in a <<canvas, Canvas>> presentation.
+* If your data includes geo data, visualize it with <<maps, Maps>>.
 
 [float]
 [[index-patterns-read-only-access]]
 === [xpack]#Read-only access#
 If you have insufficient privileges to create or save index patterns, a read-only
 indicator appears in Kibana. The buttons to create new index patterns or save
-existing index patterns are not visible. For more information on granting access to
-Kibana, see <<xpack-security-authorization>>.
+existing index patterns are not visible. For more information, see <<xpack-security-authorization>>.
 
 [role="screenshot"]
 image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]
@@ -26,7 +27,7 @@ image::images/management-index-read-only-badge.png[Example of Index Pattern Mana
 
 If you are in an app that requires an index pattern, and you don't have one yet,
 {kib} prompts you to create one.  Or, you can go directly to
-*Management > Kibana > Index Patterns* to create one.
+*Management > Kibana > Index Patterns*.
 
 [role="screenshot"]
 image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollup index pattern"]
@@ -92,10 +93,11 @@ aggregations using that index pattern in {kib} take advantage of {ccs}.
 === Manage your index pattern
 
 Once you create an index pattern, manually or with a sample data set,
-you might want look under the covers and view its fields and associated data types.
-Or, you might want to set the index pattern as the default.
-You can perform these actions, and delete an index pattern you no longer need, in
-*Management > Index patterns*.
+you might want to look at its fields and associated data types
+You might also want to perform housekeeping tasks, such as making the
+index pattern the default or deleting it when you longer need it.
+You can drill down into the details of an index pattern by clicking its name in
+the *Index patterns* overview.
 
 [role="screenshot"]
 image:management/index-patterns/images/new-index-pattern.png["Index files and data types"]
