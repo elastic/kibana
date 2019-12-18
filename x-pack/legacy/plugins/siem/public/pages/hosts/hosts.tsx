@@ -37,6 +37,7 @@ import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
 import { HostsComponentProps, HostsComponentReduxProps } from './types';
 import { filterAlertsHosts } from './navigation';
+import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
@@ -57,7 +58,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
     const { tabName } = useParams();
 
     const hostsFilters = React.useMemo(() => {
-      if (tabName === 'alerts') {
+      if (tabName === HostsTableType.alerts) {
         return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
       }
       return filters;

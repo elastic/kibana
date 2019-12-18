@@ -33,6 +33,7 @@ import { filterAlertsNetwork } from './navigation/alerts_query_tab_body';
 import { NetworkEmptyPage } from './network_empty_page';
 import * as i18n from './translations';
 import { NetworkComponentProps } from './types';
+import { NetworkRouteType } from './navigation/types';
 
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 const sourceId = 'default';
@@ -54,7 +55,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const { tabName } = useParams();
 
     const networkFilters = useMemo(() => {
-      if (tabName === 'alerts') {
+      if (tabName === NetworkRouteType.alerts) {
         return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
       }
       return filters;
