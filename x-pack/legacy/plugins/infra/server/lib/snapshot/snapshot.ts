@@ -214,7 +214,7 @@ const buildFilters = (options: InfraSnapshotRequestOptions, withQuery = true) =>
   ];
 
   if (withQuery) {
-    filters = [...createQueryFilterClauses(options.filterQuery)];
+    filters = [...createQueryFilterClauses(options.filterQuery), ...filters];
   }
 
   if (options.accountId) {
