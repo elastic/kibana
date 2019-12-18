@@ -71,7 +71,8 @@ visualizations. An attacker could create a malicious visualization that
 executes JavaScript in a victim’s browser when the visualization, or dashboard 
 containing the visualization, was viewed. Since Kibana 7.0.0, Content Security 
 Policy (CSP), which prevents attackers from using this flaw, is enabled by 
-default. See https://www.elastic.co/community/security/, CVE-2019-7621.
+default. However, an attacker can still inject arbitrary HTML into the page. 
+See https://www.elastic.co/community/security/, CVE-2019-7621.
 * Prevents users from overflowing URL when filtering by shape {pull}50747[#50747]
 * Delays vector tile layer syncing until spritesheet is loaded {pull}48955[#48955]
 * Sanitizes attribution {pull}52309[#52309]
