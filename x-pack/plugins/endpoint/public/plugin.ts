@@ -7,6 +7,7 @@
 import { Plugin, CoreSetup } from 'kibana/public';
 import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
+import { i18n } from '@kbn/i18n';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -26,6 +27,17 @@ export class EndpointPlugin
     > {
   public setup(_core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
     const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
+    _core.application.register({
+      id: 'endpoint',
+      title: i18n.translate('xpack.endpoint.pluginTitle', {
+        defaultMessage: 'Endpoint',
+      }),
+      async mount(context, params) {
+        const { renderApp } = await import('./applications/endpoint');
+        return renderApp(context, params);
+      },
+    });
+    
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,
       resolverEmbeddableFactory

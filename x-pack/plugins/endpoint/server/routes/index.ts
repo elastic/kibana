@@ -11,6 +11,9 @@ export function addRoutes(router: IRouter) {
     {
       path: '/api/endpoint/hello-world',
       validate: false,
+      options: {
+        tags: ['access:endpoints'],
+      },
     },
     async function greetingIndex(_context, _request, response) {
       return response.ok({
