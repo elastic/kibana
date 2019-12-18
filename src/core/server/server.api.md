@@ -564,6 +564,8 @@ export interface CoreSetup {
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
+    // (undocumented)
+    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -1829,6 +1831,11 @@ export interface UserProvidedValues<T = any> {
     isOverridden?: boolean;
     // (undocumented)
     userValue?: T;
+}
+
+// @public
+export interface UuidServiceSetup {
+    getInstanceUuid(): string;
 }
 
 // @public

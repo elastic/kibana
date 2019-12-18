@@ -1,0 +1,17 @@
+{
+  "rule_id": "9511b7f4-3898-4813-8bd3-d810b03148ab",
+  "risk_score": 50,
+  "description": "PSexec activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "PSexec activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:PsExec.exe or process.name:PsExec64.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -25,7 +25,7 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';

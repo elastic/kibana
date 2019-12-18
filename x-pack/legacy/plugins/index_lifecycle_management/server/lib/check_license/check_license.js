@@ -22,7 +22,7 @@ export function checkLicense(xpackLicenseInfo) {
     };
   }
 
-  const VALID_LICENSE_MODES = ['trial', 'basic', 'standard', 'gold', 'platinum'];
+  const VALID_LICENSE_MODES = ['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
