@@ -62,6 +62,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
