@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -195,8 +195,8 @@ export default async function ({ readConfigFile }) {
       },
       transform: {
         pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform'
-      }
+        hash: '/management/elasticsearch/transform',
+      },
     },
 
     // choose where esArchiver should load archives from

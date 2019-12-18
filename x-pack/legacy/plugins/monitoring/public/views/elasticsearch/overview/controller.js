@@ -16,7 +16,7 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
     const $route = $injector.get('$route');
     const globalState = $injector.get('globalState');
     $scope.cluster = find($route.current.locals.clusters, {
-      cluster_uuid: globalState.cluster_uuid
+      cluster_uuid: globalState.cluster_uuid,
     });
 
     super({
@@ -25,11 +25,11 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
       defaultData: {
         clusterStatus: { status: '' },
         metrics: null,
-        shardActivity: null
+        shardActivity: null,
       },
       reactNodeId: 'elasticsearchOverviewReact',
       $scope,
-      $injector
+      $injector,
     });
 
     this.isCcrEnabled = $scope.cluster.isCcrEnabled;
@@ -45,20 +45,26 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
   }
 
   initScope($scope) {
-    $scope.$watch(() => this.data, data => {
-      this.renderReact(data, $scope.cluster);
-    });
+    $scope.$watch(
+      () => this.data,
+      data => {
+        this.renderReact(data, $scope.cluster);
+      }
+    );
 
     // HACK to force table to re-render even if data hasn't changed. This
     // happens when the data remains empty after turning on showHistory. The
     // button toggle needs to update the "no data" message based on the value of showHistory
-    $scope.$watch(() => this.showShardActivityHistory, () => {
-      const { data } = this;
-      const dataWithShardActivityLoading = { ...data, shardActivity: null };
-      // force shard activity to rerender by manipulating and then re-setting its data prop
-      this.renderReact(dataWithShardActivityLoading, $scope.cluster);
-      this.renderReact(data, $scope.cluster);
-    });
+    $scope.$watch(
+      () => this.showShardActivityHistory,
+      () => {
+        const { data } = this;
+        const dataWithShardActivityLoading = { ...data, shardActivity: null };
+        // force shard activity to rerender by manipulating and then re-setting its data prop
+        this.renderReact(dataWithShardActivityLoading, $scope.cluster);
+        this.renderReact(data, $scope.cluster);
+      }
+    );
   }
 
   filterShardActivityData(shardActivity) {

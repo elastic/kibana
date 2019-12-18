@@ -35,11 +35,11 @@ export class StaticDynamicStyleRow extends Component {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         ...this._getStyleOptions(),
-        fieldMetaOptions
-      }
+        fieldMetaOptions,
+      },
     };
     this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
-  }
+  };
 
   _onStaticStyleChange = options => {
     const styleDescriptor = {
@@ -104,11 +104,11 @@ export class StaticDynamicStyleRow extends Component {
     const isDynamic = this._isDynamic();
     const dynamicTooltipContent = isDynamic
       ? i18n.translate('xpack.maps.styles.staticDynamic.staticDescription', {
-        defaultMessage: 'Use static styling properties to symbolize features.',
-      })
+          defaultMessage: 'Use static styling properties to symbolize features.',
+        })
       : i18n.translate('xpack.maps.styles.staticDynamic.dynamicDescription', {
-        defaultMessage: 'Use property values to symbolize features.',
-      });
+          defaultMessage: 'Use property values to symbolize features.',
+        });
 
     return (
       <EuiFlexGroup gutterSize="s">

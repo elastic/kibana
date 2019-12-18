@@ -20,7 +20,6 @@
 import compactStringify from 'json-stringify-pretty-compact';
 
 export class Utils {
-
   /**
    * If the 2nd array parameter in args exists, append it to the warning/error string value
    */
@@ -47,5 +46,4 @@ export class Utils {
     }
     return Utils.formatWarningToStr(error, ...Array.from(arguments).slice(1));
   }
-
 }

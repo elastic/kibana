@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
+import { InfraMetric, InfraMetricData } from '../../../graphql/types';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
-import { metrics } from '../../../../common/inventory_models';
+import { metrics, findInventoryFields } from '../../../../common/inventory_models';
 import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
@@ -25,15 +25,12 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   public async getMetrics(
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
-    rawRequest: KibanaRequest // NP_TODO: Temporarily needed until metrics getVisData no longer needs full request
+    rawRequest: KibanaRequest
   ): Promise<InfraMetricData[]> {
-    const fields = {
-      [InfraNodeType.host]: options.sourceConfiguration.fields.host,
-      [InfraNodeType.container]: options.sourceConfiguration.fields.container,
-      [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
-    };
     const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
-    const nodeField = fields[options.nodeType];
+    const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+    const nodeField = fields.id;
+
     const search = <Aggregation>(searchOptions: object) =>
       this.framework.callWithRequest<{}, Aggregation>(requestContext, 'search', searchOptions);
 

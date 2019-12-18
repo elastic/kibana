@@ -457,6 +457,8 @@ export interface Source {
   /** The status of the source */
   status: SourceStatus;
 
+  AlertsHistogram: AlertsOverTimeData;
+
   AnomaliesOverTime: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
@@ -558,10 +560,10 @@ export interface IndexField {
   format?: Maybe<string>;
 }
 
-export interface AnomaliesOverTimeData {
+export interface AlertsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  anomaliesOverTime: MatrixOverTimeHistogramData[];
+  alertsOverTimeByModule: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -578,6 +580,14 @@ export interface MatrixOverTimeHistogramData {
   y: number;
 
   g: string;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  anomaliesOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -2137,6 +2147,13 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+}
 export interface AnomaliesOverTimeSourceArgs {
   timerange: TimerangeInput;
 
@@ -2437,6 +2454,58 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace GetAlertsOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AlertsHistogram: AlertsHistogram;
+  };
+
+  export type AlertsHistogram = {
+    __typename?: 'AlertsOverTimeData';
+
+    alertsOverTimeByModule: AlertsOverTimeByModule[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type AlertsOverTimeByModule = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
 
 export namespace GetAnomaliesOverTimeQuery {
   export type Variables = {
