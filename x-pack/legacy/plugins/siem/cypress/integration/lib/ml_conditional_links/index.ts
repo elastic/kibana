@@ -49,28 +49,28 @@ export const mlNetworkKqlQuery =
 
 // Single host name with a null for the Query:
 export const mlHostSingleHostNullKqlQuery =
-  "/app/siem#/ml-hosts/siem-windows?_g=()&query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/siem-windows?query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
 
 // Single host name with a variable in the Query:
 export const mlHostSingleHostKqlQueryVariable =
-  "/app/siem#/ml-hosts/siem-windows?_g=()&query=(language:kuery,query:'process.name%20:%20%22$process.name$%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/siem-windows?query=(language:kuery,query:'process.name%20:%20%22$process.name$%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
 
 // Single host name with a value for Query:
 export const mlHostSingleHostKqlQuery =
-  "/app/siem#/ml-hosts/siem-windows?_g=()&query=(language:kuery,query:'process.name%20:%20%22conhost.exe,sc.exe%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/siem-windows?query=(language:kuery,query:'process.name%20:%20%22conhost.exe,sc.exe%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
 
 // Multiple host names with null for Query:
 export const mlHostMultiHostNullKqlQuery =
-  "/app/siem#/ml-hosts/siem-windows,siem-suricata?_g=()&query=!n&&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/siem-windows,siem-suricata?query=!n&&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
 
 // Multiple host names with a value for Query:
 export const mlHostMultiHostKqlQuery =
-  "/app/siem#/ml-hosts/siem-windows,siem-suricata?_g=()&query=(language:kuery,query:'process.name%20:%20%22conhost.exe,sc.exe%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/siem-windows,siem-suricata?query=(language:kuery,query:'process.name%20:%20%22conhost.exe,sc.exe%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
 
 // Undefined/null host name with a null for the KQL:
 export const mlHostVariableHostNullKqlQuery =
-  "/app/siem#/ml-hosts/$host.name$?_g=()&query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/$host.name$?query=!n&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
 
 // Undefined/null host name but with a value for Query:
 export const mlHostVariableHostKqlQuery =
-  "/app/siem#/ml-hosts/$host.name$?_g=()&query=(language:kuery,query:'process.name%20:%20%22conhost.exe,sc.exe%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
+  "/app/siem#/ml-hosts/$host.name$?query=(language:kuery,query:'process.name%20:%20%22conhost.exe,sc.exe%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')),timeline:(linkTo:!(global),timerange:(from:'2019-06-06T06:00:00.000Z',kind:absolute,to:'2019-06-07T05:59:59.999Z')))";
