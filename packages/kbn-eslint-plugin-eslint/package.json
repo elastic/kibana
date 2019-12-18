@@ -4,12 +4,12 @@
   "private": true,
   "license": "Apache-2.0",
   "peerDependencies": {
-    "eslint": "6.7.2",
+    "eslint": "6.5.1",
     "babel-eslint": "^10.0.3"
   },
   "dependencies": {
     "micromatch": "3.1.10",
     "dedent": "^0.7.0",
-    "eslint-module-utils": "2.5.0"
+    "eslint-module-utils": "2.4.1"
   }
 }
