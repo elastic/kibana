@@ -69,6 +69,13 @@ export class ActionExecutor {
     const {
       attributes: { actionTypeId, config, name },
     } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+
+    try {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    } catch (err) {
+      return { status: 'error', actionId, message: err.message, retry: false };
+    }
+
     // Only get encrypted attributes here, the remaining attributes can be fetched in
     // the savedObjectsClient call
     const {

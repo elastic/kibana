@@ -170,7 +170,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
                     {license =>
-                      this.renderMLHeader(license.features.ml?.is_available)
+                      this.renderMLHeader(license?.getFeature('ml').isAvailable)
                     }
                   </LicenseContext.Consumer>
                 </EuiFlexGroup>
