@@ -16,12 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-} from '../../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { createInputControlVisFn } from './input_control_fn';
@@ -46,12 +41,9 @@ export class InputControlPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { expressions, visualizations }: InputControlPluginSetupDependencies
   ) {
-
     expressions.registerFunction(createInputControlVisFn);
-    
-    visualizations.types.createBaseVisualization(
-      createInputControlTypeDefinition()
-    );
+
+    visualizations.types.createBaseVisualization(createInputControlTypeDefinition());
   }
 
   public start(core: CoreStart) {

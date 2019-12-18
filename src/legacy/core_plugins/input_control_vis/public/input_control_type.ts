@@ -17,13 +17,13 @@
  * under the License.
  */
 
- // @ts-ignore
+// @ts-ignore
+import { i18n } from '@kbn/i18n';
 import { VisController } from './vis_controller';
 // @ts-ignore
 import { ControlsTab } from './components/editor/controls_tab';
 // @ts-ignore
 import { OptionsTab } from './components/editor/options_tab';
-import { i18n } from '@kbn/i18n';
 import { Status, defaultFeedbackMessage } from '../../visualizations/public';
 
 export const createInputControlTypeDefinition = () => {
@@ -71,4 +71,3 @@ export const createInputControlTypeDefinition = () => {
     responseHandler: 'none',
   };
 };
-
