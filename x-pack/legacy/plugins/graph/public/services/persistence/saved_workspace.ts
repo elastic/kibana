@@ -3,10 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
-import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { i18n } from '@kbn/i18n';
 import { extractReferences, injectReferences } from './saved_workspace_references';
+import {
+  createSavedObjectClass,
+  SavedObject,
+  SavedObjectKibanaServices,
+} from '../../legacy_imports';
 
 export interface SavedWorkspace extends SavedObject {
   wsState?: string;

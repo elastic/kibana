@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
+import { IBasePath } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 
 import { createSavedWorkspaceClass } from './saved_workspace';
+import { SavedObjectKibanaServices } from '../../legacy_imports';
 
-export function SavedWorkspacesProvider() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-
+export function createSavedWorkspacesLoader(
+  services: SavedObjectKibanaServices & { basePath: IBasePath }
+) {
+  const { savedObjectsClient, basePath } = services;
   const SavedWorkspace = createSavedWorkspaceClass(services);
   const urlFor = (id: string) =>
-    npSetup.core.http.basePath.prepend(`/app/graph#/workspace/${encodeURIComponent(id)}`);
+    basePath.prepend(`/app/graph#/workspace/${encodeURIComponent(id)}`);
   const mapHits = (hit: { id: string; attributes: Record<string, unknown> }) => {
     const source = hit.attributes;
     source.id = hit.id;
@@ -72,5 +67,3 @@ export function SavedWorkspacesProvider() {
     },
   };
 }
-
-SavedObjectRegistryProvider.register(SavedWorkspacesProvider);
