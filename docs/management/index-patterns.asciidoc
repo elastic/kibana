@@ -7,7 +7,7 @@ you want to work with.
 Once you create an index pattern, you're ready to:
 
 * Interactively explore your data in <<discover, Discover>>.
-* Present your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
+* Analyze your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
 * Show off your data in a <<canvas, Canvas>> presentation.
 * If your data includes geo data, visualize it with <<maps, Maps>>.
 
@@ -93,7 +93,7 @@ aggregations using that index pattern in {kib} take advantage of {ccs}.
 === Manage your index pattern
 
 Once you create an index pattern, manually or with a sample data set,
-you might want to look at its fields and associated data types
+you might want to look at its fields and associated data types.
 You might also want to perform housekeeping tasks, such as making the
 index pattern the default or deleting it when you longer need it.
 You can drill down into the details of an index pattern by clicking its name in
@@ -105,7 +105,7 @@ image:management/index-patterns/images/new-index-pattern.png["Index files and da
 From this view, you can perform the following actions:
 
 * *Manage the index fields.* Click a column header to sort the table by that column.
-Use the field dropdown menu to limit to display to a specific field.
+Use the field dropdown menu to limit the display to a specific field.
 See <<managing-fields, Managing fields>> for more detailed information.
 
 * [[set-default-pattern]]*Set the default index pattern.* {kib} uses a badge to make users
