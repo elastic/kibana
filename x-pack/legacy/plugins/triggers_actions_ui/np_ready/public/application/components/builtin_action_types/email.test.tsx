@@ -49,6 +49,7 @@ describe('connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
+        service: [],
         port: [],
         host: [],
         user: [],
@@ -62,6 +63,20 @@ describe('connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
+        service: [],
+        port: [],
+        host: [],
+        user: [],
+        password: [],
+      },
+    });
+    delete actionConnector.config.host;
+    delete actionConnector.config.port;
+    actionConnector.config.service = 'testService';
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        from: [],
+        service: [],
         port: [],
         host: [],
         user: [],
@@ -87,8 +102,9 @@ describe('connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
-        port: ['Port is required.'],
-        host: ['Host is required.'],
+        service: ['Service or host with port is required.'],
+        port: ['Port or Service is required.'],
+        host: ['Host or Service is required.'],
         user: [],
         password: [],
       },

@@ -12,6 +12,7 @@ import {
   EuiFieldPassword,
   EuiComboBox,
   EuiTextArea,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../page_error';
@@ -30,13 +31,14 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
       {
-        defaultMessage: 'Configure SMTP settings to send email from your servers',
+        defaultMessage: 'Configure settings to send email through your mail server',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         from: new Array<string>(),
+        service: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
         user: new Array<string>(),
@@ -53,22 +55,32 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!action.config.port) {
+      if (!action.config.port && !action.config.service) {
         errors.port.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
             {
-              defaultMessage: 'Port is required.',
+              defaultMessage: 'Port or Service is required.',
             }
           )
         );
       }
-      if (!action.config.host) {
+      if (!action.config.service && (!action.config.port || !action.config.host)) {
+        errors.service.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
+            {
+              defaultMessage: 'Service or host with port is required.',
+            }
+          )
+        );
+      }
+      if (!action.config.host && !action.config.service) {
         errors.host.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
             {
-              defaultMessage: 'Host is required.',
+              defaultMessage: 'Host or Service is required.',
             }
           )
         );
@@ -154,7 +166,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   errors,
   hasErrors,
 }) => {
-  const { from, host, port } = action.config;
+  const { from, host, port, secure, service } = action.config;
   const { user, password } = action.secrets;
 
   return (
@@ -183,6 +195,34 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           onBlur={() => {
             if (!from) {
               editActionConfig('from', '');
+            }
+          }}
+        />
+      </ErrableFormRow>
+      <ErrableFormRow
+        id="service"
+        errorKey="service"
+        fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && service !== undefined}
+        label={i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
+          {
+            defaultMessage: 'Service',
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          name="service"
+          value={service || ''}
+          data-test-subj="emailServiceInput"
+          onChange={e => {
+            editActionConfig('service', e.target.value);
+          }}
+          onBlur={() => {
+            if (!service) {
+              editActionConfig('service', '');
             }
           }}
         />
@@ -248,6 +288,20 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               }}
             />
           </ErrableFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+              {
+                defaultMessage: 'Secure',
+              }
+            )}
+            checked={secure || false}
+            onChange={e => {
+              editActionConfig('secure', e.target.checked);
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
