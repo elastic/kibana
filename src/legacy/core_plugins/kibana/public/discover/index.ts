@@ -28,10 +28,8 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = () => {
 
 // Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
-(async () => {
-  pluginInstance.setup(npSetup.core, npSetup.plugins);
-  pluginInstance.start(npStart.core, npStart.plugins);
-})();
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);
 
 SavedObjectRegistryProvider.register((savedSearches: any) => {
   return savedSearches;

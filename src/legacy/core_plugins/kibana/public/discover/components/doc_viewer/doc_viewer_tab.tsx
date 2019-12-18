@@ -18,9 +18,9 @@
  */
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DocViewRenderProps, DocViewRenderFn } from '../../kibana_services';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
+import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 interface Props {
   component?: React.ComponentType<DocViewRenderProps>;

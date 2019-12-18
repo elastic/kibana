@@ -16,18 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { addDocView } from 'ui/registry/doc_views';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { JsonCodeBlock } from './json_code_block';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
-/*
- * Registration of the the doc view: json
- * - used to display an ES hit as pretty printed JSON at Discover
- */
-addDocView({
-  title: i18n.translate('kbnDocViews.json.jsonTitle', {
-    defaultMessage: 'JSON',
-  }),
-  order: 20,
-  component: JsonCodeBlock,
-});
+export interface Props {
+  onClick: () => void;
+  isCollapsed: boolean;
+}
+
+export function DocViewTableRowBtnCollapse({ onClick, isCollapsed }: Props) {
+  const label = i18n.translate('kbn.discover.docViews.table.toggleFieldDetails', {
+    defaultMessage: 'Toggle field details',
+  });
+  return (
+    <EuiToolTip content={label}>
+      <EuiButtonIcon
+        aria-expanded={!isCollapsed}
+        aria-label={label}
+        data-test-subj="collapseBtn"
+        onClick={() => onClick()}
+        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+        iconSize={'s'}
+      />
+    </EuiToolTip>
+  );
+}

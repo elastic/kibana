@@ -24,7 +24,6 @@ import {
   ToastsStart,
   IUiSettingsClient,
 } from 'kibana/public';
-import * as docViewsRegistry from 'ui/registry/doc_views';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 // @ts-ignore
 import { createSavedSearchesService } from '../saved_searches/saved_searches';
@@ -34,6 +33,7 @@ import { DataStart } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
+import { DocViewsRegistry } from '../doc_views/doc_views_registry';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -42,7 +42,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataStart;
   docLinks: DocLinksStart;
-  docViewsRegistry: docViewsRegistry.DocViewsRegistry;
+  docViewsRegistry: DocViewsRegistry;
   eui_utils: EuiUtilsStart;
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -55,7 +55,11 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
 }
-export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins) {
+export async function buildServices(
+  core: CoreStart,
+  plugins: DiscoverStartPlugins,
+  docViewsRegistry: DocViewsRegistry
+) {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,

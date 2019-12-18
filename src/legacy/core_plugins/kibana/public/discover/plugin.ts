@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
@@ -30,13 +31,19 @@ import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './helpers/build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { DocViewsRegistry } from './doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from './doc_views/doc_views_types';
+import { DocViewTable } from './components/table/table';
+import { JsonCodeBlock } from './components/json_code_block/json_code_block';
 
 /**
  * These are the interfaces with your public contracts. You should export these
  * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
  * @public
  */
-export type DiscoverSetup = void;
+export interface DiscoverSetup {
+  addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
+}
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
@@ -63,12 +70,32 @@ const embeddableAngularName = 'app/discoverEmbeddable';
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
+  private readonly docViewsRegistry: DocViewsRegistry;
   /**
    * why are those functions public? they are needed for some mocha tests
    * can be removed once all is Jest
    */
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => void;
+
+  constructor() {
+    this.docViewsRegistry = new DocViewsRegistry();
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
+        defaultMessage: 'Table',
+      }),
+      order: 10,
+      component: DocViewTable,
+    });
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('kbn.discover.docViews.json.jsonTitle', {
+        defaultMessage: 'JSON',
+      }),
+      order: 20,
+      component: JsonCodeBlock,
+    });
+  }
+
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
@@ -88,6 +115,10 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         return renderApp(innerAngularName, params.element);
       },
     });
+
+    return {
+      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+    };
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
@@ -109,7 +140,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       if (this.servicesInitialized) {
         return;
       }
-      const services = await buildServices(core, plugins);
+      const services = await buildServices(core, plugins, this.docViewsRegistry);
       setServices(services);
       this.servicesInitialized = true;
     };

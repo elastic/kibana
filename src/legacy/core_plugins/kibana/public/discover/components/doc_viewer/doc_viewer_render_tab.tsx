@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useRef, useEffect } from 'react';
-import { DocViewRenderFn, DocViewRenderProps } from '../../kibana_services';
+import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 interface Props {
   render: DocViewRenderFn;

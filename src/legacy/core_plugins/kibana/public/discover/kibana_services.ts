@@ -87,6 +87,5 @@ export {
   IndexPattern,
   IFieldType,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from 'ui/registry/doc_views_types';
-export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
+export { ElasticSearchHit } from './doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';

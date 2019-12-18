@@ -17,9 +17,9 @@
  * under the License.
  */
 import React from 'react';
-import { DocView } from 'ui/registry/doc_views_types';
 import { EuiTabbedContent } from '@elastic/eui';
-import { getServices, DocViewRenderProps } from '../../kibana_services';
+import { DocView, DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { getServices } from '../../kibana_services';
 import { DocViewerTab } from './doc_viewer_tab';
 
 /**
