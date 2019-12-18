@@ -17,17 +17,13 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { IIndexPattern } from '../..';
+import { SearchSource as SearchSourceClass } from 'ui/courier';
+import { Class } from '@kbn/utility-types';
 
-export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
-  }
+export { Vis, VisParams } from 'ui/vis';
+export { VisOptionsProps } from 'ui/vis/editors/default';
+export { ValidatedDualRange } from 'ui/validated_range';
+export { SearchSourceFields } from 'ui/courier/types';
 
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
-}
+export type SearchSource = Class<SearchSourceClass>;
+export const SearchSource = SearchSourceClass;

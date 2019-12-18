@@ -17,17 +17,19 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { IIndexPattern } from '../..';
+import { IIndexPattern } from '../../../../../../../plugins/data/public';
 
-export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
-  }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
-}
+/**
+ * Returns forced **Partial** IndexPattern for use in tests
+ */
+export const getIndexPatternMock = (): Promise<IIndexPattern> => {
+  return Promise.resolve({
+    id: 'mockIndexPattern',
+    title: 'mockIndexPattern',
+    fields: [
+      { name: 'keywordField', type: 'string', aggregatable: true },
+      { name: 'textField', type: 'string', aggregatable: false },
+      { name: 'numberField', type: 'number', aggregatable: true },
+    ],
+  } as IIndexPattern);
+};

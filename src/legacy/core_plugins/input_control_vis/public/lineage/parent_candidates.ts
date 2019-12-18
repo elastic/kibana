@@ -17,17 +17,30 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { IIndexPattern } from '../..';
+import { getTitle, ControlParams } from '../editor_utils';
 
-export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
-  }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
+export function getParentCandidates(
+  controlParamsList: ControlParams[],
+  controlId: string,
+  lineageMap: Map<string, string[]>
+) {
+  return controlParamsList
+    .filter(controlParams => {
+      // Ignore controls that do not have index pattern and field set
+      if (!controlParams.indexPattern || !controlParams.fieldName) {
+        return false;
+      }
+      // Ignore controls that would create a circular graph
+      const lineage = lineageMap.get(controlParams.id);
+      if (lineage?.includes(controlId)) {
+        return false;
+      }
+      return true;
+    })
+    .map((controlParams, controlIndex) => {
+      return {
+        value: controlParams.id,
+        text: getTitle(controlParams, controlIndex),
+      };
+    });
 }
