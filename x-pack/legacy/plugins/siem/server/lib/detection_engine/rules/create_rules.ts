@@ -67,7 +67,7 @@ export const createRules = async ({
         references,
         version,
       },
-      interval,
+      schedule: { interval },
       enabled,
       actions: [], // TODO: Create and add actions here once we have email, etc...
       throttle: null,
