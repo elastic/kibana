@@ -20,14 +20,11 @@
 import Fs from 'fs';
 import { resolve } from 'path';
 
-import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { logging } from 'selenium-webdriver';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
-import { pollForLogEntry$ } from './poll_for_log_entry';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
@@ -37,7 +34,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const collectCoverage: boolean = !!process.env.CODE_COVERAGE;
   const coveragePrefix = 'coveragejson:';
   const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
-  let logSubscription: undefined | Rx.Subscription;
+  let coverageCounter = 1;
   type BrowserStorage = 'sessionStorage' | 'localStorage';
 
   const clearBrowserStorage = async (storageType: BrowserStorage) => {
@@ -48,6 +45,22 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         throw error;
       }
     }
+  };
+
+  const writeCoverage = async (logEntry?: { message: string; level: string }) => {
+    const id = coverageCounter++;
+    const timestamp = Date.now();
+    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    let coverageJson: string;
+    if (logEntry) {
+      const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+      coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+    } else {
+      const coverageObject = (await driver.executeScript('return window.__coverage__;')) as object;
+      coverageJson = JSON.stringify(coverageObject);
+    }
+    log.info('writing coverage to', path);
+    Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
 
   const { driver, By, until, consoleLog$ } = await initWebDriver(
@@ -72,23 +85,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   }
   // code coverage is supported only in Chrome browser
   if (collectCoverage && browserType === Browsers.Chrome) {
-    let coverageCounter = 1;
     // We are running xpack tests with different configs and cleanup will delete collected coverage
     // del.sync(coverageDir);
     Fs.mkdirSync(coverageDir, { recursive: true });
 
-    logSubscription = consoleLog$
+    consoleLog$
       .pipe(
         mergeMap(logEntry => {
           if (logEntry.message.includes(coveragePrefix)) {
-            const id = coverageCounter++;
-            const timestamp = Date.now();
-            const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
-            const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
-            const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
-
-            log.info('writing coverage to', path);
-            Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+            writeCoverage(logEntry);
 
             // filter out this message
             return [];
@@ -147,8 +152,9 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.cleanup.add(async () => {
-    if (logSubscription) {
-      await new Promise(r => logSubscription!.add(r));
+    // Getting last piece of code coverage before closing browser
+    if (collectCoverage) {
+      await writeCoverage();
     }
 
     await driver.quit();
