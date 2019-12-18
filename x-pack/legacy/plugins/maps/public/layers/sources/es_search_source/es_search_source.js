@@ -17,36 +17,16 @@ import { UpdateSourceEditor } from './update_source_editor';
 import {
   ES_SEARCH,
   ES_GEO_FIELD_TYPE,
-  DEFAULT_MAX_RESULT_WINDOW,
-  DEFAULT_MAX_INNER_RESULT_WINDOW,
   DEFAULT_MAX_BUCKETS_LIMIT,
-  GIS_API_PATH,
   SORT_ORDER,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
-import { kfetch } from 'ui/kfetch';
+import { loadIndexSettings } from './load_index_settings';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-
-async function loadIndexSettings(indexPatternTitle) {
-  try {
-    const indexSettings = await kfetch({
-      pathname: `../${GIS_API_PATH}/indexSettings`,
-      query: {
-        indexPatternTitle,
-      },
-    });
-    return indexSettings;
-  } catch (err) {
-    return {
-      maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
-      maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
-    };
-  }
-}
 
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
