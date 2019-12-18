@@ -30,10 +30,6 @@ export interface IFieldList extends Array<Field> {
   add: (field: FieldSpec) => void;
   remove: (field: IFieldType) => void;
   update: (field: IFieldType) => void;
-  /**
-   * Get new `FieldList` based on matching partial `Field` properties
-   */
-  getWhere: (condition: Partial<Field>) => FieldList;
 }
 
 export class FieldList extends Array<Field> implements IFieldList {
@@ -56,10 +52,6 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.shortDotsEnable = shortDotsEnable;
 
     specs.map(field => this.add(field));
-  }
-
-  getWhere(condition: Partial<Field>): FieldList {
-    return new FieldList(this.indexPattern, where(this, condition), this.shortDotsEnable);
   }
 
   getByName = (name: Field['name']) => this.byName.get(name);
