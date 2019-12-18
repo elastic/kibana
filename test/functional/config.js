@@ -41,11 +41,11 @@ export default async function({ readConfigFile }) {
     servers: commonConfig.get('servers'),
     security: commonConfig.get('security'),
 
-    esTestCluster: commonConfig.get('esTestCluster'),
+    esTestCluster: { ...commonConfig.get('esTestCluster'), license: 'trial' },
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
-      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs'), '--oss'],
+      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs')],
     },
 
     uiSettings: {
