@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetReference, Dataset, ElasticsearchAssetType } from '../../../../common/types';
+import { Dataset, ElasticsearchAssetType } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { CallESAsCurrentUser } from '../../cluster_access';
 
@@ -64,7 +64,7 @@ export async function installPipelinesForDataset({
     });
     substitutions.push({
       source: name,
-      target: getNameForInstallation(name, dataset, datasourceName, packageName),
+      target: getPipelineNameForInstallation(name, dataset, datasourceName, packageName),
       templateFunction: 'IngestPipeline',
     });
   });
@@ -143,11 +143,11 @@ const getNameAndExtension = (
   };
 };
 
-const getNameForInstallation = (
-  name: string,
+export const getPipelineNameForInstallation = (
+  pipelineName: string,
   dataset: Dataset,
   datasourceName: string,
   packageName: string
 ): string => {
-  return `${dataset.type}-${packageName}-${datasourceName}-${dataset.name}-${name}`;
+  return `${dataset.type}-${packageName}-${datasourceName}-${dataset.name}-${pipelineName}`;
 };

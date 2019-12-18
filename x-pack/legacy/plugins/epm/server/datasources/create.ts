@@ -48,7 +48,12 @@ export async function createDatasource(options: {
 
   if (datasetsRequested) {
     datasetsRequested.forEach(dataset => {
-      const templateRef = installTemplateForDataset(registryPackageInfo, callCluster, dataset);
+      const templateRef = installTemplateForDataset(
+        registryPackageInfo,
+        callCluster,
+        dataset,
+        datasourceName
+      );
       if (templateRef) {
         templateRefs.push(templateRef);
       }

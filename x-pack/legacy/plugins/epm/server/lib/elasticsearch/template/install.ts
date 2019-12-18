@@ -9,6 +9,7 @@ import { AssetReference, Dataset, RegistryPackage } from '../../../../common/typ
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';
 import { Field } from '../../fields/field';
+import { getPipelineNameForInstallation } from '../ingest_pipeline/ingest_pipelines';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 
 const isFields = (path: string) => {
@@ -25,7 +26,8 @@ const isFields = (path: string) => {
 export async function installTemplateForDataset(
   pkg: RegistryPackage,
   callCluster: CallESAsCurrentUser,
-  dataset: Dataset
+  dataset: Dataset,
+  datasourceName: string
 ) {
   // Fetch all field definition files for this dataset
   const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
@@ -41,7 +43,7 @@ export async function installTemplateForDataset(
       }
     }
     dataset.package = pkg.name;
-    return installTemplate({ callCluster, fields, dataset });
+    return installTemplate({ callCluster, fields, dataset, datasourceName });
   }
 }
 
@@ -49,14 +51,25 @@ async function installTemplate({
   callCluster,
   fields,
   dataset,
+  datasourceName,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
   dataset: Dataset;
+  datasourceName: string;
 }): Promise<AssetReference> {
   const mappings = generateMappings(fields);
   const templateName = generateTemplateName(dataset);
-  const template = getTemplate(templateName + '-*', mappings);
+  let pipelineName;
+  if (dataset.ingest_pipeline) {
+    pipelineName = getPipelineNameForInstallation(
+      dataset.ingest_pipeline,
+      dataset,
+      dataset.package,
+      datasourceName
+    );
+  }
+  const template = getTemplate(templateName + '-*', mappings, pipelineName);
 
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
