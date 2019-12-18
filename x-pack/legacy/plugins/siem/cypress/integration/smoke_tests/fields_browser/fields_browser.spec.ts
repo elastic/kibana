@@ -154,10 +154,7 @@ describe('Fields Browser', () => {
           .then(systemCategoriesCount => {
             cy.get(FIELDS_BROWSER_FIELDS_COUNT)
               .invoke('text')
-              .should(
-                'eq',
-                `${parseInt(hostCategoriesCount, 10) + parseInt(systemCategoriesCount, 10)} fields`
-              );
+              .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
           });
       });
   });
