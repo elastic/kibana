@@ -1,0 +1,36 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": {
+        "term": {
+          "agent.name": "nodejs"
+        }
+      }
+    }
+  },
+  "aggregations": {
+    "buckets": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "900000ms"
+      },
+      "aggregations": {
+        "@timestamp": {
+          "max": {
+            "field": "@timestamp"
+          }
+        }
+      }
+    }
+  },
+  "scroll_size": 1000,
+  "chunking_config": {
+    "mode": "manual",
+    "time_span": "900000000ms"
+  }
+}

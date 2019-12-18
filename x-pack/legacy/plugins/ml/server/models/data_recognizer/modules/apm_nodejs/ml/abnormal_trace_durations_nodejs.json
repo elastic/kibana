@@ -1,0 +1,40 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "apm"
+  ],
+  "description": "APM NodeJS: Identifies trace transactions that are processing more slowly than usual.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_mean(\"transaction.duration.us\") by \"transaction.name\"",
+        "function": "high_mean",
+        "field_name": "transaction.duration.us",
+        "by_field_name": "transaction.name"
+      }
+    ],
+    "influencers": [
+      "transaction.name",
+      "trace.id",
+      "service.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-apm-nosejs",
+    "custom_urls": [
+      {
+        "url_name": "APM",
+        "time_range": "2h",
+        "url_value": "apm#/traces?rangeFrom=$earliest$&rangeTo=$latest$&kuery=trace.id%253A%2520%2522$trace.id$%2522%2520and%2520transaction.name%253A%2520%2522$transaction.name$%2522&_g=()"
+      }
+    ]
+  }
+}

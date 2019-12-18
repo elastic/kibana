@@ -1,0 +1,38 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "apm"
+  ],
+  "description": "APM JSBase: Detects user agents that are making requests at a suspiciously high rate. This is useful in identifying bots.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_non_zero_count partitionfield=\"user_agent.name\"",
+        "function": "high_non_zero_count",
+        "partition_field_name": "user_agent.name"
+      }
+    ],
+    "influencers": [
+      "user_agent.name",
+      "service.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-apm-jsbase",
+    "custom_urls": [
+      {
+        "url_name": "APM",
+        "time_range": "2h",
+        "url_value": "apm#/services/$service.name$/transactions?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=user_agent.name%2520%253A%2520%2522$user_agent.name$%2522&_g=()"
+      }
+    ]
+  }
+}

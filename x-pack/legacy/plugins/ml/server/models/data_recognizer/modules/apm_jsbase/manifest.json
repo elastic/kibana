@@ -1,0 +1,59 @@
+{
+  "id": "apm_jsbase",
+  "title": "APM: RUM Javascript",
+  "description": "Detect anomalies in transactions, spans, and errors coming from the Javascript APM Rum Agent",
+  "type": "APM data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "apm-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "agent.name": "js-base"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "abnormal_span_durations_jsbase",
+      "file": "abnormal_span_durations_jsbase.json"
+    },
+    {
+      "id": "anomalous_error_rate_for_user_agents_jsbase",
+      "file": "anomalous_error_rate_for_user_agents_jsbase.json"
+    },
+    {
+      "id": "decreased_throughput_jsbase",
+      "file": "decreased_throughput_jsbase.json"
+    },
+    {
+      "id": "high_count_by_user_agent_jsbase",
+      "file": "high_count_by_user_agent_jsbase.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-abnormal_span_durations_jsbase",
+      "file": "datafeed_abnormal_span_durations_jsbase.json",
+      "job_id": "abnormal_span_durations_jsbase"
+    },
+    {
+      "id": "datafeed-anomalous_error_rate_for_user_agents_jsbase",
+      "file": "datafeed_anomalous_error_rate_for_user_agents_jsbase.json",
+      "job_id": "anomalous_error_rate_for_user_agents_jsbase"
+    },
+    {
+      "id": "datafeed-decreased_throughput_jsbase",
+      "file": "datafeed_decreased_throughput_jsbase.json",
+      "job_id": "decreased_throughput_jsbase"
+    },
+    {
+      "id": "datafeed-high_count_by_user_agent_jsbase",
+      "file": "datafeed_high_count_by_user_agent_jsbase.json",
+      "job_id": "high_count_by_user_agent_jsbase"
+    }
+  ]
+}

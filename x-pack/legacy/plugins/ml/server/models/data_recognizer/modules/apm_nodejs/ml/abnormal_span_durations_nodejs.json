@@ -1,0 +1,41 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "apm"
+  ],
+  "description": "APM NodeJS: Looks for spans that are taking longer than usual to process.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_mean(\"span.duration.us\") partitionfield=\"span.type\"",
+        "function": "high_mean",
+        "field_name": "span.duration.us",
+        "partition_field_name": "span.type"
+      }
+    ],
+    "influencers": [
+      "span.type",
+      "trace.id",
+      "span.name",
+      "service.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "128mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-apm-nodejs",
+    "custom_urls": [
+      {
+        "url_name": "APM",
+        "time_range": "2h",
+        "url_value": "apm#/traces?rangeFrom=$earliest$&rangeTo=$latest$&kuery=trace.id%253A%2520%2522$trace.id$%2522%2520and&_g=()"
+      }
+    ]
+  }
+}
