@@ -10,37 +10,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
-import {
-  FormSchema,
-  FIELD_TYPES,
-  VALIDATION_TYPES,
-  FieldConfig,
-  fieldValidators,
-} from '../../shared_imports';
+import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
 import { MappingsConfiguration } from '../../reducer';
 
 const { containsCharsField } = fieldValidators;
 
-const arrayItemSpaceNotAllowedValidator = {
-  validator: containsCharsField({
-    message: i18n.translate(
-      'xpack.idxMgmt.mappingsEditor.configuration.spaceNotAllowedErrorMessage',
-      {
-        defaultMessage: 'Spaces are not allowed.',
-      }
-    ),
-    chars: ' ',
-  }),
-  type: VALIDATION_TYPES.ARRAY_ITEM,
-};
-
-const fieldPathComboBoxConfig: FieldConfig = {
+const fieldPathComboBoxConfig = {
   helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldPathComboBoxHelpText', {
     defaultMessage: 'Accepts a path to the field, including wildcards.',
   }),
   type: FIELD_TYPES.COMBO_BOX,
   defaultValue: [],
-  validations: [arrayItemSpaceNotAllowedValidator],
 };
 
 export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
@@ -107,7 +87,20 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
     ),
     type: FIELD_TYPES.COMBO_BOX,
     defaultValue: ['strict_date_optional_time', 'yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z'],
-    validations: [arrayItemSpaceNotAllowedValidator],
+    validations: [
+      {
+        validator: containsCharsField({
+          message: i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldValidationErrorMessage',
+            {
+              defaultMessage: 'Spaces are not allowed.',
+            }
+          ),
+          chars: ' ',
+        }),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+      },
+    ],
   },
   _source: {
     enabled: {
