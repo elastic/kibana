@@ -206,7 +206,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertAdd.unableToLoadActionsMessage',
           {
-            defaultMessage: 'Unable to load actions',
+            defaultMessage: 'Unable to load connectors',
           }
         ),
       });
