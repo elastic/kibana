@@ -84,7 +84,7 @@ export async function getFileByPath(filePath: string): Promise<string> {
 }
 
 export async function installDatasource(datasource: DatasourcePayload): Promise<AssetReference[]> {
-  const path = getInstallDatasourcePath(datasource.pkgkey);
+  const path = getInstallDatasourcePath();
   const body = JSON.stringify(datasource);
   return _fetch(path, { body, method: 'POST' });
 }

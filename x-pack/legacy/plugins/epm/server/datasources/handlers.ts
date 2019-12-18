@@ -19,9 +19,6 @@ interface Extra extends ResponseToolkit {
 }
 
 interface CreateDatasourceRequest extends Request {
-  params: {
-    pkgkey: string;
-  };
   payload: DatasourcePayload;
 }
 
