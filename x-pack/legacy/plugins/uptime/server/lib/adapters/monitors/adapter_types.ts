@@ -28,7 +28,10 @@ export interface GetFilterBarParams {
   dateRangeStart: string;
   /** @member dateRangeEnd timestamp bounds */
   dateRangeEnd: string;
-  filters: Record<string, any>;
+  /** @member search this value should correspond to Elasticsearch DSL
+   *  generated from KQL text the user provided.
+   */
+  search?: Record<string, any>;
   filterOptions: Record<string, string[] | number[]>;
 }
 

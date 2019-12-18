@@ -7,7 +7,7 @@
 export const combineRangeWithFilters = (
   dateRangeStart: string,
   dateRangeEnd: string,
-  filters: Record<string, any>
+  filters?: Record<string, any>
 ) => {
   const range = {
     range: {

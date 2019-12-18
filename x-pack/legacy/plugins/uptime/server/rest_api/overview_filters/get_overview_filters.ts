@@ -6,16 +6,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
-import { UMRestApiRouteCreator } from '../types';
-
-const stringToArray = (locations: string | string[] | undefined) =>
-  locations ? (Array.isArray(locations) ? locations : [locations]) : [];
+import { UMRestApiRouteFactory } from '../types';
+import { objectValuesToArrays } from '../../lib/helper';
 
 const arrayOrStringType = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
 );
 
-export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
+export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/filters',
   validate: {
@@ -29,32 +27,43 @@ export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLi
       tags: arrayOrStringType,
     }),
   },
+
   options: {
     tags: ['access:uptime'],
   },
-  handler: async (_context, request, response) => {
-    const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
+  handler: async ({ callES }, _context, request, response) => {
+    const {
+      dateRangeStart,
+      dateRangeEnd,
+      locations,
+      schemes,
+      search: searchString,
+      ports,
+      tags,
+    } = request.query;
 
-    let searchObject: Record<string, any> | undefined;
-    if (search) {
+    let search: Record<string, any> | undefined;
+    if (searchString) {
       try {
-        searchObject = JSON.parse(search);
+        search = JSON.parse(searchString);
       } catch (e) {
         return response.badRequest();
       }
     }
-    const filtersResponse = await libs.monitors.getFilterBar(
-      request,
+
+    const filtersResponse = await libs.monitors.getFilterBar({
+      callES,
       dateRangeStart,
       dateRangeEnd,
-      searchObject,
-      {
-        locations: stringToArray(locations),
-        ports: stringToArray(ports),
-        tags: stringToArray(tags),
-        schemes: stringToArray(schemes),
-      }
-    );
+      search,
+      filterOptions: objectValuesToArrays<string>({
+        locations,
+        ports,
+        schemes,
+        tags,
+      }),
+    });
+
     return response.ok({ body: { ...filtersResponse } });
   },
 });

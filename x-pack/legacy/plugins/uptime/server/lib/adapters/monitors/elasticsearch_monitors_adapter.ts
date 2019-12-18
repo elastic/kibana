@@ -163,7 +163,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     return monitorChartsData;
   },
 
-  getFilterBar: async ({ callES, dateRangeStart, dateRangeEnd, filters, filterOptions }) => {
+  getFilterBar: async ({ callES, dateRangeStart, dateRangeEnd, search, filterOptions }) => {
     const aggs = generateFilterAggs(
       [
         { aggName: 'locations', filterName: 'locations', field: 'observer.geo.name' },
@@ -173,13 +173,13 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
       ],
       filterOptions
     );
-    const filtersObj = combineRangeWithFilters(dateRangeStart, dateRangeEnd, filters);
+    const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 0,
         query: {
-          ...filtersObj,
+          ...filters,
         },
         aggs,
       },
