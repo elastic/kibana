@@ -79,6 +79,26 @@ const TlsTableComponent = React.memo<TlsTableProps>(
         ? networkModel.NetworkTableType.tls
         : networkModel.IpDetailsTableType.tls;
 
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
@@ -96,8 +116,9 @@ const TlsTableComponent = React.memo<TlsTableProps>(
           }
         }
       },
-      [sort, type]
+      [sort, type, tableType, updateNetworkTable]
     );
+
     return (
       <PaginatedTable
         activePage={activePage}
@@ -112,25 +133,13 @@ const TlsTableComponent = React.memo<TlsTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
