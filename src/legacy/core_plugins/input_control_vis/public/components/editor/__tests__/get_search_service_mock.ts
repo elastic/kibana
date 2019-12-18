@@ -17,17 +17,30 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { IIndexPattern } from '../..';
+import { SearchSource } from '../../../legacy_imports';
 
-export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
-  }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
-}
+export const getSearchSourceMock = (esSearchResponse?: any): SearchSource =>
+  jest.fn().mockImplementation(() => ({
+    setParent: jest.fn(),
+    setField: jest.fn(),
+    fetch: jest.fn().mockResolvedValue(
+      esSearchResponse
+        ? esSearchResponse
+        : {
+            aggregations: {
+              termsAgg: {
+                buckets: [
+                  {
+                    key: 'Zurich Airport',
+                    doc_count: 691,
+                  },
+                  {
+                    key: 'Xi an Xianyang International Airport',
+                    doc_count: 526,
+                  },
+                ],
+              },
+            },
+          }
+    ),
+  }));

@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { IIndexPattern } from '../..';
+import { rangeControlFactory } from './range_control_factory';
+import { listControlFactory } from './list_control_factory';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 
-export function getFromSavedObject(savedObject: any): IIndexPattern | undefined {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return;
+export function getControlFactory(controlParams: ControlParams) {
+  let factory = null;
+  switch (controlParams.type) {
+    case CONTROL_TYPES.RANGE:
+      factory = rangeControlFactory;
+      break;
+    case CONTROL_TYPES.LIST:
+      factory = listControlFactory;
+      break;
+    default:
+      throw new Error(`Unhandled control type ${controlParams.type}`);
   }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
+  return factory;
 }
