@@ -31,9 +31,14 @@ import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../unc
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
+import { PluginsSetup } from '../../plugin';
 
-export function compose(core: CoreSetup, env: PluginInitializerContext['env']): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, env);
+export function compose(
+  core: CoreSetup,
+  plugin: PluginsSetup,
+  env: PluginInitializerContext['env']
+): AppBackendLibs {
+  const framework = new KibanaBackendFrameworkAdapter(core, plugin, env);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
