@@ -32,8 +32,8 @@ export function useMetadata(
       nodeId,
       nodeType,
       sourceId,
-      decodeResponse,
-    })
+    }),
+    decodeResponse
   );
 
   useEffect(() => {

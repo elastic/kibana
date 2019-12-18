@@ -51,8 +51,8 @@ export function useSnapshot(
       timerange,
       filterQuery,
       sourceId,
-      decodeResponse,
-    })
+    }),
+    decodeResponse
   );
 
   useEffect(() => {
@@ -65,6 +65,7 @@ export function useSnapshot(
     error: (error && error.message) || null,
     loading,
     nodes: response ? response.nodes : [],
+    interval: response ? response.interval : '60s',
     reload: makeRequest,
   };
 }

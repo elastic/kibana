@@ -205,7 +205,7 @@ export class TaskManagerRunner implements TaskRunner {
         status: TaskStatus.Running,
         startedAt: now,
         attempts,
-        retryAt: this.instance.interval
+        retryAt: this.instance.schedule
           ? intervalFromNow(this.definition.timeout)!
           : this.getRetryDelay({
               attempts,
@@ -273,7 +273,7 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private shouldTryToScheduleRetry(): boolean {
-    if (this.instance.interval) {
+    if (this.instance.schedule) {
       return true;
     }
 
@@ -287,8 +287,8 @@ export class TaskManagerRunner implements TaskRunner {
     if (this.shouldTryToScheduleRetry()) {
       const { runAt, state, error } = failureResult;
       // if we're retrying, keep the number of attempts
-      const { interval, attempts } = this.instance;
-      if (runAt || interval) {
+      const { schedule, attempts } = this.instance;
+      if (runAt || schedule) {
         return asOk({ state, attempts, runAt });
       } else {
         // when result.error is truthy, then we're retrying because it failed
@@ -312,10 +312,9 @@ export class TaskManagerRunner implements TaskRunner {
     const fieldUpdates = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
-      // if retrying is possible (new runAt) or this is simply an interval
-      // based task - reschedule
+      // if retrying is possible (new runAt) or this is an recurring task - reschedule
       mapOk(({ runAt, state, attempts = 0 }: Partial<ConcreteTaskInstance>) => {
-        const { startedAt, interval } = this.instance;
+        const { startedAt, schedule: { interval = undefined } = {} } = this.instance;
         return asOk({
           runAt: runAt || intervalFromDate(startedAt!, interval)!,
           state,
@@ -359,7 +358,7 @@ export class TaskManagerRunner implements TaskRunner {
     await eitherAsync(
       result,
       async ({ runAt }: SuccessfulRunResult) => {
-        if (runAt || this.instance.interval) {
+        if (runAt || this.instance.schedule) {
           await this.processResultForRecurringTask(result);
         } else {
           await this.processResultWhenDone();
