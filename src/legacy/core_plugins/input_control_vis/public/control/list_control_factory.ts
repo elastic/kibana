@@ -134,6 +134,7 @@ export class ListControl extends Control<PhraseFilterManager> {
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState: SearchSourceFields = {
       // Type property does not exist on SearchSourceFields
+      // TODO: Update SearchSource class constructor to accept these options
       // @ts-ignore
       timeout: `${this.getInjectedVar('autocompleteTimeout')}ms`,
       terminate_after: this.getInjectedVar('autocompleteTerminateAfter'),

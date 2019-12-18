@@ -22,7 +22,6 @@ import _ from 'lodash';
 import { FilterManager } from './filter_manager';
 import {
   esFilters,
-  IFieldType,
   IndexPattern,
   FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
@@ -39,8 +38,11 @@ export class PhraseFilterManager extends FilterManager {
 
   createFilter(phrases: any): esFilters.PhraseFilter {
     let newFilter: esFilters.PhraseFilter;
-    // TODO: Fix type to be required
-    const value = this.indexPattern.fields.getByName(this.fieldName) as IFieldType;
+    const value = this.indexPattern.fields.getByName(this.fieldName);
+
+    if (!value) {
+      throw new Error(`Unable to find field with name: ${this.fieldName} on indexPattern`);
+    }
 
     if (phrases.length === 1) {
       newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);

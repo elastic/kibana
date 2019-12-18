@@ -46,7 +46,7 @@ export function noIndexPatternMsg(indexPatternId: string) {
 }
 
 export abstract class Control<FilterManager extends BaseFilterManager> {
-  private kbnFilter: esFilters.PhraseFilter | null = null;
+  private kbnFilter: esFilters.Filter | null = null;
 
   enable: boolean = false;
   disabledReason: string = '';

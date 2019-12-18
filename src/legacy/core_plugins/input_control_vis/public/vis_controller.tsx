@@ -30,6 +30,7 @@ import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
+import { FilterManager, esFilters } from '../../../../plugins/data/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
@@ -37,7 +38,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
-    filterManager: any;
+    filterManager: FilterManager;
     updateSubsciption: any;
     visParams?: VisParams;
 
@@ -152,11 +153,9 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       });
 
       const newFilters = stagedControls
-        .filter(control => {
-          return control.hasKbnFilter();
-        })
-        .map(control => {
-          return control.getKbnFilter();
+        .map(control => control.getKbnFilter())
+        .filter((filter): filter is esFilters.Filter => {
+          return filter !== null;
         });
 
       stagedControls.forEach(control => {

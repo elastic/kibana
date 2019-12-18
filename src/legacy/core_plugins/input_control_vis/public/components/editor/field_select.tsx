@@ -158,7 +158,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
         label={
           <FormattedMessage
             id="inputControl.editor.fieldSelect.fieldLabel"
-            defaultMessage="IFieldType"
+            defaultMessage="Field"
           />
         }
       >
