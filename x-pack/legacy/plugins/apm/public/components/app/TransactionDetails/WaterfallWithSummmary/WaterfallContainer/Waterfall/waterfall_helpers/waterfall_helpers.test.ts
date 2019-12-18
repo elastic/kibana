@@ -13,6 +13,7 @@ import {
   getWaterfall,
   IWaterfallItem
 } from './waterfall_helpers';
+import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
@@ -80,7 +81,7 @@ describe('waterfall_helpers', () => {
         },
         timestamp: { us: 1549324795785760 }
       } as Span,
-      {
+      ({
         parent: { id: 'mySpanIdD' },
         processor: { event: 'transaction' },
         trace: { id: 'myTraceId' },
@@ -88,10 +89,36 @@ describe('waterfall_helpers', () => {
         transaction: {
           duration: { us: 8634 },
           name: 'Api::ProductsController#index',
-          id: 'myTransactionId2'
+          id: 'myTransactionId2',
+          marks: {
+            agent: {
+              domInteractive: 382,
+              domComplete: 383,
+              timeToFirstByte: 14
+            }
+          }
         },
         timestamp: { us: 1549324795823304 }
-      } as Transaction
+      } as unknown) as Transaction,
+      ({
+        processor: { event: 'error' },
+        parent: { id: 'myTransactionId1' },
+        timestamp: { us: 1549324795810000 },
+        trace: { id: 'myTraceId' },
+        transaction: { id: 'myTransactionId1' },
+        error: {
+          id: 'error1',
+          grouping_key: 'errorGroupingKey1',
+          log: {
+            message: 'error message'
+          }
+        },
+        service: { name: 'opbeans-ruby' },
+        agent: {
+          name: 'ruby',
+          version: '2'
+        }
+      } as unknown) as APMError
     ];
 
     it('should return full waterfall', () => {
@@ -107,8 +134,18 @@ describe('waterfall_helpers', () => {
         },
         entryTransactionId
       );
-      expect(waterfall.orderedItems.length).toBe(6);
+
+      const agentMarks = waterfall.orderedItems.filter(
+        item => item.docType === 'agentMark'
+      );
+      const errors = waterfall.orderedItems.filter(
+        item => item.docType === 'error'
+      );
+
+      expect(waterfall.orderedItems.length).toBe(7);
       expect(waterfall.orderedItems[0].id).toBe('myTransactionId1');
+      expect(agentMarks.length).toEqual(0);
+      expect(errors.length).toEqual(1);
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -125,8 +162,18 @@ describe('waterfall_helpers', () => {
         },
         entryTransactionId
       );
-      expect(waterfall.orderedItems.length).toBe(4);
+
+      const agentMarks = waterfall.orderedItems.filter(
+        item => item.docType === 'agentMark'
+      );
+      const errors = waterfall.orderedItems.filter(
+        item => item.docType === 'error'
+      );
+
+      expect(waterfall.orderedItems.length).toBe(7);
       expect(waterfall.orderedItems[0].id).toBe('myTransactionId2');
+      expect(agentMarks.length).toEqual(3);
+      expect(errors.length).toEqual(0);
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -302,6 +349,20 @@ describe('waterfall_helpers', () => {
     it('should return parent skew for spans', () => {
       const child = {
         docType: 'span'
+      } as IWaterfallItem;
+
+      const parent = {
+        timestamp: 100,
+        duration: 100,
+        skew: 5
+      } as IWaterfallItem;
+
+      expect(getClockSkew(child, parent)).toBe(5);
+    });
+
+    it('should return parent skew for error', () => {
+      const child = {
+        docType: 'error'
       } as IWaterfallItem;
 
       const parent = {

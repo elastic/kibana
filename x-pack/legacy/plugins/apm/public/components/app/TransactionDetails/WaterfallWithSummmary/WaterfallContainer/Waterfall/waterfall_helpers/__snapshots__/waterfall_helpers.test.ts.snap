@@ -30,6 +30,50 @@ Object {
   },
   "getTransactionById": [Function],
   "itemsById": Object {
+    "error1": Object {
+      "childIds": Array [],
+      "docType": "error",
+      "duration": 0,
+      "error": Object {
+        "agent": Object {
+          "name": "ruby",
+          "version": "2",
+        },
+        "error": Object {
+          "grouping_key": "errorGroupingKey1",
+          "id": "error1",
+          "log": Object {
+            "message": "error message",
+          },
+        },
+        "parent": Object {
+          "id": "myTransactionId1",
+        },
+        "processor": Object {
+          "event": "error",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795810000,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId1",
+        },
+      },
+      "id": "error1",
+      "message": "error message",
+      "offset": 25994,
+      "parentId": "myTransactionId1",
+      "serviceColor": "#00b3a4",
+      "serviceName": "opbeans-ruby",
+      "skew": 0,
+      "timestamp": 1549324795810000,
+    },
     "mySpanIdA": Object {
       "childIds": Array [
         "mySpanIdB",
@@ -194,6 +238,7 @@ Object {
     "myTransactionId1": Object {
       "childIds": Array [
         "mySpanIdD",
+        "error1",
       ],
       "docType": "transaction",
       "duration": 49660,
@@ -262,6 +307,13 @@ Object {
             "us": 8634,
           },
           "id": "myTransactionId2",
+          "marks": Object {
+            "agent": Object {
+              "domComplete": 383,
+              "domInteractive": 382,
+              "timeToFirstByte": 14,
+            },
+          },
           "name": "Api::ProductsController#index",
         },
       },
@@ -271,6 +323,7 @@ Object {
     Object {
       "childIds": Array [
         "mySpanIdD",
+        "error1",
       ],
       "docType": "transaction",
       "duration": 49660,
@@ -380,6 +433,13 @@ Object {
             "us": 8634,
           },
           "id": "myTransactionId2",
+          "marks": Object {
+            "agent": Object {
+              "domComplete": 383,
+              "domInteractive": 382,
+              "timeToFirstByte": 14,
+            },
+          },
           "name": "Api::ProductsController#index",
         },
       },
@@ -503,6 +563,50 @@ Object {
         },
       },
       "timestamp": 1549324795827905,
+    },
+    Object {
+      "childIds": Array [],
+      "docType": "error",
+      "duration": 0,
+      "error": Object {
+        "agent": Object {
+          "name": "ruby",
+          "version": "2",
+        },
+        "error": Object {
+          "grouping_key": "errorGroupingKey1",
+          "id": "error1",
+          "log": Object {
+            "message": "error message",
+          },
+        },
+        "parent": Object {
+          "id": "myTransactionId1",
+        },
+        "processor": Object {
+          "event": "error",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795810000,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId1",
+        },
+      },
+      "id": "error1",
+      "message": "error message",
+      "offset": 25994,
+      "parentId": "myTransactionId1",
+      "serviceColor": "#00b3a4",
+      "serviceName": "opbeans-ruby",
+      "skew": 0,
+      "timestamp": 1549324795810000,
     },
   ],
   "serviceColors": Object {
@@ -558,6 +662,13 @@ Object {
         "us": 8634,
       },
       "id": "myTransactionId2",
+      "marks": Object {
+        "agent": Object {
+          "domComplete": 383,
+          "domInteractive": 382,
+          "timeToFirstByte": 14,
+        },
+      },
       "name": "Api::ProductsController#index",
     },
   },
@@ -567,6 +678,48 @@ Object {
   },
   "getTransactionById": [Function],
   "itemsById": Object {
+    "error1": Object {
+      "docType": "error",
+      "duration": 0,
+      "error": Object {
+        "agent": Object {
+          "name": "ruby",
+          "version": "2",
+        },
+        "error": Object {
+          "grouping_key": "errorGroupingKey1",
+          "id": "error1",
+          "log": Object {
+            "message": "error message",
+          },
+        },
+        "parent": Object {
+          "id": "myTransactionId1",
+        },
+        "processor": Object {
+          "event": "error",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795810000,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId1",
+        },
+      },
+      "id": "error1",
+      "message": "error message",
+      "offset": 0,
+      "parentId": "myTransactionId1",
+      "serviceName": "opbeans-ruby",
+      "skew": 0,
+      "timestamp": 1549324795810000,
+    },
     "mySpanIdA": Object {
       "childIds": Array [
         "mySpanIdB",
@@ -793,6 +946,13 @@ Object {
             "us": 8634,
           },
           "id": "myTransactionId2",
+          "marks": Object {
+            "agent": Object {
+              "domComplete": 383,
+              "domInteractive": 382,
+              "timeToFirstByte": 14,
+            },
+          },
           "name": "Api::ProductsController#index",
         },
       },
@@ -834,6 +994,13 @@ Object {
             "us": 8634,
           },
           "id": "myTransactionId2",
+          "marks": Object {
+            "agent": Object {
+              "domComplete": 383,
+              "domInteractive": 382,
+              "timeToFirstByte": 14,
+            },
+          },
           "name": "Api::ProductsController#index",
         },
       },
@@ -957,6 +1124,24 @@ Object {
         },
       },
       "timestamp": 1549324795827905,
+    },
+    Object {
+      "docType": "agentMark",
+      "id": "domInteractive",
+      "name": "domInteractive",
+      "offset": 382000,
+    },
+    Object {
+      "docType": "agentMark",
+      "id": "domComplete",
+      "name": "domComplete",
+      "offset": 383000,
+    },
+    Object {
+      "docType": "agentMark",
+      "id": "timeToFirstByte",
+      "name": "timeToFirstByte",
+      "offset": 14000,
     },
   ],
   "serviceColors": Object {
