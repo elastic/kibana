@@ -13,7 +13,7 @@ import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '..
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelinesForDataset } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
-import { installTemplates } from '../lib/elasticsearch/template/install';
+import { installTemplateForDataset } from '../lib/elasticsearch/template/install';
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 import { Request } from '../types';
@@ -43,35 +43,48 @@ export async function createDatasource(options: {
     return datasetsRequestedNames.includes(packageDataset.name);
   });
 
+  let templateRefs: any[] = [];
+  let pipelineRefs: any[] = [];
+
   if (datasetsRequested) {
-    datasetsRequested.forEach(async dataset => {
+    datasetsRequested.forEach(dataset => {
+      const templateRef = installTemplateForDataset(registryPackageInfo, callCluster, dataset);
+      if (templateRef) {
+        templateRefs.push(templateRef);
+      }
       if (dataset.ingest_pipeline) {
-        await installPipelinesForDataset({
+        const pipelineRefArray = installPipelinesForDataset({
           pkgkey,
           dataset,
           callCluster,
           datasourceName,
           packageName: registryPackageInfo.name,
         });
+        pipelineRefs = pipelineRefs.concat(pipelineRefArray);
       }
     });
   }
-  const toSave = await installTemplates(registryPackageInfo, callCluster);
+  // the promises from template installation resolve to template references
+  templateRefs = await Promise.all(templateRefs);
+  // the promises from pipeline installation resolve to arrays of pipeline references
+  pipelineRefs = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
+
+  const toSave = templateRefs.concat(pipelineRefs);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
 
   const streams = await getStreams(pkgkey, datasets);
 
-  // await saveDatasourceReferences({
-  //   savedObjectsClient,
-  //   pkg: registryPackageInfo,
-  //   datasourceName,
-  //   datasets,
-  //   toSave,
-  //   request,
-  //   streams,
-  // });
+  await saveDatasourceReferences({
+    savedObjectsClient,
+    pkg: registryPackageInfo,
+    datasourceName,
+    datasets,
+    toSave,
+    request,
+    streams,
+  });
 
   return toSave;
 }

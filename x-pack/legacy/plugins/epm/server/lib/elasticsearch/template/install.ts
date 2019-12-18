@@ -22,27 +22,27 @@ const isFields = (path: string) => {
  * in one datasets, they are merged together into 1 and then converted to a template
  * The template is currently loaded with the pkgey-package-dataset
  */
-export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
-  // If no datasets exist in this package, no templates have to be installed.
-  if (!pkg.datasets) return;
-  return pkg.datasets.map(async dataset => {
-    dataset.package = pkg.name;
-    // Fetch all field definition files for this dataset
-    const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
-    // Merge all the fields of a dataset together and create an Elasticsearch index template
-    let fields: Field[] = [];
-    for (const file of fieldDefinitionFiles) {
-      // Make sure it is defined as it is optional. Should never happen.
-      if (file.buffer) {
-        const tmpFields = safeLoad(file.buffer.toString());
-        // safeLoad() returns undefined for empty files, we don't want that
-        if (tmpFields) {
-          fields = fields.concat(tmpFields);
-        }
+export async function installTemplateForDataset(
+  pkg: RegistryPackage,
+  callCluster: CallESAsCurrentUser,
+  dataset: Dataset
+) {
+  // Fetch all field definition files for this dataset
+  const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
+  // Merge all the fields of a dataset together and create an Elasticsearch index template
+  let fields: Field[] = [];
+  for (const file of fieldDefinitionFiles) {
+    // Make sure it is defined as it is optional. Should never happen.
+    if (file.buffer) {
+      const tmpFields = safeLoad(file.buffer.toString());
+      // safeLoad() returns undefined for empty files, we don't want that
+      if (tmpFields) {
+        fields = fields.concat(tmpFields);
       }
     }
+    dataset.package = pkg.name;
     return installTemplate({ callCluster, fields, dataset });
-  });
+  }
 }
 
 async function installTemplate({

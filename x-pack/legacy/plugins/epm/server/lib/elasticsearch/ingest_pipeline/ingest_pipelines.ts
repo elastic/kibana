@@ -47,7 +47,7 @@ export async function installPipelinesForDataset({
   dataset: Dataset;
   datasourceName: string;
   packageName: string;
-}): Promise<any> {
+}): Promise<any[]> {
   const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
     isDatasetPipeline(entry, dataset.name)
   );
@@ -77,11 +77,11 @@ export async function installPipelinesForDataset({
     return pipeline;
   });
 
-  const installationPromises = pipelines.map(pipeline => {
-    installPipeline({ callCluster, pipeline });
+  const installationPromises = pipelines.map(async pipeline => {
+    return installPipeline({ callCluster, pipeline });
   });
 
-  return installationPromises;
+  return Promise.all(installationPromises);
 }
 
 async function installPipeline({
@@ -113,7 +113,6 @@ async function installPipeline({
   // which we could otherwise use.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
   await callCluster('transport.request', callClusterParams);
-
   return { id: pipeline.name, type: 'ingest-pipeline' };
 }
 
