@@ -595,20 +595,30 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      */
     public async reorderSeries(from: number, to: number): Promise<void> {
       const seriesList = await testSubjects.findAll('tsvbDraggableSeriesHandler');
-      // focus on the series drag handler
+      log.debug(`focus on the series drag handler n:${from}`);
       await seriesList[from].focus();
       // enable dragging using accessibility key
+      log.debug(`enabling the dragging with the spacebar`);
       await browser.pressKeys(browser.keys.SPACE);
+      await PageObjects.common.sleep(1000);
       // wait for dragging enabled
       await find.byCssSelector('.tvbEditor .euiDroppable.euiDroppable--isDraggingOver');
+      log.debug(`the dragging is enabled`);
       // move the series up or down depending on the number of steps
       const steps = to - from;
       for (let i = 0; i < Math.abs(steps); i++) {
-        await browser.pressKeys(steps > 0 ? browser.keys.DOWN : browser.keys.UP);
+        const key = steps > 0 ? browser.keys.DOWN : browser.keys.UP;
+        log.debug(`Pressing ${key}`);
+        await browser.pressKeys(key);
+        await PageObjects.common.sleep(1000);
       }
+      log.debug(`we moved the series to ${to}`);
       // complete the dragging action
       await browser.pressKeys(browser.keys.SPACE);
+      await PageObjects.common.sleep(1000);
+      log.debug(`mark the dragging action as done`);
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      log.debug(`wait for the chart to render the update`);
     }
   }
 
