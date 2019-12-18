@@ -99,11 +99,10 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              localsConvention: 'camelCaseOnly',
+              modules: true,
+              localIdentName: '[name]__[local]___[hash:base64:5]',
+              camelCase: true,
               sourceMap: !isProd,
-              modules: {
-                localIdentName: '[name]__[local]___[hash:base64:5]',
-              },
             },
           },
           {

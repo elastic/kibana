@@ -8,7 +8,14 @@ import Boom from 'boom';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction, AlertType } from './types';
+import {
+  Alert,
+  RawAlert,
+  AlertTypeRegistry,
+  AlertAction,
+  AlertType,
+  IntervalSchedule,
+} from './types';
 import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
 import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
@@ -82,7 +89,7 @@ interface UpdateOptions {
   data: {
     name: string;
     tags: string[];
-    interval: string;
+    schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
     params: Record<string, any>;
   };
@@ -145,11 +152,7 @@ export class AlertsClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(
-          createdAlert.id,
-          rawAlert.alertTypeId,
-          rawAlert.interval
-        );
+        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -259,11 +262,7 @@ export class AlertsClient {
     const { attributes, version } = await this.savedObjectsClient.get('alert', id);
     if (attributes.enabled === false) {
       const apiKey = await this.createAPIKey();
-      const scheduledTask = await this.scheduleAlert(
-        id,
-        attributes.alertTypeId,
-        attributes.interval
-      );
+      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
@@ -364,7 +363,7 @@ export class AlertsClient {
     }
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
+  private async scheduleAlert(id: string, alertTypeId: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       params: {

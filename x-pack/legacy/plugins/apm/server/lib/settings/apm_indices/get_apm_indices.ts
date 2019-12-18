@@ -54,10 +54,6 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   };
 }
 
-// export async function getApmIndices(context: APMRequestHandlerContext) {
-//   return _getApmIndices(context.core, context.config);
-// }
-
 export async function getApmIndices({
   config,
   savedObjectsClient

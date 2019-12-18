@@ -1,0 +1,17 @@
+{
+  "rule_id": "256e9e8b-8366-4f23-8cbe-c9eb5ba25633",
+  "risk_score": 50,
+  "description": "Suricata non-SSH Traffic on Port 22",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-SSH Traffic on Port 22",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610008 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
