@@ -12,7 +12,7 @@ export function addRoutes(router: IRouter) {
       path: '/api/endpoint/hello-world',
       validate: false,
       options: {
-        tags: ['access:endpoints'],
+        tags: ['access:resolver'],
       },
     },
     async function greetingIndex(_context, _request, response) {
