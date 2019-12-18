@@ -91,7 +91,7 @@ export const ActionConnectorForm = ({
         i18n.translate(
           'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
           {
-            defaultMessage: 'Description is required.',
+            defaultMessage: 'Name is required.',
           }
         )
       );
@@ -152,7 +152,7 @@ export const ActionConnectorForm = ({
                 title={
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.actionConnectorForm.saveActionErrorTitle"
-                    defaultMessage="Error saving action"
+                    defaultMessage="Error saving connector"
                   />
                 }
                 error={serverError}
