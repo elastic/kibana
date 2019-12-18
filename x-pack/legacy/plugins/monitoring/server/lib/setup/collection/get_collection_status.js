@@ -241,9 +241,7 @@ async function hasNecessaryPermissions(req) {
   }
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const response = await callWithRequest(req, 'transport.request', {
-    method: 'POST',
-    path: '/_security/user/_has_privileges',
+  const response = await callWithRequest(req, 'security.hasPrivileges', {
     body: {
       cluster: ['monitor'],
     },
