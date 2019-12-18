@@ -9,7 +9,7 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-import { ExpressionAST, ExpressionArgAST } from '../../../../legacy/plugins/canvas/types';
+import { ExpressionAST, ExpressionArgAST } from '../../types';
 
 function isExpression(maybeExpression: ExpressionArgAST): maybeExpression is ExpressionAST {
   return typeof maybeExpression === 'object';

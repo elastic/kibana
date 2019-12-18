@@ -5,7 +5,7 @@
  */
 
 import { summarizeCustomElements } from './custom_element_collector';
-import { TelemetryCustomElementDocument } from '../../../../legacy/plugins/canvas/types';
+import { TelemetryCustomElementDocument } from '../../types';
 
 function mockCustomElement(...nodeExpressions: string[]): TelemetryCustomElementDocument {
   return {

@@ -13,7 +13,7 @@ import {
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
-} from '../../../../legacy/plugins/canvas/types';
+} from '../../types';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {

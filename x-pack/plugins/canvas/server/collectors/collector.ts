@@ -7,7 +7,7 @@
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CANVAS_USAGE_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
-import { TelemetryCollector } from '../../../../legacy/plugins/canvas/types';
+import { TelemetryCollector } from '../../types';
 
 import { workpadCollector } from './workpad_collector';
 import { customElementCollector } from './custom_element_collector';
