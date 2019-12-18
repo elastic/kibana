@@ -7,7 +7,7 @@
 import { generateRulesFromRaw, ExceptFieldRule, AnyRule, FieldRule } from '.';
 import { RoleMapping } from '../../../../../common/model';
 import { AllRule } from './all_rule';
-import { RuleBuilderError } from './rule_builder';
+import { RuleBuilderError } from './rule_builder_error';
 
 describe('generateRulesFromRaw', () => {
   it('returns null for an empty rule set', () => {
@@ -160,6 +160,19 @@ describe('generateRulesFromRaw', () => {
         });
       }).toThrowError('Expected an array of rules, but found object.');
     });
+
+    it('expects each entry to be an object with a single property', () => {
+      expect(() => {
+        generateRulesFromRaw({
+          any: [
+            {
+              any: [{ field: { foo: 'bar' } }],
+              all: [{ field: { foo: 'bar' } }],
+            } as any,
+          ],
+        });
+      }).toThrowError('Expected a single rule definition, but found 2.');
+    });
   });
 
   describe('"all"', () => {
@@ -171,6 +184,19 @@ describe('generateRulesFromRaw', () => {
           } as any,
         });
       }).toThrowError('Expected an array of rules, but found object.');
+    });
+
+    it('expects each entry to be an object with a single property', () => {
+      expect(() => {
+        generateRulesFromRaw({
+          all: [
+            {
+              field: { username: '*' },
+              any: [{ field: { foo: 'bar' } }],
+            } as any,
+          ],
+        });
+      }).toThrowError('Expected a single rule definition, but found 2.');
     });
   });
 
@@ -224,7 +250,23 @@ describe('generateRulesFromRaw', () => {
   });
 
   describe('"except"', () => {
-    it(`"except" can only be nested inside an "all" clause`, () => {
+    it(`expects an object value`, () => {
+      expect(() => {
+        generateRulesFromRaw({
+          all: [
+            {
+              except: [
+                {
+                  field: { username: '*' },
+                },
+              ],
+            },
+          ],
+        } as any);
+      }).toThrowError('Expected an object, but found array.');
+    });
+
+    it(`can only be nested inside an "all" clause`, () => {
       expect(() => {
         generateRulesFromRaw({
           any: [

@@ -13,21 +13,7 @@ import { Rule } from './rule';
 import { ExceptFieldRule } from './except_field_rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
-
-/**
- * Describes an error during rule building.
- * In addition to a user-"friendly" message, this also includes a rule trace,
- * which is the "JSON path" where the error occurred.
- */
-export class RuleBuilderError extends Error {
-  constructor(message: string, public readonly ruleTrace: string[]) {
-    super(message);
-
-    // Set the prototype explicitly, see:
-    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    Object.setPrototypeOf(this, RuleBuilderError.prototype);
-  }
-}
+import { RuleBuilderError } from '.';
 
 interface RuleBuilderResult {
   /** The maximum rule depth within the parsed rule set. */
@@ -78,35 +64,20 @@ function parseRawRules(
 
 function createRuleForType(
   ruleType: string,
-  ruleDefinition: any | undefined,
+  ruleDefinition: any,
   parentRuleType: string | null,
   ruleTrace: string[] = [],
   depth: number
 ): RuleBuilderResult {
   const isRuleNegated = parentRuleType === 'except';
 
+  const currentRuleTrace = [...ruleTrace, ruleType];
+
   switch (ruleType) {
     case 'field': {
-      const fieldData = ruleDefinition || { username: '*' };
+      assertIsObject(ruleDefinition, currentRuleTrace);
 
-      let fieldDataType: string = typeof fieldData;
-      if (Array.isArray(fieldData)) {
-        fieldDataType = 'array';
-      }
-      if (fieldDataType !== 'object') {
-        throw new RuleBuilderError(
-          i18n.translate(
-            'xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectForFieldRule',
-            {
-              defaultMessage: `Expected an object, but found {unexpectedType}.`,
-              values: { unexpectedType: fieldDataType },
-            }
-          ),
-          [...ruleTrace, ruleType]
-        );
-      }
-
-      const entries = Object.entries(fieldData);
+      const entries = Object.entries(ruleDefinition);
       if (entries.length !== 1) {
         throw new RuleBuilderError(
           i18n.translate(
@@ -116,7 +87,7 @@ function createRuleForType(
               values: { count: entries.length },
             }
           ),
-          [...ruleTrace, ruleType]
+          currentRuleTrace
         );
       }
 
@@ -133,7 +104,7 @@ function createRuleForType(
                 values: { valueType, value: JSON.stringify(value) },
               }
             ),
-            [...ruleTrace, `field[${field}]`]
+            currentRuleTrace
           );
         }
       });
@@ -155,12 +126,12 @@ function createRuleForType(
               values: { type: typeof ruleDefinition },
             }
           ),
-          [...ruleTrace, ruleType]
+          currentRuleTrace
         );
       }
 
       const subRulesResults = ((ruleDefinition as any[]) || []).map((definition: any, index) =>
-        parseRawRules(definition, ruleType, [...ruleTrace, ruleType, `[${index}]`], depth)
+        parseRawRules(definition, ruleType, [...currentRuleTrace, `[${index}]`], depth)
       ) as RuleBuilderResult[];
 
       const { subRules, maxDepth } = subRulesResults.reduce(
@@ -186,18 +157,8 @@ function createRuleForType(
       }
     }
     case 'except': {
-      if (ruleDefinition && typeof ruleDefinition !== 'object') {
-        throw new RuleBuilderError(
-          i18n.translate(
-            'xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectForExceptRule',
-            {
-              defaultMessage: `Expected an object, but found {type}.`,
-              values: { type: typeof ruleDefinition },
-            }
-          ),
-          [...ruleTrace, 'except']
-        );
-      }
+      assertIsObject(ruleDefinition, currentRuleTrace);
+
       if (parentRuleType !== 'all') {
         throw new RuleBuilderError(
           i18n.translate(
@@ -206,13 +167,13 @@ function createRuleForType(
               defaultMessage: `"except" rule can only exist within an "all" rule.`,
             }
           ),
-          [...ruleTrace, ruleType]
+          currentRuleTrace
         );
       }
       // subtracting 1 from depth because we don't currently count the "except" level itself as part of the depth calculation
       // for the purpose of determining if the rule set is "too complex" for the visual rule editor.
       // The "except" rule MUST be nested within an "all" rule type (see validation above), so the depth itself will always be a non-negative number.
-      return parseRawRules(ruleDefinition || {}, ruleType, [...ruleTrace, ruleType], depth - 1);
+      return parseRawRules(ruleDefinition || {}, ruleType, currentRuleTrace, depth - 1);
     }
     default:
       throw new RuleBuilderError(
@@ -220,7 +181,24 @@ function createRuleForType(
           defaultMessage: `Unknown rule type: {ruleType}.`,
           values: { ruleType },
         }),
-        [...ruleTrace, ruleType]
+        currentRuleTrace
       );
+  }
+}
+
+function assertIsObject(ruleDefinition: any, ruleTrace: string[]) {
+  let fieldType: string = typeof ruleDefinition;
+  if (Array.isArray(ruleDefinition)) {
+    fieldType = 'array';
+  }
+
+  if (ruleDefinition && fieldType !== 'object') {
+    throw new RuleBuilderError(
+      i18n.translate('xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectError', {
+        defaultMessage: `Expected an object, but found {type}.`,
+        values: { type: fieldType },
+      }),
+      ruleTrace
+    );
   }
 }
