@@ -99,8 +99,8 @@ describe('connector validation', () => {
 describe('action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      to: 'test@test.com',
-      cc: 'test1@test.com',
+      to: [],
+      cc: ['test1@test.com'],
       message: 'message {test}',
       subject: 'test',
     };
@@ -118,7 +118,7 @@ describe('action params validation', () => {
 
   test('action params validation fails when action params is not valid', () => {
     const actionParams = {
-      to: 'test@test.com',
+      to: ['test@test.com'],
       subject: 'test',
     };
 
