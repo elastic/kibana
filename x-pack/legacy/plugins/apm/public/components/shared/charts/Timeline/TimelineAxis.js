@@ -83,7 +83,11 @@ function TimelineAxis({ plotValues, marks, topTraceDuration }) {
               )}
 
               {marks.map(mark => (
-                <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
+                <Marker
+                  key={mark.id}
+                  mark={mark}
+                  x={xScale(mark.offset + mark.skew)}
+                />
               ))}
             </XYPlot>
           </div>

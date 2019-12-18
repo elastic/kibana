@@ -19,6 +19,7 @@ describe('ErrorMarker', () => {
     id: '123',
     name: 'foo',
     offset: 10000,
+    skew: 0,
     serviceColor: '#fff',
     serviceName: 'bar'
   } as unknown) as IWaterfallItemError;

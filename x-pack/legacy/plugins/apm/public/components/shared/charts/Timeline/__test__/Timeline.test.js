@@ -30,9 +30,19 @@ describe('Timeline', () => {
       },
       animation: null,
       marks: [
-        { name: 'timeToFirstByte', offset: 100000, docType: 'agentMark' },
-        { name: 'domInteractive', offset: 110000, docType: 'agentMark' },
-        { name: 'domComplete', offset: 190000, docType: 'agentMark' }
+        {
+          name: 'timeToFirstByte',
+          offset: 100000,
+          skew: 0,
+          docType: 'agentMark'
+        },
+        {
+          name: 'domInteractive',
+          offset: 110000,
+          skew: 0,
+          docType: 'agentMark'
+        },
+        { name: 'domComplete', offset: 190000, skew: 0, docType: 'agentMark' }
       ]
     };
 

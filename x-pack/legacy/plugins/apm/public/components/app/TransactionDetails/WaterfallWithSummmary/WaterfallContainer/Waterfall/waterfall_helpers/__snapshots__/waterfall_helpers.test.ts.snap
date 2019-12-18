@@ -1132,18 +1132,21 @@ Object {
       "id": "domInteractive",
       "name": "domInteractive",
       "offset": 382000,
+      "skew": 0,
     },
     Object {
       "docType": "agentMark",
       "id": "domComplete",
       "name": "domComplete",
       "offset": 383000,
+      "skew": 0,
     },
     Object {
       "docType": "agentMark",
       "id": "timeToFirstByte",
       "name": "timeToFirstByte",
       "offset": 14000,
+      "skew": 0,
     },
   ],
   "serviceColors": Object {

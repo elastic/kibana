@@ -72,7 +72,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       anchorPosition="upCenter"
     >
       <Popover>
-        <Label>{`@ ${asDuration(mark.offset)}`}</Label>
+        <Label>{`@ ${asDuration(mark.offset + mark.skew)}`}</Label>
         <Legend
           key={mark.serviceColor}
           color={mark.serviceColor}
