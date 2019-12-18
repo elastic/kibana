@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
@@ -33,12 +33,12 @@ export interface OwnProps {
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
+  pageFilters?: esFilters.Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (totalCount: number) => React.ReactNode;
 }
 
 interface StateReduxProps {
-  activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   filters: esFilters.Filter[];
@@ -158,6 +158,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
+    const eventsFilter = useMemo(() => [...filters], [defaultFilters]);
 
     return (
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
@@ -168,7 +169,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           dataProviders={dataProviders!}
           deletedEventIds={deletedEventIds}
           end={end}
-          filters={[...filters, ...defaultFilters]}
+          filters={eventsFilter}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
@@ -189,7 +190,6 @@ const StatefulEventsViewerComponent = React.memo<Props>(
   },
   (prevProps, nextProps) =>
     prevProps.id === nextProps.id &&
-    prevProps.activePage === nextProps.activePage &&
     isEqual(prevProps.columns, nextProps.columns) &&
     isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
@@ -202,6 +202,8 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     isEqual(prevProps.query, nextProps.query) &&
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
+    prevProps.start === nextProps.start &&
+    isEqual(prevProps.defaultFilters, nextProps.defaultFilters) &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
     prevProps.showRowRenderers === nextProps.showRowRenderers &&
     prevProps.start === nextProps.start &&
@@ -254,7 +256,6 @@ export const StatefulEventsViewer = connect(makeMapStateToProps, {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
-  updateSort: timelineActions.updateSort,
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
 })(StatefulEventsViewerComponent);
