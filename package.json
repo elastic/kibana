@@ -277,7 +277,6 @@
   },
   "devDependencies": {
     "@babel/parser": "^7.5.5",
-    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/types": "^7.5.5",
     "@elastic/elasticsearch": "^7.4.0",
     "@elastic/eslint-config-kibana": "0.15.0",
@@ -372,7 +371,6 @@
     "axe-core": "^3.3.2",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
-    "babel-plugin-dynamic-import-node": "^2.3.0",
     "babel-plugin-istanbul": "^5.2.0",
     "backport": "4.8.0",
     "chai": "3.5.0",
