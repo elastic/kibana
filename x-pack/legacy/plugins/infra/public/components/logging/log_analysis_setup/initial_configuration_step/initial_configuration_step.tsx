@@ -5,16 +5,14 @@
  */
 
 import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import {
-  ValidatedIndex,
-  ValidationIndicesUIError,
-} from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
+import { ValidatedIndex, ValidationIndicesUIError } from './validation';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -26,6 +24,13 @@ interface InitialConfigurationStepProps {
   setValidatedIndices: (selectedIndices: ValidatedIndex[]) => void;
   validationErrors?: ValidationIndicesUIError[];
 }
+
+export const createInitialConfigurationStep = (
+  props: InitialConfigurationStepProps
+): EuiContainedStepProps => ({
+  title: initialConfigurationStepTitle,
+  children: <InitialConfigurationStep {...props} />,
+});
 
 export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurationStepProps> = ({
   setStartTime,
@@ -64,6 +69,13 @@ const errorCalloutTitle = i18n.translate(
   'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',
   {
     defaultMessage: 'Your index configuration is not valid',
+  }
+);
+
+const initialConfigurationStepTitle = i18n.translate(
+  'xpack.infra.analysisSetup.configurationStepTitle',
+  {
+    defaultMessage: 'Configuration',
   }
 );
 
