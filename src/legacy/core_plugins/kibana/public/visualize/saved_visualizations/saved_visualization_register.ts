@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 // @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import './saved_visualizations';
-
-SavedObjectRegistryProvider.register((savedVisualizations: any) => {
-  return savedVisualizations;
-});
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
