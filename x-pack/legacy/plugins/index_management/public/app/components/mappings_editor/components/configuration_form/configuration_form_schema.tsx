@@ -119,13 +119,13 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
       deserializer: (value?: boolean) => (value === undefined ? true : value),
     },
     includes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.includeSourceFieldsLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.excludeSourceFieldsLabel', {
         defaultMessage: 'Include fields',
       }),
       ...fieldPathComboBoxConfig,
     },
     excludes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.excludeSourceFieldsLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.includeSourceFieldsLabel', {
         defaultMessage: 'Exclude fields',
       }),
       ...fieldPathComboBoxConfig,
