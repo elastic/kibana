@@ -14,14 +14,17 @@ import {
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
 import { LogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
-import { LogEntryRateResultsContent } from './page_results_content';
-import { LogEntryRateSetupContent } from './page_setup_content';
-import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
+import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
-export const LogEntryRatePageContent = () => {
+export const LogEntryCategoriesPageContent = () => {
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const { fetchJobStatus, fetchModuleDefinition, setupStatus } = useLogEntryRateModuleContext();
+  const {
+    fetchJobStatus,
+    fetchModuleDefinition,
+    setupStatus,
+  } = useLogEntryCategoriesModuleContext();
 
   useEffect(() => {
     fetchModuleDefinition();
@@ -33,16 +36,17 @@ export const LogEntryRatePageContent = () => {
   } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
-        message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
-          defaultMessage: 'Checking status of analysis jobs...',
+        message={i18n.translate('xpack.infra.logs.logEntryCategories.jobStatusLoadingMessage', {
+          defaultMessage: 'Checking status of categorization jobs...',
         })}
       />
     );
   } else if (setupStatus === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
-    return <LogEntryRateResultsContent />;
+    return null;
+    // return <LogEntryCategoriesResultsContent />;
   } else {
-    return <LogEntryRateSetupContent />;
+    return <LogEntryCategoriesSetupContent />;
   }
 };
