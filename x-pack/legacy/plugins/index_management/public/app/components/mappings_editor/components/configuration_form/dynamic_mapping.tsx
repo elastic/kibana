@@ -31,7 +31,7 @@ export const DynamicMapping = () => (
       <>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dynamicMappingDescription"
-          defaultMessage="Dynamic mapping allows an index template to intrerpret unmapped fields. {docsLink}"
+          defaultMessage="Dynamic mapping allows an index template to interpret unmapped fields. {docsLink}"
           values={{
             docsLink: (
               <EuiLink href={documentationService.getDynamicMappingLink()} target="_blank">
@@ -48,15 +48,14 @@ export const DynamicMapping = () => (
     }
   >
     <FormDataProvider pathsToWatch={['enabled', 'date_detection']}>
-      {({ enabled, date_detection }) => {
+      {({ enabled, date_detection: dateDetection }) => {
         // Enabled is true by default
         if (enabled) {
           return (
             <>
               <UseField path="numeric_detection" />
               <UseField path="date_detection" />
-              {/* eslint-disable @typescript-eslint/camelcase */}
-              {date_detection && (
+              {dateDetection && (
                 <UseField
                   path="dynamic_date_formats"
                   componentProps={{
@@ -67,7 +66,6 @@ export const DynamicMapping = () => (
                   }}
                 />
               )}
-              {/* eslint-enable @typescript-eslint/camelcase */}
             </>
           );
         } else {
