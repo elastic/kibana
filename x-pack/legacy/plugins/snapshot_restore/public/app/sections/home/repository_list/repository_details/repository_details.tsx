@@ -279,6 +279,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           <EuiSpacer size="s" />
           {verification ? (
             <EuiCodeEditor
+              data-test-subj="verificationCodeEditor"
               mode="json"
               theme="textmate"
               width="100%"
@@ -360,6 +361,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           <EuiSpacer size="s" />
           {cleanup ? (
             <EuiCodeEditor
+              data-test-subj="cleanupCodeEditor"
               mode="json"
               theme="textmate"
               width="100%"
