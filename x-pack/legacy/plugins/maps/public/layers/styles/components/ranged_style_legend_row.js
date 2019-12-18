@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
-export function StyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
+export function RangedStyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fieldLabel }) {
   return (
     <div>
       <EuiSpacer size="xs" />
@@ -39,7 +39,7 @@ export function StyleLegendRow({ header, minLabel, maxLabel, propertyLabel, fiel
   );
 }
 
-StyleLegendRow.propTypes = {
+RangedStyleLegendRow.propTypes = {
   header: PropTypes.node.isRequired,
   minLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   maxLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,

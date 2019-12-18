@@ -333,11 +333,10 @@ export class VectorStyle extends AbstractStyle {
 
     const data = styleMetaDataRequest.getData();
     const fieldMeta = dynamicProp.pluckStyleMetaFromFieldMetaData(data);
-
     return fieldMeta ? fieldMeta : fieldMetaFromLocalFeatures;
   };
 
-  _getFieldFormatter(fieldName) {
+  _getFieldFormatter = fieldName => {
     const dynamicProp = this._getDynamicPropertyByFieldName(fieldName);
     if (!dynamicProp) {
       return null;
@@ -366,7 +365,7 @@ export class VectorStyle extends AbstractStyle {
 
     const formatters = formattersDataRequest.getData();
     return formatters[fieldName];
-  }
+  };
 
   _getStyleMeta = () => {
     return _.get(this._descriptor, '__styleMeta', {});
@@ -388,7 +387,7 @@ export class VectorStyle extends AbstractStyle {
     );
   };
 
-  async _getLegendDetailStyleProperties() {
+  _getLegendDetailStyleProperties = async () => {
     const isLinesOnly = await this._getIsLinesOnly();
     const isPolygonsOnly = await this._getIsPolygonsOnly();
 
@@ -403,7 +402,7 @@ export class VectorStyle extends AbstractStyle {
 
       return true;
     });
-  }
+  };
 
   async hasLegendDetails() {
     const styles = await this._getLegendDetailStyleProperties();
@@ -411,20 +410,9 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderLegendDetails() {
-    const loadRows = async () => {
-      const styles = await this._getLegendDetailStyleProperties();
-      const promises = styles.map(async style => {
-        return {
-          label: await style.getField().getLabel(),
-          fieldFormatter: this._getFieldFormatter(style.getField().getName()),
-          meta: this._getFieldMeta(style.getField().getName()),
-          style,
-        };
-      });
-      return await Promise.all(promises);
-    };
-
-    return <VectorStyleLegend loadRows={loadRows} />;
+    return (
+      <VectorStyleLegend getLegendDetailStyleProperties={this._getLegendDetailStyleProperties} />
+    );
   }
 
   _getFeatureStyleParams() {
@@ -589,7 +577,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticSizeProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicSizeProperty(descriptor.options, styleName, field);
+      return new DynamicSizeProperty(
+        descriptor.options,
+        styleName,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
@@ -602,7 +596,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicColorProperty(descriptor.options, styleName, field);
+      return new DynamicColorProperty(
+        descriptor.options,
+        styleName,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
