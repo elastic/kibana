@@ -23,7 +23,7 @@ import * as ast from '../ast';
 
 export function buildNodeParams(fieldName, points) {
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
-  const args = points.map((point) => {
+  const args = points.map(point => {
     const latLon = `${point.lat}, ${point.lon}`;
     return nodeTypes.literal.buildNode(latLon);
   });
@@ -34,12 +34,17 @@ export function buildNodeParams(fieldName, points) {
 }
 
 export function toElasticsearchQuery(node, indexPattern, config = {}, context = {}) {
-  const [ fieldNameArg, ...points ] = node.arguments;
-  const fullFieldNameArg = { ...fieldNameArg, value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value };
+  const [fieldNameArg, ...points] = node.arguments;
+  const fullFieldNameArg = {
+    ...fieldNameArg,
+    value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
+  };
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg);
   const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
   const queryParams = {
-    points: points.map((point) => { return ast.toElasticsearchQuery(point, indexPattern, config, context); })
+    points: points.map(point => {
+      return ast.toElasticsearchQuery(point, indexPattern, config, context);
+    }),
   };
 
   if (field && field.scripted) {

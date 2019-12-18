@@ -7,9 +7,13 @@
 import _ from 'lodash';
 
 export function mapRequests(requests) {
-  return _.reduce(_.values(requests), (result, value) => {
-    result.total += value.total;
-    result.disconnects += value.disconnects;
-    return result;
-  }, { total: 0, disconnects: 0 });
+  return _.reduce(
+    _.values(requests),
+    (result, value) => {
+      result.total += value.total;
+      result.disconnects += value.disconnects;
+      return result;
+    },
+    { total: 0, disconnects: 0 }
+  );
 }

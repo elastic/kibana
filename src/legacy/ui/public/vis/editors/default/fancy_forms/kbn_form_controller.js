@@ -29,7 +29,7 @@ export function decorateFormController($delegate, $injector) {
     constructor($scope, $element, ...superArgs) {
       super(...superArgs);
 
-      const onSubmit = (event) => {
+      const onSubmit = event => {
         this._markInvalidTouched(event);
       };
 
@@ -45,14 +45,11 @@ export function decorateFormController($delegate, $injector) {
 
     // same as error count, but filters out untouched and pristine models
     softErrorCount() {
-      return this._getInvalidModels()
-        .filter(model => model.$touched || model.$dirty)
-        .length;
+      return this._getInvalidModels().filter(model => model.$touched || model.$dirty).length;
     }
 
     $setTouched() {
-      this._getInvalidModels()
-        .forEach(model => model.$setTouched());
+      this._getInvalidModels().forEach(model => model.$setTouched());
     }
 
     _markInvalidTouched(event) {
@@ -83,11 +80,8 @@ export function decorateFormController($delegate, $injector) {
   directive.controller = [
     ...$injector.annotate(KbnFormController),
     ...$injector.annotate(FormController),
-    (...args) => (
-      new KbnFormController(...args)
-    )
+    (...args) => new KbnFormController(...args),
   ];
 
   return $delegate;
 }
-

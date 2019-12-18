@@ -30,9 +30,8 @@
 
 import { get, identity } from 'lodash';
 // @ts-ignore
-import { npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { FUNCTIONS_URL } from './consts';
-import { ajaxStream } from './ajax_stream';
 import { batchedFetch } from './batched_fetch';
 
 export function getType(node: any) {
@@ -69,10 +68,7 @@ export const loadLegacyServerFunctionWrappers = async () => {
       const types = npSetup.plugins.expressions.__LEGACY.types.toJS();
       const { serialize } = serializeProvider(types);
       const batch = batchedFetch({
-        ajaxStream: ajaxStream(
-          npSetup.core.injectedMetadata.getKibanaVersion(),
-          npSetup.core.injectedMetadata.getBasePath()
-        ),
+        fetchStreaming: npStart.plugins.bfetch.fetchStreaming,
         serialize,
       });
 

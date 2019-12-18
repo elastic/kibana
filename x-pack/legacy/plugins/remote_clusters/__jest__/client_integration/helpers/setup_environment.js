@@ -21,7 +21,7 @@ export const setupEnvironment = () => {
     set: () => {},
   };
   // axios has a $http like interface so using it to simulate $http
-  initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
+  initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
   initBreadcrumb(() => {}, MANAGEMENT_BREADCRUMB);
   initNotification(toastNotifications, fatalError);
   initUiMetric(() => () => {});

@@ -32,7 +32,7 @@ const mockComponent = () => {
 };
 
 export const mockUiSettings = {
-  get: (item) => {
+  get: item => {
     return mockUiSettings[item];
   },
   getUpdate$: () => ({
@@ -93,7 +93,7 @@ export const npSetup = {
           getSavedQuery: sinon.fake(),
           deleteSavedQuery: sinon.fake(),
           getSavedQueryCount: sinon.fake(),
-        }
+        },
       },
       fieldFormats: getFieldFormatsRegistry(mockUiSettings),
     },
@@ -137,6 +137,13 @@ export const npStart = {
     chrome: {},
   },
   plugins: {
+    management: {
+      legacy: {
+        getSection: () => ({
+          register: sinon.fake(),
+        }),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
@@ -242,6 +249,11 @@ export const npStart = {
     home: {
       featureCatalogue: {
         register: sinon.fake(),
+      },
+    },
+    navigation: {
+      ui: {
+        TopNavMenu: mockComponent,
       },
     },
   },
