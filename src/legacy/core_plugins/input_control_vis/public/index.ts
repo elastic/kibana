@@ -17,14 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { PluginInitializerContext } from '../../../../core/public';
+import { InputControlPlugin as Plugin } from './plugin';
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: ['plugins/input_control_vis/register_vis'],
-      interpreter: ['plugins/input_control_vis/input_control_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  });
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }

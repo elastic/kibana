@@ -17,35 +17,27 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
-import { i18n } from '@kbn/i18n';
+import { resolve } from 'path';
+import { Legacy } from 'kibana';
 
-export const inputControlVis = () => ({
-  name: 'input_control_vis',
-  type: 'render',
-  context: {
-    types: [],
-  },
-  help: i18n.translate('inputControl.function.help', {
-    defaultMessage: 'Input control visualization',
-  }),
-  args: {
-    visConfig: {
-      types: ['string'],
-      default: '"{}"',
+import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+
+const inputControlPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
+    id: 'input_control',
+    require: ['kibana', 'elasticsearch'],
+    publicDir: resolve(__dirname, 'public'),
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: [resolve(__dirname, 'public/legacy')],
+      injectDefaultVars: server => ({}),
     },
-  },
-  fn(context, args) {
-    const params = JSON.parse(args.visConfig);
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visType: 'input_control_vis',
-        visConfig: params,
-      },
-    };
-  },
-});
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+  } as Legacy.PluginSpecOptions);
 
-functionsRegistry.register(inputControlVis);
+// eslint-disable-next-line import/no-default-export
+export default inputControlPluginInitializer;
