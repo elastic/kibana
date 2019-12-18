@@ -33,7 +33,7 @@ import { validateRoleMappingForSave } from '../services/role_mapping_validation'
 import { MappingInfoPanel } from './mapping_info_panel';
 
 interface State {
-  loadState: 'loading' | 'permissionDenied' | 'finished';
+  loadState: 'loading' | 'permissionDenied' | 'ready' | 'saveInProgress';
   roleMapping: RoleMapping | null;
   hasCompatibleRealms: boolean;
   canUseStoredScripts: boolean;
@@ -43,7 +43,6 @@ interface State {
     error?: string;
   };
   validateForm: boolean;
-  saveInProgress: boolean;
   rulesValid: boolean;
 }
 
@@ -61,7 +60,6 @@ export class EditRoleMappingPage extends Component<Props, State> {
       hasCompatibleRealms: true,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
-      saveInProgress: false,
       rulesValid: true,
       validateForm: false,
       formError: {
@@ -166,8 +164,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
           <EuiButton
             fill
             onClick={this.saveRoleMapping}
-            isLoading={this.state.saveInProgress}
-            disabled={!this.state.rulesValid}
+            isLoading={this.state.loadState === 'saveInProgress'}
+            disabled={!this.state.rulesValid || this.state.loadState === 'saveInProgress'}
             data-test-subj="saveRoleMappingButton"
           >
             <FormattedMessage
@@ -232,7 +230,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     const roleMappingName = this.state.roleMapping.name;
 
     this.setState({
-      saveInProgress: true,
+      loadState: 'saveInProgress',
     });
 
     this.props.roleMappingsAPI
@@ -258,7 +256,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         });
 
         this.setState({
-          saveInProgress: false,
+          loadState: 'saveInProgress',
         });
       });
   };
@@ -288,7 +286,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         hasCompatibleRealms,
       } = features;
 
-      const loadState: State['loadState'] = canManageRoleMappings ? 'finished' : 'permissionDenied';
+      const loadState: State['loadState'] = canManageRoleMappings ? 'ready' : 'permissionDenied';
 
       this.setState({
         loadState,
