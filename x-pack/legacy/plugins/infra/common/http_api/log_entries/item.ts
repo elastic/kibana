@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { logEntriesCursorRT } from './common';
 
 export const LOG_ENTRIES_ITEM_PATH = '/api/log_entries/item';
 
@@ -20,10 +21,7 @@ const logEntriesItemRT = rt.type({
   id: rt.string,
   index: rt.string,
   fields: rt.array(logEntriesItemFieldRT),
-  key: rt.type({
-    time: rt.number,
-    tiebreaker: rt.number,
-  }),
+  key: logEntriesCursorRT,
 });
 export const logEntriesItemResponseRT = rt.type({
   data: logEntriesItemRT,
