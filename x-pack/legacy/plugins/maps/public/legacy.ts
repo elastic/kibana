@@ -16,11 +16,11 @@ const setupPlugins = {
   __LEGACY: {
     uiModules,
   },
-  plugins: npSetup.plugins,
+  np: npSetup.plugins,
 };
 
 const startPlugins = {
-  plugins: npStart.plugins,
+  np: npStart.plugins,
 };
 
 export const setup = pluginInstance.setup(npSetup.core, setupPlugins);

@@ -15,5 +15,25 @@ export const migrations = {
       ...doc,
       updated_at: new Date().toISOString(),
     }),
+    '7.6.0': moveIntervalIntoSchedule,
   },
 };
+
+function moveIntervalIntoSchedule({
+  attributes: { interval, ...attributes },
+  ...doc
+}: SavedObject) {
+  return {
+    ...doc,
+    attributes: {
+      ...attributes,
+      ...(interval
+        ? {
+            schedule: {
+              interval,
+            },
+          }
+        : {}),
+    },
+  };
+}

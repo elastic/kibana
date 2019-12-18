@@ -51,6 +51,8 @@ describe('buildSignal', () => {
         tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
+        updated_at: signal.rule.updated_at,
+        created_at: signal.rule.created_at,
       },
     };
     expect(signal).toEqual(expected);
@@ -104,6 +106,8 @@ describe('buildSignal', () => {
         tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
+        updated_at: signal.rule.updated_at,
+        created_at: signal.rule.created_at,
       },
     };
     expect(signal).toEqual(expected);

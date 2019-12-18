@@ -25,7 +25,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   public async getMetrics(
     requestContext: RequestHandlerContext,
     options: InfraMetricsRequestOptions,
-    rawRequest: KibanaRequest // NP_TODO: Temporarily needed until metrics getVisData no longer needs full request
+    rawRequest: KibanaRequest
   ): Promise<InfraMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
