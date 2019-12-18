@@ -2,7 +2,6 @@
 
 exports[`NewVisModal filter for visualization types should render as expected 1`] = `
 <NewVisModal
-  addBasePath={[Function]}
   editorParams={Array []}
   intl={
     Object {
@@ -1030,7 +1029,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   className="euiModal__flex"
                 >
                   <TypeSelection
-                    addBasePath={[Function]}
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
                       Object {
@@ -1539,7 +1537,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 />
                               </EuiSpacer>
                               <NewVisHelp
-                                addBasePath={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>
@@ -1592,7 +1589,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
 
 exports[`NewVisModal should render as expected 1`] = `
 <NewVisModal
-  addBasePath={[Function]}
   editorParams={Array []}
   intl={
     Object {
@@ -2611,7 +2607,6 @@ exports[`NewVisModal should render as expected 1`] = `
                   className="euiModal__flex"
                 >
                   <TypeSelection
-                    addBasePath={[Function]}
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
                       Object {
@@ -3108,7 +3103,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                 />
                               </EuiSpacer>
                               <NewVisHelp
-                                addBasePath={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>

@@ -24,6 +24,17 @@ import { NewVisModal } from './new_vis_modal';
 import { VisType } from '..';
 import { TypesStart } from '../np_ready/public/types';
 
+jest.mock('../../../ui_metric/public', () => {
+  return {
+    createUiStatsReporter: () => {
+      return () => {};
+    },
+    METRIC_TYPE: {
+      CLICK: '',
+    },
+  };
+});
+
 jest.mock('../np_ready/public/services', () => {
   const mock = {
     getHttp: () => ({
@@ -58,6 +69,12 @@ jest.mock('../np_ready/public/services', () => {
           title: 'Vis with search',
           stage: 'production',
           ...defaultVisTypeParams,
+        },
+        {
+          name: 'visWithAliasUrl',
+          title: 'Vis with alias Url',
+          stage: 'production',
+          aliasUrl: '/aliasUrl',
         },
       ];
       const visTypes: TypesStart = {
@@ -116,13 +133,13 @@ describe('NewVisModal', () => {
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
-          onClose={() => null}
+          onClose={onClose}
           editorParams={['foo=true', 'bar=42', 'addToDashboard']}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(window.location.assign).toBeCalledWith('root/aliasUrl');
       expect(onClose).toHaveBeenCalled();
     });
   });
