@@ -102,11 +102,11 @@ describe('KibanaRequest', () => {
       const kibanaRequest = KibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
-        body: data => {
+        body: ({ ok, fail }, data) => {
           if (Buffer.isBuffer(data)) {
-            return { value: data };
+            return ok(data);
           } else {
-            return { error: new RouteValidationError('It should be a Buffer', []) };
+            return fail('It should be a Buffer', []);
           }
         },
       });
