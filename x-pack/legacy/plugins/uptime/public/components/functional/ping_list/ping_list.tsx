@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   EuiBadge,
   EuiBasicTable,
@@ -22,12 +23,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment, useState } from 'react';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { pingsQuery } from '../../../queries';
 import { LocationName } from './../location_name';
-import { Criteria, Pagination } from './../monitor_list';
+import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
 
 interface PingListQueryResult {
@@ -173,25 +175,21 @@ export const PingListComponent = ({
       render: (error: string) => error ?? '-',
     },
   ];
-  let pings: Ping[] = [];
-  if (data && data.allPings && data.allPings.pings) {
-    pings = data.allPings.pings;
-    const hasStatus: boolean = pings.reduce(
-      (hasHttpStatus: boolean, currentPing: Ping) =>
-        hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
-      false
-    );
-    if (hasStatus) {
-      columns.push({
-        field: 'http.response.status_code',
-        // @ts-ignore "align" property missing on type definition for column type
-        align: 'right',
-        name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-          defaultMessage: 'Response code',
-        }),
-        render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
-      });
-    }
+  const pings: Ping[] = data?.allPings?.pings ?? [];
+  const hasStatus: boolean = pings.reduce(
+    (hasHttpStatus: boolean, currentPing: Ping) =>
+      hasHttpStatus || !!currentPing.http?.response?.status_code,
+    false
+  );
+  if (hasStatus) {
+    columns.push({
+      field: 'http.response.status_code',
+      align: 'right',
+      name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+        defaultMessage: 'Response code',
+      }),
+      render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
+    });
   }
 
   columns.push({
@@ -302,7 +300,9 @@ export const PingListComponent = ({
           itemId="id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           pagination={pagination}
-          onChange={(criteria: Criteria) => onPageCountChange(criteria.page!.size)}
+          onChange={(criteria: CriteriaWithPagination<Ping>) =>
+            onPageCountChange(criteria.page!.size)
+          }
         />
       </EuiPanel>
     </Fragment>
