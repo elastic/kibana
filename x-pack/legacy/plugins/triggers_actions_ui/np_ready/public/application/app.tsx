@@ -46,7 +46,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: any) => {
     plugins: { capabilities },
   } = useAppDependencies();
   const canShowAlerts = hasShowAlertsCapability(capabilities.get());
-  const DEFAULT_SECTION = canShowAlerts ? 'alerts' : 'connectors';
+  const DEFAULT_SECTION: Section = canShowAlerts ? 'alerts' : 'connectors';
   return (
     <Switch>
       <Route
