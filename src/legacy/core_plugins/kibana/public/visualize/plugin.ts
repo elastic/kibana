@@ -48,7 +48,6 @@ import { SavedVisualizations } from './types';
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
   editorTypes: any;
-  savedObjectRegistry: any;
   savedVisualizations: SavedVisualizations;
 }
 
