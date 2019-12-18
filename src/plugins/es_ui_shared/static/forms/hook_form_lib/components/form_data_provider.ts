@@ -53,10 +53,5 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
     return subscription.unsubscribe;
   }, [form, pathsToWatch]);
 
-  if (Object.keys(formData).length === 0) {
-    // Don't render anything if fields haven't been populated yet.
-    return null;
-  }
-
   return children(formData);
 });

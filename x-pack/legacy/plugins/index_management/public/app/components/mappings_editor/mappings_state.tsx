@@ -12,19 +12,22 @@ import {
   MappingsConfiguration,
   MappingsFields,
   State,
+  SourceField,
   Dispatch,
 } from './reducer';
 import { Field, FieldsEditor } from './types';
 import { normalize, deNormalize, canUseMappingsEditor } from './lib';
 
-type Mappings = MappingsConfiguration & {
-  properties: MappingsFields;
-};
+type Mappings = MappingsConfiguration &
+  SourceField & {
+    properties: MappingsFields;
+  };
 
 export interface Types {
   Mappings: Mappings;
   MappingsConfiguration: MappingsConfiguration;
   MappingsFields: MappingsFields;
+  SourceField: SourceField;
 }
 
 export interface OnUpdateHandlerArg {
@@ -57,6 +60,13 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   const initialState: State = {
     isValid: undefined,
     configuration: {
+      data: {
+        raw: {},
+        format: () => ({} as Mappings),
+      },
+      validate: () => Promise.resolve(true),
+    },
+    sourceField: {
       data: {
         raw: {},
         format: () => ({} as Mappings),
@@ -112,6 +122,18 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
           }
         }
 
+        const {
+          enabled: dynamicMappingsEnabled,
+          throwErrorsForUnmappedFields,
+          ...configurationData
+        } = nextState.configuration.data.format();
+
+        const dynamicMapping = dynamicMappingsEnabled
+          ? true
+          : throwErrorsForUnmappedFields
+          ? 'strict'
+          : false;
+
         // Pull the mappings properties from the current editor
         const fields =
           nextState.documentFields.editor === 'json'
@@ -119,7 +141,11 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
             : deNormalize(nextState.fields);
 
         return {
-          ...nextState.configuration.data.format(),
+          dynamic: dynamicMapping,
+          ...configurationData,
+          _source: {
+            ...nextState.sourceField.data.format(),
+          },
           properties: fields,
         };
       },
