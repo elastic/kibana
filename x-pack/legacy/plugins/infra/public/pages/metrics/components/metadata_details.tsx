@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { InfraMetadata } from '../../../../common/http_api';
 import euiStyled from '../../../../../../common/eui_styled_components';
-
-interface Props {
-  metadata?: InfraMetadata | null;
-}
+import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {
   field: string;
@@ -101,7 +98,13 @@ const getValueForField = (metadata: InfraMetadata, { field, isBoolean }: FieldDe
   return value;
 };
 
-export const NodeDetails = ({ metadata }: Props) => {
+interface Props {
+  fields?: string[];
+}
+
+const NUMBER_OF_COLUMNS = 4;
+
+export const MetadataDetails = (props: Props) => {
   const [isOpen, setControlState] = useState<boolean>(false);
 
   const toggleIsOpen = useCallback(
@@ -109,38 +112,58 @@ export const NodeDetails = ({ metadata }: Props) => {
     [isOpen]
   );
 
-  const fields = useMemo(() => (isOpen ? FIELDS : FIELDS.slice(0, 4)), [isOpen]);
+  const filteredFields = useMemo(() => {
+    if (props.fields && props.fields.length) {
+      return props.fields
+        .map(field => {
+          const fieldDef = FIELDS.find(f => f.field === field);
+          if (fieldDef) {
+            return fieldDef;
+          }
+        })
+        .filter(f => f) as FieldDef[];
+    } else {
+      return FIELDS;
+    }
+  }, [props.fields]);
+  const fields = useMemo(
+    () => (isOpen ? filteredFields : filteredFields.slice(0, NUMBER_OF_COLUMNS)),
+    [filteredFields, isOpen]
+  );
+  const metadata = useContext(MetadataContext);
 
   if (!metadata) {
     return null;
   }
 
   return (
-    <NodeDetailsContainer>
-      <Controls>
-        <EuiButtonIcon
-          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-          onClick={toggleIsOpen}
-          aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
-            defaultMessage: 'Show more details',
-          })}
-        />
-      </Controls>
-      <EuiFlexGrid columns={4} style={{ flexGrow: 1 }}>
+    <MetadataContainer>
+      {filteredFields.length > NUMBER_OF_COLUMNS ? (
+        <Controls>
+          <EuiButtonIcon
+            iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+            onClick={toggleIsOpen}
+            aria-label={i18n.translate('xpack.infra.nodeDetails.labels.showMoreDetails', {
+              defaultMessage: 'Show more details',
+            })}
+          />
+        </Controls>
+      ) : null}
+      <EuiFlexGrid columns={NUMBER_OF_COLUMNS} style={{ flexGrow: 1 }} gutterSize="s">
         {fields.map(field => (
           <EuiFlexItem key={field.field} style={{ minWidth: 0 }}>
             <EuiTitle size="xs">
-              <h4>{getLabelForField(field)}</h4>
+              <h5>{getLabelForField(field)}</h5>
             </EuiTitle>
             <EuiText>{getValueForField(metadata, field)}</EuiText>
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
-    </NodeDetailsContainer>
+    </MetadataContainer>
   );
 };
 
-const NodeDetailsContainer = euiStyled.div`
+const MetadataContainer = euiStyled.div`
 border-top: ${props => props.theme.eui.euiBorderWidthThin} solid ${props =>
   props.theme.eui.euiBorderColor};
 border-bottom: ${props => props.theme.eui.euiBorderWidthThin} solid ${props =>
@@ -153,4 +176,5 @@ display: flex;
 const Controls = euiStyled.div`
 flex-grow: 0;
 margin-right: ${props => props.theme.eui.paddingSizes.m};
+min-width: 0px;
 `;
