@@ -387,7 +387,7 @@ export class VectorStyle extends AbstractStyle {
     );
   };
 
-  async _getLegendDetailStyleProperties() {
+  _getLegendDetailStyleProperties = async () => {
     const isLinesOnly = await this._getIsLinesOnly();
     const isPolygonsOnly = await this._getIsPolygonsOnly();
 
@@ -402,7 +402,7 @@ export class VectorStyle extends AbstractStyle {
 
       return true;
     });
-  }
+  };
 
   async hasLegendDetails() {
     const styles = await this._getLegendDetailStyleProperties();
@@ -410,8 +410,9 @@ export class VectorStyle extends AbstractStyle {
   }
 
   renderLegendDetails() {
-    const stylesPromise = this._getLegendDetailStyleProperties();
-    return <VectorStyleLegend stylesPromise={stylesPromise} />;
+    return (
+      <VectorStyleLegend getLegendDetailStyleProperties={this._getLegendDetailStyleProperties} />
+    );
   }
 
   _getFeatureStyleParams() {

@@ -27,7 +27,7 @@ export class VectorStyleLegend extends Component {
   }
 
   _loadRows = _.debounce(async () => {
-    const styles = await this.props.stylesPromise;
+    const styles = await this.props.getLegendDetailStyleProperties();
     const styleDescriptorPromises = styles.map(async style => {
       return {
         type: style.getStyleName(),
