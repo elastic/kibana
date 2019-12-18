@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   region?: string;
@@ -70,8 +71,14 @@ export const WaffleRegionControls = (props: Props) => {
           <EuiFilterButton iconType="arrowDown" onClick={showPopover}>
             <FormattedMessage
               id="xpack.infra.waffle.regionLabel"
-              defaultMessage="Region {selectedRegion}"
-              values={{ selectedRegion: currentLabel }}
+              defaultMessage="Region: {selectedRegion}"
+              values={{
+                selectedRegion:
+                  currentLabel ||
+                  i18n.translate('xpack.infra.waffle.region', {
+                    defaultMessage: 'All',
+                  }),
+              }}
             />
           </EuiFilterButton>
         }

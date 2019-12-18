@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { InventoryCloudAccount } from '../../../common/http_api/inventory_meta_api';
 
 interface Props {
@@ -71,8 +72,14 @@ export const WaffleAccountsControls = (props: Props) => {
           <EuiFilterButton iconType="arrowDown" onClick={showPopover}>
             <FormattedMessage
               id="xpack.infra.waffle.accountLabel"
-              defaultMessage="Account {selectedAccount}"
-              values={{ selectedAccount: currentLabel?.name }}
+              defaultMessage="Account: {selectedAccount}"
+              values={{
+                selectedAccount: currentLabel
+                  ? currentLabel.name
+                  : i18n.translate('xpack.infra.waffle.accountAllTitle', {
+                      defaultMessage: 'All',
+                    }),
+              }}
             />
           </EuiFilterButton>
         }

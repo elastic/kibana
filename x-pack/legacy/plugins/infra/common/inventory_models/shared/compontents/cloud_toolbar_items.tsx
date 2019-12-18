@@ -15,20 +15,24 @@ type Props = ToolbarProps;
 export const CloudToolbarItems = (props: Props) => {
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <WaffleAccountsControls
-          changeAccount={props.changeAccount}
-          accountId={props.accountId}
-          options={props.accounts}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <WaffleRegionControls
-          changeRegion={props.changeRegion}
-          region={props.region}
-          options={props.regions || []}
-        />
-      </EuiFlexItem>
+      {props.accounts.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <WaffleAccountsControls
+            changeAccount={props.changeAccount}
+            accountId={props.accountId}
+            options={props.accounts}
+          />
+        </EuiFlexItem>
+      )}
+      {props.regions.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <WaffleRegionControls
+            changeRegion={props.changeRegion}
+            region={props.region}
+            options={props.regions}
+          />
+        </EuiFlexItem>
+      )}
     </>
   );
 };
