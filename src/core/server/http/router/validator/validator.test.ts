@@ -23,7 +23,7 @@ import { schema, Type } from '@kbn/config-schema';
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
     const validator = RouteValidator.from({
-      params: (resolver, { foo } = {}) => {
+      params: (resolver, { foo }) => {
         if (typeof foo === 'string') {
           return resolver.ok({ foo });
         }
@@ -36,7 +36,7 @@ describe('Router validator', () => {
     expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
 
     expect(() => validator.getParams(undefined)).toThrowError(
-      `Cannot read property 'foo' of undefined`
+      "Cannot destructure property `foo` of 'undefined' or 'null'."
     );
     expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
 
