@@ -20,9 +20,6 @@ class ShareRouter extends Component {
       }).isRequired,
     }).isRequired,
   };
-  constructor(props: any, context?: any) {
-    super(props, context);
-  }
 
   render() {
     return this.props.children;
