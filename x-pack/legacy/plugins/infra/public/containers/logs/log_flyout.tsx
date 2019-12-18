@@ -8,12 +8,11 @@ import createContainer from 'constate';
 import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
-import { FlyoutItemQuery, InfraLogItem } from '../../graphql/types';
-import { useApolloClient } from '../../utils/apollo_context';
+import { InfraLogItem } from '../../graphql/types';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { Source } from '../source';
-import { flyoutItemQuery } from './flyout_item.gql_query';
+import { fetchLogEntriesItem } from './log_entries/api/fetch_log_entries_item';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
@@ -33,37 +32,23 @@ export const useLogFlyout = () => {
   const [flyoutItem, setFlyoutItem] = useState<InfraLogItem | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
-  const apolloClient = useApolloClient();
-
   const [loadFlyoutItemRequest, loadFlyoutItem] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        if (!apolloClient) {
-          throw new Error('Failed to load flyout item: No apollo client available.');
-        }
-
         if (!flyoutId) {
           return;
         }
-
-        return await apolloClient.query<FlyoutItemQuery.Query, FlyoutItemQuery.Variables>({
-          fetchPolicy: 'no-cache',
-          query: flyoutItemQuery,
-          variables: {
-            itemId: flyoutId,
-            sourceId,
-          },
-        });
+        return await fetchLogEntriesItem({ sourceId, id: flyoutId });
       },
       onResolve: response => {
         if (response) {
           const { data } = response;
-          setFlyoutItem((data && data.source && data.source.logItem) || null);
+          setFlyoutItem(data || null);
         }
       },
     },
-    [apolloClient, sourceId, flyoutId]
+    [sourceId, flyoutId]
   );
 
   const isLoading = useMemo(() => {
