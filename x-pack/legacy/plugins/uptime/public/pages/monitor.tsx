@@ -16,7 +16,6 @@ import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
-import { getTitle } from '../lib/helper/get_title';
 import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 
 interface MonitorPageProps {
