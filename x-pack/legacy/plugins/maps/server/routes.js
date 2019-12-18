@@ -21,6 +21,7 @@ import {
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 
 import Boom from 'boom';
 
@@ -429,8 +430,7 @@ export function initRoutes(server, licenseUid) {
         const resp = await callWithRequest(request, 'indices.getSettings', {
           index: query.indexPatternTitle,
         });
-        console.log(JSON.stringify(resp, null, ' '));
-        return resp;
+        return getIndexPatternSettings(resp);
       } catch (error) {
         return h.response().code(400);
       }

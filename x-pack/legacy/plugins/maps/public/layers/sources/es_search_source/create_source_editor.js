@@ -15,7 +15,11 @@ import { NoIndexPatternCallout } from '../../../components/no_index_pattern_call
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { kfetch } from 'ui/kfetch';
-import { ES_GEO_FIELD_TYPE, GIS_API_PATH, DEFAULT_ES_SIZE_LIMIT } from '../../../../common/constants';
+import {
+  ES_GEO_FIELD_TYPE,
+  GIS_API_PATH,
+  DEFAULT_MAX_RESULT_WINDOW,
+} from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
 import { npStart } from 'ui/new_platform';
@@ -96,7 +100,7 @@ export class CreateSourceEditor extends Component {
     let indexHasSmallDocCount = false;
     try {
       const indexDocCount = await this.loadIndexDocCount(indexPattern.title);
-      indexHasSmallDocCount = indexDocCount <= DEFAULT_ES_SIZE_LIMIT;
+      indexHasSmallDocCount = indexDocCount <= DEFAULT_MAX_RESULT_WINDOW;
     } catch (error) {
       // retrieving index count is a nice to have and is not essential
       // do not interrupt user flow if unable to retrieve count
