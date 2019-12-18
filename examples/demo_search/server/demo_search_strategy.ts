@@ -20,15 +20,28 @@
 import { TSearchStrategyProvider } from '../../../src/plugins/data/server';
 import { DEMO_SEARCH_STRATEGY } from '../common';
 
+const responseMap = new Map<string, any>();
+const getId = (() => {
+  let id = 0;
+  return () => `${id++}`;
+})();
+
 export const demoSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = () => {
   return {
     search: request => {
-      return Promise.resolve({
+      const { id = getId() } = request;
+      const response = responseMap.get(id) ?? {};
+      const nextResponse = {
+        id,
+        loaded: (response.loaded ?? 0) + 1,
+        total: response.total ?? 10,
         greeting:
-          request.mood === 'happy'
+          response.greeting ?? request.mood === 'happy'
             ? `Lovely to meet you, ${request.name}`
             : `Hope you feel better, ${request.name}`,
-      });
+      };
+      responseMap.set(id, nextResponse);
+      return Promise.resolve(nextResponse);
     },
   };
 };

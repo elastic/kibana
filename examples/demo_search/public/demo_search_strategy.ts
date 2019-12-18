@@ -18,14 +18,11 @@
  */
 
 import { Observable } from 'rxjs';
-import {
-  ISearchContext,
-  SYNC_SEARCH_STRATEGY,
-  ISearchGeneric,
-} from '../../../src/plugins/data/public';
+import { ISearchContext, ISearchGeneric } from '../../../src/plugins/data/public';
 import { TSearchStrategyProvider, ISearchStrategy } from '../../../src/plugins/data/public';
 
 import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
+import { ASYNC_SEARCH_STRATEGY } from '../../../x-pack/plugins/enhanced_data/public';
 
 /**
  * This demo search strategy provider simply provides a shortcut for calling the DEMO_SEARCH_STRATEGY
@@ -47,7 +44,7 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
  * ```
  * context.search(request, options, DEMO_SEARCH_STRATEGY);
  * ```
- * 
+ *
  * and are ensured type safety in regard to the request and response objects.
  *
  * @param context - context supplied by other plugins.
@@ -62,7 +59,7 @@ export const demoClientSearchStrategyProvider: TSearchStrategyProvider<typeof DE
       search(
         { ...request, serverStrategy: DEMO_SEARCH_STRATEGY },
         options,
-        SYNC_SEARCH_STRATEGY
+        ASYNC_SEARCH_STRATEGY
       ) as Observable<IDemoResponse>,
   };
 };

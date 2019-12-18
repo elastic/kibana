@@ -13,4 +13,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { EnhancedDataPublicPlugin as Plugin };
 
+export { ASYNC_SEARCH_STRATEGY } from './search/async_search_strategy';
 export { IAsyncSearchRequest, IAsyncSearchOptions } from './search/types';
