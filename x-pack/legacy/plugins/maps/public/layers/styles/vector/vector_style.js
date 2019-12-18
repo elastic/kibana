@@ -563,7 +563,7 @@ export class VectorStyle extends AbstractStyle {
       const join = this._layer.getValidJoins().find(join => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);
       });
-      return join ? join.getMetricFieldForFieldName(fieldDescriptor.name) : null;
+      return join ? join.getRightJoinSource().getMetricFieldForName(fieldDescriptor.name) : null;
     } else {
       throw new Error(`Unknown origin-type ${fieldDescriptor.origin}`);
     }
