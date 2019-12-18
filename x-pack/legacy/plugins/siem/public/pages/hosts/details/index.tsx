@@ -87,6 +87,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
         },
       },
     ];
+    const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
     return (
       <>
@@ -96,7 +97,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters: [...hostDetailsPageFilters, ...filters],
+              filters: getFilters(),
             });
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>

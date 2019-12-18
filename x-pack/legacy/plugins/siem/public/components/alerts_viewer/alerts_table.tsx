@@ -35,7 +35,7 @@ const defaultAlertsFilters: esFilters.Filter[] = [
         filter: [
           {
             bool: {
-              should: [
+              must: [
                 {
                   match: {
                     'event.kind': 'alert',
@@ -69,13 +69,16 @@ export const AlertsTable = React.memo(
         end={endDate}
         id={ALERTS_TABLE_ID}
         start={startDate}
-        timelineTypeContext={{
-          documentType: i18n.ALERTS_DOCUMENT_TYPE,
-          footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-          showCheckboxes: false,
-          showRowRenderers: false,
-          title: i18n.ALERTS_TABLE_TITLE,
-        }}
+        timelineTypeContext={useMemo(
+          () => ({
+            documentType: i18n.ALERTS_DOCUMENT_TYPE,
+            footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+            showCheckboxes: false,
+            showRowRenderers: false,
+            title: i18n.ALERTS_TABLE_TITLE,
+          }),
+          []
+        )}
       />
     );
   }

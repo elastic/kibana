@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/';
+
 import { NavTab } from '../../../components/navigation/types';
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import { networkModel } from '../../../store';

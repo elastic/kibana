@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../components/alerts_viewer';
@@ -14,14 +14,20 @@ export const filterAlertsHosts: esFilters.Filter[] = [
   {
     query: {
       bool: {
-        should: [
+        filter: [
           {
-            exists: {
-              field: 'host.name',
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'host.name',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
-        minimum_should_match: 1,
       },
     },
     meta: {
@@ -31,14 +37,17 @@ export const filterAlertsHosts: esFilters.Filter[] = [
       negate: false,
       type: 'custom',
       value:
-        '{"bool":{"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1},"minimum_should_match": 1}',
+        '{"query": {"bool": {"filter": [{"bool": {"should": [{"exists": {"field": "host.name"}}],"minimum_should_match": 1}}]}}}',
     },
   },
 ];
 export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, ...rest } = alertsProps;
-  const hostPageFilters =
-    pageFilters != null ? [...filterAlertsHosts, ...pageFilters] : filterAlertsHosts;
+  const hostPageFilters = useMemo(
+    () => (pageFilters != null ? [...filterAlertsHosts, ...pageFilters] : filterAlertsHosts),
+    [pageFilters]
+  );
+
   return <AlertsView {...rest} pageFilters={hostPageFilters} />;
 });
 
