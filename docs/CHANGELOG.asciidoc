@@ -67,7 +67,7 @@ Machine Learning::
 * Fixes lat_long anomalies table links menu and value formatting {pull}50916[#50916]
 * Fixes loading of data visualizer with KQL saved search {pull}51882[#51882]
 Maps::
-* Fixes a cross-site scripting (XSS) flaw in coordinate and region map 
+* Fixes a cross-site scripting (XSS) flaw in Coordinate and Region Map 
 visualizations. An attacker could create a malicious visualization that 
 executes JavaScript in a victim’s browser when the visualization, or dashboard 
 containing the visualization, was viewed. Since Kibana 7.0.0, Content Security 
