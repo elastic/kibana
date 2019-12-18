@@ -27,8 +27,8 @@ describe('buildCollectorObj#fetch', () => {
   test('makes and registers maps usage collector', async () => {
     registerMapsUsageCollector(usageCollection, savedObjectsClient, config);
 
-    expect(registerStub).toHaveBeenCalledTimes(0);
-    expect(makeUsageCollectorStub).toHaveBeenCalledTimes(0);
+    expect(registerStub).toHaveBeenCalledTimes(1);
+    expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
     expect(makeUsageCollectorStub).toHaveBeenCalledWith({
       type: expect.any(String),
       isReady: expect.any(Function),
