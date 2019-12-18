@@ -3,57 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { useForm, Form, SerializerFunc } from '../../shared_imports';
-import { Types, useDispatch } from '../../mappings_state';
-import { configurationFormSchema } from './configuration_form_schema';
-import { DynamicMapping } from './dynamic_mapping';
-import { SourceField } from './source_field';
+import { Types } from '../../mappings_state';
+import { DynamicMappingForm } from './dynamic_mapping_form';
+import { SourceFieldForm } from './source_field_form';
 
 type MappingsConfiguration = Types['MappingsConfiguration'];
+type SourceField = Types['SourceField'];
 
 interface Props {
-  defaultValue?: MappingsConfiguration;
+  configurationDefaultValue?: MappingsConfiguration;
+  sourceFieldDefaultValue?: SourceField;
 }
 
-const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
-  const {
-    enabled: dynamicMappingsEnabled,
-    throwErrorsForUnmappedFields,
-    ...configurationData
-  } = formData;
-
-  const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
-
-  return {
-    ...configurationData,
-    dynamic,
-  };
-};
-
-export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
-  const { form } = useForm<MappingsConfiguration>({
-    schema: configurationFormSchema,
-    serializer: formSerializer,
-    defaultValue,
-  });
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const subscription = form.subscribe(updatedConfiguration => {
-      dispatch({ type: 'configuration.update', value: updatedConfiguration });
-    });
-    return subscription.unsubscribe;
-  }, [form]);
-
-  return (
-    <Form form={form}>
-      <DynamicMapping />
-      <EuiSpacer size="xl" />
-      <SourceField />
-    </Form>
-  );
-});
+export const ConfigurationForm = React.memo(
+  ({ configurationDefaultValue, sourceFieldDefaultValue }: Props) => {
+    return (
+      <>
+        <DynamicMappingForm defaultValue={configurationDefaultValue} />
+        <EuiSpacer size="xl" />
+        <SourceFieldForm defaultValue={sourceFieldDefaultValue} />
+      </>
+    );
+  }
+);

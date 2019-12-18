@@ -9,21 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 
-import { documentationService } from '../../../../services/documentation';
-import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { MappingsConfiguration } from '../../reducer';
+import { documentationService } from '../../../../../services/documentation';
+import {
+  FormSchema,
+  FIELD_TYPES,
+  VALIDATION_TYPES,
+  fieldValidators,
+} from '../../../shared_imports';
+import { MappingsConfiguration } from '../../../reducer';
 
 const { containsCharsField } = fieldValidators;
 
-const fieldPathComboBoxConfig = {
-  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldPathComboBoxHelpText', {
-    defaultMessage: 'Accepts a path to the field, including wildcards.',
-  }),
-  type: FIELD_TYPES.COMBO_BOX,
-  defaultValue: [],
-};
-
-export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
+export const dynamicMappingSchema: FormSchema<MappingsConfiguration> = {
   enabled: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.enableDynamicMappingsLabel', {
       defaultMessage: 'Enable dynamic mapping',
@@ -102,30 +99,6 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
       },
     ],
   },
-  _source: {
-    enabled: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldLabel', {
-        defaultMessage: 'Enable _source field',
-      }),
-      type: FIELD_TYPES.TOGGLE,
-      defaultValue: true,
-      deserializer: (value?: boolean) => (value === undefined ? true : value),
-    },
-    includes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.excludeSourceFieldsLabel', {
-        defaultMessage: 'Include fields',
-      }),
-      ...fieldPathComboBoxConfig,
-    },
-    excludes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.includeSourceFieldsLabel', {
-        defaultMessage: 'Exclude fields',
-      }),
-      ...fieldPathComboBoxConfig,
-    },
-  },
 };
 
-export const CONFIGURATION_FIELDS = Object.keys(configurationFormSchema).filter(
-  k => k !== '_source'
-);
+export const CONFIGURATION_FIELDS = Object.keys(dynamicMappingSchema);

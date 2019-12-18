@@ -30,12 +30,13 @@ export const MappingsEditor = React.memo(
   ({ onUpdate, defaultValue = {}, indexSettings }: Props) => {
     const [selectedTab, selectTab] = useState<'fields' | 'advanced'>('fields');
 
-    const { configurationDefaultValue, fieldsDefaultValue } = useMemo(
+    const { configurationDefaultValue, sourceFieldDefaultValue, fieldsDefaultValue } = useMemo(
       () => ({
-        configurationDefaultValue: {
-          ...(pick(defaultValue, CONFIGURATION_FIELDS) as Types['MappingsConfiguration']),
-          _source: defaultValue._source || {},
-        },
+        configurationDefaultValue: pick(
+          defaultValue,
+          CONFIGURATION_FIELDS
+        ) as Types['MappingsConfiguration'],
+        sourceFieldDefaultValue: defaultValue._source || {},
         fieldsDefaultValue: defaultValue.properties || {},
       }),
       [defaultValue]
@@ -60,7 +61,10 @@ export const MappingsEditor = React.memo(
                   {editor}
                 </>
               ) : (
-                <ConfigurationForm defaultValue={configurationDefaultValue} />
+                <ConfigurationForm
+                  configurationDefaultValue={configurationDefaultValue}
+                  sourceFieldDefaultValue={sourceFieldDefaultValue}
+                />
               );
 
             return (
