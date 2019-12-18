@@ -18,7 +18,7 @@ import {
   Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect, ComponentType } from 'react';
+import React, { memo, useState, useEffect, useCallback, ComponentType } from 'react';
 import styled from 'styled-components';
 
 import { AuthTableColumns } from '../page/hosts/authentications_table';
@@ -227,13 +227,15 @@ export const PaginatedTable = memo<SiemTables>(
         </EuiContextMenuItem>
       ));
     const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
     return (
       <Panel
         data-test-subj={`${dataTestSubj}-loading-${loading}`}
         loading={loading}
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
+        onMouseEnter={handleOnMouseEnter}
+        onMouseLeave={handleOnMouseLeave}
       >
         <HeaderSection
           id={id}

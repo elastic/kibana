@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -278,6 +278,14 @@ export const ActivityMonitor = React.memo(() => {
   // const [selectedState, setSelectedState] = useState<ColumnTypes[]>([]);
   const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
+  const handleChange = useCallback(
+    ({ page, sort }: { page?: PageTypes; sort?: SortTypes }) => {
+      setPageState(page!);
+      setSortState(sort!);
+    },
+    [setPageState, setSortState]
+  );
+
   return (
     <>
       <EuiSpacer />
@@ -309,10 +317,7 @@ export const ActivityMonitor = React.memo(() => {
           isSelectable
           itemId="id"
           items={sampleTableData}
-          onChange={({ page, sort }: { page?: PageTypes; sort?: SortTypes }) => {
-            setPageState(page!);
-            setSortState(sort!);
-          }}
+          onChange={handleChange}
           pagination={{
             pageIndex: pageState.index,
             pageSize: pageState.size,

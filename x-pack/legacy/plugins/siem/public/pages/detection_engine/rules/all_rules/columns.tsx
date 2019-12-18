@@ -28,7 +28,7 @@ import { Action } from './reducer';
 import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
-import { RuleSwitch } from '../components/rule_switch';
+import { RuleSwitch, RuleStateChangeCallback } from '../components/rule_switch';
 
 const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   {
@@ -159,16 +159,20 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     align: 'center' as const,
     field: 'activate',
     name: i18n.COLUMN_ACTIVATE,
-    render: (value: TableData['activate'], item: TableData) => (
-      <RuleSwitch
-        id={item.id}
-        enabled={item.activate}
-        isLoading={item.isLoading}
-        onRuleStateChange={async (enabled, id) => {
-          await enableRulesAction([id], enabled, dispatch, kbnVersion);
-        }}
-      />
-    ),
+    render: (value: TableData['activate'], item: TableData) => {
+      const handleRuleStateChange: RuleStateChangeCallback = async (enabled, id) => {
+        await enableRulesAction([id], enabled, dispatch, kbnVersion);
+      };
+
+      return (
+        <RuleSwitch
+          id={item.id}
+          enabled={item.activate}
+          isLoading={item.isLoading}
+          onRuleStateChange={handleRuleStateChange}
+        />
+      );
+    },
     sortable: true,
     width: '85px',
   },

@@ -45,6 +45,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
+        alerts: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -59,6 +60,7 @@ export const mockGlobalState: State = {
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
         anomalies: null,
+        alerts: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -100,6 +102,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
           sort: { direction: Direction.desc },
+        },
+        [networkModel.NetworkTableType.alerts]: {
+          activePage: 0,
+          limit: 10,
         },
       },
     },

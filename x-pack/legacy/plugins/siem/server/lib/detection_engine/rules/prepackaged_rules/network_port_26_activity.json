@@ -1,0 +1,17 @@
+{
+  "rule_id": "d7e62693-aab9-4f66-a21a-3d79ecdd603d",
+  "risk_score": 50,
+  "description": "Network - Port 26 Activity\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - Port 26 Activity\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:26",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
