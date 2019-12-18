@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { ApmRoute } from '@elastic/apm-rum-react';
 import styled from 'styled-components';
 import { metadata } from 'ui/metadata';
 import {
@@ -52,7 +53,7 @@ const App = () => {
       <Route component={ScrollToTopOnPathChange} />
       <Switch>
         {routes.map((route, i) => (
-          <Route key={i} {...route} />
+          <ApmRoute key={i} {...route} />
         ))}
       </Switch>
     </MainContainer>

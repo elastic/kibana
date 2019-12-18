@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './log_analysis';
-export * from './metadata_api';
-export * from './log_entries';
-export * from './metrics_explorer';
+export * from './summary';
+export * from './summary_highlights';
