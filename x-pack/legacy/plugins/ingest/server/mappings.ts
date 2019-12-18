@@ -79,29 +79,7 @@ export const mappings = {
             type: 'keyword',
           },
           input: {
-            properties: {
-              config: {
-                type: 'flattened',
-              },
-              fields: {
-                type: 'flattened',
-              },
-              id: {
-                type: 'keyword',
-              },
-              ilm_policy: {
-                type: 'keyword',
-              },
-              index_template: {
-                type: 'keyword',
-              },
-              ingest_pipelines: {
-                type: 'keyword',
-              },
-              type: {
-                type: 'keyword',
-              },
-            },
+            type: 'flattened',
           },
           output_id: {
             type: 'keyword',
