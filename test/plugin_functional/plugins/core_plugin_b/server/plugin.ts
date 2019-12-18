@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 import { PluginARequestContext } from '../../core_plugin_a/server';
 
 declare module 'kibana/server' {
@@ -34,6 +35,25 @@ export class CorePluginBPlugin implements Plugin {
       const response = await context.pluginA.ping();
       return res.ok({ body: `Pong via plugin A: ${response}` });
     });
+
+    router.post(
+      {
+        path: '/core_plugin_b/:id',
+        validate: {
+          params: schema.object({ id: schema.string() }),
+          body: ({ ok, fail }, { bar, baz } = {}) => {
+            if (typeof bar === 'string' && bar === baz) {
+              return ok({ bar, baz });
+            } else {
+              return fail(`bar: ${bar} !== baz: ${baz} or they are not string`);
+            }
+          },
+        },
+      },
+      async (context, req, res) => {
+        return res.ok({ body: `ID: ${req.params.id} - ${req.body.bar.toUpperCase()}` });
+      }
+    );
   }
 
   public start() {}
