@@ -23,6 +23,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   'index-template': 'Index Template',
   search: 'Saved Search',
   visualization: 'Visualization',
+  input: 'Agent input',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
