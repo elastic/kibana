@@ -141,7 +141,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     Object.entries(route.validate).forEach(([key, schema]) => {
       if (!(schema instanceof Type || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidateFunction at key: [${key}].`
+          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });

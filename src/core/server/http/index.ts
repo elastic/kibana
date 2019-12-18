@@ -52,10 +52,11 @@ export {
   validBodyOutput,
   RouteValidatorConfig,
   RouteValidationSpec,
-  RouteValidateFunction,
+  RouteValidationFunction,
   RouteValidatorOptions,
   RouteValidationError,
   RouteValidatorFullConfig,
+  RouteValidationResolver,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
 export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';

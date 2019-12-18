@@ -23,7 +23,30 @@ import { schema, Type } from '@kbn/config-schema';
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
     const validator = RouteValidator.from({
-      params: data => {
+      params: (resolver, { foo } = {}) => {
+        if (typeof foo === 'string') {
+          return resolver.ok({ foo });
+        }
+        return resolver.fail('Not a string', ['foo']);
+      },
+    });
+    expect(validator.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
+    expect(validator.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
+    expect(() => validator.getParams({ foo: 1 })).toThrowError('[foo]: Not a string');
+    expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
+
+    expect(() => validator.getParams(undefined)).toThrowError(
+      `Cannot read property 'foo' of undefined`
+    );
+    expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
+
+    expect(validator.getBody(undefined)).toStrictEqual({});
+    expect(validator.getQuery(undefined)).toStrictEqual({});
+  });
+
+  it('should validate and infer the type from a function that does not use the resolver', () => {
+    const validator = RouteValidator.from({
+      params: (resolver, data) => {
         if (typeof data.foo === 'string') {
           return { value: { foo: data.foo as string } };
         }

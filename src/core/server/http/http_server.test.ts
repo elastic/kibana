@@ -29,10 +29,11 @@ import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
 import {
   Router,
-  RouteValidationError,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
+  RouteValidationResolver,
+  RouteValidationFunction,
 } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
@@ -302,13 +303,96 @@ test('valid body with validate function', async () => {
     {
       path: '/',
       validate: {
-        body: ({ bar, baz } = {}) => {
+        body: ({ ok, fail }, { bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
-            return { value: { bar, baz } };
+            return ok({ bar, baz });
           } else {
-            return { error: new RouteValidationError('Wrong payload', ['body']) };
+            return fail('Wrong payload', ['body']);
           }
         },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying params', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation = ({ ok, fail }: RouteValidationResolver, { bar, baz }: any = {}) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return fail('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying validation handler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
+    { ok, fail },
+    { bar, baz } = {}
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return fail('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
       },
     },
     (context, req, res) => {
@@ -354,11 +438,11 @@ test('not inline handler - KibanaRequest', async () => {
     {
       path: '/',
       validate: {
-        body: ({ bar, baz } = {}) => {
+        body: ({ ok, fail }, { bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
-            return { value: { bar, baz } };
+            return ok({ bar, baz });
           } else {
-            return { error: new RouteValidationError('Wrong payload', ['body']) };
+            return fail('Wrong payload', ['body']);
           }
         },
       },
@@ -403,11 +487,11 @@ test('not inline handler - RequestHandler', async () => {
     {
       path: '/',
       validate: {
-        body: ({ bar, baz } = {}) => {
+        body: ({ ok, fail }, { bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
-            return { value: { bar, baz } };
+            return ok({ bar, baz });
           } else {
-            return { error: new RouteValidationError('Wrong payload', ['body']) };
+            return fail('Wrong payload', ['body']);
           }
         },
       },

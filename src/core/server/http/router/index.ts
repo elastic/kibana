@@ -58,8 +58,9 @@ export { IKibanaSocket } from './socket';
 export {
   RouteValidatorConfig,
   RouteValidationSpec,
-  RouteValidateFunction,
+  RouteValidationFunction,
   RouteValidatorOptions,
   RouteValidationError,
   RouteValidatorFullConfig,
+  RouteValidationResolver,
 } from './validator';

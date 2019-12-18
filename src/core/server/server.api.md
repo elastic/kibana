@@ -1233,7 +1233,12 @@ export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options
 export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export type RouteValidateFunction<T> = (data: any) => {
+export class RouteValidationError extends SchemaTypeError {
+    constructor(error: Error | string, path?: string[]);
+}
+
+// @public
+export type RouteValidationFunction<T> = (validationResolver: RouteValidationResolver, data: any) => {
     value: T;
     error?: never;
 } | {
@@ -1242,12 +1247,19 @@ export type RouteValidateFunction<T> = (data: any) => {
 };
 
 // @public
-export class RouteValidationError extends SchemaTypeError {
-    constructor(error: Error | string, path?: string[]);
+export interface RouteValidationResolver {
+    // (undocumented)
+    fail: (error: Error | string, path?: string[]) => {
+        error: RouteValidationError;
+    };
+    // (undocumented)
+    ok: <T>(value: T) => {
+        value: T;
+    };
 }
 
 // @public
-export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidateFunction<T>;
+export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
 
 // @public
 export interface RouteValidatorConfig<P, Q, B> {

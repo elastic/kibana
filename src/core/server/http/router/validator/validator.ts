@@ -22,11 +22,42 @@ import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
 /**
- * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
+ * Validation resolver to be used in the custom validation function
+ *
+ * See {@link RouteValidationFunction}.
  *
  * @public
  */
-export type RouteValidateFunction<T> = (
+export interface RouteValidationResolver {
+  ok: <T>(value: T) => { value: T };
+  fail: (error: Error | string, path?: string[]) => { error: RouteValidationError };
+}
+
+/**
+ * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
+ *
+ * The validation should look something like:
+ * ```typescript
+ * interface MyExpectedBody {
+ *   bar: string;
+ *   baz: number;
+ * }
+ *
+ * const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (validationResolver, data) => {
+ *   const { ok, fail } = validationResolver;
+ *   const { bar, baz } = data || {};
+ *   if (typeof bar === 'string' && typeof baz === 'number') {
+ *     return ok({ bar, baz });
+ *   } else {
+ *     return fail('Wrong payload', ['body']);
+ *   }
+ * }
+ * ```
+ *
+ * @public
+ */
+export type RouteValidationFunction<T> = (
+  validationResolver: RouteValidationResolver,
   data: any
 ) =>
   | {
@@ -41,15 +72,15 @@ export type RouteValidateFunction<T> = (
 /**
  * Allowed property validation options: either @kbn/config-schema validations or custom validation functions
  *
- * See {@link RouteValidateFunction} for custom validation.
+ * See {@link RouteValidationFunction} for custom validation.
  *
  * @public
  */
-export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidateFunction<T>;
+export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
 
 // Ugly as hell but we need this conditional typing to have proper type inference
 type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
-  T extends RouteValidateFunction<any>
+  T extends RouteValidationFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
     ? ReturnType<T['validate']>
@@ -211,13 +242,20 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
   }
 
   private validateFunction<T>(
-    validateFn: RouteValidateFunction<T>,
+    validateFn: RouteValidationFunction<T>,
     data: unknown,
     namespace?: string
   ): T {
+    const routeValidationResolver: RouteValidationResolver = {
+      ok: <T>(value: T) => ({ value }),
+      fail: (error: Error | string, path?: string[]) => ({
+        error: new RouteValidationError(error, path),
+      }),
+    };
+
     let result: ReturnType<typeof validateFn>;
     try {
-      result = validateFn(data);
+      result = validateFn(routeValidationResolver, data);
     } catch (err) {
       result = { error: new RouteValidationError(err) };
     }

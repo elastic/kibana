@@ -21,8 +21,9 @@ export {
   RouteValidator,
   RouteValidatorConfig,
   RouteValidationSpec,
-  RouteValidateFunction,
+  RouteValidationFunction,
   RouteValidatorOptions,
   RouteValidatorFullConfig,
+  RouteValidationResolver,
 } from './validator';
 export { RouteValidationError } from './validator_error';

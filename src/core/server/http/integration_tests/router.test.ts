@@ -26,7 +26,6 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { createHttpServer } from '../test_utils';
-import { RouteValidationError } from '..';
 
 let server: HttpService;
 
@@ -651,11 +650,11 @@ describe('Response factory', () => {
         {
           path: '/',
           validate: {
-            body: ({ bar, baz } = {}) => {
+            body: ({ ok, fail }, { bar, baz } = {}) => {
               if (typeof bar === 'string' && typeof baz === 'number') {
-                return { value: { bar, baz } };
+                return ok({ bar, baz });
               } else {
-                return { error: new RouteValidationError('Wrong payload', ['body']) };
+                return fail('Wrong payload', ['body']);
               }
             },
           },
