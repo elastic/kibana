@@ -63,3 +63,5 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
     visualizations,
   });
 })();
+
+export { createSavedVisLoader } from './saved_visualizations/saved_visualizations';

@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
 import { wrapInI18nContext } from '../legacy_imports';
-import { savedObjectLoaderVisualize } from '../saved_visualizations/saved_visualizations';
+import { savedObjectLoaderVisualize } from '../saved_visualizations/saved_visualization_register';
 
 export function initListingDirective(app) {
   app.directive('visualizeListingTable', reactDirective =>
