@@ -11,10 +11,5 @@ jobs:
         uses: elastic/github-actions/project-assigner@v1.0.0
         id: project_assigner
         with:
-<<<<<<< HEAD
           issue-mappings: '[{"label": "Team:AppArch", "projectName": "kibana-app-arch", "columnId": 6173897}]'
           ghToken: ${{ secrets.GITHUB_TOKEN }}
-=======
-          issue-mappings: '[{"label": "Team:AppAch", "projectName": "kibana-app-arch", "columnId": 6173897}]'
-          ghToken: ${{ secrets.GITHUB_TOKEN }}
->>>>>>> master
