@@ -4,26 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
+import React from 'react';
+
 import euiStyled from '../../../../../../common/eui_styled_components';
 
-export const LogEntryRateUnavailableContent: React.FunctionComponent<{}> = () => (
+export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
   <EmptyPrompt
     title={
       <h2>
         <FormattedMessage
-          id="xpack.infra.logs.analysisPage.unavailable.mLDisabledTitle"
-          defaultMessage="The Analysis feature requires Machine Learning"
+          id="xpack.infra.logs.analysis.mlUnavailableTitle"
+          defaultMessage="This feature requires Machine Learning"
         />
       </h2>
     }
     body={
       <p>
         <FormattedMessage
-          id="xpack.infra.logs.analysisPage.unavailable.mlDisabledBody"
+          id="xpack.infra.logs.analysis.mlUnavailableBody"
           defaultMessage="Check the {machineLearningAppLink} for more information."
           values={{
             machineLearningAppLink: (
@@ -40,7 +41,7 @@ export const LogEntryRateUnavailableContent: React.FunctionComponent<{}> = () =>
     }
     actions={
       <EuiButton target="_blank" href="ml" color="primary" fill>
-        {i18n.translate('xpack.infra.logs.analysisPage.unavailable.mlAppButton', {
+        {i18n.translate('xpack.infra.logs.analysis.mlAppButton', {
           defaultMessage: 'Open Machine Learning',
         })}
       </EuiButton>
