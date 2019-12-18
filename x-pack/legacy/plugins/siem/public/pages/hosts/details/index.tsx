@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
@@ -61,9 +61,15 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   }) => {
     useEffect(() => {
       setHostDetailsTablesActivePageToZero(null);
-    }, [detailName]);
+    }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+    const narrowDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
 
     return (
       <>
@@ -176,9 +182,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
+                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostDetailsQuery>

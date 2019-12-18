@@ -28,7 +28,7 @@ describe('read_tags', () => {
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readRawTags({
@@ -49,7 +49,7 @@ describe('read_tags', () => {
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readRawTags({
@@ -70,7 +70,7 @@ describe('read_tags', () => {
       result2.tags = [];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readRawTags({
@@ -86,7 +86,7 @@ describe('read_tags', () => {
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readRawTags({
@@ -102,7 +102,7 @@ describe('read_tags', () => {
       result1.tags = [];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readRawTags({
@@ -125,7 +125,7 @@ describe('read_tags', () => {
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -146,7 +146,7 @@ describe('read_tags', () => {
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -167,7 +167,7 @@ describe('read_tags', () => {
       result2.tags = [];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1, result2]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -183,7 +183,7 @@ describe('read_tags', () => {
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -199,7 +199,7 @@ describe('read_tags', () => {
       result1.tags = [];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -219,7 +219,7 @@ describe('read_tags', () => {
       ];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -255,7 +255,7 @@ describe('read_tags', () => {
       ];
 
       const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits([result1]));
+      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
       const unsafeCast: AlertsClient = (alertsClient as unknown) as AlertsClient;
       const tags = await readTags({
@@ -277,7 +277,7 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
-      const findResult = getFindResultWithMultiHits([result1, result2]);
+      const findResult = getFindResultWithMultiHits({ data: [result1, result2] });
       const set = convertTagsToSet(findResult.data);
       expect(Array.from(set)).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
@@ -300,7 +300,7 @@ describe('read_tags', () => {
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
-      const findResult = getFindResultWithMultiHits([result1, result2]);
+      const findResult = getFindResultWithMultiHits({ data: [result1, result2] });
       const tags = convertToTags(findResult.data);
       expect(tags).toEqual([
         'tag 1',
@@ -331,7 +331,7 @@ describe('read_tags', () => {
       result3.params.ruleId = 'rule-2';
       result3.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
-      const findResult = getFindResultWithMultiHits([result1, result2, result3]);
+      const findResult = getFindResultWithMultiHits({ data: [result1, result2, result3] });
       const tags = convertToTags(findResult.data);
       expect(tags).toEqual([
         'tag 1',
