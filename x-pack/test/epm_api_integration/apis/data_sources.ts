@@ -80,7 +80,7 @@ export default function({ getService }: FtrProviderContext) {
     // it('works with a package containing only yml format ingest pipelines', async () => {
     //   const createDataSource = async () => {
     //     const response = await supertest
-    //       .post('/api/epm/datasource/install/yamlpipeline-1.0.0')
+    //       .post('/api/epm/datasources)
     //       .send({
     //         datasourceName: 'my pipeline',
     //         pkgkey: 'yamlpipeline-1.0.0',
