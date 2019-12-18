@@ -36,7 +36,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             params: {
               foo: true,
             },
-            interval: '12s',
+            schedule: { interval: '12s' },
             actions: [],
             throttle: '2m',
           };
@@ -97,7 +97,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               params: {
                 foo: true,
               },
-              interval: '12s',
+              schedule: { interval: '12s' },
               throttle: '1m',
               actions: [],
             });
@@ -146,7 +146,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               params: {
                 foo: true,
               },
-              interval: '12s',
+              schedule: { interval: '12s' },
               actions: [],
             });
 
@@ -204,10 +204,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "throttle" fails because ["throttle" is required]. child "name" fails because ["name" is required]. child "tags" fails because ["tags" is required]. child "interval" fails because ["interval" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
+                  'child "throttle" fails because ["throttle" is required]. child "name" fails because ["name" is required]. child "tags" fails because ["tags" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['throttle', 'name', 'tags', 'interval', 'params', 'actions'],
+                  keys: ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'],
                 },
               });
               break;
@@ -238,7 +238,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .send({
               name: 'bcd',
               tags: ['bar'],
-              interval: '1m',
+              schedule: { interval: '1m' },
               throttle: '1m',
               params: {},
               actions: [],
@@ -270,12 +270,18 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle update alert request appropriately when interval is wrong syntax', async () => {
+        it('should handle update alert request appropriately when interval schedule is wrong syntax', async () => {
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alert/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData({ interval: '10x', enabled: undefined, consumer: undefined }));
+            .send(
+              getTestAlertData({
+                schedule: { interval: '10x' },
+                enabled: undefined,
+                consumer: undefined,
+              })
+            );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -295,10 +301,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]. "alertTypeId" is not allowed',
+                  'child "schedule" fails because [child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]]. "alertTypeId" is not allowed',
                 validation: {
                   source: 'payload',
-                  keys: ['interval', 'interval', 'interval', 'interval', 'alertTypeId'],
+                  keys: [
+                    'schedule.interval',
+                    'schedule.interval',
+                    'schedule.interval',
+                    'schedule.interval',
+                    'alertTypeId',
+                  ],
                 },
               });
               break;

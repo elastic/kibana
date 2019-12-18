@@ -450,7 +450,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -491,7 +491,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              interval: '1s',
+              schedule: { interval: '1s' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -561,7 +561,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
-              interval: '1s',
+              schedule: { interval: '1s' },
               params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
@@ -608,7 +608,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               enabled: false,
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -653,7 +653,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               enabled: false,
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 
@@ -698,7 +698,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               enabled: false,
-              interval: '1s',
+              schedule: { interval: '1s' },
             },
           });
 

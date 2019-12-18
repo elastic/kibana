@@ -17,8 +17,8 @@ describe('PluginStatement class', () => {
         source: {
           id: 'output',
           user: 'user',
-          password: 'password'
-        }
+          password: 'password',
+        },
       };
       pluginVertex = {
         id: 'es_output',
@@ -26,7 +26,7 @@ describe('PluginStatement class', () => {
         stats: {},
         meta,
         pluginType: 'output',
-        name: 'elasticsearch'
+        name: 'elasticsearch',
       };
     });
 

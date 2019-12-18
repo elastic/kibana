@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiSpacer
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { MLJobEditor } from '../ml_job_editor';
 

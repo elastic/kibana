@@ -43,7 +43,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         tags: ['foo'],
         alertTypeId: 'test.noop',
         consumer: 'bar',
-        interval: '1m',
+        schedule: { interval: '1m' },
         enabled: true,
         actions: [],
         params: {},

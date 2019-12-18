@@ -72,7 +72,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         consumer: 'bar',
         params: {},
         createdBy: null,
-        interval: '1m',
+        schedule: { interval: '1m' },
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',

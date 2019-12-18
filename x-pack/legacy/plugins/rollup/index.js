@@ -26,9 +26,7 @@ export function rollup(kibana) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: [
-        'plugins/rollup/crud_app',
-      ],
+      managementSections: ['plugins/rollup/crud_app'],
       uiSettingDefaults: {
         [CONFIG_ROLLUPS]: {
           name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
@@ -36,8 +34,7 @@ export function rollup(kibana) {
           }),
           value: true,
           description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
-            defaultMessage:
-              `Enable the creation of index patterns which capture rollup indices,
+            defaultMessage: `Enable the creation of index patterns which capture rollup indices,
               which in turn enable visualizations based on rollup data. Refresh
               the page to apply the changes.`,
           }),
@@ -49,14 +46,10 @@ export function rollup(kibana) {
         'plugins/rollup/index_pattern_list',
         'plugins/rollup/extend_index_management',
       ],
-      visualize: [
-        'plugins/rollup/visualize',
-      ],
-      search: [
-        'plugins/rollup/search',
-      ],
+      visualize: ['plugins/rollup/visualize'],
+      search: ['plugins/rollup/search'],
     },
-    init: function (server) {
+    init: function(server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       registerLicenseChecker(server);
       registerIndicesRoute(server);
@@ -72,6 +65,6 @@ export function rollup(kibana) {
       }
 
       registerRollupSearchStrategy(this.kbnServer, server);
-    }
+    },
   });
 }

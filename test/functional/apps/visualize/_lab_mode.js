@@ -19,13 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   // Flaky: https://github.com/elastic/kibana/issues/19743
   describe('visualize lab mode', () => {
-
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '');
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
@@ -55,6 +54,5 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
     });
-
   });
 }
