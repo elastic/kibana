@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { RequestFacade } from '../../types';
 
 import {
@@ -25,16 +26,19 @@ import {
   internalFrameworkRequest,
   WrappableRequest,
 } from './types';
+import { SiemPluginSecurity, PluginsSetup } from '../../plugin';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   private isProductionMode: boolean;
   private router: IRouter;
+  private security: SiemPluginSecurity;
 
-  constructor(core: CoreSetup, env: PluginInitializerContext['env']) {
+  constructor(core: CoreSetup, plugin: PluginsSetup, env: PluginInitializerContext['env']) {
     this.version = env.packageInfo.version;
     this.isProductionMode = env.mode.prod;
     this.router = core.http.createRouter();
+    this.security = plugin.security;
   }
 
   public async callWithRequest(
@@ -76,10 +80,11 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       },
       async (context, request, response) => {
         try {
+          const user = await this.security.authc.getCurrentUser(request);
           const gqlResponse = await runHttpQuery([request], {
             method: 'POST',
             options: (req: RequestFacade) => ({
-              context: { req: wrapRequest(req, context) },
+              context: { req: wrapRequest(req, context, user) },
               schema,
             }),
             query: request.body,
@@ -108,11 +113,12 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         },
         async (context, request, response) => {
           try {
+            const user = await this.security.authc.getCurrentUser(request);
             const { query } = request;
             const gqlResponse = await runHttpQuery([request], {
               method: 'GET',
               options: (req: RequestFacade) => ({
-                context: { req: wrapRequest(req, context) },
+                context: { req: wrapRequest(req, context, user) },
                 schema,
               }),
               query,
@@ -194,7 +200,8 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
 export function wrapRequest<InternalRequest extends WrappableRequest>(
   req: InternalRequest,
-  context: RequestHandlerContext
+  context: RequestHandlerContext,
+  user: AuthenticatedUser | null
 ): FrameworkRequest<InternalRequest> {
   const { auth, params, payload, query } = req;
 
@@ -205,5 +212,6 @@ export function wrapRequest<InternalRequest extends WrappableRequest>(
     params,
     payload,
     query,
+    user,
   };
 }
