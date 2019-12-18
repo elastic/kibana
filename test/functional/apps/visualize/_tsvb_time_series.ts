@@ -108,6 +108,26 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be(expectedLegendValue);
       });
 
+      it('should correctly change color and reorder the series', async () => {
+        await visualBuilder.cloneSeries();
+        await visualBuilder.cloneSeries();
+        await visualBuilder.setLabel('R', 0);
+        await visualBuilder.setLabel('G', 1);
+        await visualBuilder.setLabel('B', 2);
+        await visualBuilder.changeSeriesColor('#FF0000', 0);
+        await visualBuilder.changeSeriesColor('#00FF00', 1);
+        await visualBuilder.changeSeriesColor('#0000FF', 2);
+        const legendTitles = await visualBuilder.getLegendItemsTitles();
+        expect(legendTitles).to.eql(['R', 'G', 'B']);
+        const legendColors = await visualBuilder.getLegendItemsColors();
+        expect(legendColors).to.eql(['rgb(255, 0, 0)', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)']);
+        const tooltipLabels = await visualBuilder.getTooltipLabels();
+        expect(tooltipLabels).to.eql(['R', 'G', 'B']);
+        await visualBuilder.reorderSeries(0, 1);
+        const reorderedLegendTitles = await visualBuilder.getLegendItemsTitles();
+        expect(reorderedLegendTitles).to.eql(['G', 'R', 'B']);
+      });
+
       it.skip('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
@@ -136,7 +156,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         it(`viz should have 'reversed' class when background color is white`, async () => {
           await visualBuilder.clickPanelOptions('timeSeries');
-          await visualBuilder.setBackgroundColor('#FFFFFF');
+          await visualBuilder.changeSeriesColor('#FFFFFF');
 
           const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
           expect(classNames.includes('tvbVisTimeSeries--reversed')).to.be(true);

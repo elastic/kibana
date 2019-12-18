@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Color from 'color';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
@@ -26,6 +27,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
 
   type Duration =
@@ -475,17 +477,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
     }
 
-    public async clickColorPicker(): Promise<void> {
-      const picker = await find.byCssSelector('.tvbColorPicker button');
+    public async clickColorPicker(nth: number = 0): Promise<void> {
+      const colorPickers = await testSubjects.findAll('tvbColorPicker');
+      const picker = colorPickers[nth];
       await picker.clickMouseButton();
-    }
-
-    public async setBackgroundColor(colorHex: string): Promise<void> {
-      await this.clickColorPicker();
-      await this.checkColorPickerPopUpIsPresent();
-      await find.setValue('.tvbColorPickerPopUp input', colorHex);
-      await this.clickColorPicker();
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async checkColorPickerPopUpIsPresent(): Promise<void> {
@@ -498,6 +493,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const changePreviewBtnArray = await testSubjects.findAll('AddActivatePanelBtn');
       await changePreviewBtnArray[nth].click();
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
+    }
+
+    /**
+     * Change the color of a series
+     * @param colorHex the color expressed in hex value e.g. #FF00CC
+     * @param nthSeries the index of the series to change
+     */
+    public async changeSeriesColor(colorHex: string, nthSeries: number = 0): Promise<void> {
+      await this.clickColorPicker(nthSeries);
+      await this.checkColorPickerPopUpIsPresent();
+      await find.setValue('.tvbColorPickerPopUp input', colorHex);
+      await this.clickColorPicker(nthSeries);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
 
     public async checkPreviewIsDisabled(): Promise<void> {
@@ -535,8 +543,73 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await find.allByCssSelector('.echLegendItem');
     }
 
+    /**
+     * Return the legend items text without the last value
+     */
+    public async getLegendItemsTitles(): Promise<string[]> {
+      const legendItemTitles = await find.allByCssSelector('.echLegendItem__title');
+      return Promise.all(
+        legendItemTitles.map(titleElements => {
+          return titleElements.getVisibleText();
+        })
+      );
+    }
+    /**
+     * Return the colors for each single legend item
+     */
+    public async getLegendItemsColors(): Promise<string[]> {
+      const legendItemColors = await find.allByCssSelector('.echLegendItem__color .echIcon');
+      return Promise.all(
+        legendItemColors.map(icon => {
+          return icon.getAttribute('color');
+        })
+      );
+    }
+    /**
+     * Return the tooltip labels from a random point inside the chart.
+     */
+    public async getTooltipLabels(): Promise<string[]> {
+      const el = await find.byCssSelector('.echChart canvas:last-of-type');
+      await el.scrollIntoViewIfNecessary();
+      await browser
+        .getActions()
+        .move({ x: 200, y: 20, origin: el._webElement })
+        .perform();
+      const tooltipLabelsElements = await find.allByCssSelector(
+        '#echTooltipContainerPortal .echTooltip__label'
+      );
+      return Promise.all(
+        tooltipLabelsElements.map(icon => {
+          return icon.getVisibleText();
+        })
+      );
+    }
+
     public async getSeries(): Promise<WebElementWrapper[]> {
       return await find.allByCssSelector('.tvbSeriesEditor');
+    }
+
+    /**
+     * Reorder the series on the editor
+     * @param from the 0-index of the series to move
+     * @param to the 0-index of the place to move the selected series
+     */
+    public async reorderSeries(from: number, to: number): Promise<void> {
+      const seriesList = await testSubjects.findAll('tsvbDraggableSeriesHandler');
+      // focus on the series drag handler
+      await seriesList[from].focus();
+      // enable dragging using accessibility key
+      await browser.pressKeys(browser.keys.SPACE);
+      // wait for dragging enabled
+      await find.byCssSelector('.tvbEditor .euiDroppable.euiDroppable--isDraggingOver');
+      // move the series up or down depending on the number of steps
+      const steps = to - from;
+      for (let i = 0; i < Math.abs(steps); i++) {
+        await browser.pressKeys(steps > 0 ? browser.keys.DOWN : browser.keys.UP);
+      }
+      // complete the dragging action
+      await browser.pressKeys(browser.keys.SPACE);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
     }
   }
 

@@ -28,7 +28,7 @@ export class SeriesDragHandler extends PureComponent {
 
     return (
       <EuiFlexItem grow={false}>
-        <div {...dragHandleProps}>
+        <div {...dragHandleProps} data-test-subj={'tsvbDraggableSeriesHandler'}>
           {!hideDragHandler && (
             <EuiToolTip
               content={i18n.translate('visTypeTimeseries.sort.dragToSortTooltip', {
