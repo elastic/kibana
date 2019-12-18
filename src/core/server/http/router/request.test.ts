@@ -19,7 +19,6 @@
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
-import { RouteValidationError } from './validator';
 
 describe('KibanaRequest', () => {
   describe('get all headers', () => {
