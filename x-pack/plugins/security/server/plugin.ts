@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription, combineLatest } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   IClusterClient,
@@ -25,7 +25,7 @@ import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
 import { createConfig$ } from './config';
 import { defineRoutes } from './routes';
-import { SecurityLicenseService, SecurityLicense } from './licensing';
+import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
@@ -90,7 +90,7 @@ export class Plugin {
   private readonly logger: Logger;
   private clusterClient?: IClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
-  private licenseSubscription?: Subscription;
+  private securityLicenseService?: SecurityLicenseService;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -128,10 +128,10 @@ export class Plugin {
       plugins: [elasticsearchClientPlugin],
     });
 
-    const { license, update: updateLicense } = new SecurityLicenseService().setup();
-    this.licenseSubscription = licensing.license$.subscribe(rawLicense =>
-      updateLicense(rawLicense)
-    );
+    this.securityLicenseService = new SecurityLicenseService();
+    const { license } = this.securityLicenseService.setup({
+      license$: licensing.license$,
+    });
 
     const authc = await setupAuthentication({
       http: core.http,
@@ -223,9 +223,9 @@ export class Plugin {
       this.clusterClient = undefined;
     }
 
-    if (this.licenseSubscription) {
-      this.licenseSubscription.unsubscribe();
-      this.licenseSubscription = undefined;
+    if (this.securityLicenseService) {
+      this.securityLicenseService.stop();
+      this.securityLicenseService = undefined;
     }
   }
 

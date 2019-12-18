@@ -12,6 +12,8 @@ import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
 import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
 import { REPOSITORY_EDIT } from './helpers/constant';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
 

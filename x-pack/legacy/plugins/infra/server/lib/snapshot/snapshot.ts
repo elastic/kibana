@@ -37,7 +37,7 @@ export class InfraSnapshot {
   public async getNodes(
     requestContext: RequestHandlerContext,
     options: InfraSnapshotRequestOptions
-  ): Promise<InfraSnapshotNode[]> {
+  ): Promise<{ nodes: InfraSnapshotNode[]; interval: string }> {
     // Both requestGroupedNodes and requestNodeMetrics may send several requests to elasticsearch
     // in order to page through the results of their respective composite aggregations.
     // Both chains of requests are supposed to run in parallel, and their results be merged
@@ -61,7 +61,10 @@ export class InfraSnapshot {
 
     const groupedNodeBuckets = await groupedNodesPromise;
     const nodeMetricBuckets = await nodeMetricsPromise;
-    return mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options);
+    return {
+      nodes: mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options),
+      interval: timeRangeWithIntervalApplied.interval,
+    };
   }
 }
 
