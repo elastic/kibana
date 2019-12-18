@@ -1044,4 +1044,26 @@ describe('create rules schema', () => {
       }).error
     ).toBeFalsy();
   });
+
+  test('timeline_id validates', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'some_id',
+      }).error
+    ).toBeFalsy();
+  });
 });

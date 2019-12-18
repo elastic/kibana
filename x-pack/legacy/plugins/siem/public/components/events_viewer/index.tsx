@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
@@ -32,6 +32,7 @@ export interface OwnProps {
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
+  pageFilters?: esFilters.Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (totalCount: number) => React.ReactNode;
 }
@@ -150,7 +151,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
-
+    const eventsFilter = useMemo(() => [...filters], [defaultFilters]);
     return (
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <EventsViewer
@@ -159,7 +160,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           id={id}
           dataProviders={dataProviders!}
           end={end}
-          filters={[...filters, ...defaultFilters]}
+          filters={eventsFilter}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
@@ -192,7 +193,8 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     isEqual(prevProps.query, nextProps.query) &&
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
-    prevProps.start === nextProps.start
+    prevProps.start === nextProps.start &&
+    isEqual(prevProps.defaultFilters, nextProps.defaultFilters)
 );
 
 StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';
@@ -227,7 +229,7 @@ export const StatefulEventsViewer = connect(makeMapStateToProps, {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
-  updateSort: timelineActions.updateSort,
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
+  setSearchBarFilter: inputsActions.setSearchBarFilter,
 })(StatefulEventsViewerComponent);
