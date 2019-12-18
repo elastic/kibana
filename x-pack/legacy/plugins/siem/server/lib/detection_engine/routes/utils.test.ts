@@ -44,5 +44,17 @@ describe('utils', () => {
       const transformed = transformError(error);
       expect(Boom.isBoom(transformed)).toBe(false);
     });
+
+    test('it detects a TypeError and returns a Boom', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(true);
+    });
+
+    test('it detects a TypeError and returns a Boom status of 400', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformError(error) as Boom;
+      expect(transformed.output.statusCode).toBe(400);
+    });
   });
 });

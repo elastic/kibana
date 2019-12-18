@@ -22,12 +22,10 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 
 import { migrations } from './migrations';
-import manageUuid from './server/lib/manage_uuid';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
-import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
@@ -323,14 +321,11 @@ export default function(kibana) {
 
     init: async function(server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
-      // uuid
-      await manageUuid(server);
       // routes
       importApi(server);
       exportApi(server);
       homeApi(server);
       managementApi(server);
-      registerSuggestionsApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
       registerCspCollector(usageCollection, server);

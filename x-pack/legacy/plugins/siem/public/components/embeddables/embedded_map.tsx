@@ -52,15 +52,15 @@ const EmbeddableMap = styled.div.attrs(() => ({
   ${({ maintainRatio }) =>
     maintainRatio &&
     css`
-      padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+      padding-top: calc(3 / 4 * 100%); /* 4:3 (standard) ratio */
       position: relative;
 
       @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
-        padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+        padding-top: calc(9 / 32 * 100%); /* 32:9 (ultra widescreen) ratio */
       }
 
       @media only screen and (min-width: 1441px) and (min-height: 901px) {
-        padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+        padding-top: calc(9 / 21 * 100%); /* 21:9 (ultrawide) ratio */
       }
 
       .embPanel {

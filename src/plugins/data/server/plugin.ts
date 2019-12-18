@@ -24,6 +24,7 @@ import { SearchService } from './search/search_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
+import { AutocompleteService } from './autocomplete';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
@@ -32,11 +33,11 @@ export interface DataPluginSetup {
 export interface DataPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
-
 export class DataServerPlugin implements Plugin<DataPluginSetup> {
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
+  private readonly autocompleteService = new AutocompleteService();
   private readonly indexPatterns = new IndexPatternsService();
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -48,7 +49,8 @@ export class DataServerPlugin implements Plugin<DataPluginSetup> {
   public async setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
-    await this.kqlTelemetryService.setup(core, { usageCollection });
+    this.autocompleteService.setup(core);
+    this.kqlTelemetryService.setup(core, { usageCollection });
 
     return {
       search: this.searchService.setup(core),
