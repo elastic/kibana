@@ -22,6 +22,9 @@ export default function canvasSmokeTest({ getService, getPageObjects }: FtrProvi
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('canvas/default');
 
+      // open canvas home
+      await PageObjects.common.navigateToApp('canvas');
+
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
@@ -30,7 +33,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }: FtrProvi
 
     it('creates a custom element from an element when prompted', async () => {
       // find the first workpad element (a markdown element) and click it to select it
-      testSubjects.click('canvasWorkpadPage > canvasWorkpadPageElementContent');
+      await testSubjects.click('canvasWorkpadPage > canvasWorkpadPageElementContent', 20000);
 
       // click the "Save as new element" button
       await find.clickByCssSelector('[aria-label="Save as new element"]', 20000);
