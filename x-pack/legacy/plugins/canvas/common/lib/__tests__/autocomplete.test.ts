@@ -5,9 +5,9 @@
  */
 
 jest.mock('ui/new_platform');
-import { functionSpecs } from '../../__tests__/fixtures/function_specs';
+import { functionSpecs } from '../../../__tests__/fixtures/function_specs';
 
-import { getAutocompleteSuggestions } from './autocomplete';
+import { getAutocompleteSuggestions } from '../autocomplete';
 
 describe('getAutocompleteSuggestions', () => {
   it('should suggest functions', () => {
