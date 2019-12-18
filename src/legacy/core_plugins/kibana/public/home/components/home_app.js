@@ -33,7 +33,7 @@ export function HomeApp({ directories }) {
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
   const mlEnabled = chrome.getInjected('mlEnabled', false);
-  const { setOptInNoticeSeen } = telemetryOptInProvider;
+  const { setOptInNoticeSeen, getOptIn } = telemetryOptInProvider;
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const renderTutorialDirectory = props => {
@@ -77,6 +77,7 @@ export function HomeApp({ directories }) {
             localStorage={localStorage}
             urlBasePath={chrome.getBasePath()}
             onOptInSeen={setOptInNoticeSeen}
+            getOptInStatus={getOptIn}
           />
         </Route>
       </Switch>
