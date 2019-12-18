@@ -51,6 +51,7 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   max_signals: 100,
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
+  timeline_id: 'timeline-id',
 });
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -227,14 +228,22 @@ export const getResult = (): RuleAlertType => ({
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     falsePositives: [],
     from: 'now-6m',
-    filter: null,
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     outputIndex: '.siem-signals',
-    savedId: null,
-    meta: null,
-    filters: null,
+    savedId: 'some-id',
+    timelineId: 'some-timeline-id',
+    meta: { someMeta: 'someField' },
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     riskScore: 50,
     maxSignals: 100,
     size: 1,
