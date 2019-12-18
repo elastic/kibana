@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { AlertTypeModel, Alert, ValidationResult } from '../../../../types';
 import { Comparator, AggregationType, GroupByType } from './types';
-import { COMPARATORS, AGGREGATION_TYPES } from '../../../constants';
+import { AGGREGATION_TYPES, COMPARATORS } from './constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,

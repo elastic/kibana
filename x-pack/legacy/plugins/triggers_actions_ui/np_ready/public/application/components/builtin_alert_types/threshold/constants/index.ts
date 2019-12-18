@@ -4,16 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const expressionFields = [
-  'aggType',
-  'aggField',
-  'termSize',
-  'termField',
-  'thresholdComparator',
-  'timeWindowSize',
-  'timeWindowUnit',
-  'triggerIntervalSize',
-  'triggerIntervalUnit',
-  'threshold',
-  'groupBy',
-];
+export { COMPARATORS } from './comparators';
+export { AGGREGATION_TYPES } from './aggregation_types';
