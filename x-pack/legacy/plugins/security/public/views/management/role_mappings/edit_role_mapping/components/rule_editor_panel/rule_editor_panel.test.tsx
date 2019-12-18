@@ -62,12 +62,15 @@ describe('RuleEditorPanel', () => {
 
   it('allows switching to the visual editor, carrying over rules', () => {
     const props = {
-      rawRules: {},
+      rawRules: {
+        field: { username: '*' },
+      },
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+
     findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton').simulate('click');
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
@@ -76,8 +79,11 @@ describe('RuleEditorPanel', () => {
     const jsonEditor = wrapper.find(JSONRuleEditor);
     expect(jsonEditor).toHaveLength(1);
     const { rules: initialRules, onChange } = jsonEditor.props();
-    expect(initialRules).toBeNull();
-    onChange(new AllRule([new FieldRule('username', '*')]));
+    expect(initialRules?.toRaw()).toEqual({
+      field: { username: '*' },
+    });
+
+    onChange(new AllRule([new FieldRule('otherRule', 12)]));
 
     findTestSubject(wrapper, 'roleMappingsVisualRuleEditorButton').simulate('click');
 
@@ -87,7 +93,7 @@ describe('RuleEditorPanel', () => {
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [rules] = props.onChange.mock.calls[0];
     expect(rules).toEqual({
-      all: [{ field: { username: '*' } }],
+      all: [{ field: { otherRule: 12 } }],
     });
   });
 

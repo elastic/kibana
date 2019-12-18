@@ -30,6 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('roleMappingFormRoleComboBox', 'superuser');
       await browser.pressKeys(browser.keys.ENTER);
 
+      await testSubjects.click('roleMappingsAddRuleButton');
+
       await testSubjects.click('roleMappingsJSONRuleEditorButton');
 
       await aceEditor.setValue(

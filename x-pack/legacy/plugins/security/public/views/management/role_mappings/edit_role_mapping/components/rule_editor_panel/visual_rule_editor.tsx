@@ -42,11 +42,12 @@ export class VisualRuleEditor extends Component<Props, {}> {
             />
           </h3>
         }
+        titleSize="s"
         body={
           <div>
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.visualRuleEditor.noRulesDefinedMessage"
-              defaultMessage="Add a rule to control which users should be assigned roles."
+              defaultMessage="Rules control which users should be assigned roles."
             />
           </div>
         }

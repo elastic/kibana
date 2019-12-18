@@ -152,6 +152,11 @@ export class RuleEditorPanel extends Component<Props, State> {
       );
     }
 
+    // Don't offer swith if no rules are present yet
+    if (this.state.mode === 'visual' && this.state.rules === null) {
+      return null;
+    }
+
     switch (this.state.mode) {
       case 'visual':
         return (
