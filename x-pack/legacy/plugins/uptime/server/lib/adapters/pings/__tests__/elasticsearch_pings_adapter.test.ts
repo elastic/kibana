@@ -5,14 +5,10 @@
  */
 
 import { set } from 'lodash';
-import { DatabaseAdapter } from '../../database';
-import { ElasticsearchPingsAdapter } from '../elasticsearch_pings_adapter';
+import { elasticsearchPingsAdapter as adapter } from '../elasticsearch_pings_adapter';
 import { assertCloseTo } from '../../../helper';
 
 describe('ElasticsearchPingsAdapter class', () => {
-  let database: DatabaseAdapter;
-  let adapter: ElasticsearchPingsAdapter;
-  let serverRequest: any;
   let mockHits: any[];
   let mockEsSearchResult: any;
   let mockEsCountResult: any;
@@ -77,22 +73,13 @@ describe('ElasticsearchPingsAdapter class', () => {
     mockEsCountResult = {
       count: mockHits.length,
     };
-    database = {
-      search: async (request: any, params: any) => mockEsSearchResult,
-      count: async (request: any, params: any) => mockEsCountResult,
-      head: async (request: any, params: any) => null,
-    };
-    adapter = new ElasticsearchPingsAdapter(database);
-    serverRequest = {
-      requestArgs: 'hello',
-    };
   });
 
   describe('getPingHistogram', () => {
     it('returns a single bucket if array has 1', async () => {
       expect.assertions(2);
-      const search = jest.fn();
-      search.mockReturnValue({
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue({
         aggregations: {
           timeseries: {
             buckets: [
@@ -109,43 +96,41 @@ describe('ElasticsearchPingsAdapter class', () => {
           },
         },
       });
-      const pingDatabase = {
-        search,
-        count: jest.fn(),
-        head: async (request: any, params: any) => null,
-      };
-      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
+        dateRangeStart: 'now-15m',
+        dateRangeEnd: 'now',
+        filters: null,
+      });
       assertCloseTo(result.interval, 36000, 100);
       result.interval = 36000;
-      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
 
     it('returns expected result for no status filter', async () => {
       expect.assertions(2);
-      const search = jest.fn();
+      const mockEsClient = jest.fn();
 
-      search.mockReturnValue(standardMockResponse);
+      mockEsClient.mockReturnValue(standardMockResponse);
 
-      const pingDatabase = {
-        search,
-        count: jest.fn(),
-        head: async (request: any, params: any) => null,
-      };
-      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
+        dateRangeStart: 'now-15m',
+        dateRangeEnd: 'now',
+        filters: null,
+      });
       assertCloseTo(result.interval, 36000, 100);
       result.interval = 36000;
 
-      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
 
     it('handles status + additional user queries', async () => {
       expect.assertions(2);
-      const search = jest.fn();
-      search.mockReturnValue({
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue({
         aggregations: {
           timeseries: {
             buckets: [
@@ -188,31 +173,25 @@ describe('ElasticsearchPingsAdapter class', () => {
           ],
         },
       };
-      const pingDatabase = {
-        search,
-        count: jest.fn(),
-        head: async (request: any, params: any) => null,
-      };
-      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(
-        serverRequest,
-        '1234',
-        '5678',
-        JSON.stringify(searchFilter),
-        undefined,
-        'down'
-      );
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
+        dateRangeStart: '1234',
+        dateRangeEnd: '5678',
+        filters: JSON.stringify(searchFilter),
+        monitorId: undefined,
+        statusFilter: 'down',
+      });
       assertCloseTo(result.interval, 5609564928000, 1000);
       result.interval = 5609564928000;
 
-      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
 
     it('handles simple_text_query without issues', async () => {
       expect.assertions(2);
-      const search = jest.fn();
-      search.mockReturnValue({
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue({
         aggregations: {
           timeseries: {
             buckets: [
@@ -247,89 +226,71 @@ describe('ElasticsearchPingsAdapter class', () => {
           },
         },
       });
-      const searchFilter = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
-      const pingDatabase = {
-        search,
-        count: jest.fn(),
-        head: async (request: any, params: any) => null,
-      };
-      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(
-        serverRequest,
-        'now-15m',
-        'now',
-        searchFilter
-      );
+      const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
+        dateRangeStart: 'now-15m',
+        dateRangeEnd: 'now',
+        filters,
+      });
 
       assertCloseTo(result.interval, 36000, 100);
       result.interval = 36000;
-      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
 
     it('returns a down-filtered array for when filtered by down status', async () => {
       expect.assertions(2);
-      const search = jest.fn();
-      search.mockReturnValue(standardMockResponse);
-      const pingDatabase = {
-        search,
-        count: jest.fn(),
-        head: async (request: any, params: any) => null,
-      };
-      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(
-        serverRequest,
-        '1234',
-        '5678',
-        '',
-        undefined,
-        'down'
-      );
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(standardMockResponse);
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
+        dateRangeStart: '1234',
+        dateRangeEnd: '5678',
+        filters: '',
+        monitorId: undefined,
+        statusFilter: 'down',
+      });
       assertCloseTo(result.interval, 5609564928000, 1000);
       result.interval = 5609564928000;
 
-      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
 
     it('returns a down-filtered array for when filtered by up status', async () => {
       expect.assertions(2);
-      const search = jest.fn();
+      const mockEsClient = jest.fn();
 
-      search.mockReturnValue(standardMockResponse);
+      mockEsClient.mockReturnValue(standardMockResponse);
 
-      const pingDatabase = {
-        search,
-        count: jest.fn(),
-        head: async (request: any, params: any) => null,
-      };
-      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(
-        serverRequest,
-        '1234',
-        '5678',
-        '',
-        undefined,
-        'up'
-      );
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
+        dateRangeStart: '1234',
+        dateRangeEnd: '5678',
+        filters: '',
+        monitorId: undefined,
+        statusFilter: 'up',
+      });
 
-      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
   });
 
   describe('getDocCount', () => {
     it('returns data in appropriate shape', async () => {
-      const { count } = await adapter.getDocCount(serverRequest);
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsCountResult);
+      const { count } = await adapter.getDocCount({ callES: mockEsClient });
       expect(count).toEqual(3);
     });
   });
 
   describe('getAll', () => {
-    let getAllSearchMock: (request: any, params: any) => Promise<any>;
     let expectedGetAllParams: any;
     beforeEach(() => {
-      getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetAllParams = {
         index: 'heartbeat-8*',
         body: {
@@ -354,15 +315,15 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
 
     it('returns data in the appropriate shape', async () => {
-      const result = await adapter.getAll(
-        serverRequest,
-        'now-1h',
-        'now',
-        undefined,
-        undefined,
-        'asc',
-        12
-      );
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsSearchResult);
+      const result = await adapter.getAll({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        sort: 'asc',
+        size: 12,
+      });
       const count = 3;
 
       expect(result.total).toBe(count);
@@ -372,57 +333,87 @@ describe('ElasticsearchPingsAdapter class', () => {
       expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
       expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
       expect(pings[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
     });
 
     it('creates appropriate sort and size parameters', async () => {
-      database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, 'asc', 12);
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsSearchResult);
+      await adapter.getAll({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        sort: 'asc',
+        size: 12,
+      });
       set(expectedGetAllParams, 'body.sort[0]', { '@timestamp': { order: 'asc' } });
 
-      expect(database.search).toHaveBeenCalledTimes(1);
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+      expect(mockEsClient).toHaveBeenCalledTimes(1);
+      expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
     });
 
     it('omits the sort param when no sort passed', async () => {
-      database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, undefined, 12);
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsSearchResult);
+      await adapter.getAll({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        size: 12,
+      });
 
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+      expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
     });
 
     it('omits the size param when no size passed', async () => {
-      database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, 'desc');
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsSearchResult);
+      await adapter.getAll({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        sort: 'desc',
+      });
       delete expectedGetAllParams.body.size;
       set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
 
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+      expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
     });
 
     it('adds a filter for monitor ID', async () => {
-      database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'now-1h', 'now', 'testmonitorid');
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsSearchResult);
+      await adapter.getAll({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        monitorId: 'testmonitorid',
+      });
       delete expectedGetAllParams.body.size;
       expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.id': 'testmonitorid' } });
 
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+      expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
     });
 
     it('adds a filter for monitor status', async () => {
-      database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, 'down');
+      const mockEsClient = jest.fn();
+      mockEsClient.mockReturnValue(mockEsSearchResult);
+      await adapter.getAll({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        status: 'down',
+      });
       delete expectedGetAllParams.body.size;
       expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.status': 'down' } });
 
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
+      expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetAllParams);
     });
   });
 
   describe('getLatestMonitorDocs', () => {
-    let getLatestSearchMock: (request: any, params: any) => Promise<any>;
     let expectedGetLatestSearchParams: any;
     beforeEach(() => {
-      getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetLatestSearchParams = {
         index: 'heartbeat-8*',
         body: {
@@ -491,19 +482,19 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
 
     it('returns data in expected shape', async () => {
-      database.search = getLatestSearchMock;
-      const result = await adapter.getLatestMonitorStatus(
-        serverRequest,
-        'now-1h',
-        'now',
-        'testMonitor'
-      );
+      const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
+      const result = await adapter.getLatestMonitorStatus({
+        callES: mockEsClient,
+        dateRangeStart: 'now-1h',
+        dateRangeEnd: 'now',
+        monitorId: 'testmonitor',
+      });
       expect(result).toHaveLength(1);
       expect(result.timestamp).toBe(123456);
       expect(result.monitor).not.toBeFalsy();
       // @ts-ignore monitor will be defined
-      expect(result.monitor.id).toBe('testMonitor');
-      expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetLatestSearchParams);
+      expect(result[0].monitor.id).toBe('testmonitor');
+      expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);
     });
   });
 });

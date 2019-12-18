@@ -16,8 +16,12 @@
       "retryAt": {
         "type": "date"
       },
-      "interval": {
-        "type": "text"
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
       },
       "attempts": {
         "type": "integer"

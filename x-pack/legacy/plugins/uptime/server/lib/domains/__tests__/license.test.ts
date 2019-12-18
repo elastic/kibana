@@ -11,7 +11,7 @@ describe('license check', () => {
   let mockLicense: Pick<ILicense, 'isActive' | 'isOneOf'>;
 
   it('throws for null license', () => {
-    expect(licenseCheck(null)).toMatchSnapshot();
+    expect(licenseCheck(undefined)).toMatchSnapshot();
   });
 
   it('throws for unsupported license type', () => {
