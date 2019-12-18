@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useMemo } from 'react';
 
-import { euiStyled } from '../../../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../../../common/eui_styled_components';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
