@@ -5,17 +5,16 @@
  */
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { initRoutes } from './routes';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
-import { checkLicense } from '../check_license';
-import { watchStatusAndLicenseToInitialize } from '../../../server/lib/watch_status_and_license_to_initialize';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
+import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
+import { initRoutes } from './routes';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, usageCollection } = plugins;
+    const { featuresPlugin, licensing, usageCollection } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -45,20 +44,13 @@ export class MapPlugin {
       },
     });
 
-    watchStatusAndLicenseToInitialize(
-      __LEGACY.plugins.xpackMainPlugin,
-      __LEGACY.pluginRef,
-      async license => {
-        if (license && license.maps && !routesInitialized) {
-          routesInitialized = true;
-          initRoutes(__LEGACY, license.uid);
-        }
+    licensing.license$.subscribe(license => {
+      const { state } = license.check('maps', 'basic');
+      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
+        routesInitialized = true;
+        initRoutes(__LEGACY, license.uid);
       }
-    );
-
-    __LEGACY.plugins.xpackMainPlugin.info
-      .feature(APP_ID)
-      .registerLicenseCheckResultsGenerator(checkLicense);
+    });
 
     // Init telemetry
     const { savedObjectsClient } = __LEGACY.savedObjects;

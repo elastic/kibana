@@ -73,6 +73,10 @@ export const mockNetworkState: NetworkModel = {
         limit: DEFAULT_TABLE_LIMIT,
         sort: { direction: Direction.desc },
       },
+      [NetworkTableType.alerts]: {
+        activePage: 0,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -185,6 +189,10 @@ describe('Network redux store', () => {
             direction: 'desc',
             field: 'bytes_out',
           },
+        },
+        [NetworkTableType.alerts]: {
+          activePage: 0,
+          limit: 10,
         },
       });
     });
