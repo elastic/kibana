@@ -157,7 +157,6 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
-    const eventsFilter = useMemo(() => [...filters], [pageFilters]);
 
     return (
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
@@ -168,7 +167,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           dataProviders={dataProviders!}
           deletedEventIds={deletedEventIds}
           end={end}
-          filters={eventsFilter}
+          filters={filters}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
