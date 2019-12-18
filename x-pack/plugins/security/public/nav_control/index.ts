@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './nav_control';
+export { SecurityNavControlService } from './nav_control_service';
