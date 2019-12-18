@@ -32,6 +32,7 @@ import {
   threats,
   references,
   id,
+  version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -60,4 +61,5 @@ export const updateRulesSchema = Joi.object({
   type,
   threats,
   references,
+  version,
 }).xor('id', 'rule_id');
