@@ -12,6 +12,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
+import { Popover } from './Popover';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -58,7 +59,11 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const license = useLicense();
   const isValidPlatinumLicense =
     license?.isActive &&
+<<<<<<< HEAD
     (license?.type === 'platinum' || license?.type === 'trial');
+=======
+    (license?.type === 'trial' || license?.type === 'platinum');
+>>>>>>> Start popover
 
   return isValidPlatinumLicense ? (
     <Cytoscape
@@ -67,6 +72,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       style={cytoscapeDivStyle}
     >
       <Controls />
+      <Popover />
     </Cytoscape>
   ) : (
     <PlatinumLicensePrompt />

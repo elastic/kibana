@@ -36,10 +36,15 @@ const style: cytoscape.Stylesheet[] = [
         isDatabaseOrExternal(el.data('agentName')) ? '40%' : '80%',
       'background-width': (el: cytoscape.NodeSingular) =>
         isDatabaseOrExternal(el.data('agentName')) ? '40%' : '80%',
-      'border-color': (el: cytoscape.NodeSingular) =>
-        el.hasClass('primary')
-          ? theme.euiColorSecondary
-          : theme.euiColorMediumShade,
+      'border-color': (el: cytoscape.NodeSingular) => {
+        if (el.hasClass('primary')) {
+          return theme.euiColorSecondary;
+        }
+        if (el.selected()) {
+          return 'red';
+        }
+        return theme.euiColorMediumShade;
+      },
       'border-width': 2,
       color: theme.textColors.default,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
@@ -83,7 +88,6 @@ const style: cytoscape.Stylesheet[] = [
 
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   autoungrabify: true,
-  autounselectify: true,
   boxSelectionEnabled: false,
   layout,
   maxZoom: 3,
