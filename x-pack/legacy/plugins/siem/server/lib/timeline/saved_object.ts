@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request } from 'hapi';
+
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsFindOptions, KibanaRequest } from '../../../../../../../src/core/server';
+import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
 import {
   ResponseTimeline,
   PageInfoTimeline,
@@ -147,7 +147,7 @@ export class Timeline {
           timeline: convertSavedObjectToSavedTimeline(
             await savedObjectsClient.create(
               timelineSavedObjectType,
-              pickSavedTimeline(timelineId, timeline, request.auth || null)
+              pickSavedTimeline(timelineId, timeline, request.user)
             )
           ),
         };
@@ -156,7 +156,7 @@ export class Timeline {
       await savedObjectsClient.update(
         timelineSavedObjectType,
         timelineId,
-        pickSavedTimeline(timelineId, timeline, request.auth || null),
+        pickSavedTimeline(timelineId, timeline, request.user),
         {
           version: version || undefined,
         }

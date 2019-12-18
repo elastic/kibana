@@ -118,7 +118,7 @@ export class Note {
                 const timelineResult = convertSavedObjectToSavedTimeline(
                   await savedObjectsClient.create(
                     timelineSavedObjectType,
-                    pickSavedTimeline(null, {}, request.auth || null)
+                    pickSavedTimeline(null, {}, request.user)
                   )
                 );
                 note.timelineId = timelineResult.savedObjectId;
