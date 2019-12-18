@@ -112,6 +112,7 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
+    "@elastic/apm-rum": "^4.6.0",
     "@elastic/charts": "^14.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
@@ -467,7 +468,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.15.2",
+    "node": "10.18.0",
     "yarn": "^1.21.1"
   }
 }

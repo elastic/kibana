@@ -1,0 +1,287 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UptimeDatePicker component renders properly with mock data 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+>
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        id="QuickSelectPopover"
+      >
+        <div
+          class="euiPopover__anchor euiQuickSelectPopover__anchor"
+        >
+          <button
+            aria-label="Date quick select"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+            data-test-subj="superDatePickerToggleQuickMenuButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                focusable="false"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
+              >
+                <svg
+                  class="euiIcon euiIcon--medium euiIcon-isLoading"
+                  focusable="false"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiFormControlLayout__childrenWrapper"
+      >
+        <div
+          class="euiDatePickerRange euiDatePickerRange--inGroup"
+        >
+          <button
+            class="euiSuperDatePicker__prettyFormat"
+            data-test-subj="superDatePickerShowDatesButton"
+          >
+            Last 15 minutes
+            <span
+              class="euiSuperDatePicker__prettyFormatLink"
+            >
+              Show dates
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <span
+      class="euiToolTipAnchor"
+    >
+      <button
+        class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+        data-test-subj="superDatePickerApplyTimeButton"
+        type="button"
+      >
+        <span
+          class="euiButton__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+            focusable="false"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiButton__text euiSuperUpdateButton__text"
+          >
+            Refresh
+          </span>
+        </span>
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`UptimeDatePicker component renders properly without commonlyUsedRanges prop 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+>
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        id="QuickSelectPopover"
+      >
+        <div
+          class="euiPopover__anchor euiQuickSelectPopover__anchor"
+        >
+          <button
+            aria-label="Date quick select"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+            data-test-subj="superDatePickerToggleQuickMenuButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                focusable="false"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
+              >
+                <svg
+                  class="euiIcon euiIcon--medium euiIcon-isLoading"
+                  focusable="false"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiFormControlLayout__childrenWrapper"
+      >
+        <div
+          class="euiDatePickerRange euiDatePickerRange--inGroup"
+        >
+          <button
+            class="euiSuperDatePicker__prettyFormat"
+            data-test-subj="superDatePickerShowDatesButton"
+          >
+            Last 15 minutes
+            <span
+              class="euiSuperDatePicker__prettyFormatLink"
+            >
+              Show dates
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <span
+      class="euiToolTipAnchor"
+    >
+      <button
+        class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+        data-test-subj="superDatePickerApplyTimeButton"
+        type="button"
+      >
+        <span
+          class="euiButton__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+            focusable="false"
+            height="16"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiButton__text euiSuperUpdateButton__text"
+          >
+            Refresh
+          </span>
+        </span>
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`UptimeDatePicker component validates props with shallow render 1`] = `
+<EuiSuperDatePicker
+  commonlyUsedRanges={
+    Array [
+      Object {
+        "end": "now/d",
+        "label": "Today",
+        "start": "now/d",
+      },
+      Object {
+        "end": "now/w",
+        "label": "This week",
+        "start": "now/w",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 15 minutes",
+        "start": "now-15m",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 30 minutes",
+        "start": "now-30m",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 1 hour",
+        "start": "now-1h",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 24 hours",
+        "start": "now-24h",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 7 days",
+        "start": "now-7d",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 30 days",
+        "start": "now-30d",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 90 days",
+        "start": "now-90d",
+      },
+      Object {
+        "end": "now",
+        "label": "Last 2 year",
+        "start": "now-1y",
+      },
+    ]
+  }
+  dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+  end="now"
+  isAutoRefreshOnly={false}
+  isDisabled={false}
+  isPaused={false}
+  onRefresh={[MockFunction]}
+  onRefreshChange={[Function]}
+  onTimeChange={[Function]}
+  recentlyUsedRanges={Array []}
+  refreshInterval={60000}
+  showUpdateButton={true}
+  start="now-15m"
+  timeFormat="HH:mm"
+/>
+`;
