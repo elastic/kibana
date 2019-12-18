@@ -47,18 +47,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     }
   };
 
-  const writeCoverage = async (logEntry?: { message: string; level: string }) => {
+  const writeCoverage = (coverageJson: string) => {
     const id = coverageCounter++;
     const timestamp = Date.now();
     const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
-    let coverageJson: string;
-    if (logEntry) {
-      const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
-      coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
-    } else {
-      const coverageObject = (await driver.executeScript('return window.__coverage__;')) as object;
-      coverageJson = JSON.stringify(coverageObject);
-    }
     log.info('writing coverage to', path);
     Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
@@ -94,7 +86,9 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     .pipe(
       mergeMap(logEntry => {
         if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
-          writeCoverage(logEntry);
+          const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+          const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+          writeCoverage(coverageJson);
 
           // filter out this message
           return [];
@@ -144,9 +138,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.cleanup.add(async () => {
-    // Getting last piece of code coverage before closing browser
+    // Getting the last piece of code coverage before closing browser
     if (collectCoverage) {
-      await writeCoverage();
+      const coverageJson = await driver
+        .executeScript('return window.__coverage__')
+        .catch(() => undefined)
+        .then(coverage => coverage && JSON.stringify(coverage));
+      if (coverageJson) {
+        writeCoverage(coverageJson);
+      }
     }
 
     await driver.quit();
