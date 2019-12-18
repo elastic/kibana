@@ -11,6 +11,7 @@ import d3 from 'd3';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import { unit } from '../../../../style/variables';
 import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 
@@ -22,20 +23,23 @@ const XY_MARGIN = {
   bottom: unit * 2
 };
 
-const getXScale = (xMin, xMax, width) => {
+const getXScale = (xMin: number, xMax: number, width: number) => {
   return scaleLinear()
     .domain([xMin, xMax])
     .range([XY_MARGIN.left, width - XY_MARGIN.right]);
 };
 
-const getYScale = (yMin, yMax) => {
+const getYScale = (yMin: number, yMax: number) => {
   return scaleLinear()
     .domain([yMin, yMax])
     .range([XY_HEIGHT, 0])
     .nice();
 };
 
-function getFlattenedCoordinates(visibleSeries, enabledSeries) {
+function getFlattenedCoordinates(
+  visibleSeries: Array<TimeSeries<Coordinate>>,
+  enabledSeries: Array<TimeSeries<Coordinate>>
+) {
   const enabledCoordinates = flatten(enabledSeries.map(serie => serie.data));
   if (!isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
@@ -44,10 +48,24 @@ function getFlattenedCoordinates(visibleSeries, enabledSeries) {
   return flatten(visibleSeries.map(serie => serie.data));
 }
 
+export type PlotValues = ReturnType<typeof getPlotValues>;
+
 export function getPlotValues(
-  visibleSeries,
-  enabledSeries,
-  { width, yMin = 0, yMax = 'max', height, stackBy }
+  visibleSeries: Array<TimeSeries<Coordinate>>,
+  enabledSeries: Array<TimeSeries<Coordinate>>,
+  {
+    width,
+    yMin = 0,
+    yMax = 'max',
+    height,
+    stackBy
+  }: {
+    width: number;
+    yMin?: number | 'min';
+    yMax?: number | 'max';
+    height: number;
+    stackBy?: 'x' | 'y';
+  }
 ) {
   const flattenedCoordinates = getFlattenedCoordinates(
     visibleSeries,
@@ -59,10 +77,10 @@ export function getPlotValues(
   const xMax = d3.max(flattenedCoordinates, d => d.x);
 
   if (yMax === 'max') {
-    yMax = d3.max(flattenedCoordinates, d => d.y);
+    yMax = d3.max(flattenedCoordinates, d => d.y ?? 0);
   }
   if (yMin === 'min') {
-    yMin = d3.min(flattenedCoordinates, d => d.y);
+    yMin = d3.min(flattenedCoordinates, d => d.y ?? 0);
   }
 
   const [xMinZone, xMaxZone] = [xMin, xMax].map(x => {
@@ -101,11 +119,19 @@ export function getPlotValues(
   };
 }
 
-export function SharedPlot({ plotValues, ...props }) {
+export function SharedPlot({
+  plotValues,
+  ...props
+}: {
+  plotValues: PlotValues;
+  children: React.ReactNode;
+}) {
   const { XY_HEIGHT: height, XY_MARGIN: margin, XY_WIDTH: width } = plotValues;
 
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0 }}>
+    <div
+      style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
+    >
       <XYPlot
         dontCheckIfEmpty
         height={height}
