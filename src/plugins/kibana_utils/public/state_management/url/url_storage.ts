@@ -21,7 +21,7 @@ import { format as formatUrl } from 'url';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
-import { stringifyQueryString } from './stringify-query-string';
+import { stringifyQueryString } from './stringify_query_string';
 import { replaceUrlHashQuery } from './format';
 
 /**

@@ -18,4 +18,4 @@
  */
 
 export * from './defer';
-export { distinctUntilChangedWithInitialValue } from './distinct-until-changed-with-initial-value';
+export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';

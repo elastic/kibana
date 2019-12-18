@@ -20,7 +20,7 @@
 import { format as formatUrl } from 'url';
 import { ParsedUrlQuery } from 'querystring';
 import { parseUrl, parseUrlHash } from './parse';
-import { stringifyQueryString } from './stringify-query-string';
+import { stringifyQueryString } from './stringify_query_string';
 
 export function replaceUrlHashQuery(
   rawUrl: string,

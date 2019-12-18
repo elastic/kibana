@@ -127,14 +127,25 @@ const TodoAppConnected = connect<TodoAppProps, never>(() => ({}))(TodoApp);
 export const TodoAppPage: React.FC<{ history: History }> = props => {
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
   useEffect(() => {
-    const destroySyncState = syncState({
-      stateContainer: container,
-      syncKey: '_todo',
+    const destroySyncState = syncState([
+      {
+        stateContainer: container,
+        syncKey: '_todo',
 
-      // have to sync with history passed to react-router
-      // history v5 will be singleton and this will not be needed
-      syncStrategy: createUrlSyncStrategy({ useHash: useHashedUrl, history: props.history }),
-    });
+        // have to sync with history passed to react-router
+        // history v5 will be singleton and this will not be needed
+        syncStrategy: createUrlSyncStrategy({ useHash: useHashedUrl, history: props.history }),
+      },
+      // {
+      //   stateContainer: container,
+      //   syncKey: '_todo',
+      //   syncStrategy: {
+      //     toStorage: async (syncKey, state) =>
+      //       sessionStorage.setItem(syncKey, JSON.stringify(state)),
+      //     fromStorage: async syncKey => JSON.parse(sessionStorage.getItem(syncKey)!),
+      //   },
+      // },
+    ]);
     return () => {
       destroySyncState();
     };
