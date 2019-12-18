@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { findIndex, where } from 'lodash';
+import { findIndex } from 'lodash';
 import { IndexPattern } from '../index_patterns';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
@@ -25,11 +25,10 @@ import { Field, FieldSpec } from './field';
 type FieldMap = Map<Field['name'], Field>;
 
 export interface IFieldList extends Array<Field> {
-  getByName: (name: Field['name']) => Field | undefined;
-  getByType: (type: Field['type']) => Field[];
-  add: (field: FieldSpec) => void;
-  remove: (field: IFieldType) => void;
-  update: (field: IFieldType) => void;
+  getByName(name: Field['name']): Field | undefined;
+  getByType(type: Field['type']): Field[];
+  add(field: FieldSpec): void;
+  remove(field: IFieldType): void;
 }
 
 export class FieldList extends Array<Field> implements IFieldList {
@@ -55,9 +54,7 @@ export class FieldList extends Array<Field> implements IFieldList {
   }
 
   getByName = (name: Field['name']) => this.byName.get(name);
-
   getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
-
   add = (field: FieldSpec) => {
     const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
     this.push(newField);
@@ -73,12 +70,11 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.splice(fieldIndex, 1);
   };
 
-  update = (field: IFieldType) => {
+  update = (field: Field) => {
     const index = this.findIndex(f => f.name === field.name);
-    const fullField = this[index];
-    this.splice(index, 1, fullField);
-    this.setByName(fullField);
-    this.removeByGroup(fullField);
-    this.setByGroup(fullField);
+    this.splice(index, 1, field);
+    this.setByName(field);
+    this.removeByGroup(field);
+    this.setByGroup(field);
   };
 }

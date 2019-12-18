@@ -127,15 +127,14 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns, savedObjectsClient } = this.props;
-    const hasFieldTypes = Boolean(fieldTypes && fieldTypes.length > 0);
 
     const savedObjectFields = ['title'];
-    if (hasFieldTypes) {
+    if (fieldTypes) {
       savedObjectFields.push('fields');
     }
     let savedObjects = await getIndexPatterns(savedObjectsClient, searchValue, savedObjectFields);
 
-    if (hasFieldTypes) {
+    if (fieldTypes) {
       savedObjects = savedObjects.filter((savedObject: SimpleSavedObject<any>) => {
         try {
           const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
