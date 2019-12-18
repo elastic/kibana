@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetReference, ElasticsearchAssetType } from '../../../../common/types';
+import { AssetReference, Dataset, ElasticsearchAssetType } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { CallESAsCurrentUser } from '../../cluster_access';
 
+interface RewriteSubstitution {
+  source: string;
+  target: string;
+  templateFunction: string;
+}
+
 export function rewriteIngestPipeline(
   pipeline: string,
-  substitutions: Array<{
-    source: string;
-    target: string;
-    templateFunction: string;
-  }>
+  substitutions: RewriteSubstitution[]
 ): string {
   substitutions.forEach(sub => {
     const { source, target, templateFunction } = sub;
@@ -33,36 +35,68 @@ export function rewriteIngestPipeline(
   return pipeline;
 }
 
-export async function installPipelines({
+export async function installPipelinesForDataset({
   callCluster,
   pkgkey,
-  datasetNames,
+  dataset,
+  datasourceName,
+  packageName,
 }: {
   callCluster: CallESAsCurrentUser;
   pkgkey: string;
-  datasetNames: string[];
-}) {
-  const paths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
-    isDatasetPipeline(entry, datasetNames)
+  dataset: Dataset;
+  datasourceName: string;
+  packageName: string;
+}): Promise<AssetReference[]> {
+  const pipelinePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
+    isDatasetPipeline(entry, dataset.name)
   );
-  const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
+  let pipelines: any[] = [];
+  const substitutions: RewriteSubstitution[] = [];
+
+  pipelinePaths.forEach(path => {
+    const { name, extension } = getNameAndExtension(path);
+    const nameForInstallation = getPipelineNameForInstallation(
+      name,
+      dataset,
+      datasourceName,
+      packageName
+    );
+    const content = Registry.getAsset(path).toString('utf-8');
+    pipelines.push({
+      name,
+      nameForInstallation,
+      content,
+      extension,
+    });
+    substitutions.push({
+      source: name,
+      target: nameForInstallation,
+      templateFunction: 'IngestPipeline',
+    });
+  });
+
+  pipelines = pipelines.map(pipeline => {
+    return {
+      ...pipeline,
+      contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
+    };
+  });
+
+  const installationPromises = pipelines.map(async pipeline => {
+    return installPipeline({ callCluster, pipeline });
+  });
 
   return Promise.all(installationPromises);
 }
 
 async function installPipeline({
   callCluster,
-  path,
+  pipeline,
 }: {
   callCluster: CallESAsCurrentUser;
-  path: string;
+  pipeline: any;
 }): Promise<AssetReference> {
-  const buffer = Registry.getAsset(path);
-  const parts = Registry.pathParts(path);
-  const extension = getExtension(path);
-  const id = path.replace(/\W/g, '_'); // TODO: replace with "real" pipeline id
-  const pipeline = buffer.toString('utf8');
-
   const callClusterParams: {
     method: string;
     path: string;
@@ -71,11 +105,11 @@ async function installPipeline({
     headers?: any;
   } = {
     method: 'PUT',
-    path: `/_ingest/pipeline/${id}`,
+    path: `/_ingest/pipeline/${pipeline.nameForInstallation}`,
     ignore: [404],
-    body: pipeline,
+    body: pipeline.contentForInstallation,
   };
-  if (extension === 'yml') {
+  if (pipeline.extension === 'yml') {
     callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
   }
 
@@ -85,23 +119,41 @@ async function installPipeline({
   // which we could otherwise use.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
   await callCluster('transport.request', callClusterParams);
-
-  return { id, type: parts.type };
+  return { id: pipeline.name, type: 'ingest-pipeline' };
 }
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
-const isDatasetPipeline = ({ path }: Registry.ArchiveEntry, datasetNames: string[]) => {
+const isDatasetPipeline = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
   // TODO: better way to get particular assets
   const pathParts = Registry.pathParts(path);
   return (
     !isDirectory({ path }) &&
     pathParts.type === ElasticsearchAssetType.ingestPipeline &&
     pathParts.dataset !== undefined &&
-    datasetNames.includes(pathParts.dataset)
+    datasetName === pathParts.dataset
   );
 };
 
-const getExtension = (path: string): string => {
-  const splitPath = path.split('.');
-  return splitPath[splitPath.length - 1];
+// XXX: assumes path/to/file.ext -- 0..n '/' and exactly one '.'
+const getNameAndExtension = (
+  path: string
+): {
+  name: string;
+  extension: string;
+} => {
+  const splitPath = path.split('/');
+  const filename = splitPath[splitPath.length - 1];
+  return {
+    name: filename.split('.')[0],
+    extension: filename.split('.')[1],
+  };
+};
+
+export const getPipelineNameForInstallation = (
+  pipelineName: string,
+  dataset: Dataset,
+  datasourceName: string,
+  packageName: string
+): string => {
+  return `${dataset.type}-${packageName}-${datasourceName}-${dataset.name}-${pipelineName}`;
 };
