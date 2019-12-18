@@ -9,7 +9,7 @@ import { pickBy } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
-import { transformBulkError, createBulkErrorObject } from '../utils';
+import { createBulkErrorObject } from '../utils';
 
 export const getIdError = ({
   id,
@@ -24,6 +24,34 @@ export const getIdError = ({
     return new Boom(`rule_id: "${ruleId}" not found`, { statusCode: 404 });
   } else {
     return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
+  }
+};
+
+export const getIdBulkError = ({
+  id,
+  ruleId,
+}: {
+  id: string | undefined | null;
+  ruleId: string | undefined | null;
+}) => {
+  if (id != null) {
+    return createBulkErrorObject({
+      ruleId: id,
+      statusCode: 404,
+      message: `id: "${id}" not found`,
+    });
+  } else if (ruleId != null) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 404,
+      message: `rule_id: "${ruleId}" not found`,
+    });
+  } else {
+    return createBulkErrorObject({
+      ruleId: '(unknown id)',
+      statusCode: 404,
+      message: `id or rule_id should have been defined`,
+    });
   }
 };
 

@@ -31,6 +31,10 @@ export interface UpdateRulesRequest extends RequestFacade {
   payload: UpdateRuleAlertParamsRest;
 }
 
+export interface BulkUpdateRulesRequest extends RequestFacade {
+  payload: UpdateRuleAlertParamsRest[];
+}
+
 export type RuleAlertType = Alert & {
   id: string;
   params: RuleTypeParams;
@@ -41,7 +45,7 @@ export interface RulesRequest extends RequestFacade {
 }
 
 export interface BulkRulesRequest extends RequestFacade {
-  payload: [RulesRequest['payload']];
+  payload: RuleAlertParamsRest[];
 }
 
 export interface FindRuleParams {

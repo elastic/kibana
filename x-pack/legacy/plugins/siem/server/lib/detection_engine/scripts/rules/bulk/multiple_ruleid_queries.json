@@ -1,8 +1,8 @@
 [
   {
-    "name": "Simplest Query Number 1",
-    "description": "Simplest query with the least amount of fields required",
-    "rule_id": "simple-query-1",
+    "name": "Query with a rule id Number 1",
+    "description": "Query with a rule_id that acts like an external id",
+    "rule_id": "query-rule-id-1",
     "risk_score": 1,
     "severity": "high",
     "type": "query",
@@ -11,9 +11,9 @@
     "query": "user.name: root or user.name: admin"
   },
   {
-    "name": "Simplest Query Number 2",
-    "description": "Simplest query with the least amount of fields required",
-    "rule_id": "simple-query-2",
+    "name": "Query with a rule id Number 2",
+    "description": "Query with a rule_id that acts like an external id",
+    "rule_id": "query-rule-id-2",
     "risk_score": 2,
     "severity": "low",
     "type": "query",
