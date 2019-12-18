@@ -13,7 +13,7 @@ import {
 // NOTE: now we import it from our "public" folder, but when the Authorisation lib
 // will move to the "es_ui_shared" plugin, it will be imported from its "static" folder
 import { Privileges } from '../../../public/app/lib/authorization';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
 
 let xpackMainPlugin: any;
 

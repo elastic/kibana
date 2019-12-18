@@ -263,7 +263,8 @@ module.exports = {
                   'src/legacy/**/*',
                   'x-pack/**/*',
                   '!x-pack/**/*.test.*',
-                  'src/plugins/**/(public|server)/**/*',
+                  '!x-pack/test/**/*',
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'src/core/(public|server)/**/*',
                 ],
                 from: [
@@ -283,16 +284,35 @@ module.exports = {
                   '!src/core/server/types',
                   '!src/core/server/*.test.mocks.ts',
 
-                  'src/plugins/**/public/**/*',
-                  '!src/plugins/**/public/index.{js,ts,tsx}',
-
-                  'src/plugins/**/server/**/*',
-                  '!src/plugins/**/server/index.{js,ts,tsx}',
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+                errorMessage: 'Plugins may only import from top-level public and server modules.',
               },
               {
-                target: ['src/core/**/*'],
+                target: [
+                  '(src|x-pack)/plugins/**/*',
+                  '!(src|x-pack)/plugins/*/server/**/*',
+
+                  'src/legacy/core_plugins/**/*',
+                  '!src/legacy/core_plugins/*/server/**/*',
+                  '!src/legacy/core_plugins/*/index.{js,ts,tsx}',
+
+                  'x-pack/legacy/plugins/**/*',
+                  '!x-pack/legacy/plugins/*/server/**/*',
+                  '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+                ],
+                from: [
+                  'src/core/server',
+                  'src/core/server/**/*',
+                  '(src|x-pack)/plugins/*/server/**/*',
+                ],
+                errorMessage:
+                  'Server modules cannot be imported into client modules or shared modules.',
+              },
+              {
+                target: ['src/**/*'],
                 from: ['x-pack/**/*'],
                 errorMessage: 'OSS cannot import x-pack files.',
               },
@@ -305,6 +325,11 @@ module.exports = {
                   'src/legacy/ui/**/*',
                 ],
                 errorMessage: 'The core cannot depend on any plugins.',
+              },
+              {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['ui/**/*', 'uiExports/**/*'],
+                errorMessage: 'Plugins cannot import legacy UI code.',
               },
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],

@@ -252,6 +252,18 @@ module.exports = function(grunt) {
       ],
     }),
 
+    exampleFunctionalTestsRelease: scriptWithGithubChecks({
+      title: 'Example functional tests',
+      cmd: NODE,
+      args: [
+        'scripts/functional_tests',
+        '--config',
+        'test/examples/config.js',
+        '--bail',
+        '--debug',
+      ],
+    }),
+
     functionalTests: scriptWithGithubChecks({
       title: 'Functional tests',
       cmd: NODE,

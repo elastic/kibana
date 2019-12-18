@@ -171,7 +171,7 @@ that feature would not take any effect.
 
 `logging.rotate.everyBytes:`:: [experimental] *Default: 10485760* The maximum size of a log file (that is `not an exact` limit). After the
 limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
-this option should be at least greater than 1024.
+this option should be in the range of 102400 (100KB) to 1073741824 (1GB).
 
 `logging.rotate.keepFiles:`:: [experimental] *Default: 7* The number of most recent rotated log files to keep
 on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
@@ -358,6 +358,18 @@ all http requests to https over the port configured as `server.port`.
 `server.ssl.supportedProtocols:`:: *Default: TLSv1.1, TLSv1.2*  An array of
 supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
 
+`server.xsrf.whitelist:`:: It is not recommended to disable protections for
+arbitrary API endpoints. Instead, supply the `kbn-xsrf` header. There are some
+scenarios where whitelisting is required, however, such as
+<<kibana-authentication, SAML and OpenID Connect Single Sign-On setups>>.
+The `server.xsrf.whitelist` setting requires the following format:
+
+[source,text]
+
+----
+*Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
+----
+
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled,
 setting this to `true` enables unauthenticated users to access the Kibana server
 status API and status page.
@@ -384,6 +396,15 @@ Rollup user interface.
 
 `i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
+`xpack.actions.enabledActionTypes:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of action types that are enabled.  An element of `*` indicates all
+action types registered are enabled.  The action types provided by Kibana are:
+`.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`.
+
+`xpack.actions.whitelistedHosts:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of host names which actions such as email, slack, pagerduty, and
+webhook can connect to.  An element of `*` indicates any host can be connected
+to.  An empty array indicates no hosts can be connected to.
 
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
