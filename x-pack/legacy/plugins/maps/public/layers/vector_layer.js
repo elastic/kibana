@@ -13,7 +13,7 @@ import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
   SOURCE_META_ID_ORIGIN,
-  SORUCE_FORMATTERS_ID_ORIGIN,
+  SOURCE_FORMATTERS_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE,
@@ -234,7 +234,7 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
-  _findDataRequestForSource(sourceDataId) {
+  _findDataRequestById(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
@@ -255,7 +255,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
     };
-    const prevDataRequest = this._findDataRequestForSource(sourceDataId);
+    const prevDataRequest = this._findDataRequestById(sourceDataId);
 
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
@@ -370,7 +370,7 @@ export class VectorLayer extends AbstractLayer {
     registerCancelCallback,
     dataFilters,
   }) {
-    const requestToken = Symbol(`layer-source-data:${this.getId()}`);
+    const requestToken = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
 
@@ -474,7 +474,7 @@ export class VectorLayer extends AbstractLayer {
       isTimeAware: this._style.isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
     };
-    const prevDataRequest = this._findDataRequestForSource(dataRequestId);
+    const prevDataRequest = this._findDataRequestById(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
     if (canSkipFetch) {
       return;
@@ -506,10 +506,15 @@ export class VectorLayer extends AbstractLayer {
 
     return this._syncFormatters({
       source: this._source,
-      dataRequestId: SORUCE_FORMATTERS_ID_ORIGIN,
-      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
-        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE;
-      }),
+      dataRequestId: SOURCE_FORMATTERS_ID_ORIGIN,
+      fields: this._style
+        .getDynamicPropertiesArray()
+        .filter(dynamicStyleProp => {
+          return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE;
+        })
+        .map(dynamicStyleProp => {
+          return dynamicStyleProp.getField();
+        }),
       ...syncContext,
     });
   }
@@ -519,35 +524,33 @@ export class VectorLayer extends AbstractLayer {
     return this._syncFormatters({
       source: joinSource,
       dataRequestId: join.getSourceFormattersDataRequestId(),
-      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
-        const matchingField = joinSource.getMetricFieldForName(
-          dynamicStyleProp.getField().getName()
-        );
-        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
-      }),
+      fields: this._style
+        .getDynamicPropertiesArray()
+        .filter(dynamicStyleProp => {
+          const matchingField = joinSource.getMetricFieldForName(
+            dynamicStyleProp.getField().getName()
+          );
+          return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
+        })
+        .map(dynamicStyleProp => {
+          return dynamicStyleProp.getField();
+        }),
       ...syncContext,
     });
   }
 
-  async _syncFormatters({
-    source,
-    dataRequestId,
-    dynamicStyleProps,
-    startLoading,
-    stopLoading,
-    onLoadError,
-  }) {
-    if (dynamicStyleProps.length === 0) {
+  async _syncFormatters({ source, dataRequestId, fields, startLoading, stopLoading, onLoadError }) {
+    if (fields.length === 0) {
       return;
     }
 
-    const fieldNames = dynamicStyleProps.map(dynamicStyleProp => {
-      return dynamicStyleProp.getField().getName();
+    const fieldNames = fields.map(field => {
+      return field.getName();
     });
     const nextMeta = {
       fieldNames: _.uniq(fieldNames).sort(),
     };
-    const prevDataRequest = this._findDataRequestForSource(dataRequestId);
+    const prevDataRequest = this._findDataRequestById(dataRequestId);
     const canSkipUpdate = canSkipFormattersUpdate({ prevDataRequest, nextMeta });
     if (canSkipUpdate) {
       return;
@@ -558,8 +561,8 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
 
       const formatters = {};
-      const promises = dynamicStyleProps.map(async dynamicStyleProp => {
-        const fieldName = dynamicStyleProp.getField().getName();
+      const promises = fields.map(async field => {
+        const fieldName = field.getName();
         formatters[fieldName] = await source.getFieldFormatter(fieldName);
       });
       await Promise.all(promises);
