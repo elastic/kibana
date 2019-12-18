@@ -271,7 +271,7 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },
-  interval: '5m',
+  schedule: { interval: '5m' },
   enabled: true,
   actions: [],
   throttle: null,
