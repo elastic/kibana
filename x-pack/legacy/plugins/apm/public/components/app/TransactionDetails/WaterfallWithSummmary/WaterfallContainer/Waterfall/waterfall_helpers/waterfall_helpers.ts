@@ -162,7 +162,8 @@ function getAgentMarks(transaction?: Transaction): IWaterfallItemAgentMark[] {
         id: name,
         name,
         offset: ms * 1000,
-        docType: 'agentMark'
+        docType: 'agentMark',
+        skew: 0
       } as IWaterfallItemAgentMark)
   );
 }
@@ -176,13 +177,18 @@ export function getClockSkew(
   }
 
   switch (item.docType) {
-    // don't calculate skew for spans and error. Just use parent's skew
-    case 'error':
+    // don't calculate skew for spans. Just use parent's skew
     case 'span':
       return parentItem.skew;
     // agentMark doesnt have parent-child relationship, no adjustment is needed
     case 'agentMark':
       return 0;
+    case 'error':
+      // when the errors offset is negative, it means that its timestamp is lower then its parent. In that case sum the skew and the duration of the parent is necessary.
+      // e.g.: An error with a parent that is the entry transaction and it doesnt have parent (skew = 0).
+      return item.offset > 0
+        ? parentItem.skew
+        : parentItem.skew + parentItem.duration;
 
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
