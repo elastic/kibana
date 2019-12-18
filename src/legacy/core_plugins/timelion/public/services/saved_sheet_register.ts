@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import './saved_sheets';
 
-export default function savedSearchObjectFn(savedSheets) {
+SavedObjectRegistryProvider.register((savedSheets: any) => {
   return savedSheets;
-}
+});
