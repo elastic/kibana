@@ -509,10 +509,6 @@ Object {
     "opbeans-node": "#3185fc",
     "opbeans-ruby": "#00b3a4",
   },
-  "services": Array [
-    "opbeans-node",
-    "opbeans-ruby",
-  ],
   "traceRoot": Object {
     "processor": Object {
       "event": "transaction",
@@ -966,9 +962,6 @@ Object {
   "serviceColors": Object {
     "opbeans-ruby": "#3185fc",
   },
-  "services": Array [
-    "opbeans-ruby",
-  ],
   "traceRoot": Object {
     "processor": Object {
       "event": "transaction",
