@@ -88,6 +88,9 @@ export interface InjectedMetadataParams {
         user?: Record<string, UserProvidedValues>;
       };
     };
+    apm: {
+      [key: string]: unknown;
+    };
   };
 }
 
