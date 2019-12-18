@@ -18,7 +18,7 @@
  */
 
 import { forOwn, isFunction, memoize } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
@@ -33,6 +33,7 @@ export class FieldFormatRegisty {
   private fieldFormats: Map<IFieldFormatId, IFieldFormatType>;
   private uiSettings!: IUiSettingsClient;
   private defaultMap: Record<string, FieldType>;
+  private basePath?: string;
 
   constructor() {
     this.fieldFormats = new Map();
@@ -41,8 +42,9 @@ export class FieldFormatRegisty {
 
   getConfig = (key: string, override?: any) => this.uiSettings.get(key, override);
 
-  init(uiSettings: IUiSettingsClient) {
+  init({ uiSettings, http }: CoreSetup) {
     this.uiSettings = uiSettings;
+    this.basePath = http.basePath.get();
 
     this.parseDefaultTypeMap(this.uiSettings.get('format:defaultTypeMap'));
 
@@ -76,7 +78,11 @@ export class FieldFormatRegisty {
    * @return {FieldFormat}
    */
   getType = (formatId: IFieldFormatId): IFieldFormatType | undefined => {
-    return this.fieldFormats.get(formatId);
+    const decoratedFieldFormat: any = this.decorateFieldFormatWithParams(formatId);
+
+    if (decoratedFieldFormat) {
+      return decoratedFieldFormat as IFieldFormatType;
+    }
   };
 
   /**
@@ -136,14 +142,14 @@ export class FieldFormatRegisty {
    * @return {FIELD_FORMATS_INSTANCES[number]}
    */
   getInstance = memoize(
-    (formatId: IFieldFormatId): FieldFormat => {
+    (formatId: IFieldFormatId, params: Record<string, any> = {}): FieldFormat => {
       const DerivedFieldFormat = this.getType(formatId);
 
       if (!DerivedFieldFormat) {
         throw new Error(`Field Format '${formatId}' not found!`);
       }
 
-      return new DerivedFieldFormat({}, this.getConfig);
+      return new DerivedFieldFormat(params, this.getConfig);
     }
   );
 
@@ -217,10 +223,26 @@ export class FieldFormatRegisty {
   }
 
   register = (fieldFormats: IFieldFormatType[]) => {
-    fieldFormats.forEach(fieldFormat => {
-      this.fieldFormats.set(fieldFormat.id, fieldFormat);
-    });
+    fieldFormats.forEach(fieldFormat => this.fieldFormats.set(fieldFormat.id, fieldFormat));
 
     return this;
+  };
+
+  private decorateFieldFormatWithParams = (formatId: IFieldFormatId): Function | undefined => {
+    const concreteFieldFormat = this.fieldFormats.get(formatId);
+    const decorateMetaParams = (customOptions: Record<string, any> = {}) => ({
+      parsedUrl: {
+        origin: window.location.origin,
+        pathname: window.location.pathname,
+        basePath: this.basePath,
+      },
+      ...customOptions,
+    });
+
+    if (concreteFieldFormat) {
+      return function(params: Record<string, any> = {}, getConfig?: Function) {
+        return new concreteFieldFormat(decorateMetaParams(params), getConfig);
+      };
+    }
   };
 }

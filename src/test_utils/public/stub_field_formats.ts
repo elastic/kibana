@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IUiSettingsClient } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
 
 import {
   FieldFormatRegisty,
@@ -37,7 +37,7 @@ import {
   UrlFormat,
 } from '../../plugins/data/public/';
 
-export const getFieldFormatsRegistry = (uiSettings: IUiSettingsClient) => {
+export const getFieldFormatsRegistry = (npSetup: CoreSetup) => {
   const fieldFormats = new FieldFormatRegisty();
 
   fieldFormats.register([
@@ -58,7 +58,7 @@ export const getFieldFormatsRegistry = (uiSettings: IUiSettingsClient) => {
     UrlFormat,
   ]);
 
-  fieldFormats.init(uiSettings);
+  fieldFormats.init(npSetup);
 
   return fieldFormats;
 };
