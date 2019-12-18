@@ -16,6 +16,7 @@ async function doesFilebeatIndexExist(
   const filter = [createTimeFilter({ start, end, metric })];
 
   const typeFilter = { term: { 'service.type': 'elasticsearch' } };
+  const structuredLogsFilter = { exists: { field: 'elasticsearch.cluster' } };
   const clusterFilter = { term: { 'elasticsearch.cluster.uuid': clusterUuid } };
   const nodeFilter = { term: { 'elasticsearch.node.id': nodeUuid } };
   const indexFilter = { term: { 'elasticsearch.index.name': indexUuid } };
@@ -40,6 +41,14 @@ async function doesFilebeatIndexExist(
     query: {
       bool: {
         filter: [...filter, typeFilter],
+      },
+    },
+  };
+
+  const usingStructuredLogsQuery = {
+    query: {
+      bool: {
+        filter: [...filter, typeFilter, structuredLogsFilter],
       },
     },
   };
@@ -81,6 +90,8 @@ async function doesFilebeatIndexExist(
     { ...defaultParams, ...typeExistsAtAnyTimeQuery },
     { index: filebeatIndexPattern },
     { ...defaultParams, ...typeExistsQuery },
+    { index: filebeatIndexPattern },
+    { ...defaultParams, ...usingStructuredLogsQuery },
   ];
 
   if (clusterUuid) {
@@ -102,6 +113,7 @@ async function doesFilebeatIndexExist(
       indexPatternExistsInTimeRangeResponse,
       typeExistsAtAnyTimeResponse,
       typeExistsResponse,
+      usingStructuredLogsResponse,
       clusterExistsResponse,
       nodeExistsResponse,
       indexExistsResponse,
@@ -114,6 +126,7 @@ async function doesFilebeatIndexExist(
       get(indexPatternExistsInTimeRangeResponse, 'hits.total.value', 0) > 0,
     typeExistsAtAnyTime: get(typeExistsAtAnyTimeResponse, 'hits.total.value', 0) > 0,
     typeExists: get(typeExistsResponse, 'hits.total.value', 0) > 0,
+    usingStructuredLogs: get(usingStructuredLogsResponse, 'hits.total.value', 0) > 0,
     clusterExists: clusterUuid ? get(clusterExistsResponse, 'hits.total.value', 0) > 0 : null,
     nodeExists: nodeUuid ? get(nodeExistsResponse, 'hits.total.value', 0) > 0 : null,
     indexExists: indexUuid ? get(indexExistsResponse, 'hits.total.value', 0) > 0 : null,
