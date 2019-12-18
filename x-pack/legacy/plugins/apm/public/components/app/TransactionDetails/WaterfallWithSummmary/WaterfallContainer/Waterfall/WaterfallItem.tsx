@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { asDuration } from '../../../../../../utils/formatters';
-import { ErrorCountBadge } from '../../ErrorCountBadge';
+import { ErrorCount } from '../../ErrorCount';
 import {
   IWaterfallItemTransaction,
   IWaterfallItemSpan
@@ -225,14 +225,7 @@ export function WaterfallItem({
             style={{ textDecoration: 'none' }}
           >
             <EuiToolTip content={tooltipContent}>
-              <ErrorCountBadge
-                onClick={event => {
-                  event.stopPropagation();
-                }}
-                onClickAriaLabel={tooltipContent}
-              >
-                {errorCount}
-              </ErrorCountBadge>
+              <ErrorCount count={errorCount} />
             </EuiToolTip>
           </ErrorOverviewLink>
         ) : null}
