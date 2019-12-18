@@ -17,20 +17,4 @@
  * under the License.
  */
 
-import { IFieldType } from './fields';
-
-export interface IIndexPattern {
-  [key: string]: any;
-  fields: IFieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
-}
+export { AutocompleteService } from './autocomplete_service';

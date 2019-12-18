@@ -17,20 +17,11 @@
  * under the License.
  */
 
-import { IFieldType } from './fields';
+import { CoreSetup } from 'kibana/server';
+import { registerValueSuggestionsRoute } from './value_suggestions_route';
 
-export interface IIndexPattern {
-  [key: string]: any;
-  fields: IFieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
+export function registerRoutes({ http }: CoreSetup): void {
+  const router = http.createRouter();
+
+  registerValueSuggestionsRoute(router);
 }
