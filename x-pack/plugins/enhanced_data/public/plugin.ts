@@ -6,10 +6,9 @@
 
 import { PluginInitializerContext, CoreSetup, Plugin } from '../../../../src/core/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
-import {
-  ASYNC_SEARCH_STRATEGY,
-  asyncSearchStrategyProvider,
-} from './search/async_search_strategy';
+import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
+import { ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider } from './search/async_search_strategy';
+import { enhancedEsSearchStrategyProvider } from './search/es_search';
 
 interface SetupDependencies {
   data: DataPublicPluginSetup;
@@ -23,6 +22,11 @@ export class EnhancedDataPublicPlugin implements Plugin<void, void, SetupDepende
       this.initializerContext.opaqueId,
       ASYNC_SEARCH_STRATEGY,
       asyncSearchStrategyProvider
+    );
+    data.search.registerSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      ES_SEARCH_STRATEGY,
+      enhancedEsSearchStrategyProvider
     );
   }
 

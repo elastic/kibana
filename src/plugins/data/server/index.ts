@@ -90,4 +90,6 @@ export {
   getKbnTypeNames,
 } from '../common';
 
+export { DataPluginSetup } from './plugin';
+
 export { DataServerPlugin as Plugin };

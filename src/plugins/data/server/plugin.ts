@@ -25,6 +25,7 @@ import { SearchService } from './search/search_service';
 export interface DataPluginSetup {
   search: ISearchSetup;
 }
+
 export class DataServerPlugin implements Plugin<DataPluginSetup> {
   private readonly searchService: SearchService;
   private readonly indexPatterns = new IndexPatternsService();
