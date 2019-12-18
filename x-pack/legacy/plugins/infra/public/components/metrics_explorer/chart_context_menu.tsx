@@ -31,7 +31,7 @@ interface Props {
   series: MetricsExplorerSeries;
   source?: SourceConfiguration;
   timeRange: MetricsExplorerTimeOptions;
-  uiCapabilities: Capabilities;
+  uiCapabilities?: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 
