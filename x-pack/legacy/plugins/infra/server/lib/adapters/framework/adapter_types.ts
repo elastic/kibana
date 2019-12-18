@@ -9,19 +9,21 @@ import { Lifecycle } from 'hapi';
 import { ObjectType } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 import { APMPluginContract } from '../../../../../../../plugins/apm/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
+  spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  spaces: any;
   metrics: {
     getVisData: any;
   };
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
-  features: any;
+  features: FeaturesPluginSetup;
   apm: APMPluginContract;
   ___legacy: any;
 }

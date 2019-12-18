@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './adapter_types';
+import { useContext } from 'react';
+import { LicenseContext } from '../context/LicenseContext';
+
+export function useLicense() {
+  return useContext(LicenseContext);
+}

@@ -44,4 +44,6 @@ export * from './ignore_z_value_parameter';
 
 export * from './orientation_parameter';
 
+export * from './fielddata_parameter';
+
 export * from './split_queries_on_whitespace_parameter';
