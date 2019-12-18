@@ -84,39 +84,31 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     );
   }
   // code coverage is supported only in Chrome browser
-  if (collectCoverage && browserType === Browsers.Chrome) {
+  if (collectCoverage) {
     // We are running xpack tests with different configs and cleanup will delete collected coverage
     // del.sync(coverageDir);
     Fs.mkdirSync(coverageDir, { recursive: true });
+  }
 
-    consoleLog$
-      .pipe(
-        mergeMap(logEntry => {
-          if (logEntry.message.includes(coveragePrefix)) {
-            writeCoverage(logEntry);
+  consoleLog$
+    .pipe(
+      mergeMap(logEntry => {
+        if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
+          writeCoverage(logEntry);
 
-            // filter out this message
-            return [];
-          }
+          // filter out this message
+          return [];
+        }
 
-          return [logEntry];
-        })
-      )
-      .subscribe({
-        next({ message, level }) {
-          const msg = message.replace(/\\n/g, '\n');
-          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-        },
-      });
-  } else {
-    // default subscription for Chrome and Firefox
-    consoleLog$.subscribe({
+        return [logEntry];
+      })
+    )
+    .subscribe({
       next({ message, level }) {
         const msg = message.replace(/\\n/g, '\n');
         log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
       },
     });
-  }
 
   lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
