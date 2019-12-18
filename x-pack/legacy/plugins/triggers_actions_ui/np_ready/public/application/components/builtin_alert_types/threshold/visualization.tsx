@@ -26,7 +26,7 @@ import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { npStart } from 'ui/new_platform';
-import { getThresholdAlertVisualizationData } from '../../../lib/api';
+import { getThresholdAlertVisualizationData } from './lib/api';
 import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../app_dependencies';
 import { SectionError } from '../../../components/page_error/section_error';

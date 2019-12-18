@@ -24,7 +24,7 @@ import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { AlertTypeRegistry } from './application/alert_type_registry';
 import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
-import { setSavedObjectsClient } from './application/lib/api';
+import { setSavedObjectsClient } from './application/components/builtin_alert_types/threshold/lib/api';
 import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 
 export type Setup = void;
