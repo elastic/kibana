@@ -407,12 +407,17 @@ export class VectorStyle extends AbstractStyle {
     const isPolygonsOnly = await this._getIsPolygonsOnly();
 
     return this.getDynamicPropertiesArray().filter(styleProperty => {
+      const styleName = styleProperty.getStyleName();
+      if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
+        return false;
+      }
+
       if (isLinesOnly) {
-        return LINE_STYLES.includes(styleProperty.getStyleName());
+        return LINE_STYLES.includes(styleName);
       }
 
       if (isPolygonsOnly) {
-        return POLYGON_STYLES.includes(styleProperty.getStyleName());
+        return POLYGON_STYLES.includes(styleName);
       }
 
       return true;
