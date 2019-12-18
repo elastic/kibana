@@ -41,11 +41,11 @@ const freeze: <T>(value: T) => RecursiveReadonly<T> =
 
 export const createStateContainer = <
   State,
-  PureTransitions extends object,
+  PureTransitions extends object = {},
   PureSelectors extends object = {}
 >(
   defaultState: State,
-  pureTransitions: PureTransitions,
+  pureTransitions: PureTransitions = {} as PureTransitions,
   pureSelectors: PureSelectors = {} as PureSelectors
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> => {
   const data$ = new BehaviorSubject<RecursiveReadonly<State>>(freeze(defaultState));

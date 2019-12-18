@@ -11577,11 +11577,6 @@ enabled@1.0.x:
   dependencies:
     env-variable "0.0.x"
 
-encode-uri-query@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/encode-uri-query/-/encode-uri-query-1.0.1.tgz#e9c70d3e1aab71b039e55b38a166013508803ba8"
-  integrity sha1-6ccNPhqrcbA55Vs4oWYBNQiAO6g=
-
 encodeurl@^1.0.2, encodeurl@~1.0.1, encodeurl@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"

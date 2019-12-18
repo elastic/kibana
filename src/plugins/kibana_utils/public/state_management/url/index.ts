@@ -17,4 +17,22 @@
  * under the License.
  */
 
-export * from './hash_unhash_url';
+import { hashUrl, hashQuery, unhashUrl, unhashQuery } from './hash_unhash_url';
+import {
+  createUrlControls,
+  setStateToUrl,
+  getStateFromUrl,
+  getStatesFromUrl,
+  IUrlControls,
+} from './url_storage';
+export {
+  hashUrl,
+  hashQuery,
+  unhashUrl,
+  unhashQuery,
+  createUrlControls,
+  setStateToUrl,
+  getStateFromUrl,
+  getStatesFromUrl,
+  IUrlControls,
+};

@@ -17,28 +17,6 @@
  * under the License.
  */
 
-export { defer } from '../common';
-export * from './core';
-export * from './errors';
-export * from './field_mapping';
-export * from './parse';
-export * from './render_complete';
-export * from './resize_checker';
-export * from './state_containers';
-export * from './storage';
-export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
-export {
-  createStateHash,
-  persistState,
-  retrieveState,
-  isStateHash,
-} from './state_management/state_hash';
-export { hashQuery, hashUrl, unhashUrl, unhashQuery } from './state_management/url';
-export {
-  syncState,
-  ISyncStrategy,
-  IStateSyncConfig,
-  SyncStrategy,
-  InitialTruthSource,
-  DestroySyncStateFnType,
-} from './state_sync';
+import { StateContainersExamplesPlugin } from './plugin';
+
+export const plugin = () => new StateContainersExamplesPlugin();

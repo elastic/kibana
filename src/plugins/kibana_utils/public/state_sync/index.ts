@@ -17,8 +17,6 @@
  * under the License.
  */
 
-declare module 'encode-uri-query' {
-  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
-  // eslint-disable-next-line import/no-default-export
-  export default encodeUriQuery;
-}
+export { ISyncStrategy, SyncStrategy, createUrlSyncStrategy } from './state_sync_strategies';
+export { InitialTruthSource, IStateSyncConfig } from './types';
+export { syncState, DestroySyncStateFnType } from './state_sync';

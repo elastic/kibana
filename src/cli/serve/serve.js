@@ -154,6 +154,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
               fromRoot('examples/search_explorer'),
               fromRoot('examples/embeddable_examples'),
               fromRoot('examples/embeddable_explorer'),
+              fromRoot('examples/state_containers_examples'),
             ]
           : [],
 

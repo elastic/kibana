@@ -1,0 +1,196 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { Subscription } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
+import defaultComparator from 'fast-deep-equal';
+import { InitialTruthSource, IStateSyncConfig } from './types';
+import { isSyncStrategy, syncStrategies, SyncStrategy } from './state_sync_strategies';
+import { distinctUntilChangedWithInitialValue } from '../../common';
+
+/**
+ * Utility for syncing application state wrapped in state container
+ * with some kind of storage (e.g. URL)
+ * * 1. the simplest use case
+ * $scope.destroyStateSync = syncState({
+ *   syncKey: '_s',
+ *   stateContainer,
+ * });
+ *
+ * 2. conditionally picking sync strategy
+ * $scope.destroyStateSync = syncState({
+ *   syncKey: '_s',
+ *   stateContainer,
+ *   syncStrategy: config.get('state:stateContainerInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
+ * });
+ *
+ * 3. implementing custom sync strategy
+ * const localStorageSyncStrategy = {
+ *   toStorage: (syncKey, state) => localStorage.setItem(syncKey, JSON.stringify(state)),
+ *   fromStorage: (syncKey) => localStorage.getItem(syncKey) ? JSON.parse(localStorage.getItem(syncKey)) : null
+ * };
+ * $scope.destroyStateSync = syncState({
+ *   syncKey: '_s',
+ *   stateContainer,
+ *   syncStrategy: localStorageSyncStrategy
+ * });
+ *
+ * 4. syncing only part of state
+ * const stateToStorage = (s) => ({ tab: s.tab });
+ * $scope.destroyStateSync = syncState({
+ *   syncKey: '_s',
+ *   stateContainer: {
+ *     get: () => stateToStorage(stateContainer.get()),
+ *     set: stateContainer.set(({ tab }) => ({ ...stateContainer.get(), tab }),
+ *       state$: stateContainer.state$.pipe(map(stateToStorage))
+ *   }
+ * });
+ *
+ * 5. transform state before serialising
+ * this could be super useful for backward compatibility
+ * const stateToStorage = (s) => ({ t: s.tab });
+ * $scope.destroyStateSync = syncState({
+ *   syncKey: '_s',
+ *   stateContainer: {
+ *     get: () => stateToStorage(stateContainer.get()),
+ *     set: ({ t }) => stateContainer.set({ ...stateContainer.get(), tab: t }),
+ *     state$: stateContainer.state$.pipe(map(stateToStorage))
+ *   }
+ * });
+ *
+ * 6. multiple different sync configs
+ * const stateAToStorage = s => ({ t: s.tab });
+ * const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
+ * $scope.destroyStateSync = syncState([
+ *   {
+ *     syncKey: '_a',
+ *     syncStrategy: SyncStrategy.Url,
+ *     stateContainer: {
+ *       get: () => stateAToStorage(stateContainer.get()),
+ *       set: s => stateContainer.set(({ ...stateContainer.get(), tab: s.t })),
+ *       state$: stateContainer.state$.pipe(map(stateAToStorage))
+ *     },
+ *   },
+ *   {
+ *     syncKey: '_b',
+ *     syncStrategy: SyncStrategy.HashedUrl,
+ *     stateContainer: {
+ *       get: () => stateBToStorage(stateContainer.get()),
+ *       set: s => stateContainer.set({
+ *         ...stateContainer.get(),
+ *         fieldFilter: s.f || '',
+ *         indexedFieldTypeFilter: s.i || '',
+ *         scriptedFieldLanguageFilter: s.l || ''
+ *       }),
+ *       state$: stateContainer.state$.pipe(map(stateBToStorage))
+ *     },
+ *   },
+ * ]);
+ */
+export type DestroySyncStateFnType = () => void;
+export function syncState<State>(
+  config: Array<IStateSyncConfig<State>> | IStateSyncConfig<State>
+): DestroySyncStateFnType {
+  const stateSyncConfigs = Array.isArray(config) ? config : [config];
+  const subscriptions: Subscription[] = [];
+
+  stateSyncConfigs.forEach(stateSyncConfig => {
+    const { toStorage, fromStorage, storageChange$ } = isSyncStrategy(stateSyncConfig.syncStrategy)
+      ? stateSyncConfig.syncStrategy
+      : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.Url];
+
+    // returned boolean indicates if update happen
+    const updateState = async (): Promise<boolean> => {
+      const storageState = await fromStorage<State>(stateSyncConfig.syncKey);
+      if (!storageState) {
+        return false;
+      }
+
+      if (storageState && !defaultComparator(storageState, stateSyncConfig.stateContainer.get())) {
+        stateSyncConfig.stateContainer.set(storageState);
+        return true;
+      }
+
+      return false;
+    };
+
+    // returned boolean indicates if update happen
+    const updateStorage = async ({ replace = false } = {}): Promise<boolean> => {
+      const newStorageState = stateSyncConfig.stateContainer.get();
+      const oldStorageState = await fromStorage<State>(stateSyncConfig.syncKey);
+      if (!defaultComparator(newStorageState, oldStorageState)) {
+        await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
+      }
+
+      return true;
+    };
+
+    // subscribe to state and storage updates
+    subscriptions.push(
+      stateSyncConfig.stateContainer.state$
+        .pipe(
+          distinctUntilChangedWithInitialValue(
+            stateSyncConfig.stateContainer.get(),
+            defaultComparator
+          ),
+          concatMap(() => updateStorage())
+        )
+        .subscribe()
+    );
+    if (storageChange$) {
+      subscriptions.push(
+        storageChange$<State>(stateSyncConfig.syncKey)
+          .pipe(
+            distinctUntilChangedWithInitialValue<State | null>(
+              fromStorage<State>(stateSyncConfig.syncKey),
+              defaultComparator
+            ),
+            concatMap(() =>
+              updateState().then(hasUpdated => {
+                // if there is nothing by state key in storage
+                // then we should fallback and consider state source of truth
+                if (!hasUpdated) {
+                  return updateStorage({ replace: true });
+                }
+              })
+            )
+          )
+          .subscribe()
+      );
+    }
+
+    // initial syncing of stateContainer state and storage state
+    const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
+    if (initialTruthSource === InitialTruthSource.Storage) {
+      updateState().then(hasUpdated => {
+        // if there is nothing by state key in storage
+        // then we should fallback and consider state source of truth
+        if (!hasUpdated) {
+          updateStorage({ replace: true });
+        }
+      });
+    } else if (initialTruthSource === InitialTruthSource.StateContainer) {
+      updateStorage({ replace: true });
+    }
+  });
+
+  return () => {
+    subscriptions.forEach(sub => sub.unsubscribe());
+  };
+}

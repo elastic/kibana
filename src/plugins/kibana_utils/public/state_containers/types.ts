@@ -42,7 +42,7 @@ export interface BaseStateContainer<State> {
 
 export interface StateContainer<
   State,
-  PureTransitions extends object,
+  PureTransitions extends object = {},
   PureSelectors extends object = {}
 > extends BaseStateContainer<State> {
   transitions: Readonly<PureTransitionsToTransitions<PureTransitions>>;
@@ -51,7 +51,7 @@ export interface StateContainer<
 
 export interface ReduxLikeStateContainer<
   State,
-  PureTransitions extends object,
+  PureTransitions extends object = {},
   PureSelectors extends object = {}
 > extends StateContainer<State, PureTransitions, PureSelectors> {
   getState: () => RecursiveReadonly<State>;

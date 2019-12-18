@@ -17,8 +17,24 @@
  * under the License.
  */
 
-declare module 'encode-uri-query' {
-  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
-  // eslint-disable-next-line import/no-default-export
-  export default encodeUriQuery;
+import { format as formatUrl } from 'url';
+import { ParsedUrlQuery } from 'querystring';
+import { parseUrl, parseUrlHash } from './parse';
+import { stringifyQueryString } from './stringify-query-string';
+
+export function replaceUrlHashQuery(
+  rawUrl: string,
+  queryReplacer: (query: ParsedUrlQuery) => ParsedUrlQuery
+) {
+  const url = parseUrl(rawUrl);
+  const hash = parseUrlHash(rawUrl);
+  const newQuery = queryReplacer(hash?.query || {});
+  const searchQueryString = stringifyQueryString(newQuery);
+  return formatUrl({
+    ...url,
+    hash: formatUrl({
+      pathname: hash?.pathname || '',
+      search: searchQueryString,
+    }),
+  });
 }
