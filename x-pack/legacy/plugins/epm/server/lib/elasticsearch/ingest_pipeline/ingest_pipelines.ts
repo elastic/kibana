@@ -56,25 +56,31 @@ export async function installPipelinesForDataset({
 
   pipelinePaths.forEach(path => {
     const { name, extension } = getNameAndExtension(path);
+    const nameForInstallation = getPipelineNameForInstallation(
+      name,
+      dataset,
+      datasourceName,
+      packageName
+    );
     const content = Registry.getAsset(path).toString('utf-8');
     pipelines.push({
       name,
+      nameForInstallation,
       content,
       extension,
     });
     substitutions.push({
       source: name,
-      target: getPipelineNameForInstallation(name, dataset, datasourceName, packageName),
+      target: nameForInstallation,
       templateFunction: 'IngestPipeline',
     });
   });
 
   pipelines = pipelines.map(pipeline => {
-    substitutions.forEach(sub => {
-      const { source, target } = sub;
-      if (pipeline.name === source) pipeline.name = target;
-    });
-    return pipeline;
+    return {
+      ...pipeline,
+      contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
+    };
   });
 
   const installationPromises = pipelines.map(async pipeline => {
@@ -99,9 +105,9 @@ async function installPipeline({
     headers?: any;
   } = {
     method: 'PUT',
-    path: `/_ingest/pipeline/${pipeline.name}`,
+    path: `/_ingest/pipeline/${pipeline.nameForInstallation}`,
     ignore: [404],
-    body: pipeline.content,
+    body: pipeline.contentForInstallation,
   };
   if (pipeline.extension === 'yml') {
     callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
