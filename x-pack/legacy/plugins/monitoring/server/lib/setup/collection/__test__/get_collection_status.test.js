@@ -59,7 +59,11 @@ const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions =
                 ) {
                   return Promise.resolve({ cluster_uuid: liveClusterUuid });
                 }
-                if (type === 'security.hasPrivileges') {
+                if (
+                  type === 'transport.request' &&
+                  params &&
+                  params.path === '/_security/user/_has_privileges'
+                ) {
                   return Promise.resolve({ has_all_requested: userHasPermissions });
                 }
                 if (type === 'transport.request' && params && params.path === '/_nodes') {
