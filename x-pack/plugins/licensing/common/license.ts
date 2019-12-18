@@ -91,14 +91,14 @@ export class License implements ILicense {
       return false;
     }
 
-    return LICENSE_TYPE[minimumLicenseRequired] <= LICENSE_TYPE[type];
-  }
-
-  check(pluginName: string, minimumLicenseRequired: LicenseType) {
     if (!(minimumLicenseRequired in LICENSE_TYPE)) {
       throw new Error(`"${minimumLicenseRequired}" is not a valid license type`);
     }
 
+    return LICENSE_TYPE[minimumLicenseRequired] <= LICENSE_TYPE[type];
+  }
+
+  check(pluginName: string, minimumLicenseRequired: LicenseType) {
     if (!this.isAvailable) {
       return {
         state: LICENSE_CHECK_STATE.Unavailable,

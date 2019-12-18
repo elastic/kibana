@@ -104,9 +104,13 @@ describe('License', () => {
     });
 
     it('throws in case of unknown license type', () => {
-      expect(
-        () => basicLicense.check('ccr', 'any' as any).state
-      ).toThrowErrorMatchingInlineSnapshot(`"\\"any\\" is not a valid license type"`);
+      expect(() => basicLicense.check('ccr', 'any' as any)).toThrowErrorMatchingInlineSnapshot(
+        `"\\"any\\" is not a valid license type"`
+      );
+
+      expect(() => basicLicense.hasAtLeast('any' as any)).toThrowErrorMatchingInlineSnapshot(
+        `"\\"any\\" is not a valid license type"`
+      );
     });
   });
 });
