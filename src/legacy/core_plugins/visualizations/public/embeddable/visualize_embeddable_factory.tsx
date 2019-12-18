@@ -29,7 +29,6 @@ import 'uiExports/inspectorViews';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
-import 'uiExports/visTypes';
 import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
