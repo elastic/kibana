@@ -22,7 +22,7 @@ import { schema, Type } from '@kbn/config-schema';
 
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
-    const validator = new RouteValidator({
+    const validator = RouteValidator.from({
       params: data => {
         if (typeof data.foo === 'string') {
           return { value: { foo: data.foo as string } };
@@ -45,7 +45,7 @@ describe('Router validator', () => {
   });
 
   it('should validate and infer the type from a config-schema ObjectType', () => {
-    const schemaValidation = new RouteValidator({
+    const schemaValidation = RouteValidator.from({
       params: schema.object({
         foo: schema.string(),
       }),
@@ -68,7 +68,7 @@ describe('Router validator', () => {
   });
 
   it('should validate and infer the type from a config-schema non-ObjectType', () => {
-    const schemaValidation = new RouteValidator({ params: schema.buffer() });
+    const schemaValidation = RouteValidator.from({ params: schema.buffer() });
 
     const foo = Buffer.from('hi!');
     expect(schemaValidation.getParams(foo)).toStrictEqual(foo);
@@ -88,7 +88,7 @@ describe('Router validator', () => {
   });
 
   it('should catch the errors thrown by the validate function', () => {
-    const validator = new RouteValidator({
+    const validator = RouteValidator.from({
       params: data => {
         throw new Error('Something went terribly wrong');
       },
@@ -101,7 +101,7 @@ describe('Router validator', () => {
   });
 
   it('should not accept invalid validation options', () => {
-    const wrongValidateSpec = new RouteValidator({
+    const wrongValidateSpec = RouteValidator.from({
       params: { validate: <T>(data: T): T => data } as Type<any>,
     });
 

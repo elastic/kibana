@@ -148,8 +148,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 
   if (route.validate) {
-    const { params, query, body, ...validationOptions } = route.validate;
-    return new RouteValidator({ params, query, body }, validationOptions);
+    return RouteValidator.from(route.validate);
   }
 }
 

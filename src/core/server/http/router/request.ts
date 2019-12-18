@@ -70,10 +70,10 @@ export class KibanaRequest<
    */
   public static from<P, Q, B>(
     req: Request,
-    routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>,
+    routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
     withoutSecretHeaders: boolean = true
   ) {
-    const routeValidator = routeSchemas && RouteValidator.from<P, Q, B>(routeSchemas);
+    const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
     const requestParts = KibanaRequest.validate(req, routeValidator);
     return new KibanaRequest(
       req,
@@ -92,25 +92,15 @@ export class KibanaRequest<
    */
   private static validate<P, Q, B>(
     req: Request,
-    routeSchemas: RouteValidator<P, Q, B> | undefined
+    routeValidator: RouteValidator<P, Q, B>
   ): {
     params: P;
     query: Q;
     body: B;
   } {
-    if (routeSchemas === undefined) {
-      return {
-        params: {} as P,
-        query: {} as Q,
-        body: {} as B,
-      };
-    }
-
-    const params = routeSchemas.getParams(req.params, 'request params');
-
-    const query = routeSchemas.getQuery(req.query, 'request query');
-
-    const body = routeSchemas.getBody(req.payload, 'request body');
+    const params = routeValidator.getParams(req.params, 'request params');
+    const query = routeValidator.getQuery(req.query, 'request query');
+    const body = routeValidator.getBody(req.payload, 'request body');
 
     return { query, params, body };
   }

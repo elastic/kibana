@@ -22,10 +22,13 @@ import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
 /**
- * Allowed returned format of the custom validate function
+ * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
+ *
  * @public
  */
-export type RouteValidateFunctionReturn<T> =
+export type RouteValidateFunction<T> = (
+  data: any
+) =>
   | {
       value: T;
       error?: never;
@@ -36,21 +39,16 @@ export type RouteValidateFunctionReturn<T> =
     };
 
 /**
- * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
- *
- * @public
- */
-export type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
-
-/**
  * Allowed property validation options: either @kbn/config-schema validations or custom validation functions
+ *
+ * See {@link RouteValidateFunction} for custom validation.
  *
  * @public
  */
 export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidateFunction<T>;
 
 // Ugly as hell but we need this conditional typing to have proper type inference
-type RouteValidatedValue<T extends RouteValidationSpec<any> | undefined> = NonNullable<
+type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
   T extends RouteValidateFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
@@ -109,7 +107,7 @@ export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
 /**
  * Route validator class to define the validation logic for each new route.
  *
- * @private
+ * @internal
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
   public static from<P = {}, Q = {}, B = {}>(
@@ -122,14 +120,14 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     return new RouteValidator({ params, query, body }, options);
   }
 
-  constructor(
+  private constructor(
     private readonly config: RouteValidatorConfig<P, Q, B>,
     private readonly options: RouteValidatorOptions = {}
   ) {}
 
   /**
    * Get validated URL params
-   * @private
+   * @internal
    */
   public getParams(data: unknown, namespace?: string): Readonly<P> {
     return this.validate(this.config.params, this.options.unsafe?.params, data, namespace);
@@ -137,7 +135,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   /**
    * Get validated query params
-   * @private
+   * @internal
    */
   public getQuery(data: unknown, namespace?: string): Readonly<Q> {
     return this.validate(this.config.query, this.options.unsafe?.query, data, namespace);
@@ -145,7 +143,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   /**
    * Get validated body
-   * @private
+   * @internal
    */
   public getBody(data: unknown, namespace?: string): Readonly<B> {
     return this.validate(this.config.body, this.options.unsafe?.body, data, namespace);
@@ -153,7 +151,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   /**
    * Has body validation
-   * @private
+   * @internal
    */
   public hasBody(): boolean {
     return typeof this.config.body !== 'undefined';
@@ -164,7 +162,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     unsafe?: boolean,
     data?: unknown,
     namespace?: string
-  ): RouteValidatedValue<typeof validationRule> {
+  ): RouteValidationResultType<typeof validationRule> {
     if (typeof validationRule === 'undefined') {
       return {};
     }
@@ -197,7 +195,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     validationRule?: RouteValidationSpec<T>,
     data?: unknown,
     namespace?: string
-  ): RouteValidatedValue<typeof validationRule> {
+  ): RouteValidationResultType<typeof validationRule> {
     if (typeof validationRule === 'undefined') {
       return {};
     } else if (validationRule instanceof Type) {
@@ -217,7 +215,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     data: unknown,
     namespace?: string
   ): T {
-    let result: RouteValidateFunctionReturn<T>;
+    let result: ReturnType<typeof validateFn>;
     try {
       result = validateFn(data);
     } catch (err) {

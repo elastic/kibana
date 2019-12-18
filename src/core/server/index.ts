@@ -140,7 +140,6 @@ export {
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidateFunction,
-  RouteValidateFunctionReturn,
   RouteValidatorOptions,
   RouteValidatorFullConfig,
   RouteValidationError,

@@ -9,5 +9,11 @@ The custom validation function if @<!-- -->kbn/config-schema is not a valid solu
 <b>Signature:</b>
 
 ```typescript
-export declare type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
+export declare type RouteValidateFunction<T> = (data: any) => {
+    value: T;
+    error?: never;
+} | {
+    value?: never;
+    error: RouteValidationError;
+};
 ```

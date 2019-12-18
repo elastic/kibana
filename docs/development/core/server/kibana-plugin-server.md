@@ -202,8 +202,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
 |  [RouteRegistrar](./kibana-plugin-server.routeregistrar.md) | Route handler common definition |
 |  [RouteValidateFunction](./kibana-plugin-server.routevalidatefunction.md) | The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements. |
-|  [RouteValidateFunctionReturn](./kibana-plugin-server.routevalidatefunctionreturn.md) | Allowed returned format of the custom validate function |
-|  [RouteValidationSpec](./kibana-plugin-server.routevalidationspec.md) | Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions |
+|  [RouteValidationSpec](./kibana-plugin-server.routevalidationspec.md) | Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions<!-- -->See [RouteValidateFunction](./kibana-plugin-server.routevalidatefunction.md) for custom validation. |
 |  [RouteValidatorFullConfig](./kibana-plugin-server.routevalidatorfullconfig.md) | Route validations config and options merged into one object |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-server.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |

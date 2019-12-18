@@ -1233,10 +1233,7 @@ export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options
 export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
-
-// @public
-export type RouteValidateFunctionReturn<T> = {
+export type RouteValidateFunction<T> = (data: any) => {
     value: T;
     error?: never;
 } | {

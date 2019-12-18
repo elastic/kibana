@@ -53,7 +53,6 @@ export {
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidateFunction,
-  RouteValidateFunctionReturn,
   RouteValidatorOptions,
   RouteValidationError,
   RouteValidatorFullConfig,
