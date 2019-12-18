@@ -70,6 +70,7 @@ describe('license features', function() {
             "layout": "error-xpack-unavailable",
             "showLinks": false,
             "showLogin": true,
+            "showRoleMappingsManagement": false,
           },
         ]
       `);
@@ -86,6 +87,7 @@ describe('license features', function() {
             "linksMessage": "Access is denied because Security is disabled in Elasticsearch.",
             "showLinks": false,
             "showLogin": false,
+            "showRoleMappingsManagement": false,
           },
         ]
       `);
