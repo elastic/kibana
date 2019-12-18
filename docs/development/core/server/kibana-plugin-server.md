@@ -138,6 +138,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
 |  [UserProvidedValues](./kibana-plugin-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
+|  [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
 
 ## Variables
 
