@@ -5,7 +5,7 @@
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import createContainer from 'constate';
-import { pick, throttle } from 'lodash';
+import { pick, throttle, omit } from 'lodash';
 import { useGraphQLQueries } from './gql_queries';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import { InfraLogEntry } from './types';
@@ -45,6 +45,7 @@ interface LogEntriesProps {
   pagesAfterEnd: number | null;
   sourceId: string;
   isAutoReloading: boolean;
+  jumpToTargetPosition: (position: TimeKey) => void;
 }
 
 type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
@@ -65,7 +66,7 @@ export type LogEntriesStateParams = {
 } & LogEntriesResponse;
 
 export interface LogEntriesCallbacks {
-  fetchNewerEntries: () => Promise<void>;
+  fetchNewerEntries: () => Promise<TimeKey | null | undefined>;
 }
 export const logEntriesInitialCallbacks = {
   fetchNewerEntries: async () => {},
@@ -127,10 +128,13 @@ const useFetchEntriesEffect = (
   const [prevParams, cachePrevParams] = useState(props);
   const [startedStreaming, setStartedStreaming] = useState(false);
 
-  const runFetchNewEntriesRequest = async () => {
+  const runFetchNewEntriesRequest = async (override = {}) => {
     dispatch({ type: Action.FetchingNewEntries });
     try {
-      const payload = await getLogEntriesAround(props);
+      const payload = await getLogEntriesAround({
+        ...omit(props, 'jumpToTargetPosition'),
+        ...override,
+      });
       dispatch({ type: Action.ReceiveNewEntries, payload });
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
@@ -150,6 +154,7 @@ const useFetchEntriesEffect = (
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
         payload,
       });
+      return payload.entriesEnd;
     } catch (e) {
       dispatch({ type: Action.ErrorOnMoreEntries });
     }
@@ -185,19 +190,37 @@ const useFetchEntriesEffect = (
 
   const fetchNewerEntries = useCallback(
     throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
-    [props]
+    [props, state.entriesEnd]
   );
 
-  const streamEntriesEffectDependencies = [props.isAutoReloading, state.isLoadingMore];
+  const streamEntriesEffectDependencies = [
+    props.isAutoReloading,
+    state.isLoadingMore,
+    state.isReloading,
+  ];
   const streamEntriesEffect = () => {
     (async () => {
-      if (props.isAutoReloading && !state.isLoadingMore) {
+      if (props.isAutoReloading && !state.isLoadingMore && !state.isReloading) {
         if (startedStreaming) {
           await new Promise(res => setTimeout(res, 5000));
         } else {
+          const nowKey = {
+            tiebreaker: 0,
+            time: Date.now(),
+          };
+          props.jumpToTargetPosition(nowKey);
           setStartedStreaming(true);
+          if (state.hasMoreAfterEnd) {
+            runFetchNewEntriesRequest({
+              timeKey: nowKey,
+            });
+            return;
+          }
         }
-        fetchNewerEntries();
+        const newEntriesEnd = await runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After);
+        if (newEntriesEnd) {
+          props.jumpToTargetPosition(newEntriesEnd);
+        }
       } else if (!props.isAutoReloading) {
         setStartedStreaming(false);
       }

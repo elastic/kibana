@@ -31,7 +31,7 @@ export interface LogPositionStateParams {
 
 export interface LogPositionCallbacks {
   jumpToTargetPosition: (pos: TimeKeyOrNull) => void;
-  jumpToTargetPositionTime: (time: number, fromAutoReload?: boolean) => void;
+  jumpToTargetPositionTime: (time: number) => void;
   reportVisiblePositions: (visPos: VisiblePositions) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
@@ -92,10 +92,9 @@ export const useLogPositionState: () => [LogPositionStateParams, LogPositionCall
 
   const callbacks = {
     jumpToTargetPosition,
-    jumpToTargetPositionTime: (time: number, fromAutoReload: boolean = false) =>
-      jumpToTargetPosition({ tiebreaker: 0, time, fromAutoReload }),
+    jumpToTargetPositionTime: (time: number) => jumpToTargetPosition({ tiebreaker: 0, time }),
     reportVisiblePositions,
-    startLiveStreaming: () => callbacks.jumpToTargetPositionTime(Date.now()),
+    startLiveStreaming: () => setIsAutoReloading(true),
     stopLiveStreaming: () => setIsAutoReloading(false),
   };
 

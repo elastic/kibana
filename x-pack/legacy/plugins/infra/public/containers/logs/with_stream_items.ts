@@ -24,18 +24,17 @@ export const WithStreamItems: React.FunctionComponent<{
   >;
 }> = ({ children }) => {
   const [logEntries, logEntriesCallbacks] = useContext(LogEntriesState.Context);
-  const { isAutoReloading } = useContext(LogPositionState.Context);
   const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
 
   const items = useMemo(
     () =>
-      logEntries.isReloading && !isAutoReloading
+      logEntries.isReloading
         ? []
         : logEntries.entries.map(logEntry =>
             createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])
           ),
 
-    [isAutoReloading, logEntries.entries, logEntries.isReloading, logEntryHighlightsById]
+    [logEntries.entries, logEntries.isReloading, logEntryHighlightsById]
   );
 
   return children({

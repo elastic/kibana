@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
@@ -25,10 +25,12 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
-  const [{ targetPosition, pagesBeforeStart, pagesAfterEnd, isAutoReloading }] = useContext(
-    LogPositionState.Context
-  );
+  const [
+    { targetPosition, pagesBeforeStart, pagesAfterEnd, isAutoReloading },
+    { jumpToTargetPosition },
+  ] = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
+
   const entriesProps = {
     timeKey: targetPosition,
     pagesBeforeStart,
@@ -36,6 +38,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     filterQuery,
     sourceId,
     isAutoReloading,
+    jumpToTargetPosition,
   };
   return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;
 };
