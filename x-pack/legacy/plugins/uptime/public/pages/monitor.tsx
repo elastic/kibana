@@ -103,10 +103,10 @@ export const MonitorPage = ({
       <PingList
         onPageCountChange={setPingListPageCount}
         onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | undefined) =>
-          updateUrlParams({ selectedPingStatus: selectedStatus || '' })
-        }
-        onUpdateApp={refreshApp}
+        onSelectedStatusChange={(selectedStatus: string | undefined) => {
+          updateUrlParams({ selectedPingStatus: selectedStatus || '' });
+          refreshApp();
+        }}
         pageSize={pingListPageCount}
         selectedOption={selectedPingStatus}
         selectedLocation={selectedLocation}

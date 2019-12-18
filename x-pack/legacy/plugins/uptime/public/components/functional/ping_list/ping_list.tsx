@@ -21,9 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment, useEffect, useState } from 'react';
-// @ts-ignore formatNumber
-import { formatNumber } from '@elastic/eui/lib/services/format';
+import React, { Fragment, useState } from 'react';
 import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
@@ -40,7 +38,6 @@ interface PingListProps {
   onSelectedStatusChange: (status: string | undefined) => void;
   onSelectedLocationChange: (location: any) => void;
   onPageCountChange: (itemCount: number) => void;
-  onUpdateApp: () => void;
   pageSize: number;
   selectedOption: string;
   selectedLocation: string | undefined;
@@ -76,16 +73,11 @@ export const PingListComponent = ({
   onPageCountChange,
   onSelectedLocationChange,
   onSelectedStatusChange,
-  onUpdateApp,
   pageSize,
   selectedOption,
   selectedLocation,
 }: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
-
-  useEffect(() => {
-    onUpdateApp();
-  }, [onUpdateApp, selectedOption]);
 
   const statusOptions = [
     {
@@ -181,9 +173,6 @@ export const PingListComponent = ({
       render: (error: string) => error ?? '-',
     },
   ];
-  useEffect(() => {
-    onUpdateApp();
-  }, [onUpdateApp, selectedOption]);
   let pings: Ping[] = [];
   if (data && data.allPings && data.allPings.pings) {
     pings = data.allPings.pings;
