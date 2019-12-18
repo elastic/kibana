@@ -17,21 +17,42 @@ import {
   EuiText,
   EuiSpacer,
   EuiPopover,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { AuthenticatedUser } from '../../common/model';
 
-/**
- * Placeholder for now from eui demo. Will need to be populated by Security plugin
- */
-export class SecurityNavControl extends Component {
-  constructor(props) {
+interface Props {
+  user: Promise<AuthenticatedUser>;
+  editProfileUrl: string;
+  logoutUrl: string;
+}
+
+interface State {
+  isOpen: boolean;
+  authenticatedUser: AuthenticatedUser | null;
+}
+
+export class SecurityNavControl extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
       isOpen: false,
+      authenticatedUser: null,
     };
+
+    props.user.then(authenticatedUser => {
+      this.setState({
+        authenticatedUser,
+      });
+    });
   }
 
   onMenuButtonClick = () => {
+    if (!this.state.authenticatedUser) {
+      return;
+    }
+
     this.setState({
       isOpen: !this.state.isOpen,
     });
@@ -44,8 +65,18 @@ export class SecurityNavControl extends Component {
   };
 
   render() {
-    const { user, editProfileUrl, logoutUrl } = this.props;
-    const name = user.full_name || user.username || '';
+    const { editProfileUrl, logoutUrl } = this.props;
+    const { authenticatedUser } = this.state;
+
+    const name =
+      (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
+
+    const buttonContents = authenticatedUser ? (
+      <EuiAvatar name={name} size="s" />
+    ) : (
+      <EuiLoadingSpinner size="m" />
+    );
+
     const button = (
       <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
@@ -57,7 +88,7 @@ export class SecurityNavControl extends Component {
         onClick={this.onMenuButtonClick}
         data-test-subj="userMenuButton"
       >
-        <EuiAvatar name={name} size="s" />
+        {buttonContents}
       </EuiHeaderSectionItemButton>
     );
 
