@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { registerValueSuggestions } from './register_value_suggestions';
+import { CoreSetup, Plugin } from 'kibana/server';
+import { registerRoutes } from './routes';
 
-export function registerSuggestionsApi(server) {
-  registerValueSuggestions(server);
+export class AutocompleteService implements Plugin<void> {
+  public setup(core: CoreSetup) {
+    registerRoutes(core);
+  }
+
+  public start() {}
 }
