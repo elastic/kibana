@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import chrome from 'ui/chrome';
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects';
@@ -28,7 +29,12 @@ export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = () => {
 
 // Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);
-export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const setup = pluginInstance.setup(npSetup.core, {
+  ...npSetup.plugins,
+  __LEGACY: {
+    chrome,
+  },
+});
 export const start = pluginInstance.start(npStart.core, npStart.plugins);
 
 SavedObjectRegistryProvider.register((savedSearches: any) => {

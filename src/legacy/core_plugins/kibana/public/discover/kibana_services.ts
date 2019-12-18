@@ -89,3 +89,4 @@ export {
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
+export { Chrome } from 'ui/chrome';

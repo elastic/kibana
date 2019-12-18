@@ -19,7 +19,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import angular, { ICompileService } from 'angular';
-import chrome from 'ui/chrome';
 import {
   DocViewRenderProps,
   AngularScope,
@@ -27,6 +26,7 @@ import {
   AngularDirective,
 } from './doc_views_types';
 import { DocViewerError } from '../components/doc_viewer/doc_viewer_render_error';
+import { Chrome } from '../kibana_services';
 
 /**
  * Compiles and injects the give angular template into the given dom node
@@ -36,7 +36,8 @@ export async function injectAngularElement(
   domNode: Element,
   template: string,
   scopeProps: DocViewRenderProps,
-  Controller: AngularController
+  Controller: AngularController,
+  chrome: Chrome
 ): Promise<() => void> {
   const $injector = await chrome.dangerouslyGetActiveInjector();
   const rootScope: AngularScope = $injector.get('$rootScope');
@@ -68,7 +69,7 @@ export async function injectAngularElement(
  * Converts a given legacy angular directive to a render function
  * for usage in a react component. Note that the rendering is async
  */
-export function convertDirectiveToRenderFn(directive: AngularDirective) {
+export function convertDirectiveToRenderFn(directive: AngularDirective, chrome: Chrome) {
   return (domNode: Element, props: DocViewRenderProps) => {
     let rejected = false;
 
@@ -76,7 +77,8 @@ export function convertDirectiveToRenderFn(directive: AngularDirective) {
       domNode,
       directive.template,
       props,
-      directive.controller
+      directive.controller,
+      chrome
     );
     cleanupFnPromise.catch(e => {
       rejected = true;

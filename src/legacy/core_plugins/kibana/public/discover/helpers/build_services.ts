@@ -59,7 +59,7 @@ export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   docViewsRegistry: DocViewsRegistry
-) {
+): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,

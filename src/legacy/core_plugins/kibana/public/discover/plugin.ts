@@ -25,7 +25,7 @@ import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices } from './kibana_services';
+import { Chrome, setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './helpers/build_services';
@@ -49,6 +49,9 @@ export interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
   embeddable: IEmbeddableSetup;
   kibana_legacy: KibanaLegacySetup;
+  __LEGACY: {
+    chrome: Chrome;
+  };
 }
 export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
@@ -70,7 +73,7 @@ const embeddableAngularName = 'app/discoverEmbeddable';
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
-  private readonly docViewsRegistry: DocViewsRegistry;
+  private docViewsRegistry: DocViewsRegistry | null = null;
   /**
    * why are those functions public? they are needed for some mocha tests
    * can be removed once all is Jest
@@ -78,8 +81,8 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => void;
 
-  constructor() {
-    this.docViewsRegistry = new DocViewsRegistry();
+  setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
+    this.docViewsRegistry = new DocViewsRegistry(plugins.__LEGACY.chrome);
     this.docViewsRegistry.addDocView({
       title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -94,9 +97,6 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: 20,
       component: JsonCodeBlock,
     });
-  }
-
-  setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
@@ -140,7 +140,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       if (this.servicesInitialized) {
         return;
       }
-      const services = await buildServices(core, plugins, this.docViewsRegistry);
+      const services = await buildServices(core, plugins, this.docViewsRegistry!);
       setServices(services);
       this.servicesInitialized = true;
     };

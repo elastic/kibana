@@ -18,11 +18,15 @@
  */
 import { convertDirectiveToRenderFn } from './doc_views_helpers';
 import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
+import { Chrome } from '../kibana_services';
 
 export { DocViewRenderProps, DocView, DocViewRenderFn } from './doc_views_types';
 
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
+
+  constructor(private legacyChrome: Chrome) {}
+
   /**
    * Extends and adds the given doc view to the registry array
    */
@@ -30,7 +34,7 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive);
+      docView.render = convertDirectiveToRenderFn(docView.directive, this.legacyChrome);
     }
     if (typeof docView.shouldShow !== 'function') {
       docView.shouldShow = () => true;
