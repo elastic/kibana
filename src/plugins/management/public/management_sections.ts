@@ -20,6 +20,8 @@
 import { Section } from './section';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { Capabilities } from '../../../core/public';
+// @ts-ignore
+import { ManagementSection } from './legacy/section';
 
 export class ManagementSections {
   private sections: Section[] = [];
@@ -28,7 +30,10 @@ export class ManagementSections {
   }
 
   // todo verify input,
-  private register(registerLegacyApp: KibanaLegacySetup['registerLegacyApp']) {
+  private register(
+    registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
+    getLegacyManagement: () => ManagementSection
+  ) {
     return (section: {
       id: string;
       title: string;
@@ -36,7 +41,12 @@ export class ManagementSections {
       euiIconType?: string; // takes precedence over `icon` property.
       icon?: string; // URL to image file; fallback if no `euiIconType`
     }) => {
-      const newSection = new Section(section, this.sections, registerLegacyApp);
+      const newSection = new Section(
+        section,
+        this.sections,
+        registerLegacyApp,
+        getLegacyManagement
+      );
       this.sections.push(newSection);
       return newSection;
     };
@@ -53,8 +63,11 @@ export class ManagementSections {
     };
   }
 
-  public setup = (kibanaLegacy: KibanaLegacySetup) => ({
-    register: this.register.bind(this)(kibanaLegacy.registerLegacyApp),
+  public setup = (
+    kibanaLegacy: KibanaLegacySetup,
+    getLegacyManagement: () => ManagementSections
+  ) => ({
+    register: this.register.bind(this)(kibanaLegacy.registerLegacyApp, getLegacyManagement),
     get: this.get.bind(this),
     getAvailable: this.getAvailable.bind(this),
   });
@@ -64,7 +77,7 @@ export class ManagementSections {
 
     navigateToApp: (appId: string, options?: { path?: string; state?: any }) => {
       // @ts-ignore
-      console.log('navigateToApp', appId, options);
+      // console.log('navigateToApp', appId, options);
     },
   });
 }

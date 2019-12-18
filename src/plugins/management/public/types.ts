@@ -94,3 +94,5 @@ export interface ISection {
   euiIconType?: string;
   icon?: string;
 }
+
+// export type GetLegacyManagement = () =>

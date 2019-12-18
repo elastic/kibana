@@ -21,10 +21,11 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
-import { SidebarNav } from 'ui/management/components';
-// import { management } from 'ui/management/sections_register';
+import { SidebarNav } from './components';
 import { ManagementApp, CreateSection, ISection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+// @ts-ignore
+import { ManagementSection } from './legacy/section';
 
 export class Section implements ISection {
   public readonly id: string = '';
@@ -35,11 +36,13 @@ export class Section implements ISection {
   public readonly icon?: string;
   private readonly sections: Section[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
+  private readonly getLegacyManagementSection: () => ManagementSection;
 
   constructor(
     section: CreateSection,
     sections: Section[],
-    registerLegacyApp: KibanaLegacySetup['registerLegacyApp']
+    registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
+    getLegacyManagementSection: () => ManagementSection
   ) {
     this.id = section.id;
     this.title = section.title;
@@ -48,6 +51,7 @@ export class Section implements ISection {
     this.icon = section.icon;
     this.sections = sections;
     this.registerLegacyApp = registerLegacyApp;
+    this.getLegacyManagementSection = getLegacyManagementSection;
   }
 
   // todo create class
@@ -66,11 +70,8 @@ export class Section implements ISection {
             <EuiPage>
               <SidebarNav
                 sections={this.sections}
-                // legacySections={management.getVisible()}
-                // sections={[]}
-                legacySections={[]}
+                legacySections={this.getLegacyManagementSection().items}
                 selectedId={id}
-                className="mgtSideNav"
               />
               <EuiPageBody>hihihi</EuiPageBody>
             </EuiPage>

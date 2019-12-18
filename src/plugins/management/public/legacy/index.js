@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { management } from './sections_register';
+export { legacyManagementAdapter } from './sections_register';

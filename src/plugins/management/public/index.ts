@@ -32,3 +32,4 @@ export {
   ManagementApp,
   RegisterManagementApp,
 } from './types';
+export { SidebarNav } from './components';

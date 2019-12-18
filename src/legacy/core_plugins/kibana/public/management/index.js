@@ -28,7 +28,8 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { SidebarNav } from '../../../../../plugins/management/public';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,

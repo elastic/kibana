@@ -20,41 +20,45 @@
 import { ManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
 
-export const management = capabilities => {
-  const main = new ManagementSection(
-    'management',
-    {
-      display: i18n.translate('management.displayName', {
-        defaultMessage: 'Management',
+export class legacyManagementAdapter {
+  main = undefined;
+  init = capabilities => {
+    this.main = new ManagementSection(
+      'management',
+      {
+        display: i18n.translate('management.displayName', {
+          defaultMessage: 'Management',
+        }),
+      },
+      capabilities
+    );
+
+    this.main.register('data', {
+      display: i18n.translate('management.connectDataDisplayName', {
+        defaultMessage: 'Connect Data',
       }),
-    },
-    capabilities
-  );
+      order: 0,
+    });
 
-  main.register('data', {
-    display: i18n.translate('management.connectDataDisplayName', {
-      defaultMessage: 'Connect Data',
-    }),
-    order: 0,
-  });
+    this.main.register('elasticsearch', {
+      display: 'Elasticsearch',
+      order: 20,
+      icon: 'logoElasticsearch',
+    });
 
-  main.register('elasticsearch', {
-    display: 'Elasticsearch',
-    order: 20,
-    icon: 'logoElasticsearch',
-  });
+    this.main.register('kibana', {
+      display: 'Kibana',
+      order: 30,
+      icon: 'logoKibana',
+    });
 
-  main.register('kibana', {
-    display: 'Kibana',
-    order: 30,
-    icon: 'logoKibana',
-  });
+    this.main.register('logstash', {
+      display: 'Logstash',
+      order: 30,
+      icon: 'logoLogstash',
+    });
 
-  main.register('logstash', {
-    display: 'Logstash',
-    order: 30,
-    icon: 'logoLogstash',
-  });
-
-  return main;
-};
+    return this.main;
+  };
+  getManagement = () => this.main;
+}

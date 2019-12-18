@@ -21,19 +21,23 @@ import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ManagementSetup, ManagementStart } from './types';
 import { ManagementSections } from './management_sections';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+// @ts-ignore
+import { legacyManagementAdapter } from './legacy';
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
   private managementSections = new ManagementSections();
+  private legacyManagement = new legacyManagementAdapter();
 
   public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
     return {
-      sections: this.managementSections.setup(kibana_legacy),
+      sections: this.managementSections.setup(kibana_legacy, this.legacyManagement.getManagement),
     };
   }
 
   public start(core: CoreStart) {
     return {
       sections: this.managementSections.start(core.application.capabilities),
+      legacy: this.legacyManagement.init(core.application.capabilities),
     };
   }
 }
