@@ -34,6 +34,7 @@ export const SnapshotNodeRT = rt.type({
 
 export const SnapshotNodeResponseRT = rt.type({
   nodes: rt.array(SnapshotNodeRT),
+  interval: rt.string,
 });
 
 export const InfraTimerangeInputRT = rt.type({

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UMSavedObjectsQueryFn } from '../framework';
+
 export interface UMSavedObjectsAdapter {
-  getUptimeIndexPattern: () => Promise<any>;
+  getUptimeIndexPattern: UMSavedObjectsQueryFn;
 }

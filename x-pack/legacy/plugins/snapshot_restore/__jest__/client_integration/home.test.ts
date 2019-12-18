@@ -21,6 +21,7 @@ import moment from 'moment-timezone';
 
 const { setup } = pageHelpers.home;
 
+jest.mock('ui/new_platform');
 jest.mock('ui/i18n', () => {
   const I18nContext = ({ children }: any) => children;
   return { I18nContext };
