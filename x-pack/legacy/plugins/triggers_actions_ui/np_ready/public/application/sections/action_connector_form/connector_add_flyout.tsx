@@ -76,10 +76,12 @@ export const ConnectorAddFlyout = () => {
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage
-                      defaultMessage="Connector for "
+                      defaultMessage="Connector for {actionTypeName}"
                       id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
+                      values={{
+                        actionTypeName: actionType.name,
+                      }}
                     />
-                    {actionType.name}
                   </h3>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
