@@ -1,0 +1,17 @@
+{
+  "rule_id": "cec5eb81-6e01-40e5-a1bf-bf175cce4eb4",
+  "risk_score": 50,
+  "description": "Windows Management Instrumentation (WMI) Execution",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Management Instrumentation (WMI) Execution",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:1 and (process.parent.args:*wmiprvse.exe* or process.name:wmic.exe or process.args:*wmic* )",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
