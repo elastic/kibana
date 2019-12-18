@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { MonitorStatusBarComponent } from './monitor_status_bar';
-import { getMonitorStatus } from '../../../../state/actions/monitorStatus';
+import { getMonitorStatus } from '../../../../state/actions/monitor_status';
 import { AppState } from '../../../../state';
 
 const mapStateToProps = (state: AppState, { monitorId }: any) => ({

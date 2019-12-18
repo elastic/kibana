@@ -6,4 +6,4 @@
 
 export * from './snapshot';
 export * from './ui';
-export * from './monitorStatus';
+export * from './monitor_status';

@@ -88,7 +88,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     return results;
   },
 
-  getLatestMonitorStatus: async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
+  getLatestMonitorStatus: async ({ callES, dateStart, dateEnd, monitorId, location }) => {
     // TODO: Write tests for this function
 
     const params = {
@@ -100,8 +100,8 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
               {
                 range: {
                   '@timestamp': {
-                    gte: dateRangeStart,
-                    lte: dateRangeEnd,
+                    gte: dateStart,
+                    lte: dateEnd,
                   },
                 },
               },
@@ -133,21 +133,12 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     };
 
     const result = await callES('search', params);
-    const buckets: any = get(result, 'aggregations.by_id.buckets', []);
+    const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.[0] ?? {};
 
-    return buckets.map(
-      ({
-        latest: {
-          hits: { hits },
-        },
-      }) => {
-        const timestamp = hits[0]._source[`@timestamp`];
-        return {
-          ...hits[0]._source,
-          timestamp,
-        };
-      }
-    );
+    return {
+      ...ping?._source,
+      timestamp: ping?.['@timestamp'],
+    };
   },
 
   getPingHistogram: async ({

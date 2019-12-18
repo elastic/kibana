@@ -33,10 +33,10 @@ export interface GetAllParams {
 
 export interface GetLatestMonitorDocsParams {
   /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
+  dateStart: string;
 
   /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
+  dateEnd: string;
 
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;

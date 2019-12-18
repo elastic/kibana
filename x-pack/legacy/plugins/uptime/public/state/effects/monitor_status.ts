@@ -31,6 +31,6 @@ function* monitorStatusEffect(action: Action<any>) {
   }
 }
 
-export function* fetchMonitorDetailsEffect() {
+export function* fetchMonitorStatusEffect() {
   yield takeLatest(getMonitorStatus, monitorStatusEffect);
 }
