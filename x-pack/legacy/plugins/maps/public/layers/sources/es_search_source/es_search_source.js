@@ -18,11 +18,13 @@ import {
   ES_SEARCH,
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
+  GIS_API_PATH,
   SORT_ORDER,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
+import { kfetch } from 'ui/kfetch';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -304,13 +306,13 @@ export class ESSearchSource extends AbstractESSource {
     const geoField = await this._getGeoField();
     const indexPattern = await this.getIndexPattern();
 
-    const resp = await kfetch({
+    const indexSettings = await kfetch({
       pathname: `../${GIS_API_PATH}/indexSettings`,
       query: {
-        index: indexPattern.title,
+        indexPatternTitle: indexPattern.title,
       },
     });
-    console.log(resp);
+    console.log(indexSettings);
 
     let searchSource;
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {

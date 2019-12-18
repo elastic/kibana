@@ -428,10 +428,9 @@ export function initRoutes(server, licenseUid) {
       try {
         const resp = await callWithRequest(request, 'indices.getSettings', {
           index: query.indexPatternTitle,
-          includeDefaults: true
         });
         console.log(JSON.stringify(resp, null, ' '));
-        return { };
+        return resp;
       } catch (error) {
         return h.response().code(400);
       }
