@@ -1,0 +1,19 @@
+#!/bin/groovy
+
+// TODO is there a good place to grab a list of these?
+def branches = [
+  'master',
+  // '7.4',
+]
+
+branches.each { branch ->
+  build(
+    propagate: false,
+    wait: false,
+    job: 'build-es',
+    parameters: [
+      string(name: 'branch_specifier', value: 'es-snapshots-automation'), // TODO
+      string(name: 'ES_BRANCH', value: branch),
+    ]
+  )
+}
