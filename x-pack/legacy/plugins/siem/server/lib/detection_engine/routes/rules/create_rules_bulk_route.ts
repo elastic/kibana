@@ -11,27 +11,29 @@ import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
-import { createRulesSchema } from '../schemas/create_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
 import { transformOrError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 
 export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
     method: 'POST',
-    path: DETECTION_ENGINE_RULES_URL,
+    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
     options: {
       tags: ['access:siem'],
       validate: {
         options: {
           abortEarly: false,
         },
-        payload: createRulesSchema, // TODO: Change this for an array version
+        // payload: createRulesBulkSchema,
       },
     },
     async handler(request: BulkRulesRequest, headers) {
+      console.log('YOLO, I AM HERE');
+      return request.payload;
       const {
         created_at: createdAt,
         description,
