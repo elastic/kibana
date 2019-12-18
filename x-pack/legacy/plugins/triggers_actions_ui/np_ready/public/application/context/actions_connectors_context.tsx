@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { ActionType } from '../../types';
-export const ActionsConnectorsContext = React.createContext({} as IActionsConnectorsContext);
 
 export interface IActionsConnectorsContext {
   addFlyoutVisible: boolean;
@@ -16,3 +15,5 @@ export interface IActionsConnectorsContext {
   actionTypesIndex: Record<string, ActionType> | undefined;
   reloadConnectors: () => Promise<void>;
 }
+
+export const ActionsConnectorsContext = React.createContext({} as IActionsConnectorsContext);

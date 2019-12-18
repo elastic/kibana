@@ -5,4 +5,10 @@
  */
 
 import React from 'react';
-export const AlertsContext = React.createContext({} as any);
+
+export interface IAlertsContext {
+  alertFlyoutVisible: boolean;
+  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const AlertsContext = React.createContext({} as IAlertsContext);
