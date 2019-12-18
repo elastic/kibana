@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SourceFieldForm } from './source_field_form';
+export { DynamicMappingSection } from './dynamic_mapping_section';

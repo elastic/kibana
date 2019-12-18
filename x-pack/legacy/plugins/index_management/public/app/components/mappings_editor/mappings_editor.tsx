@@ -6,18 +6,16 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { pick } from 'lodash';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import {
   ConfigurationForm,
-  CONFIGURATION_FIELDS,
   DocumentFieldsHeader,
   DocumentFields,
   DocumentFieldsJsonEditor,
 } from './components';
 import { IndexSettings } from './types';
-import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
+import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
 
 interface Props {
@@ -30,14 +28,25 @@ export const MappingsEditor = React.memo(
   ({ onUpdate, defaultValue = {}, indexSettings }: Props) => {
     const [selectedTab, selectTab] = useState<'fields' | 'advanced'>('fields');
 
-    const { configurationDefaultValue, sourceFieldDefaultValue, fieldsDefaultValue } = useMemo(
+    const {
+      _source = {},
+      dynamic,
+      numeric_detection,
+      date_detection,
+      dynamic_date_formats,
+      properties = {},
+    } = defaultValue;
+
+    const { configurationDefaultValue, fieldsDefaultValue } = useMemo(
       () => ({
-        configurationDefaultValue: pick(
-          defaultValue,
-          CONFIGURATION_FIELDS
-        ) as Types['MappingsConfiguration'],
-        sourceFieldDefaultValue: defaultValue._source || {},
-        fieldsDefaultValue: defaultValue.properties || {},
+        configurationDefaultValue: {
+          _source,
+          dynamic,
+          numeric_detection,
+          date_detection,
+          dynamic_date_formats,
+        },
+        fieldsDefaultValue: properties,
       }),
       [defaultValue]
     );
@@ -61,10 +70,7 @@ export const MappingsEditor = React.memo(
                   {editor}
                 </>
               ) : (
-                <ConfigurationForm
-                  configurationDefaultValue={configurationDefaultValue}
-                  sourceFieldDefaultValue={sourceFieldDefaultValue}
-                />
+                <ConfigurationForm defaultValue={configurationDefaultValue} />
               );
 
             return (
