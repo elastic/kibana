@@ -57,7 +57,6 @@ export interface RenderDeps {
   npDataStart: NpDataStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectRegistry: any;
   dashboardConfig: any;
   savedDashboards: any;
   dashboardCapabilities: any;

@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import {
-  npSetup,
-  npStart,
-  SavedObjectRegistryProvider,
-  legacyChrome,
-  IPrivate,
-} from './legacy_imports';
+import { npSetup, npStart, legacyChrome } from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
@@ -37,13 +31,8 @@ import './dashboard_config';
 async function getAngularDependencies(): Promise<LegacyAngularInjectedDependencies> {
   const injector = await legacyChrome.dangerouslyGetActiveInjector();
 
-  const Private = injector.get<IPrivate>('Private');
-
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
-
   return {
     dashboardConfig: injector.get('dashboardConfig'),
-    savedObjectRegistry,
     savedDashboards: injector.get('savedDashboards'),
   };
 }

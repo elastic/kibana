@@ -36,17 +36,20 @@ savedObjectManagementRegistry.register({
     defaultMessage: 'dashboards',
   }),
 });
+const savedObjectsClient = npStart.core.savedObjects.client;
+const services = {
+  savedObjectsClient,
+  indexPatterns: npStart.plugins.data.indexPatterns,
+  chrome: npStart.core.chrome,
+  overlays: npStart.core.overlays,
+};
+
+const SavedDashboard = createSavedDashboardClass(services);
+export const savedObjectLoaderDashboard = new SavedObjectLoader(
+  SavedDashboard,
+  savedObjectsClient,
+  npStart.core.chrome
+);
 
 // This is the only thing that gets injected into controllers
-module.service('savedDashboards', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, savedObjectsClient, npStart.core.chrome);
-});
+module.service('savedDashboards', () => savedObjectLoaderDashboard);

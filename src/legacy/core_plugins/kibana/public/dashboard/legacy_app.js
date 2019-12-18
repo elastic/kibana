@@ -33,6 +33,7 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
 import { syncOnMount } from './global_state_sync';
+import { savedObjectLoaderDashboard } from './saved_dashboard/saved_dashboards';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -86,7 +87,8 @@ export function initDashboardApp(app, deps) {
         ...defaults,
         template: dashboardListingTemplate,
         controller($injector, $location, $scope) {
-          const services = deps.savedObjectRegistry.byLoaderPropertiesName;
+          const service = savedObjectLoaderDashboard;
+
           const kbnUrl = $injector.get('kbnUrl');
           const dashboardConfig = deps.dashboardConfig;
 
@@ -95,7 +97,7 @@ export function initDashboardApp(app, deps) {
             kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
           $scope.find = search => {
-            return services.dashboards.find(search, $scope.listingLimit);
+            return service.find(search, $scope.listingLimit);
           };
           $scope.editItem = ({ id }) => {
             kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
@@ -104,7 +106,7 @@ export function initDashboardApp(app, deps) {
             return deps.addBasePath(`#${createDashboardEditUrl(id)}`);
           };
           $scope.delete = dashboards => {
-            return services.dashboards.delete(dashboards.map(d => d.id));
+            return service.delete(dashboards.map(d => d.id));
           };
           $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
           $scope.initialFilter = $location.search().filter || EMPTY_FILTER;

@@ -42,7 +42,6 @@ import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
-  savedObjectRegistry: any;
   savedDashboards: any;
 }
 

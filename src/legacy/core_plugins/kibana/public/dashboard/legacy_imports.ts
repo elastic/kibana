@@ -32,7 +32,6 @@ export { AppState } from 'ui/state_management/app_state';
 export { AppStateClass } from 'ui/state_management/app_state';
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
-export { SavedObjectRegistryProvider } from 'ui/saved_objects';
 export { IPrivate } from 'ui/private';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
