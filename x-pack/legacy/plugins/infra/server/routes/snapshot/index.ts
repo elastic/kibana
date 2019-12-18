@@ -47,10 +47,9 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           metric: metric as InfraSnapshotMetricInput,
           timerange,
         };
+        const nodesWithInterval = await libs.snapshot.getNodes(requestContext, options);
         return response.ok({
-          body: SnapshotNodeResponseRT.encode({
-            nodes: await libs.snapshot.getNodes(requestContext, options),
-          }),
+          body: SnapshotNodeResponseRT.encode(nodesWithInterval),
         });
       } catch (error) {
         return response.internalError({

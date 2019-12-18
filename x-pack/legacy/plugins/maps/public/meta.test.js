@@ -33,10 +33,8 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('./kibana_services', () => {
   return {
-    xpackInfo: {
-      get() {
-        return 'foobarlicenseid';
-      },
+    getLicenseId() {
+      return 'foobarlicenseid';
     },
   };
 });
