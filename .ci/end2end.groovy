@@ -25,7 +25,7 @@ pipeline {
     durabilityHint('PERFORMANCE_OPTIMIZED')
   }
   triggers {
-    issueCommentTrigger('(?i).*jenkins\\W+run\\W+(?:the\\W+)?e2e(?:\\W+please)?.*')
+    issueCommentTrigger('(?i)(retest|.*jenkins\\W+run\\W+(?:the\\W+)?e2e?.*)')
   }
   parameters {
     booleanParam(name: 'FORCE', defaultValue: false, description: 'Whether to force the run.')
