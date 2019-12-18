@@ -69,45 +69,48 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         caps.get('chrome').chromedriverVersion
       }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
     );
+  }
+  // code coverage is supported only in Chrome browser
+  if (collectCoverage && browserType === Browsers.Chrome) {
+    let coverageCounter = 1;
+    // We are running xpack tests with different configs and cleanup will delete collected coverage
+    // del.sync(coverageDir);
+    Fs.mkdirSync(coverageDir, { recursive: true });
 
-    if (collectCoverage) {
-      let coverageCounter = 1;
-      // We are running xpack tests with different configs and cleanup will delete collected coverage
-      // del.sync(coverageDir);
-      Fs.mkdirSync(coverageDir, { recursive: true });
+    logSubscription = consoleLog$
+      .pipe(
+        mergeMap(logEntry => {
+          if (logEntry.message.includes(coveragePrefix)) {
+            const id = coverageCounter++;
+            const timestamp = Date.now();
+            const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+            const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+            const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
 
-      logSubscription = pollForLogEntry$(
-        driver,
-        logging.Type.BROWSER,
-        config.get('browser.logPollingMs'),
-        lifecycle.cleanup.after$
+            log.info('writing coverage to', path);
+            Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+            // filter out this message
+            return [];
+          }
+
+          return [logEntry];
+        })
       )
-        .pipe(
-          mergeMap(logEntry => {
-            if (logEntry.message.includes(coveragePrefix)) {
-              const id = coverageCounter++;
-              const timestamp = Date.now();
-              const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
-              const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
-              const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
-
-              log.info('writing coverage to', path);
-              Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
-
-              // filter out this message
-              return [];
-            }
-
-            return [logEntry];
-          })
-        )
-        .subscribe({
-          next({ message, level: { name: level } }) {
-            const msg = message.replace(/\\n/g, '\n');
-            log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
-          },
-        });
-    }
+      .subscribe({
+        next({ message, level }) {
+          const msg = message.replace(/\\n/g, '\n');
+          log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+        },
+      });
+  } else {
+    // default subscription for Chrome and Firefox
+    consoleLog$.subscribe({
+      next({ message, level }) {
+        const msg = message.replace(/\\n/g, '\n');
+        log[level === 'SEVERE' ? 'error' : 'debug'](`browser[${level}] ${msg}`);
+      },
+    });
   }
 
   lifecycle.beforeTests.add(async () => {
