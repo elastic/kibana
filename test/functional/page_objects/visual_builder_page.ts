@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Color from 'color';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
