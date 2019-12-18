@@ -33,8 +33,8 @@ describe('index connector validation', () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.index',
+      name: 'es_index',
       config: {
         index: 'test_es_index',
       },
@@ -82,8 +82,8 @@ describe('IndexActionConnectorFields renders', () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.index',
+      name: 'es_index',
       config: {
         index: 'test',
       },

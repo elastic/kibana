@@ -36,8 +36,8 @@ describe('webhook connector validation', () => {
         password: 'pass',
       },
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.webhook',
+      name: 'webhook',
       config: {
         method: 'PUT',
         url: 'http:\\test',
@@ -61,8 +61,8 @@ describe('webhook connector validation', () => {
         user: 'user',
       },
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.webhook',
+      name: 'webhook',
       config: {
         method: 'PUT',
       },
@@ -104,8 +104,8 @@ describe('WebhookActionConnectorFields renders', () => {
         password: 'pass',
       },
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.webhook',
+      name: 'webhook',
       config: {
         method: 'PUT',
         url: 'http:\\test',

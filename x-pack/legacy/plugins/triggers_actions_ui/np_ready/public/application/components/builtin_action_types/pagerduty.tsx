@@ -29,7 +29,6 @@ export function getActionType(): ActionTypeModel {
       const validationResult = { errors: {} };
       const errors = {
         routingKey: new Array<string>(),
-        apiUrl: new Array<string>(),
       };
       validationResult.errors = errors;
       if (!action.secrets.routingKey) {
@@ -38,16 +37,6 @@ export function getActionType(): ActionTypeModel {
             'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
             {
               defaultMessage: 'Routing Key is required.',
-            }
-          )
-        );
-      }
-      if (!action.config.apiUrl) {
-        errors.apiUrl.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredApiUrlText',
-            {
-              defaultMessage: 'ApiUrl is required.',
             }
           )
         );
@@ -74,12 +63,9 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
   const { routingKey } = action.secrets;
   return (
     <Fragment>
-      <ErrableFormRow
+      <EuiFormRow
         id="apiUrl"
-        errorKey="apiUrl"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors === true && apiUrl !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
@@ -101,7 +87,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
             }
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
       <ErrableFormRow
         id="routingKey"
         errorKey="routingKey"

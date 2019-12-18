@@ -35,8 +35,8 @@ describe('pagerduty connector validation', () => {
         routingKey: 'test',
       },
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.pagerduty',
+      name: 'pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
@@ -45,7 +45,6 @@ describe('pagerduty connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         routingKey: [],
-        apiUrl: [],
       },
     });
 
@@ -54,7 +53,6 @@ describe('pagerduty connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         routingKey: [],
-        apiUrl: [],
       },
     });
   });
@@ -63,8 +61,8 @@ describe('pagerduty connector validation', () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.pagerduty',
+      name: 'pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
@@ -73,7 +71,6 @@ describe('pagerduty connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         routingKey: ['Routing Key is required.'],
-        apiUrl: [],
       },
     });
   });
@@ -111,8 +108,8 @@ describe('PagerDutyActionConnectorFields renders', () => {
         routingKey: 'test',
       },
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.pagerduty',
+      name: 'pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },

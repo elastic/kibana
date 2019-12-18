@@ -33,8 +33,8 @@ describe('server-log connector validation', () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
+      actionTypeId: '.server-log',
+      name: 'server-log',
       config: {},
     } as ActionConnector;
 
