@@ -55,15 +55,15 @@ async function getSnapshotManifest(urlVersion, license) {
   const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
   const desiredLicense = license === 'oss' ? 'oss' : 'default';
 
-  let { abc, resp, json } = await fetchSnapshotManifest(
-    `https://storage.googleapis.com/kibana-ci-es-snapshots/${desiredVersion}/manifest-latest${
-      shouldUseUnverifiedSnapshot() ? '' : '-verified'
-    }.json`
-  );
-  if (!shouldUseUnverifiedSnapshot() && resp.status === 404) {
-    ({ abc, resp, json } = await fetchSnapshotManifest(
-      `https://storage.googleapis.com/kibana-ci-es-snapshots-permanent/${desiredVersion}/manifest.json`
-    ));
+  const customManifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
+  const primaryManifestUrl = `https://storage.googleapis.com/kibana-ci-es-snapshots/${desiredVersion}/manifest-latest${
+    shouldUseUnverifiedSnapshot() ? '' : '-verified'
+  }.json`;
+  const secondaryManifestUrl = `https://storage.googleapis.com/kibana-ci-es-snapshots-permanent/${desiredVersion}/manifest.json`;
+
+  let { abc, resp, json } = await fetchSnapshotManifest(customManifestUrl || primaryManifestUrl);
+  if (!customManifestUrl && !shouldUseUnverifiedSnapshot() && resp.status === 404) {
+    ({ abc, resp, json } = await fetchSnapshotManifest(secondaryManifestUrl));
   }
 
   if (resp.status === 404) {

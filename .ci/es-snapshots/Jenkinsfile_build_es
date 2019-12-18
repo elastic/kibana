@@ -53,6 +53,7 @@ timeout(time: 120, unit: 'MINUTES') {
 
             sh 'find * -exec bash -c "shasum -a 512 {} > {}.sha512" \\;'
 
+            // TODO remove all currently unused params?
             def manifest = [
               bucket: "kibana-ci-es-snapshots/${DESTINATION}".toString(),
               branch: ES_BRANCH,
@@ -67,6 +68,7 @@ timeout(time: 120, unit: 'MINUTES') {
 
             upload(DESTINATION, '*.*')
 
+            // Remove this? I like that there's an easy way to use it without having to look it up
             sh "cp manifest.json manifest-latest.json"
             upload(VERSION, 'manifest-latest.json')
           }

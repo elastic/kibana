@@ -7,8 +7,9 @@ kibanaLibrary.load()
 def SNAPSHOT_VERSION = params.SNAPSHOT_VERSION ?: "8.0.0"
 def SNAPSHOT_ID = params.SNAPSHOT_ID ?: "20191216-202229_c1d075a7dab"
 
-def ES_OSS_SNAPSHOT = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/elasticsearch-oss-${SNAPSHOT_VERSION}-SNAPSHOT-linux-x86_64.tar.gz"
-def ES_XPACK_SNAPSHOT = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/elasticsearch-${SNAPSHOT_VERSION}-SNAPSHOT-linux-x86_64.tar.gz"
+// def ES_OSS_SNAPSHOT = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/elasticsearch-oss-${SNAPSHOT_VERSION}-SNAPSHOT-linux-x86_64.tar.gz"
+// def ES_XPACK_SNAPSHOT = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/elasticsearch-${SNAPSHOT_VERSION}-SNAPSHOT-linux-x86_64.tar.gz"
+def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
 
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {
@@ -16,7 +17,8 @@ timeout(time: 120, unit: 'MINUTES') {
       catchError {
         parallel([
           oss: {
-            withEnv(["KBN_ES_SNAPSHOT_URL=${ES_OSS_SNAPSHOT}"]) {
+            // withEnv(["KBN_ES_SNAPSHOT_URL=${ES_OSS_SNAPSHOT}"]) {
+            withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
               parallel([
                 'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'), // TODO we just need to run integration tests from intake?
                 'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
@@ -37,7 +39,8 @@ timeout(time: 120, unit: 'MINUTES') {
             }
           },
           xpack: {
-            withEnv(["KBN_ES_SNAPSHOT_URL=${ES_XPACK_SNAPSHOT}"]) {
+            // withEnv(["KBN_ES_SNAPSHOT_URL=${ES_XPACK_SNAPSHOT}"]) {
+            withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
               parallel([
                 'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'), // TODO we just need to run integration tests from intake?
                 'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
