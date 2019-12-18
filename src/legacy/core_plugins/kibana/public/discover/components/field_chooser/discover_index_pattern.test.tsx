@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
@@ -46,11 +47,7 @@ const defaultProps = {
 };
 
 function getIndexPatternPickerList(instance: ShallowWrapper) {
-  return instance
-    .find(ChangeIndexPattern)
-    .first()
-    .dive()
-    .find(EuiSelectable);
+  return findTestSubject(instance.find(ChangeIndexPattern), `indexPattern-switcher`);
 }
 
 function getIndexPatternPickerOptions(instance: ShallowWrapper) {

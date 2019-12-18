@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
@@ -71,55 +70,53 @@ export function ChangeIndexPattern({
   };
 
   return (
-    <>
-      <EuiPopover
-        button={createTrigger()}
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopoverIsOpen(false)}
-        className="eui-textTruncate"
-        anchorClassName="eui-textTruncate"
-        display="block"
-        panelPaddingSize="s"
-        ownFocus
-      >
-        <div style={{ width: 320 }}>
-          <EuiPopoverTitle>
-            {i18n.translate('kbn.discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
-              defaultMessage: 'Change index pattern',
-            })}
-          </EuiPopoverTitle>
-          <EuiSelectable
-            data-test-subj="indexPattern-switcher"
-            {...selectableProps}
-            searchable
-            singleSelection="always"
-            options={indexPatternRefs.map(({ title, id }) => ({
-              label: title,
-              key: id,
-              value: id,
-              checked: id === indexPatternId ? 'on' : undefined,
-            }))}
-            onChange={choices => {
-              const choice = (choices.find(({ checked }) => checked) as unknown) as {
-                value: string;
-              };
-              onChangeIndexPattern(choice.value);
-              setPopoverIsOpen(false);
-            }}
-            searchProps={{
-              compressed: true,
-              ...(selectableProps ? selectableProps.searchProps : undefined),
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </div>
-      </EuiPopover>
-    </>
+    <EuiPopover
+      button={createTrigger()}
+      isOpen={isPopoverOpen}
+      closePopover={() => setPopoverIsOpen(false)}
+      className="eui-textTruncate"
+      anchorClassName="eui-textTruncate"
+      display="block"
+      panelPaddingSize="s"
+      ownFocus
+    >
+      <div style={{ width: 320 }}>
+        <EuiPopoverTitle>
+          {i18n.translate('kbn.discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
+            defaultMessage: 'Change index pattern',
+          })}
+        </EuiPopoverTitle>
+        <EuiSelectable
+          data-test-subj="indexPattern-switcher"
+          {...selectableProps}
+          searchable
+          singleSelection="always"
+          options={indexPatternRefs.map(({ title, id }) => ({
+            label: title,
+            key: id,
+            value: id,
+            checked: id === indexPatternId ? 'on' : undefined,
+          }))}
+          onChange={choices => {
+            const choice = (choices.find(({ checked }) => checked) as unknown) as {
+              value: string;
+            };
+            onChangeIndexPattern(choice.value);
+            setPopoverIsOpen(false);
+          }}
+          searchProps={{
+            compressed: true,
+            ...(selectableProps ? selectableProps.searchProps : undefined),
+          }}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </div>
+    </EuiPopover>
   );
 }
