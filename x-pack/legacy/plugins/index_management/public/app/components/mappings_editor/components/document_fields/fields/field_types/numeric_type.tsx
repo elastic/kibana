@@ -15,7 +15,7 @@ import {
   DocValuesParameter,
   BoostParameter,
   NullValueParameter,
-  CoerceParameter,
+  CoerceNumberParameter,
   IgnoreMalformedParameter,
   CopyToParameter,
 } from '../../field_parameters';
@@ -70,7 +70,7 @@ export const NumericType = ({ field }: Props) => {
       </BasicParametersSection>
 
       <AdvancedParametersSection>
-        <CoerceParameter />
+        <CoerceNumberParameter />
 
         <DocValuesParameter />
 

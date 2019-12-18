@@ -9,11 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+
 import {
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
-  CoerceParameter,
   OrientationParameter,
+  CoerceShapeParameter,
 } from '../../field_parameters';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
@@ -47,7 +48,8 @@ export const ShapeType = ({ field }: Props) => {
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.shapeType.ignoredMalformedFieldDescription',
             {
-              defaultMessage: 'If true, malformed GeoJSON or WKT shapes are ignored.',
+              defaultMessage:
+                'Malformed GeoJSON or WKT shapes will not be indexed, but other fields in the document will be processed normally. The number of documents that have a malformed field should be contained, or queries on this field will become meaningless.',
             }
           )}
         />
@@ -60,7 +62,7 @@ export const ShapeType = ({ field }: Props) => {
 
         <IgnoreZValueParameter />
 
-        <CoerceParameter configPath="coerce_shape" />
+        <CoerceShapeParameter />
       </AdvancedParametersSection>
     </>
   );

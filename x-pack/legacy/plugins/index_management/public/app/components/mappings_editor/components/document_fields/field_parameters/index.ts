@@ -28,7 +28,9 @@ export * from './similarity_parameter';
 
 export * from './path_parameter';
 
-export * from './coerce_parameter';
+export * from './coerce_number_parameter';
+
+export * from './coerce_shape_parameter';
 
 export * from './format_parameter';
 

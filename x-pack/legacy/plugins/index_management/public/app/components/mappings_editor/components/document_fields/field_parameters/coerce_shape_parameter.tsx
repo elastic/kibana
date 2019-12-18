@@ -11,28 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 
-type CoerceParameterNames = 'coerce' | 'coerce_geo_shape' | 'coerce_shape';
-
-export const CoerceParameter = ({
-  configPath = 'coerce',
-}: {
-  configPath?: CoerceParameterNames;
-}) => (
+export const CoerceShapeParameter = () => (
   <EditFieldFormRow
-    title={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceFieldTitle', {
-      defaultMessage: 'Coerce to number',
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceShapeFieldTitle', {
+      defaultMessage: 'Coerce to shape',
     })}
-    description={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDescription', {
-      defaultMessage:
-        'Whether to try to convert strings to numbers and truncate fractions for integers.',
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceShapeDescription', {
+      defaultMessage: 'Unclosed linear rings in polygons will be automatically closed.',
     })}
     docLink={{
-      text: i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDocLinkText', {
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.coerceShapeDocLinkText', {
         defaultMessage: 'Coerce documentation',
       }),
       href: documentationService.getCoerceLink(),
     }}
     formFieldPath="coerce"
-    configPath={configPath}
+    configPath="coerce_shape"
   />
 );

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
-  CoerceParameter,
+  CoerceShapeParameter,
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
   OrientationParameter,
@@ -65,7 +65,8 @@ export const GeoShapeType = ({ field }: Props) => {
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
             {
-              defaultMessage: 'Configures the geo_shape field type for point shapes only.',
+              defaultMessage:
+                'This optimizes index and search performance when it is known that only points will be indexed. Shapes, including multi-point shapes, will be rejected.',
             }
           )}
           formFieldPath="points_only"
@@ -73,7 +74,7 @@ export const GeoShapeType = ({ field }: Props) => {
 
         <IgnoreZValueParameter />
 
-        <CoerceParameter configPath="coerce_geo_shape" />
+        <CoerceShapeParameter />
       </AdvancedParametersSection>
     </>
   );

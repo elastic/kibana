@@ -39,7 +39,8 @@ export const GeoPointType = ({ field }: Props) => {
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
             {
-              defaultMessage: 'Whether to ignore malformed geo-points.',
+              defaultMessage:
+                'Malformed geo-points will not be indexed, but other fields in the document will be processed normally. The number of documents that have a malformed field should be contained, or queries on this field will become meaningless.',
             }
           )}
         />
@@ -54,7 +55,7 @@ export const GeoPointType = ({ field }: Props) => {
             'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
             {
               defaultMessage:
-                'Accepts a geopoint value which is substituted for any explicit null values.',
+                'Replace explicit null values with a geo-point value so that it can be indexed and searched.',
             }
           )}
         >

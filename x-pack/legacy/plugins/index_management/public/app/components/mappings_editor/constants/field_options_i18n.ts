@@ -362,7 +362,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.orientation.counterclockwiseDescription',
       {
         defaultMessage:
-          'Defines outer ring vertices in counterclockwise order with inner ring(s) vertices (holes) in clockwise order.',
+          'Defines outer polygon vertices in counterclockwise order and interior shape vertices int clockwise order. This is the Open Geospatial Consortium (OGC) and GeoJSON standard.',
       }
     ),
   },
@@ -373,7 +373,8 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.orientation.clockwiseDescription',
       {
-        defaultMessage: 'TODO: Get description for this option.',
+        defaultMessage:
+          'Defines outer polygon vertices in clockwise order and interior shape vertices in counterclockwise order.',
       }
     ),
   },
