@@ -35,7 +35,7 @@ const defaultAlertsFilters: esFilters.Filter[] = [
         filter: [
           {
             bool: {
-              must: [
+              should: [
                 {
                   match: {
                     'event.kind': 'alert',

@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
@@ -60,6 +60,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       }
       return filters;
     }, [tabName]);
+    const narrowDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
 
     return (
       <>
@@ -112,9 +118,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                         loading={loading}
                         from={from}
                         to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
+                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiNetworkQuery>
