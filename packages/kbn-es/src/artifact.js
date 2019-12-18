@@ -97,7 +97,6 @@ exports.Artifact = class Artifact {
 
     const customSnapshotArtifactSpec = await resolveCustomSnapshotUrl(urlVersion, license);
     if (customSnapshotArtifactSpec) {
-      console.log(customSnapshotArtifactSpec);
       return new Artifact(customSnapshotArtifactSpec, log);
     }
 
