@@ -18,7 +18,7 @@ import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
 import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } from './contexts';
-import { UptimeDatePicker } from './components/functional/uptime_date_picker';
+import { UptimeDatePicker, CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 import { store } from './state';
 import { setBasePath, triggerAppRefresh } from './state/actions';
@@ -49,6 +49,7 @@ export interface UptimeAppProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
+  commonlyUsedRanges: CommonlyUsedRange[];
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -58,6 +59,7 @@ const Application = (props: UptimeAppProps) => {
     canSave,
     client,
     darkMode,
+    commonlyUsedRanges,
     i18n: i18nCore,
     isApmAvailable,
     isInfraAvailable,
@@ -171,7 +173,11 @@ const Application = (props: UptimeAppProps) => {
                               </EuiTitle>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
+                              <UptimeDatePicker
+                                refreshApp={refreshApp}
+                                commonlyUsedRanges={commonlyUsedRanges}
+                                {...rootRouteProps}
+                              />
                             </EuiFlexItem>
                           </EuiFlexGroup>
                           <EuiSpacer size="s" />
