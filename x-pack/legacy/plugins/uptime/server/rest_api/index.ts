@@ -9,12 +9,13 @@ import { createGetAllRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
-import { UMRestApiRouteCreator } from './types';
+import { UMRestApiRouteFactory } from './types';
 import { createGetMonitorDetailsRoute, createGetMonitorLocationsRoute } from './monitors';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
-export const restApiRoutes: UMRestApiRouteCreator[] = [
+export { uptimeRouteWrapper } from './uptime_route_wrapper';
+export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetOverviewFilters,
   createGetAllRoute,
   createGetIndexPatternRoute,

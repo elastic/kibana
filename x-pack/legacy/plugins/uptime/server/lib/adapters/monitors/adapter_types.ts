@@ -5,29 +5,71 @@
  */
 
 import { MonitorChart, MonitorPageTitle } from '../../../../common/graphql/types';
-import { OverviewFilters } from '../../../../common/runtime_types';
+import { UMElasticsearchQueryFn } from '../framework';
+import {
+  MonitorDetails,
+  MonitorLocations,
+  OverviewFilters,
+} from '../../../../common/runtime_types';
+
+export interface GetMonitorChartsDataParams {
+  /** @member monitorId ID value for the selected monitor */
+  monitorId: string;
+  /** @member dateRangeStart timestamp bounds */
+  dateRangeStart: string;
+  /** @member dateRangeEnd timestamp bounds */
+  dateRangeEnd: string;
+  /** @member location optional location value for use in filtering*/
+  location?: string | null;
+}
+
+export interface GetFilterBarParams {
+  /** @param dateRangeStart timestamp bounds */
+  dateRangeStart: string;
+  /** @member dateRangeEnd timestamp bounds */
+  dateRangeEnd: string;
+  filters: Record<string, any>;
+  filterOptions: Record<string, string[] | number[]>;
+}
+
+export interface GetMonitorDetailsParams {
+  monitorId: string;
+}
+
+export interface GetMonitorPageTitleParams {
+  /** @member monitorId the ID to query */
+  monitorId: string;
+}
+
+/**
+ * Fetch data for the monitor page title.
+ */
+export interface GetMonitorLocationsParams {
+  /**
+   * @member monitorId the ID to query
+   */
+  monitorId: string;
+  dateStart: string;
+  dateEnd: string;
+}
 
 export interface UMMonitorsAdapter {
-  getMonitorChartsData(
-    request: any,
-    monitorId: string,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    location?: string | null
-  ): Promise<MonitorChart>;
-  getFilterBar(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: Record<string, any>,
-    filterOptions?: Record<string, string[] | number[]>
-  ): Promise<OverviewFilters>;
-  getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
-  getMonitorDetails(request: any, monitorId: string): Promise<any>;
-  getMonitorLocations(
-    request: any,
-    monitorId: string,
-    dateStart: string,
-    dateEnd: string
-  ): Promise<any>;
+  /**
+   * Fetches data used to populate monitor charts
+   */
+  getMonitorChartsData: UMElasticsearchQueryFn<GetMonitorChartsDataParams, MonitorChart>;
+
+  /**
+   * Fetch options for the filter bar.
+   */
+  getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters>;
+
+  /**
+   * Fetch data for the monitor page title.
+   */
+  getMonitorPageTitle: UMElasticsearchQueryFn<{ monitorId: string }, MonitorPageTitle | null>;
+
+  getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails>;
+
+  getMonitorLocations: UMElasticsearchQueryFn<GetMonitorLocationsParams, MonitorLocations>;
 }
