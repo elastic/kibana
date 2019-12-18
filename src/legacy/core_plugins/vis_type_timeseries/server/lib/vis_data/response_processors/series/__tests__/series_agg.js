@@ -113,7 +113,10 @@ describe('seriesAgg(resp, panel, series)', () => {
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
       points: { show: true, radius: 1, lineWidth: 1 },
       bars: { fill: 0, lineWidth: 1, show: false },
-      data: [[1, 0.5], [2, 0.5]],
+      data: [
+        [1, 0.5],
+        [2, 0.5],
+      ],
     });
   });
 });

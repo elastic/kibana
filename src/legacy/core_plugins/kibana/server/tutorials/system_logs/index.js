@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function systemLogsSpecProvider(context) {
   const moduleName = 'system';
@@ -34,7 +38,8 @@ export function systemLogsSpecProvider(context) {
       defaultMessage: 'Collect and parse logs written by the local Syslog server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.systemLogs.longDescription', {
-      defaultMessage: 'The `system` Filebeat module collects and parses logs created by the system logging service of common \
+      defaultMessage:
+        'The `system` Filebeat module collects and parses logs created by the system logging service of common \
 Unix/Linux based distributions. This module is not available on Windows. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -45,20 +50,23 @@ Unix/Linux based distributions. This module is not available on Windows. \
       dashboards: [
         {
           id: 'Filebeat-syslog-dashboard-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.systemLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'System logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.systemLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'System logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-system.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-system.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/system_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

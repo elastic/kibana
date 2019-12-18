@@ -15,7 +15,9 @@ import { resolve } from 'path';
  */
 export const getUiExports = () => ({
   app: {
-    title: i18n.translate('xpack.monitoring.stackMonitoringTitle', { defaultMessage: 'Stack Monitoring' }),
+    title: i18n.translate('xpack.monitoring.stackMonitoringTitle', {
+      defaultMessage: 'Stack Monitoring',
+    }),
     order: 9002,
     description: i18n.translate('xpack.monitoring.uiExportsDescription', {
       defaultMessage: 'Monitoring for Elastic Stack',
@@ -29,10 +31,12 @@ export const getUiExports = () => ({
     const config = server.config();
     return {
       monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
-      monitoringLegacyEmailAddress: config.get('xpack.monitoring.cluster_alerts.email_notifications.email_address'),
+      monitoringLegacyEmailAddress: config.get(
+        'xpack.monitoring.cluster_alerts.email_notifications.email_address'
+      ),
     };
   },
-  hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],
-  home: [ 'plugins/monitoring/register_feature' ],
+  hacks: ['plugins/monitoring/hacks/toggle_app_link_in_nav'],
+  home: ['plugins/monitoring/register_feature'],
   styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 });

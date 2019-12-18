@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function activemqLogsSpecProvider(server, context) {
   const moduleName = 'activemq';
@@ -45,20 +49,23 @@ export function activemqLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: '26434790-1464-11ea-8fd8-030a13064883',
-          linkLabel: i18n.translate('kbn.server.tutorials.activemqLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'ActiveMQ Application Events',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.activemqLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'ActiveMQ Application Events',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-activemq.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-activemq.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/activemq_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

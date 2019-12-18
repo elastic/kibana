@@ -16,14 +16,14 @@ describe('BooleanEdge', () => {
     graph = {
       verticesById: {
         myif: {},
-        myes: {}
-      }
+        myes: {},
+      },
     };
     edgeJson = {
       id: 'abcdef',
       from: 'myif',
       to: 'myes',
-      when: true
+      when: true,
     };
   });
 

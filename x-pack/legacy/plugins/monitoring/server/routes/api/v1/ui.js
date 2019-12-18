@@ -5,19 +5,10 @@
  */
 
 // all routes for the app
-export {
-  checkAccessRoute
-} from './check_access';
+export { checkAccessRoute } from './check_access';
 export * from './alerts/';
-export {
-  beatsDetailRoute,
-  beatsListingRoute,
-  beatsOverviewRoute
-} from './beats';
-export {
-  clusterRoute,
-  clustersRoute,
-} from './cluster';
+export { beatsDetailRoute, beatsListingRoute, beatsOverviewRoute } from './beats';
+export { clusterRoute, clustersRoute } from './cluster';
 export {
   esIndexRoute,
   esIndicesRoute,
@@ -32,18 +23,10 @@ export {
   clusterSettingsCheckRoute,
   nodesSettingsCheckRoute,
   setCollectionEnabledRoute,
-  setCollectionIntervalRoute
+  setCollectionIntervalRoute,
 } from './elasticsearch_settings';
-export {
-  kibanaInstanceRoute,
-  kibanaInstancesRoute,
-  kibanaOverviewRoute
-} from './kibana';
-export {
-  apmInstanceRoute,
-  apmInstancesRoute,
-  apmOverviewRoute
-} from './apm';
+export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
+export { apmInstanceRoute, apmInstancesRoute, apmOverviewRoute } from './apm';
 export {
   logstashClusterPipelinesRoute,
   logstashNodePipelinesRoute,
@@ -51,6 +34,6 @@ export {
   logstashNodesRoute,
   logstashOverviewRoute,
   logstashPipelineRoute,
-  logstashClusterPipelineIdsRoute
+  logstashClusterPipelineIdsRoute,
 } from './logstash';
 export * from './setup';

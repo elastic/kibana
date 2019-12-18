@@ -75,9 +75,9 @@ describe('setup_mode', () => {
           cloud: {
             cloudId: undefined,
             isCloudEnabled: false,
-          }
-        }
-      }
+          },
+        },
+      },
     }));
     setModules();
   });
@@ -90,9 +90,11 @@ describe('setup_mode', () => {
       } catch (err) {
         error = err;
       }
-      expect(error.message).toEqual('Unable to interact with setup '
-      + 'mode because the angular injector was not previously set. This needs to be '
-      + 'set by calling `initSetupModeState`.');
+      expect(error.message).toEqual(
+        'Unable to interact with setup ' +
+          'mode because the angular injector was not previously set. This needs to be ' +
+          'set by calling `initSetupModeState`.'
+      );
     });
 
     it('should enable toggle mode', async () => {
@@ -129,9 +131,9 @@ describe('setup_mode', () => {
             cloud: {
               cloudId: 'test',
               isCloudEnabled: true,
-            }
-          }
-        }
+            },
+          },
+        },
       }));
       data = {
         _meta: {
@@ -227,7 +229,9 @@ describe('setup_mode', () => {
       waitForSetupModeData(() => {
         expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
           `../api/monitoring/v1/setup/collection/cluster/${clusterUuid}`,
-          { ccs: undefined }
+          {
+            ccs: undefined,
+          }
         );
         done();
       });
@@ -240,7 +244,9 @@ describe('setup_mode', () => {
       await updateSetupModeData('45asd');
       expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
         '../api/monitoring/v1/setup/collection/node/45asd',
-        { ccs: undefined }
+        {
+          ccs: undefined,
+        }
       );
     });
 
@@ -249,10 +255,9 @@ describe('setup_mode', () => {
       await toggleSetupMode(true);
       injectorModulesMock.$http.post.mockClear();
       await updateSetupModeData(undefined, true);
-      expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(
-        '../api/monitoring/v1/setup/collection/cluster',
-        { ccs: undefined }
-      );
+      const url = '../api/monitoring/v1/setup/collection/cluster';
+      const args = { ccs: undefined };
+      expect(injectorModulesMock.$http.post).toHaveBeenCalledWith(url, args);
     });
   });
 });

@@ -79,7 +79,17 @@ import {
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
 
-export { App, AppBase, AppUnmount, AppMountContext, AppMountParameters } from './application';
+export {
+  ApplicationSetup,
+  ApplicationStart,
+  App,
+  AppBase,
+  AppMount,
+  AppMountDeprecated,
+  AppUnmount,
+  AppMountContext,
+  AppMountParameters,
+} from './application';
 
 export {
   SavedObjectsBatchResponse,
@@ -101,6 +111,13 @@ export {
   SavedObjectsClientContract,
   SavedObjectsClient,
   SimpleSavedObject,
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from './saved_objects';
 
 export {
@@ -145,10 +162,13 @@ export { MountPoint, UnmountCallback } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
-  /** {@link ContextSetup} */
+  /**
+   * {@link ContextSetup}
+   * @deprecated
+   */
   context: ContextSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
@@ -167,6 +187,13 @@ export interface CoreSetup {
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
+
+  /**
+   * Allows plugins to get access to APIs available in start inside async
+   * handlers, such as {@link App.mount}. Promise will not resolve until Core
+   * and plugin dependencies have completed `start`.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
@@ -218,7 +245,7 @@ export interface CoreStart {
  * @public
  * @deprecated
  */
-export interface LegacyCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup<any> {
   /** @deprecated */
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -239,8 +266,6 @@ export interface LegacyCoreStart extends CoreStart {
 }
 
 export {
-  ApplicationSetup,
-  ApplicationStart,
   Capabilities,
   ChromeBadge,
   ChromeBrand,

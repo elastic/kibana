@@ -1,0 +1,15 @@
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+
+jobs:
+  assign_to_project:
+    runs-on: ubuntu-latest
+    name: Assign a PR to project based on label
+    steps:
+      - name: Assign to project
+        uses: elastic/github-actions/project-assigner@v1.0.0
+        id: project_assigner
+        with:
+          issue-mappings: '[{"label": "Team:AppArch", "projectName": "kibana-app-arch", "columnId": 6173897}]'
+          ghToken: ${{ secrets.GITHUB_TOKEN }}

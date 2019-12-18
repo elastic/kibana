@@ -21,6 +21,7 @@ export interface ThreatParams {
 }
 
 export interface RuleAlertParams {
+  createdAt: string;
   description: string;
   enabled: boolean;
   falsePositives: string[];
@@ -42,22 +43,36 @@ export interface RuleAlertParams {
   severity: string;
   tags: string[];
   to: string;
+  timelineId: string | undefined | null;
   threats: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
+  version: number;
+  updatedAt: string;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
-  'ruleId' | 'falsePositives' | 'maxSignals' | 'savedId' | 'riskScore' | 'outputIndex'
+  | 'ruleId'
+  | 'falsePositives'
+  | 'maxSignals'
+  | 'savedId'
+  | 'riskScore'
+  | 'timelineId'
+  | 'outputIndex'
+  | 'updatedAt'
+  | 'createdAt'
 > & {
   rule_id: RuleAlertParams['ruleId'];
   false_positives: RuleAlertParams['falsePositives'];
   saved_id: RuleAlertParams['savedId'];
+  timeline_id: RuleAlertParams['timelineId'];
   max_signals: RuleAlertParams['maxSignals'];
   risk_score: RuleAlertParams['riskScore'];
   output_index: RuleAlertParams['outputIndex'];
+  created_at: RuleAlertParams['createdAt'];
+  updated_at: RuleAlertParams['updatedAt'];
 };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {
@@ -65,3 +80,5 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
 };
+
+export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;
