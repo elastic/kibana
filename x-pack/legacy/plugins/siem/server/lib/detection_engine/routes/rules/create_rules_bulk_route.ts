@@ -32,7 +32,6 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       },
     },
     async handler(request: BulkRulesRequest, headers) {
-      console.log('YOLO, I AM HERE');
       return request.payload;
       const {
         created_at: createdAt,
