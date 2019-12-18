@@ -73,22 +73,22 @@ describe('list()', () => {
     const actionTypeRegistry = new ActionTypeRegistry();
     actionTypeRegistry.register(getTestActionType());
     const actionTypes = actionTypeRegistry.list();
-    expect(JSON.stringify(actionTypes)).toEqual(
-      JSON.stringify([
-        {
+    expect(actionTypes).toEqual([
+      {
+        id: 'my-action-type',
+        name: 'my-action-type',
+        iconClass: 'test',
+        actionType: {
           id: 'my-action-type',
-          name: 'my-action-type',
           iconClass: 'test',
-          actionType: {
-            id: 'my-action-type',
-            iconClass: 'test',
-            selectMessage: 'test',
-            actionConnectorFields: null,
-            actionParamsFields: null,
-          },
+          selectMessage: 'test',
+          actionConnectorFields: null,
+          actionParamsFields: null,
+          validateConnector: actionTypes[0].actionType.validateConnector,
+          validateParams: actionTypes[0].actionType.validateParams,
         },
-      ])
-    );
+      },
+    ]);
   });
 });
 

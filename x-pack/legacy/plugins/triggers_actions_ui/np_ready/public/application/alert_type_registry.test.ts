@@ -70,21 +70,20 @@ describe('list()', () => {
     const alertTypeRegistry = new AlertTypeRegistry();
     alertTypeRegistry.register(getTestAlertType());
     const alertTypes = alertTypeRegistry.list();
-    expect(JSON.stringify(alertTypes)).toEqual(
-      JSON.stringify([
-        {
+    expect(alertTypes).toEqual([
+      {
+        id: 'test-alet-type',
+        name: 'Test alert type',
+        iconClass: 'icon',
+        alertType: {
           id: 'test-alet-type',
           name: 'Test alert type',
           iconClass: 'icon',
-          alertType: {
-            id: 'test-alet-type',
-            name: 'Test alert type',
-            iconClass: 'icon',
-            alertParamsExpression: ExpressionComponent,
-          },
+          alertParamsExpression: ExpressionComponent,
+          validate: alertTypes[0].alertType.validate,
         },
-      ])
-    );
+      },
+    ]);
   });
 });
 
