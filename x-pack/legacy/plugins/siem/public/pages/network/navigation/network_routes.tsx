@@ -42,13 +42,13 @@ export const NetworkRoutes = ({
         to: fromTo.to,
       });
     },
-    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
+    [setAbsoluteRangeDatePicker]
   );
   const updateDateRange = useCallback(
     (min: number, max: number) => {
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
-    [from, to]
+    [setAbsoluteRangeDatePicker]
   );
 
   const networkAnomaliesFilterQuery = {
