@@ -64,39 +64,40 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     }, [detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+    const hostDetailsPageFilters: esFilters.Filter[] = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'host.name',
+          value: detailName,
+          params: {
+            query: detailName,
+          },
+        },
+        query: {
+          match: {
+            'host.name': {
+              query: detailName,
+              type: 'phrase',
+            },
+          },
+        },
+      },
+    ];
 
     return (
       <>
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
-            const defaultFilters: esFilters.Filter = {
-              meta: {
-                alias: null,
-                negate: false,
-                disabled: false,
-                type: 'phrase',
-                key: 'host.name',
-                value: detailName,
-                params: {
-                  query: detailName,
-                },
-              },
-              query: {
-                match: {
-                  'host.name': {
-                    query: detailName,
-                    type: 'phrase',
-                  },
-                },
-              },
-            };
             const filterQuery = convertToBuildEsQuery({
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters: [defaultFilters, ...filters],
+              filters: [...hostDetailsPageFilters, ...filters],
             });
-
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
@@ -192,7 +193,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   <HostDetailsTabs
                     isInitializing={isInitializing}
                     deleteQuery={deleteQuery}
-                    defaultFilters={[defaultFilters]}
+                    pageFilters={hostDetailsPageFilters}
                     to={to}
                     from={from}
                     detailName={detailName}

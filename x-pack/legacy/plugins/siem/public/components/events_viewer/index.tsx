@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
@@ -84,7 +84,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
-    pageFilters = [],
+    defaultFilters = [],
     defaultModel,
     defaultIndices,
     deleteEventQuery,
@@ -151,7 +151,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
-
+    const eventsFilter = useMemo(() => [...filters], [defaultFilters]);
     return (
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
         <EventsViewer
@@ -160,7 +160,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           id={id}
           dataProviders={dataProviders!}
           end={end}
-          filters={[...filters, ...pageFilters]}
+          filters={eventsFilter}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
@@ -193,7 +193,8 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     isEqual(prevProps.query, nextProps.query) &&
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
-    prevProps.start === nextProps.start
+    prevProps.start === nextProps.start &&
+    isEqual(prevProps.defaultFilters, nextProps.defaultFilters)
 );
 
 StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';

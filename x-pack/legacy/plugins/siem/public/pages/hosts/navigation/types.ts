@@ -55,7 +55,7 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
 
 export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
   filterQuery: string;
-  defaultFilters?: esFilters.Filter[];
+  pageFilters?: esFilters.Filter[];
 };
 
 export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;

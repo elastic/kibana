@@ -18,54 +18,53 @@ export interface OwnProps {
 }
 
 const ALERTS_TABLE_ID = 'timeline-alerts-table';
-const filter: esFilters.Filter = {
-  meta: {
-    alias: null,
-    negate: false,
-    disabled: false,
-    type: 'phrase',
-    key: 'event.kind',
-    params: {
-      query: 'alert',
+const defaultAlertsFilters: esFilters.Filter[] = [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'event.kind',
+      params: {
+        query: 'alert',
+      },
     },
-  },
-  query: {
-    bool: {
-      filter: [
-        {
-          bool: {
-            should: [
-              {
-                match: {
-                  'event.kind': 'alert',
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  match: {
+                    'event.kind': 'alert',
+                  },
                 },
-              },
-            ],
-            minimum_should_match: 1,
+              ],
+              minimum_should_match: 1,
+            },
           },
-        },
-      ],
+        ],
+      },
     },
   },
-};
+];
 
 export const AlertsTable = React.memo(
   ({
     endDate,
     startDate,
-    pageFilters,
-    defaultFilters,
+    pageFilters = [],
   }: {
     endDate: number;
     startDate: number;
-    pageFilters: esFilters.Filter[];
-    defaultFilters?: esFilters.Filter[];
+    pageFilters?: esFilters.Filter[];
   }) => {
-    const alertsFilter = useMemo(() => [filter, ...pageFilters], [filter, pageFilters]);
+    const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
     return (
       <StatefulEventsViewer
-        pageFilters={alertsFilter}
-        defaultFilters={defaultFilters}
+        defaultFilters={alertsFilter}
         defaultModel={alertsDefaultModel}
         end={endDate}
         id={ALERTS_TABLE_ID}

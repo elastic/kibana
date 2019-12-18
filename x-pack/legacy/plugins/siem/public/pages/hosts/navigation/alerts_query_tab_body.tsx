@@ -35,8 +35,11 @@ export const filterAlertsHosts: esFilters.Filter[] = [
     },
   },
 ];
-export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => (
-  <AlertsView {...alertsProps} pageFilters={filterAlertsHosts} />
-));
+export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
+  const { pageFilters, ...rest } = alertsProps;
+  const hostPageFilters =
+    pageFilters != null ? [...filterAlertsHosts, ...pageFilters] : filterAlertsHosts;
+  return <AlertsView {...rest} pageFilters={hostPageFilters} />;
+});
 
 HostAlertsQueryTabBody.displayName = 'HostAlertsQueryTabBody';
