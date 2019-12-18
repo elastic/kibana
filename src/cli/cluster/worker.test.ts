@@ -17,22 +17,20 @@
  * under the License.
  */
 
-import { mockCluster } from './__mocks__/cluster';
-jest.mock('cluster', () => mockCluster());
+import { mockCluster } from './cluster_manager.test.mocks';
 
-import cluster from 'cluster';
-
-import Worker from './worker';
+import Worker, { ClusterWorker } from './worker';
+// @ts-ignore
 import Log from '../log';
 
-const workersToShutdown = [];
+const workersToShutdown: Worker[] = [];
 
-function assertListenerAdded(emitter, event) {
+function assertListenerAdded(emitter: NodeJS.EventEmitter, event: any) {
   expect(emitter.on).toHaveBeenCalledWith(event, expect.any(Function));
 }
 
-function assertListenerRemoved(emitter, event) {
-  const [, onEventListener] = emitter.on.mock.calls.find(([eventName]) => {
+function assertListenerRemoved(emitter: NodeJS.EventEmitter, event: any) {
+  const [, onEventListener] = (emitter.on as jest.Mock).mock.calls.find(([eventName]) => {
     return eventName === event;
   });
 
@@ -44,6 +42,7 @@ function setup(opts = {}) {
     log: new Log(false, true),
     ...opts,
     baseArgv: [],
+    type: 'test',
   });
 
   workersToShutdown.push(worker);
@@ -53,7 +52,7 @@ function setup(opts = {}) {
 describe('CLI cluster manager', () => {
   afterEach(async () => {
     while (workersToShutdown.length > 0) {
-      const worker = workersToShutdown.pop();
+      const worker = workersToShutdown.pop() as Worker;
       // If `fork` exists we should set `exitCode` to the non-zero value to
       // prevent worker from auto restart.
       if (worker.fork) {
@@ -63,14 +62,14 @@ describe('CLI cluster manager', () => {
       await worker.shutdown();
     }
 
-    cluster.fork.mockClear();
+    mockCluster.fork.mockClear();
   });
 
   describe('#onChange', () => {
     describe('opts.watch = true', () => {
       test('restarts the fork', () => {
         const worker = setup({ watch: true });
-        jest.spyOn(worker, 'start').mockImplementation(() => {});
+        jest.spyOn(worker, 'start').mockResolvedValue();
         worker.onChange('/some/path');
         expect(worker.changes).toEqual(['/some/path']);
         expect(worker.start).toHaveBeenCalledTimes(1);
@@ -80,7 +79,7 @@ describe('CLI cluster manager', () => {
     describe('opts.watch = false', () => {
       test('does not restart the fork', () => {
         const worker = setup({ watch: false });
-        jest.spyOn(worker, 'start').mockImplementation(() => {});
+        jest.spyOn(worker, 'start').mockResolvedValue();
         worker.onChange('/some/path');
         expect(worker.changes).toEqual([]);
         expect(worker.start).not.toHaveBeenCalled();
@@ -94,13 +93,13 @@ describe('CLI cluster manager', () => {
         const worker = setup();
         await worker.start();
         expect(worker).toHaveProperty('online', true);
-        const fork = worker.fork;
-        expect(fork.process.kill).not.toHaveBeenCalled();
+        const fork = worker.fork as ClusterWorker;
+        expect(fork!.process.kill).not.toHaveBeenCalled();
         assertListenerAdded(fork, 'message');
         assertListenerAdded(fork, 'online');
         assertListenerAdded(fork, 'disconnect');
         await worker.shutdown();
-        expect(fork.process.kill).toHaveBeenCalledTimes(1);
+        expect(fork!.process.kill).toHaveBeenCalledTimes(1);
         assertListenerRemoved(fork, 'message');
         assertListenerRemoved(fork, 'online');
         assertListenerRemoved(fork, 'disconnect');
@@ -120,7 +119,7 @@ describe('CLI cluster manager', () => {
       test(`is bound to fork's message event`, async () => {
         const worker = setup();
         await worker.start();
-        expect(worker.fork.on).toHaveBeenCalledWith('message', expect.any(Function));
+        expect(worker.fork!.on).toHaveBeenCalledWith('message', expect.any(Function));
       });
     });
 
@@ -138,8 +137,8 @@ describe('CLI cluster manager', () => {
       test('calls #onMessage with message parts', () => {
         const worker = setup();
         jest.spyOn(worker, 'onMessage').mockImplementation(() => {});
-        worker.parseIncomingMessage([10, 100, 1000, 10000]);
-        expect(worker.onMessage).toHaveBeenCalledWith(10, 100, 1000, 10000);
+        worker.parseIncomingMessage(['event', 'some-data']);
+        expect(worker.onMessage).toHaveBeenCalledWith('event', 'some-data');
       });
     });
   });
@@ -149,7 +148,7 @@ describe('CLI cluster manager', () => {
       test('emits the data to be broadcasted', () => {
         const worker = setup();
         const data = {};
-        jest.spyOn(worker, 'emit').mockImplementation(() => {});
+        jest.spyOn(worker, 'emit').mockImplementation(() => true);
         worker.onMessage('WORKER_BROADCAST', data);
         expect(worker.emit).toHaveBeenCalledWith('broadcast', data);
       });
@@ -158,7 +157,7 @@ describe('CLI cluster manager', () => {
     describe('when sent WORKER_LISTENING message', () => {
       test('sets the listening flag and emits the listening event', () => {
         const worker = setup();
-        jest.spyOn(worker, 'emit').mockImplementation(() => {});
+        jest.spyOn(worker, 'emit').mockImplementation(() => true);
         expect(worker).toHaveProperty('listening', false);
         worker.onMessage('WORKER_LISTENING');
         expect(worker).toHaveProperty('listening', true);
@@ -170,8 +169,6 @@ describe('CLI cluster manager', () => {
       test('does nothing', () => {
         const worker = setup();
         worker.onMessage('asdlfkajsdfahsdfiohuasdofihsdoif');
-        worker.onMessage({});
-        worker.onMessage(23049283094);
       });
     });
   });
@@ -185,7 +182,7 @@ describe('CLI cluster manager', () => {
 
         await worker.start();
 
-        expect(cluster.fork).toHaveBeenCalledTimes(1);
+        expect(mockCluster.fork).toHaveBeenCalledTimes(1);
         expect(worker.on).toHaveBeenCalledWith('fork:online', expect.any(Function));
       });
 
@@ -193,12 +190,12 @@ describe('CLI cluster manager', () => {
         const worker = setup();
 
         jest.spyOn(process, 'on');
-        jest.spyOn(cluster, 'on');
+        jest.spyOn(mockCluster, 'on');
 
         await worker.start();
 
-        expect(cluster.on).toHaveBeenCalledTimes(1);
-        expect(cluster.on).toHaveBeenCalledWith('exit', expect.any(Function));
+        expect(mockCluster.on).toHaveBeenCalledTimes(1);
+        expect(mockCluster.on).toHaveBeenCalledWith('exit', expect.any(Function));
         expect(process.on).toHaveBeenCalledTimes(1);
         expect(process.on).toHaveBeenCalledWith('exit', expect.any(Function));
       });

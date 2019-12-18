@@ -21,25 +21,58 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor } from '../../legacy/utils';
+import { BinderFor } from '../../legacy/utils/binder_for';
 import { fromRoot } from '../../core/server/utils';
 
 const cliPath = fromRoot('src/cli');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
 const baseArgv = [process.execPath, cliPath].concat(baseArgs);
 
+export type ClusterWorker = cluster.Worker & {
+  killed: boolean;
+  exitCode?: number;
+};
+
 cluster.setupMaster({
   exec: cliPath,
   silent: false,
 });
 
-const dead = fork => {
+const dead = (fork: ClusterWorker) => {
   return fork.isDead() || fork.killed;
 };
 
+interface WorkerOptions {
+  type: string;
+  log: any; // src/cli/log.js
+  argv?: string[];
+  title?: string;
+  watch?: boolean;
+  baseArgv?: string[];
+}
+
+// eslint-disable-next-line import/no-default-export
 export default class Worker extends EventEmitter {
-  constructor(opts) {
-    opts = opts || {};
+  private readonly clusterBinder: BinderFor;
+  private readonly processBinder: BinderFor;
+
+  private type: string;
+  private title: string;
+  private log: any;
+  private forkBinder: BinderFor | null = null;
+  private startCount: number;
+  private watch: boolean;
+  private env: Record<string, string>;
+
+  public fork: ClusterWorker | null = null;
+  public changes: string[];
+
+  // status flags
+  public online = false; // the fork can accept messages
+  public listening = false; // the fork is listening for connections
+  public crashed = false; // the fork crashed
+
+  constructor(opts: WorkerOptions) {
     super();
 
     this.log = opts.log;
@@ -48,15 +81,9 @@ export default class Worker extends EventEmitter {
     this.watch = opts.watch !== false;
     this.startCount = 0;
 
-    // status flags
-    this.online = false; // the fork can accept messages
-    this.listening = false; // the fork is listening for connections
-    this.crashed = false; // the fork crashed
-
     this.changes = [];
 
-    this.forkBinder = null; // defined when the fork is
-    this.clusterBinder = new BinderFor(cluster);
+    this.clusterBinder = new BinderFor(cluster as any); // lack the 'off' method
     this.processBinder = new BinderFor(process);
 
     this.env = {
@@ -66,7 +93,7 @@ export default class Worker extends EventEmitter {
     };
   }
 
-  onExit(fork, code) {
+  onExit(fork: ClusterWorker, code: number) {
     if (this.fork !== fork) return;
 
     // we have our fork's exit, so stop listening for others
@@ -91,7 +118,7 @@ export default class Worker extends EventEmitter {
     }
   }
 
-  onChange(path) {
+  onChange(path: string) {
     if (!this.watch) return;
     this.changes.push(path);
     this.start();
@@ -104,7 +131,7 @@ export default class Worker extends EventEmitter {
       this.fork.killed = true;
 
       // stop listening to the fork, it's just going to die
-      this.forkBinder.destroy();
+      this.forkBinder!.destroy();
 
       // we don't need to react to process.exit anymore
       this.processBinder.destroy();
@@ -114,12 +141,14 @@ export default class Worker extends EventEmitter {
     }
   }
 
-  parseIncomingMessage(msg) {
-    if (!Array.isArray(msg)) return;
-    this.onMessage(...msg);
+  parseIncomingMessage(msg: any) {
+    if (!Array.isArray(msg)) {
+      return;
+    }
+    this.onMessage(msg[0], msg[1]);
   }
 
-  onMessage(type, data) {
+  onMessage(type: string, data?: any) {
     switch (type) {
       case 'WORKER_BROADCAST':
         this.emit('broadcast', data);
@@ -170,16 +199,16 @@ export default class Worker extends EventEmitter {
       this.log.warn(`restarting ${this.title}...`);
     }
 
-    this.fork = cluster.fork(this.env);
+    this.fork = cluster.fork(this.env) as ClusterWorker;
     this.forkBinder = new BinderFor(this.fork);
 
     // when the fork sends a message, comes online, or loses its connection, then react
-    this.forkBinder.on('message', msg => this.parseIncomingMessage(msg));
+    this.forkBinder.on('message', (msg: any) => this.parseIncomingMessage(msg));
     this.forkBinder.on('online', () => this.onOnline());
     this.forkBinder.on('disconnect', () => this.onDisconnect());
 
     // when the cluster says a fork has exited, check if it is ours
-    this.clusterBinder.on('exit', (fork, code) => this.onExit(fork, code));
+    this.clusterBinder.on('exit', (fork: ClusterWorker, code: number) => this.onExit(fork, code));
 
     // when the process exits, make sure we kill our workers
     this.processBinder.on('exit', () => this.shutdown());
