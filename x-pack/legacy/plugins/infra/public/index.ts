@@ -4,47 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-import { PluginInitializerContext } from 'kibana/public';
-import chrome from 'ui/chrome';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
-// @ts-ignore
-import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { plugin } from './new_platform_index';
+// NP_NOTE: Whilst we are in the transition period of the NP migration, this index file
+// is exclusively for our static code exports that other plugins (e.g. APM) use.
+// When we switch over to the real NP, and an export of "plugin" is expected and called,
+// we can do away with the middle "app.ts" layer. The "app.ts" layer is needed for now,
+// and needs to be situated differently to this index file, so that our code for setting the root template
+// and attempting to start the app doesn't try to run just because another plugin is importing from this file.
 
-const ROOT_ELEMENT_ID = 'react-infra-root';
 export { useTrackPageview } from './hooks/use_track_metric';
-export { ROOT_ELEMENT_ID };
-
-const { core, plugins } = npStart;
-const __LEGACY = {
-  uiModules,
-  uiRoutes,
-  timezoneProvider,
-};
-// This will be moved to core.application.register when the new platform
-// migration is complete.
-// @ts-ignore
-chrome.setRootTemplate(`
-  <main
-    id="${ROOT_ELEMENT_ID}"
-    class="infReactRoot"
-  ></main>
-`);
-
-const checkForRoot = () => {
-  return new Promise(resolve => {
-    const ready = !!document.getElementById(ROOT_ELEMENT_ID);
-    if (ready) {
-      resolve();
-    } else {
-      setTimeout(() => resolve(checkForRoot()), 10);
-    }
-  });
-};
-
-checkForRoot().then(() => {
-  plugin({} as PluginInitializerContext).start(core, plugins, __LEGACY);
-});

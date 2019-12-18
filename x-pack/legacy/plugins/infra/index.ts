@@ -35,7 +35,7 @@ export function infra(kibana: any) {
           defaultMessage: 'Explore your metrics',
         }),
         icon: 'plugins/infra/images/infra_mono_white.svg',
-        main: 'plugins/infra/index',
+        main: 'plugins/infra/app',
         title: i18n.translate('xpack.infra.infrastructureTitle', {
           defaultMessage: 'Metrics',
         }),
