@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first } from 'lodash';
+import { first, memoize } from 'lodash';
 
 export const ECS_ALLOWED_LIST = [
   'host',
@@ -47,7 +47,7 @@ export const DOCKER_ALLOWED_LIST = [
 
 export const AWS_S3_ALLOWED_LIST = ['aws.s3'];
 
-export const getAllowedListForPrefix = (prefix: string) => {
+export const getAllowedListForPrefix = memoize((prefix: string) => {
   const firstPart = first(prefix.split(/\./));
   const defaultAllowedList = prefix ? [...ECS_ALLOWED_LIST, prefix] : ECS_ALLOWED_LIST;
   switch (firstPart) {
@@ -61,7 +61,10 @@ export const getAllowedListForPrefix = (prefix: string) => {
       if (prefix === 'aws.s3_daily_storage') {
         return [...defaultAllowedList, ...AWS_S3_ALLOWED_LIST];
       }
+      if (prefix === 'aws.metrics') {
+        return [...defaultAllowedList, 'aws.cloudwatch'];
+      }
     default:
       return defaultAllowedList;
   }
-};
+});
