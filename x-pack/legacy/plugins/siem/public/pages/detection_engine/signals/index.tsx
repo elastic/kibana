@@ -290,7 +290,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     return (
       <StatefulEventsViewer
         defaultIndices={defaultIndices} // TODO Get from new FrankInspired XavierHook
-        defaultFilters={defaultFiltersMemo}
+        pageFilters={defaultFiltersMemo}
         defaultModel={signalsDefaultModel}
         end={to}
         headerFilterGroup={

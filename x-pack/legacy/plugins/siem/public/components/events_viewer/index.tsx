@@ -27,7 +27,6 @@ import * as i18n from './translations';
 
 export interface OwnProps {
   defaultIndices?: string[];
-  defaultFilters?: esFilters.Filter[];
   defaultModel: SubsetTimelineModel;
   end: number;
   id: string;
@@ -89,7 +88,6 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
-    defaultFilters = [],
     defaultModel,
     deletedEventIds,
     defaultIndices,
@@ -102,6 +100,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
+    pageFilters = [],
     query,
     removeColumn,
     start,
@@ -158,7 +157,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
     const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
-    const eventsFilter = useMemo(() => [...filters], [defaultFilters]);
+    const eventsFilter = useMemo(() => [...filters], [pageFilters]);
 
     return (
       <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
@@ -203,7 +202,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
     prevProps.start === nextProps.start &&
-    isEqual(prevProps.defaultFilters, nextProps.defaultFilters) &&
+    isEqual(prevProps.pageFilters, nextProps.pageFilters) &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
     prevProps.showRowRenderers === nextProps.showRowRenderers &&
     prevProps.start === nextProps.start &&
@@ -218,7 +217,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id, defaultFilters = [], defaultModel }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, pageFilters = [], defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
     const {
@@ -237,7 +236,7 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
-      filters: [...getGlobalFiltersQuerySelector(state), ...defaultFilters],
+      filters: [...getGlobalFiltersQuerySelector(state), ...pageFilters],
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
