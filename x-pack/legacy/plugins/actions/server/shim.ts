@@ -7,7 +7,6 @@
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -23,8 +22,7 @@ import {
   LoggerFactory,
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
-import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
-import { PLUGIN } from './constants/plugin';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -79,9 +77,7 @@ export interface ActionsPluginsSetup {
   task_manager: TaskManagerSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
-  license: {
-    registerLicenseChecker: () => void;
-  };
+  licensing: LicensingPluginSetup;
 }
 export interface ActionsPluginsStart {
   security?: SecurityPluginStartContract;
@@ -140,15 +136,7 @@ export function shim(
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
-    license: {
-      registerLicenseChecker: registerLicenseChecker.bind(
-        null,
-        server,
-        PLUGIN.ID,
-        PLUGIN.getI18nName(i18n),
-        PLUGIN.MINIMUM_LICENSE_REQUIRED
-      ),
-    },
+    licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
   };
 
   const pluginsStart: ActionsPluginsStart = {

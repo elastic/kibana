@@ -10,6 +10,7 @@ import { Services } from './types';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertsClientFactory, TaskRunnerFactory } from './lib';
+import { LicenseState } from './lib/license_state';
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import {
   AlertingPluginInitializerContext,
@@ -49,6 +50,7 @@ export class Plugin {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private adminClient?: IClusterClient;
   private serverBasePath?: string;
+  private licenseState: LicenseState | null = null;
 
   constructor(initializerContext: AlertingPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -61,8 +63,9 @@ export class Plugin {
   ): Promise<PluginSetupContract> {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
-    // Register license checker
-    plugins.license.registerLicenseChecker();
+    const licenseState = new LicenseState();
+    licenseState.start(plugins.licensing.license$);
+    this.licenseState = licenseState;
 
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
@@ -84,19 +87,19 @@ export class Plugin {
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     // Register routes
-    core.http.route(extendRouteWithLicenseCheck(createAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(deleteAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(findAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(getAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(listAlertTypesRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(updateAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(enableAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(disableAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(updateApiKeyRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(muteAllAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(unmuteAllAlertRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(muteAlertInstanceRoute, plugins));
-    core.http.route(extendRouteWithLicenseCheck(unmuteAlertInstanceRoute, plugins));
+    core.http.route(extendRouteWithLicenseCheck(createAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(deleteAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(findAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(listAlertTypesRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(enableAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(disableAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateApiKeyRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(muteAllAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(unmuteAllAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(muteAlertInstanceRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(unmuteAlertInstanceRoute, this.licenseState));
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
@@ -143,5 +146,11 @@ export class Plugin {
       getAlertsClientWithRequest: (request: Hapi.Request) =>
         alertsClientFactory!.create(KibanaRequest.from(request), request),
     };
+  }
+
+  public stop() {
+    if (this.licenseState) {
+      this.licenseState.stop();
+    }
   }
 }

@@ -3,17 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AlertingPluginsSetup } from './shim';
-import { licensePreRoutingFactory } from './lib/license_pre_routing_factory';
+import { LicenseState, verifyApiAccessFactory } from './lib/license_state';
 
-export function extendRouteWithLicenseCheck(route: any, plugins: AlertingPluginsSetup) {
-  const licensePreRouting = licensePreRoutingFactory(plugins);
+export function extendRouteWithLicenseCheck(route: any, licenseState: LicenseState) {
+  const verifyApiAccessPreRouting = verifyApiAccessFactory(licenseState);
 
+  if (route.options) {
+    return {
+      ...route,
+      ['options']: {
+        ...route.options,
+        pre: [verifyApiAccessPreRouting],
+      },
+    };
+  }
   return {
     ...route,
     ['config']: {
       ...route.config,
-      pre: [licensePreRouting],
+      pre: [verifyApiAccessPreRouting],
     },
   };
 }
