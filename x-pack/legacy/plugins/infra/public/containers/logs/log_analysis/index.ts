@@ -9,3 +9,4 @@ export * from './log_analysis_cleanup';
 export * from './log_analysis_module';
 export * from './log_analysis_module_status';
 export * from './log_analysis_module_types';
+export * from './log_analysis_setup_state';
