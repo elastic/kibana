@@ -69,7 +69,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? 'unknown rule id';
           try {
-            const updatedRule = await updateRules({
+            const rule = await updateRules({
               alertsClient,
               actionsClient,
               description,
@@ -99,8 +99,8 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               references,
               version,
             });
-            if (updatedRule != null) {
-              return transformOrBulkError(updatedRule.id, updatedRule);
+            if (rule != null) {
+              return transformOrBulkError(rule.id, rule);
             } else {
               return getIdBulkError({ id, ruleId });
             }

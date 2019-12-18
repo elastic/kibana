@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Joi from 'joi';
 
-import { RequestFacade } from '../../../../types';
+import { queryRulesSchema } from './query_rules_schema';
 
-export type QueryRequest = Omit<RequestFacade, 'query'> & {
-  query: { id: string | undefined; rule_id: string | undefined };
-};
+export const queryRulesBulkSchema = Joi.array().items(queryRulesSchema);

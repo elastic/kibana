@@ -48,6 +48,14 @@ export interface BulkRulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest[];
 }
 
+export type QueryRequest = Omit<RequestFacade, 'query'> & {
+  query: { id: string | undefined; rule_id: string | undefined };
+};
+
+export interface QueryBulkRequest extends RequestFacade {
+  payload: Array<QueryRequest['query']>;
+}
+
 export interface FindRuleParams {
   alertsClient: AlertsClient;
   perPage?: number;
