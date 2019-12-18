@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
 import { wrapInI18nContext } from '../legacy_imports';
+import { savedObjectLoaderVisualize } from '../saved_visualizations/saved_visualizations';
 
 export function initListingDirective(app) {
   app.directive('visualizeListingTable', reactDirective =>
@@ -47,7 +48,6 @@ export function VisualizeListingController($injector, createNewVis) {
     addBasePath,
     chrome,
     legacyChrome,
-    savedObjectRegistry,
     savedObjectsClient,
     data: {
       query: {
@@ -94,10 +94,7 @@ export function VisualizeListingController($injector, createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
     this.createNewVis();
   }
-
-  // TODO: Extract this into an external service.
-  const services = savedObjectRegistry.byLoaderPropertiesName;
-  const visualizationService = services.visualizations;
+  const visualizationService = savedObjectLoaderVisualize;
   this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {

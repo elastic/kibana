@@ -25,7 +25,6 @@ import {
   legacyChrome,
   npSetup,
   npStart,
-  SavedObjectRegistryProvider,
   VisEditorTypesRegistryProvider,
 } from './legacy_imports';
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
@@ -42,12 +41,10 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const Private = injector.get<IPrivate>('Private');
 
   const editorTypes = Private(VisEditorTypesRegistryProvider);
-  const savedObjectRegistry = Private(SavedObjectRegistryProvider);
 
   return {
     legacyChrome,
     editorTypes,
-    savedObjectRegistry,
     savedVisualizations: injector.get('savedVisualizations'),
   };
 }

@@ -28,59 +28,62 @@ import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 const app = uiModules.get('app/visualize');
 
-app.service('savedVisualizations', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-  class SavedObjectLoaderVisualize extends SavedObjectLoader {
-    mapHitSource = (source: Record<string, any>, id: string) => {
-      const visTypes = visualizations.types;
-      source.id = id;
-      source.url = this.urlFor(id);
+const savedObjectsClient = npStart.core.savedObjects.client;
+const services = {
+  savedObjectsClient,
+  indexPatterns: npStart.plugins.data.indexPatterns,
+  chrome: npStart.core.chrome,
+  overlays: npStart.core.overlays,
+};
+class SavedObjectLoaderVisualize extends SavedObjectLoader {
+  mapHitSource = (source: Record<string, any>, id: string) => {
+    const visTypes = visualizations.types;
+    source.id = id;
+    source.url = this.urlFor(id);
 
-      let typeName = source.typeName;
-      if (source.visState) {
-        try {
-          typeName = JSON.parse(String(source.visState)).type;
-        } catch (e) {
-          /* missing typename handled below */
-        } // eslint-disable-line no-empty
-      }
+    let typeName = source.typeName;
+    if (source.visState) {
+      try {
+        typeName = JSON.parse(String(source.visState)).type;
+      } catch (e) {
+        /* missing typename handled below */
+      } // eslint-disable-line no-empty
+    }
 
-      if (!typeName || !visTypes.get(typeName)) {
-        source.error = 'Unknown visualization type';
-        return source;
-      }
-
-      source.type = visTypes.get(typeName);
-      source.savedObjectType = 'visualization';
-      source.icon = source.type.icon;
-      source.image = source.type.image;
-      source.typeTitle = source.type.title;
-      source.editUrl = `#${createVisualizeEditUrl(id)}`;
-
+    if (!typeName || !visTypes.get(typeName)) {
+      source.error = 'Unknown visualization type';
       return source;
-    };
-    urlFor(id: string) {
-      return `#/visualize/edit/${encodeURIComponent(id)}`;
     }
-    // This behaves similarly to find, except it returns visualizations that are
-    // defined as appExtensions and which may not conform to type: visualization
-    findListItems(search: string = '', size: number = 100) {
-      return findListItems({
-        search,
-        size,
-        mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
-        savedObjectsClient,
-        visTypes: visualizations.types.getAliases(),
-      });
-    }
-  }
-  const SavedVis = createSavedVisClass(services);
 
-  return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient, npStart.core.chrome);
-});
+    source.type = visTypes.get(typeName);
+    source.savedObjectType = 'visualization';
+    source.icon = source.type.icon;
+    source.image = source.type.image;
+    source.typeTitle = source.type.title;
+    source.editUrl = `#${createVisualizeEditUrl(id)}`;
+
+    return source;
+  };
+  urlFor(id: string) {
+    return `#/visualize/edit/${encodeURIComponent(id)}`;
+  }
+  // This behaves similarly to find, except it returns visualizations that are
+  // defined as appExtensions and which may not conform to type: visualization
+  findListItems(search: string = '', size: number = 100) {
+    return findListItems({
+      search,
+      size,
+      mapSavedObjectApiHits: this.mapSavedObjectApiHits.bind(this),
+      savedObjectsClient,
+      visTypes: visualizations.types.getAliases(),
+    });
+  }
+}
+const SavedVis = createSavedVisClass(services);
+export const savedObjectLoaderVisualize = new SavedObjectLoaderVisualize(
+  SavedVis,
+  savedObjectsClient,
+  npStart.core.chrome
+);
+
+app.service('savedVisualizations', () => savedObjectLoaderVisualize);
