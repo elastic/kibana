@@ -1098,4 +1098,26 @@ describe('add prepackaged rules schema', () => {
       }).error
     ).toBeFalsy();
   });
+
+  test('validates with timeline_id', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        version: 1,
+        timeline_id: 'timeline-id',
+      }).error
+    ).toBeFalsy();
+  });
 });
