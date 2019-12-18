@@ -14,21 +14,21 @@ interface Props {
   retry: () => void;
 }
 
-export const LogEntryRateSetupStatusUnknownContent: React.FunctionComponent<Props> = ({
+export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<Props> = ({
   retry,
 }: Props) => (
   <EmptyPrompt
     title={
       <h2>
         <FormattedMessage
-          id="xpack.infra.logs.analysisPage.setupStatusUnknown.title"
+          id="xpack.infra.logs.analysis.setupStatusUnknownTitle"
           defaultMessage="We couldn't determine the status of your ML jobs."
         />
       </h2>
     }
     actions={
       <EuiButton onClick={() => retry()} color="primary" fill>
-        {i18n.translate('xpack.infra.logs.analysisPage.setupStatusUnknown.tryAgainButton', {
+        {i18n.translate('xpack.infra.logs.analysis.setupStatusTryAgainButton', {
           defaultMessage: 'Try again',
         })}
       </EuiButton>

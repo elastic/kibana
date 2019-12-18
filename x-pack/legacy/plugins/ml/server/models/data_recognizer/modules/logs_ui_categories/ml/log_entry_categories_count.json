@@ -1,21 +1,24 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Logs UI: Detects anomalies in the log entry ingestion rate",
+  "description": "Logs UI: Detects anomalies in count of log entries by category",
   "groups": ["logs-ui"],
   "analysis_config": {
     "bucket_span": "15m",
+    "categorization_field_name": "message",
     "detectors": [
       {
-        "detector_description": "count",
+        "by_field_name": "mlcategory",
+        "detector_description": "count by learned log entry category",
         "function": "count",
         "partition_field_name": "event.dataset",
         "use_null": true
       }
     ],
-    "influencers": ["event.dataset"]
+    "influencers": ["event.dataset", "mlcategory"]
   },
   "analysis_limits": {
-    "model_memory_limit": "10mb"
+    "model_memory_limit": "100mb",
+    "categorization_examples_limit": 1
   },
   "data_description": {
     "time_field": "@timestamp",
@@ -25,7 +28,7 @@
     "enabled": true
   },
   "custom_settings": {
-    "created_by": "ml-module-logs-ui-analysis",
-    "job_revision": 2
+    "created_by": "ml-module-logs-ui-categories",
+    "job_revision": 0
   }
 }

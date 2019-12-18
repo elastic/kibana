@@ -16,11 +16,11 @@ import {
   LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
-import { useLogEntryRateSetup } from './use_log_entry_rate_setup';
+import { useLogEntryCategoriesSetup } from './use_log_entry_categories_setup';
 
-export const LogEntryRateSetupContent: React.FunctionComponent = () => {
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup' });
-  useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
+export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
+  useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 
   const {
     cleanUpAndSetUp,
@@ -36,7 +36,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
     validatedIndices,
     validationErrors,
     viewResults,
-  } = useLogEntryRateSetup();
+  } = useLogEntryCategoriesSetup();
 
   const steps = useMemo(
     () => [
@@ -77,18 +77,18 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
   );
 
   return (
-    <LogAnalysisSetupPage data-test-subj="logEntryRateSetupPage">
+    <LogAnalysisSetupPage data-test-subj="logEntryCategoriesSetupPage">
       <LogAnalysisSetupPageHeader>
         <FormattedMessage
-          id="xpack.infra.analysisSetup.analysisSetupTitle"
+          id="xpack.infra.logs.logEntryCategories.setupTitle"
           defaultMessage="Enable Machine Learning analysis"
         />
       </LogAnalysisSetupPageHeader>
       <LogAnalysisSetupPageContent>
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.infra.analysisSetup.analysisSetupDescription"
-            defaultMessage="Use Machine Learning to automatically detect anomalous log rate counts."
+            id="xpack.infra.logs.logEntryCategories.setupDescription"
+            defaultMessage="Use Machine Learning to automatically categorize log messages."
           />
         </EuiText>
         <EuiSpacer />
