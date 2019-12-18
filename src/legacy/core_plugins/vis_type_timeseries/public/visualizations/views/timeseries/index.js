@@ -136,79 +136,80 @@ export const TimeSeries = ({
         );
       })}
 
-      {series.map(
-        (
-          {
-            id,
-            label,
-            bars,
-            lines,
-            data,
-            hideInLegend,
-            xScaleType,
-            yScaleType,
-            groupId,
-            color,
-            stack,
-            points,
-            useDefaultGroupDomain,
-          },
-          sortIndex
-        ) => {
-          const stackAccessors = getStackAccessors(stack);
-          const isPercentage = stack === STACKED_OPTIONS.PERCENT;
-          const key = `${id}-${label}`;
+      {series
+        .map(
+          (
+            {
+              id,
+              label,
+              bars,
+              lines,
+              data,
+              hideInLegend,
+              xScaleType,
+              yScaleType,
+              groupId,
+              color,
+              stack,
+              points,
+              useDefaultGroupDomain,
+            },
+            sortIndex
+          ) => {
+            const stackAccessors = getStackAccessors(stack);
+            const isPercentage = stack === STACKED_OPTIONS.PERCENT;
+            const key = `${id}-${label}-${sortIndex}`;
+            if (bars.show) {
+              return (
+                <BarSeriesDecorator
+                  key={key}
+                  seriesId={id}
+                  seriesGroupId={groupId}
+                  name={label.toString()}
+                  data={data}
+                  hideInLegend={hideInLegend}
+                  bars={bars}
+                  color={color}
+                  stackAccessors={stackAccessors}
+                  stackAsPercentage={isPercentage}
+                  xScaleType={xScaleType}
+                  yScaleType={yScaleType}
+                  timeZone={timeZone}
+                  enableHistogramMode={enableHistogramMode}
+                  useDefaultGroupDomain={useDefaultGroupDomain}
+                  sortIndex={sortIndex}
+                />
+              );
+            }
 
-          if (bars.show) {
-            return (
-              <BarSeriesDecorator
-                key={key}
-                seriesId={id}
-                seriesGroupId={groupId}
-                name={label.toString()}
-                data={data}
-                hideInLegend={hideInLegend}
-                bars={bars}
-                color={color}
-                stackAccessors={stackAccessors}
-                stackAsPercentage={isPercentage}
-                xScaleType={xScaleType}
-                yScaleType={yScaleType}
-                timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
-                useDefaultGroupDomain={useDefaultGroupDomain}
-                sortIndex={sortIndex}
-              />
-            );
+            if (lines.show) {
+              return (
+                <AreaSeriesDecorator
+                  key={key}
+                  seriesId={id}
+                  seriesGroupId={groupId}
+                  name={label.toString()}
+                  data={data}
+                  hideInLegend={hideInLegend}
+                  lines={lines}
+                  color={color}
+                  stackAccessors={stackAccessors}
+                  stackAsPercentage={isPercentage}
+                  points={points}
+                  xScaleType={xScaleType}
+                  yScaleType={yScaleType}
+                  timeZone={timeZone}
+                  enableHistogramMode={enableHistogramMode}
+                  useDefaultGroupDomain={useDefaultGroupDomain}
+                  sortIndex={sortIndex}
+                />
+              );
+            }
+
+            return null;
           }
-
-          if (lines.show) {
-            return (
-              <AreaSeriesDecorator
-                key={key}
-                seriesId={id}
-                seriesGroupId={groupId}
-                name={label.toString()}
-                data={data}
-                hideInLegend={hideInLegend}
-                lines={lines}
-                color={color}
-                stackAccessors={stackAccessors}
-                stackAsPercentage={isPercentage}
-                points={points}
-                xScaleType={xScaleType}
-                yScaleType={yScaleType}
-                timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
-                useDefaultGroupDomain={useDefaultGroupDomain}
-                sortIndex={sortIndex}
-              />
-            );
-          }
-
-          return null;
-        }
-      )}
+        )
+        .reverse()}
 
       {yAxis.map(({ id, groupId, position, tickFormatter, domain, hide }) => (
         <Axis
