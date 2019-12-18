@@ -350,7 +350,7 @@ export function App({
             }}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             title={lastKnownDoc.title || ''}
-            showCopyOnSave={true}
+            showCopyOnSave={!addToDashMode}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
