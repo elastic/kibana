@@ -6,8 +6,8 @@ if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   yarn run grunt functionalTests:ensureAllTestsInCiGroup;
   node scripts/build --debug --oss;
 else
-  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
-  destDir=${installDir}-${CI_WORKER_NUMBER}
+  installDir="$PARENT_DIR/install/kibana"
+  destDir="${installDir}-${CI_WORKER_NUMBER}"
   cp -R "$installDir" "$destDir"
 
   export KIBANA_INSTALL_DIR="$destDir"
