@@ -51,8 +51,7 @@ interface WorkerOptions {
   baseArgv?: string[];
 }
 
-// eslint-disable-next-line import/no-default-export
-export default class Worker extends EventEmitter {
+export class Worker extends EventEmitter {
   private readonly clusterBinder: BinderFor;
   private readonly processBinder: BinderFor;
 

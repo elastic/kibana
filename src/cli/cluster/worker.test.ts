@@ -19,7 +19,7 @@
 
 import { mockCluster } from './cluster_manager.test.mocks';
 
-import Worker, { ClusterWorker } from './worker';
+import { Worker, ClusterWorker } from './worker';
 // @ts-ignore
 import Log from '../log';
 

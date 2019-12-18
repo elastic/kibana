@@ -254,7 +254,7 @@ export class LegacyService implements CoreService {
       : EMPTY;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const ClusterManager = require('../../../cli/cluster/cluster_manager');
+    const { ClusterManager } = require('../../../cli/cluster/cluster_manager');
     return new ClusterManager(
       this.coreContext.env.cliArgs,
       config,

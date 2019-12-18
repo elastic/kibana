@@ -27,7 +27,7 @@ import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
 // @ts-ignore: implicit any for JS file
-import MockClusterManager from '../../../cli/cluster/cluster_manager';
+import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';

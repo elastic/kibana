@@ -31,12 +31,11 @@ import { BasePathProxyServer } from '../../core/server/http';
 
 // @ts-ignore
 import Log from '../log';
-import Worker from './worker';
+import { Worker } from './worker';
 
 process.env.kbnWorkerType = 'managr';
 
-// eslint-disable-next-line import/no-default-export
-export default class ClusterManager {
+export class ClusterManager {
   public optimizer: Worker;
   public server: Worker;
   public workers: Worker[];

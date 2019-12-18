@@ -28,8 +28,8 @@ jest.mock('readline', () => ({
 
 import { sample } from 'lodash';
 
-import ClusterManager from './cluster_manager';
-import Worker from './worker';
+import { ClusterManager } from './cluster_manager';
+import { Worker } from './worker';
 
 describe('CLI cluster manager', () => {
   beforeEach(() => {
