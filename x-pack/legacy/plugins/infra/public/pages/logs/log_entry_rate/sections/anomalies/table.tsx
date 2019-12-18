@@ -22,8 +22,8 @@ interface TableItem {
 
 interface SortingOptions {
   sort: {
-    field: string;
-    direction: string;
+    field: keyof TableItem;
+    direction: 'asc' | 'desc';
   };
 }
 
@@ -139,7 +139,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       name: maxAnomalyScoreColumnName,
       sortable: true,
       truncateText: true,
-      dataType: 'number',
+      dataType: 'number' as const,
     },
     {
       align: RIGHT_ALIGNMENT,
@@ -169,8 +169,8 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 };
 
-const StyledEuiBasicTable = euiStyled(EuiBasicTable)`
+const StyledEuiBasicTable: typeof EuiBasicTable = euiStyled(EuiBasicTable as any)`
   & .euiTable {
     table-layout: auto;
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any

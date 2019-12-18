@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiHealth,
+  EuiIconTip,
+  EuiLink,
+  EuiTableActionsColumnType,
+  EuiTextColor,
+} from '@elastic/eui';
 import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getEmptyTagValue } from '../../../../components/empty_value';
@@ -26,6 +33,7 @@ import { RuleSwitch, RuleStateChangeCallback } from '../components/rule_switch';
 const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
+    type: 'icon',
     icon: 'visControls',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: editRuleAction,
@@ -33,6 +41,7 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   },
   {
     description: i18n.RUN_RULE_MANUALLY,
+    type: 'icon',
     icon: 'play',
     name: i18n.RUN_RULE_MANUALLY,
     onClick: runRuleAction,
@@ -40,18 +49,21 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string) => [
   },
   {
     description: i18n.DUPLICATE_RULE,
+    type: 'icon',
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
     onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch, kbnVersion),
   },
   {
     description: i18n.EXPORT_RULE,
+    type: 'icon',
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
     onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
   },
   {
     description: i18n.DELETE_RULE,
+    type: 'icon',
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, kbnVersion),
@@ -144,7 +156,7 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
     width: '20%',
   },
   {
-    align: 'center',
+    align: 'center' as const,
     field: 'activate',
     name: i18n.COLUMN_ACTIVATE,
     render: (value: TableData['activate'], item: TableData) => {
@@ -167,5 +179,5 @@ export const getColumns = (dispatch: React.Dispatch<Action>, kbnVersion: string)
   {
     actions: getActions(dispatch, kbnVersion),
     width: '40px',
-  },
+  } as EuiTableActionsColumnType<TableData>,
 ];
