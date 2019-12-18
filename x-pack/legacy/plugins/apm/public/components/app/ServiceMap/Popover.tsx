@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
 import { EuiPopover } from '@elastic/eui';
-import { CytoscapeContext } from './Cytoscape';
 import cytoscape from 'cytoscape';
+import React, { useContext, useEffect, useState } from 'react';
+import { CytoscapeContext } from './Cytoscape';
 
 export function Popover() {
   const cy = useContext(CytoscapeContext);
-  const [isOpen, setIsOpen] = useState(true);
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
   >(undefined);
@@ -21,29 +20,51 @@ export function Popover() {
       cy.on('select', event => {
         setSelectedNode(event.target);
       });
-      cy.on('unselect', () => {
+      cy.on('unselect viewport', () => {
         setSelectedNode(undefined);
       });
     }
+
+    window.onclick = event => {
+      console.log(event);
+      console.log(event.target.x, event.target.y);
+    };
   }, [cy]);
 
-  console.log({
-    position: selectedNode?.position(),
-    renderedPostion: selectedNode?.renderedPosition()
-  });
+  if (!cy || !selectedNode) {
+    return null;
+  }
 
+  const container = (cy.container() as HTMLElement) || undefined;
+
+  if (!container) {
+    return null;
+  }
+
+  const triggerStyle = {
+    background: 'transparent',
+    height: selectedNode.renderedHeight(),
+    width: selectedNode.renderedWidth()
+  };
+  const trigger = <div className="trigger" style={triggerStyle} />;
+
+  const { x, y } = selectedNode.position();
+  const pan = cy.pan();
+
+  const popoverStyle = {
+    transform: `translate(${x - pan.x}px, ${y + pan.y}px)`
+  };
+  console.log({ x, y, panx: cy.pan().x, pany: cy.pan().y });
   return (
-    <span
-      style={{
-        position: 'absolute',
-        left: selectedNode?.renderedPosition().x,
-        top: selectedNode?.renderedPosition().y
-      }}
+    <EuiPopover
+      className="poopover"
+      container={container}
+      style={popoverStyle}
+      closePopover={() => {}}
+      isOpen={true}
+      button={trigger}
     >
-      {JSON.stringify(selectedNode?.data())}
-    </span>
-    // <EuiPopover isOpen={isOpen} style={{ top: 100, right: 300 }}>
-    //   content
-    // </EuiPopover>
+      {JSON.stringify(selectedNode.data())}
+    </EuiPopover>
   );
 }

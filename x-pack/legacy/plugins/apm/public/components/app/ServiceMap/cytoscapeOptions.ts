@@ -41,11 +41,19 @@ const style: cytoscape.Stylesheet[] = [
           return theme.euiColorSecondary;
         }
         if (el.selected()) {
-          return 'red';
+          return theme.euiColorPrimary;
         }
         return theme.euiColorMediumShade;
       },
-      'border-width': 2,
+      'border-width': (el: cytoscape.NodeSingular) => {
+        if (el.hasClass('primary')) {
+          return 4;
+        }
+        if (el.selected()) {
+          return 4;
+        }
+        return 2;
+      },
       color: theme.textColors.default,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
@@ -82,6 +90,13 @@ const style: cytoscape.Stylesheet[] = [
       // @ts-ignore
       'target-distance-from-node': theme.paddingSizes.xs,
       width: 2
+    }
+  },
+  {
+    selector: 'edge:hover',
+    style: {
+      color: theme.euiColorPrimary,
+      width: 4
     }
   }
 ];
