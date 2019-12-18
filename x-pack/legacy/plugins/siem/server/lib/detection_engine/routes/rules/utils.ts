@@ -9,6 +9,7 @@ import { pickBy } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
+import { transformBulkError, createBulkErrorObject } from '../utils';
 
 export const getIdError = ({
   id,
@@ -81,5 +82,20 @@ export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> |
     return transformAlertToRule(alert);
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
+  }
+};
+
+export const transformOrBulkError = (
+  ruleId: string,
+  alert: unknown
+): Partial<OutputRuleAlertRest> | Boom => {
+  if (isAlertType(alert)) {
+    return transformAlertToRule(alert);
+  } else {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+    });
   }
 };
