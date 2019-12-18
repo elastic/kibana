@@ -4,16 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILicense } from '../../../licensing/server';
+import { licensingMock } from '../../../licensing/server/mocks';
 import { SecurityLicenseService } from './license_service';
-
-function getMockRawLicense({ isAvailable = false } = {}) {
-  return ({
-    isAvailable,
-    isOneOf: jest.fn(),
-    getFeature: jest.fn(),
-  } as unknown) as jest.Mocked<ILicense>;
-}
 
 describe('license features', function() {
   it('should display error when ES is unavailable', () => {
@@ -31,7 +23,9 @@ describe('license features', function() {
 
   it('should display error when X-Pack is unavailable', () => {
     const serviceSetup = new SecurityLicenseService().setup();
-    serviceSetup.update(getMockRawLicense({ isAvailable: false }));
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.isAvailable = false;
+    serviceSetup.update(mockRawLicense);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
@@ -44,10 +38,8 @@ describe('license features', function() {
   });
 
   it('should show login page and other security elements, allow RBAC but forbid document level security if license is not platinum or trial.', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
-    mockRawLicense.isOneOf.mockImplementation(licenses =>
-      Array.isArray(licenses) ? licenses.includes('basic') : licenses === 'basic'
-    );
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.hasAtLeast.mockReturnValue(false);
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup();
@@ -65,8 +57,8 @@ describe('license features', function() {
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
-    mockRawLicense.isOneOf.mockReturnValue(false);
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.hasAtLeast.mockReturnValue(false);
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: false, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup();
@@ -83,14 +75,9 @@ describe('license features', function() {
   });
 
   it('should allow to login, allow RBAC and document level security if license >= platinum', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
-    mockRawLicense.isOneOf.mockImplementation(licenses => {
-      const licenseArray = [licenses].flat();
-      return (
-        licenseArray.includes('trial') ||
-        licenseArray.includes('platinum') ||
-        licenseArray.includes('enterprise')
-      );
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.hasAtLeast.mockImplementation(license => {
+      return license === 'trial' || license === 'platinum' || license === 'enterprise';
     });
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
