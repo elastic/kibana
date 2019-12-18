@@ -17,6 +17,8 @@ import { UpdateSourceEditor } from './update_source_editor';
 import {
   ES_SEARCH,
   ES_GEO_FIELD_TYPE,
+  DEFAULT_MAX_RESULT_WINDOW,
+  DEFAULT_MAX_INNER_RESULT_WINDOW,
   DEFAULT_MAX_BUCKETS_LIMIT,
   GIS_API_PATH,
   SORT_ORDER,
@@ -28,6 +30,23 @@ import { kfetch } from 'ui/kfetch';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
+
+async function loadIndexSettings(indexPatternTitle) {
+  try {
+    const indexSettings = await kfetch({
+      pathname: `../${GIS_API_PATH}/indexSettings`,
+      query: {
+        indexPatternTitle,
+      },
+    });
+    return indexSettings;
+  } catch (err) {
+    return {
+      maxResultWindow: DEFAULT_MAX_RESULT_WINDOW,
+      maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
+    };
+  }
+}
 
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
@@ -299,20 +318,11 @@ export class ESSearchSource extends AbstractESSource {
 
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
-  async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
+  async _getSearchHits(layerName, searchFilters, maxResultWindow, registerCancelCallback) {
     const initialSearchContext = {
       docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
     };
     const geoField = await this._getGeoField();
-    const indexPattern = await this.getIndexPattern();
-
-    const indexSettings = await kfetch({
-      pathname: `../${GIS_API_PATH}/indexSettings`,
-      query: {
-        indexPatternTitle: indexPattern.title,
-      },
-    });
-    console.log(indexSettings);
 
     let searchSource;
     if (geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT) {
@@ -324,7 +334,7 @@ export class ESSearchSource extends AbstractESSource {
       );
       searchSource = await this._makeSearchSource(
         searchFilters,
-        10000,
+        maxResultWindow,
         initialSearchContext
       );
       searchSource.setField('source', false); // do not need anything from _source
@@ -333,7 +343,7 @@ export class ESSearchSource extends AbstractESSource {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
       searchSource = await this._makeSearchSource(
         searchFilters,
-        10000,
+        maxResultWindow,
         initialSearchContext
       );
       // Setting "fields" instead of "source: { includes: []}"
@@ -374,12 +384,22 @@ export class ESSearchSource extends AbstractESSource {
     return !!sortField && !!sortOrder;
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+  async getGeoJsonWithMeta(layerName, searchFilters, prevMeta, registerCancelCallback) {
+    const indexPattern = await this.getIndexPattern();
+
+    const indexSettings = prevMeta.indexSettings
+      ? prevMeta.indexSettings
+      : await loadIndexSettings(indexPattern.title);
+
     const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
+      : await this._getSearchHits(
+          layerName,
+          searchFilters,
+          indexSettings.maxResultWindow,
+          registerCancelCallback
+        );
 
-    const indexPattern = await this.getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
       return !['_id', '_index'].includes(metaField);
     });
@@ -408,7 +428,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta,
+      meta: { ...meta, indexSettings },
     };
   }
 
