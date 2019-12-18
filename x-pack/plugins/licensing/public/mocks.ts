@@ -8,22 +8,17 @@ import { LicensingPluginSetup } from './types';
 import { licenseMock } from '../common/licensing.mock';
 
 const createSetupMock = () => {
-  const license = licenseMock.create();
+  const license = licenseMock.createLicense();
   const mock: jest.Mocked<LicensingPluginSetup> = {
     license$: new BehaviorSubject(license),
     refresh: jest.fn(),
-    createLicensePoller: jest.fn(),
   };
   mock.refresh.mockResolvedValue(license);
-  mock.createLicensePoller.mockReturnValue({
-    license$: mock.license$,
-    refresh: mock.refresh,
-  });
 
   return mock;
 };
 
 export const licensingMock = {
   createSetup: createSetupMock,
-  createLicense: licenseMock.create,
+  ...licenseMock,
 };
