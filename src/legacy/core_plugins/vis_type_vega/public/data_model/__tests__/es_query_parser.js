@@ -36,7 +36,7 @@ const ctxObj = { bool: { must: { match_all: { a: 1 } }, must_not: { b: 2 } } };
 function create(min, max, dashboardCtx) {
   const inst = new EsQueryParser(
     {
-      getTimeBounds: () => ({ min, max })
+      getTimeBounds: () => ({ min, max }),
     },
     () => {},
     _.cloneDeep(dashboardCtx),
@@ -46,25 +46,35 @@ function create(min, max, dashboardCtx) {
 }
 
 describe(`EsQueryParser time`, () => {
-
   it(`roundInterval(4s)`, () => expect(EsQueryParser._roundInterval(4 * second)).to.be(`1s`));
   it(`roundInterval(4hr)`, () => expect(EsQueryParser._roundInterval(4 * hour)).to.be(`3h`));
   it(`getTimeBound`, () => expect(create(1000, 2000)._getTimeBound({}, `min`)).to.be(1000));
-  it(`getTimeBound(shift 2d)`, () => expect(create(5, 2000)._getTimeBound({ shift: 2 }, `min`)).to.be(5 + 2 * day));
-  it(`getTimeBound(shift -2hr)`, () => expect(create(10 * day, 20 * day)
-    ._getTimeBound({ shift: -2, unit: `h` }, `min`))
-    .to.be(10 * day - 2 * hour));
+  it(`getTimeBound(shift 2d)`, () =>
+    expect(create(5, 2000)._getTimeBound({ shift: 2 }, `min`)).to.be(5 + 2 * day));
+  it(`getTimeBound(shift -2hr)`, () =>
+    expect(create(10 * day, 20 * day)._getTimeBound({ shift: -2, unit: `h` }, `min`)).to.be(
+      10 * day - 2 * hour
+    ));
   it(`createRangeFilter({})`, () => {
     const obj = {};
     expect(create(1000, 2000)._createRangeFilter(obj))
-      .to.eql({ format: 'strict_date_optional_time', gte: moment(1000).toISOString(), lte: moment(2000).toISOString() }).and.to.be(obj);
+      .to.eql({
+        format: 'strict_date_optional_time',
+        gte: moment(1000).toISOString(),
+        lte: moment(2000).toISOString(),
+      })
+      .and.to.be(obj);
   });
   it(`createRangeFilter(shift 1s)`, () => {
     const obj = { shift: 5, unit: 's' };
     expect(create(1000, 2000)._createRangeFilter(obj))
-      .to.eql({ format: 'strict_date_optional_time', gte: moment(6000).toISOString(), lte: moment(7000).toISOString() }).and.to.be(obj);
+      .to.eql({
+        format: 'strict_date_optional_time',
+        gte: moment(6000).toISOString(),
+        lte: moment(7000).toISOString(),
+      })
+      .and.to.be(obj);
   });
-
 });
 
 describe('EsQueryParser.populateData', () => {
@@ -78,19 +88,23 @@ describe('EsQueryParser.populateData', () => {
     searchStub.returns(Promise.resolve([{}, {}]));
   });
   it('should set the timeout for each request', async () => {
-    await parser.populateData([{ url: { body: { } }, dataObject: {} }, { url: { body: {} }, dataObject: {} }]);
+    await parser.populateData([
+      { url: { body: {} }, dataObject: {} },
+      { url: { body: {} }, dataObject: {} },
+    ]);
     expect(searchStub.firstCall.args[0][0].body.timeout).to.be.defined;
   });
 
   it('should remove possible timeout parameters on a request', async () => {
-    await parser.populateData([{ url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} }]);
+    await parser.populateData([
+      { url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} },
+    ]);
     expect(searchStub.firstCall.args[0][0].body.timeout).to.be.defined;
     expect(searchStub.firstCall.args[0][0].timeout).to.be(undefined);
   });
 });
 
 describe(`EsQueryParser.injectQueryContextVars`, () => {
-
   function test(obj, expected, ctx) {
     return () => {
       create(rangeStart, rangeEnd, ctx)._injectContextVars(obj, true);
@@ -104,21 +118,53 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
     test(obj, _.cloneDeep(obj));
   });
   it(`must clause empty`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [] }, {}));
-  it(`must clause arr`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [...ctxArr.bool.must] }, ctxArr));
-  it(`must clause obj`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [ctxObj.bool.must] }, ctxObj));
-  it(`mixed clause arr`, test(
-    { arr: [1, '%dashboard_context-must_clause%', 2, '%dashboard_context-must_not_clause%'] },
-    { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not] }, ctxArr));
-  it(`mixed clause obj`, test(
-    { arr: ['%dashboard_context-must_clause%', 1, '%dashboard_context-must_not_clause%', 2] },
-    { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2] }, ctxObj));
-  it(`%autointerval% = true`, test({ interval: { '%autointerval%': true } }, { interval: `1h` }, ctxObj));
-  it(`%autointerval% = 10`, test({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, ctxObj));
+  it(
+    `must clause arr`,
+    test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [...ctxArr.bool.must] }, ctxArr)
+  );
+  it(
+    `must clause obj`,
+    test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [ctxObj.bool.must] }, ctxObj)
+  );
+  it(
+    `mixed clause arr`,
+    test(
+      { arr: [1, '%dashboard_context-must_clause%', 2, '%dashboard_context-must_not_clause%'] },
+      { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not] },
+      ctxArr
+    )
+  );
+  it(
+    `mixed clause obj`,
+    test(
+      { arr: ['%dashboard_context-must_clause%', 1, '%dashboard_context-must_not_clause%', 2] },
+      { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2] },
+      ctxObj
+    )
+  );
+  it(
+    `%autointerval% = true`,
+    test({ interval: { '%autointerval%': true } }, { interval: `1h` }, ctxObj)
+  );
+  it(
+    `%autointerval% = 10`,
+    test({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, ctxObj)
+  );
   it(`%timefilter% = min`, test({ a: { '%timefilter%': 'min' } }, { a: rangeStart }));
   it(`%timefilter% = max`, test({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));
-  it(`%timefilter% = true`, test(
-    { a: { '%timefilter%': true } },
-    { a: { format: 'strict_date_optional_time', gte: moment(rangeStart).toISOString(), lte: moment(rangeEnd).toISOString() } }));
+  it(
+    `%timefilter% = true`,
+    test(
+      { a: { '%timefilter%': true } },
+      {
+        a: {
+          format: 'strict_date_optional_time',
+          gte: moment(rangeStart).toISOString(),
+          lte: moment(rangeEnd).toISOString(),
+        },
+      }
+    )
+  );
 });
 
 describe(`EsQueryParser.parseEsRequest`, () => {
@@ -129,13 +175,18 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     };
   }
 
-  it(`%context_query%=true`, test(
-    { index: '_all', '%context_query%': true }, ctxArr,
-    { index: '_all', body: { query: ctxArr } }));
+  it(
+    `%context_query%=true`,
+    test({ index: '_all', '%context_query%': true }, ctxArr, {
+      index: '_all',
+      body: { query: ctxArr },
+    })
+  );
 
-  it(`%context%=true`, test(
-    { index: '_all', '%context%': true }, ctxArr,
-    { index: '_all', body: { query: ctxArr } }));
+  it(
+    `%context%=true`,
+    test({ index: '_all', '%context%': true }, ctxArr, { index: '_all', body: { query: ctxArr } })
+  );
 
   const expectedForCtxAndTimefield = {
     index: '_all',
@@ -149,25 +200,34 @@ describe(`EsQueryParser.parseEsRequest`, () => {
                 abc: {
                   format: 'strict_date_optional_time',
                   gte: moment(rangeStart).toISOString(),
-                  lte: moment(rangeEnd).toISOString()
-                }
-              }
-            }
+                  lte: moment(rangeEnd).toISOString(),
+                },
+              },
+            },
           ],
-          must_not: [{ 'd': 4 }]
-        }
-      }
-    }
+          must_not: [{ d: 4 }],
+        },
+      },
+    },
   };
 
-  it(`%context_query%='abc'`, test(
-    { index: '_all', '%context_query%': 'abc' }, ctxArr, expectedForCtxAndTimefield));
+  it(
+    `%context_query%='abc'`,
+    test({ index: '_all', '%context_query%': 'abc' }, ctxArr, expectedForCtxAndTimefield)
+  );
 
-  it(`%context%=true, %timefield%='abc'`, test(
-    { index: '_all', '%context%': true, '%timefield%': 'abc' }, ctxArr, expectedForCtxAndTimefield));
+  it(
+    `%context%=true, %timefield%='abc'`,
+    test(
+      { index: '_all', '%context%': true, '%timefield%': 'abc' },
+      ctxArr,
+      expectedForCtxAndTimefield
+    )
+  );
 
-  it(`%timefield%='abc'`, test({ index: '_all', '%timefield%': 'abc' }, ctxArr,
-    {
+  it(
+    `%timefield%='abc'`,
+    test({ index: '_all', '%timefield%': 'abc' }, ctxArr, {
       index: '_all',
       body: {
         query: {
@@ -175,18 +235,21 @@ describe(`EsQueryParser.parseEsRequest`, () => {
             abc: {
               format: 'strict_date_optional_time',
               gte: moment(rangeStart).toISOString(),
-              lte: moment(rangeEnd).toISOString()
-            }
-          }
-        }
-      }
-    }
-  ));
+              lte: moment(rangeEnd).toISOString(),
+            },
+          },
+        },
+      },
+    })
+  );
 
   it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
 
-  it(`esRequest`, test({ index: '_all', body: { query: 2 } }, ctxArr, {
-    index: '_all',
-    body: { query: 2 }
-  }));
+  it(
+    `esRequest`,
+    test({ index: '_all', body: { query: 2 } }, ctxArr, {
+      index: '_all',
+      body: { query: 2 },
+    })
+  );
 });

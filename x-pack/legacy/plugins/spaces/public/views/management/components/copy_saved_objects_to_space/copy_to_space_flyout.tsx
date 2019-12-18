@@ -21,12 +21,12 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  SavedObjectsManagementRecord,
-  processImportResponse,
-  ProcessedImportResponse,
-} from 'ui/management/saved_objects_management';
 import { ToastNotifications } from 'ui/notify/toasts/toast_notifications';
+import { SavedObjectsManagementRecord } from '../../../../../../../../../src/legacy/core_plugins/management/public';
+import {
+  ProcessedImportResponse,
+  processImportResponse,
+} from '../../../../../../../../../src/legacy/core_plugins/management/public';
 import { Space } from '../../../../../common/model/space';
 import { SpacesManager } from '../../../../lib';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
@@ -38,7 +38,6 @@ interface Props {
   onClose: () => void;
   savedObject: SavedObjectsManagementRecord;
   spacesManager: SpacesManager;
-  activeSpace: Space;
   toastNotifications: ToastNotifications;
 }
 
@@ -57,12 +56,13 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
   );
   useEffect(() => {
-    spacesManager
-      .getSpaces('copySavedObjectsIntoSpace')
-      .then(response => {
+    const getSpaces = spacesManager.getSpaces('copySavedObjectsIntoSpace');
+    const getActiveSpace = spacesManager.getActiveSpace();
+    Promise.all([getSpaces, getActiveSpace])
+      .then(([allSpaces, activeSpace]) => {
         setSpacesState({
           isLoading: false,
-          spaces: response,
+          spaces: allSpaces.filter(space => space.id !== activeSpace.id),
         });
       })
       .catch(e => {
@@ -73,7 +73,6 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         });
       });
   }, [spacesManager, toastNotifications]);
-  const eligibleSpaces = spaces.filter(space => space.id !== props.activeSpace.id);
 
   const [copyInProgress, setCopyInProgress] = useState(false);
   const [conflictResolutionInProgress, setConflictResolutionInProgress] = useState(false);
@@ -159,7 +158,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     }
 
     // Step 1a: assets loaded, but no spaces are available for copy.
-    if (eligibleSpaces.length === 0) {
+    if (spaces.length === 0) {
       return (
         <EuiEmptyPrompt
           body={
@@ -185,11 +184,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     // Step 2: Copy has not been initiated yet; User must fill out form to continue.
     if (!copyInProgress) {
       return (
-        <CopyToSpaceForm
-          spaces={eligibleSpaces}
-          copyOptions={copyOptions}
-          onUpdate={setCopyOptions}
-        />
+        <CopyToSpaceForm spaces={spaces} copyOptions={copyOptions} onUpdate={setCopyOptions} />
       );
     }
 
@@ -200,7 +195,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         copyInProgress={copyInProgress}
         conflictResolutionInProgress={conflictResolutionInProgress}
         copyResult={copyResult}
-        spaces={eligibleSpaces}
+        spaces={spaces}
         copyOptions={copyOptions}
         retries={retries}
         onRetriesChange={onRetriesChange}

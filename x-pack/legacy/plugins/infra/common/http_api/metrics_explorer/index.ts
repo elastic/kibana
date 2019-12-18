@@ -6,14 +6,22 @@
 
 import * as rt from 'io-ts';
 
-export const metricsExplorerAggregationRT = rt.keyof({
-  avg: null,
-  max: null,
-  min: null,
-  cardinality: null,
-  rate: null,
-  count: null,
-});
+export const METRIC_EXPLORER_AGGREGATIONS = [
+  'avg',
+  'max',
+  'min',
+  'cardinality',
+  'rate',
+  'count',
+] as const;
+
+type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
+
+const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
+  Record<MetricExplorerAggregations, null>
+>((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<MetricExplorerAggregations, null>);
+
+export const metricsExplorerAggregationRT = rt.keyof(metricsExplorerAggregationKeys);
 
 export const metricsExplorerMetricRequiredFieldsRT = rt.type({
   aggregation: metricsExplorerAggregationRT,

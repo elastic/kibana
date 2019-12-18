@@ -12,6 +12,24 @@ export function getComputedFieldNamePrefix(fieldName) {
   return `__kbn__dynamic__${fieldName}`;
 }
 
+export function isOnlySingleFeatureType(featureType, supportedFeatures, hasFeatureType) {
+  if (supportedFeatures.length === 1) {
+    return supportedFeatures[0] === featureType;
+  }
+
+  if (!hasFeatureType) {
+    return false;
+  }
+
+  const featureTypes = Object.keys(hasFeatureType);
+  return featureTypes.reduce((isOnlyTargetFeatureType, featureTypeKey) => {
+    const hasFeature = hasFeatureType[featureTypeKey];
+    return featureTypeKey === featureType
+      ? isOnlyTargetFeatureType && hasFeature
+      : isOnlyTargetFeatureType && !hasFeature;
+  }, true);
+}
+
 export function scaleValue(value, range) {
   if (isNaN(value) || !range) {
     return -1; //Nothing to scale, put outside scaled range

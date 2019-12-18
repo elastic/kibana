@@ -19,7 +19,7 @@
 
 import { buildQueryFilter } from './query_string_filter';
 
-describe('Phrase filter builder', () => {
+describe('Query string filter builder', () => {
   it('should be a function', () => {
     expect(typeof buildQueryFilter).toBe('function');
   });

@@ -5,14 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  formatNumber, formatBytesUsage
-} from '../format_number';
+import { formatNumber, formatBytesUsage } from '../format_number';
 
 describe('format_number', () => {
-
   describe('formatBytesUsage', () => {
-
     it('should 0 format bytes without a decimal', () => {
       expect(formatBytesUsage(0, 1024)).to.be('0.0 B / 1.0 KB');
       expect(formatBytesUsage(0, 1024 * 1024)).to.be('0.0 B / 1.0 MB');
@@ -22,13 +18,13 @@ describe('format_number', () => {
       // 604 KB + 114 B = 604.1 KB
       expect(formatBytesUsage(604 * 1024 + 114, 1024 * 1024)).to.be('604.1 KB / 1.0 MB');
       // 1.4 GB (aka roughly the standard Kibana heap)
-      expect(formatBytesUsage(604 * 1024 * 1024 + 114 * 1024, 1.4 * 1024 * 1024 * 1024)).to.be('604.1 MB / 1.4 GB');
+      expect(formatBytesUsage(604 * 1024 * 1024 + 114 * 1024, 1.4 * 1024 * 1024 * 1024)).to.be(
+        '604.1 MB / 1.4 GB'
+      );
     });
-
   });
 
   describe('formatNumber', () => {
-
     it('should format time since', () => {
       expect(formatNumber(3000, 'time_since')).to.be('a few seconds');
       expect(formatNumber(300000, 'time_since')).to.be('5 minutes');
@@ -62,7 +58,5 @@ describe('format_number', () => {
     it('should format NaN as 0', () => {
       expect(formatNumber(Number.NaN, 'ms')).to.be('0ms');
     });
-
   });
-
 });

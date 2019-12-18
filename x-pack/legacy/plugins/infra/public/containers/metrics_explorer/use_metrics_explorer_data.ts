@@ -93,6 +93,9 @@ export function useMetricsExplorerData(
       }
       setLoading(false);
     })();
+
+    // TODO: fix this dependency list while preserving the semantics
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, source, timerange, signal, afterKey]);
   return { error, loading, data };
 }

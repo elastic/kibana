@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 
 const StaticSwitch = styled(EuiSwitch)`
@@ -17,11 +17,13 @@ const StaticSwitch = styled(EuiSwitch)`
 
 StaticSwitch.displayName = 'StaticSwitch';
 
+export type RuleStateChangeCallback = (isEnabled: boolean, id: string) => void;
+
 export interface RuleSwitchProps {
   id: string;
   enabled: boolean;
   isLoading: boolean;
-  onRuleStateChange: (isEnabled: boolean, id: string) => void;
+  onRuleStateChange: RuleStateChangeCallback;
 }
 
 /**
@@ -32,26 +34,32 @@ export const RuleSwitchComponent = ({
   enabled,
   isLoading,
   onRuleStateChange,
-}: RuleSwitchProps) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
-    <EuiFlexItem grow={false}>
-      {isLoading ? (
-        <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
-      ) : (
-        <StaticSwitch
-          data-test-subj="rule-switch"
-          label="rule-switch"
-          showLabel={false}
-          disabled={false}
-          checked={enabled ?? false}
-          onChange={e => {
-            onRuleStateChange(e.target.checked!, id);
-          }}
-        />
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+}: RuleSwitchProps) => {
+  const handleChange = useCallback(
+    e => {
+      onRuleStateChange(e.target.checked!, id);
+    },
+    [onRuleStateChange, id]
+  );
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        {isLoading ? (
+          <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
+        ) : (
+          <StaticSwitch
+            data-test-subj="rule-switch"
+            label="rule-switch"
+            showLabel={false}
+            disabled={false}
+            checked={enabled ?? false}
+            onChange={handleChange}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const RuleSwitch = React.memo(RuleSwitchComponent);
 

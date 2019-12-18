@@ -12,7 +12,6 @@ import {
   InfraNodeType,
   InfraSnapshotMetricInput,
   InfraSnapshotGroupbyInput,
-  InfraTimerangeInput,
 } from '../../graphql/types';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { useHTTPRequest } from '../../hooks/use_http_request';
@@ -27,13 +26,19 @@ export function useSnapshot(
   groupBy: InfraSnapshotGroupbyInput[],
   nodeType: InfraNodeType,
   sourceId: string,
-  timerange: InfraTimerangeInput
+  currentTime: number
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
       SnapshotNodeResponseRT.decode(response),
       fold(throwErrors(createPlainError), identity)
     );
+  };
+
+  const timerange = {
+    interval: '1m',
+    to: currentTime,
+    from: currentTime - 360 * 1000,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
@@ -46,8 +51,8 @@ export function useSnapshot(
       timerange,
       filterQuery,
       sourceId,
-      decodeResponse,
-    })
+    }),
+    decodeResponse
   );
 
   useEffect(() => {
@@ -60,6 +65,7 @@ export function useSnapshot(
     error: (error && error.message) || null,
     loading,
     nodes: response ? response.nodes : [],
+    interval: response ? response.interval : '60s',
     reload: makeRequest,
   };
 }

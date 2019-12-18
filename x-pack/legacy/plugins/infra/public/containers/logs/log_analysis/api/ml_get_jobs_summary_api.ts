@@ -12,15 +12,19 @@ import { kfetch } from 'ui/kfetch';
 
 import { jobCustomSettingsRT } from './ml_api_types';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getAllModuleJobIds } from '../../../../../common/log_analysis';
+import { getJobId } from '../../../../../common/log_analysis';
 
-export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
+export const callJobsSummaryAPI = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
   const response = await kfetch({
     method: 'POST',
     pathname: '/api/ml/jobs/jobs_summary',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: getAllModuleJobIds(spaceId, sourceId),
+        jobIds: jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType)),
       })
     ),
   });
@@ -45,6 +49,7 @@ const datafeedStateRT = rt.keyof({
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
+  deleting: null,
   failed: null,
   opened: null,
   opening: null,

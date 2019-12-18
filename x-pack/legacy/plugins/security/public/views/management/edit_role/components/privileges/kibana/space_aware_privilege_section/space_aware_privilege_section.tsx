@@ -16,7 +16,7 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../../../../plugins/features/public';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isReservedRole } from '../../../../../../../lib/role_utils';
