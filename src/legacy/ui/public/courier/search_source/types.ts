@@ -47,7 +47,7 @@ export interface SearchSourceFields {
   index?: IndexPattern;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
-  terminate_after?: string;
+  terminate_after?: number;
 }
 
 export interface SearchSourceOptions {

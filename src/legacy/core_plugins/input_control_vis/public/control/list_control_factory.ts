@@ -134,7 +134,7 @@ export class ListControl extends Control<PhraseFilterManager> {
     const fieldName = this.filterManager.fieldName;
     const initialSearchSourceState: SearchSourceFields = {
       timeout: `${this.getInjectedVar('autocompleteTimeout')}ms`,
-      terminate_after: `${this.getInjectedVar('autocompleteTerminateAfter')}`,
+      terminate_after: Number(this.getInjectedVar('autocompleteTerminateAfter')),
     };
     const aggs = termsAgg({
       field: indexPattern.fields.getByName(fieldName),
