@@ -15,7 +15,18 @@ Object {
   },
   "streams": Array [
     Object {
+      "config": Object {
+        "paths": "/var/log/*.log",
+      },
+      "fields": Array [
+        Object {},
+      ],
       "id": "string",
+      "ilm_policy": "string",
+      "index_template": "string",
+      "ingest_pipelines": Array [
+        "string",
+      ],
       "metricsets": Array [
         "container",
         "cpu",

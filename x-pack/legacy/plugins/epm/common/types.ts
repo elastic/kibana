@@ -16,7 +16,7 @@ export enum InstallationStatus {
 }
 
 export type ServiceName = 'kibana' | 'elasticsearch';
-export type AssetType = KibanaAssetType | ElasticsearchAssetType;
+export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
 export enum KibanaAssetType {
   dashboard = 'dashboard',
@@ -29,6 +29,10 @@ export enum ElasticsearchAssetType {
   ingestPipeline = 'ingest-pipeline',
   indexTemplate = 'index-template',
   ilmPolicy = 'ilm-policy',
+}
+
+export enum AgentAssetType {
+  input = 'input',
 }
 
 // from /package/{name}
@@ -119,11 +123,16 @@ export interface Dataset {
   title: string;
   name: string;
   release: string;
-  ingeset_pipeline: string;
-  vars: object[];
+  ingest_pipeline: string;
+  vars: VarsEntry[];
   type: string;
   // This is for convenience and not in the output from the registry. When creating a dataset, this info should be added.
   package: string;
+}
+
+export interface VarsEntry {
+  name: string;
+  default: string;
 }
 
 // some properties are optional in Registry responses but required in EPM

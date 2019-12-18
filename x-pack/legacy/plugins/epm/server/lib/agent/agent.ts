@@ -5,23 +5,16 @@
  */
 
 import Handlebars from 'handlebars';
+import { VarsEntry } from '../../../common/types';
 
-interface Manifest {
-  vars: VarsEntry[];
-}
-
-interface VarsEntry {
-  name: string;
-  default: string;
-}
 /**
- * This takes a manifest object as input and merges it with the input template.
+ * This takes a dataset object as input and merges it with the input template.
  * It returns the resolved template as a string.
  */
-export function createInput(manifest: Manifest, inputTemplate: string): string {
+export function createInput(vars: VarsEntry[], inputTemplate: string): string {
   const view: Record<VarsEntry['name'], VarsEntry['default']> = {};
 
-  for (const v of manifest.vars) {
+  for (const v of vars) {
     view[v.name] = v.default;
   }
 

@@ -5,17 +5,19 @@
  */
 
 import fetch from 'node-fetch';
+import yaml from 'js-yaml';
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
+import { Asset, Datasource, Stream } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
-import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
-import { installTemplates } from '../lib/elasticsearch/template/install';
+import { installPipelinesForDataset } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
+import { installTemplateForDataset } from '../lib/elasticsearch/template/install';
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 import { Request } from '../types';
+import { createInput } from '../lib/agent/agent';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,28 +29,67 @@ export async function createDatasource(options: {
 }) {
   const { savedObjectsClient, callCluster, pkgkey, datasets, datasourceName, request } = options;
 
-  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-  if (packageInfo.status !== InstallationStatus.installed) {
+  const epmPackageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
+  if (epmPackageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
   }
-  const datasetNames = datasets.map(d => d.name);
-  const toSave = await installPipelines({ pkgkey, datasetNames, callCluster });
+
+  const registryPackageInfo = await Registry.fetchInfo(pkgkey);
+  // Pick the full dataset definition for each dataset name that has been requested
+  // from the package information from the registry.
+  // Requested dataset names that don't exist in the package will be silently ignored.
+  const datasetsRequestedNames = datasets.map(d => d.name);
+  const datasetsRequested = registryPackageInfo.datasets?.filter(packageDataset => {
+    return datasetsRequestedNames.includes(packageDataset.name);
+  });
+
+  const templateRefs: Array<Promise<AssetReference>> = [];
+  const pipelineRefs: Array<Promise<AssetReference[]>> = [];
+
+  if (datasetsRequested) {
+    datasetsRequested.forEach(dataset => {
+      const templateRef = installTemplateForDataset(
+        registryPackageInfo,
+        callCluster,
+        dataset,
+        datasourceName
+      );
+      if (templateRef) {
+        templateRefs.push(templateRef as Promise<AssetReference>); // Typescript thinks this may still be undefined here
+      }
+      if (dataset.ingest_pipeline) {
+        const pipelineRefArray = installPipelinesForDataset({
+          pkgkey,
+          dataset,
+          callCluster,
+          datasourceName,
+          packageName: registryPackageInfo.name,
+        });
+        pipelineRefs.push(pipelineRefArray);
+      }
+    });
+  }
+  // the promises from template installation resolve to template references
+  const templatesToSave = await Promise.all(templateRefs);
+  // the promises from pipeline installation resolve to arrays of pipeline references
+  const pipelinesToSave = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
+
+  const toSave = templatesToSave.concat(pipelinesToSave);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
-  const pkg = await Registry.fetchInfo(pkgkey);
 
-  await Promise.all([
-    installTemplates(pkg, callCluster),
-    saveDatasourceReferences({
-      savedObjectsClient,
-      pkg,
-      datasourceName,
-      datasets,
-      toSave,
-      request,
-    }),
-  ]);
+  const streams = await getStreams(pkgkey, datasets);
+
+  await saveDatasourceReferences({
+    savedObjectsClient,
+    pkg: registryPackageInfo,
+    datasourceName,
+    datasets,
+    toSave,
+    request,
+    streams,
+  });
 
   return toSave;
 }
@@ -73,8 +114,9 @@ async function saveDatasourceReferences(options: {
   datasourceName: string;
   toSave: AssetReference[];
   request: Request;
+  streams: Stream[];
 }) {
-  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request } = options;
+  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request, streams } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -89,7 +131,9 @@ async function saveDatasourceReferences(options: {
     datasourceName,
     datasets,
     assets: toInstall,
+    streams,
   });
+
   // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
   // or something similar, but it's a class not an object so many pieces are missing
   // we'd still need `user` from the request object, but that's not terrible
@@ -97,6 +141,23 @@ async function saveDatasourceReferences(options: {
   await ingestDatasourceCreate({ request, datasource });
 
   return toInstall;
+}
+
+async function getStreams(pkgkey: string, datasets: Dataset[]) {
+  const streams: Stream[] = [];
+  if (datasets) {
+    for (const dataset of datasets) {
+      const input = yaml.load(await getConfig(pkgkey, dataset));
+      if (input) {
+        streams.push({
+          id: dataset.name,
+          input,
+          output_id: 'default',
+        });
+      }
+    }
+  }
+  return streams;
 }
 
 async function getDatasource(options: {
@@ -116,6 +177,7 @@ interface CreateFakeDatasource {
   datasourceName: string;
   datasets: Dataset[];
   assets: Asset[] | undefined;
+  streams: Stream[];
 }
 
 function createFakeDatasource({
@@ -123,22 +185,8 @@ function createFakeDatasource({
   datasourceName,
   datasets,
   assets = [],
+  streams,
 }: CreateFakeDatasource): Datasource {
-  const streams = datasets.map(dataset => ({
-    id: dataset.name,
-    input: {
-      type: InputType.Log,
-      config: { config: 'values', go: 'here' },
-      ingest_pipelines: ['string'],
-      id: 'string',
-      index_template: 'string',
-      ilm_policy: 'string',
-      fields: [{}],
-    },
-    config: { config: 'values', go: 'here' },
-    output_id: 'output_id',
-    processors: ['string'],
-  }));
   return {
     id: Registry.pkgToPkgKey(pkg),
     name: datasourceName,
@@ -173,7 +221,7 @@ async function ingestDatasourceCreate({
   const url = `${origin}${basePath}${apiPath}`;
   const body = { datasource };
   delete request.headers['transfer-encoding'];
-  return fetch(url, {
+  await fetch(url, {
     method: 'post',
     body: JSON.stringify(body),
     headers: {
@@ -182,5 +230,28 @@ async function ingestDatasourceCreate({
       // the main (only?) one we want is `authorization`
       ...request.headers,
     },
-  }).then(response => response.json());
+  });
 }
+
+async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
+  const vars = dataset.vars;
+
+  // This searches for the /agent/input.yml file
+  const paths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
+    isDatasetInput(entry, dataset.name)
+  );
+
+  if (paths.length === 1) {
+    const buffer = Registry.getAsset(paths[0]);
+    // Load input template from path
+    return createInput(vars, buffer.toString());
+  }
+  return '';
+}
+
+const isDatasetInput = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
+  const pathParts = Registry.pathParts(path);
+  return !isDirectory({ path }) && pathParts.type === 'input' && pathParts.dataset === datasetName;
+};
+
+const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');

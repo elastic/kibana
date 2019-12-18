@@ -11,7 +11,7 @@ import { getDatasetAssetBaseName } from '../index';
 export interface Template {
   order: number;
   index_patterns: string[];
-  settings: object;
+  settings: any;
   mappings: object;
   aliases: object;
 }
@@ -29,9 +29,16 @@ export interface Mappings {
  *
  * @param indexPattern String with the index pattern
  */
-export function getTemplate(indexPattern: string, mappings: Mappings): Template {
+export function getTemplate(
+  indexPattern: string,
+  mappings: Mappings,
+  pipelineName?: string | undefined
+): Template {
   const template = getBaseTemplate(mappings);
   template.index_patterns = [indexPattern];
+  if (pipelineName) {
+    template.settings.index.default_pipeline = pipelineName;
+  }
   return template;
 }
 

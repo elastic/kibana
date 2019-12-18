@@ -15,7 +15,7 @@ test('test converting input and manifest into template', () => {
   );
 
   const inputTemplate = fs.readFileSync(path.join(__dirname, 'tests/input.yml'), 'utf8');
-  const output = createInput(manifest, inputTemplate);
+  const output = createInput(manifest.vars, inputTemplate);
 
   // Golden file path
   const generatedFile = path.join(__dirname, './tests/input.generated.yaml');
