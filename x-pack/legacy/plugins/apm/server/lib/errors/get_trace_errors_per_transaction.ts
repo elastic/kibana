@@ -45,14 +45,9 @@ export async function getTraceErrorsPerTransaction(
       aggs: {
         transactions: {
           terms: {
-            field: TRANSACTION_ID
-          },
-          aggs: {
-            error: {
-              top_hits: {
-                size: 1
-              }
-            }
+            field: TRANSACTION_ID,
+            // high cardinality
+            execution_hint: 'map'
           }
         }
       }

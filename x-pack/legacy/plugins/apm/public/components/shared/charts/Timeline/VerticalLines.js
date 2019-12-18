@@ -21,7 +21,7 @@ class VerticalLines extends PureComponent {
     } = this.props.plotValues;
 
     const markTimes = marks
-      .filter(mark => mark.type !== 'error')
+      .filter(mark => mark.docType === 'agentMark')
       .map(({ offset }) => offset);
 
     return (
