@@ -29,7 +29,7 @@ const initTimelineType: TimelineTypeContextProps = {
   footerText: undefined,
   loadingText: undefined,
   queryFields: [],
-  selectAll: undefined,
+  selectAll: false,
   timelineActions: [],
   title: undefined,
 };

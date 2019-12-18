@@ -166,7 +166,7 @@ export const getSignalsActions = ({
       >
         <EuiButtonIcon
           data-test-subj={'send-signal-to-timeline-tool-tip'}
-          onClick={() => sendSignalsToTimelineAction({ createTimeline, data })}
+          onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
           iconType="tableDensityNormal"
           aria-label="Next"
         />

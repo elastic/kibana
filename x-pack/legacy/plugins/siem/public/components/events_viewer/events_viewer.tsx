@@ -6,7 +6,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import { getOr, isEmpty, isEqual, union } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -106,9 +106,13 @@ export const EventsViewer = React.memo<Props>(
       end,
       isEventViewer: true,
     });
-    const queryFields = union(
-      columnsHeader.map(c => c.id),
-      timelineTypeContext.queryFields ?? []
+    const queryFields = useMemo(
+      () =>
+        union(
+          columnsHeader.map(c => c.id),
+          timelineTypeContext.queryFields ?? []
+        ),
+      [columnsHeader, timelineTypeContext.queryFields]
     );
 
     return (

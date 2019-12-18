@@ -1176,6 +1176,7 @@ export const setLoadingTimelineEvents = ({
 interface SetSelectedTimelineEventsParams {
   id: string;
   eventIds: Record<string, TimelineNonEcsData[]>;
+  isSelectAllChecked: boolean;
   isSelected: boolean;
   timelineById: TimelineById;
 }
@@ -1183,6 +1184,7 @@ interface SetSelectedTimelineEventsParams {
 export const setSelectedTimelineEvents = ({
   id,
   eventIds,
+  isSelectAllChecked = false,
   isSelected,
   timelineById,
 }: SetSelectedTimelineEventsParams): TimelineById => {
@@ -1197,6 +1199,7 @@ export const setSelectedTimelineEvents = ({
     [id]: {
       ...timeline,
       selectedEventIds,
+      isSelectAllChecked,
     },
   };
 };

@@ -41,6 +41,7 @@ export interface BodyProps {
   height: number;
   id: string;
   isEventViewer?: boolean;
+  isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
@@ -75,6 +76,7 @@ export const Body = React.memo<BodyProps>(
     height,
     id,
     isEventViewer = false,
+    isSelectAllChecked,
     loadingEventIds,
     onColumnRemoved,
     onColumnResized,
@@ -102,13 +104,11 @@ export const Body = React.memo<BodyProps>(
       [isEventViewer, showCheckboxes, additionalActionWidth]
     );
 
-    const columnWidths = columnHeaders.reduce(
-      (totalWidth, header) => totalWidth + header.width,
-      actionsColumnWidth
+    const columnWidths = useMemo(
+      () =>
+        columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
+      [actionsColumnWidth, columnHeaders]
     );
-
-    const isSelectAllChecked =
-      data.length > 0 && data.length === Object.keys(selectedEventIds).length;
 
     return (
       <>

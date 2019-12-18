@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { SignalsUtilityBar } from './components/signals_utility_bar';
-import { GlobalTime } from '../../../containers/global_time';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import * as i18n from './translations';
 import {
@@ -27,12 +26,12 @@ import {
   SignalsTableFilterGroup,
 } from './components/signals_filter_group/signals_filter_group';
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION, DEFAULT_SIGNALS_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_KBN_VERSION, DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { defaultHeaders } from '../../../components/timeline/body/column_headers/default_headers';
 import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
-import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { esFilters, esQuery } from '../../../../../../../../src/plugins/data/common/es_query';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { SerializedFilterQuery, State } from '../../../store';
+import { inputsSelectors, SerializedFilterQuery, State } from '../../../store';
 import { sendSignalsToTimelineAction, updateSignalStatusAction } from './actions';
 import {
   CreateTimelineProps,
@@ -43,19 +42,19 @@ import {
   UpdateSignalsStatusProps,
 } from './types';
 import { inputsActions } from '../../../store/inputs';
+import { combineQueries } from '../../../components/timeline/helpers';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules/fetch_index_patterns';
+import { InputsRange } from '../../../store/inputs/model';
+import { Query } from '../../../../../../../../src/plugins/data/common/query';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
-function usePrevious(value: number) {
-  const ref = useRef<number>();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref;
-}
-
 interface ReduxProps {
+  globalQuery: Query;
+  globalFilters: esFilters.Filter[];
   deletedEventIds: string[];
+  isSelectAllChecked: boolean;
   loadingEventIds: string[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
 }
@@ -88,14 +87,15 @@ interface DispatchProps {
     eventIds: string[];
     isLoading: boolean;
   }>;
-  setSelected?: ActionCreator<{
-    id: string;
-    eventIds: Record<string, TimelineNonEcsData[]>;
-    isSelected: boolean;
-  }>;
 }
 
-type SignalsTableComponentProps = ReduxProps & DispatchProps;
+interface OwnProps {
+  defaultFilters?: esFilters.Filter[];
+  from: number;
+  to: number;
+}
+
+type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
   ({
@@ -103,20 +103,43 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     clearEventsDeleted,
     clearEventsLoading,
     clearSelected,
+    defaultFilters = [],
+    from,
+    globalFilters,
+    globalQuery,
+    isSelectAllChecked,
     loadingEventIds,
     removeTimelineLinkTo,
     selectedEventIds,
     setEventsDeleted,
     setEventsLoading,
-    setSelected,
+    to,
   }) => {
-    const [selectAll, setSelectAll] = useState<boolean>(false);
+    const [selectAll, setSelectAll] = useState(false);
 
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([DEFAULT_SIGNALS_INDEX]); // TODO Get from new FrankInspired XavierHook
     const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+    const core = useKibanaCore();
 
-    const previousSelectedCount = usePrevious(Object.keys(selectedEventIds).length);
+    const getGlobalQuery = useCallback(() => {
+      if (browserFields != null && indexPatterns != null) {
+        return combineQueries({
+          config: esQuery.getEsQueryConfig(core.uiSettings),
+          dataProviders: [],
+          indexPattern: indexPatterns,
+          browserFields,
+          filters: globalFilters,
+          kqlQuery: globalQuery,
+          kqlMode: globalQuery.language,
+          start: from,
+          end: to,
+          isEventViewer: true,
+        });
+      }
+      return null;
+    }, [browserFields, globalFilters, globalQuery, indexPatterns, to, from]);
 
     // Callback for creating a new timeline -- utilized by row/batch actions
     const createTimelineCallback = useCallback(
@@ -141,13 +164,14 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       [setEventsDeleted, SIGNALS_PAGE_TIMELINE_ID]
     );
 
-    // Catches state change to selectAll->false upon user selection change
-    // TODO: Simplify as isSelectAllChecked in redux state
+    // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
     useEffect(() => {
-      if (Object.keys(selectedEventIds).length !== previousSelectedCount?.current && selectAll) {
+      if (!isSelectAllChecked) {
         setShowClearSelectionAction(false);
+      } else {
+        setSelectAll(false);
       }
-    }, [previousSelectedCount, Object.keys(selectedEventIds).length, selectAll]);
+    }, [isSelectAllChecked]);
 
     // Callback for when open/closed filter changes
     const onFilterGroupChangedCallback = useCallback(
@@ -163,21 +187,22 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     // Callback for clearing entire selection from utility bar
     const clearSelectionCallback = useCallback(() => {
       clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
+      setSelectAll(false);
       setShowClearSelectionAction(false);
-    }, [setSelected, setShowClearSelectionAction]);
+    }, [clearSelected, setShowClearSelectionAction]);
 
     // Callback for selecting all events on all pages from utility bar
     // Dispatches to stateful_body's selectAll via TimelineTypeContext props
     // as scope of response data required to actually set selectedEvents
     const selectAllCallback = useCallback(() => {
-      setSelectAll(!selectAll);
+      setSelectAll(true);
       setShowClearSelectionAction(true);
-    }, [setSelectAll, setShowClearSelectionAction]);
+    }, [setShowClearSelectionAction]);
 
     const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
       async ({ signalIds, status }: UpdateSignalsStatusProps) => {
-        // TODO: When select all on all pages send global query/filter/daterange
         await updateSignalStatusAction({
+          query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
           signalIds: Object.keys(selectedEventIds),
           status,
           setEventsDeleted: setEventsDeletedCallback,
@@ -185,13 +210,18 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
           kbnVersion,
         });
       },
-      [selectedEventIds, setEventsDeletedCallback, setEventsLoadingCallback]
+      [
+        getGlobalQuery,
+        selectedEventIds,
+        setEventsDeletedCallback,
+        setEventsLoadingCallback,
+        showClearSelectionAction,
+      ]
     );
     const sendSignalsToTimelineCallback: SendSignalsToTimeline = useCallback(async () => {
-      // TODO: Update data to use all signals
       await sendSignalsToTimelineAction({
         createTimeline: createTimelineCallback,
-        data: Object.values(selectedEventIds)[0],
+        data: Object.values(selectedEventIds),
       });
     }, [selectedEventIds, setEventsDeletedCallback, setEventsLoadingCallback]);
 
@@ -235,36 +265,42 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       [createTimelineCallback, filterGroup, kbnVersion]
     );
 
+    const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}`], [DEFAULT_SIGNALS_INDEX]);
+    const defaultFiltersMemo = useMemo(
+      () => [
+        ...defaultFilters,
+        ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
+      ],
+      [defaultFilters, filterGroup]
+    );
+
+    const timelineTypeContext = useMemo(
+      () => ({
+        documentType: i18n.SIGNALS_DOCUMENT_TYPE,
+        footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
+        loadingText: i18n.LOADING_SIGNALS,
+        queryFields: requiredFieldsForActions,
+        timelineActions: additionalActions,
+        title: i18n.SIGNALS_TABLE_TITLE,
+        selectAll,
+      }),
+      [additionalActions, selectAll]
+    );
+
     return (
-      <>
-        <GlobalTime>
-          {({ to, from }) => (
-            <StatefulEventsViewer
-              defaultIndices={[DEFAULT_SIGNALS_INDEX_KEY]} // TODO Get from new FrankInspired XavierHook
-              defaultFilters={
-                filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters
-              }
-              defaultModel={signalsDefaultModel}
-              end={to}
-              headerFilterGroup={
-                <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-              }
-              id={SIGNALS_PAGE_TIMELINE_ID}
-              start={from}
-              timelineTypeContext={{
-                documentType: i18n.SIGNALS_DOCUMENT_TYPE,
-                footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
-                loadingText: i18n.LOADING_SIGNALS,
-                queryFields: requiredFieldsForActions,
-                timelineActions: additionalActions,
-                title: i18n.SIGNALS_TABLE_TITLE,
-                selectAll,
-              }}
-              utilityBar={utilityBarCallback}
-            />
-          )}
-        </GlobalTime>
-      </>
+      <StatefulEventsViewer
+        defaultIndices={defaultIndices} // TODO Get from new FrankInspired XavierHook
+        defaultFilters={defaultFiltersMemo}
+        defaultModel={signalsDefaultModel}
+        end={to}
+        headerFilterGroup={
+          <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+        }
+        id={SIGNALS_PAGE_TIMELINE_ID}
+        start={from}
+        timelineTypeContext={timelineTypeContext}
+        utilityBar={utilityBarCallback}
+      />
     );
   }
 );
@@ -273,13 +309,20 @@ SignalsTableComponent.displayName = 'SignalsTableComponent';
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getGlobalInputs = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State) => {
     const timeline: TimelineModel =
       getTimeline(state, SIGNALS_PAGE_TIMELINE_ID) ?? timelineDefaults;
-    const { deletedEventIds, loadingEventIds, selectedEventIds } = timeline;
+    const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
+
+    const globalInputs: InputsRange = getGlobalInputs(state);
+    const { query, filters } = globalInputs;
 
     return {
+      globalQuery: query,
+      globalFilters: filters,
       deletedEventIds,
+      isSelectAllChecked,
       loadingEventIds,
       selectedEventIds,
     };
@@ -289,7 +332,6 @@ const makeMapStateToProps = () => {
 
 export const SignalsTable = connect(makeMapStateToProps, {
   removeTimelineLinkTo: inputsActions.removeTimelineLinkTo,
-  setSelected: timelineActions.setSelected,
   clearSelected: timelineActions.clearSelected,
   setEventsLoading: timelineActions.setEventsLoading,
   clearEventsLoading: timelineActions.clearEventsLoading,

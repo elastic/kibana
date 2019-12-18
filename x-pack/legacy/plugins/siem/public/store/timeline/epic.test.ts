@@ -118,6 +118,7 @@ describe('Epic Timeline', () => {
         ],
         isFavorite: false,
         isLive: false,
+        isSelectAllChecked: false,
         isLoading: false,
         isSaving: false,
         itemsPerPage: 25,

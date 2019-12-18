@@ -21,7 +21,7 @@ export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
 // TODO: Remove this as soon as no code is left that is pulling data from it.
 export const DEFAULT_SIGNALS_INDEX_KEY = 'siem:defaultSignalsIndex';
 
-export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+export const DEFAULT_SIGNALS_INDEX = '.siem-signals-spong-default';
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';

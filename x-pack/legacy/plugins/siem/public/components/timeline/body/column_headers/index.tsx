@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiCheckbox } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 
-import { EuiCheckbox } from '@elastic/eui';
 import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import {
@@ -86,6 +86,7 @@ export const ColumnHeadersComponent = ({
       <EventsTrHeader>
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
+          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
           data-test-subj="actions-container"
         >
           {showEventsSelect && (
@@ -96,9 +97,9 @@ export const ColumnHeadersComponent = ({
             </EventsTh>
           )}
 
-          <EventsTh>
-            <EventsThContent textAlign="center">
-              {showSelectAllCheckbox && (
+          {showSelectAllCheckbox && (
+            <EventsTh>
+              <EventsThContent textAlign="center">
                 <EuiCheckbox
                   data-test-subj="select-all-events"
                   id={'select-all-events'}
@@ -107,8 +108,12 @@ export const ColumnHeadersComponent = ({
                     onSelectAll({ isSelected: event.currentTarget.checked });
                   }}
                 />
-              )}
+              </EventsThContent>
+            </EventsTh>
+          )}
 
+          <EventsTh>
+            <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
               <StatefulFieldsBrowser
                 browserFields={browserFields}
                 columnHeaders={columnHeaders}

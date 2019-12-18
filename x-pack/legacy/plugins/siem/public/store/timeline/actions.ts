@@ -215,6 +215,7 @@ export const setSelected = actionCreator<{
   id: string;
   eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   isSelected: boolean;
+  isSelectAllChecked: boolean;
 }>('SET_TIMELINE_SELECTED');
 
 export const clearSelected = actionCreator<{

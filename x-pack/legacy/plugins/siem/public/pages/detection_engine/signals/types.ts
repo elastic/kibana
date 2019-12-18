@@ -26,6 +26,7 @@ export interface UpdateSignalsStatusProps {
 export type UpdateSignalsStatus = ({ signalIds, status }: UpdateSignalsStatusProps) => void;
 
 export interface UpdateSignalStatusActionProps {
+  query?: string;
   signalIds: string[];
   status: 'open' | 'closed';
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
@@ -37,7 +38,7 @@ export type SendSignalsToTimeline = () => void;
 
 export interface SendSignalsToTimelineActionProps {
   createTimeline: CreateTimeline;
-  data: TimelineNonEcsData[];
+  data: TimelineNonEcsData[][];
 }
 
 export interface CreateTimelineProps {

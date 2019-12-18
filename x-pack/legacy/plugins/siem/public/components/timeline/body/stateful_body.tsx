@@ -49,6 +49,7 @@ interface OwnProps {
 interface ReduxProps {
   columnHeaders: ColumnHeader[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  isSelectAllChecked: boolean;
   loadingEventIds: Readonly<string[]>;
   notesById: appModel.NotesById;
   pinnedEventIds: Readonly<Record<string, boolean>>;
@@ -80,6 +81,7 @@ interface DispatchProps {
     id: string;
     eventIds: Record<string, TimelineNonEcsData[]>;
     isSelected: boolean;
+    isSelectAllChecked: boolean;
   }>;
   unPinEvent?: ActionCreator<{
     id: string;
@@ -111,6 +113,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     height,
     id,
     isEventViewer = false,
+    isSelectAllChecked,
     loadingEventIds,
     notesById,
     pinEvent,
@@ -143,13 +146,16 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     );
 
     const onRowSelected: OnRowSelected = useCallback(
-      ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) =>
+      ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
         setSelected!({
           id,
           eventIds: getEventIdToDataMapping(data, eventIds, timelineTypeContext.queryFields ?? []),
           isSelected,
-        }),
-      [id, data, timelineTypeContext.queryFields]
+          isSelectAllChecked:
+            isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
+        });
+      },
+      [id, data, selectedEventIds, timelineTypeContext.queryFields]
     );
 
     const onSelectAll: OnSelectAll = useCallback(
@@ -163,6 +169,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
                 timelineTypeContext.queryFields ?? []
               ),
               isSelected,
+              isSelectAllChecked: isSelected,
             })
           : clearSelected!({ id }),
       [id, data, timelineTypeContext.queryFields]
@@ -196,13 +203,12 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [id]
     );
 
-    // TODO: Rework selectAll dispatch via timelineTypeContext
     // Sync to timelineTypeContext.selectAll so parent components can select all events
     useEffect(() => {
       if (timelineTypeContext.selectAll) {
         onSelectAll({ isSelected: true });
       }
-    }, [timelineTypeContext.selectAll]);
+    }, [timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
 
     return (
       <Body
@@ -216,6 +222,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         height={height}
         id={id}
         isEventViewer={isEventViewer}
+        isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
         onColumnRemoved={onColumnRemoved}
         onColumnResized={onColumnResized}
@@ -247,6 +254,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       prevProps.height === nextProps.height &&
       prevProps.id === nextProps.id &&
       prevProps.isEventViewer === nextProps.isEventViewer &&
+      prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
       prevProps.loadingEventIds === nextProps.loadingEventIds &&
       prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
       prevProps.selectedEventIds === nextProps.selectedEventIds &&
@@ -273,6 +281,7 @@ const makeMapStateToProps = () => {
     const {
       columns,
       eventIdToNoteIds,
+      isSelectAllChecked,
       loadingEventIds,
       pinnedEventIds,
       selectedEventIds,
@@ -283,6 +292,7 @@ const makeMapStateToProps = () => {
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
+      isSelectAllChecked,
       loadingEventIds,
       notesById: getNotesByIds(state),
       id,

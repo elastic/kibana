@@ -168,6 +168,7 @@ export const Actions = React.memo<Props>(
       prevProps.loading === nextProps.loading &&
       prevProps.loadingEventIds === nextProps.loadingEventIds &&
       prevProps.noteIds === nextProps.noteIds &&
+      prevProps.onRowSelected === nextProps.onRowSelected &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showNotes === nextProps.showNotes
     );

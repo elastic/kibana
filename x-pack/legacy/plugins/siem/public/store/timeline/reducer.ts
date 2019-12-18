@@ -287,13 +287,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(setSelected, (state, { id, eventIds, isSelected }) => ({
+  .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,
     timelineById: setSelectedTimelineEvents({
       id,
       eventIds,
       timelineById: state.timelineById,
       isSelected,
+      isSelectAllChecked,
     }),
   }))
   .case(clearSelected, (state, { id }) => ({
@@ -303,6 +304,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         selectedEventIds: {},
+        isSelectAllChecked: false,
       },
     },
   }))

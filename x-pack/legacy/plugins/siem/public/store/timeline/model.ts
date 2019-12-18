@@ -34,6 +34,8 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  /** If selectAll checkbox in header is checked **/
+  isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/
   loadingEventIds: string[];
   savedObjectId: string | null;
@@ -95,6 +97,7 @@ export type SubsetTimelineModel = Readonly<
     | 'historyIds'
     | 'isFavorite'
     | 'isLive'
+    | 'isSelectAllChecked'
     | 'itemsPerPage'
     | 'itemsPerPageOptions'
     | 'kqlMode'
@@ -129,6 +132,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   filters: [],
   isFavorite: false,
   isLive: false,
+  isSelectAllChecked: false,
   isLoading: false,
   isSaving: false,
   itemsPerPage: 25,

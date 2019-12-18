@@ -143,6 +143,7 @@ export const EventColumnView = React.memo<Props>(
       prevProps.loading === nextProps.loading &&
       prevProps.loadingEventIds === nextProps.loadingEventIds &&
       prevProps.isEventPinned === nextProps.isEventPinned &&
+      prevProps.onRowSelected === nextProps.onRowSelected &&
       prevProps.selectedEventIds === nextProps.selectedEventIds &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showNotes === nextProps.showNotes &&
