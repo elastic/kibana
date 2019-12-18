@@ -17,14 +17,9 @@
  * under the License.
  */
 
-export default function(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: ['plugins/kbn_vislib_vis_types/kbn_vislib_vis_types'],
-      interpreter: [
-        'plugins/kbn_vislib_vis_types/pie_fn',
-        'plugins/kbn_vislib_vis_types/vislib_fn',
-      ],
-    },
-  });
+import { PluginInitializerContext } from '../../../../core/public';
+import { KbnVislibVisTypesPlugin as Plugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }

@@ -17,38 +17,73 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
-import { vislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 
-export const kibanaPie = () => ({
-  name: 'kibana_pie',
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Render,
+} from '../../../../plugins/expressions/public';
+
+const name = 'vislib';
+
+type Context = KibanaDatatable;
+
+interface Arguments {
+  type: string;
+  visConfig: string;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visType: string;
+  visConfig: VisParams;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createKbnVislibVisTypesFn = (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
+  name: 'vislib',
   type: 'render',
   context: {
     types: ['kibana_datatable'],
   },
-  help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
-    defaultMessage: 'Pie visualization',
+  help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
+    defaultMessage: 'Vislib visualization',
   }),
   args: {
+    type: {
+      types: ['string'],
+      default: '""',
+      help: 'vislib vis type',
+    },
     visConfig: {
-      types: ['string', 'null'],
+      types: ['string'],
       default: '"{}"',
+      help: '',
     },
   },
   async fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+    const responseHandler = vislibSeriesResponseHandlerProvider().handler;
+    const visConfigParams = JSON.parse(args.visConfig);
 
-    const responseHandler = vislibSlicesResponseHandler().handler;
-    const convertedData = await responseHandler(context, visConfig.dimensions);
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visType: 'pie',
-        visConfig,
+        visType: args.type,
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         },
@@ -56,5 +91,3 @@ export const kibanaPie = () => ({
     };
   },
 });
-
-functionsRegistry.register(kibanaPie);

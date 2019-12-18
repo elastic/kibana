@@ -17,42 +17,61 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
-import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+// @ts-ignore
+import { vislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 
-export const vislib = () => ({
-  name: 'vislib',
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Render,
+} from '../../../../plugins/expressions/public';
+
+const name = 'kibana_pie';
+
+type Context = KibanaDatatable;
+
+interface Arguments {
+  visConfig: string;
+}
+
+type VisParams = Required<Arguments>;
+
+interface RenderValue {
+  visConfig: VisParams;
+}
+
+type Return = Promise<Render<RenderValue>>;
+
+export const createPieVisFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+  name: 'kibana_pie',
   type: 'render',
   context: {
     types: ['kibana_datatable'],
   },
-  help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
-    defaultMessage: 'Vislib visualization',
+  help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
+    defaultMessage: 'Pie visualization',
   }),
   args: {
-    type: {
-      types: ['string'],
-      default: '""',
-    },
     visConfig: {
-      types: ['string', 'null'],
+      types: ['string'],
       default: '"{}"',
+      help: '',
     },
   },
   async fn(context, args) {
-    const responseHandler = vislibSeriesResponseHandlerProvider().handler;
-    const visConfigParams = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig);
 
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const responseHandler = vislibSlicesResponseHandler().handler;
+    const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visType: args.type,
-        visConfig: visConfigParams,
+        visType: 'pie',
+        visConfig,
         params: {
           listenOnChange: true,
         },
@@ -60,5 +79,3 @@ export const vislib = () => ({
     };
   },
 });
-
-functionsRegistry.register(vislib);

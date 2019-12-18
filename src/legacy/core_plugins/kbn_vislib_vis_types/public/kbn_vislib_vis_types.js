@@ -17,22 +17,11 @@
  * under the License.
  */
 
-import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
-
-import { histogramDefinition } from './histogram';
-import { lineDefinition } from './line';
-import { pieDefinition } from './pie';
-import { areaDefinition } from './area';
-import { heatmapDefinition } from './heatmap';
-import { horizontalBarDefinition } from './horizontal_bar';
-import { gaugeDefinition } from './gauge';
-import { goalDefinition } from './goal';
-
-visualizations.types.createBaseVisualization(histogramDefinition);
-visualizations.types.createBaseVisualization(lineDefinition);
-visualizations.types.createBaseVisualization(pieDefinition);
-visualizations.types.createBaseVisualization(areaDefinition);
-visualizations.types.createBaseVisualization(heatmapDefinition);
-visualizations.types.createBaseVisualization(horizontalBarDefinition);
-visualizations.types.createBaseVisualization(gaugeDefinition);
-visualizations.types.createBaseVisualization(goalDefinition);
+export { histogramDefinition } from './histogram';
+export { lineDefinition } from './line';
+export { pieDefinition } from './pie';
+export { areaDefinition } from './area';
+export { heatmapDefinition } from './heatmap';
+export { horizontalBarDefinition } from './horizontal_bar';
+export { gaugeDefinition } from './gauge';
+export { goalDefinition } from './goal';
