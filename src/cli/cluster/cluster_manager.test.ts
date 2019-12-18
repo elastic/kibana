@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { mockCluster } from './__mocks__/cluster';
-jest.mock('cluster', () => mockCluster());
+import { mockCluster } from './cluster_manager.test.mocks';
 jest.mock('readline', () => ({
   createInterface: jest.fn(() => ({
     on: jest.fn(),
@@ -27,15 +26,14 @@ jest.mock('readline', () => ({
   })),
 }));
 
-import cluster from 'cluster';
 import { sample } from 'lodash';
 
-import ClusterManager from './cluster_manager';
-import Worker from './worker';
+import { ClusterManager } from './cluster_manager';
+import { Worker } from './worker';
 
 describe('CLI cluster manager', () => {
   beforeEach(() => {
-    cluster.fork.mockImplementation(() => {
+    mockCluster.fork.mockImplementation(() => {
       return {
         process: {
           kill: jest.fn(),
@@ -44,16 +42,16 @@ describe('CLI cluster manager', () => {
         off: jest.fn(),
         on: jest.fn(),
         send: jest.fn(),
-      };
+      } as any;
     });
   });
 
   afterEach(() => {
-    cluster.fork.mockReset();
+    mockCluster.fork.mockReset();
   });
 
   test('has two workers', () => {
-    const manager = ClusterManager.create({});
+    const manager = new ClusterManager({}, {} as any);
 
     expect(manager.workers).toHaveLength(2);
     for (const worker of manager.workers) expect(worker).toBeInstanceOf(Worker);
@@ -63,7 +61,7 @@ describe('CLI cluster manager', () => {
   });
 
   test('delivers broadcast messages to other workers', () => {
-    const manager = ClusterManager.create({});
+    const manager = new ClusterManager({}, {} as any);
 
     for (const worker of manager.workers) {
       Worker.prototype.start.call(worker); // bypass the debounced start method
@@ -76,10 +74,10 @@ describe('CLI cluster manager', () => {
     messenger.emit('broadcast', football);
     for (const worker of manager.workers) {
       if (worker === messenger) {
-        expect(worker.fork.send).not.toHaveBeenCalled();
+        expect(worker.fork!.send).not.toHaveBeenCalled();
       } else {
-        expect(worker.fork.send).toHaveBeenCalledTimes(1);
-        expect(worker.fork.send).toHaveBeenCalledWith(football);
+        expect(worker.fork!.send).toHaveBeenCalledTimes(1);
+        expect(worker.fork!.send).toHaveBeenCalledWith(football);
       }
     }
   });
@@ -88,7 +86,7 @@ describe('CLI cluster manager', () => {
     test('correctly configures `BasePathProxy`.', async () => {
       const basePathProxyMock = { start: jest.fn() };
 
-      ClusterManager.create({}, {}, basePathProxyMock);
+      new ClusterManager({}, {} as any, basePathProxyMock as any);
 
       expect(basePathProxyMock.start).toHaveBeenCalledWith({
         shouldRedirectFromOldBasePath: expect.any(Function),
@@ -97,13 +95,13 @@ describe('CLI cluster manager', () => {
     });
 
     describe('proxy is configured with the correct `shouldRedirectFromOldBasePath` and `blockUntil` functions.', () => {
-      let clusterManager;
-      let shouldRedirectFromOldBasePath;
-      let blockUntil;
+      let clusterManager: ClusterManager;
+      let shouldRedirectFromOldBasePath: (path: string) => boolean;
+      let blockUntil: () => Promise<any>;
       beforeEach(async () => {
         const basePathProxyMock = { start: jest.fn() };
 
-        clusterManager = ClusterManager.create({}, {}, basePathProxyMock);
+        clusterManager = new ClusterManager({}, {} as any, basePathProxyMock as any);
 
         jest.spyOn(clusterManager.server, 'on');
         jest.spyOn(clusterManager.server, 'off');
@@ -146,7 +144,7 @@ describe('CLI cluster manager', () => {
         expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
         expect(clusterManager.server.on).toHaveBeenCalledWith('crashed', expect.any(Function));
 
-        const [, [eventName, onCrashed]] = clusterManager.server.on.mock.calls;
+        const [, [eventName, onCrashed]] = (clusterManager.server.on as jest.Mock).mock.calls;
         // Check event name to make sure we call the right callback,
         // in Jest 23 we could use `toHaveBeenNthCalledWith` instead.
         expect(eventName).toBe('crashed');
@@ -164,7 +162,7 @@ describe('CLI cluster manager', () => {
         expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
         expect(clusterManager.server.on).toHaveBeenCalledWith('listening', expect.any(Function));
 
-        const [[eventName, onListening]] = clusterManager.server.on.mock.calls;
+        const [[eventName, onListening]] = (clusterManager.server.on as jest.Mock).mock.calls;
         // Check event name to make sure we call the right callback,
         // in Jest 23 we could use `toHaveBeenNthCalledWith` instead.
         expect(eventName).toBe('listening');

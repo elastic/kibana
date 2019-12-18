@@ -20,26 +20,38 @@
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 import opn from 'opn';
-
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
 import * as Rx from 'rxjs';
 import { first, mapTo, filter, map, take } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/dev-utils';
+import { FSWatcher } from 'chokidar';
 
+import { LegacyConfig } from '../../core/server/legacy/config';
+import { BasePathProxyServer } from '../../core/server/http';
+
+// @ts-ignore
 import Log from '../log';
-import Worker from './worker';
-import { Config } from '../../legacy/server/config/config';
+import { Worker } from './worker';
 
 process.env.kbnWorkerType = 'managr';
 
-export default class ClusterManager {
-  static create(opts, settings = {}, basePathProxy) {
-    return new ClusterManager(opts, Config.withDefaultSchema(settings), basePathProxy);
-  }
+export class ClusterManager {
+  public optimizer: Worker;
+  public server: Worker;
+  public workers: Worker[];
 
-  constructor(opts, config, basePathProxy) {
+  private watcher: FSWatcher | null = null;
+  private basePathProxy: BasePathProxyServer | undefined;
+  private log: any;
+  private addedCount = 0;
+  private inReplMode: boolean;
+
+  constructor(
+    opts: Record<string, any>,
+    config: LegacyConfig,
+    basePathProxy?: BasePathProxyServer
+  ) {
     this.log = new Log(opts.quiet, opts.silent);
-    this.addedCount = 0;
     this.inReplMode = !!opts.repl;
     this.basePathProxy = basePathProxy;
 
@@ -79,7 +91,7 @@ export default class ClusterManager {
       worker.on('broadcast', msg => {
         this.workers.forEach(to => {
           if (to !== worker && to.online) {
-            to.fork.send(msg);
+            to.fork!.send(msg);
           }
         });
       });
@@ -90,10 +102,10 @@ export default class ClusterManager {
     // and all workers. This is only used by LogRotator service
     // when the cluster mode is enabled
     this.server.on('reloadLoggingConfigFromServerWorker', () => {
-      process.emit('message', { reloadLoggingConfig: true });
+      process.emit('message' as any, { reloadLoggingConfig: true } as any);
 
       this.workers.forEach(worker => {
-        worker.fork.send({ reloadLoggingConfig: true });
+        worker.fork!.send({ reloadLoggingConfig: true });
       });
     });
 
@@ -111,9 +123,9 @@ export default class ClusterManager {
     }
 
     if (opts.watch) {
-      const pluginPaths = config.get('plugins.paths');
+      const pluginPaths = config.get<string[]>('plugins.paths');
       const scanDirs = [
-        ...config.get('plugins.scanDirs'),
+        ...config.get<string[]>('plugins.scanDirs'),
         resolve(REPO_ROOT, 'src/plugins'),
         resolve(REPO_ROOT, 'x-pack/plugins'),
       ];
@@ -131,7 +143,7 @@ export default class ClusterManager {
               resolve(path, 'scripts'),
               resolve(path, 'docs')
             ),
-          []
+          [] as string[]
         );
 
       this.setupWatching(extraPaths, pluginInternalDirsIgnore);
@@ -149,7 +161,7 @@ export default class ClusterManager {
     }
   }
 
-  setupOpen(openUrl) {
+  setupOpen(openUrl: string) {
     const serverListening$ = Rx.merge(
       Rx.fromEvent(this.server, 'listening').pipe(mapTo(true)),
       Rx.fromEvent(this.server, 'fork:exit').pipe(mapTo(false)),
@@ -157,7 +169,7 @@ export default class ClusterManager {
     );
 
     const optimizeSuccess$ = Rx.fromEvent(this.optimizer, 'optimizeStatus').pipe(
-      map(msg => !!msg.success)
+      map((msg: any) => !!msg.success)
     );
 
     Rx.combineLatest(serverListening$, optimizeSuccess$)
@@ -169,8 +181,10 @@ export default class ClusterManager {
       .then(() => opn(openUrl));
   }
 
-  setupWatching(extraPaths, pluginInternalDirsIgnore) {
+  setupWatching(extraPaths: string[], pluginInternalDirsIgnore: string[]) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const chokidar = require('chokidar');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { fromRoot } = require('../../core/server/utils');
 
     const watchPaths = [
@@ -203,7 +217,7 @@ export default class ClusterManager {
         ...ignorePaths,
         'plugins/java_languageserver',
       ],
-    });
+    }) as FSWatcher;
 
     this.watcher.on('add', this.onWatcherAdd);
     this.watcher.on('error', this.onWatcherError);
@@ -212,8 +226,8 @@ export default class ClusterManager {
       'ready',
       once(() => {
         // start sending changes to workers
-        this.watcher.removeListener('add', this.onWatcherAdd);
-        this.watcher.on('all', this.onWatcherChange);
+        this.watcher!.removeListener('add', this.onWatcherAdd);
+        this.watcher!.on('all', this.onWatcherChange);
 
         this.log.good('watching for changes', `(${this.addedCount} files)`);
         this.startCluster();
@@ -228,6 +242,7 @@ export default class ClusterManager {
     if (this.inReplMode) {
       return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const readline = require('readline');
     const rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -262,16 +277,16 @@ export default class ClusterManager {
     this.addedCount += 1;
   }
 
-  onWatcherChange(e, path) {
+  onWatcherChange(e: any, path: string) {
     invoke(this.workers, 'onChange', path);
   }
 
-  onWatcherError(err) {
+  onWatcherError(err: any) {
     this.log.bad('failed to watch files!\n', err.stack);
     process.exit(1); // eslint-disable-line no-process-exit
   }
 
-  shouldRedirectFromOldBasePath(path) {
+  shouldRedirectFromOldBasePath(path: string) {
     // strip `s/{id}` prefix when checking for need to redirect
     if (path.startsWith('s/')) {
       path = path

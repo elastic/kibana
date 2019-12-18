@@ -18,12 +18,15 @@
  */
 /* eslint-env jest */
 
+// eslint-disable-next-line max-classes-per-file
 import EventEmitter from 'events';
 import { assign, random } from 'lodash';
 import { delay } from 'bluebird';
 
 class MockClusterFork extends EventEmitter {
-  constructor(cluster) {
+  public exitCode = 0;
+
+  constructor(cluster: MockCluster) {
     super();
 
     let dead = true;
@@ -49,9 +52,9 @@ class MockClusterFork extends EventEmitter {
       send: jest.fn(),
     });
 
-    jest.spyOn(this, 'on');
-    jest.spyOn(this, 'off');
-    jest.spyOn(this, 'emit');
+    jest.spyOn(this as EventEmitter, 'on');
+    jest.spyOn(this as EventEmitter, 'off');
+    jest.spyOn(this as EventEmitter, 'emit');
 
     (async () => {
       await wait();
@@ -61,11 +64,7 @@ class MockClusterFork extends EventEmitter {
   }
 }
 
-class MockCluster extends EventEmitter {
+export class MockCluster extends EventEmitter {
   fork = jest.fn(() => new MockClusterFork(this));
   setupMaster = jest.fn();
-}
-
-export function mockCluster() {
-  return new MockCluster();
 }
