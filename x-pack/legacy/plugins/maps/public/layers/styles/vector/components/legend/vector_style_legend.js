@@ -46,11 +46,7 @@ export class VectorStyleLegend extends Component {
 
   render() {
     return this.state.styles.map(style => {
-      return (
-        <Fragment key={style.getStyleName()}>
-          {style.renderLegendDetailRow()}
-        </Fragment>
-      );
+      return <Fragment key={style.getStyleName()}>{style.renderLegendDetailRow()}</Fragment>;
     });
   }
 }

@@ -365,7 +365,7 @@ export class VectorStyle extends AbstractStyle {
 
     const formatters = formattersDataRequest.getData();
     return formatters[fieldName];
-  }
+  };
 
   _getStyleMeta = () => {
     return _.get(this._descriptor, '__styleMeta', {});
@@ -576,7 +576,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticSizeProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicSizeProperty(descriptor.options, styleName, field, this._getFieldMeta, this._getFieldFormatter);
+      return new DynamicSizeProperty(
+        descriptor.options,
+        styleName,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
@@ -589,7 +595,13 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicColorProperty(descriptor.options, styleName, field, this._getFieldMeta, this._getFieldFormatter);
+      return new DynamicColorProperty(
+        descriptor.options,
+        styleName,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
