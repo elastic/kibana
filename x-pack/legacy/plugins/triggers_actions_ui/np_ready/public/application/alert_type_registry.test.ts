@@ -75,13 +75,8 @@ describe('list()', () => {
         id: 'test-alet-type',
         name: 'Test alert type',
         iconClass: 'icon',
-        alertType: {
-          id: 'test-alet-type',
-          name: 'Test alert type',
-          iconClass: 'icon',
-          alertParamsExpression: ExpressionComponent,
-          validate: alertTypes[0].alertType.validate,
-        },
+        alertParamsExpression: ExpressionComponent,
+        validate: alertTypes[0].validate,
       },
     ]);
   });

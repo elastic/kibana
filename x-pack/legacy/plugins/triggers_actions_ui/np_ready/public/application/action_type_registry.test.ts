@@ -76,17 +76,12 @@ describe('list()', () => {
     expect(actionTypes).toEqual([
       {
         id: 'my-action-type',
-        name: 'my-action-type',
         iconClass: 'test',
-        actionType: {
-          id: 'my-action-type',
-          iconClass: 'test',
-          selectMessage: 'test',
-          actionConnectorFields: null,
-          actionParamsFields: null,
-          validateConnector: actionTypes[0].actionType.validateConnector,
-          validateParams: actionTypes[0].actionType.validateParams,
-        },
+        selectMessage: 'test',
+        actionConnectorFields: null,
+        actionParamsFields: null,
+        validateConnector: actionTypes[0].validateConnector,
+        validateParams: actionTypes[0].validateParams,
       },
     ]);
   });

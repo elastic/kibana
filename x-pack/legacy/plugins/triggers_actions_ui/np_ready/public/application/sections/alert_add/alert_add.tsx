@@ -299,7 +299,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
         label={item.name}
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
-          setAlertType(item.alertType);
+          setAlertType(item);
         }}
       >
         <EuiIcon size="xl" type={item.iconClass} />
@@ -311,8 +311,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
     return (
       <EuiKeyPadMenuItem
         key={index}
-        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.name}
-        onClick={() => addActionType(item.actionType)}
+        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.id}
+        onClick={() => addActionType(item)}
       >
         <EuiIcon size="xl" type={item.iconClass} />
       </EuiKeyPadMenuItem>

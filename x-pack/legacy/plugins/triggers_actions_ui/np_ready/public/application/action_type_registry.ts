@@ -48,11 +48,6 @@ export class ActionTypeRegistry {
   }
 
   public list() {
-    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => ({
-      id: actionTypeId,
-      name: actionType.id,
-      iconClass: actionType.iconClass,
-      actionType,
-    }));
+    return Array.from(this.actionTypes).map(([actionTypeId, actionType]) => actionType);
   }
 }

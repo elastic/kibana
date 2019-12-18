@@ -39,11 +39,6 @@ export class AlertTypeRegistry {
   }
 
   public list() {
-    return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => ({
-      id: alertTypeId,
-      name: alertType.name,
-      iconClass: alertType.iconClass,
-      alertType,
-    }));
+    return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => alertType);
   }
 }

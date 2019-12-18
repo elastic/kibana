@@ -30,15 +30,10 @@ const alertType = {
   id: 'test_alert_type',
   name: 'some alert type',
   iconClass: 'test',
-  alertType: {
-    id: 'test_alert_type',
-    name: 'some alert type',
-    iconClass: 'test',
-    validate: (): ValidationResult => {
-      return { errors: {} };
-    },
-    alertParamsExpression: () => null,
+  validate: (): ValidationResult => {
+    return { errors: {} };
   },
+  alertParamsExpression: () => null,
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
