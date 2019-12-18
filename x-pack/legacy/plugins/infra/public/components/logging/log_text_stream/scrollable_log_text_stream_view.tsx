@@ -55,17 +55,13 @@ interface ScrollableLogTextStreamViewProps {
   setFlyoutVisibility: (visible: boolean) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
-  scrollLock: {
-    enable: () => void;
-    disable: () => void;
-    isEnabled: boolean;
-  };
 }
 
 interface ScrollableLogTextStreamViewState {
   target: TimeKey | null;
   targetId: string | null;
   items: StreamItem[];
+  isScrollLocked: boolean;
 }
 
 export class ScrollableLogTextStreamView extends React.PureComponent<
@@ -81,8 +77,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
 
     // Prevent new entries from being appended and moving the stream forward when
     // the user has scrolled up during live streaming
-    const nextItems =
-      hasItems && nextProps.scrollLock.isEnabled ? prevState.items : nextProps.items;
+    const nextItems = hasItems && prevState.isScrollLocked ? prevState.items : nextProps.items;
 
     if (nextProps.isStreaming && hasItems) {
       return {
@@ -121,6 +116,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       target: null,
       targetId: null,
       items: props.items,
+      isScrollLocked: false,
     };
   }
 
@@ -137,9 +133,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
       scale,
       wrap,
-      scrollLock,
     } = this.props;
-    const { targetId, items } = this.state;
+    const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
     return (
       <ScrollableLogTextStreamViewWrapper>
@@ -187,7 +182,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         target={targetId}
                         hideScrollbar={true}
                         data-test-subj={'logStream'}
-                        isLocked={scrollLock.isEnabled}
+                        isLocked={isScrollLocked}
                         entriesCount={items.length}
                       >
                         {registerChild => (
@@ -248,7 +243,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                               lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
                               onLoadMore={this.handleLoadNewerItems}
                             />
-                            {scrollLock.isEnabled && (
+                            {isScrollLocked && (
                               <LogTextStreamJumpToTail
                                 width={width}
                                 onClickJump={this.handleJumpToTail}
@@ -308,7 +303,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       fromScroll: boolean;
     }) => {
       if (fromScroll && this.props.isStreaming) {
-        this.props.scrollLock[pagesBelow === 0 ? 'disable' : 'enable']();
+        this.setState({
+          isScrollLocked: pagesBelow !== 0,
+        });
       }
       this.props.reportVisibleInterval({
         endKey: parseStreamItemId(bottomChild),
@@ -322,11 +319,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   );
 
   private handleJumpToTail = () => {
-    const { items, scrollLock } = this.props;
-    scrollLock.disable();
+    const { items } = this.props;
     const lastItemTarget = getStreamItemId(items[items.length - 1]);
     this.setState({
       targetId: lastItemTarget,
+      isScrollLocked: false,
     });
   };
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import createContainer from 'constate';
 import { TimeKey } from '../../../../common/time';
 
@@ -37,10 +37,31 @@ export interface LogPositionCallbacks {
   stopLiveStreaming: () => void;
 }
 
+const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
+  // Of the two dependencies `middleKey` and `targetPosition`, return
+  // whichever one was the most recently updated. This allows the UI controls
+  // to display a newly-selected `targetPosition` before loading new data;
+  // otherwise the previous `middleKey` would linger in the UI for the entirety
+  // of the loading operation, which the user could perceive as unresponsiveness
+  const [store, update] = useState({
+    middleKey,
+    targetPosition,
+    currentValue: middleKey || targetPosition,
+  });
+  useEffect(() => {
+    if (middleKey !== store.middleKey) {
+      update({ targetPosition, middleKey, currentValue: middleKey });
+    } else if (targetPosition !== store.targetPosition) {
+      update({ targetPosition, middleKey, currentValue: targetPosition });
+    }
+  }, [middleKey, targetPosition]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return store.currentValue;
+};
+
 export const useLogPositionState: () => [LogPositionStateParams, LogPositionCallbacks] = () => {
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
-  const [isAutoReloading, setIsAutoReloading] = useState<boolean>(false);
-  // const [autoReloadScrollLock, setAutoReloadScrollLock] = useState(false);
+  const [isAutoReloading, setIsAutoReloading] = useState(false);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
     endKey: null,
     middleKey: null,
@@ -48,23 +69,10 @@ export const useLogPositionState: () => [LogPositionStateParams, LogPositionCall
     pagesBeforeStart: Infinity,
     pagesAfterEnd: Infinity,
   });
-  const [controlsShouldDisplayTargetPosition, setControlsShouldDisplayTargetPosition] = useState(
-    false
-  );
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
-  const visibleMidpoint = useMemo(() => {
-    if (controlsShouldDisplayTargetPosition) {
-      return targetPosition;
-    } else if (middleKey) {
-      return middleKey;
-    } else if (targetPosition) {
-      return targetPosition;
-    } else {
-      return null;
-    }
-  }, [middleKey, targetPosition, controlsShouldDisplayTargetPosition]);
+  const visibleMidpoint = useVisibleMidpoint(middleKey, targetPosition);
 
   const visibleTimeInterval = useMemo(
     () => (startKey && endKey ? { start: startKey.time, end: endKey.time } : null),
@@ -77,7 +85,6 @@ export const useLogPositionState: () => [LogPositionStateParams, LogPositionCall
     firstVisiblePosition: startKey,
     pagesBeforeStart,
     pagesAfterEnd,
-    // autoReloadScrollLock,
     visibleMidpoint,
     visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
     visibleTimeInterval,
@@ -88,16 +95,8 @@ export const useLogPositionState: () => [LogPositionStateParams, LogPositionCall
     jumpToTargetPositionTime: (time: number, fromAutoReload: boolean = false) =>
       jumpToTargetPosition({ tiebreaker: 0, time, fromAutoReload }),
     reportVisiblePositions,
-    startLiveStreaming: () => {
-      setIsAutoReloading(true);
-      // setAutoReloadScrollLock(false);
-    },
-    stopLiveStreaming: () => {
-      setIsAutoReloading(false);
-      // setAutoReloadScrollLock(false);
-    },
-    // scrollLockLiveStreaming: () => setAutoReloadScrollLock(true),
-    // scrollUnlockLiveStreaming: () => setAutoReloadScrollLock(false),
+    startLiveStreaming: () => callbacks.jumpToTargetPositionTime(Date.now()),
+    stopLiveStreaming: () => setIsAutoReloading(false),
   };
 
   return [state, callbacks];

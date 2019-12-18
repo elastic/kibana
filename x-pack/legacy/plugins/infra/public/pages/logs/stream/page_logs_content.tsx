@@ -100,11 +100,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               setFlyoutVisibility={setFlyoutVisibility}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}
               currentHighlightKey={currentHighlightKey}
-              scrollLock={{
-                enable: () => {}, // scrollLockLiveStreaming,
-                disable: () => {}, // scrollUnlockLiveStreaming,
-                isEnabled: false, // isScrollLocked,
-              }}
             />
           )}
         </WithStreamItems>
