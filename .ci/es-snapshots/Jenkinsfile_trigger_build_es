@@ -10,7 +10,7 @@ branches.each { branch ->
   build(
     propagate: false,
     wait: false,
-    job: 'build-es',
+    job: 'elasticsearch / snapshots # build',
     parameters: [
       string(name: 'branch_specifier', value: 'es-snapshots-automation'), // TODO
       string(name: 'ES_BRANCH', value: branch),
