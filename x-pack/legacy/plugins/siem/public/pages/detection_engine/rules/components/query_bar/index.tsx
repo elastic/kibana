@@ -217,6 +217,7 @@ export const QueryBarDefineRule = ({
               onSubmitQuery={onSubmitQuery}
               savedQuery={savedQuery}
               onSavedQuery={onSavedQuery}
+              hideSavedQuery={false}
             />
           </div>
         )}

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 
 import { HeaderPage } from '../../../../components/header_page';
 import { WrapperPage } from '../../../../components/wrapper_page';
@@ -27,36 +27,23 @@ import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
-import {
-  formatRule,
-  formatAboutStepData,
-  formatDefineStepData,
-  formatScheduleStepData,
-} from '../create/helpers';
+import { formatRule } from '../create/helpers';
 import { getStepsData } from '../helpers';
 import * as ruleI18n from '../translations';
-import {
-  RuleStep,
-  DefineStepRule,
-  AboutStepRule,
-  ScheduleStepRule,
-  AboutStepRuleJson,
-  DefineStepRuleJson,
-  ScheduleStepRuleJson,
-} from '../types';
+import { RuleStep, DefineStepRule, AboutStepRule, ScheduleStepRule } from '../types';
 import * as i18n from './translations';
 
 interface StepRuleForm {
   isValid: boolean;
 }
 interface AboutStepRuleForm extends StepRuleForm {
-  data: AboutStepRuleJson | null;
+  data: AboutStepRule | null;
 }
 interface DefineStepRuleForm extends StepRuleForm {
-  data: DefineStepRuleJson | null;
+  data: DefineStepRule | null;
 }
 interface ScheduleStepRuleForm extends StepRuleForm {
-  data: ScheduleStepRuleJson | null;
+  data: ScheduleStepRule | null;
 }
 
 export const EditRuleComponent = memo(() => {
@@ -83,7 +70,6 @@ export const EditRuleComponent = memo(() => {
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
-
   const setStepsForm = useCallback(
     (step: RuleStep, form: FormHook<FormData>) => {
       stepsForm.current[step] = form;
@@ -94,84 +80,6 @@ export const EditRuleComponent = memo(() => {
     },
     [initForm, selectedTab]
   );
-
-  const onSubmit = useCallback(async () => {
-    const activeFormId = selectedTab?.id as RuleStep;
-    const activeForm = await stepsForm.current[activeFormId]?.submit();
-
-    const invalidForms = [RuleStep.aboutRule, RuleStep.defineRule, RuleStep.scheduleRule].reduce<
-      RuleStep[]
-    >((acc, step) => {
-      if (
-        (step === activeFormId && activeForm != null && !activeForm?.isValid) ||
-        (step === RuleStep.aboutRule && !myAboutRuleForm.isValid) ||
-        (step === RuleStep.defineRule && !myDefineRuleForm.isValid) ||
-        (step === RuleStep.scheduleRule && !myScheduleRuleForm.isValid)
-      ) {
-        return [...acc, step];
-      }
-      return acc;
-    }, []);
-
-    if (invalidForms.length === 0 && activeForm != null) {
-      setTabHasError([]);
-      setRule(
-        formatRule(
-          (activeFormId === RuleStep.defineRule
-            ? activeForm.data
-            : myDefineRuleForm.data) as DefineStepRule,
-          (activeFormId === RuleStep.aboutRule
-            ? activeForm.data
-            : myAboutRuleForm.data) as AboutStepRule,
-          (activeFormId === RuleStep.scheduleRule
-            ? activeForm.data
-            : myScheduleRuleForm.data) as ScheduleStepRule
-        )
-      );
-    } else {
-      setTabHasError(invalidForms);
-    }
-  }, [stepsForm, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, selectedTab]);
-
-  useEffect(() => {
-    if (rule != null) {
-      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
-      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
-      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
-      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
-    }
-  }, [rule]);
-
-  const onTabClick = useCallback(
-    async (tab: EuiTabbedContentTab) => {
-      if (selectedTab != null) {
-        const ruleStep = selectedTab.id as RuleStep;
-        const respForm = await stepsForm.current[ruleStep]?.submit();
-        if (respForm != null) {
-          if (ruleStep === RuleStep.aboutRule) {
-            setMyAboutRuleForm({
-              data: formatAboutStepData(respForm.data as AboutStepRule),
-              isValid: respForm.isValid,
-            });
-          } else if (ruleStep === RuleStep.defineRule) {
-            setMyDefineRuleForm({
-              data: formatDefineStepData(respForm.data as DefineStepRule),
-              isValid: respForm.isValid,
-            });
-          } else if (ruleStep === RuleStep.scheduleRule) {
-            setMyScheduleRuleForm({
-              data: formatScheduleStepData(respForm.data as ScheduleStepRule),
-              isValid: respForm.isValid,
-            });
-          }
-        }
-      }
-      setInitForm(true);
-      setSelectedTab(tab);
-    },
-    [selectedTab, stepsForm.current]
-  );
-
   const tabs = useMemo(
     () => [
       {
@@ -238,8 +146,107 @@ export const EditRuleComponent = memo(() => {
         ),
       },
     ],
-    [loading, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, setStepsForm, stepsForm]
+    [
+      loading,
+      isLoading,
+      myAboutRuleForm,
+      myDefineRuleForm,
+      myScheduleRuleForm,
+      setStepsForm,
+      stepsForm,
+    ]
   );
+
+  const onSubmit = useCallback(async () => {
+    const activeFormId = selectedTab?.id as RuleStep;
+    const activeForm = await stepsForm.current[activeFormId]?.submit();
+
+    const invalidForms = [RuleStep.aboutRule, RuleStep.defineRule, RuleStep.scheduleRule].reduce<
+      RuleStep[]
+    >((acc, step) => {
+      if (
+        (step === activeFormId && activeForm != null && !activeForm?.isValid) ||
+        (step === RuleStep.aboutRule && !myAboutRuleForm.isValid) ||
+        (step === RuleStep.defineRule && !myDefineRuleForm.isValid) ||
+        (step === RuleStep.scheduleRule && !myScheduleRuleForm.isValid)
+      ) {
+        return [...acc, step];
+      }
+      return acc;
+    }, []);
+
+    if (invalidForms.length === 0 && activeForm != null) {
+      setTabHasError([]);
+      setRule(
+        formatRule(
+          (activeFormId === RuleStep.defineRule
+            ? activeForm.data
+            : myDefineRuleForm.data) as DefineStepRule,
+          (activeFormId === RuleStep.aboutRule
+            ? activeForm.data
+            : myAboutRuleForm.data) as AboutStepRule,
+          (activeFormId === RuleStep.scheduleRule
+            ? activeForm.data
+            : myScheduleRuleForm.data) as ScheduleStepRule,
+          ruleId
+        )
+      );
+    } else {
+      setTabHasError(invalidForms);
+    }
+  }, [stepsForm, myAboutRuleForm, myDefineRuleForm, myScheduleRuleForm, selectedTab, ruleId]);
+
+  useEffect(() => {
+    if (rule != null) {
+      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
+      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
+      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+    }
+  }, [rule]);
+
+  const onTabClick = useCallback(
+    async (tab: EuiTabbedContentTab) => {
+      if (selectedTab != null) {
+        const ruleStep = selectedTab.id as RuleStep;
+        const respForm = await stepsForm.current[ruleStep]?.submit();
+        if (respForm != null) {
+          if (ruleStep === RuleStep.aboutRule) {
+            setMyAboutRuleForm({
+              data: respForm.data as AboutStepRule,
+              isValid: respForm.isValid,
+            });
+          } else if (ruleStep === RuleStep.defineRule) {
+            setMyDefineRuleForm({
+              data: respForm.data as DefineStepRule,
+              isValid: respForm.isValid,
+            });
+          } else if (ruleStep === RuleStep.scheduleRule) {
+            setMyScheduleRuleForm({
+              data: respForm.data as ScheduleStepRule,
+              isValid: respForm.isValid,
+            });
+          }
+        }
+      }
+      setInitForm(true);
+      setSelectedTab(tab);
+    },
+    [selectedTab, stepsForm.current]
+  );
+
+  useEffect(() => {
+    if (rule != null) {
+      const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({ rule });
+      setMyAboutRuleForm({ data: aboutRuleData, isValid: true });
+      setMyDefineRuleForm({ data: defineRuleData, isValid: true });
+      setMyScheduleRuleForm({ data: scheduleRuleData, isValid: true });
+    }
+  }, [rule]);
+
+  useEffect(() => {
+    setSelectedTab(tabs[0]);
+  }, []);
 
   if (isSaved || (rule != null && rule.immutable)) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`} />;

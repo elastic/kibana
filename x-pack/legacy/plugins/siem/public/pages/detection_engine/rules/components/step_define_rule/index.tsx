@@ -9,11 +9,11 @@ import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { useUiSetting$ } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import * as RuleI18n from '../../translations';
-import { DefineStepRuleJson, DefineStepRule, RuleStep, RuleStepProps } from '../../types';
+import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
@@ -23,7 +23,7 @@ import * as I18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepDefineRuleProps extends RuleStepProps {
-  defaultValues?: DefineStepRuleJson | null;
+  defaultValues?: DefineStepRule | null;
 }
 
 const stepDefineDefaultValue = {
@@ -39,17 +39,12 @@ const stepDefineDefaultValue = {
 
 const getStepDefaultValue = (
   indicesConfig: string[],
-  defaultValues?: DefineStepRuleJson | null
+  defaultValues: DefineStepRule | null
 ): DefineStepRule => {
   if (defaultValues != null) {
     return {
+      ...defaultValues,
       isNew: false,
-      queryBar: {
-        query: { query: defaultValues.query ?? '', language: defaultValues.language ?? 'kuery' },
-        filters: defaultValues.filters ?? [],
-        saved_id: defaultValues.saved_id ?? null,
-      },
-      index: defaultValues.index,
       useIndicesConfig: `${isEqual(defaultValues.index, indicesConfig)}`,
     };
   } else {
@@ -72,11 +67,11 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
     setStepData,
   }) => {
     const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState('');
+    const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
     const [
       { indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
       setIndices,
-    ] = useFetchIndexPatterns(defaultValues != null ? defaultValues.index : []);
-    const [indicesConfig] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
+    ] = useFetchIndexPatterns(defaultValues != null ? defaultValues.index : indicesConfig ?? []);
     const [myStepData, setMyStepData] = useState<DefineStepRule>(stepDefineDefaultValue);
 
     const { form } = useForm({
@@ -97,7 +92,7 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
     }, [form]);
 
     useEffect(() => {
-      if (indicesConfig != null) {
+      if (indicesConfig != null && defaultValues != null) {
         const myDefaultValues = getStepDefaultValue(indicesConfig, defaultValues);
         if (!isEqual(myDefaultValues, myStepData)) {
           setMyStepData(myDefaultValues);

@@ -28,7 +28,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
  */
 export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Promise<NewRule> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
-    method: 'POST',
+    method: rule.id != null ? 'PUT' : 'POST',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
@@ -89,11 +89,11 @@ export const fetchRules = async ({
   await throwIfNotOk(response);
   return id != null
     ? {
-        page: 0,
-        perPage: 1,
-        total: 1,
-        data: response.json(),
-      }
+      page: 0,
+      perPage: 1,
+      total: 1,
+      data: response.json(),
+    }
     : response.json();
 };
 
@@ -200,9 +200,11 @@ export const duplicateRules = async ({
       body: JSON.stringify({
         ...rule,
         name: `${rule.name} [Duplicate]`,
+        created_at: undefined,
         created_by: undefined,
         id: undefined,
         rule_id: undefined,
+        updated_at: undefined,
         updated_by: undefined,
         enabled: rule.enabled,
       }),

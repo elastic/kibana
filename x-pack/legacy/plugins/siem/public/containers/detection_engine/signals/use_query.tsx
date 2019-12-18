@@ -18,9 +18,9 @@ import { SignalSearchResponse } from './types';
 type Return<Hit, Aggs> = [boolean, SignalSearchResponse<Hit, Aggs> | null];
 
 /**
- * Hook for using to get a Rule from the Detection Engine API
+ * Hook for using to get a Signals from the Detection Engine API
  *
- * @param id desired Rule ID's (not rule_id)
+ * @param query convert a dsl into string
  *
  */
 export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => {

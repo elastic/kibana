@@ -25,7 +25,7 @@ import * as i18n from './translations';
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
-const ResizeEuiPanel = styled(EuiPanel)<{
+const ResizeEuiPanel = styled(EuiPanel) <{
   height?: number;
 }>`
   .euiAccordion__childWrapper {
@@ -51,34 +51,37 @@ export const CreateRuleComponent = React.memo(() => {
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
 
-  const setStepData = (step: RuleStep, data: unknown, isValid: boolean) => {
-    stepsData.current[step] = { ...stepsData.current[step], data, isValid };
-    if (isValid) {
-      const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
-      if ([0, 1].includes(stepRuleIdx)) {
-        setIsStepRuleInEditView({
-          ...isStepRuleInReadOnlyView,
-          [step]: true,
-        });
-        if (openAccordionId !== stepsRuleOrder[stepRuleIdx + 1]) {
-          openCloseAccordion(stepsRuleOrder[stepRuleIdx + 1]);
-          setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
+  const setStepData = useCallback(
+    (step: RuleStep, data: unknown, isValid: boolean) => {
+      stepsData.current[step] = { ...stepsData.current[step], data, isValid };
+      if (isValid) {
+        const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
+        if ([0, 1].includes(stepRuleIdx)) {
+          setIsStepRuleInEditView({
+            ...isStepRuleInReadOnlyView,
+            [step]: true,
+          });
+          if (openAccordionId !== stepsRuleOrder[stepRuleIdx + 1]) {
+            openCloseAccordion(stepsRuleOrder[stepRuleIdx + 1]);
+            setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
+          }
+        } else if (
+          stepRuleIdx === 2 &&
+          stepsData.current[RuleStep.defineRule].isValid &&
+          stepsData.current[RuleStep.aboutRule].isValid
+        ) {
+          setRule(
+            formatRule(
+              stepsData.current[RuleStep.defineRule].data as DefineStepRule,
+              stepsData.current[RuleStep.aboutRule].data as AboutStepRule,
+              stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule
+            )
+          );
         }
-      } else if (
-        stepRuleIdx === 2 &&
-        stepsData.current[RuleStep.defineRule].isValid &&
-        stepsData.current[RuleStep.aboutRule].isValid
-      ) {
-        setRule(
-          formatRule(
-            stepsData.current[RuleStep.defineRule].data as DefineStepRule,
-            stepsData.current[RuleStep.aboutRule].data as AboutStepRule,
-            stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule
-          )
-        );
       }
-    }
-  };
+    },
+    [openAccordionId, stepsData.current, setRule]
+  );
 
   const getAccordionType = useCallback(
     (accordionId: RuleStep) => {
@@ -136,8 +139,8 @@ export const CreateRuleComponent = React.memo(() => {
         stepRuleIdx === 0
           ? true
           : stepsRuleOrder
-              .filter((stepRule, index) => index < stepRuleIdx)
-              .every(stepRule => stepsData.current[stepRule].isValid);
+            .filter((stepRule, index) => index < stepRuleIdx)
+            .every(stepRule => stepsData.current[stepRule].isValid);
 
       if (stepRuleIdx < activeRuleIdx && !isOpen) {
         openCloseAccordion(id);

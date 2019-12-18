@@ -119,6 +119,10 @@ export interface ScheduleStepRuleJson {
   meta?: unknown;
 }
 
+export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {
+  immutable: boolean;
+};
+
 export type FormatRuleType = 'query' | 'saved_query';
 
 export interface IMitreAttack {

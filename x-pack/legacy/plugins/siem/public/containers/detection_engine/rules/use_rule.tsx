@@ -9,8 +9,8 @@ import { useEffect, useState } from 'react';
 import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { useStateToaster } from '../../../components/toasters';
-import { fetchRuleById } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { fetchRuleById } from './api';
 import * as i18n from './translations';
 import { Rule } from './types';
 

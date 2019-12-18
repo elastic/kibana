@@ -6,8 +6,8 @@
 
 import { isEmpty, isEqual, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
@@ -33,7 +33,7 @@ type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();
-  const [indices, setIndices] = useState<string[]>([]);
+  const [indices, setIndices] = useState<string[]>(defaultIndices);
   const [indicesExists, setIndicesExists] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<IIndexPattern | null>(null);
   const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
@@ -51,7 +51,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
     const abortCtrl = new AbortController();
 
     async function fetchIndexPatterns() {
-      if (apolloClient && !isEmpty(indices) && !isEqual(defaultIndices, indices)) {
+      if (apolloClient && !isEmpty(indices)) {
         setIsLoading(true);
         apolloClient
           .query<SourceQuery.Query, SourceQuery.Variables>({

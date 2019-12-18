@@ -8,7 +8,7 @@ import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elasti
 import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
-import { RuleStepProps, RuleStep, AboutStepRule, AboutStepRuleJson } from '../../types';
+import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as RuleI18n from '../../translations';
 import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { AddItem } from '../add_item_form';
@@ -22,7 +22,7 @@ import { AddMitreThreat } from '../mitre';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
-  defaultValues?: AboutStepRuleJson | null;
+  defaultValues?: AboutStepRule | null;
 }
 
 export const StepAboutRule = memo<StepAboutRuleProps>(
@@ -60,8 +60,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
         const myDefaultValues = {
           ...defaultValues,
           isNew: false,
-          riskScore: defaultValues.risk_score,
-          falsePositives: defaultValues.false_positives,
         };
         setMyStepData(myDefaultValues);
         if (!isReadOnlyView) {

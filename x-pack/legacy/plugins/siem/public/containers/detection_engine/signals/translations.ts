@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const SIGNAL_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDexcription',
+  'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDescription',
   {
     defaultMessage: 'Failed to query signals',
   }

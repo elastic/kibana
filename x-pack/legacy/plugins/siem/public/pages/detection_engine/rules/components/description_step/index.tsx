@@ -16,15 +16,16 @@ import {
   EuiListGroup,
 } from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useState } from 'react';
 import styled from 'styled-components';
 
 import {
   IIndexPattern,
   esFilters,
+  FilterManager,
   Query,
 } from '../../../../../../../../../../src/plugins/data/public';
-
+import { useKibanaCore } from '../../../../../lib/compose/kibana_core';
 import { FilterLabel } from './filter_label';
 import { FormSchema } from '../shared_imports';
 import * as I18n from './translations';
@@ -69,11 +70,14 @@ const MyEuiTextArea = styled(EuiTextArea)`
 
 export const StepRuleDescription = memo<StepRuleDescriptionProps>(
   ({ data, direction = 'row', indexPatterns, schema }) => {
+    const core = useKibanaCore();
+    const [filterManager] = useState<FilterManager>(new FilterManager(core.uiSettings));
+
     const keys = Object.keys(schema);
     const listItems = keys.reduce(
       (acc: ListItems[], key: string) => [
         ...acc,
-        ...buildListItems(data, pick(key, schema), indexPatterns),
+        ...buildListItems(data, pick(key, schema), filterManager, indexPatterns),
       ],
       []
     );
@@ -101,12 +105,19 @@ interface ListItems {
 const buildListItems = (
   data: unknown,
   schema: FormSchema,
+  filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] =>
   Object.keys(schema).reduce<ListItems[]>(
     (acc, field) => [
       ...acc,
-      ...getDescriptionItem(field, get([field, 'label'], schema), data, indexPatterns),
+      ...getDescriptionItem(
+        field,
+        get([field, 'label'], schema),
+        data,
+        filterManager,
+        indexPatterns
+      ),
     ],
     []
   );
@@ -115,6 +126,7 @@ const getDescriptionItem = (
   field: string,
   label: string,
   value: unknown,
+  filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
   if (field === 'useIndicesConfig') {
@@ -125,13 +137,14 @@ const getDescriptionItem = (
     const savedId = get('queryBar.saved_id', value);
     let items: ListItems[] = [];
     if (!isEmpty(filters)) {
+      filterManager.setFilters(filters);
       items = [
         ...items,
         {
           title: <>{I18n.FILTERS_LABEL}</>,
           description: (
             <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-              {filters.map((filter, index) => (
+              {filterManager.getFilters().map((filter, index) => (
                 <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                   <EuiBadgeWrap color="hollow">
                     {indexPatterns != null ? (

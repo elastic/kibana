@@ -8,7 +8,7 @@ import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elasti
 import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
-import { RuleStep, RuleStepProps, ScheduleStepRule, ScheduleStepRuleJson } from '../../types';
+import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
 import { Form, UseField, useForm } from '../shared_imports';
@@ -16,7 +16,7 @@ import { schema } from './schema';
 import * as I18n from './translations';
 
 interface StepScheduleRuleProps extends RuleStepProps {
-  defaultValues?: ScheduleStepRuleJson | null;
+  defaultValues?: ScheduleStepRule | null;
 }
 
 const stepScheduleDefaultValue = {
@@ -47,7 +47,7 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
     const onSubmit = useCallback(
       async (enabled: boolean) => {
         if (setStepData) {
-          setStepData(RuleStep.aboutRule, null, false);
+          setStepData(RuleStep.scheduleRule, null, false);
           const { isValid: newIsValid, data } = await form.submit();
           if (newIsValid) {
             setStepData(RuleStep.scheduleRule, { ...data, enabled }, newIsValid);

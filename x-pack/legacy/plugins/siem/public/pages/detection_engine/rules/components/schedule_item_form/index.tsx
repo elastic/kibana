@@ -37,23 +37,25 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const onChangeTimeType = useCallback(e => {
-    setTimeType(e.target.value);
-  }, []);
+  const onChangeTimeType = useCallback(
+    e => {
+      setTimeType(e.target.value);
+      field.setValue(`${timeVal}${e.target.value}`);
+    },
+    [timeVal]
+  );
 
-  const onChangeTimeVal = useCallback(e => {
-    const sanitizedValue: number = parseInt(e.target.value, 10);
-    setTimeVal(isNaN(sanitizedValue) ? 0 : sanitizedValue);
-  }, []);
+  const onChangeTimeVal = useCallback(
+    e => {
+      const sanitizedValue: number = parseInt(e.target.value, 10);
+      setTimeVal(sanitizedValue);
+      field.setValue(`${sanitizedValue}${timeType}`);
+    },
+    [timeType]
+  );
 
   useEffect(() => {
-    if (!isEmpty(timeVal) && Number(timeVal) >= 0 && field.value !== `${timeVal}${timeType}`) {
-      field.setValue(`${timeVal}${timeType}`);
-    }
-  }, [field.value, timeType, timeVal]);
-
-  useEffect(() => {
-    if (!isEmpty(field.value)) {
+    if (field.value !== `${timeVal}${timeType}`) {
       const filterTimeVal = (field.value as string).match(/\d+/g);
       const filterTimeType = (field.value as string).match(/[a-zA-Z]+/g);
       if (

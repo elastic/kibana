@@ -6,20 +6,16 @@
 
 import { pick } from 'lodash/fp';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/common';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
-import {
-  AboutStepRuleJson,
-  DefineStepRuleJson,
-  IMitreEnterpriseAttack,
-  ScheduleStepRuleJson,
-} from './types';
+import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
 
 interface GetStepsData {
-  aboutRuleData: AboutStepRuleJson | null;
-  defineRuleData: DefineStepRuleJson | null;
-  scheduleRuleData: ScheduleStepRuleJson | null;
+  aboutRuleData: AboutStepRule | null;
+  defineRuleData: DefineStepRule | null;
+  scheduleRuleData: ScheduleStepRule | null;
 }
+
 export const getStepsData = ({
   rule,
   detailsView = false,
@@ -27,38 +23,36 @@ export const getStepsData = ({
   rule: Rule | null;
   detailsView?: boolean;
 }): GetStepsData => {
-  const defineRuleData: DefineStepRuleJson | null =
+  const defineRuleData: DefineStepRule | null =
     rule != null
       ? {
-          ...pick(['index', 'language', 'query', 'saved_id'], rule),
-          filters: rule.filters as esFilters.Filter[],
+          isNew: false,
+          index: rule.index,
+          queryBar: {
+            query: { query: rule.query as string, language: rule.language },
+            filters: rule.filters as esFilters.Filter[],
+            saved_id: rule.saved_id ?? null,
+          },
+          useIndicesConfig: 'true',
         }
       : null;
-  const aboutRuleData: AboutStepRuleJson | null =
+  const aboutRuleData: AboutStepRule | null =
     rule != null
       ? {
-          ...pick(
-            [
-              'description',
-              'false_positives',
-              'name',
-              'references',
-              'risk_score',
-              'severity',
-              'tags',
-              'threats',
-            ],
-            rule
-          ),
+          isNew: false,
+          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threats'], rule),
           ...(detailsView ? { name: '' } : {}),
           threats: rule.threats as IMitreEnterpriseAttack[],
+          falsePositives: rule.false_positives,
+          riskScore: rule.risk_score,
         }
       : null;
-  const scheduleRuleData: ScheduleStepRuleJson | null =
+  const scheduleRuleData: ScheduleStepRule | null =
     rule != null
       ? {
+          isNew: false,
           ...pick(['enabled', 'interval'], rule),
-          from: rule.meta.from,
+          from: rule.meta.from.replace('now-', ''),
         }
       : null;
 

@@ -39,8 +39,8 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   return timeObj;
 };
 
-export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, useIndicesConfig, ...rest } = defineStepData;
+const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
+  const { queryBar, useIndicesConfig, isNew, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
     ...rest,
@@ -51,9 +51,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
   };
 };
 
-export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
-  const formatScheduleData = scheduleData;
-
+const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
+  const { isNew, ...formatScheduleData } = scheduleData;
   if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(
       formatScheduleData.interval
@@ -72,9 +71,8 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
   };
 };
 
-export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const { falsePositives, references, riskScore, threats, ...rest } = aboutStepData;
-
+const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
+  const { falsePositives, references, riskScore, threats, isNew, ...rest } = aboutStepData;
   return {
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
@@ -96,7 +94,8 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
 export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
-  scheduleData: ScheduleStepRule
+  scheduleData: ScheduleStepRule,
+  ruleId?: string
 ): NewRule => {
   const type: FormatRuleType = defineStepData.queryBar.saved_id != null ? 'saved_query' : 'query';
   const persistData = {
@@ -105,6 +104,5 @@ export const formatRule = (
     ...formatAboutStepData(aboutStepData),
     ...formatScheduleStepData(scheduleData),
   };
-
-  return persistData;
+  return ruleId != null ? { id: ruleId, ...persistData } : persistData;
 };

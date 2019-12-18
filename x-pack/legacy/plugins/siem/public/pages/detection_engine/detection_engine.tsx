@@ -38,11 +38,13 @@ export const DetectionEngineComponent = React.memo(() => {
                 <HeaderPage
                   border
                   subtitle={
-                    <>
-                      {i18n.LAST_SIGNAL}
-                      {': '}
-                      {lastSignals}
-                    </>
+                    lastSignals != null && (
+                      <>
+                        {i18n.LAST_SIGNAL}
+                        {': '}
+                        {lastSignals}
+                      </>
+                    )
                   }
                   title={i18n.PAGE_TITLE}
                 >
@@ -59,12 +61,12 @@ export const DetectionEngineComponent = React.memo(() => {
               </WrapperPage>
             </StickyContainer>
           ) : (
-            <WrapperPage>
-              <HeaderPage border title={i18n.PAGE_TITLE} />
+              <WrapperPage>
+                <HeaderPage border title={i18n.PAGE_TITLE} />
 
-              <DetectionEngineEmptyPage />
-            </WrapperPage>
-          );
+                <DetectionEngineEmptyPage />
+              </WrapperPage>
+            );
         }}
       </WithSource>
 

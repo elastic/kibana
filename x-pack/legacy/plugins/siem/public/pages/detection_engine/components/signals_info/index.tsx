@@ -16,10 +16,10 @@ interface SignalInfo {
   ruleId?: string | null;
 }
 
-type Return = [React.ReactElement, React.ReactNode];
+type Return = [React.ReactNode, React.ReactNode];
 
 export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
-  const [lastSignals, setLastSignals] = useState<React.ReactElement>(
+  const [lastSignals, setLastSignals] = useState<React.ReactElement | null>(
     <EuiLoadingSpinner size="m" />
   );
   const [totalSignals, setTotalSignals] = useState<React.ReactElement>(
@@ -39,9 +39,11 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
     if (signals != null) {
       const mySignals = signals;
       setLastSignals(
-        <FormattedRelative
-          value={new Date(mySignals.aggregations?.lastSeen.value_as_string ?? '')}
-        />
+        mySignals.aggregations?.lastSeen.value != null ? (
+          <FormattedRelative
+            value={new Date(mySignals.aggregations?.lastSeen.value_as_string ?? '')}
+          />
+        ) : null
       );
       setTotalSignals(<>{mySignals.hits.total.value}</>);
     }

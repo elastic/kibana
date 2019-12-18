@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
 import {
   EuiBadge,
   EuiHealth,
   EuiIconTip,
   EuiLink,
-  EuiTableActionsColumnType,
   EuiTextColor,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
 } from '@elastic/eui';
-=======
-import { EuiBadge, EuiHealth, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
 import * as H from 'history';
->>>>>>> add editing/details feature for a rule
 import React from 'react';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { getEmptyTagValue } from '../../../../components/empty_value';
@@ -32,20 +29,11 @@ import { Action } from './reducer';
 import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
-<<<<<<< HEAD
-<<<<<<< HEAD:x-pack/legacy/plugins/siem/public/pages/detection_engine/rules/all_rules/columns.tsx
-import { RuleSwitch, RuleStateChangeCallback } from '../components/rule_switch';
-=======
-import { RuleSwitch } from '../../components/rule_switch';
->>>>>>> re-structure detection engine + change routing name:x-pack/legacy/plugins/siem/public/pages/detection_engine/rules/all/columns.tsx
-=======
 import { RuleSwitch } from '../components/rule_switch';
->>>>>>> add editing/details feature for a rule
 
 const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, history: H.History) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
-    type: 'icon',
     icon: 'visControls',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
@@ -53,7 +41,6 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, histor
   },
   {
     description: i18n.RUN_RULE_MANUALLY,
-    type: 'icon',
     icon: 'play',
     name: i18n.RUN_RULE_MANUALLY,
     onClick: runRuleAction,
@@ -61,21 +48,18 @@ const getActions = (dispatch: React.Dispatch<Action>, kbnVersion: string, histor
   },
   {
     description: i18n.DUPLICATE_RULE,
-    type: 'icon',
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
     onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch, kbnVersion),
   },
   {
     description: i18n.EXPORT_RULE,
-    type: 'icon',
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
     onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
   },
   {
     description: i18n.DELETE_RULE,
-    type: 'icon',
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, kbnVersion),
@@ -87,7 +71,7 @@ export const getColumns = (
   dispatch: React.Dispatch<Action>,
   kbnVersion: string,
   history: H.History
-) => [
+): Array<EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<TableData>> => [
   {
     field: 'rule',
     name: i18n.COLUMN_RULE,
@@ -172,25 +156,9 @@ export const getColumns = (
     width: '20%',
   },
   {
-    align: 'center' as const,
+    align: 'center',
     field: 'activate',
     name: i18n.COLUMN_ACTIVATE,
-<<<<<<< HEAD
-    render: (value: TableData['activate'], item: TableData) => {
-      const handleRuleStateChange: RuleStateChangeCallback = async (enabled, id) => {
-        await enableRulesAction([id], enabled, dispatch, kbnVersion);
-      };
-
-      return (
-        <RuleSwitch
-          id={item.id}
-          enabled={item.activate}
-          isLoading={item.isLoading}
-          onRuleStateChange={handleRuleStateChange}
-        />
-      );
-    },
-=======
     render: (value: TableData['activate'], item: TableData) => (
       <RuleSwitch
         dispatch={dispatch}
@@ -199,7 +167,6 @@ export const getColumns = (
         isLoading={item.isLoading}
       />
     ),
->>>>>>> add editing/details feature for a rule
     sortable: true,
     width: '85px',
   },

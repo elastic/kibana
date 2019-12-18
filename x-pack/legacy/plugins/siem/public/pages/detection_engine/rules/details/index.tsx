@@ -90,11 +90,13 @@ export const RuleDetailsComponent = memo(() => {
                   border
                   subtitle={subTitle}
                   subtitle2={[
-                    <>
-                      {detectionI18n.LAST_SIGNAL}
-                      {': '}
-                      {lastSignals}
-                    </>,
+                    lastSignals != null ? (
+                      <>
+                        {detectionI18n.LAST_SIGNAL}
+                        {': '}
+                        {lastSignals}
+                      </>
+                    ) : null,
                     'Status: Comming Soon',
                   ]}
                   title={title}

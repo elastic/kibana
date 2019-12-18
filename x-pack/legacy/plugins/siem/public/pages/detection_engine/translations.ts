@@ -10,11 +10,11 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
   defaultMessage: 'Detection engine',
 });
 
-export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignaltitle', {
+export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignalTitle', {
   defaultMessage: 'Last signal:',
 });
 
-export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSignaltitle', {
+export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSignalTitle', {
   defaultMessage: 'Total',
 });
 
