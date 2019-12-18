@@ -46,33 +46,7 @@ const EmbeddedPanel = styled.div`
 
 export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
-
-  useEffect(() => {
-    async function setupEmbeddable() {
-      const mapState = {
-        layerList: getLayerList(upPoints, downPoints),
-        title: i18n.MAP_TITLE,
-      };
-      // @ts-ignore
-      const embeddableObject = await factory.createFromState(mapState, input, undefined);
-
-      setEmbeddable(embeddableObject);
-    }
-    setupEmbeddable();
-  }, []);
-
-  useEffect(() => {
-    if (embeddable) {
-      embeddable.setLayerList(getLayerList(upPoints, downPoints));
-    }
-  }, [upPoints, downPoints]);
-
-  useEffect(() => {
-    if (embeddableRoot.current && embeddable) {
-      embeddable.render(embeddableRoot.current);
-    }
-  }, [embeddable]);
-
+  const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input = {
@@ -90,7 +64,31 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     hideToolbarOverlay: true,
   };
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();
+  useEffect(() => {
+    async function setupEmbeddable() {
+      const mapState = {
+        layerList: getLayerList(upPoints, downPoints),
+        title: i18n.MAP_TITLE,
+      };
+      // @ts-ignore
+      const embeddableObject = await factory.createFromState(mapState, input, undefined);
+
+      setEmbeddable(embeddableObject);
+    }
+    setupEmbeddable();
+  }, [downPoints, factory, input, upPoints]);
+
+  useEffect(() => {
+    if (embeddable) {
+      embeddable.setLayerList(getLayerList(upPoints, downPoints));
+    }
+  }, [embeddable, upPoints, downPoints]);
+
+  useEffect(() => {
+    if (embeddableRoot.current && embeddable) {
+      embeddable.render(embeddableRoot.current);
+    }
+  }, [embeddable, embeddableRoot]);
 
   return (
     <EmbeddedPanel>
