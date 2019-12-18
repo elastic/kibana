@@ -49,7 +49,7 @@ export abstract class FilterManager {
     return this.indexPattern;
   }
 
-  getField(): any {
+  getField() {
     return this.indexPattern.fields.getByName(this.fieldName);
   }
 

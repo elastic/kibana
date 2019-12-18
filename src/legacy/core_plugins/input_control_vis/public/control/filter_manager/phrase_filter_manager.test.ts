@@ -40,7 +40,7 @@ describe('PhraseFilterManager', function() {
     const indexPatternMock: IndexPattern = {
       id: indexPatternId,
       fields: {
-        getByName: (name: any) => {
+        getByName: (name: string) => {
           const fields: any = { field1: fieldMock };
           return fields[name];
         },
