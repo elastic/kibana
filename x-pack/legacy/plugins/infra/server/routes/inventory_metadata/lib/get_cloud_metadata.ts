@@ -5,7 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-import { InventoryAWSAccount } from '../../../../common/http_api/inventory_meta_api';
+import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
   InfraMetadataAggregationResponse,
   InfraMetadataAggregationBucket,
@@ -15,18 +15,18 @@ import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framewor
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../common/inventory_models';
 
-export interface AWSInventoryMetadata {
-  accounts: InventoryAWSAccount[];
+export interface CloudMetaData {
+  accounts: InventoryCloudAccount[];
   projects: string[];
   regions: string[];
 }
 
-export const getAWSMetadata = async (
+export const getCloudMetadata = async (
   framework: KibanaFramework,
   req: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeType: InventoryItemType
-): Promise<AWSInventoryMetadata> => {
+): Promise<CloudMetaData> => {
   const model = findInventoryModel(nodeType);
 
   const metricQuery = {
@@ -88,7 +88,7 @@ export const getAWSMetadata = async (
       ? response.aggregations.regions.buckets
       : [];
 
-  const accounts: InventoryAWSAccount[] = [];
+  const accounts: InventoryCloudAccount[] = [];
   if (response.aggregations && response.aggregations.accounts) {
     response.aggregations.accounts.buckets.forEach(b => {
       if (b.accountNames.buckets.length) {
