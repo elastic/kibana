@@ -188,18 +188,20 @@ export class MBMapContainer extends React.Component {
         this.props.extentChanged(this._getMapState());
       }, 100)
     );
-
-    const throttledSetMouseCoordinates = _.throttle(e => {
-      this.props.setMouseCoordinates({
-        lat: e.lngLat.lat,
-        lon: e.lngLat.lng,
+    // Attach event only if view control is visible, which shows lat/lon
+    if (!this.props.hideViewControl) {
+      const throttledSetMouseCoordinates = _.throttle(e => {
+        this.props.setMouseCoordinates({
+          lat: e.lngLat.lat,
+          lon: e.lngLat.lng,
+        });
+      }, 100);
+      this.state.mbMap.on('mousemove', throttledSetMouseCoordinates);
+      this.state.mbMap.on('mouseout', () => {
+        throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
+        this.props.clearMouseCoordinates();
       });
-    }, 100);
-    this.state.mbMap.on('mousemove', throttledSetMouseCoordinates);
-    this.state.mbMap.on('mouseout', () => {
-      throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
-      this.props.clearMouseCoordinates();
-    });
+    }
   }
 
   _initResizerChecker() {
