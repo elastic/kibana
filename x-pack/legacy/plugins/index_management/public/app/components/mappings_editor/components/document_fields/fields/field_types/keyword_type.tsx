@@ -62,7 +62,7 @@ export const KeywordType = ({ field }: Props) => {
             defaultMessage: 'Use normalizer',
           })}
           description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
-            defaultMessage: 'Process the keyword prior to indexing. ',
+            defaultMessage: 'Process the keyword prior to indexing.',
           })}
           docLink={{
             text: i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerDocLinkText', {

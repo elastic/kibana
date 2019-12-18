@@ -270,7 +270,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.copyToLabel', {
-        defaultMessage: 'Destination field name',
+        defaultMessage: 'Group field name',
       }),
       validations: [
         {
@@ -278,7 +278,7 @@ export const PARAMETERS_DEFINITION = {
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.copyToIsRequiredErrorMessage',
               {
-                defaultMessage: 'Copy to is required.',
+                defaultMessage: 'Group field name is required.',
               }
             )
           ),
@@ -511,7 +511,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.normalizerHelpText', {
-        defaultMessage: 'The name of the normalizer defined in your index settings.',
+        defaultMessage: `The name of a normalizer defined in the index's settings.`,
       }),
     },
   },

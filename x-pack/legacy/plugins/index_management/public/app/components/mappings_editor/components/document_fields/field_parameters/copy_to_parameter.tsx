@@ -20,10 +20,11 @@ interface Props {
 export const CopyToParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldTitle', {
-      defaultMessage: 'Copy to',
+      defaultMessage: 'Copy to group field',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldDescription', {
-      defaultMessage: 'Copy the values of multiple fields into a group field.',
+      defaultMessage:
+        'Copy the values of multiple fields into a group field. This group field can then be queried as a single field.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.copyToDocLinkText', {

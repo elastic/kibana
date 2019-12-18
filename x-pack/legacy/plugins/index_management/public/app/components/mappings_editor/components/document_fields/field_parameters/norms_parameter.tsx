@@ -20,7 +20,7 @@ export const NormsParameter = ({ configPath = 'norms' }: { configPath?: NormsPar
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldDescription', {
       defaultMessage:
-        'Account for field length when scoring queries. Norms are useful for scoring, but also require a lot of disk space.',
+        'Account for field length when scoring queries. Norms require significant memory and are not necessary for fields that are used solely for filtering or aggregations.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.normsDocLinkText', {

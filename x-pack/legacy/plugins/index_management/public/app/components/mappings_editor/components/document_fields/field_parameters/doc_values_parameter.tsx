@@ -23,8 +23,7 @@ export const DocValuesParameter = ({
       defaultMessage: 'Use doc values',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldDescription', {
-      defaultMessage:
-        'Store fields on disk in a column-stride fashion for use in sorting, aggregations, and scripting.',
+      defaultMessage: `Store each document's value for this field in memory so it can be used for sorting, aggregations, and in scripts.`,
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesDocLinkText', {
