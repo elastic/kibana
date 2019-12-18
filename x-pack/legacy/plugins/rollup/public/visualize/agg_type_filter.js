@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { aggTypeFilters } from 'ui/agg_types/filter';
-
-export function initAggTypeFilter() {
+export function initAggTypeFilter(aggTypeFilters) {
   /**
    * If rollup index pattern, check its capabilities
    * and limit available aggregations based on that.

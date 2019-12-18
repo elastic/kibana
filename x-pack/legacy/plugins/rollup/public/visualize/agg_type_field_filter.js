@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-
-export function initAggTypeFieldFilter() {
+export function initAggTypeFieldFilter(aggTypeFieldFilters) {
   /**
    * If rollup index pattern, check its capabilities
    * and limit available fields for a given aggType based on that.

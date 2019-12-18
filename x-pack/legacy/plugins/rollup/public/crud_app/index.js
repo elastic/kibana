@@ -5,15 +5,9 @@
  */
 
 import React from 'react';
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
@@ -21,15 +15,6 @@ import { setHttp, setUserHasLeftApp } from './services';
 import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
-
-const esSection = management.getSection('elasticsearch');
-
-esSection.register('rollup_jobs', {
-  visible: true,
-  display: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-  order: 3,
-  url: `#${CRUD_APP_BASE_PATH}/job_list`,
-});
 
 const renderReact = async elem => {
   render(
@@ -81,18 +66,4 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
       });
     }
   },
-});
-
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'rollup_jobs',
-    title: 'Rollups',
-    description: i18n.translate('xpack.rollupJobs.featureCatalogueDescription', {
-      defaultMessage: 'Summarize and store historical data in a smaller index for future analysis.',
-    }),
-    icon: 'indexRollupApp',
-    path: `#${CRUD_APP_BASE_PATH}/job_list`,
-    showOnHomePage: true,
-    category: FeatureCatalogueCategory.ADMIN,
-  };
 });

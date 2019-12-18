@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  addToggleExtension,
-  addBadgeExtension,
-} from '../../../index_management/public/index_management_extensions';
 import { get } from 'lodash';
 
 const propertyPath = 'isRollupIndex';
 export const rollupToggleExtension = {
-  matchIndex: index => {
+  matchIndex: (index: { isRollupIndex: boolean }) => {
     return get(index, propertyPath);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtToggle.toggleLabel', {
@@ -20,8 +16,9 @@ export const rollupToggleExtension = {
   }),
   name: 'rollupToggle',
 };
+
 export const rollupBadgeExtension = {
-  matchIndex: index => {
+  matchIndex: (index: { isRollupIndex: boolean }) => {
     return get(index, propertyPath);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
@@ -30,6 +27,3 @@ export const rollupBadgeExtension = {
   color: 'secondary',
   filterExpression: 'isRollupIndex:true',
 };
-
-addBadgeExtension(rollupBadgeExtension);
-addToggleExtension(rollupToggleExtension);

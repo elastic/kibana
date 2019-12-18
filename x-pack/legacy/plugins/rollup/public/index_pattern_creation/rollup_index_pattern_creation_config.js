@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
 
 import { RollupPrompt } from './components/rollup_prompt';
-import { setHttpClient, getRollupIndices } from '../services/api';
 import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
 
 const rollupIndexPatternTypeName = i18n.translate(
@@ -54,7 +53,6 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       ...options,
     });
 
-    setHttpClient(this.httpClient);
     this.rollupIndex = null;
     this.rollupJobs = [];
     this.rollupIndicesCapabilities = {};
@@ -69,7 +67,9 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       // request resolves after the logout request resolves, and un-clears the session ID.
       const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
       if (!isAnonymous) {
-        this.rollupIndicesCapabilities = await getRollupIndices();
+        const response = await this.httpClient.get('/api/rollup/indices');
+        return response || {};
+        this.rollupIndicesCapabilities = response || {};
       }
 
       this.rollupIndices = Object.keys(this.rollupIndicesCapabilities);
