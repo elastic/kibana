@@ -23,7 +23,7 @@ import { docTitleService } from './application/lib/doc_title';
 import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { AlertTypeRegistry } from './application/alert_type_registry';
-import { registerAlertTypes } from './application/sections/alert_add/alert_types';
+import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
 import { setSavedObjectsClient } from './application/lib/api';
 import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 
@@ -63,7 +63,7 @@ export class Plugin implements CorePlugin<Setup, Start> {
         actionTypeRegistry: this.actionTypeRegistry,
       });
 
-      registerAlertTypes({
+      registerBuiltInAlertTypes({
         alertTypeRegistry: this.alertTypeRegistry,
       });
 

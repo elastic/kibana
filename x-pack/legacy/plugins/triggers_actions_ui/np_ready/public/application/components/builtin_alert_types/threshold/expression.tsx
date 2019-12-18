@@ -21,18 +21,18 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { AlertTypeModel, Alert, ValidationResult } from '../../../../../types';
-import { Comparator, AggregationType, GroupByType } from '../types';
-import { COMPARATORS, AGGREGATION_TYPES } from '../../../../constants';
+import { AlertTypeModel, Alert, ValidationResult } from '../../../../types';
+import { Comparator, AggregationType, GroupByType } from './types';
+import { COMPARATORS, AGGREGATION_TYPES } from '../../../constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
   loadIndexPatterns,
-} from '../../../../lib/api';
-import { useAppDependencies } from '../../../../app_dependencies';
-import { ErrableFormRow } from '../../../../components/page_error';
-import { getTimeOptions, getTimeFieldOptions } from '../../../../lib/get_time_options';
-import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
+} from '../../../lib/api';
+import { useAppDependencies } from '../../../app_dependencies';
+import { ErrableFormRow } from '../../../components/page_error';
+import { getTimeOptions, getTimeFieldOptions } from '../../../lib/get_time_options';
+import { getTimeUnitLabel } from '../../../lib/get_time_unit_label';
 import { ThresholdVisualization } from './visualization';
 
 const DEFAULT_VALUES = {
