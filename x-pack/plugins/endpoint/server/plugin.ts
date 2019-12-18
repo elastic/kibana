@@ -5,8 +5,7 @@
  */
 import { Plugin, CoreSetup } from 'kibana/server';
 import { addRoutes } from './routes';
-import {  PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
-
+import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -24,25 +23,24 @@ export class EndpointPlugin
       EndpointPluginSetupDependencies,
       EndpointPluginStartDependencies
     > {
-
-    public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
-      plugins.features.registerFeature({
-        id: 'endpoint',
-        name: 'Endpoint',
-        icon: 'bug',
-        navLinkId: 'endpoint',
-        app: ['endpoint', 'kibana'],
-        privileges: {
-          all: {
-            api: ['resolver'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['save'],
+  public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
+    plugins.features.registerFeature({
+      id: 'endpoint',
+      name: 'Endpoint',
+      icon: 'bug',
+      navLinkId: 'endpoint',
+      app: ['endpoint', 'kibana'],
+      privileges: {
+        all: {
+          api: ['resolver'],
+          savedObject: {
+            all: [],
+            read: [],
           },
+          ui: ['save'],
         },
-      })
+      },
+    });
     const router = core.http.createRouter();
     addRoutes(router);
   }

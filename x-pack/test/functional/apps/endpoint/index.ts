@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
 
-  describe.only('The Endpoint app', function() {
+  describe('The Endpoint app', function() {
     this.tags('ciGroup7');
 
     beforeEach(async function() {

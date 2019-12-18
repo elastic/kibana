@@ -6,8 +6,8 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
-import { ResolverEmbeddableFactory } from './embeddables/resolver';
 import { i18n } from '@kbn/i18n';
+import { ResolverEmbeddableFactory } from './embeddables/resolver';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -37,7 +37,7 @@ export class EndpointPlugin
         return renderApp(context, params);
       },
     });
-    
+
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,
       resolverEmbeddableFactory
