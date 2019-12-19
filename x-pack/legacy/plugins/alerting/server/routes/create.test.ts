@@ -12,8 +12,9 @@ server.route(createAlertRoute);
 
 const mockedAlert = {
   alertTypeId: '1',
+  consumer: 'bar',
   name: 'abc',
-  interval: '10s',
+  schedule: { interval: '10s' },
   tags: ['foo'],
   params: {
     bar: true,
@@ -41,6 +42,12 @@ test('creates an alert with proper parameters', async () => {
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
     id: '123',
+    actions: [
+      {
+        ...mockedAlert.actions[0],
+        actionTypeId: 'test',
+      },
+    ],
   });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
@@ -49,6 +56,7 @@ test('creates an alert with proper parameters', async () => {
     Object {
       "actions": Array [
         Object {
+          "actionTypeId": "test",
           "group": "default",
           "id": "2",
           "params": Object {
@@ -57,11 +65,14 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
+      "consumer": "bar",
       "id": "123",
-      "interval": "10s",
       "name": "abc",
       "params": Object {
         "bar": true,
+      },
+      "schedule": Object {
+        "interval": "10s",
       },
       "tags": Array [
         "foo",
@@ -83,40 +94,14 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
+          "consumer": "bar",
           "enabled": true,
-          "interval": "10s",
           "name": "abc",
           "params": Object {
             "bar": true,
           },
-          "tags": Array [
-            "foo",
-          ],
-          "throttle": null,
-        },
-      },
-    ]
-  `);
-  expect(alertsClient.create).toHaveBeenCalledTimes(1);
-  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "data": Object {
-          "actions": Array [
-            Object {
-              "group": "default",
-              "id": "2",
-              "params": Object {
-                "foo": true,
-              },
-            },
-          ],
-          "alertTypeId": "1",
-          "enabled": true,
-          "interval": "10s",
-          "name": "abc",
-          "params": Object {
-            "bar": true,
+          "schedule": Object {
+            "interval": "10s",
           },
           "tags": Array [
             "foo",

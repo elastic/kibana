@@ -27,10 +27,31 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     }
 
     it('should handle create alert request appropriately', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(
+          getTestAlertData({
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
@@ -38,12 +59,20 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         id: response.body.id,
         name: 'abc',
         tags: ['foo'],
-        actions: [],
+        actions: [
+          {
+            id: createdAction.id,
+            actionTypeId: createdAction.actionTypeId,
+            group: 'default',
+            params: {},
+          },
+        ],
         enabled: true,
         alertTypeId: 'test.noop',
+        consumer: 'bar',
         params: {},
         createdBy: null,
-        interval: '1m',
+        schedule: { interval: '1m' },
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',

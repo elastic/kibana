@@ -39,18 +39,17 @@ export function getMlJobs(req, esIndexPattern) {
       'hits.hits._source.job_stats.model_size_stats.model_bytes',
       'hits.hits._source.job_stats.forecasts_stats.total',
       'hits.hits._source.job_stats.node.id',
-      'hits.hits._source.job_stats.node.name'
+      'hits.hits._source.job_stats.node.name',
     ],
     body: {
       sort: { timestamp: { order: 'desc' } },
       collapse: { field: 'job_stats.job_id' },
-      query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric })
-    }
+      query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric }),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(handleResponse);
+  return callWithRequest(req, 'search', params).then(handleResponse);
 }
 
 /*
@@ -74,17 +73,16 @@ export function getMlJobsForCluster(req, esIndexPattern, cluster) {
       body: {
         query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric }),
         aggs: {
-          jobs_count: { cardinality: { field: 'job_stats.job_id' } }
-        }
-      }
+          jobs_count: { cardinality: { field: 'job_stats.job_id' } },
+        },
+      },
     };
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-    return callWithRequest(req, 'search', params)
-      .then(response => {
-        return get(response, 'aggregations.jobs_count.value', 0);
-      });
+    return callWithRequest(req, 'search', params).then(response => {
+      return get(response, 'aggregations.jobs_count.value', 0);
+    });
   }
 
   // ML is not supported

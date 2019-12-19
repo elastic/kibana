@@ -27,23 +27,14 @@
 import { indexPatterns } from '../../../../plugins/data/public';
 
 // static code
-export { getFromSavedObject, getRoutes } from '../../../core_plugins/data/public';
-
 export const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
 export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE;
 export const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS_KEY;
 export const CONTAINS_SPACES = indexPatterns.CONTAINS_SPACES_KEY;
 export const validateIndexPattern = indexPatterns.validate;
 export const flattenHitWrapper = indexPatterns.flattenHitWrapper;
-export const formatHitProvider = indexPatterns.formatHitProvider;
+export const getFromSavedObject = indexPatterns.getFromSavedObject;
+export const getRoutes = indexPatterns.getRoutes;
 
 // types
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-} from '../../../core_plugins/data/public';
-
-export { FieldList } from '../../../../plugins/data/public';
+export { Field, FieldType, IFieldList, IndexPattern } from '../../../core_plugins/data/public';

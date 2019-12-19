@@ -18,22 +18,25 @@
  */
 
 import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
-import { PluginInitializerContext, Logger } from '../../../../src/core/server';
+import { ConfigType } from './config';
+import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
+import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSet;
+export type UsageCollectionSetup = CollectorSet & {
+  registerLegacySavedObjects: (legacySavedObjects: any) => void;
+};
 
-export class Plugin {
+export class UsageCollectionPlugin {
   logger: Logger;
+  private legacySavedObjects: any;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(): Promise<UsageCollectionSetup> {
+  public async setup(core: CoreSetup) {
     const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
+      .create<ConfigType>()
       .pipe(first())
       .toPromise();
 
@@ -42,7 +45,16 @@ export class Plugin {
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
-    return collectorSet;
+    const router = core.http.createRouter();
+    const getLegacySavedObjects = () => this.legacySavedObjects;
+    setupRoutes(router, getLegacySavedObjects);
+
+    return {
+      ...collectorSet,
+      registerLegacySavedObjects: (legacySavedObjects: any) => {
+        this.legacySavedObjects = legacySavedObjects;
+      },
+    };
   }
 
   public start() {

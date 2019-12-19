@@ -2,6 +2,7 @@
 
 exports[`NewVisModal filter for visualization types should render as expected 1`] = `
 <NewVisModal
+  addBasePath={[Function]}
   editorParams={Array []}
   intl={
     Object {
@@ -107,6 +108,24 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
   }
   isOpen={true}
   onClose={[Function]}
+  savedObjects={Object {}}
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "visualize:enableLabs",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    }
+  }
   visTypesRegistry={
     Object {
       "all": [Function],
@@ -150,6 +169,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
                   height="16"
+                  role="img"
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -207,6 +227,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -223,13 +244,72 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             aria-live="polite"
                             class="euiScreenReaderOnly"
                           >
-                            1 type found
+                            2 types found
                           </span>
                           <div
                             class="euiKeyPadMenu visNewVisDialog__types"
                             data-test-subj="visNewDialogTypes"
                             role="menu"
                           >
+                            <button
+                              aria-describedby="visTypeDescription-visWithAliasUrl"
+                              class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                              data-test-subj="visType-visWithAliasUrl"
+                              data-vis-stage="alias"
+                              role="menuitem"
+                              type="button"
+                            >
+                              <div
+                                class="euiKeyPadMenuItem__inner"
+                              >
+                                <span
+                                  class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                >
+                                  <span
+                                    class="euiToolTipAnchor"
+                                  >
+                                    <span
+                                      class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                      tabindex="0"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                    </span>
+                                  </span>
+                                </span>
+                                <div
+                                  class="euiKeyPadMenuItem__icon"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </div>
+                                <p
+                                  class="euiKeyPadMenuItem__label"
+                                >
+                                  <span
+                                    data-test-subj="visTypeTitle"
+                                  >
+                                    Vis with alias Url
+                                  </span>
+                                </p>
+                              </div>
+                            </button>
                             <button
                               aria-describedby="visTypeDescription-visWithSearch"
                               class="euiKeyPadMenuItem visNewVisDialog__type"
@@ -249,6 +329,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -285,6 +366,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -418,6 +500,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height="16"
+                          role="img"
                           viewBox="0 0 16 16"
                           width="16"
                           xmlns="http://www.w3.org/2000/svg"
@@ -475,6 +558,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -491,13 +575,72 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     aria-live="polite"
                                     class="euiScreenReaderOnly"
                                   >
-                                    1 type found
+                                    2 types found
                                   </span>
                                   <div
                                     class="euiKeyPadMenu visNewVisDialog__types"
                                     data-test-subj="visNewDialogTypes"
                                     role="menu"
                                   >
+                                    <button
+                                      aria-describedby="visTypeDescription-visWithAliasUrl"
+                                      class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                      data-test-subj="visType-visWithAliasUrl"
+                                      data-vis-stage="alias"
+                                      role="menuitem"
+                                      type="button"
+                                    >
+                                      <div
+                                        class="euiKeyPadMenuItem__inner"
+                                      >
+                                        <span
+                                          class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                        >
+                                          <span
+                                            class="euiToolTipAnchor"
+                                          >
+                                            <span
+                                              class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                              tabindex="0"
+                                            >
+                                              <svg
+                                                aria-hidden="true"
+                                                class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                focusable="false"
+                                                height="16"
+                                                role="img"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                            </span>
+                                          </span>
+                                        </span>
+                                        <div
+                                          class="euiKeyPadMenuItem__icon"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                            focusable="false"
+                                            height="16"
+                                            role="img"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </div>
+                                        <p
+                                          class="euiKeyPadMenuItem__label"
+                                        >
+                                          <span
+                                            data-test-subj="visTypeTitle"
+                                          >
+                                            Vis with alias Url
+                                          </span>
+                                        </p>
+                                      </div>
+                                    </button>
                                     <button
                                       aria-describedby="visTypeDescription-visWithSearch"
                                       class="euiKeyPadMenuItem visNewVisDialog__type"
@@ -517,6 +660,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -553,6 +697,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -625,6 +770,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height="16"
+                            role="img"
                             viewBox="0 0 16 16"
                             width="16"
                             xmlns="http://www.w3.org/2000/svg"
@@ -682,6 +828,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -698,13 +845,72 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       aria-live="polite"
                                       class="euiScreenReaderOnly"
                                     >
-                                      1 type found
+                                      2 types found
                                     </span>
                                     <div
                                       class="euiKeyPadMenu visNewVisDialog__types"
                                       data-test-subj="visNewDialogTypes"
                                       role="menu"
                                     >
+                                      <button
+                                        aria-describedby="visTypeDescription-visWithAliasUrl"
+                                        class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                        data-test-subj="visType-visWithAliasUrl"
+                                        data-vis-stage="alias"
+                                        role="menuitem"
+                                        type="button"
+                                      >
+                                        <div
+                                          class="euiKeyPadMenuItem__inner"
+                                        >
+                                          <span
+                                            class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                          >
+                                            <span
+                                              class="euiToolTipAnchor"
+                                            >
+                                              <span
+                                                class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                tabindex="0"
+                                              >
+                                                <svg
+                                                  aria-hidden="true"
+                                                  class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                  focusable="false"
+                                                  height="16"
+                                                  role="img"
+                                                  viewBox="0 0 16 16"
+                                                  width="16"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                          <div
+                                            class="euiKeyPadMenuItem__icon"
+                                          >
+                                            <svg
+                                              aria-hidden="true"
+                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                              focusable="false"
+                                              height="16"
+                                              role="img"
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis with alias Url
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
                                       <button
                                         aria-describedby="visTypeDescription-visWithSearch"
                                         class="euiKeyPadMenuItem visNewVisDialog__type"
@@ -724,6 +930,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -760,6 +967,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -841,16 +1049,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         type="cross"
                       >
                         <EuiIconEmpty
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -865,6 +1075,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                   className="euiModal__flex"
                 >
                   <TypeSelection
+                    addBasePath={[Function]}
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
                       Object {
@@ -976,16 +1187,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         type="search"
                                                       >
                                                         <EuiIconEmpty
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                           focusable="false"
+                                                          role="img"
                                                           style={null}
                                                         >
                                                           <svg
-                                                            aria-hidden="true"
+                                                            aria-hidden={true}
                                                             className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                             focusable="false"
                                                             height={16}
+                                                            role="img"
                                                             style={null}
                                                             viewBox="0 0 16 16"
                                                             width={16}
@@ -1020,11 +1233,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             id="kbn.visualize.newVisWizard.resultsFound"
                                             values={
                                               Object {
-                                                "resultCount": 1,
+                                                "resultCount": 2,
                                               }
                                             }
                                           >
-                                            1 type found
+                                            2 types found
                                           </FormattedMessage>
                                         </span>
                                       </EuiScreenReaderOnly>
@@ -1037,6 +1250,148 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           data-test-subj="visNewDialogTypes"
                                           role="menu"
                                         >
+                                          <EuiKeyPadMenuItemButton
+                                            aria-describedby="visTypeDescription-visWithAliasUrl"
+                                            betaBadgeIconType="popout"
+                                            betaBadgeLabel="Kibana application"
+                                            betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
+                                            className="visNewVisDialog__type"
+                                            data-test-subj="visType-visWithAliasUrl"
+                                            data-vis-stage="alias"
+                                            disabled={false}
+                                            key="visWithAliasUrl"
+                                            label={
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with alias Url
+                                              </span>
+                                            }
+                                            onBlur={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                            role="menuitem"
+                                          >
+                                            <button
+                                              aria-describedby="visTypeDescription-visWithAliasUrl"
+                                              className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                              data-test-subj="visType-visWithAliasUrl"
+                                              data-vis-stage="alias"
+                                              disabled={false}
+                                              onBlur={[Function]}
+                                              onClick={[Function]}
+                                              onFocus={[Function]}
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                              role="menuitem"
+                                              type="button"
+                                            >
+                                              <div
+                                                className="euiKeyPadMenuItem__inner"
+                                              >
+                                                <span
+                                                  className="euiKeyPadMenuItem__betaBadgeWrapper"
+                                                >
+                                                  <EuiBetaBadge
+                                                    className="euiKeyPadMenuItem__betaBadge"
+                                                    iconType="popout"
+                                                    label="Kibana application"
+                                                    tooltipContent="Opens a Kibana application that is outside of Visualize."
+                                                  >
+                                                    <EuiToolTip
+                                                      content="Opens a Kibana application that is outside of Visualize."
+                                                      delay="regular"
+                                                      position="top"
+                                                      title="Kibana application"
+                                                    >
+                                                      <span
+                                                        className="euiToolTipAnchor"
+                                                        onMouseOut={[Function]}
+                                                        onMouseOver={[Function]}
+                                                      >
+                                                        <span
+                                                          className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                          onBlur={[Function]}
+                                                          onFocus={[Function]}
+                                                          tabIndex={0}
+                                                        >
+                                                          <EuiIcon
+                                                            aria-hidden="true"
+                                                            className="euiBetaBadge__icon"
+                                                            size="m"
+                                                            type="popout"
+                                                          >
+                                                            <EuiIconEmpty
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                              focusable="false"
+                                                              role="img"
+                                                              style={null}
+                                                            >
+                                                              <svg
+                                                                aria-hidden={true}
+                                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                                focusable="false"
+                                                                height={16}
+                                                                role="img"
+                                                                style={null}
+                                                                viewBox="0 0 16 16"
+                                                                width={16}
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                              />
+                                                            </EuiIconEmpty>
+                                                          </EuiIcon>
+                                                        </span>
+                                                      </span>
+                                                    </EuiToolTip>
+                                                  </EuiBetaBadge>
+                                                </span>
+                                                <div
+                                                  className="euiKeyPadMenuItem__icon"
+                                                >
+                                                  <VisTypeIcon>
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      color="secondary"
+                                                      size="l"
+                                                      type="empty"
+                                                    >
+                                                      <EuiIconEmpty
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </EuiIconEmpty>
+                                                    </EuiIcon>
+                                                  </VisTypeIcon>
+                                                </div>
+                                                <p
+                                                  className="euiKeyPadMenuItem__label"
+                                                >
+                                                  <span
+                                                    data-test-subj="visTypeTitle"
+                                                  >
+                                                    Vis with alias Url
+                                                  </span>
+                                                </p>
+                                              </div>
+                                            </button>
+                                          </EuiKeyPadMenuItemButton>
                                           <EuiKeyPadMenuItemButton
                                             aria-describedby="visTypeDescription-visWithSearch"
                                             className="visNewVisDialog__type"
@@ -1086,16 +1441,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       type="empty"
                                                     >
                                                       <EuiIconEmpty
-                                                        aria-hidden="true"
+                                                        aria-hidden={true}
                                                         className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
+                                                        role="img"
                                                         style={null}
                                                       >
                                                         <svg
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
                                                           height={16}
+                                                          role="img"
                                                           style={null}
                                                           viewBox="0 0 16 16"
                                                           width={16}
@@ -1166,16 +1523,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       type="empty"
                                                     >
                                                       <EuiIconEmpty
-                                                        aria-hidden="true"
+                                                        aria-hidden={true}
                                                         className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
+                                                        role="img"
                                                         style={null}
                                                       >
                                                         <svg
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
                                                           height={16}
+                                                          role="img"
                                                           style={null}
                                                           viewBox="0 0 16 16"
                                                           width={16}
@@ -1235,6 +1594,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 />
                               </EuiSpacer>
                               <NewVisHelp
+                                addBasePath={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>
@@ -1287,6 +1647,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
 
 exports[`NewVisModal should render as expected 1`] = `
 <NewVisModal
+  addBasePath={[Function]}
   editorParams={Array []}
   intl={
     Object {
@@ -1392,6 +1753,24 @@ exports[`NewVisModal should render as expected 1`] = `
   }
   isOpen={true}
   onClose={[Function]}
+  savedObjects={Object {}}
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "visualize:enableLabs",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+    }
+  }
   visTypesRegistry={
     Object {
       "all": [Function],
@@ -1435,6 +1814,7 @@ exports[`NewVisModal should render as expected 1`] = `
                   class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                   focusable="false"
                   height="16"
+                  role="img"
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -1492,6 +1872,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1532,6 +1913,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1544,6 +1926,65 @@ exports[`NewVisModal should render as expected 1`] = `
                                     data-test-subj="visTypeTitle"
                                   >
                                     Vis Type 1
+                                  </span>
+                                </p>
+                              </div>
+                            </button>
+                            <button
+                              aria-describedby="visTypeDescription-visWithAliasUrl"
+                              class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                              data-test-subj="visType-visWithAliasUrl"
+                              data-vis-stage="alias"
+                              role="menuitem"
+                              type="button"
+                            >
+                              <div
+                                class="euiKeyPadMenuItem__inner"
+                              >
+                                <span
+                                  class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                >
+                                  <span
+                                    class="euiToolTipAnchor"
+                                  >
+                                    <span
+                                      class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                      tabindex="0"
+                                    >
+                                      <svg
+                                        aria-hidden="true"
+                                        class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                        focusable="false"
+                                        height="16"
+                                        role="img"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                    </span>
+                                  </span>
+                                </span>
+                                <div
+                                  class="euiKeyPadMenuItem__icon"
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                    focusable="false"
+                                    height="16"
+                                    role="img"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </div>
+                                <p
+                                  class="euiKeyPadMenuItem__label"
+                                >
+                                  <span
+                                    data-test-subj="visTypeTitle"
+                                  >
+                                    Vis with alias Url
                                   </span>
                                 </p>
                               </div>
@@ -1567,6 +2008,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1700,6 +2142,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height="16"
+                          role="img"
                           viewBox="0 0 16 16"
                           width="16"
                           xmlns="http://www.w3.org/2000/svg"
@@ -1757,6 +2200,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -1797,6 +2241,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -1809,6 +2254,65 @@ exports[`NewVisModal should render as expected 1`] = `
                                             data-test-subj="visTypeTitle"
                                           >
                                             Vis Type 1
+                                          </span>
+                                        </p>
+                                      </div>
+                                    </button>
+                                    <button
+                                      aria-describedby="visTypeDescription-visWithAliasUrl"
+                                      class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                      data-test-subj="visType-visWithAliasUrl"
+                                      data-vis-stage="alias"
+                                      role="menuitem"
+                                      type="button"
+                                    >
+                                      <div
+                                        class="euiKeyPadMenuItem__inner"
+                                      >
+                                        <span
+                                          class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                        >
+                                          <span
+                                            class="euiToolTipAnchor"
+                                          >
+                                            <span
+                                              class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                              tabindex="0"
+                                            >
+                                              <svg
+                                                aria-hidden="true"
+                                                class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                focusable="false"
+                                                height="16"
+                                                role="img"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              />
+                                            </span>
+                                          </span>
+                                        </span>
+                                        <div
+                                          class="euiKeyPadMenuItem__icon"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                            focusable="false"
+                                            height="16"
+                                            role="img"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </div>
+                                        <p
+                                          class="euiKeyPadMenuItem__label"
+                                        >
+                                          <span
+                                            data-test-subj="visTypeTitle"
+                                          >
+                                            Vis with alias Url
                                           </span>
                                         </p>
                                       </div>
@@ -1832,6 +2336,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -1904,6 +2409,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height="16"
+                            role="img"
                             viewBox="0 0 16 16"
                             width="16"
                             xmlns="http://www.w3.org/2000/svg"
@@ -1961,6 +2467,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               class="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -2001,6 +2508,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -2013,6 +2521,65 @@ exports[`NewVisModal should render as expected 1`] = `
                                               data-test-subj="visTypeTitle"
                                             >
                                               Vis Type 1
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </button>
+                                      <button
+                                        aria-describedby="visTypeDescription-visWithAliasUrl"
+                                        class="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                        data-test-subj="visType-visWithAliasUrl"
+                                        data-vis-stage="alias"
+                                        role="menuitem"
+                                        type="button"
+                                      >
+                                        <div
+                                          class="euiKeyPadMenuItem__inner"
+                                        >
+                                          <span
+                                            class="euiKeyPadMenuItem__betaBadgeWrapper"
+                                          >
+                                            <span
+                                              class="euiToolTipAnchor"
+                                            >
+                                              <span
+                                                class="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                tabindex="0"
+                                              >
+                                                <svg
+                                                  aria-hidden="true"
+                                                  class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                  focusable="false"
+                                                  height="16"
+                                                  role="img"
+                                                  viewBox="0 0 16 16"
+                                                  width="16"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                          <div
+                                            class="euiKeyPadMenuItem__icon"
+                                          >
+                                            <svg
+                                              aria-hidden="true"
+                                              class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                              focusable="false"
+                                              height="16"
+                                              role="img"
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                          </div>
+                                          <p
+                                            class="euiKeyPadMenuItem__label"
+                                          >
+                                            <span
+                                              data-test-subj="visTypeTitle"
+                                            >
+                                              Vis with alias Url
                                             </span>
                                           </p>
                                         </div>
@@ -2036,6 +2603,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -2117,16 +2685,18 @@ exports[`NewVisModal should render as expected 1`] = `
                         type="cross"
                       >
                         <EuiIconEmpty
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -2141,6 +2711,7 @@ exports[`NewVisModal should render as expected 1`] = `
                   className="euiModal__flex"
                 >
                   <TypeSelection
+                    addBasePath={[Function]}
                     onVisTypeSelected={[Function]}
                     visTypesRegistry={
                       Object {
@@ -2252,16 +2823,18 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         type="search"
                                                       >
                                                         <EuiIconEmpty
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                           focusable="false"
+                                                          role="img"
                                                           style={null}
                                                         >
                                                           <svg
-                                                            aria-hidden="true"
+                                                            aria-hidden={true}
                                                             className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
                                                             focusable="false"
                                                             height={16}
+                                                            role="img"
                                                             style={null}
                                                             viewBox="0 0 16 16"
                                                             width={16}
@@ -2350,16 +2923,18 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       type="empty"
                                                     >
                                                       <EuiIconEmpty
-                                                        aria-hidden="true"
+                                                        aria-hidden={true}
                                                         className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
+                                                        role="img"
                                                         style={null}
                                                       >
                                                         <svg
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
                                                           height={16}
+                                                          role="img"
                                                           style={null}
                                                           viewBox="0 0 16 16"
                                                           width={16}
@@ -2376,6 +2951,148 @@ exports[`NewVisModal should render as expected 1`] = `
                                                     data-test-subj="visTypeTitle"
                                                   >
                                                     Vis Type 1
+                                                  </span>
+                                                </p>
+                                              </div>
+                                            </button>
+                                          </EuiKeyPadMenuItemButton>
+                                          <EuiKeyPadMenuItemButton
+                                            aria-describedby="visTypeDescription-visWithAliasUrl"
+                                            betaBadgeIconType="popout"
+                                            betaBadgeLabel="Kibana application"
+                                            betaBadgeTooltipContent="Opens a Kibana application that is outside of Visualize."
+                                            className="visNewVisDialog__type"
+                                            data-test-subj="visType-visWithAliasUrl"
+                                            data-vis-stage="alias"
+                                            disabled={false}
+                                            key="visWithAliasUrl"
+                                            label={
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with alias Url
+                                              </span>
+                                            }
+                                            onBlur={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                            role="menuitem"
+                                          >
+                                            <button
+                                              aria-describedby="visTypeDescription-visWithAliasUrl"
+                                              className="euiKeyPadMenuItem euiKeyPadMenuItem--hasBetaBadge visNewVisDialog__type"
+                                              data-test-subj="visType-visWithAliasUrl"
+                                              data-vis-stage="alias"
+                                              disabled={false}
+                                              onBlur={[Function]}
+                                              onClick={[Function]}
+                                              onFocus={[Function]}
+                                              onMouseEnter={[Function]}
+                                              onMouseLeave={[Function]}
+                                              role="menuitem"
+                                              type="button"
+                                            >
+                                              <div
+                                                className="euiKeyPadMenuItem__inner"
+                                              >
+                                                <span
+                                                  className="euiKeyPadMenuItem__betaBadgeWrapper"
+                                                >
+                                                  <EuiBetaBadge
+                                                    className="euiKeyPadMenuItem__betaBadge"
+                                                    iconType="popout"
+                                                    label="Kibana application"
+                                                    tooltipContent="Opens a Kibana application that is outside of Visualize."
+                                                  >
+                                                    <EuiToolTip
+                                                      content="Opens a Kibana application that is outside of Visualize."
+                                                      delay="regular"
+                                                      position="top"
+                                                      title="Kibana application"
+                                                    >
+                                                      <span
+                                                        className="euiToolTipAnchor"
+                                                        onMouseOut={[Function]}
+                                                        onMouseOver={[Function]}
+                                                      >
+                                                        <span
+                                                          className="euiBetaBadge euiBetaBadge--iconOnly euiKeyPadMenuItem__betaBadge"
+                                                          onBlur={[Function]}
+                                                          onFocus={[Function]}
+                                                          tabIndex={0}
+                                                        >
+                                                          <EuiIcon
+                                                            aria-hidden="true"
+                                                            className="euiBetaBadge__icon"
+                                                            size="m"
+                                                            type="popout"
+                                                          >
+                                                            <EuiIconEmpty
+                                                              aria-hidden={true}
+                                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                              focusable="false"
+                                                              role="img"
+                                                              style={null}
+                                                            >
+                                                              <svg
+                                                                aria-hidden={true}
+                                                                className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
+                                                                focusable="false"
+                                                                height={16}
+                                                                role="img"
+                                                                style={null}
+                                                                viewBox="0 0 16 16"
+                                                                width={16}
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                              />
+                                                            </EuiIconEmpty>
+                                                          </EuiIcon>
+                                                        </span>
+                                                      </span>
+                                                    </EuiToolTip>
+                                                  </EuiBetaBadge>
+                                                </span>
+                                                <div
+                                                  className="euiKeyPadMenuItem__icon"
+                                                >
+                                                  <VisTypeIcon>
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      color="secondary"
+                                                      size="l"
+                                                      type="empty"
+                                                    >
+                                                      <EuiIconEmpty
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </EuiIconEmpty>
+                                                    </EuiIcon>
+                                                  </VisTypeIcon>
+                                                </div>
+                                                <p
+                                                  className="euiKeyPadMenuItem__label"
+                                                >
+                                                  <span
+                                                    data-test-subj="visTypeTitle"
+                                                  >
+                                                    Vis with alias Url
                                                   </span>
                                                 </p>
                                               </div>
@@ -2430,16 +3147,18 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       type="empty"
                                                     >
                                                       <EuiIconEmpty
-                                                        aria-hidden="true"
+                                                        aria-hidden={true}
                                                         className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
+                                                        role="img"
                                                         style={null}
                                                       >
                                                         <svg
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
                                                           height={16}
+                                                          role="img"
                                                           style={null}
                                                           viewBox="0 0 16 16"
                                                           width={16}
@@ -2499,6 +3218,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 />
                               </EuiSpacer>
                               <NewVisHelp
+                                addBasePath={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>

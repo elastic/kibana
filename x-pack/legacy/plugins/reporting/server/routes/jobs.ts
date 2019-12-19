@@ -8,6 +8,8 @@ import boom from 'boom';
 import { API_BASE_URL } from '../../common/constants';
 import {
   ServerFacade,
+  ExportTypesRegistry,
+  Logger,
   RequestFacade,
   ReportingResponseToolkit,
   JobDocOutput,
@@ -24,7 +26,11 @@ import {
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server: ServerFacade) {
+export function registerJobInfoRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  logger: Logger
+) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -119,7 +125,7 @@ export function registerJobs(server: ServerFacade) {
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server);
+  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
@@ -136,13 +142,15 @@ export function registerJobs(server: ServerFacade) {
       const { statusCode } = response;
 
       if (statusCode !== 200) {
-        const logLevel = statusCode === 500 ? 'error' : 'debug';
-        server.log(
-          [logLevel, 'reporting', 'download'],
-          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-            response.source
-          )}]`
-        );
+        if (statusCode === 500) {
+          logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+        } else {
+          logger.debug(
+            `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+              response.source
+            )}]`
+          );
+        }
       }
 
       if (!response.isBoom) {

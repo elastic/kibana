@@ -4,91 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
-import { Legacy } from 'kibana';
+import { SearchResponse, GenericParams } from 'elasticsearch';
+import { Lifecycle } from 'hapi';
+import { ObjectType } from '@kbn/config-schema';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
+import { APMPluginContract } from '../../../../../../../plugins/apm/server';
 
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { JsonObject } from '../../../../common/typed_json';
-import { TSVBMetricModel } from '../../../../common/inventory_models/types';
-
-export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
-
-/* eslint-disable  @typescript-eslint/unified-signatures */
-export interface InfraBackendFrameworkAdapter {
-  version: string;
-  exposeStaticDir(urlPath: string, dir: string): void;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
-    route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
-  ): void;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: InfraFrameworkRequest,
-    method: 'search',
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: InfraFrameworkRequest,
-    method: 'msearch',
-    options?: object
-  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'fieldCaps',
-    options?: object
-  ): Promise<InfraDatabaseFieldCapsResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.existsAlias',
-    options?: object
-  ): Promise<boolean>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.getAlias',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesAliasResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.get',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'ml.getBuckets',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: string,
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse>;
-  getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
-  getSavedObjectsService(): Legacy.SavedObjectsService;
-  getSpaceId(request: InfraFrameworkRequest<any>): string;
-  makeTSVBRequest(
-    req: InfraFrameworkRequest,
-    model: TSVBMetricModel,
-    timerange: { min: number; max: number },
-    filters: JsonObject[]
-  ): Promise<InfraTSVBResponse>;
-  config(req: InfraFrameworkRequest): KibanaConfig;
-}
-/* eslint-enable  @typescript-eslint/unified-signatures */
-
-export interface InfraFrameworkRequest<
-  InternalRequest extends InfraWrappableRequest = InfraWrappableRequest
-> {
-  [internalInfraFrameworkRequest]: InternalRequest;
-  payload: InternalRequest['payload'];
-  params: InternalRequest['params'];
-  query: InternalRequest['query'];
+// NP_TODO: Compose real types from plugins we depend on, no "any"
+export interface InfraServerPluginDeps {
+  spaces: SpacesPluginSetup;
+  usageCollection: UsageCollectionSetup;
+  metrics: VisTypeTimeseriesSetup;
+  indexPatterns: {
+    indexPatternsServiceFactory: any;
+  };
+  features: FeaturesPluginSetup;
+  apm: APMPluginContract;
 }
 
-export interface InfraWrappableRequest<Payload = any, Params = any, Query = any> {
-  payload: Payload;
-  params: Params;
-  query: Query;
+export interface CallWithRequestParams extends GenericParams {
+  max_concurrent_shard_requests?: number;
+  name?: string;
+  index?: string | string[];
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  size?: number;
+  terminate_after?: number;
+  fields?: string | string[];
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -97,22 +43,6 @@ export interface InfraFrameworkPluginOptions {
   register: any;
   options: any;
 }
-
-export interface InfraFrameworkRouteOptions<
-  RouteRequest extends InfraWrappableRequest,
-  RouteResponse extends InfraResponse
-> {
-  path: string;
-  method: string | string[];
-  vhost?: string;
-  handler: InfraFrameworkRouteHandler<RouteRequest, RouteResponse>;
-  options?: Pick<RouteOptions, Exclude<keyof RouteOptions, 'handler'>>;
-}
-
-export type InfraFrameworkRouteHandler<
-  RouteRequest extends InfraWrappableRequest,
-  RouteResponse extends InfraResponse
-> = (request: InfraFrameworkRequest<RouteRequest>, h: ResponseToolkit) => RouteResponse;
 
 export interface InfraDatabaseResponse {
   took: number;
@@ -235,3 +165,12 @@ export interface InfraTSVBSeries {
 }
 
 export type InfraTSVBDataPoint = [number, number];
+
+export type InfraRouteConfig<
+  params extends ObjectType,
+  query extends ObjectType,
+  body extends ObjectType,
+  method extends RouteMethod
+> = {
+  method: RouteMethod;
+} & RouteConfig<params, query, body, method>;

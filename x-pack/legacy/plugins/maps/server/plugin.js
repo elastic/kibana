@@ -5,16 +5,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { initRoutes } from './routes';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
-import { checkLicense } from '../check_license';
-import { watchStatusAndLicenseToInitialize } from	'../../../server/lib/watch_status_and_license_to_initialize';
+import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
+import { initRoutes } from './routes';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin } = plugins;
+    const { featuresPlugin, licensing } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -30,34 +29,30 @@ export class MapPlugin {
         all: {
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern']
+            read: ['index-pattern'],
           },
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
           savedObject: {
             all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query']
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
           },
           ui: ['show'],
         },
+      },
+    });
+
+    licensing.license$.subscribe(license => {
+      const { state } = license.check('maps', 'basic');
+      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
+        routesInitialized = true;
+        initRoutes(__LEGACY, license.uid);
       }
     });
 
-    watchStatusAndLicenseToInitialize(__LEGACY.plugins.xpackMainPlugin, __LEGACY.pluginRef,
-      async license => {
-        if (license && license.maps && !routesInitialized) {
-          routesInitialized = true;
-          initRoutes(__LEGACY, license.uid);
-        }
-      });
-
-    __LEGACY.plugins.xpackMainPlugin.info
-      .feature(APP_ID)
-      .registerLicenseCheckResultsGenerator(checkLicense);
-
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
-      defaultMessage: 'Map'
+      defaultMessage: 'Map',
     });
     __LEGACY.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
@@ -65,8 +60,8 @@ export class MapPlugin {
       {
         path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
         label: sampleDataLinkLabel,
-        icon: APP_ICON
-      }
+        icon: APP_ICON,
+      },
     ]);
 
     __LEGACY.replacePanelInSampleDatasetDashboard({
@@ -76,7 +71,7 @@ export class MapPlugin {
       embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
       embeddableType: 'map',
       embeddableConfig: {
-        isLayerTOCOpen: false
+        isLayerTOCOpen: false,
       },
     });
 
@@ -86,8 +81,8 @@ export class MapPlugin {
       {
         path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
         label: sampleDataLinkLabel,
-        icon: APP_ICON
-      }
+        icon: APP_ICON,
+      },
     ]);
 
     __LEGACY.replacePanelInSampleDatasetDashboard({
@@ -97,7 +92,7 @@ export class MapPlugin {
       embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
-        isLayerTOCOpen: true
+        isLayerTOCOpen: true,
       },
     });
 
@@ -106,8 +101,8 @@ export class MapPlugin {
       {
         path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
         label: sampleDataLinkLabel,
-        icon: APP_ICON
-      }
+        icon: APP_ICON,
+      },
     ]);
     __LEGACY.replacePanelInSampleDatasetDashboard({
       sampleDataId: 'logs',
@@ -116,7 +111,7 @@ export class MapPlugin {
       embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
-        isLayerTOCOpen: false
+        isLayerTOCOpen: false,
       },
     });
 
@@ -127,8 +122,7 @@ export class MapPlugin {
     return {
       getMapConfig() {
         return __LEGACY.mapConfig();
-      }
+      },
     };
-
   }
 }

@@ -21,21 +21,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import {
-  EuiCard,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
-export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPanel, onClick, isBeta }) {
+export function Synopsis({
+  description,
+  iconUrl,
+  iconType,
+  title,
+  url,
+  wrapInPanel,
+  onClick,
+  isBeta,
+}) {
   let optionalImg;
   if (iconUrl) {
-    optionalImg = (
-      <img
-        className="synopsisIcon"
-        src={iconUrl}
-        alt=""
-      />
-    );
+    optionalImg = <img className="synopsisIcon" src={iconUrl} alt="" />;
   } else if (iconType) {
     optionalImg = (
       <EuiIcon
@@ -76,5 +76,5 @@ Synopsis.propTypes = {
 };
 
 Synopsis.defaultProps = {
-  isBeta: false
+  isBeta: false,
 };

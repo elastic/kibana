@@ -28,7 +28,7 @@ describe('DragDropContextWrapper', () => {
           </MockedProvider>
         </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DragDropContextWrapper'))).toMatchSnapshot();
     });
 
     test('it renders the children', () => {

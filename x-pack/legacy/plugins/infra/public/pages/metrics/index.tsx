@@ -5,8 +5,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
@@ -20,6 +18,7 @@ import { InfraLoadingPanel } from '../../components/loading';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -34,84 +33,84 @@ interface Props {
       node: string;
     };
   };
-  uiCapabilities: UICapabilities;
 }
 
 export const MetricDetail = withMetricPageProviders(
-  injectUICapabilities(
-    withTheme(({ uiCapabilities, match, theme }: Props) => {
-      const nodeId = match.params.node;
-      const nodeType = match.params.type as InfraNodeType;
-      const inventoryModel = findInventoryModel(nodeType);
-      const { sourceId } = useContext(Source.Context);
-      const {
-        name,
-        filteredRequiredMetrics,
-        loading: metadataLoading,
-        cloudId,
-        metadata,
-      } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId);
+  withTheme(({ match, theme }: Props) => {
+    const uiCapabilities = useKibana().services.application?.capabilities;
+    const nodeId = match.params.node;
+    const nodeType = match.params.type as InfraNodeType;
+    const inventoryModel = findInventoryModel(nodeType);
+    const { sourceId } = useContext(Source.Context);
+    const {
+      name,
+      filteredRequiredMetrics,
+      loading: metadataLoading,
+      cloudId,
+      metadata,
+    } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId);
 
-      const [sideNav, setSideNav] = useState<NavItem[]>([]);
+    const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
-      const addNavItem = React.useCallback(
-        (item: NavItem) => {
-          if (!sideNav.some(n => n.id === item.id)) {
-            setSideNav([item, ...sideNav]);
-          }
-        },
-        [sideNav]
-      );
+    const addNavItem = React.useCallback(
+      (item: NavItem) => {
+        if (!sideNav.some(n => n.id === item.id)) {
+          setSideNav([item, ...sideNav]);
+        }
+      },
+      [sideNav]
+    );
 
-      const breadcrumbs = [
-        {
-          href: '#/',
-          text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-            defaultMessage: 'Metrics',
-          }),
-        },
-        { text: name },
-      ];
+    const breadcrumbs = [
+      {
+        href: '#/',
+        text: i18n.translate('xpack.infra.header.infrastructureTitle', {
+          defaultMessage: 'Metrics',
+        }),
+      },
+      { text: name },
+    ];
 
-      if (metadataLoading && !filteredRequiredMetrics.length) {
-        return (
-          <InfraLoadingPanel
-            height="100vh"
-            width="100%"
-            text={i18n.translate('xpack.infra.metrics.loadingNodeDataText', {
-              defaultMessage: 'Loading data',
-            })}
-          />
-        );
-      }
-
+    if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
-        <WithMetricsTime>
-          {({
-            timeRange,
-            parsedTimeRange,
-            setTimeRange,
-            refreshInterval,
-            setRefreshInterval,
-            isAutoReloading,
-            setAutoReload,
-            triggerRefresh,
-          }) => (
-            <ColumnarPage>
-              <Header
-                breadcrumbs={breadcrumbs}
-                readOnlyBadge={!uiCapabilities.infrastructure.save}
-              />
-              <WithMetricsTimeUrlState />
-              <DocumentTitle
-                title={i18n.translate('xpack.infra.metricDetailPage.documentTitle', {
-                  defaultMessage: 'Infrastructure | Metrics | {name}',
-                  values: {
-                    name,
-                  },
-                })}
-              />
-              <DetailPageContent data-test-subj="infraMetricsPage">
+        <InfraLoadingPanel
+          height="100vh"
+          width="100%"
+          text={i18n.translate('xpack.infra.metrics.loadingNodeDataText', {
+            defaultMessage: 'Loading data',
+          })}
+        />
+      );
+    }
+
+    return (
+      <WithMetricsTime>
+        {({
+          timeRange,
+          parsedTimeRange,
+          setTimeRange,
+          refreshInterval,
+          setRefreshInterval,
+          isAutoReloading,
+          setAutoReload,
+          triggerRefresh,
+        }) => (
+          <ColumnarPage>
+            <Header
+              breadcrumbs={breadcrumbs}
+              readOnlyBadge={!uiCapabilities?.infrastructure?.save}
+            />
+            <WithMetricsTimeUrlState />
+            <DocumentTitle
+              title={i18n.translate('xpack.infra.metricDetailPage.documentTitle', {
+                defaultMessage: 'Infrastructure | Metrics | {name}',
+                values: {
+                  name,
+                },
+              })}
+            />
+            <DetailPageContent data-test-subj="infraMetricsPage">
+              {metadata ? (
                 <NodeDetailsPage
                   name={name}
                   requiredMetrics={filteredRequiredMetrics}
@@ -132,11 +131,11 @@ export const MetricDetail = withMetricPageProviders(
                   triggerRefresh={triggerRefresh}
                   setTimeRange={setTimeRange}
                 />
-              </DetailPageContent>
-            </ColumnarPage>
-          )}
-        </WithMetricsTime>
-      );
-    })
-  )
+              ) : null}
+            </DetailPageContent>
+          </ColumnarPage>
+        )}
+      </WithMetricsTime>
+    );
+  })
 );

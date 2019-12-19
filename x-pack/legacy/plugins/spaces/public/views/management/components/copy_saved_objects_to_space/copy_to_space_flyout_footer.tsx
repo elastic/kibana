@@ -5,10 +5,10 @@
  */
 
 import React, { Fragment } from 'react';
-import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ProcessedImportResponse } from '../../../../../../../../../src/legacy/core_plugins/management/public';
 import { ImportRetry } from '../../../../lib/copy_saved_objects_to_space/types';
 
 interface Props {

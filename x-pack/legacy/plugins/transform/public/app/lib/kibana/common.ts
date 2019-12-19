@@ -5,11 +5,8 @@
  */
 
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
-import {
-  IndexPattern as IndexPatternType,
-  IndexPatterns as IndexPatternsType,
-} from 'ui/index_patterns';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern as IndexPatternType } from 'ui/index_patterns';
+import { esQuery, IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
 type IndexPatternId = string;
 type SavedSearchId = string;
@@ -23,7 +20,7 @@ export let refreshIndexPatterns: () => Promise<unknown>;
 
 export function loadIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsType
+  indexPatterns: IndexPatternsContract
 ) {
   fullIndexPatterns = indexPatterns;
   return savedObjectsClient
@@ -56,7 +53,7 @@ export function loadIndexPatterns(
 type CombinedQuery = Record<'bool', any> | unknown;
 
 export function loadCurrentIndexPattern(
-  indexPatterns: IndexPatternsType,
+  indexPatterns: IndexPatternsContract,
   indexPatternId: IndexPatternId
 ) {
   fullIndexPatterns = indexPatterns;

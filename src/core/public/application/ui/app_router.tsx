@@ -22,12 +22,12 @@ import React from 'react';
 import { Router, Route } from 'react-router-dom';
 import { Subject } from 'rxjs';
 
-import { LegacyApp, AppMounter } from '../types';
+import { LegacyApp, AppMount } from '../types';
 import { AppContainer } from './app_container';
 import { HttpStart } from '../../http';
 
 interface Props {
-  apps: ReadonlyMap<string, AppMounter>;
+  apps: ReadonlyMap<string, AppMount>;
   legacyApps: ReadonlyMap<string, LegacyApp>;
   basePath: HttpStart['basePath'];
   currentAppId$: Subject<string | undefined>;
