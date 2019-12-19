@@ -220,6 +220,7 @@ export const getResult = (): RuleAlertType => ({
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
+  consumer: 'siem',
   params: {
     createdAt: '2019-12-13T16:40:33.400Z',
     updatedAt: '2019-12-13T16:40:33.400Z',
@@ -271,7 +272,7 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },
-  interval: '5m',
+  schedule: { interval: '5m' },
   enabled: true,
   actions: [],
   throttle: null,
