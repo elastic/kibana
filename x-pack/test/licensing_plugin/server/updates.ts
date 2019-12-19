@@ -17,8 +17,6 @@ export default function(ftrContext: FtrProviderContext) {
 
   describe('changes in license types', () => {
     after(async () => {
-      await scenario.startBasic();
-      await scenario.waitForPluginToDetectLicenseUpdate();
       await scenario.teardown();
     });
 
@@ -58,16 +56,6 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(basicLicense.features?.security).to.eql({
         isAvailable: true,
-        isEnabled: true,
-      });
-
-      await scenario.deleteLicense();
-      await scenario.waitForPluginToDetectLicenseUpdate();
-      const inactiveLicense = await scenario.getLicense();
-      expect(inactiveLicense.signature).to.not.be(initialLicense.signature);
-      expect(inactiveLicense).to.not.have.property('license');
-      expect(inactiveLicense.features?.security).to.eql({
-        isAvailable: false,
         isEnabled: true,
       });
 

@@ -19,8 +19,6 @@ export default function(ftrContext: FtrProviderContext) {
 
   describe('changes in license types', () => {
     after(async () => {
-      await scenario.startBasic();
-      await scenario.waitForPluginToDetectLicenseUpdate();
       await scenario.teardown();
     });
 
@@ -88,22 +86,6 @@ export default function(ftrContext: FtrProviderContext) {
           licensing.license$.subscribe(license => cb(license.type));
         })
       ).to.be('basic');
-
-      await scenario.deleteLicense();
-      await scenario.waitForPluginToDetectLicenseUpdate();
-
-      expect(
-        await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = window.__coreProvider;
-          // this call enforces signature check to detect license update
-          // and causes license re-fetch
-          await setup.core.http.get('/');
-          await testUtils.delay(100);
-
-          const licensing: LicensingPluginSetup = setup.plugins.licensing;
-          licensing.license$.subscribe(license => cb(license.type));
-        })
-      ).to.be(null);
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');

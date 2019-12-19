@@ -18,8 +18,6 @@ export default function(ftrContext: FtrProviderContext) {
 
   describe('changes in license types', () => {
     after(async () => {
-      await scenario.startBasic();
-      await scenario.waitForPluginToDetectLicenseUpdate();
       await scenario.teardown();
     });
 
@@ -60,9 +58,6 @@ export default function(ftrContext: FtrProviderContext) {
       expect(legacyBasicLicenseHeaders['kbn-xpack-sig']).to.not.be(
         legacyInitialLicenseHeaders['kbn-xpack-sig']
       );
-
-      await scenario.deleteLicense();
-      await scenario.waitForPluginToDetectLicenseUpdate();
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');
