@@ -21,7 +21,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     search: async (request, options) => {
       const { index, ...params } = request.params;
 
-      const rawResponse = (await caller(
+      const esSearchResponse = (await caller(
         'transport.request',
         {
           path: `${index}/_async_search`,
@@ -31,14 +31,11 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
         options
       )) as SearchResponse<any>;
 
+      const { id, response: rawResponse } = esSearchResponse;
       const {
-        id,
-        response: {
-          _shards: { total, successful, skipped, failed },
-        },
+        _shards: { total, successful, skipped, failed },
       } = rawResponse;
       const loaded = failed + skipped + successful;
-
       return { id, total, loaded, rawResponse };
     },
   };
