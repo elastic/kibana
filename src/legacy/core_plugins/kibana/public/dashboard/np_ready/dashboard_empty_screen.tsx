@@ -40,12 +40,12 @@ export interface DashboardEmptyScreenProps {
 }
 
 export function DashboardEmptyScreen({
-  showLinkToVisualize,
-  onLinkClick,
-  onVisualizeClick,
-  uiSettings,
-  http,
-}: DashboardEmptyScreenProps) {
+                                       showLinkToVisualize,
+                                       onLinkClick,
+                                       onVisualizeClick,
+                                       uiSettings,
+                                       http,
+                                     }: DashboardEmptyScreenProps) {
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
     ? '/plugins/kibana/home/assets/welcome_graphic_dark_2x.png'

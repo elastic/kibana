@@ -26,3 +26,11 @@
   margin-left: $euiSizeS;
   text-align: center;
 }
+
+.dshEmptyWidget {
+  border: 2px dashed $euiColorLightShade;
+  padding: 3 * $euiSize;
+  max-width: 20em;
+  margin-left: 10px;
+  text-align: center;
+}
