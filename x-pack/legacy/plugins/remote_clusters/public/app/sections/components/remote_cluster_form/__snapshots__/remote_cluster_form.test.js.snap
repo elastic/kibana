@@ -269,17 +269,21 @@ Array [
                       class="euiSwitch__track"
                     >
                       <svg
+                        aria-hidden="true"
                         class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                         focusable="false"
                         height="16"
+                        role="img"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
                       />
                       <svg
+                        aria-hidden="true"
                         class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                         focusable="false"
                         height="16"
+                        role="img"
                         viewBox="0 0 16 16"
                         width="16"
                         xmlns="http://www.w3.org/2000/svg"
@@ -329,6 +333,7 @@ Array [
                 class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
                 focusable="false"
                 height="16"
+                role="img"
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
@@ -531,17 +536,21 @@ Array [
               class="euiSwitch__track"
             >
               <svg
+                aria-hidden="true"
                 class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
                 focusable="false"
                 height="16"
+                role="img"
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"
               />
               <svg
+                aria-hidden="true"
                 class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
                 focusable="false"
                 height="16"
+                role="img"
                 viewBox="0 0 16 16"
                 width="16"
                 xmlns="http://www.w3.org/2000/svg"

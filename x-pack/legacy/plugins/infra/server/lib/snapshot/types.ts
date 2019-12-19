@@ -20,4 +20,6 @@ export interface InfraSnapshotRequestOptions {
   groupBy: InfraSnapshotGroupbyInput[];
   metric: InfraSnapshotMetricInput;
   filterQuery: JsonObject | undefined;
+  accountId?: string;
+  region?: string;
 }
