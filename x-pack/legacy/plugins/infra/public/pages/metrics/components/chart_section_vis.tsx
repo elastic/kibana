@@ -28,6 +28,7 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({
@@ -42,6 +43,7 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
     formatter,
@@ -125,7 +127,7 @@ export const ChartSectionVis = ({
           <Settings
             tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
-            theme={getChartTheme()}
+            theme={getChartTheme(isDarkMode)}
             showLegend={true}
             legendPosition="right"
           />
