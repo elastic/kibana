@@ -131,7 +131,7 @@ export const MinAgeInput = props => {
             onChange={async e => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
             }}
-            min={1}
+            min={0}
           />
         </ErrableFormRow>
       </EuiFlexItem>
