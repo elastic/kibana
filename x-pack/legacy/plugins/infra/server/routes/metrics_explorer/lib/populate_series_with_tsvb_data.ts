@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { union } from 'lodash';
+import { union, uniq } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
@@ -55,17 +55,10 @@ export const populateSeriesWithTSVBData = (
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
   const modules = await Promise.all(
-    options.metrics
-      .filter(m => m.field)
-      .map(
-        async m =>
-          await getDatasetForField(
-            framework,
-            requestContext,
-            m.field as string,
-            options.indexPattern
-          )
-      )
+    uniq(options.metrics.filter(m => m.field)).map(
+      async m =>
+        await getDatasetForField(framework, requestContext, m.field as string, options.indexPattern)
+    )
   );
   const calculatedInterval = await calculateMetricInterval(
     framework,
