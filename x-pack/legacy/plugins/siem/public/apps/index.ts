@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
+import { PluginInitializerContext } from '../../../../../../src/core/public';
 import { Plugin } from './plugin';
 
-const { data, embeddable, inspector, uiActions } = npStart.plugins;
-const startPlugins = { data, embeddable, inspector, uiActions };
-
-new Plugin(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { opaqueId: Symbol('siem'), env: {} as any, config: { get: () => ({} as any) } },
-  chrome
-).start(npStart.core, startPlugins);
+export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);

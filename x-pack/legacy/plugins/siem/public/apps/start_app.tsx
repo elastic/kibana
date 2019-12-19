@@ -6,6 +6,7 @@
 
 import { createHashHistory } from 'history';
 import React, { memo, FC } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -19,12 +20,13 @@ import { I18nContext } from 'ui/i18n';
 
 import { KibanaContextProvider, useUiSetting$ } from '../lib/kibana';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { AppMountParameters } from '../../../../../../src/core/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs } from '../lib/lib';
-import { StartCore, StartPlugins } from './plugin';
+import { CoreStart, StartPlugins } from './plugin';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -71,9 +73,7 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
   return <AppPluginRoot />;
 });
 
-export const ROOT_ELEMENT_ID = 'react-siem-root';
-
-export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core, plugins }) => (
+export const SiemApp = memo<{ core: CoreStart; plugins: StartPlugins }>(({ core, plugins }) => (
   <KibanaContextProvider
     services={{
       appName: 'siem',
@@ -85,3 +85,12 @@ export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core,
     <StartApp {...compose()} />
   </KibanaContextProvider>
 ));
+
+export const renderApp = (
+  core: CoreStart,
+  plugins: StartPlugins,
+  { element }: AppMountParameters
+) => {
+  render(<SiemApp core={core} plugins={plugins} />, element);
+  return () => unmountComponentAtNode(element);
+};

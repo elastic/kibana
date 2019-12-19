@@ -4,56 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
-import { LegacyCoreStart, PluginInitializerContext } from 'src/core/public';
-import { PluginsStart } from 'ui/new_platform/new_platform';
-import { Chrome } from 'ui/chrome';
+import {
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Plugin as IPlugin,
+} from '../../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { IEmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
+import { Start as InspectorStart } from '../../../../../../src/plugins/inspector/public';
+import { IUiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../common/constants';
-import { SiemApp } from './start_app';
-import template from './template.html';
+export { CoreSetup, CoreStart };
 
-export const ROOT_ELEMENT_ID = 'react-siem-root';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SetupPlugins {}
+export interface StartPlugins {
+  data: DataPublicPluginStart;
+  embeddable: IEmbeddableStart;
+  inspector: InspectorStart;
+  uiActions: IUiActionsStart;
+}
+export type StartServices = CoreStart & StartPlugins;
 
-export type StartCore = LegacyCoreStart;
-export type StartPlugins = Required<
-  Pick<PluginsStart, 'data' | 'embeddable' | 'inspector' | 'uiActions'>
->;
-export type StartServices = StartCore & StartPlugins;
+export type Setup = ReturnType<Plugin['setup']>;
+export type Start = ReturnType<Plugin['start']>;
 
-export class Plugin {
+export class Plugin implements IPlugin<Setup, Start> {
+  public name = 'siem';
   constructor(
     // @ts-ignore this is added to satisfy the New Platform typing constraint,
     // but we're not leveraging any of its functionality yet.
-    private readonly initializerContext: PluginInitializerContext,
-    private readonly chrome: Chrome
-  ) {
-    this.chrome = chrome;
-  }
+    private readonly initializerContext: PluginInitializerContext
+  ) {}
 
-  public start(core: StartCore, plugins: StartPlugins) {
+  public setup(core: CoreSetup, plugins: SetupPlugins) {
     // TODO(rylnd): These are unknown by uiSettings by default
     core.uiSettings.set(DEFAULT_KBN_VERSION, '8.0.0');
     core.uiSettings.set(DEFAULT_TIMEZONE_BROWSER, 'UTC');
 
-    // @ts-ignore improper type description
-    this.chrome.setRootTemplate(template);
-    const checkForRoot = () => {
-      return new Promise(resolve => {
-        const ready = !!document.getElementById(ROOT_ELEMENT_ID);
-        if (ready) {
-          resolve();
-        } else {
-          setTimeout(() => resolve(checkForRoot()), 10);
-        }
-      });
-    };
-    checkForRoot().then(() => {
-      const node = document.getElementById(ROOT_ELEMENT_ID);
-      if (node) {
-        render(<SiemApp core={core} plugins={plugins} />, node);
-      }
+    core.application.register({
+      id: this.name,
+      title: 'Siem',
+      async mount(context, params) {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const { renderApp } = await import('./start_app');
+
+        return renderApp(coreStart, pluginsStart as StartPlugins, params);
+      },
     });
+
+    return {};
+  }
+
+  public start(core: CoreStart, plugins: StartPlugins) {
+    return {};
+  }
+
+  public stop() {
+    return {};
   }
 }
