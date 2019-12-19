@@ -32,9 +32,10 @@ export class EndpointPlugin
       title: i18n.translate('xpack.endpoint.pluginTitle', {
         defaultMessage: 'Endpoint',
       }),
-      async mount(context, params) {
+      async mount(params) {
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');
-        return renderApp(context, params);
+        return renderApp(coreStart, params);
       },
     });
 

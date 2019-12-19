@@ -6,14 +6,14 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export function renderApp(appMountContext: AppMountContext, { element }: AppMountParameters) {
-  appMountContext.core.http.get('/api/endpoint/hello-world');
+export function renderApp(coreStart: CoreStart, { element }: AppMountParameters) {
+  coreStart.http.get('/api/endpoint/hello-world');
 
   ReactDOM.render(<AppRoot />, element);
 
