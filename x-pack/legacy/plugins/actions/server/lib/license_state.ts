@@ -40,7 +40,7 @@ export class LicenseState {
   }
 
   public checkLicense(license: ILicense | undefined): ActionsLicenseInformation {
-    if (!license || !license.isAvailable) {
+    if (!license?.isAvailable) {
       return {
         showAppLink: true,
         enableAppLink: false,
