@@ -40,10 +40,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
 
   public setup(core: CoreSetup): Setup {
     const instructions$ = core.pulse.getChannel('notifications').instructions$();
-    instructions$.subscribe(instruction => {
-      console.log('instruction::', instruction)
-      // instruction = { owner: 'my', id: 'foo_instruction', value: { foo: 'bar' } }
-    });
+    instructions$.subscribe(instruction => {});
   }
 
   public start(core: CoreStart): Start {

@@ -1,10 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 export function check() {
   return {
-    owner: 'ml_plygin',
+    owner: 'ml_plugin',
     id: 'pulse_telemetry',
-    value: {
-      timestamp: '2019-12-19T14:12:46.000Z',
-    },
+    value: {},
   };
 }
-

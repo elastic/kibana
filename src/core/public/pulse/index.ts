@@ -1,24 +1,40 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { Subject } from 'rxjs';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InstructionsResponse } from '../../server/pulse';
-import { PulseChannel, PulseInstruction } from '../../server/pulse/channel';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PulseChannel, PulseInstruction } from './channel';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fetcher, sendPulse } from '../../server/pulse/send_pulse';
 import { CoreContext } from '../core_system';
-import { Subject } from 'rxjs';
 
 export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
 }
 
-export interface PulseServiceStart {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PulseServiceStart {}
 
-}
-
-
-// import { PulseChannel, PulseInstruction } from '../../server/pulse';
-
-const channelNames = [
-  'default',
-  'notifications',
-];
+const channelNames = ['default', 'notifications'];
 
 export class PulseService {
   private retriableErrors = 0;
@@ -75,8 +91,8 @@ export class PulseService {
         body: JSON.stringify({
           channels,
         }),
-      })
-    }
+      });
+    };
 
     return await sendPulse(this.channels, fetcher);
   }
@@ -130,8 +146,7 @@ export class PulseService {
   }
 
   async start(): Promise<PulseServiceStart> {
-    return {
-    }
+    return {};
   }
   public stop() {
     // nothing to do here currently

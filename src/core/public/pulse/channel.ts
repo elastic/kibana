@@ -17,4 +17,5 @@
  * under the License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { PulseInstruction, PulseChannel } from '../../server/pulse/channel';
