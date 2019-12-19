@@ -37,3 +37,6 @@ else
   # remove vault related secrets
   unset VAULT_ROLE_ID VAULT_SECRET_ID VAULT_TOKEN VAULT_ADDR
 fi
+
+# temporarily test against source until new artifacts are built
+export TEST_ES_FROM="source"
