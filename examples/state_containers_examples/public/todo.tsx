@@ -34,7 +34,9 @@ import {
 import {
   createStateContainer,
   createStateContainerReactHelpers,
+  createUrlSyncStrategy,
   syncState,
+  useUrlTracker,
 } from '../../../src/plugins/kibana_utils/public';
 import {
   defaultState,
@@ -42,7 +44,6 @@ import {
   TodoActions,
   TodoState,
 } from '../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
-import { createUrlSyncStrategy } from '../../../src/plugins/kibana_utils/public/state_sync/state_sync_strategies';
 
 const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
 const { Provider, connect, useTransitions, useState } = createStateContainerReactHelpers<
@@ -52,6 +53,7 @@ const { Provider, connect, useTransitions, useState } = createStateContainerReac
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;
 }
+
 const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
   const { edit: editTodo, delete: deleteTodo, add: addTodo } = useTransitions();
   const todos = useState();
@@ -124,8 +126,15 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
 
 const TodoAppConnected = connect<TodoAppProps, never>(() => ({}))(TodoApp);
 
-export const TodoAppPage: React.FC<{ history: History }> = props => {
+export const TodoAppPage: React.FC<{ history: History; appInstanceId: string }> = props => {
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
+
+  /**
+   * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
+   * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
+   */
+  useUrlTracker(props.appInstanceId, props.history);
+
   useEffect(() => {
     const destroySyncState = syncState([
       {
@@ -136,14 +145,14 @@ export const TodoAppPage: React.FC<{ history: History }> = props => {
         // history v5 will be singleton and this will not be needed
         syncStrategy: createUrlSyncStrategy({ useHash: useHashedUrl, history: props.history }),
       },
+
+      // This could be used instead of useUrlTracker
+      // if all the state we want to sync
+      // is inside state containers:
       // {
       //   stateContainer: container,
-      //   syncKey: '_todo',
-      //   syncStrategy: {
-      //     toStorage: async (syncKey, state) =>
-      //       sessionStorage.setItem(syncKey, JSON.stringify(state)),
-      //     fromStorage: async syncKey => JSON.parse(sessionStorage.getItem(syncKey)!),
-      //   },
+      //   syncKey: 'preserve-todo-between-navigations',
+      //   syncStrategy: SyncStrategy.SessionStorage,
       // },
     ]);
     return () => {
@@ -158,7 +167,7 @@ export const TodoAppPage: React.FC<{ history: History }> = props => {
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle size="l">
-                <h1>State Containers Sync State Util - Todo example</h1>
+                <h1>State sync example. Instance: ${props.appInstanceId}</h1>
               </EuiTitle>
               <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
                 {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}

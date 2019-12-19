@@ -23,9 +23,12 @@ import React from 'react';
 import { createBrowserHistory } from 'history';
 import { TodoAppPage } from './todo';
 
-export const renderApp = ({ appBasePath, element }: AppMountParameters) => {
+export const renderApp = ({ appBasePath, element }: AppMountParameters, appInstanceId: string) => {
   ReactDOM.render(
-    <TodoAppPage history={createBrowserHistory({ basename: appBasePath })} />,
+    <TodoAppPage
+      history={createBrowserHistory({ basename: appBasePath })}
+      appInstanceId={appInstanceId}
+    />,
     element
   );
 

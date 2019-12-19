@@ -17,28 +17,12 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { ISyncStrategy } from './types';
 
-export class StateContainersExamplesPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    core.application.register({
-      id: 'stateContainersExamples1',
-      title: 'State containers examples 1',
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
-        return renderApp(params, '1');
-      },
-    });
-    core.application.register({
-      id: 'stateContainersExamples2',
-      title: 'State containers examples 2',
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
-        return renderApp(params, '2');
-      },
-    });
-  }
-
-  public start() {}
-  public stop() {}
-}
+export const createSessionStorageSyncStrategy = (): ISyncStrategy => {
+  return {
+    toStorage: async <State>(syncKey: string, state: State) =>
+      sessionStorage.setItem(syncKey, JSON.stringify(state)),
+    fromStorage: async syncKey => JSON.parse(sessionStorage.getItem(syncKey)!),
+  };
+};

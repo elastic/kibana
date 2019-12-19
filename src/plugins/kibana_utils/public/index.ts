@@ -33,7 +33,14 @@ export {
   retrieveState,
   isStateHash,
 } from './state_management/state_hash';
-export { hashQuery, hashUrl, unhashUrl, unhashQuery } from './state_management/url';
+export {
+  hashQuery,
+  hashUrl,
+  unhashUrl,
+  unhashQuery,
+  createUrlTracker,
+  useUrlTracker,
+} from './state_management/url';
 export {
   syncState,
   ISyncStrategy,
@@ -41,4 +48,5 @@ export {
   SyncStrategy,
   InitialTruthSource,
   DestroySyncStateFnType,
+  createUrlSyncStrategy,
 } from './state_sync';

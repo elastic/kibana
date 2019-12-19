@@ -20,11 +20,13 @@
 import { createBrowserHistory } from 'history';
 import { ISyncStrategy } from './types';
 import { createUrlSyncStrategy } from './create_url_sync_strategy';
+import { createSessionStorageSyncStrategy } from './create_session_storage_sync_strategy';
 
 // strategies provided out of the box
 enum SyncStrategy {
   Url,
   HashedUrl,
+  SessionStorage,
 }
 
 const createStrategies: () => {
@@ -34,6 +36,7 @@ const createStrategies: () => {
   return {
     [SyncStrategy.Url]: createUrlSyncStrategy({ useHash: false, history }),
     [SyncStrategy.HashedUrl]: createUrlSyncStrategy({ useHash: true, history }),
+    [SyncStrategy.SessionStorage]: createSessionStorageSyncStrategy(),
     // SyncStrategies: LocalStorage, es, somewhere else...
   };
 };

@@ -25,6 +25,7 @@ import {
   getStatesFromUrl,
   IUrlControls,
 } from './url_storage';
+export { createUrlTracker, useUrlTracker } from './url_tracker';
 export {
   hashUrl,
   hashQuery,
