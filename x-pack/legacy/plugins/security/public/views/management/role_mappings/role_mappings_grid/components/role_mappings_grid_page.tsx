@@ -185,7 +185,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     const sorting = {
       sort: {
         field: 'name',
-        direction: 'asc',
+        direction: 'asc' as any,
       },
     };
 
@@ -247,7 +247,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     return (
       <EuiInMemoryTable
-        items={roleMappings}
+        items={roleMappings!}
         itemId="name"
         columns={this.getColumnConfig()}
         search={search}
