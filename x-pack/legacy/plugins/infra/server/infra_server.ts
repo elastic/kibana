@@ -20,6 +20,7 @@ import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
 import {
+  initLogEntriesRoute,
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
   initLogEntriesItemRoute,
@@ -43,6 +44,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
+  initLogEntriesRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
   initLogEntriesItemRoute(libs);

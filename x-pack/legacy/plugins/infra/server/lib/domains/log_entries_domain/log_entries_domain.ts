@@ -102,6 +102,28 @@ export class InfraLogEntriesDomain {
     };
   }
 
+  public async getLogEntries(
+    requestContext: RequestHandlerContext,
+    sourceId: string,
+    startTimestamp: number,
+    endTimestamp: number
+  ): Promise<any> {
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
+
+    const documents = await this.adapter.getLogEntries(
+      requestContext,
+      configuration,
+      startTimestamp,
+      endTimestamp
+    );
+
+    return documents;
+  }
+
+  /** @deprecated */
   public async getLogEntriesBetween(
     requestContext: RequestHandlerContext,
     sourceId: string,
@@ -323,6 +345,13 @@ export interface LogEntriesAdapter {
     filterQuery?: LogEntryQuery,
     highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]>;
+
+  getLogEntries(
+    requestContext: RequestHandlerContext,
+    sourceConfiguration: InfraSourceConfiguration,
+    startTimestamp: number,
+    endTimestamp: number
+  ): Promise<any>;
 
   getContainedLogEntryDocuments(
     requestContext: RequestHandlerContext,

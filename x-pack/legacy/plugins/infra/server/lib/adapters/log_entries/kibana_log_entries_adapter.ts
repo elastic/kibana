@@ -82,6 +82,38 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     return direction === 'asc' ? documents : documents.reverse();
   }
 
+  public async getLogEntries(
+    requestContext: RequestHandlerContext,
+    sourceConfiguration: InfraSourceConfiguration,
+    startTimestamp: number,
+    endTimestamp: number
+  ): Promise<any> {
+    const query = {
+      allowNoIndices: true,
+      index: sourceConfiguration.logAlias,
+      ignoreUnavailable: true,
+      body: {
+        size: 10,
+        query: {
+          range: {
+            [sourceConfiguration.fields.timestamp]: {
+              gte: startTimestamp,
+              lte: endTimestamp,
+            },
+          },
+        },
+        sort: {
+          [sourceConfiguration.fields.timestamp]: 'asc',
+          [sourceConfiguration.fields.tiebreaker]: 'asc',
+        },
+      },
+    };
+
+    const documents = await this.framework.callWithRequest(requestContext, 'search', query);
+    return documents.hits.hits;
+  }
+
+  /** @deprecated */
   public async getContainedLogEntryDocuments(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
