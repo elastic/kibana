@@ -165,7 +165,7 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
       <>
         <EuiScreenReaderOnly>
           <h2 id={HEADER_ID}>
-            {i18n.translate('common.ui.management.nav.label', {
+            {i18n.translate('management.nav.label', {
               defaultMessage: 'Management',
             })}
           </h2>
@@ -188,7 +188,7 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
   }
 
   private renderMobileTitle() {
-    return <FormattedMessage id="common.ui.management.nav.menu" defaultMessage="Management menu" />;
+    return <FormattedMessage id="management.nav.menu" defaultMessage="Management menu" />;
   }
 
   private toggleOpenOnMobile = () => {

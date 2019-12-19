@@ -463,7 +463,7 @@
     "common.ui.management.breadcrumb": "管理",
     "management.connectDataDisplayName": "データに接続",
     "management.displayName": "管理",
-    "common.ui.management.nav.menu": "管理メニュー",
+    "management.nav.menu": "管理メニュー",
     "common.ui.modals.cancelButtonLabel": "キャンセル",
     "common.ui.notify.fatalError.errorStatusMessage": "エラー {errStatus} {errStatusText}: {errMessage}",
     "common.ui.notify.fatalError.unavailableServerErrorMessage": "HTTP リクエストが接続に失敗しました。Kibana サーバーが実行されていて、ご使用のブラウザの接続が正常に動作していることを確認するか、システム管理者にお問い合わせください。",

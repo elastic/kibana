@@ -463,7 +463,7 @@
     "common.ui.management.breadcrumb": "管理",
     "management.connectDataDisplayName": "连接数据",
     "management.displayName": "管理",
-    "common.ui.management.nav.menu": "管理菜单",
+    "management.nav.menu": "管理菜单",
     "common.ui.modals.cancelButtonLabel": "取消",
     "common.ui.notify.fatalError.errorStatusMessage": "错误 {errStatus} {errStatusText}：{errMessage}",
     "common.ui.notify.fatalError.unavailableServerErrorMessage": "HTTP 请求无法连接。请检查 Kibana 服务器是否正在运行以及您的浏览器是否具有有效的连接，或请联系您的系统管理员。",
