@@ -56,7 +56,16 @@ report from the Kibana UI.
 //For more information, see <<secure-reporting>>.
 //<<reporting-app-users, Setting up a Reporting Role>>.
 
-NOTE: Reporting is integrated with {watcher} only as an email attachment type.
+[NOTE]
+====
+Reporting is integrated with Watcher only as an email attachment type.
+
+The report Generation URL might contain date-math expressions
+that cause the watch to fail with a `parse_exception`.
+Remove curly braces `{`  `}` from date-math expressions and
+URL-encode characters to avoid this.
+For example: `...(range:(%27@timestamp%27:(gte:now-15m%2Fd,lte:now%2Fd))))...`
 
 For more information about configuring watches, see
-{ref}/how-watcher-works.html[How {watcher} works].
+{ref}/how-watcher-works.html[How Watcher works].
+====
