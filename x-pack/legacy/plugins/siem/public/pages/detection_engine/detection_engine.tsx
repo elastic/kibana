@@ -19,6 +19,7 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import * as i18n from './translations';
 import { SignalsTable } from './signals';
+import { GlobalTime } from '../../containers/global_time';
 
 export const DetectionEngineComponent = React.memo(() => {
   const sampleChartOptions = [
@@ -65,8 +66,7 @@ export const DetectionEngineComponent = React.memo(() => {
                 </EuiPanel>
 
                 <EuiSpacer />
-
-                <SignalsTable />
+                <GlobalTime>{({ to, from }) => <SignalsTable from={from} to={to} />}</GlobalTime>
               </WrapperPage>
             </StickyContainer>
           ) : (
