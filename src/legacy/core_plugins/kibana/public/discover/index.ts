@@ -40,3 +40,5 @@ export const start = pluginInstance.start(npStart.core, npStart.plugins);
 SavedObjectRegistryProvider.register((savedSearches: any) => {
   return savedSearches;
 });
+
+export { createSavedSearchesService } from './saved_searches/saved_searches';

@@ -16,7 +16,8 @@ export enum LICENSE_TYPE {
   standard = 20,
   gold = 30,
   platinum = 40,
-  trial = 50,
+  enterprise = 50,
+  trial = 60,
 }
 
 /** @public */
@@ -140,16 +141,6 @@ export interface ILicense {
   isAvailable: boolean;
 
   /**
-   * Determine if the type of the license is basic, and also active.
-   */
-  isBasic: boolean;
-
-  /**
-   * Determine if the type of the license is not basic, and also active.
-   */
-  isNotBasic: boolean;
-
-  /**
    * Returns
    */
   toJSON: () => PublicLicenseJSON;
@@ -165,10 +156,10 @@ export interface ILicense {
   getUnavailableReason: () => string | undefined;
 
   /**
-   * Determine if the provided license types match against the license type.
-   * @param candidateLicenses license types to intersect against the license.
+   * Determine if license type >= minimal required license type.
+   * @param minimumLicenseRequired the minimum valid license required for the given feature
    */
-  isOneOf(candidateLicenses: LicenseType | LicenseType[]): boolean;
+  hasAtLeast(minimumLicenseRequired: LicenseType): boolean;
 
   /**
    * For a given plugin and license type, receive information about the status of the license.

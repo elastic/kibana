@@ -26,7 +26,7 @@ import {
 } from 'kibana/public';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 // @ts-ignore
-import { createSavedSearchesService } from '../saved_searches/saved_searches';
+import { createSavedSearchesService } from '../saved_searches';
 // @ts-ignore
 import { DiscoverStartPlugins } from '../plugin';
 import { DataStart } from '../../../../data/public';

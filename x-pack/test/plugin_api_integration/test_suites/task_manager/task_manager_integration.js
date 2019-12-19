@@ -123,7 +123,7 @@ export default function({ getService }) {
 
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: '30m',
+        schedule: { interval: '30m' },
         params: { historyItem },
       });
       log.debug(`Task created: ${scheduledTask.id}`);
@@ -230,6 +230,27 @@ export default function({ getService }) {
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
+        schedule: { interval: `${interval}m` },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const [task] = (await currentTasks()).docs;
+        expect(task.attempts).to.eql(0);
+        expect(task.state.count).to.eql(1);
+
+        expectReschedule(Date.parse(originalTask.runAt), task, intervalMilliseconds);
+      });
+    });
+
+    it('should support the deprecated interval field', async () => {
+      const interval = _.random(5, 200);
+      const intervalMilliseconds = interval * 60000;
+
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
         interval: `${interval}m`,
         params: {},
       });
@@ -248,7 +269,7 @@ export default function({ getService }) {
     it('should return a task run result when asked to run a task now', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `30m`,
+        schedule: { interval: `30m` },
         params: {},
       });
 
@@ -291,7 +312,7 @@ export default function({ getService }) {
     it('should return a task run error result when running a task now fails', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `30m`,
+        schedule: { interval: `30m` },
         params: { failWith: 'error on run now', failOn: 3 },
       });
 
@@ -355,7 +376,7 @@ export default function({ getService }) {
     it('should return a task run error result when trying to run a task now which is already running', async () => {
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: '30m',
+        schedule: { interval: '30m' },
         params: {
           waitForParams: true,
         },
@@ -447,13 +468,13 @@ export default function({ getService }) {
        */
       const fastTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `1s`,
+        schedule: { interval: `1s` },
         params: {},
       });
 
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `1s`,
+        schedule: { interval: `1s` },
         params: {
           waitForEvent: 'rescheduleHasHappened',
         },
