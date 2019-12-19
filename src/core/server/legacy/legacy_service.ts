@@ -244,7 +244,7 @@ export class LegacyService implements CoreService {
 
   private async createClusterManager(config: LegacyConfig) {
     const basePathProxy$ = this.coreContext.env.cliArgs.basePath
-      ? combineLatest(this.devConfig$, this.httpConfig$).pipe(
+      ? combineLatest([this.devConfig$, this.httpConfig$]).pipe(
           first(),
           map(
             ([dev, http]) =>
@@ -253,7 +253,9 @@ export class LegacyService implements CoreService {
         )
       : EMPTY;
 
-    require('../../../cli/cluster/cluster_manager').create(
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { ClusterManager } = require('../../../cli/cluster/cluster_manager');
+    return new ClusterManager(
       this.coreContext.env.cliArgs,
       config,
       await basePathProxy$.toPromise()
