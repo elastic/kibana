@@ -4,7 +4,7 @@ exports[`ErrorMarker renders 1`] = `
 <EuiPopover
   anchorPosition="upCenter"
   button={
-    <Legend
+    <ForwardRef(Styled(Legend))
       clickable={true}
       color="#bd271e"
       onClick={[Function]}
