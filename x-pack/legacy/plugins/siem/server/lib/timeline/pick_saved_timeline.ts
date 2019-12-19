@@ -22,6 +22,6 @@ export const pickSavedTimeline = (
   } else if (timelineId != null) {
     savedTimeline.updated = dateNow;
     savedTimeline.updatedBy = userInfo?.username ?? '';
-    return savedTimeline;
   }
+  return savedTimeline;
 };
