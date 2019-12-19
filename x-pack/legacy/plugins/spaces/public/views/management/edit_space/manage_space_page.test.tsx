@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 jest.mock('ui/kfetch', () => ({
-  kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
+  kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]),
 }));
 import '../../../__mocks__/xpack_info';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';

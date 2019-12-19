@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
@@ -34,7 +34,7 @@ import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
@@ -61,9 +61,39 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   }) => {
     useEffect(() => {
       setHostDetailsTablesActivePageToZero(null);
-    }, [detailName]);
+    }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
+    const hostDetailsPageFilters: esFilters.Filter[] = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'host.name',
+          value: detailName,
+          params: {
+            query: detailName,
+          },
+        },
+        query: {
+          match: {
+            'host.name': {
+              query: detailName,
+              type: 'phrase',
+            },
+          },
+        },
+      },
+    ];
+    const getFilters = () => [...hostDetailsPageFilters, ...filters];
+    const narrowDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
 
     return (
       <>
@@ -73,32 +103,8 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
               config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
-              filters: [
-                {
-                  meta: {
-                    alias: null,
-                    negate: false,
-                    disabled: false,
-                    type: 'phrase',
-                    key: 'host.name',
-                    value: detailName,
-                    params: {
-                      query: detailName,
-                    },
-                  },
-                  query: {
-                    match: {
-                      'host.name': {
-                        query: detailName,
-                        type: 'phrase',
-                      },
-                    },
-                  },
-                },
-                ...filters,
-              ],
+              filters: getFilters(),
             });
-
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
@@ -176,9 +182,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                        }}
+                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostDetailsQuery>
@@ -194,6 +198,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   <HostDetailsTabs
                     isInitializing={isInitializing}
                     deleteQuery={deleteQuery}
+                    pageFilters={hostDetailsPageFilters}
                     to={to}
                     from={from}
                     detailName={detailName}

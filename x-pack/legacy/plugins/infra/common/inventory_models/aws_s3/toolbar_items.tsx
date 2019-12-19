@@ -8,6 +8,7 @@ import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
 import { InfraSnapshotMetricType } from '../../../public/graphql/types';
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
+import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
 
 export const AwsS3ToolbarItems = (props: ToolbarProps) => {
   const metricTypes = [
@@ -19,10 +20,13 @@ export const AwsS3ToolbarItems = (props: ToolbarProps) => {
   ];
   const groupByFields = ['cloud.region'];
   return (
-    <MetricsAndGroupByToolbarItems
-      {...props}
-      metricTypes={metricTypes}
-      groupByFields={groupByFields}
-    />
+    <>
+      <CloudToolbarItems {...props} />
+      <MetricsAndGroupByToolbarItems
+        {...props}
+        metricTypes={metricTypes}
+        groupByFields={groupByFields}
+      />
+    </>
   );
 };
