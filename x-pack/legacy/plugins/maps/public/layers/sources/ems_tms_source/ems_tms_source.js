@@ -57,7 +57,6 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
-    console.log(this._descriptor);
     return <UpdateSourceEditor onChange={onChange} config={this._descriptor} />;
   }
 
@@ -84,7 +83,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   async _getEMSTMSService() {
     const emsClient = getEMSClient();
     const emsTMSServices = await emsClient.getTMSServices();
-    const emsTileLayerId = this._getEmsTileLayerId();
+    const emsTileLayerId = this.getTileLayerId();
     const tmsService = emsTMSServices.find(tmsService => tmsService.getId() === emsTileLayerId);
     if (!tmsService) {
       throw new Error(
@@ -116,7 +115,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       const emsTMSService = await this._getEMSTMSService();
       return emsTMSService.getDisplayName();
     } catch (error) {
-      return this._getEmsTileLayerId();
+      return this.getTileLayerId();
     }
   }
 
@@ -135,7 +134,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   getSpriteNamespacePrefix() {
-    return 'ems/' + this._getEmsTileLayerId();
+    return 'ems/' + this.getTileLayerId();
   }
 
   async getVectorStyleSheetAndSpriteMeta(isRetina) {
@@ -148,7 +147,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  _getEmsTileLayerId() {
+  getTileLayerId() {
     if (!this._descriptor.isAutoSelect) {
       return this._descriptor.id;
     }

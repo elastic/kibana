@@ -31,25 +31,42 @@ export class VectorTileLayer extends TileLayer {
     return tileLayerDescriptor;
   }
 
+  _canSkipSync({ prevDataRequest, nextMeta }) {
+    if (!prevDataRequest) {
+      return false;
+    }
+    const prevMeta = prevDataRequest.getMeta();
+    if (!prevMeta) {
+      return false;
+    }
+
+    return prevMeta.tileLayerId === nextMeta.tileLayerId;
+  }
+
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      //data is immmutable
+
+    const nextMeta = { tileLayerId: this._source.getTileLayerId() };
+    const canSkipSync = this._canSkipSync({
+      prevDataRequest: this.getSourceDataRequest(),
+      nextMeta,
+    });
+    if (canSkipSync) {
       return;
     }
+
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
-    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
       const styleAndSprites = await this._source.getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
         spriteSheetImageData,
       };
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, {});
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, nextMeta);
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
@@ -128,6 +145,7 @@ export class VectorTileLayer extends TileLayer {
     if (!vectorStyle) {
       return;
     }
+    console.log(vectorStyle);
 
     let initialBootstrapCompleted = false;
     const sourceIds = Object.keys(vectorStyle.sources);
