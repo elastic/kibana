@@ -3558,7 +3558,6 @@
     "xpack.apm.fetcher.error.status": "错误",
     "xpack.apm.fetcher.error.title": "提取资源时出错",
     "xpack.apm.fetcher.error.url": "URL",
-    "xpack.apm.loading.prompt": "正在加载……",
     "xpack.apm.localFilters.titles.agentName": "代理名称",
     "xpack.apm.localFilters.titles.containerId": "容器 ID",
     "xpack.apm.localFilters.titles.host": "主机",
