@@ -25,7 +25,7 @@ import * as i18n from './translations';
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
-const ResizeEuiPanel = styled(EuiPanel) <{
+const ResizeEuiPanel = styled(EuiPanel)<{
   height?: number;
 }>`
   .euiAccordion__childWrapper {
@@ -139,8 +139,8 @@ export const CreateRuleComponent = React.memo(() => {
         stepRuleIdx === 0
           ? true
           : stepsRuleOrder
-            .filter((stepRule, index) => index < stepRuleIdx)
-            .every(stepRule => stepsData.current[stepRule].isValid);
+              .filter((stepRule, index) => index < stepRuleIdx)
+              .every(stepRule => stepsData.current[stepRule].isValid);
 
       if (stepRuleIdx < activeRuleIdx && !isOpen) {
         openCloseAccordion(id);

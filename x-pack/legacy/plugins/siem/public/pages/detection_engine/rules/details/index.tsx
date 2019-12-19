@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../../../components/filters_global';
+import { FormattedDate } from '../../../../components/formatted_date';
 import { HeaderPage } from '../../../../components/header_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
@@ -56,17 +57,29 @@ export const RuleDetailsComponent = memo(() => {
       [
         <FormattedMessage
           id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
-          defaultMessage="Created by: {by} on 'coming soon'"
+          defaultMessage="Created by: {by} on {date}"
           values={{
-            by: rule?.created_by ?? 'unknown',
+            by: rule?.created_by ?? i18n.UNKNOWN,
+            date: (
+              <FormattedDate
+                value={rule?.created_at ?? new Date().toISOString()}
+                fieldName="createdAt"
+              />
+            ),
           }}
         />,
         rule?.updated_by != null ? (
           <FormattedMessage
             id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
-            defaultMessage="Updated by: {by} on 'coming soon'"
+            defaultMessage="Updated by: {by} on {date}"
             values={{
-              by: rule?.updated_by ?? 'unknown',
+              by: rule?.updated_by ?? i18n.UNKNOWN,
+              date: (
+                <FormattedDate
+                  value={rule?.updated_at ?? new Date().toISOString()}
+                  fieldName="updatedAt"
+                />
+              ),
             }}
           />
         ) : (

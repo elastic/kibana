@@ -51,6 +51,7 @@ const MetaRule = t.type({
 
 export const RuleSchema = t.intersection([
   t.type({
+    created_at: t.string,
     created_by: t.string,
     description: t.string,
     enabled: t.boolean,
@@ -74,6 +75,7 @@ export const RuleSchema = t.intersection([
     tags: t.array(t.string),
     to: t.string,
     threats: t.array(t.unknown),
+    updated_at: t.string,
     updated_by: t.string,
   }),
   t.partial({

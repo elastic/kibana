@@ -30,3 +30,7 @@ export const ACTIVATE_RULE = i18n.translate(
     defaultMessage: 'Activate',
   }
 );
+
+export const UNKNOWN = i18n.translate('xpack.siem.detectionEngine.ruleDetails.unknownDescription', {
+  defaultMessage: 'Unknown',
+});
