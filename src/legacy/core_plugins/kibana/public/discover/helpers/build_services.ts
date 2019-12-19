@@ -25,16 +25,12 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 import * as docViewsRegistry from 'ui/registry/doc_views';
-import chromeLegacy from 'ui/chrome';
-import { IPrivate } from 'ui/private';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 // @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
+import { createSavedSearchesService } from '../saved_searches';
 // @ts-ignore
-import { createSavedSearchesService } from '../saved_searches/saved_searches';
-// @ts-ignore
-import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
+import { DataStart } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
@@ -44,6 +40,7 @@ export interface DiscoverServices {
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
+  data: DataStart;
   docLinks: DocLinksStart;
   docViewsRegistry: docViewsRegistry.DocViewsRegistry;
   eui_utils: EuiUtilsStart;
@@ -54,38 +51,19 @@ export interface DiscoverServices {
   share: SharePluginStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  // legacy
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  State: unknown;
   uiSettings: IUiSettingsClient;
 }
-
-export async function buildGlobalAngularServices() {
-  const injector = await chromeLegacy.dangerouslyGetActiveInjector();
-  const Private = injector.get<IPrivate>('Private');
-  const kbnUrl = injector.get<IPrivate>('kbnUrl');
-  const State = Private(StateProvider);
-  const SavedSearchFactory = createSavedSearchFactory(Private);
-  const service = createSavedSearchesService(Private, SavedSearchFactory, kbnUrl, chromeLegacy);
-  return {
-    getSavedSearchById: async (id: string) => service.get(id),
-    getSavedSearchUrlById: async (id: string) => service.urlFor(id),
-    State,
+export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins) {
+  const services = {
+    savedObjectsClient: core.savedObjects.client,
+    indexPatterns: plugins.data.indexPatterns,
+    chrome: core.chrome,
+    overlays: core.overlays,
   };
-}
-
-export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins, test: false) {
-  const globalAngularServices = !test
-    ? await buildGlobalAngularServices()
-    : {
-        getSavedSearchById: async (id: string) => void id,
-        getSavedSearchUrlById: async (id: string) => void id,
-        State: null,
-      };
-
+  const savedObjectService = createSavedSearchesService(services);
   return {
-    ...globalAngularServices,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
@@ -95,6 +73,8 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     docViewsRegistry,
     eui_utils: plugins.eui_utils,
     filterManager: plugins.data.query.filterManager,
+    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,
     // @ts-ignore

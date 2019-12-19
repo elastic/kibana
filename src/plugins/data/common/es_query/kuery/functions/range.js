@@ -22,12 +22,15 @@ import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
+import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 export function buildNodeParams(fieldName, params) {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
-  const fieldNameArg = typeof fieldName === 'string' ? ast.fromLiteralExpression(fieldName) : nodeTypes.literal.buildNode(fieldName);
+  const fieldNameArg =
+    typeof fieldName === 'string'
+      ? ast.fromLiteralExpression(fieldName)
+      : nodeTypes.literal.buildNode(fieldName);
   const args = _.map(params, (value, key) => {
     return nodeTypes.namedArg.buildNode(key, value);
   });
@@ -38,8 +41,12 @@ export function buildNodeParams(fieldName, params) {
 }
 
 export function toElasticsearchQuery(node, indexPattern = null, config = {}, context = {}) {
-  const [ fieldNameArg, ...args ] = node.arguments;
-  const fullFieldNameArg = getFullFieldNameNode(fieldNameArg, indexPattern, context.nested ? context.nested.path : undefined);
+  const [fieldNameArg, ...args] = node.arguments;
+  const fullFieldNameArg = getFullFieldNameNode(
+    fieldNameArg,
+    indexPattern,
+    context.nested ? context.nested.path : undefined
+  );
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
   const namedArgs = extractArguments(args);
   const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
@@ -56,25 +63,23 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
     });
   }
 
-
-  const queries = fields.map((field) => {
-    const wrapWithNestedQuery = (query) => {
+  const queries = fields.map(field => {
+    const wrapWithNestedQuery = query => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       if (
-        !fullFieldNameArg.type === 'wildcard'
-        || !_.get(field, 'subType.nested')
-        || context.nested
+        !fullFieldNameArg.type === 'wildcard' ||
+        !_.get(field, 'subType.nested') ||
+        context.nested
       ) {
         return query;
-      }
-      else {
+      } else {
         return {
           nested: {
             path: field.subType.nested.path,
             query,
-            score_mode: 'none'
-          }
+            score_mode: 'none',
+          },
         };
       }
     };
@@ -83,30 +88,31 @@ export function toElasticsearchQuery(node, indexPattern = null, config = {}, con
       return {
         script: getRangeScript(field, queryParams),
       };
-    }
-    else if (field.type === 'date') {
-      const timeZoneParam = config.dateFormatTZ ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) } : {};
+    } else if (field.type === 'date') {
+      const timeZoneParam = config.dateFormatTZ
+        ? { time_zone: getTimeZoneFromSettings(config.dateFormatTZ) }
+        : {};
       return wrapWithNestedQuery({
         range: {
           [field.name]: {
             ...queryParams,
             ...timeZoneParam,
-          }
-        }
+          },
+        },
       });
     }
     return wrapWithNestedQuery({
       range: {
-        [field.name]: queryParams
-      }
+        [field.name]: queryParams,
+      },
     });
   });
 
   return {
     bool: {
       should: queries,
-      minimum_should_match: 1
-    }
+      minimum_should_match: 1,
+    },
   };
 }
 
@@ -120,8 +126,7 @@ function extractArguments(args) {
   return args.reduce((acc, arg, index) => {
     if (arg.type === 'namedArg') {
       acc[arg.name] = arg.value;
-    }
-    else {
+    } else {
       acc[unnamedArgOrder[index]] = arg;
     }
 

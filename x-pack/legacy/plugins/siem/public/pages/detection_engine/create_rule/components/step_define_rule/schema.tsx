@@ -26,27 +26,6 @@ import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY } from './translations';
 const { emptyField } = fieldValidators;
 
 export const schema: FormSchema = {
-  outputIndex: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldOutputIndiceNameLabel',
-      {
-        defaultMessage: 'Output index name',
-      }
-    ),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
-            {
-              defaultMessage: 'An output indice name for signals is required.',
-            }
-          )
-        ),
-      },
-    ],
-  },
   useIndicesConfig: {
     type: FIELD_TYPES.RADIO_GROUP,
     label: i18n.translate(

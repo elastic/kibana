@@ -22,7 +22,7 @@ import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
-import { IMetricAggConfig } from '../metric_agg_type';
+import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 // @ts-ignore
 import { Schemas } from '../../../vis/editors/default/schemas';
@@ -110,7 +110,7 @@ const siblingPipelineAggHelper = {
         ),
         write: siblingPipelineAggWriter,
       },
-    ];
+    ] as Array<MetricAggParam<IMetricAggConfig>>;
   },
 
   getFormat(agg: IMetricAggConfig) {

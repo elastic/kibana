@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
@@ -17,6 +16,7 @@ import { SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
@@ -52,6 +52,7 @@ describe('body', () => {
     anomalies: 'AnomaliesQueryTabBody',
     events: 'EventsQueryTabBody',
   };
+  const mount = useMountAppended();
 
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
     test(`it should pass expected object properties to ${componentName}`, () => {
@@ -62,7 +63,7 @@ describe('body', () => {
               from={0}
               isInitializing={false}
               detailName={'host-1'}
-              setQuery={() => {}}
+              setQuery={jest.fn()}
               to={0}
               setAbsoluteRangeDatePicker={(jest.fn() as unknown) as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}

@@ -48,7 +48,7 @@ import {
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 
@@ -131,7 +131,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/State',
     'app/dashboard/ConfirmModal',
     'app/dashboard/icon',
-    'app/dashboard/emptyScreen',
   ]);
   return dashboardAngularModule;
 }

@@ -63,154 +63,171 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Label"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: labelSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: labelHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: labelSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: labelHtml,
+        },
+      ]}
     >
-
       <GuideText>
-        Never forget to label every input element. You can either
-        use a <GuideCode>label</GuideCode> element with a <GuideCode>for</GuideCode> attribute
-        referencing the <GuideCode>id</GuideCode> of the input field, wrap the <GuideCode>input</GuideCode> field
-        within the <GuideCode>label</GuideCode> element or use <GuideCode>aria-label</GuideCode> or <GuideCode>aria-labelledby</GuideCode>.
+        Never forget to label every input element. You can either use a <GuideCode>label</GuideCode>{' '}
+        element with a <GuideCode>for</GuideCode> attribute referencing the{' '}
+        <GuideCode>id</GuideCode> of the input field, wrap the <GuideCode>input</GuideCode> field
+        within the <GuideCode>label</GuideCode> element or use <GuideCode>aria-label</GuideCode> or{' '}
+        <GuideCode>aria-labelledby</GuideCode>.
       </GuideText>
 
       <GuideText>
-        For the sake of simplicity we haven&rsquo;t labeled the input elements on
-        this page correctly.
+        For the sake of simplicity we haven&rsquo;t labeled the input elements on this page
+        correctly.
       </GuideText>
 
       <GuideDemo>
-        <Label/>
+        <Label />
       </GuideDemo>
-
     </GuideSection>
 
     <GuideSection
       title="TextInput"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: textInputSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: textInputHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: textInputSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: textInputHtml,
+        },
+      ]}
     >
       <GuideDemo>
-        <TextInput/>
+        <TextInput />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="AssistedInput"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: assistedInputHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: assistedInputHtml,
+        },
+      ]}
     >
       <GuideText>
-        <strong>Note:</strong> You have to specify right-side padding using a custom class or
-        inline style to keep the input text from overlapping with the assistance content.
-        Use <GuideCode>em</GuideCode> units for this padding so that it scales appropriately if the
-        user changes their root font-size.
+        <strong>Note:</strong> You have to specify right-side padding using a custom class or inline
+        style to keep the input text from overlapping with the assistance content. Use{' '}
+        <GuideCode>em</GuideCode> units for this padding so that it scales appropriately if the user
+        changes their root font-size.
       </GuideText>
 
-      <GuideDemo
-        html={assistedInputHtml}
-      />
+      <GuideDemo html={assistedInputHtml} />
     </GuideSection>
 
     <GuideSection
       title="SearchInput"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: searchInputHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: searchInputHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={searchInputHtml}
-      />
+      <GuideDemo html={searchInputHtml} />
     </GuideSection>
 
     <GuideSection
       title="StaticInput"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: staticInputHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: staticInputHtml,
+        },
+      ]}
     >
       <GuideText>
-        Use StaticInput to display dynamic content in a form which the user isn&rsquo;t allowed to edit.
+        Use StaticInput to display dynamic content in a form which the user isn&rsquo;t allowed to
+        edit.
       </GuideText>
 
-      <GuideDemo
-        html={staticInputHtml}
-      />
+      <GuideDemo html={staticInputHtml} />
     </GuideSection>
 
     <GuideSection
       title="TextArea"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: textAreaSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: textAreaHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: textAreaSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: textAreaHtml,
+        },
+      ]}
     >
       <GuideDemo>
-        <TextArea/>
+        <TextArea />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="TextArea, non-resizable"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: textAreaNonResizableSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: textAreaNonResizableHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: textAreaNonResizableSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: textAreaNonResizableHtml,
+        },
+      ]}
     >
       <GuideDemo>
-        <TextAreaNonResizable/>
+        <TextAreaNonResizable />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="CheckBox"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: checkBoxSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: checkBoxHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: checkBoxSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: checkBoxHtml,
+        },
+      ]}
     >
       <GuideDemo>
-        <CheckBox/>
+        <CheckBox />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Select"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: selectSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: selectHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: selectSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: selectHtml,
+        },
+      ]}
     >
       <GuideDemo>
-        <Select/>
+        <Select />
       </GuideDemo>
-
     </GuideSection>
   </GuidePage>
 );

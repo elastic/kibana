@@ -65,11 +65,10 @@ const {
   data,
   docTitle,
   filterManager,
-  State,
   share,
   timefilter,
   toastNotifications,
-  uiSettings
+  uiSettings,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -87,11 +86,8 @@ const fetchStatuses = {
 };
 
 const app = getAngularModule();
-app.run((globalState, $rootScope) => {registerTimefilterWithGlobalStateFactory(
-  timefilter,
-  globalState,
-  $rootScope
-);
+app.run((globalState, $rootScope) => {
+  registerTimefilterWithGlobalStateFactory(timefilter, globalState, $rootScope);
 });
 
 app.config($routeProvider => {
@@ -121,12 +117,12 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope, State) {
         const indexPatterns = getServices().indexPatterns;
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, getServices().data, $rootScope, kbnUrl).then(() => {
           return Promise.props({
-            ip: indexPatterns.getCache().then((indexPatternList) => {
+            ip: indexPatterns.getCache().then(indexPatternList => {
               /**
                *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
                *  the load order of AppState conflicts with the load order of many other things
@@ -137,8 +133,11 @@ app.config($routeProvider => {
                *  @type {State}
                */
               const state = new State('_a', {});
-
-              const id = getIndexPatternId(state.index, indexPatternList, uiSettings.get('defaultIndex'));
+              const id = getIndexPatternId(
+                state.index,
+                indexPatternList,
+                uiSettings.get('defaultIndex')
+              );
               state.destroy();
               return Promise.props({
                 list: indexPatternList,
@@ -147,32 +146,37 @@ app.config($routeProvider => {
                 stateValFound: !!state.index && id === state.index,
               });
             }),
-            savedSearch: getServices().getSavedSearchById(savedSearchId, kbnUrl)
-              .then((savedSearch) => {
+            savedSearch: getServices()
+              .getSavedSearchById(savedSearchId, kbnUrl)
+              .then(savedSearch => {
                 if (savedSearchId) {
                   chrome.recentlyAccessed.add(
                     savedSearch.getFullPath(),
                     savedSearch.title,
-                    savedSearchId);
+                    savedSearchId
+                  );
                 }
                 return savedSearch;
               })
-              .catch(redirectWhenMissing({
-                'search': '/discover',
-                'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
-              }))
+              .catch(
+                redirectWhenMissing({
+                  search: '/discover',
+                  'index-pattern':
+                    '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                })
+              ),
           });
         });
       },
-    }
+    },
   });
 });
 
-app.directive('discoverApp', function () {
+app.directive('discoverApp', function() {
   return {
     restrict: 'E',
     controllerAs: 'discoverApp',
-    controller: discoverController
+    controller: discoverController,
   };
 });
 
@@ -190,20 +194,20 @@ function discoverController(
   localStorage,
   uiCapabilities,
   getAppState,
-  globalState,
+  globalState
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
 
   const inspectorAdapters = {
-    requests: new RequestAdapter()
+    requests: new RequestAdapter(),
   };
 
   const subscriptions = new Subscription();
 
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
-  $scope.timefilterUpdateHandler = (ranges) => {
+  $scope.timefilterUpdateHandler = ranges => {
     timefilter.setTime({
       from: moment(ranges.from).toISOString(),
       to: moment(ranges.to).toISOString(),
@@ -217,11 +221,14 @@ function discoverController(
   $scope.refreshInterval = timefilter.getRefreshInterval();
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
 
-  $scope.$watch(() => uiCapabilities.discover.saveQuery, (newCapability) => {
-    $scope.showSaveQuery = newCapability;
-  });
+  $scope.$watch(
+    () => uiCapabilities.discover.saveQuery,
+    newCapability => {
+      $scope.showSaveQuery = newCapability;
+    }
+  );
 
-  $scope.intervalEnabled = function (interval) {
+  $scope.intervalEnabled = function(interval) {
     return interval.val !== 'custom';
   };
 
@@ -236,9 +243,9 @@ function discoverController(
     filterStateManager.destroy();
   });
 
-  const $appStatus = $scope.appStatus = this.appStatus = {
-    dirty: !savedSearch.id
-  };
+  const $appStatus = ($scope.appStatus = this.appStatus = {
+    dirty: !savedSearch.id,
+  });
 
   const getTopNavLinks = () => {
     const newSearch = {
@@ -249,7 +256,11 @@ function discoverController(
       description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
-      run: function () { $scope.$evalAsync(() => { kbnUrl.change('/discover'); }); },
+      run: function() {
+        $scope.$evalAsync(() => {
+          kbnUrl.change('/discover');
+        });
+      },
       testId: 'discoverNewButton',
     };
 
@@ -263,7 +274,12 @@ function discoverController(
       }),
       testId: 'discoverSaveButton',
       run: async () => {
-        const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+        const onSave = ({
+          newTitle,
+          newCopyOnSave,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        }) => {
           const currentTitle = savedSearch.title;
           savedSearch.title = newTitle;
           savedSearch.copyOnSave = newCopyOnSave;
@@ -272,7 +288,7 @@ function discoverController(
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return saveDataSource(saveOptions).then((response) => {
+          return saveDataSource(saveOptions).then(response => {
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedSearch.title = currentTitle;
@@ -284,16 +300,18 @@ function discoverController(
         const saveModal = (
           <SavedObjectSaveModal
             onSave={onSave}
-            onClose={() => { }}
+            onClose={() => {}}
             title={savedSearch.title}
             showCopyOnSave={savedSearch.id ? true : false}
             objectType="search"
             description={i18n.translate('kbn.discover.localMenu.saveSaveSearchDescription', {
-              defaultMessage: 'Save your Discover search so you can use it in visualizations and dashboards',
+              defaultMessage:
+                'Save your Discover search so you can use it in visualizations and dashboards',
             })}
-          />);
+          />
+        );
         showSaveModal(saveModal);
-      }
+      },
     };
 
     const openSearch = {
@@ -307,11 +325,11 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: (searchId) => {
+          makeUrl: searchId => {
             return kbnUrl.eval('#/discover/{{id}}', { id: searchId });
-          }
+          },
         });
-      }
+      },
     };
 
     const shareSearch = {
@@ -323,7 +341,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async (anchorElement) => {
+      run: async anchorElement => {
         const sharingData = await this.getSharingData();
         share.toggleShareContextMenu({
           anchorElement,
@@ -338,7 +356,7 @@ function discoverController(
           },
           isDirty: $appStatus.dirty,
         });
-      }
+      },
     };
 
     const inspectSearch = {
@@ -352,9 +370,9 @@ function discoverController(
       testId: 'openInspectorButton',
       run() {
         getServices().inspector.open(inspectorAdapters, {
-          title: savedSearch.title
+          title: savedSearch.title,
         });
-      }
+      },
     };
 
     return [
@@ -398,19 +416,24 @@ function discoverController(
   });
 
   if (savedSearch.id && savedSearch.title) {
-    chrome.setBreadcrumbs([{
-      text: discoverBreadcrumbsTitle,
-      href: '#/discover',
-    }, { text: savedSearch.title }]);
+    chrome.setBreadcrumbs([
+      {
+        text: discoverBreadcrumbsTitle,
+        href: '#/discover',
+      },
+      { text: savedSearch.title },
+    ]);
   } else {
-    chrome.setBreadcrumbs([{
-      text: discoverBreadcrumbsTitle,
-    }]);
+    chrome.setBreadcrumbs([
+      {
+        text: discoverBreadcrumbsTitle,
+      },
+    ]);
   }
 
   let stateMonitor;
 
-  const $state = $scope.state = new AppState(getStateDefaults());
+  const $state = ($scope.state = new AppState(getStateDefaults()));
 
   $scope.filters = filterManager.getFilters();
   $scope.screenTitle = savedSearch.title;
@@ -428,7 +451,7 @@ function discoverController(
     }
 
     return await new Promise(resolve => {
-      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
+      const unwatch = $scope.$watch('fetchStatus', newValue => {
         if (newValue === fetchStatuses.COMPLETE) {
           unwatch();
           resolve($scope.fieldCounts);
@@ -439,20 +462,21 @@ function discoverController(
 
   const getSharingDataFields = async () => {
     const selectedFields = $state.columns;
-    if (selectedFields.length === 1 && selectedFields[0] ===  '_source') {
+    if (selectedFields.length === 1 && selectedFields[0] === '_source') {
       const fieldCounts = await getFieldCounts();
       return {
         searchFields: null,
-        selectFields: _.keys(fieldCounts).sort()
+        selectFields: _.keys(fieldCounts).sort(),
       };
     }
 
     const timeFieldName = $scope.indexPattern.timeFieldName;
     const hideTimeColumn = config.get('doc_table:hideTimeColumn');
-    const fields = (timeFieldName && !hideTimeColumn) ? [timeFieldName, ...selectedFields] : selectedFields;
+    const fields =
+      timeFieldName && !hideTimeColumn ? [timeFieldName, ...selectedFields] : selectedFields;
     return {
       searchFields: fields,
-      selectFields: fields
+      selectFields: fields,
     };
   };
 
@@ -471,12 +495,14 @@ function discoverController(
     return {
       searchRequest: {
         index: searchSource.getField('index').title,
-        body
+        body,
       },
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
-      conflictedTypesFields: $scope.indexPattern.fields.filter(f => f.type === 'conflict').map(f => f.name),
-      indexPatternId: searchSource.getField('index').id
+      conflictedTypesFields: $scope.indexPattern.fields
+        .filter(f => f.type === 'conflict')
+        .map(f => f.name),
+      indexPatternId: searchSource.getField('index').id,
     };
   };
 
@@ -484,18 +510,24 @@ function discoverController(
 
   function getStateDefaults() {
     return {
-      query: ($scope.savedQuery && $scope.savedQuery.attributes.query)
-        || $scope.searchSource.getField('query')
-        || {
+      query: ($scope.savedQuery && $scope.savedQuery.attributes.query) ||
+        $scope.searchSource.getField('query') || {
           query: '',
-          language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+          language:
+            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-      sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
-      columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
+      sort: getSort.array(
+        savedSearch.sort,
+        $scope.indexPattern,
+        config.get('discover:sort:defaultOrder')
+      ),
+      columns:
+        savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
-      filters: ($scope.savedQuery && $scope.savedQuery.attributes.filters)
-        || _.cloneDeep($scope.searchSource.getOwnField('filter'))
+      filters:
+        ($scope.savedQuery && $scope.savedQuery.attributes.filters) ||
+        _.cloneDeep($scope.searchSource.getOwnField('filter')),
     };
   }
 
@@ -504,22 +536,23 @@ function discoverController(
 
   $scope.getBucketIntervalToolTipText = () => {
     return i18n.translate('kbn.discover.bucketIntervalTooltip', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
+      defaultMessage:
+        'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
       values: {
-        bucketsDescription: $scope.bucketInterval.scale > 1
-          ? i18n.translate('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
-            defaultMessage: 'buckets that are too large',
-          })
-          : i18n.translate('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
-            defaultMessage: 'too many buckets',
-          }),
+        bucketsDescription:
+          $scope.bucketInterval.scale > 1
+            ? i18n.translate('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
+                defaultMessage: 'buckets that are too large',
+              })
+            : i18n.translate('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
+                defaultMessage: 'too many buckets',
+              }),
         bucketIntervalDescription: $scope.bucketInterval.description,
       },
     });
   };
 
-  $scope.$watchCollection('state.columns', function () {
+  $scope.$watchCollection('state.columns', function() {
     $state.save();
   });
 
@@ -539,102 +572,117 @@ function discoverController(
     }
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
-    return config.get('discover:searchOnPageLoad')
-      || savedSearch.id !== undefined
-      || _.get($scope, 'refreshInterval.pause') === false;
+    return (
+      config.get('discover:searchOnPageLoad') ||
+      savedSearch.id !== undefined ||
+      _.get($scope, 'refreshInterval.pause') === false
+    );
   };
 
-  const init = _.once(function () {
+  const init = _.once(function() {
     stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
-    stateMonitor.onChange((status) => {
+    stateMonitor.onChange(status => {
       $appStatus.dirty = status.dirty || !savedSearch.id;
     });
     $scope.$on('$destroy', () => stateMonitor.destroy());
 
-    $scope.updateDataSource()
-      .then(function () {
-        subscriptions.add(subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
-          next: $scope.fetch
-        }));
+    $scope.updateDataSource().then(function() {
+      subscriptions.add(
+        subscribeWithScope($scope, timefilter.getAutoRefreshFetch$(), {
+          next: $scope.fetch,
+        })
+      );
 
-        subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-          next: $scope.updateRefreshInterval
-        }));
-        subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: $scope.updateTime
-        }));
-        subscriptions.add(subscribeWithScope($scope, timefilter.getFetch$(), {
-          next: $scope.fetch
-        }));
+      subscriptions.add(
+        subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+          next: $scope.updateRefreshInterval,
+        })
+      );
+      subscriptions.add(
+        subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+          next: $scope.updateTime,
+        })
+      );
+      subscriptions.add(
+        subscribeWithScope($scope, timefilter.getFetch$(), {
+          next: $scope.fetch,
+        })
+      );
 
-        $scope.$watchCollection('state.sort', function (sort) {
-          if (!sort) return;
+      $scope.$watchCollection('state.sort', function(sort) {
+        if (!sort) return;
 
-          // get the current sort from searchSource as array of arrays
-          const currentSort = getSort.array($scope.searchSource.getField('sort'), $scope.indexPattern);
+        // get the current sort from searchSource as array of arrays
+        const currentSort = getSort.array(
+          $scope.searchSource.getField('sort'),
+          $scope.indexPattern
+        );
 
-          // if the searchSource doesn't know, tell it so
-          if (!angular.equals(sort, currentSort)) $scope.fetch();
-        });
+        // if the searchSource doesn't know, tell it so
+        if (!angular.equals(sort, currentSort)) $scope.fetch();
+      });
 
-        // update data source when filters update
-        subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
+      // update data source when filters update
+      subscriptions.add(
+        subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
             $scope.filters = filterManager.getFilters();
-            $scope.updateDataSource().then(function () {
+            $scope.updateDataSource().then(function() {
               $state.save();
             });
-          }
-        }));
+          },
+        })
+      );
 
-        // fetch data when filters fire fetch event
-        subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
-          next: $scope.fetch
-        }));
+      // fetch data when filters fire fetch event
+      subscriptions.add(
+        subscribeWithScope($scope, filterManager.getUpdates$(), {
+          next: $scope.fetch,
+        })
+      );
 
-        // update data source when hitting forward/back and the query changes
-        $scope.$listen($state, 'fetch_with_changes', function (diff) {
-          if (diff.indexOf('query') >= 0) $scope.fetch();
-        });
+      // update data source when hitting forward/back and the query changes
+      $scope.$listen($state, 'fetch_with_changes', function(diff) {
+        if (diff.indexOf('query') >= 0) $scope.fetch();
+      });
 
-        $scope.$watch('opts.timefield', function (timefield) {
-          $scope.enableTimeRangeSelector = !!timefield;
-        });
+      $scope.$watch('opts.timefield', function(timefield) {
+        $scope.enableTimeRangeSelector = !!timefield;
+      });
 
-        $scope.$watch('state.interval', function (newInterval, oldInterval) {
-          if (newInterval !== oldInterval) {
-            $scope.fetch();
-          }
-        });
+      $scope.$watch('state.interval', function(newInterval, oldInterval) {
+        if (newInterval !== oldInterval) {
+          $scope.fetch();
+        }
+      });
 
-        $scope.$watch('vis.aggs', function () {
+      $scope.$watch('vis.aggs', function() {
         // no timefield, no vis, nothing to update
-          if (!$scope.opts.timefield) return;
+        if (!$scope.opts.timefield) return;
 
-          const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
+        const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
 
-          if (buckets && buckets.length === 1) {
-            $scope.bucketInterval = buckets[0].buckets.getInterval();
-          }
-        });
+        if (buckets && buckets.length === 1) {
+          $scope.bucketInterval = buckets[0].buckets.getInterval();
+        }
+      });
 
-        $scope.$watch('state.query', (newQuery, oldQuery) => {
-          if (!_.isEqual(newQuery, oldQuery)) {
-            const query = migrateLegacyQuery(newQuery);
-            $scope.updateQueryAndFetch({ query });
-          }
-        });
+      $scope.$watch('state.query', (newQuery, oldQuery) => {
+        if (!_.isEqual(newQuery, oldQuery)) {
+          const query = migrateLegacyQuery(newQuery);
+          $scope.updateQueryAndFetch({ query });
+        }
+      });
 
-        $scope.$watchMulti([
-          'rows',
-          'fetchStatus'
-        ], (function updateResultState() {
+      $scope.$watchMulti(
+        ['rows', 'fetchStatus'],
+        (function updateResultState() {
           let prev = {};
           const status = {
             UNINITIALIZED: 'uninitialized',
             LOADING: 'loading', // initial data load
             READY: 'ready', // results came back
-            NO_RESULTS: 'none' // no results came back
+            NO_RESULTS: 'none', // no results came back
           };
 
           function pick(rows, oldRows, fetchStatus) {
@@ -654,10 +702,10 @@ function discoverController(
             else return status.NO_RESULTS;
           }
 
-          return function () {
+          return function() {
             const current = {
               rows: $scope.rows,
-              fetchStatus: $scope.fetchStatus
+              fetchStatus: $scope.fetchStatus,
             };
 
             $scope.resultState = pick(
@@ -669,20 +717,21 @@ function discoverController(
 
             prev = current;
           };
-        }()));
+        })()
+      );
 
-        if ($scope.opts.timefield) {
-          setupVisualization();
-          $scope.updateTime();
-        }
+      if ($scope.opts.timefield) {
+        setupVisualization();
+        $scope.updateTime();
+      }
 
-        init.complete = true;
-        $state.replace();
+      init.complete = true;
+      $state.replace();
 
-        if (shouldSearchOnPageLoad()) {
-          $scope.fetch();
-        }
-      });
+      if (shouldSearchOnPageLoad()) {
+        $scope.fetch();
+      }
+    });
   });
 
   async function saveDataSource(saveOptions) {
@@ -701,7 +750,7 @@ function discoverController(
               defaultMessage: `Search '{savedSearchTitle}' was saved`,
               values: {
                 savedSearchTitle: savedSearch.title,
-              }
+              },
             }),
             'data-test-subj': 'saveSearchSuccess',
           });
@@ -716,21 +765,21 @@ function discoverController(
         }
       });
       return { id };
-    } catch(saveError) {
+    } catch (saveError) {
       toastNotifications.addDanger({
         title: i18n.translate('kbn.discover.notifications.notSavedSearchTitle', {
           defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
           values: {
             savedSearchTitle: savedSearch.title,
-          }
+          },
         }),
-        text: saveError.message
+        text: saveError.message,
       });
       return { error: saveError };
     }
   }
 
-  $scope.opts.fetch = $scope.fetch = function () {
+  $scope.opts.fetch = $scope.fetch = function() {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 
@@ -742,18 +791,19 @@ function discoverController(
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
-    $scope.updateDataSource()
+    $scope
+      .updateDataSource()
       .then(setupVisualization)
-      .then(function () {
+      .then(function() {
         $state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
         return $scope.searchSource.fetch({
-          abortSignal: abortController.signal
+          abortSignal: abortController.signal,
         });
       })
       .then(onResults)
-      .catch((error) => {
+      .catch(error => {
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;
 
@@ -771,7 +821,7 @@ function discoverController(
       });
   };
 
-  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
+  $scope.updateQueryAndFetch = function({ query, dateRange }) {
     timefilter.setTime(dateRange);
     $state.query = query;
     $scope.fetch();
@@ -783,8 +833,12 @@ function discoverController(
     if ($scope.opts.timefield) {
       const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
       $scope.searchSource.rawResponse = resp;
-      Promise
-        .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
+      Promise.resolve(
+        buildVislibDimensions($scope.vis, {
+          timeRange: $scope.timeRange,
+          searchSource: $scope.searchSource,
+        })
+      )
         .then(resp => responseHandler(tabifiedData, resp))
         .then(resp => {
           $scope.histogramData = resp;
@@ -795,7 +849,7 @@ function discoverController(
     $scope.rows = resp.hits.hits;
 
     // if we haven't counted yet, reset the counts
-    const counts = $scope.fieldCounts = $scope.fieldCounts || {};
+    const counts = ($scope.fieldCounts = $scope.fieldCounts || {});
 
     $scope.rows.forEach(hit => {
       const fields = Object.keys($scope.indexPattern.flattenHit(hit));
@@ -825,26 +879,25 @@ function discoverController(
   }
 
   function logInspectorResponse(resp) {
-    inspectorRequest
-      .stats(getResponseInspectorStats($scope.searchSource, resp))
-      .ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
   }
 
-  $scope.updateTime = function () {
+  $scope.updateTime = function() {
     $scope.timeRange = {
       from: dateMath.parse(timefilter.getTime().from),
-      to: dateMath.parse(timefilter.getTime().to, { roundUp: true })
+      to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
     };
     $scope.time = timefilter.getTime();
   };
 
-  $scope.toMoment = function (datetime) {
+  $scope.toMoment = function(datetime) {
     return moment(datetime).format(config.get('dateFormat'));
   };
 
-  $scope.updateRefreshInterval = function () {
+  $scope.updateRefreshInterval = function() {
     const newInterval = timefilter.getRefreshInterval();
-    const shouldFetch = _.get($scope, 'refreshInterval.pause') === true && newInterval.pause === false;
+    const shouldFetch =
+      _.get($scope, 'refreshInterval.pause') === true && newInterval.pause === false;
 
     $scope.refreshInterval = newInterval;
 
@@ -853,18 +906,18 @@ function discoverController(
     }
   };
 
-  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+  $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
     timefilter.setRefreshInterval({
       pause: isPaused,
-      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value,
     });
   };
 
-  $scope.resetQuery = function () {
+  $scope.resetQuery = function() {
     kbnUrl.change('/discover/{{id}}', { id: $route.current.params.id });
   };
 
-  $scope.newQuery = function () {
+  $scope.newQuery = function() {
     kbnUrl.change('/discover');
   };
 
@@ -882,9 +935,15 @@ function discoverController(
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  $scope.filterQuery = function (field, values, operation) {
+  $scope.filterQuery = function(field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    const newFilters = generateFilters(filterManager, field, values, operation, $scope.indexPattern.id);
+    const newFilters = generateFilters(
+      filterManager,
+      field,
+      values,
+      operation,
+      $scope.indexPattern.id
+    );
     return filterManager.addFilters(newFilters);
   };
 
@@ -902,18 +961,18 @@ function discoverController(
     columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
-  $scope.scrollToTop = function () {
+  $scope.scrollToTop = function() {
     $window.scrollTo(0, 0);
   };
 
-  $scope.scrollToBottom = function () {
+  $scope.scrollToBottom = function() {
     // delay scrolling to after the rows have been rendered
     $timeout(() => {
       $element.find('#discoverBottomMarker').focus();
     }, 0);
   };
 
-  $scope.showAllRows = function () {
+  $scope.showAllRows = function() {
     $scope.minimumVisibleRows = $scope.hits;
   };
 
@@ -937,7 +996,7 @@ function discoverController(
     $scope.fetch();
   };
 
-  const updateStateFromSavedQuery = (savedQuery) => {
+  const updateStateFromSavedQuery = savedQuery => {
     $state.query = savedQuery.attributes.query;
     $state.save();
     filterManager.setFilters(savedQuery.attributes.filters || []);
@@ -955,14 +1014,13 @@ function discoverController(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery) => {
+  $scope.$watch('savedQuery', newSavedQuery => {
     if (!newSavedQuery) return;
 
     $state.savedQuery = newSavedQuery.id;
     $state.save();
 
     updateStateFromSavedQuery(newSavedQuery);
-
   });
 
   $scope.$watch('state.savedQuery', newSavedQueryId => {
@@ -971,7 +1029,7 @@ function discoverController(
       return;
     }
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      getSavedQuery(newSavedQueryId).then(savedQuery => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
           updateStateFromSavedQuery(savedQuery);
@@ -980,7 +1038,6 @@ function discoverController(
     }
   });
 
-
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!$scope.opts.timefield) return;
@@ -988,7 +1045,7 @@ function discoverController(
     const visStateAggs = [
       {
         type: 'count',
-        schema: 'metric'
+        schema: 'metric',
       },
       {
         type: 'date_histogram',
@@ -997,8 +1054,8 @@ function discoverController(
           field: $scope.opts.timefield,
           interval: $state.interval,
           timeRange: timefilter.getTime(),
-        }
-      }
+        },
+      },
     ];
 
     if ($scope.vis) {
@@ -1009,7 +1066,6 @@ function discoverController(
       return;
     }
 
-
     const visSavedObject = {
       indexPattern: $scope.indexPattern.id,
       visState: {
@@ -1017,23 +1073,20 @@ function discoverController(
         title: savedSearch.title,
         params: {
           addLegend: false,
-          addTimeMarker: true
+          addTimeMarker: true,
         },
-        aggs: visStateAggs
-      }
+        aggs: visStateAggs,
+      },
     };
 
-    $scope.vis = new Vis(
-      $scope.searchSource.getField('index'),
-      visSavedObject.visState
-    );
+    $scope.vis = new Vis($scope.searchSource.getField('index'), visSavedObject.visState);
     visSavedObject.vis = $scope.vis;
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
       return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, options);
     });
 
-    $scope.searchSource.setField('aggs', function () {
+    $scope.searchSource.setField('aggs', function() {
       return $scope.vis.getAggConfig().toDsl();
     });
   }
@@ -1052,18 +1105,22 @@ function discoverController(
     }
 
     if (stateVal && !stateValFound) {
-      const warningTitle = i18n.translate('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
-        defaultMessage: '{stateVal} is not a configured index pattern ID',
-        values: {
-          stateVal: `"${stateVal}"`,
-        },
-      });
+      const warningTitle = i18n.translate(
+        'kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
+        {
+          defaultMessage: '{stateVal} is not a configured index pattern ID',
+          values: {
+            stateVal: `"${stateVal}"`,
+          },
+        }
+      );
 
       if (ownIndexPattern) {
         toastNotifications.addWarning({
           title: warningTitle,
           text: i18n.translate('kbn.discover.showingSavedIndexPatternWarningDescription', {
-            defaultMessage: 'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
+            defaultMessage:
+              'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
             values: {
               ownIndexPatternTitle: ownIndexPattern.title,
               ownIndexPatternId: ownIndexPattern.id,
@@ -1076,7 +1133,8 @@ function discoverController(
       toastNotifications.addWarning({
         title: warningTitle,
         text: i18n.translate('kbn.discover.showingDefaultIndexPatternWarningDescription', {
-          defaultMessage: 'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
+          defaultMessage:
+            'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
           values: {
             loadedIndexPatternTitle: loadedIndexPattern.title,
             loadedIndexPatternId: loadedIndexPattern.id,
@@ -1090,10 +1148,9 @@ function discoverController(
 
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
-  $scope.isUnsupportedIndexPattern = (
-    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded)
-    && !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded)
-  );
+  $scope.isUnsupportedIndexPattern =
+    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded) &&
+    !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
 
   if ($scope.isUnsupportedIndexPattern) {
     $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;

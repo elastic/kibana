@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -14,10 +14,13 @@ import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DraggableWrapper } from './draggable_wrapper';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
   const message = 'draggable wrapper content';
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(

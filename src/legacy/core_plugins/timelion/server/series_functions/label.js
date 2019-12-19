@@ -25,7 +25,7 @@ export default new Chainable('label', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'label',
@@ -42,14 +42,14 @@ export default new Chainable('label', {
       help: i18n.translate('timelion.help.functions.label.args.regexHelpText', {
         defaultMessage: 'A regex with capture group support',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.labelHelpText', {
     defaultMessage: 'Change the label of the series. Use %s to reference the existing label',
   }),
   fn: function labelFn(args) {
     const config = args.byName;
-    return alter(args, function (eachSeries) {
+    return alter(args, function(eachSeries) {
       if (config.regex) {
         eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
       } else {
@@ -58,5 +58,5 @@ export default new Chainable('label', {
 
       return eachSeries;
     });
-  }
+  },
 });

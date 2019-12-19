@@ -19,11 +19,12 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { HttpServiceBase } from '../../../../../src/core/public';
+import { HttpServiceBase, HttpFetchQuery } from '../../../../../src/core/public';
 
 export interface SendRequestConfig {
   path: string;
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
+  query?: HttpFetchQuery;
   body?: any;
 }
 
@@ -48,10 +49,10 @@ export interface UseRequestResponse {
 
 export const sendRequest = async (
   httpClient: HttpServiceBase,
-  { path, method, body }: SendRequestConfig
+  { path, method, body, query }: SendRequestConfig
 ): Promise<SendRequestResponse> => {
   try {
-    const response = await httpClient[method](path, { body });
+    const response = await httpClient[method](path, { body, query });
 
     return {
       data: response.data ? response.data : response,
@@ -70,6 +71,7 @@ export const useRequest = (
   {
     path,
     method,
+    query,
     body,
     pollIntervalMs,
     initialData,
@@ -112,6 +114,7 @@ export const useRequest = (
     const requestBody = {
       path,
       method,
+      query,
       body,
     };
 

@@ -23,19 +23,14 @@ import { shallow } from 'enzyme';
 jest.mock('../../kibana_services', () => {
   return {
     getServices: () => ({
-      SavedObjectFinder: jest.fn()
+      core: { uiSettings: {}, savedObjects: {} },
     }),
   };
 });
 
-import {
-  OpenSearchPanel,
-} from './open_search_panel';
+import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel
-    onClose={() => {}}
-    makeUrl={() => {}}
-  />);
+  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
   expect(component).toMatchSnapshot();
 });

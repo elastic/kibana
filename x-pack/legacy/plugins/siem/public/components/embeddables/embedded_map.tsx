@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -29,6 +28,10 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { MapEmbeddable, SetQuery } from './types';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -49,15 +52,15 @@ const EmbeddableMap = styled.div.attrs(() => ({
   ${({ maintainRatio }) =>
     maintainRatio &&
     css`
-      padding-top: calc(3 / 4 * 100%); //4:3 (standard) ratio
+      padding-top: calc(3 / 4 * 100%); /* 4:3 (standard) ratio */
       position: relative;
 
       @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
-        padding-top: calc(9 / 32 * 100%); //32:9 (ultra widescreen) ratio
+        padding-top: calc(9 / 32 * 100%); /* 32:9 (ultra widescreen) ratio */
       }
 
       @media only screen and (min-width: 1441px) and (min-height: 901px) {
-        padding-top: calc(9 / 21 * 100%); //21:9 (ultrawide) ratio
+        padding-top: calc(9 / 21 * 100%); /* 21:9 (ultrawide) ratio */
       }
 
       .embPanel {
@@ -175,6 +178,10 @@ export const EmbeddedMapComponent = ({
       embeddable.updateInput({ timeRange });
     }
   }, [startDate, endDate]);
+
+  const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+    <SavedObjectFinderUi {...props} savedObjects={core.savedObjects} uiSettings={core.uiSettings} />
+  );
 
   return isError ? null : (
     <Embeddable>
