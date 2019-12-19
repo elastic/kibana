@@ -7,7 +7,6 @@
 import React from 'react';
 
 import {
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -15,9 +14,7 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
   EuiTitle,
-  EuiSideNav,
 } from '@elastic/eui';
 export const Management = () => (
   <EuiPageBody data-test-subj="fooAppPageA">

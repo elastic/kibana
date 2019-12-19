@@ -6,15 +6,23 @@
 
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { actionCreatorFactory } from '../lib/action_creator';
+import { EndpointData } from '../../server/types';
+import { EndpointsListState } from '../reducers/endpoints_list';
 
-// TODO: Type return value
 export const actions = {
-  serverReturnedEndpointListData: actionCreatorFactory<'serverReturnedEndpointListData', [any]>(
-    'serverReturnedEndpointListData'
-  ),
-  userFilteredEndpointListData: actionCreatorFactory<'userFilteredEndpointListData', [any]>(
-    'userFilteredEndpointListData'
-  ),
+  serverReturnedEndpointListData: actionCreatorFactory<
+    'serverReturnedEndpointListData',
+    [EndpointsListState['data']]
+  >('serverReturnedEndpointListData'),
+  userFilteredEndpointListData: actionCreatorFactory<
+    'userFilteredEndpointListData',
+    [
+      {
+        filteredData: EndpointData[];
+        isFiltered: boolean;
+      }
+    ]
+  >('userFilteredEndpointListData'),
   userPaginatedOrSortedEndpointListTable: actionCreatorFactory<
     'userPaginatedOrSortedEndpointListTable',
     [
@@ -28,7 +36,17 @@ export const actions = {
   >('userPaginatedOrSortedEndpointListTable'),
 };
 
+export type EndpointListServerDataAction = ReturnType<
+  typeof actions.serverReturnedEndpointListData
+>;
+export type EndpointListFilteredDataAction = ReturnType<
+  typeof actions.userFilteredEndpointListData
+>;
+export type EndpointListPageAndSortedDataAction = ReturnType<
+  typeof actions.userPaginatedOrSortedEndpointListTable
+>;
+
 export type EndpointListActions =
-  | ReturnType<typeof actions.serverReturnedEndpointListData>
-  | ReturnType<typeof actions.userFilteredEndpointListData>
-  | ReturnType<typeof actions.userPaginatedOrSortedEndpointListTable>;
+  | EndpointListServerDataAction
+  | EndpointListFilteredDataAction
+  | EndpointListPageAndSortedDataAction;

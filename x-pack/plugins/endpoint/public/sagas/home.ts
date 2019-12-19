@@ -12,24 +12,16 @@ import { SagaContext } from '../lib/saga';
 
 let hasBootstrapped = false;
 
-// TODO: type this properly
 export async function homeSaga(sagaContext: SagaContext, context: AppMountContext) {
   await Promise.all([resourceSaga(sagaContext, context)]);
 }
 
-// TODO type actionsAndState, dispatch
 async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context: AppMountContext) {
   function isOnPage(href: any) {
     return hrefIsForPath(href, `${context.core.http.basePath.get()}/app/endpoint/`);
   }
 
-  for await (const {
-    action,
-    userIsOnPageAndLoggedIn,
-    href,
-    state,
-    shouldInitialize,
-  } of withPageNavigationStatus({
+  for await (const { userIsOnPageAndLoggedIn, shouldInitialize } of withPageNavigationStatus({
     actionsAndState,
     isOnPage,
   })) {

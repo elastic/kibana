@@ -6,6 +6,7 @@
 
 import { userNavigated } from '../concerns/routing';
 import { SagaContext } from '../lib/saga';
+import { GlobalState } from '../types';
 
 /**
  * This must be used for `withPageNavigationStatus`
@@ -29,7 +30,6 @@ export async function routingSaga({ dispatch, actionsAndState }: SagaContext) {
   }
 }
 
-// TODO: Type actionsAndState and isOnPage
 export async function* withPageNavigationStatus({
   actionsAndState,
   isOnPage = function() {
@@ -77,7 +77,7 @@ export async function* withPageNavigationStatus({
   }
 }
 
-// TODO: type this properly, Should we use immutable?
-function hrefFromState(state: any) {
+// TODO: Should we use immutable?
+function hrefFromState(state: GlobalState) {
   return state.saga;
 }
