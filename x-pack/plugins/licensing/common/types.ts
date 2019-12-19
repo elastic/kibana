@@ -157,7 +157,7 @@ export interface ILicense {
 
   /**
    * Determine if license type >= minimal required license type.
-   * @param minimumLicenseRequired the minimum valid license for operating the given plugin
+   * @param minimumLicenseRequired the minimum valid license required for the given feature
    */
   hasAtLeast(minimumLicenseRequired: LicenseType): boolean;
 
