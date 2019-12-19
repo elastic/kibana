@@ -16,6 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiSettingsPlugin } from './plugin';
 
-export const plugin = () => new UiSettingsPlugin();
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+
+// eslint-disable-next-line import/no-default-export
+export default function CoreProviderPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'core-provider',
+    require: [],
+    publicDir: resolve(__dirname, 'public'),
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      hacks: [resolve(__dirname, 'public/index')],
+    },
+  };
+
+  return new kibana.Plugin(config);
+}
