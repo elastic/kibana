@@ -14,6 +14,10 @@ export const transformError = (err: Error & { statusCode?: number }) => {
   } else {
     if (err.statusCode != null) {
       return new Boom(err.message, { statusCode: err.statusCode });
+    } else if (err instanceof TypeError) {
+      // allows us to throw type errors instead of booms in some conditions
+      // where we don't want to mingle Boom with the rest of the code
+      return new Boom(err.message, { statusCode: 400 });
     } else {
       // natively return the err and allow the regular framework
       // to deal with the error when it is a non Boom

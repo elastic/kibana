@@ -8,13 +8,21 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
+import { DynamicLegendRow } from './components/dynamic_legend_row';
+import React from 'react';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field) {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
     super(options, styleName);
     this._field = field;
+    this._getFieldMeta = getFieldMeta;
+    this._getFieldFormatter = getFieldFormatter;
+  }
+
+  getFieldMeta() {
+    return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
   }
 
   getField() {
@@ -104,5 +112,19 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
       isMinOutsideStdRange: stats.min < stdLowerBounds,
       isMaxOutsideStdRange: stats.max > stdUpperBounds,
     };
+  }
+
+  formatField(value) {
+    if (this.getField()) {
+      const fieldName = this.getField().getName();
+      const fieldFormatter = this._getFieldFormatter(fieldName);
+      return fieldFormatter ? fieldFormatter(value) : value;
+    } else {
+      return value;
+    }
+  }
+
+  renderLegendDetailRow() {
+    return <DynamicLegendRow style={this} />;
   }
 }

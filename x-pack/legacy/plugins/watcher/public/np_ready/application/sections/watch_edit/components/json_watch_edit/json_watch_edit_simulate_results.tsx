@@ -101,8 +101,10 @@ export const JsonWatchEditSimulateResults = ({
           defaultMessage: 'State',
         }
       ),
-      dataType: 'string',
-      render: (actionState: string) => <WatchStatus status={actionState} />,
+      dataType: 'string' as const,
+      render: (actionState: string, _item: typeof actionsTableData[number]) => (
+        <WatchStatus status={actionState} />
+      ),
     },
     {
       field: 'actionReason',

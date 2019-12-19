@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { last } from 'lodash';
@@ -45,7 +45,7 @@ export const TableView = class extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodes, options, formatter, currentTime, nodeType } = this.props;
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<typeof items[number]>> = [
       {
         field: 'name',
         name: i18n.translate('xpack.infra.tableView.columnName.name', { defaultMessage: 'Name' }),
@@ -139,7 +139,7 @@ export const TableView = class extends React.PureComponent<Props, State> {
         field: 'value',
         direction: 'desc',
       },
-    };
+    } as const;
     return (
       <EuiInMemoryTable
         pagination={true}
