@@ -1,5 +1,8 @@
 # Licensing plugin
 
+- [API](#api)
+- [Migration example](#migration-example)
+- [The list of breaking changes](#the-list-of-breaking-changes)
 Retrieves license data from Elasticsearch and becomes a source of license data for all Kibana plugins on server-side and client-side.
 
 ## API: 
@@ -13,7 +16,7 @@ Retrieves license data from Elasticsearch and becomes a source of license data f
 - `license$: Observable<ILicense>` Provides a steam of license data [ILicense](./common/types.ts). Plugin emits new value whenever it detects changes in license info. If the plugin cannot retrieve a license from **Kibana**, it will emit `an empty license` object. 
 - `refresh: () => Promise<ILicense>` allows a plugin to enforce license retrieval.
 
-## Migration path
+## Migration example
 The new platform licensing plugin became stateless now. It means that instead of storing all your data from `checkLicense` within the plugin, you should react on license data change on both the client and server sides.
 
 ### Before
@@ -93,7 +96,7 @@ class MyPlugin {
   }
 }
 ```
-### The list of breaking changes
+## The list of breaking changes
 
 #### state
 **LP**: The plugin allows consumers to calculate state on `license change` event and store this
