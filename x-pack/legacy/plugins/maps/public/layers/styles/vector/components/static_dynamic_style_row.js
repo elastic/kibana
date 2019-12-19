@@ -19,7 +19,7 @@ export class StaticDynamicStyleRow extends Component {
   prevDynamicStyleOptions = this.props.defaultDynamicStyleOptions;
 
   _canBeDynamic() {
-    return this.props.ordinalFields.length > 0;
+    return this.props.fields.length > 0;
   }
 
   _isDynamic() {
@@ -78,7 +78,7 @@ export class StaticDynamicStyleRow extends Component {
       return (
         <Fragment>
           <DynamicSelector
-            ordinalFields={this.props.ordinalFields}
+            fields={this.props.fields}
             onChange={this._onDynamicStyleChange}
             styleOptions={this._getStyleOptions()}
           />
