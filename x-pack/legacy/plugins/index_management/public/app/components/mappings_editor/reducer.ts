@@ -18,10 +18,16 @@ import {
 import { PARAMETERS_DEFINITION } from './constants';
 
 export interface MappingsConfiguration {
-  dynamic: boolean | string;
+  enabled?: boolean;
+  throwErrorsForUnmappedFields?: boolean;
   date_detection: boolean;
   numeric_detection: boolean;
   dynamic_date_formats: string[];
+  _source: {
+    enabled?: boolean;
+    includes?: string[];
+    excludes?: string[];
+  };
 }
 
 export interface MappingsFields {
@@ -224,7 +230,6 @@ export const reducer = (state: State, action: Action): State => {
 
       const isValid = isStateValid(nextState);
       nextState.isValid = isValid;
-
       return nextState;
     }
     case 'fieldForm.update': {

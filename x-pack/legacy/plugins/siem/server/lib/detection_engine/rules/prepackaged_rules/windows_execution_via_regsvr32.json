@@ -1,0 +1,17 @@
+{
+  "rule_id": "b7333d08-be4b-4cb4-b81e-924ae37b3143",
+  "risk_score": 50,
+  "description": "Windows Execution via Regsvr32",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Execution via Regsvr32",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code: 1 and scrobj.dll and (process.name:certutil.exe or process.name:regsvr32.exe or process.name:rundll32.exe)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

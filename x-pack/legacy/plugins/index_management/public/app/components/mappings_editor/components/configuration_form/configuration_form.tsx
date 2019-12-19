@@ -4,36 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink } from '@elastic/eui';
-
-import {
-  useForm,
-  getUseField,
-  Form,
-  OnFormUpdateArg,
-  FormDataProvider,
-} from '../../shared_imports';
-import { FormRow, Field } from '../../shared_imports';
-import { DYNAMIC_SETTING_OPTIONS, ALL_DATE_FORMAT_OPTIONS } from '../../constants';
+import { useForm, Form, SerializerFunc } from '../../shared_imports';
 import { Types, useDispatch } from '../../mappings_state';
-import { schema } from './form.schema';
-import { documentationService } from '../../../../services/documentation';
+import { DynamicMappingSection } from './dynamic_mapping_section';
+import { SourceFieldSection } from './source_field_section';
+import { configurationFormSchema } from './configuration_form_schema';
 
 type MappingsConfiguration = Types['MappingsConfiguration'];
-
-export type ConfigurationUpdateHandler = (arg: OnFormUpdateArg<MappingsConfiguration>) => void;
 
 interface Props {
   defaultValue?: MappingsConfiguration;
 }
 
-const UseField = getUseField({ component: Field });
+const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
+  const {
+    dynamicMapping: {
+      enabled: dynamicMappingsEnabled,
+      throwErrorsForUnmappedFields,
+      numeric_detection,
+      date_detection,
+      dynamic_date_formats,
+    },
+    sourceField,
+  } = formData;
+
+  const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
+
+  return {
+    dynamic,
+    numeric_detection,
+    date_detection,
+    dynamic_date_formats,
+    _source: { ...sourceField },
+  };
+};
+
+const formDeserializer = (formData: { [key: string]: any }) => {
+  const {
+    dynamic,
+    numeric_detection,
+    date_detection,
+    dynamic_date_formats,
+    _source: { enabled, includes, excludes },
+  } = formData;
+
+  return {
+    dynamicMapping: {
+      enabled: dynamic === true || dynamic === undefined,
+      throwErrorsForUnmappedFields: dynamic === 'strict',
+      numeric_detection,
+      date_detection,
+      dynamic_date_formats,
+    },
+    sourceField: {
+      enabled: enabled === true || enabled === undefined,
+      includes,
+      excludes,
+    },
+  };
+};
 
 export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
-  const { form } = useForm<MappingsConfiguration>({ schema, defaultValue });
+  const { form } = useForm<MappingsConfiguration>({
+    schema: configurationFormSchema,
+    serializer: formSerializer,
+    deserializer: formDeserializer,
+    defaultValue,
+  });
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -45,56 +84,9 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   return (
     <Form form={form}>
-      <FormRow
-        title={i18n.translate('xpack.idxMgmt.mappingsEditor.configurationTitle', {
-          defaultMessage: 'Configuration',
-        })}
-        description={
-          <FormattedMessage
-            id="xpack.idxMgmt.mappingsEditor.configurationDescription"
-            defaultMessage="The dynamic mapping rules to apply at the document level. {docsLink}"
-            values={{
-              docsLink: (
-                <EuiLink
-                  href={documentationService.getTypeDocLink('dynamic', 'main')}
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.configurationDocumentionLink', {
-                    defaultMessage: 'Learn more.',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-      >
-        <UseField
-          path="dynamic"
-          componentProps={{
-            euiFieldProps: { options: DYNAMIC_SETTING_OPTIONS },
-          }}
-        />
-        <UseField path="numeric_detection" />
-        <UseField path="date_detection" />
-        <FormDataProvider pathsToWatch="date_detection">
-          {formData => {
-            if (formData.date_detection) {
-              return (
-                <UseField
-                  path="dynamic_date_formats"
-                  componentProps={{
-                    euiFieldProps: {
-                      options: ALL_DATE_FORMAT_OPTIONS,
-                      noSuggestions: false,
-                    },
-                  }}
-                />
-              );
-            }
-            return null;
-          }}
-        </FormDataProvider>
-      </FormRow>
+      <DynamicMappingSection />
+      <EuiSpacer size="xl" />
+      <SourceFieldSection />
     </Form>
   );
 });

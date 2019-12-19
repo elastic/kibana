@@ -26,9 +26,5 @@ export const ALIASES = {
 };
 
 export const MAPPINGS = {
-  dynamic: true,
-  numeric_detection: false,
-  date_detection: true,
-  dynamic_date_formats: ['strict_date_optional_time', 'yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z'],
   properties: {},
 };
