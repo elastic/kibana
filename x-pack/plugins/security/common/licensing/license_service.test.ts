@@ -5,21 +5,13 @@
  */
 
 import { of, BehaviorSubject } from 'rxjs';
-import { ILicense } from '../../../licensing/public';
+import { licensingMock } from '../../../licensing/public/mocks';
 import { SecurityLicenseService } from './license_service';
-
-function getMockRawLicense({ isAvailable = false } = {}) {
-  return ({
-    isAvailable,
-    isOneOf: jest.fn(),
-    getFeature: jest.fn(),
-  } as unknown) as jest.Mocked<ILicense>;
-}
 
 describe('license features', function() {
   it('should display error when ES is unavailable', () => {
     const serviceSetup = new SecurityLicenseService().setup({
-      license$: of((undefined as unknown) as ILicense),
+      license$: of(undefined as any),
     });
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
@@ -33,8 +25,10 @@ describe('license features', function() {
   });
 
   it('should display error when X-Pack is unavailable', () => {
+    const rawLicenseMock = licensingMock.createLicenseMock();
+    rawLicenseMock.isAvailable = false;
     const serviceSetup = new SecurityLicenseService().setup({
-      license$: of(getMockRawLicense({ isAvailable: false })),
+      license$: of(rawLicenseMock),
     });
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
@@ -48,7 +42,9 @@ describe('license features', function() {
   });
 
   it('should notify consumers of licensed feature changes', () => {
-    const rawLicense$ = new BehaviorSubject(getMockRawLicense({ isAvailable: false }));
+    const rawLicenseMock = licensingMock.createLicenseMock();
+    rawLicenseMock.isAvailable = false;
+    const rawLicense$ = new BehaviorSubject(rawLicenseMock);
     const serviceSetup = new SecurityLicenseService().setup({
       license$: rawLicense$,
     });
@@ -71,7 +67,7 @@ describe('license features', function() {
         ]
       `);
 
-      rawLicense$.next(getMockRawLicense({ isAvailable: true }));
+      rawLicense$.next(licensingMock.createLicenseMock());
       expect(subscriptionHandler).toHaveBeenCalledTimes(2);
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
@@ -92,10 +88,8 @@ describe('license features', function() {
   });
 
   it('should show login page and other security elements, allow RBAC but forbid document level security if license is not platinum or trial.', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
-    mockRawLicense.isOneOf.mockImplementation(licenses =>
-      Array.isArray(licenses) ? licenses.includes('basic') : licenses === 'basic'
-    );
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.hasAtLeast.mockReturnValue(false);
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup({
@@ -114,8 +108,8 @@ describe('license features', function() {
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
-    mockRawLicense.isOneOf.mockReturnValue(false);
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.hasAtLeast.mockReturnValue(false);
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: false, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup({
@@ -133,14 +127,9 @@ describe('license features', function() {
   });
 
   it('should allow to login, allow RBAC and document level security if license >= platinum', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
-    mockRawLicense.isOneOf.mockImplementation(licenses => {
-      const licenseArray = [licenses].flat();
-      return (
-        licenseArray.includes('trial') ||
-        licenseArray.includes('platinum') ||
-        licenseArray.includes('enterprise')
-      );
+    const mockRawLicense = licensingMock.createLicenseMock();
+    mockRawLicense.hasAtLeast.mockImplementation(license => {
+      return license === 'trial' || license === 'platinum' || license === 'enterprise';
     });
     mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
