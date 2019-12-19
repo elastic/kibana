@@ -7,7 +7,7 @@
 import { npSetup, npStart } from 'ui/new_platform';
 
 import { PluginInitializerContext } from '../../../../../src/core/public';
-import { plugin } from './apps';
+import { plugin } from './';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 

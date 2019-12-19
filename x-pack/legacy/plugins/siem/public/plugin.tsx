@@ -5,18 +5,19 @@
  */
 
 import {
+  AppMountParameters,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
-} from '../../../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IEmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
-import { Start as InspectorStart } from '../../../../../../src/plugins/inspector/public';
-import { IUiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../src/core/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
+import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
-import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../common/constants';
-export { CoreSetup, CoreStart };
+import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../common/constants';
+export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
@@ -49,7 +50,7 @@ export class Plugin implements IPlugin<Setup, Start> {
       title: 'Siem',
       async mount(context, params) {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { renderApp } = await import('./start_app');
+        const { renderApp } = await import('./app');
 
         return renderApp(coreStart, pluginsStart as StartPlugins, params);
       },
