@@ -18,3 +18,7 @@ export const getMonitorDetails = (state: AppState, summary: any) => {
 export const getMonitorLocations = (state: AppState, monitorId: string) => {
   return state.monitor.monitorLocationsList?.get(monitorId);
 };
+
+export const selectMonitorStatus = (state: AppState) => {
+  return state.monitorStatus.status;
+};

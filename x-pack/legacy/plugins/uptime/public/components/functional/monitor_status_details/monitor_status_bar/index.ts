@@ -6,11 +6,12 @@
 
 import { connect } from 'react-redux';
 import { MonitorStatusBarComponent } from './monitor_status_bar';
-import { getMonitorStatus } from '../../../../state/actions/monitor_status';
+import { selectMonitorStatus } from '../../../../state/selectors';
 import { AppState } from '../../../../state';
+import { getMonitorStatus } from '../../../../state/actions';
 
-const mapStateToProps = (state: AppState, { monitorId }: any) => ({
-  //   monitorLocations: getMonitorLocations(state, monitorId),
+const mapStateToProps = (state: AppState) => ({
+  monitorStatus: selectMonitorStatus(state),
 });
 
 const mapDispatchToProps = (dispatch: any, ownProps: any) => ({

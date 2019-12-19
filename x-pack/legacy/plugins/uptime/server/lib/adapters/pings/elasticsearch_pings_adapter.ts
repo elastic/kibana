@@ -133,11 +133,11 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     };
 
     const result = await callES('search', params);
-    const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.[0] ?? {};
+    const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
 
     return {
       ...ping?._source,
-      timestamp: ping?.['@timestamp'],
+      timestamp: ping?._source?.['@timestamp'],
     };
   },
 

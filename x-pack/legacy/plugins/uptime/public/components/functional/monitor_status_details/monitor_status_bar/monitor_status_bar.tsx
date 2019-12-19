@@ -10,33 +10,35 @@ import { get } from 'lodash';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { Ping } from '../../../../../common/graphql/types';
-import { UptimeGraphQLQueryProps } from '../../../higher_order';
 import { EmptyStatusBar } from './empty_status_bar';
 import { convertMicrosecondsToMilliseconds } from '../../../../lib/helper';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
 
-interface MonitorStatusBarQueryResult {
-  monitorStatus?: Ping;
-}
-
 interface MonitorStatusBarProps {
   monitorId: string;
   loadMonitorStatus: any;
+  dateStart: string;
+  dateEnd: string;
+  monitorStatus: any;
 }
 
-type Props = MonitorStatusBarProps & UptimeGraphQLQueryProps<MonitorStatusBarQueryResult>;
-
-export const MonitorStatusBarComponent = ({ data, monitorId, loadMonitorStatus }: Props) => {
+export const MonitorStatusBarComponent = ({
+  dateStart,
+  dateEnd,
+  monitorId,
+  loadMonitorStatus,
+  monitorStatus,
+}: MonitorStatusBarProps) => {
   useEffect(() => {
     loadMonitorStatus();
-  }, []);
+  }, [dateStart, dateEnd]);
 
-  if (data?.monitorStatus) {
-    const { monitor, timestamp, tls } = data.monitorStatus;
+  if (monitorStatus) {
+    const { monitor, timestamp, tls } = monitorStatus;
     const duration: number | undefined = get(monitor, 'duration.us', undefined);
     const status = get<'up' | 'down'>(monitor, 'status', 'down');
-    const full = get<string>(data.monitorStatus, 'url.full');
+    const full = get<string>(monitorStatus, 'url.full');
 
     return (
       <>

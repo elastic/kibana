@@ -34,7 +34,12 @@ export const MonitorStatusDetailsComponent = ({
     <EuiPanel>
       <EuiFlexGroup gutterSize="l" wrap>
         <EuiFlexItem grow={true}>
-          <MonitorStatusBar monitorId={monitorId} variables={variables} />
+          <MonitorStatusBar
+            monitorId={monitorId}
+            variables={variables}
+            dateStart={dateStart}
+            dateEnd={dateEnd}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LocationMap monitorLocations={monitorLocations} />

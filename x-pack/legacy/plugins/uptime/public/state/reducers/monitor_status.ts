@@ -18,7 +18,7 @@ const initialState: MonitorStatusState = {
   loading: false,
 };
 
-type MonitorStatusPayload = QueryParams & string & boolean & number & Map<string, string[]>;
+type MonitorStatusPayload = QueryParams & Ping;
 
 export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorStatusPayload>(
   {
@@ -27,12 +27,12 @@ export const monitorStatusReducer = handleActions<MonitorStatusState, MonitorSta
       loading: true,
     }),
 
-    [String(getMonitorStatusSuccess)]: (state, action: Action<string>) => ({
+    [String(getMonitorStatusSuccess)]: (state, action: Action<Ping>) => ({
       ...state,
-      basePath: action.payload as string,
+      status: action.payload as Ping,
     }),
 
-    [String(getMonitorStatusFail)]: (state, action: Action<number>) => ({
+    [String(getMonitorStatusFail)]: (state, action: Action<any>) => ({
       ...state,
       loading: false,
     }),
