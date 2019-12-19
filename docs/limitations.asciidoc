@@ -1,4 +1,4 @@
-{ml-docs}[[limitations]]
+[[limitations]]
 = Limitations
 
 [partintro]
