@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
 import { Data } from '../../lib/data';
-import '../../../persisted_state';
+import 'ui/persisted_state';
 
 const seriesData = {
   label: '',

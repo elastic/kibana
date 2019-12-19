@@ -23,12 +23,12 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import { Vis } from '../../../vis';
-import '../../../persisted_state';
+import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import { Vis } from 'ui/vis';
+import 'ui/persisted_state';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { vislibSlicesResponseHandlerProvider } from '../../../vis/response_handlers/vislib';
-import { tabifyAggResponse } from '../../../agg_response/tabify';
+import { vislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { tabifyAggResponse } from 'ui/agg_response/tabify';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },

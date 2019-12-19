@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { ColorSchemas } from 'ui/color_maps';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
 import { vislibVisController } from './controller';

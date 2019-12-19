@@ -24,7 +24,7 @@ import {
   CUSTOM_LEGEND_VIS_TYPES,
   VisLegend,
 } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
-import { VislibVisProvider } from '../../../ui/public/vislib/vis';
+import { VislibVisProvider } from './vislib/vis';
 import chrome from '../../../ui/public/chrome';
 import { mountReactNode } from '../../../../core/public/utils';
 

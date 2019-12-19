@@ -23,7 +23,7 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { ChartTitle } from '../../lib/chart_title';
 import { VisConfig } from '../../lib/vis_config';
-import '../../../persisted_state';
+import 'ui/persisted_state';
 
 describe('Vislib ChartTitle Class Test Suite', function() {
   let persistedState;

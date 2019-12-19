@@ -27,6 +27,7 @@ const kbnVislibVisTypesPluginInitializer: LegacyPluginInitializer = ({ Plugin }:
     id: 'kbn_vislib_vis_types',
     require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
     publicDir: resolve(__dirname, 'public'),
+    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     uiExports: {
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),

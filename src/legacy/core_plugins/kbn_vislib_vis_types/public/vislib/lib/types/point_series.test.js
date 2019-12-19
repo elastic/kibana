@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import stackedSeries from '../../../../../../fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import stackedSeries from '../../__tests__/lib/fixtures/mock_data/date_histogram/_stacked_series';
 import { vislibPointSeriesTypes } from './point_series';
 
 describe('vislibPointSeriesTypes', () => {

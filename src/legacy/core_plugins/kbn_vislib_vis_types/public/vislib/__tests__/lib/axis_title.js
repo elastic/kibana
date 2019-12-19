@@ -26,7 +26,7 @@ import { AxisTitle } from '../../lib/axis/axis_title';
 import { AxisConfig } from '../../lib/axis/axis_config';
 import { VisConfig } from '../../lib/vis_config';
 import { Data } from '../../lib/data';
-import '../../../persisted_state';
+import 'ui/persisted_state';
 
 describe('Vislib AxisTitle Class Test Suite', function() {
   let PersistedState;

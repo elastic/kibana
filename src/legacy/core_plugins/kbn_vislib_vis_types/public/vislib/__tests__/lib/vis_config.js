@@ -21,7 +21,7 @@ import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { VisConfig } from '../../lib/vis_config';
-import '../../../persisted_state';
+import 'ui/persisted_state';
 
 describe('Vislib VisConfig Class Test Suite', function() {
   let el;

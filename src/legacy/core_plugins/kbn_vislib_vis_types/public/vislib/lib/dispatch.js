@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
-import { SimpleEmitter } from '../../../../../ui/public/utils/simple_emitter';
+import { SimpleEmitter } from 'ui/utils/simple_emitter';
 import chrome from 'ui/chrome';
 
 const config = chrome.getUiSettingsClient();

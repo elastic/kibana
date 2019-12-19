@@ -23,10 +23,10 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
 // Data
-import data from 'fixtures/vislib/mock_data/date_histogram/_series';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import '../../../persisted_state';
-import { SimpleEmitter } from '../../../utils/simple_emitter';
+import data from './fixtures/mock_data/date_histogram/_series';
+import FixturesVislibVisFixtureProvider from './fixtures/_vis_fixture';
+import 'ui/persisted_state';
+import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
 describe('Vislib Dispatch Class Test Suite', function() {
   function destroyVis(vis) {

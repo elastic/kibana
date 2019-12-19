@@ -21,9 +21,9 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import _ from 'lodash';
-import data from 'fixtures/vislib/mock_data/terms/_seriesMultiple';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import '../../../persisted_state';
+import data from '../lib/fixtures/mock_data/terms/_seriesMultiple';
+import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import 'ui/persisted_state';
 
 describe('Vislib Gauge Chart Test Suite', function() {
   let PersistedState;

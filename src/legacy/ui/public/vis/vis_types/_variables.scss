@@ -1,5 +1,5 @@
 // TODO: Use the same styles for TSVB and Vislib vis'
-// Duplicate of src/legacy/ui/public/vis/vis_types/vislib_vis_legend/_variables.scss
+// Duplicate of src/legacy/core_plugins/kbn_vislib_vis_types/public/vislib/_variables.scss
 $visLineColor: transparentize($euiColorDarkShade, .8);
 $visTextColor: $euiColorDarkShade;
 $visHoverBackgroundColor: transparentize($euiColorFullShade, .9);

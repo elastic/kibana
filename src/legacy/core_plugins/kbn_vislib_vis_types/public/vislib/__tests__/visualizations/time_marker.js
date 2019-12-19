@@ -20,8 +20,8 @@
 import d3 from 'd3';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import series from 'fixtures/vislib/mock_data/date_histogram/_series';
-import terms from 'fixtures/vislib/mock_data/terms/_columns';
+import series from '../lib/fixtures/mock_data/date_histogram/_series';
+import terms from '../lib/fixtures/mock_data/terms/_columns';
 import $ from 'jquery';
 import { TimeMarker } from '../../visualizations/time_marker';
 

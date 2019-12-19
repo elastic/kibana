@@ -23,18 +23,18 @@ import _ from 'lodash';
 import d3 from 'd3';
 
 // Data
-import series from 'fixtures/vislib/mock_data/date_histogram/_series';
-import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
-import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
-import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
-import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
-import { seriesMonthlyInterval } from 'fixtures/vislib/mock_data/date_histogram/_series_monthly_interval';
-import { rowsSeriesWithHoles } from 'fixtures/vislib/mock_data/date_histogram/_rows_series_with_holes';
-import rowsWithZeros from 'fixtures/vislib/mock_data/date_histogram/_rows';
+import series from '../lib/fixtures/mock_data/date_histogram/_series';
+import seriesPosNeg from '../lib/fixtures/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
+import termsColumns from '../lib/fixtures/mock_data/terms/_columns';
+import histogramRows from '../lib/fixtures/mock_data/histogram/_rows';
+import stackedSeries from '../lib/fixtures/mock_data/date_histogram/_stacked_series';
+import { seriesMonthlyInterval } from '../lib/fixtures/mock_data/date_histogram/_series_monthly_interval';
+import { rowsSeriesWithHoles } from '../lib/fixtures/mock_data/date_histogram/_rows_series_with_holes';
+import rowsWithZeros from '../lib/fixtures/mock_data/date_histogram/_rows';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import '../../../persisted_state';
+import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
