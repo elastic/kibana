@@ -121,6 +121,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
 const getErrorToast = (type: 'create' | 'find', msg?: string) => {
   if (type === 'create') {
     return {
+      toastLifeTimeMs: 3000,
       title:
         msg ||
         i18n.translate('xpack.infra.savedView.errorOnCreate.title', {
@@ -129,6 +130,7 @@ const getErrorToast = (type: 'create' | 'find', msg?: string) => {
     };
   } else if (type === 'find') {
     return {
+      toastLifeTimeMs: 3000,
       title:
         msg ||
         i18n.translate('xpack.infra.savedView.findError.title', {

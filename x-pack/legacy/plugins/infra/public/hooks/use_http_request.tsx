@@ -38,23 +38,30 @@ export function useHTTPRequest<Response>(
         const err = e as IHttpFetchError;
         setError(err);
         toasts.warning({
+          toastLifeTimeMs: 3000,
           title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
             defaultMessage: `Error while fetching resource`,
           }),
           body: (
             <div>
-              <h5>
-                {i18n.translate('xpack.infra.useHTTPRequest.error.status', {
-                  defaultMessage: `Error`,
-                })}
-              </h5>
-              {err.response?.statusText} ({err.response?.status})
-              <h5>
-                {i18n.translate('xpack.infra.useHTTPRequest.error.url', {
-                  defaultMessage: `URL`,
-                })}
-              </h5>
-              {err.response?.url}
+              {err.response ? (
+                <>
+                  <h5>
+                    {i18n.translate('xpack.infra.useHTTPRequest.error.status', {
+                      defaultMessage: `Error`,
+                    })}
+                  </h5>
+                  {err.response?.statusText} ({err.response?.status})
+                  <h5>
+                    {i18n.translate('xpack.infra.useHTTPRequest.error.url', {
+                      defaultMessage: `URL`,
+                    })}
+                  </h5>
+                  {err.response?.url}
+                </>
+              ) : (
+                <h5>{err.message}</h5>
+              )}
             </div>
           ),
         });
