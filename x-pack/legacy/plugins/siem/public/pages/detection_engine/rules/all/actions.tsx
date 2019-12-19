@@ -30,7 +30,7 @@ export const duplicateRuleAction = async (
   dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: true });
   const duplicatedRule = await duplicateRules({ rules: [rule], kbnVersion });
   dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: false });
-  dispatch({ type: 'updateRules', rules: duplicatedRule });
+  dispatch({ type: 'updateRules', rules: duplicatedRule, appendRuleId: rule.id });
 };
 
 export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<Action>) => {

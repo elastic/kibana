@@ -31,7 +31,7 @@ export type Action =
   | { type: 'setExportPayload'; exportPayload?: object[] }
   | { type: 'setSelected'; selectedItems: TableData[] }
   | { type: 'updateLoading'; ids: string[]; isLoading: boolean }
-  | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
+  | { type: 'updateRules'; rules: Rule[]; appendRuleId?: string; pagination?: PaginationOptions }
   | { type: 'updatePagination'; pagination: PaginationOptions }
   | { type: 'updateFilterOptions'; filterOptions: FilterOptions }
   | { type: 'failure' };
@@ -56,10 +56,18 @@ export const allRulesReducer = (state: State, action: Action): State => {
       }
 
       const ruleIds = state.rules.map(r => r.rule_id);
+      const appendIdx =
+        action.appendRuleId != null ? state.rules.findIndex(r => r.id === action.appendRuleId) : -1;
       const updatedRules = action.rules.reduce(
         (rules, updatedRule) =>
           ruleIds.includes(updatedRule.rule_id)
             ? rules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r))
+            : appendIdx !== -1
+            ? [
+                ...rules.slice(0, appendIdx + 1),
+                updatedRule,
+                ...rules.slice(appendIdx + 1, rules.length - 1),
+              ]
             : [...rules, updatedRule],
         [...state.rules]
       );

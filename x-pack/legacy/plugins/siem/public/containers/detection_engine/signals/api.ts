@@ -7,13 +7,16 @@
 import chrome from 'ui/chrome';
 
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
-import { QuerySignals, SignalSearchResponse } from './types';
+import {
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '../../../../common/constants';
+import { QuerySignals, SignalSearchResponse, UpdateSignalStatusProps } from './types';
 
 /**
  * Fetch Signals by providing a query
  *
- * @param query Rule ID's (not rule_id)
+ * @param query String to match a dsl
  * @param kbnVersion current Kibana Version to use for headers
  */
 export const fetchQuerySignals = async <Hit, Aggregations>({
@@ -35,4 +38,34 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
   await throwIfNotOk(response);
   const signals = await response.json();
   return signals;
+};
+
+/**
+ * Update signal status by query
+ *
+ * @param query of signals to update
+ * @param status to update to('open' / 'closed')
+ * @param kbnVersion current Kibana Version to use for headers
+ * @param signal to cancel request
+ */
+export const updateSignalStatus = async ({
+  query,
+  status,
+  kbnVersion,
+  signal,
+}: UpdateSignalStatusProps): Promise<unknown> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_SIGNALS_STATUS_URL}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    body: JSON.stringify({ status, ...query }),
+    signal,
+  });
+
+  await throwIfNotOk(response);
+  return response.json();
 };

@@ -11,6 +11,7 @@ export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 export const DEFAULT_DARK_MODE = 'theme:darkMode';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
@@ -20,7 +21,7 @@ export const DEFAULT_SIEM_REFRESH_INTERVAL = 'siem:refreshIntervalDefaults';
 // TODO: Remove this as soon as no code is left that is pulling data from it.
 export const DEFAULT_SIGNALS_INDEX_KEY = 'siem:defaultSignalsIndex';
 
-export const DEFAULT_SIGNALS_INDEX = '.siem-signals-xavier-default';
+export const DEFAULT_SIGNALS_INDEX = '.siem-signals-xavier';
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'siem:defaultAnomalyScore';

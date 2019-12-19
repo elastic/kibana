@@ -89,11 +89,11 @@ export const fetchRules = async ({
   await throwIfNotOk(response);
   return id != null
     ? {
-      page: 0,
-      perPage: 1,
-      total: 1,
-      data: response.json(),
-    }
+        page: 0,
+        perPage: 1,
+        total: 1,
+        data: response.json(),
+      }
     : response.json();
 };
 
@@ -207,6 +207,7 @@ export const duplicateRules = async ({
         updated_at: undefined,
         updated_by: undefined,
         enabled: rule.enabled,
+        immutable: false,
       }),
     })
   );

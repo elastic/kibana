@@ -37,6 +37,7 @@ import { StepPanel } from '../components/step_panel';
 import { getStepsData } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
+import { GlobalTime } from '../../../../containers/global_time';
 
 export const RuleDetailsComponent = memo(() => {
   const { ruleId } = useParams();
@@ -78,108 +79,116 @@ export const RuleDetailsComponent = memo(() => {
       <WithSource sourceId="default">
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <StickyContainer>
-              <FiltersGlobal>
-                <SiemSearchBar id="global" indexPattern={indexPattern} />
-              </FiltersGlobal>
+            <GlobalTime>
+              {({ to, from }) => (
+                <StickyContainer>
+                  <FiltersGlobal>
+                    <SiemSearchBar id="global" indexPattern={indexPattern} />
+                  </FiltersGlobal>
 
-              <WrapperPage>
-                <HeaderPage
-                  backOptions={{ href: '#detection-engine/rules', text: i18n.BACK_TO_RULES }}
-                  badgeOptions={{ text: i18n.EXPERIMENTAL }}
-                  border
-                  subtitle={subTitle}
-                  subtitle2={[
-                    lastSignals != null ? (
-                      <>
-                        {detectionI18n.LAST_SIGNAL}
-                        {': '}
-                        {lastSignals}
-                      </>
-                    ) : null,
-                    'Status: Comming Soon',
-                  ]}
-                  title={title}
-                >
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <RuleSwitch
-                        id={rule?.id ?? '-1'}
-                        enabled={rule?.enabled ?? false}
-                        optionLabel={i18n.ACTIVATE_RULE}
-                      />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <WrapperPage>
+                    <HeaderPage
+                      backOptions={{ href: '#detection-engine/rules', text: i18n.BACK_TO_RULES }}
+                      badgeOptions={{ text: i18n.EXPERIMENTAL }}
+                      border
+                      subtitle={subTitle}
+                      subtitle2={[
+                        lastSignals != null ? (
+                          <>
+                            {detectionI18n.LAST_SIGNAL}
+                            {': '}
+                            {lastSignals}
+                          </>
+                        ) : null,
+                        'Status: Comming Soon',
+                      ]}
+                      title={title}
+                    >
+                      <EuiFlexGroup alignItems="center">
                         <EuiFlexItem grow={false}>
-                          <EuiButton
-                            href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}/edit`}
-                            iconType="visControls"
-                            isDisabled={rule?.immutable ?? true}
-                          >
-                            {ruleI18n.EDIT_RULE_SETTINGS}
-                          </EuiButton>
+                          <RuleSwitch
+                            id={rule?.id ?? '-1'}
+                            enabled={rule?.enabled ?? false}
+                            optionLabel={i18n.ACTIVATE_RULE}
+                          />
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <EuiButton
+                                href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}/edit`}
+                                iconType="visControls"
+                                isDisabled={rule?.immutable ?? true}
+                              >
+                                {ruleI18n.EDIT_RULE_SETTINGS}
+                              </EuiButton>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </HeaderPage>
+                    </HeaderPage>
 
-                <EuiSpacer />
+                    <EuiSpacer />
 
-                <EuiFlexGroup>
-                  <EuiFlexItem component="section" grow={1}>
-                    <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
-                      {defineRuleData != null && (
-                        <StepDefineRule
-                          descriptionDirection="column"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={defineRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
+                    <EuiFlexGroup>
+                      <EuiFlexItem component="section" grow={1}>
+                        <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
+                          {defineRuleData != null && (
+                            <StepDefineRule
+                              descriptionDirection="column"
+                              isReadOnlyView={true}
+                              isLoading={false}
+                              defaultValues={defineRuleData}
+                            />
+                          )}
+                        </StepPanel>
+                      </EuiFlexItem>
 
-                  <EuiFlexItem component="section" grow={2}>
-                    <StepPanel loading={loading} title={ruleI18n.ABOUT}>
-                      {aboutRuleData != null && (
-                        <StepAboutRule
-                          descriptionDirection="column"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={aboutRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
+                      <EuiFlexItem component="section" grow={2}>
+                        <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+                          {aboutRuleData != null && (
+                            <StepAboutRule
+                              descriptionDirection="column"
+                              isReadOnlyView={true}
+                              isLoading={false}
+                              defaultValues={aboutRuleData}
+                            />
+                          )}
+                        </StepPanel>
+                      </EuiFlexItem>
 
-                  <EuiFlexItem component="section" grow={1}>
-                    <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
-                      {scheduleRuleData != null && (
-                        <StepScheduleRule
-                          descriptionDirection="column"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={scheduleRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                      <EuiFlexItem component="section" grow={1}>
+                        <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+                          {scheduleRuleData != null && (
+                            <StepScheduleRule
+                              descriptionDirection="column"
+                              isReadOnlyView={true}
+                              isLoading={false}
+                              defaultValues={scheduleRuleData}
+                            />
+                          )}
+                        </StepPanel>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
 
-                <EuiSpacer />
+                    <EuiSpacer />
 
-                <SignalsCharts />
+                    <SignalsCharts />
 
-                <EuiSpacer />
+                    <EuiSpacer />
 
-                {ruleId != null && (
-                  <SignalsTable defaultFilters={buildSignalsRuleIdFilter(ruleId)} />
-                )}
-              </WrapperPage>
-            </StickyContainer>
+                    {ruleId != null && (
+                      <SignalsTable
+                        from={from}
+                        to={to}
+                        defaultFilters={buildSignalsRuleIdFilter(ruleId)}
+                      />
+                    )}
+                  </WrapperPage>
+                </StickyContainer>
+              )}
+            </GlobalTime>
           ) : (
             <WrapperPage>
               <HeaderPage border title={i18n.PAGE_TITLE} />

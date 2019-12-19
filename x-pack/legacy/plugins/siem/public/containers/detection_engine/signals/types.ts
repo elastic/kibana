@@ -31,3 +31,10 @@ export interface SignalSearchResponse<Hit = {}, Aggregations = undefined> extend
     hits: Hit[];
   };
 }
+
+export interface UpdateSignalStatusProps {
+  query: object;
+  status: 'open' | 'closed';
+  kbnVersion: string;
+  signal?: AbortSignal; // TODO: implement cancelling
+}

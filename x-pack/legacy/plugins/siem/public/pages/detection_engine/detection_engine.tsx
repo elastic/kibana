@@ -11,9 +11,9 @@ import { StickyContainer } from 'react-sticky';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { SiemSearchBar } from '../../components/search_bar';
-
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { WrapperPage } from '../../components/wrapper_page';
+import { GlobalTime } from '../../containers/global_time';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
 import { SignalsTable } from './components/signals';
@@ -56,17 +56,15 @@ export const DetectionEngineComponent = React.memo(() => {
                 <SignalsCharts />
 
                 <EuiSpacer />
-
-                <SignalsTable />
+                <GlobalTime>{({ to, from }) => <SignalsTable from={from} to={to} />}</GlobalTime>
               </WrapperPage>
             </StickyContainer>
           ) : (
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
-
-                <DetectionEngineEmptyPage />
-              </WrapperPage>
-            );
+            <WrapperPage>
+              <HeaderPage border title={i18n.PAGE_TITLE} />
+              <DetectionEngineEmptyPage />
+            </WrapperPage>
+          );
         }}
       </WithSource>
 

@@ -52,7 +52,10 @@ export const getStepsData = ({
       ? {
           isNew: false,
           ...pick(['enabled', 'interval'], rule),
-          from: rule.meta.from.replace('now-', ''),
+          from:
+            rule?.meta?.from != null
+              ? rule.meta.from.replace('now-', '')
+              : rule.from.replace('now-', ''),
         }
       : null;
 
