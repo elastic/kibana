@@ -11,11 +11,11 @@ import sinon from 'sinon';
 import { XPackInfo } from '../../../xpack_main/server/lib/xpack_info';
 import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 
-const createLicense = () => {
+const createLicense = (type = 'basic') => {
   return licensingMock.createLicense({
     license: {
       uid: 'custom-uid',
-      type: 'basic',
+      type,
       mode: 'basic',
       status: 'active',
       expiryDateInMillis: 1286575200000,
@@ -70,9 +70,17 @@ describe('XPackInfo', () => {
   describe('Change type', () => {
     it('trigger event when license type changes', async () => {
       const license$ = new BehaviorSubject(createLicense());
+      const refresh = () => void 0;
+      const xPackInfo = new XPackInfo(mockServer, {
+        licensing: {
+          license$,
+          refresh,
+        },
+      });
       let changed = false;
       license$.subscribe(() => (changed = true));
-      await license$.next(createLicense({ type: 'gold' }));
+      await license$.next(createLicense('gold'));
+      expect(xPackInfo.license.getType()).to.be('gold');
       expect(changed).to.be(true);
     });
   });
