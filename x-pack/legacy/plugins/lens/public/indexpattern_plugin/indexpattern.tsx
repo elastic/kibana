@@ -128,11 +128,7 @@ export function getIndexPatternDatasource({
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: {
-            indexPatternId: state.currentIndexPatternId,
-            columns: {},
-            columnOrder: [],
-          },
+          [newLayerId]: blankLayer(state.currentIndexPatternId),
         },
       };
     },
@@ -144,6 +140,16 @@ export function getIndexPatternDatasource({
       return {
         ...state,
         layers: newLayers,
+      };
+    },
+
+    clearLayer(state: IndexPatternPrivateState, layerId: string) {
+      return {
+        ...state,
+        layers: {
+          ...state.layers,
+          [layerId]: blankLayer(state.currentIndexPatternId),
+        },
       };
     },
 
@@ -275,4 +281,12 @@ export function getIndexPatternDatasource({
   };
 
   return indexPatternDatasource;
+}
+
+function blankLayer(indexPatternId: string) {
+  return {
+    indexPatternId,
+    columns: {},
+    columnOrder: [],
+  };
 }

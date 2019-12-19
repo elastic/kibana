@@ -14,12 +14,14 @@ import {
 import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
-import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
+import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     id: 'TEST_VIS',
+    clearLayer: jest.fn((state, _layerId) => state),
+    getLayerIds: jest.fn(_state => ['layer1']),
     visualizationTypes: [
       {
         icon: 'empty',
@@ -32,7 +34,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
-    renderConfigPanel: jest.fn(),
+    renderLayerConfigPanel: jest.fn(),
     toExpression: jest.fn((_state, _frame) => null),
     toPreviewExpression: jest.fn((_state, _frame) => null),
   };
@@ -52,7 +54,8 @@ export function createMockDatasource(): DatasourceMock {
 
   return {
     id: 'mockindexpattern',
-    getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
+    clearLayer: jest.fn((state, _layerId) => state),
+    getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),

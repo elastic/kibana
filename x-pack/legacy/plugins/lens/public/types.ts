@@ -135,6 +135,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
@@ -237,7 +238,8 @@ export interface LensMultiTable {
   };
 }
 
-export interface VisualizationProps<T = unknown> {
+export interface VisualizationLayerConfigProps<T = unknown> {
+  layerId: string;
   dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
@@ -325,6 +327,16 @@ export interface Visualization<T = unknown, P = unknown> {
 
   visualizationTypes: VisualizationType[];
 
+  getLayerIds: (state: T) => string[];
+
+  clearLayer: (state: T, layerId: string) => T;
+
+  removeLayer?: (state: T, layerId: string) => T;
+
+  appendLayer?: (state: T, layerId: string) => T;
+
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
+
   getDescription: (
     state: T
   ) => {
@@ -339,7 +351,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  renderLayerConfigPanel: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

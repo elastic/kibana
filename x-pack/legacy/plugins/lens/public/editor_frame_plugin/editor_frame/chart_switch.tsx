@@ -81,7 +81,6 @@ export function ChartSwitch(props: Props) {
     trackUiEvent(`chart_switch`);
 
     switchToSuggestion(
-      props.framePublicAPI,
       props.dispatch,
       {
         ...selection,

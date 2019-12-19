@@ -50,6 +50,22 @@ describe('metric_visualization', () => {
     });
   });
 
+  describe('#getLayerIds', () => {
+    it('returns the layer id', () => {
+      expect(metricVisualization.getLayerIds(exampleState())).toEqual(['l1']);
+    });
+  });
+
+  describe('#clearLayer', () => {
+    it('returns a clean layer', () => {
+      (generateId as jest.Mock).mockReturnValueOnce('test-id1');
+      expect(metricVisualization.clearLayer(exampleState(), 'l1')).toEqual({
+        accessor: 'test-id1',
+        layerId: 'l1',
+      });
+    });
+  });
+
   describe('#getPersistableState', () => {
     it('persists the state as given', () => {
       expect(metricVisualization.getPersistableState(exampleState())).toEqual(exampleState());

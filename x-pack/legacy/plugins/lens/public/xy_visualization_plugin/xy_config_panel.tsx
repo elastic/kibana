@@ -5,25 +5,11 @@
  */
 
 import _ from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiPanel,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiPopoverFooter,
-  EuiToolTip,
-} from '@elastic/eui';
-import { State, SeriesType, LayerConfig, visualizationTypes } from './types';
-import { VisualizationProps, OperationMetadata } from '../types';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { State, SeriesType, visualizationTypes } from './types';
+import { VisualizationLayerConfigProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { MultiColumnEditor } from '../multi_column_editor';
 import { generateId } from '../id_generator';
@@ -45,253 +31,140 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
-  return {
-    layerId,
-    seriesType,
-    xAccessor: generateId(),
-    accessors: [generateId()],
-    splitAccessor: generateId(),
-  };
-}
+export function LayerContextMenu(props: VisualizationLayerConfigProps<State>) {
+  const { state, layerId } = props;
+  const horizontalOnly = isHorizontalChart(state.layers);
+  const index = state.layers.findIndex(l => l.layerId === layerId);
+  const layer = state.layers[index];
 
-function LayerSettings({
-  layer,
-  horizontalOnly,
-  setSeriesType,
-  removeLayer,
-}: {
-  layer: LayerConfig;
-  horizontalOnly: boolean;
-  setSeriesType: (seriesType: SeriesType) => void;
-  removeLayer: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const { icon } = visualizationTypes.find(c => c.id === layer.seriesType)!;
+  if (!layer) {
+    return null;
+  }
 
   return (
-    <EuiPopover
-      id={`lnsXYSeriesTypePopover_${layer.layerId}`}
-      panelPaddingSize="s"
-      ownFocus
-      button={
-        <EuiButtonIcon
-          iconType={icon || 'lnsBarVertical'}
-          aria-label={i18n.translate('xpack.lens.xyChart.layerSettings', {
-            defaultMessage: 'Edit layer settings',
-          })}
-          onClick={() => setIsOpen(!isOpen)}
-          data-test-subj="lnsXY_layer_advanced"
-        />
-      }
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      anchorPosition="leftUp"
+    <EuiFormRow
+      label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
+        defaultMessage: 'Chart type',
+      })}
     >
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.xyChart.chartTypeLabel', {
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
           defaultMessage: 'Chart type',
         })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
-            defaultMessage: 'Chart type',
-          })}
-          name="chartType"
-          className="eui-displayInlineBlock"
-          data-test-subj="lnsXY_seriesType"
-          options={visualizationTypes
-            .filter(t => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
-            .map(t => ({
-              id: t.id,
-              label: t.label,
-              iconType: t.icon || 'empty',
-            }))}
-          idSelected={layer.seriesType}
-          onChange={seriesType => {
-            trackUiEvent('xy_change_layer_display');
-            setSeriesType(seriesType as SeriesType);
-          }}
-          isIconOnly
-          buttonSize="compressed"
-        />
-      </EuiFormRow>
-      <EuiPopoverFooter className="eui-textCenter">
-        <EuiButtonEmpty
-          size="xs"
-          iconType="trash"
-          color="danger"
-          data-test-subj="lnsXY_layer_remove"
-          onClick={removeLayer}
-        >
-          {i18n.translate('xpack.lens.xyChart.deleteLayer', {
-            defaultMessage: 'Delete layer',
-          })}
-        </EuiButtonEmpty>
-      </EuiPopoverFooter>
-    </EuiPopover>
+        name="chartType"
+        className="eui-displayInlineBlock"
+        data-test-subj="lnsXY_seriesType"
+        options={visualizationTypes
+          .filter(t => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
+          .map(t => ({
+            id: t.id,
+            label: t.label,
+            iconType: t.icon || 'empty',
+          }))}
+        idSelected={layer.seriesType}
+        onChange={seriesType => {
+          trackUiEvent('xy_change_layer_display');
+          props.setState(
+            updateLayer(state, { ...layer, seriesType: seriesType as SeriesType }, index)
+          );
+        }}
+        isIconOnly
+        buttonSize="compressed"
+      />
+    </EuiFormRow>
   );
 }
 
-export function XYConfigPanel(props: VisualizationProps<State>) {
-  const { state, setState, frame } = props;
-  const horizontalOnly = isHorizontalChart(state.layers);
+export function XYConfigPanel(props: VisualizationLayerConfigProps<State>) {
+  const { state, setState, frame, layerId } = props;
+  const index = props.state.layers.findIndex(l => l.layerId === layerId);
+
+  if (index < 0) {
+    return null;
+  }
+
+  const layer = props.state.layers[index];
 
   return (
-    <EuiForm className="lnsConfigPanel">
-      {state.layers.map((layer, index) => (
-        <EuiPanel
-          className="lnsConfigPanel__panel"
-          key={layer.layerId}
-          data-test-subj={`lnsXY_layer_${layer.layerId}`}
-          paddingSize="s"
-        >
-          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <LayerSettings
-                layer={layer}
-                horizontalOnly={horizontalOnly}
-                setSeriesType={seriesType =>
-                  setState(updateLayer(state, { ...layer, seriesType }, index))
-                }
-                removeLayer={() => {
-                  trackUiEvent('xy_layer_removed');
-                  frame.removeLayers([layer.layerId]);
-                  setState({ ...state, layers: state.layers.filter(l => l !== layer) });
-                }}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem className="eui-textTruncate">
-              <NativeRenderer
-                data-test-subj="lnsXY_layerHeader"
-                render={props.frame.datasourceLayers[layer.layerId].renderLayerPanel}
-                nativeProps={{ layerId: layer.layerId }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="xs" />
-
-          <EuiFormRow
-            className="lnsConfigPanel__axis"
-            label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-              defaultMessage: 'X-axis',
-            })}
-          >
-            <NativeRenderer
-              data-test-subj="lnsXY_xDimensionPanel"
-              render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-              nativeProps={{
-                columnId: layer.xAccessor,
-                dragDropContext: props.dragDropContext,
-                filterOperations: isBucketed,
-                suggestedPriority: 1,
-                layerId: layer.layerId,
-                hideGrouping: true,
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            className="lnsConfigPanel__axis"
-            data-test-subj="lnsXY_yDimensionPanel"
-            label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-              defaultMessage: 'Y-axis',
-            })}
-          >
-            <MultiColumnEditor
-              accessors={layer.accessors}
-              datasource={frame.datasourceLayers[layer.layerId]}
-              dragDropContext={props.dragDropContext}
-              onAdd={() =>
-                setState(
-                  updateLayer(
-                    state,
-                    {
-                      ...layer,
-                      accessors: [...layer.accessors, generateId()],
-                    },
-                    index
-                  )
-                )
-              }
-              onRemove={accessor =>
-                setState(
-                  updateLayer(
-                    state,
-                    {
-                      ...layer,
-                      accessors: layer.accessors.filter(col => col !== accessor),
-                    },
-                    index
-                  )
-                )
-              }
-              filterOperations={isNumericMetric}
-              data-test-subj="lensXY_yDimensionPanel"
-              testSubj="lensXY_yDimensionPanel"
-              layerId={layer.layerId}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            className="lnsConfigPanel__axis"
-            label={i18n.translate('xpack.lens.xyChart.splitSeries', {
-              defaultMessage: 'Break down by',
-            })}
-          >
-            <NativeRenderer
-              data-test-subj="lnsXY_splitDimensionPanel"
-              render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
-              nativeProps={{
-                columnId: layer.splitAccessor,
-                dragDropContext: props.dragDropContext,
-                filterOperations: isBucketed,
-                suggestedPriority: 0,
-                layerId: layer.layerId,
-              }}
-            />
-          </EuiFormRow>
-        </EuiPanel>
-      ))}
-
-      <EuiFlexItem grow={true}>
-        <EuiToolTip
-          className="eui-fullWidth"
-          content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-            defaultMessage:
-              'Use multiple layers to combine chart types or visualize different index patterns.',
-          })}
-          position="bottom"
-        >
-          <EuiButton
-            className="lnsConfigPanel__addLayerBtn"
-            fullWidth
-            size="s"
-            data-test-subj={`lnsXY_layer_add`}
-            aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            title={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-              defaultMessage: 'Add layer',
-            })}
-            onClick={() => {
-              trackUiEvent('xy_layer_added');
-              const usedSeriesTypes = _.uniq(state.layers.map(layer => layer.seriesType));
-              setState({
-                ...state,
-                layers: [
-                  ...state.layers,
-                  newLayerState(
-                    usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-                    frame.addNewLayer()
-                  ),
-                ],
-              });
-            }}
-            iconType="plusInCircleFilled"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiForm>
+    <>
+      <EuiFormRow
+        className="lnsConfigPanel__axis"
+        label={i18n.translate('xpack.lens.xyChart.xAxisLabel', {
+          defaultMessage: 'X-axis',
+        })}
+      >
+        <NativeRenderer
+          data-test-subj="lnsXY_xDimensionPanel"
+          render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
+          nativeProps={{
+            columnId: layer.xAccessor,
+            dragDropContext: props.dragDropContext,
+            filterOperations: isBucketed,
+            suggestedPriority: 1,
+            layerId: layer.layerId,
+            hideGrouping: true,
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        className="lnsConfigPanel__axis"
+        data-test-subj="lnsXY_yDimensionPanel"
+        label={i18n.translate('xpack.lens.xyChart.yAxisLabel', {
+          defaultMessage: 'Y-axis',
+        })}
+      >
+        <MultiColumnEditor
+          accessors={layer.accessors}
+          datasource={frame.datasourceLayers[layer.layerId]}
+          dragDropContext={props.dragDropContext}
+          onAdd={() =>
+            setState(
+              updateLayer(
+                state,
+                {
+                  ...layer,
+                  accessors: [...layer.accessors, generateId()],
+                },
+                index
+              )
+            )
+          }
+          onRemove={accessor =>
+            setState(
+              updateLayer(
+                state,
+                {
+                  ...layer,
+                  accessors: layer.accessors.filter(col => col !== accessor),
+                },
+                index
+              )
+            )
+          }
+          filterOperations={isNumericMetric}
+          data-test-subj="lensXY_yDimensionPanel"
+          testSubj="lensXY_yDimensionPanel"
+          layerId={layer.layerId}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        className="lnsConfigPanel__axis"
+        label={i18n.translate('xpack.lens.xyChart.splitSeries', {
+          defaultMessage: 'Break down by',
+        })}
+      >
+        <NativeRenderer
+          data-test-subj="lnsXY_splitDimensionPanel"
+          render={props.frame.datasourceLayers[layer.layerId].renderDimensionPanel}
+          nativeProps={{
+            columnId: layer.splitAccessor,
+            dragDropContext: props.dragDropContext,
+            filterOperations: isBucketed,
+            suggestedPriority: 0,
+            layerId: layer.layerId,
+          }}
+        />
+      </EuiFormRow>
+    </>
   );
 }

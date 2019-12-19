@@ -320,7 +320,7 @@ export function SuggestionPanel({
                 } else {
                   trackSuggestionEvent(`position_${index}_of_${suggestions.length}`);
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(frame, dispatch, suggestion);
+                  switchToSuggestion(dispatch, suggestion);
                 }
               }}
               selected={index === lastSelectedSuggestion}

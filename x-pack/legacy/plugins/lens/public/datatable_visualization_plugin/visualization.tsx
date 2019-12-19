@@ -6,19 +6,18 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiForm, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MultiColumnEditor } from '../multi_column_editor';
 import {
   SuggestionRequest,
   Visualization,
-  VisualizationProps,
+  VisualizationLayerConfigProps,
   VisualizationSuggestion,
   Operation,
 } from '../types';
 import { generateId } from '../id_generator';
-import { NativeRenderer } from '../native_renderer';
 import chartTableSVG from '../assets/chart_datatable.svg';
 
 export interface LayerState {
@@ -56,7 +55,7 @@ export function DataTableLayer({
   state,
   setState,
   dragDropContext,
-}: { layer: LayerState } & VisualizationProps<DatatableVisualizationState>) {
+}: { layer: LayerState } & VisualizationLayerConfigProps<DatatableVisualizationState>) {
   const datasource = frame.datasourceLayers[layer.layerId];
 
   const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
@@ -64,32 +63,24 @@ export function DataTableLayer({
   const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
 
   return (
-    <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
-      <NativeRenderer
-        render={datasource.renderLayerPanel}
-        nativeProps={{ layerId: layer.layerId }}
+    <EuiFormRow
+      className="lnsConfigPanel__axis"
+      label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
+    >
+      <MultiColumnEditor
+        accessors={sortedColumns}
+        datasource={datasource}
+        dragDropContext={dragDropContext}
+        filterOperations={allOperations}
+        layerId={layer.layerId}
+        onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
+        onRemove={column =>
+          setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
+        }
+        testSubj="datatable_columns"
+        data-test-subj="datatable_multicolumnEditor"
       />
-
-      <EuiSpacer size="s" />
-      <EuiFormRow
-        className="lnsConfigPanel__axis"
-        label={i18n.translate('xpack.lens.datatable.columns', { defaultMessage: 'Columns' })}
-      >
-        <MultiColumnEditor
-          accessors={sortedColumns}
-          datasource={datasource}
-          dragDropContext={dragDropContext}
-          filterOperations={allOperations}
-          layerId={layer.layerId}
-          onAdd={() => setState(updateColumns(state, layer, columns => [...columns, generateId()]))}
-          onRemove={column =>
-            setState(updateColumns(state, layer, columns => columns.filter(c => c !== column)))
-          }
-          testSubj="datatable_columns"
-          data-test-subj="datatable_multicolumnEditor"
-        />
-      </EuiFormRow>
-    </EuiPanel>
+    </EuiFormRow>
   );
 }
 
@@ -110,7 +101,17 @@ export const datatableVisualization: Visualization<
     },
   ],
 
-  getDescription(state) {
+  getLayerIds(state) {
+    return state.layers.map(l => l.layerId);
+  },
+
+  clearLayer(state) {
+    return {
+      layers: state.layers.map(l => newLayerState(l.layerId)),
+    };
+  },
+
+  getDescription() {
     return {
       icon: chartTableSVG,
       label: i18n.translate('xpack.lens.datatable.label', {
@@ -187,17 +188,18 @@ export const datatableVisualization: Visualization<
     ];
   },
 
-  renderConfigPanel: (domElement, props) =>
-    render(
-      <I18nProvider>
-        <EuiForm className="lnsConfigPanel">
-          {props.state.layers.map(layer => (
-            <DataTableLayer key={layer.layerId} layer={layer} {...props} />
-          ))}
-        </EuiForm>
-      </I18nProvider>,
-      domElement
-    ),
+  renderLayerConfigPanel(domElement, props) {
+    const layer = props.state.layers.find(l => l.layerId === props.layerId);
+
+    if (layer) {
+      render(
+        <I18nProvider>
+          <DataTableLayer {...props} layer={layer} />
+        </I18nProvider>,
+        domElement
+      );
+    }
+  },
 
   toExpression(state, frame) {
     const layer = state.layers[0];
