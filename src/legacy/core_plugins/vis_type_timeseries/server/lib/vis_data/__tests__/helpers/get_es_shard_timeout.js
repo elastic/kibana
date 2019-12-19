@@ -25,7 +25,7 @@ describe('getEsShardTimeout', () => {
     const req = {
       getEsShardTimeout: async () => {
         return 12345;
-      }
+      },
     };
 
     const timeout = await getEsShardTimeout(req);
