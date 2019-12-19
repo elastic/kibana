@@ -31,6 +31,7 @@ import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../unc
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
+import { Alerts, ElasticsearchAlertsAdapter } from '../alerts';
 
 export function compose(core: CoreSetup, env: PluginInitializerContext['env']): AppBackendLibs {
   const framework = new KibanaBackendFrameworkAdapter(core, env);
@@ -42,6 +43,7 @@ export function compose(core: CoreSetup, env: PluginInitializerContext['env']): 
   const pinnedEvent = new PinnedEvent();
 
   const domainLibs: AppDomainLibs = {
+    alerts: new Alerts(new ElasticsearchAlertsAdapter(framework)),
     anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),

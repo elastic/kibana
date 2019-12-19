@@ -94,8 +94,8 @@ export class SecurityLicenseService {
       };
     }
 
-    const showRoleMappingsManagement = rawLicense.isNotBasic;
-    const isLicensePlatinumOrBetter = rawLicense.isOneOf(['enterprise', 'platinum', 'trial']);
+    const showRoleMappingsManagement = rawLicense.hasAtLeast('gold');
+    const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
       showLogin: true,
       allowLogin: true,
