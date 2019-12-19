@@ -14,6 +14,7 @@ jobs:
           issue-mappings: |
             [
               { "label": "Team:AppArch", "projectName": "kibana-app-arch", "columnId": 6173897 },
+              { "label": "Feature:Lens", "projectName": "Lens", "columnId": 6219362 },
               { "label": "Team:Platform", "projectName": "kibana-platform", "columnId": 5514360 }
             ]
           ghToken: ${{ secrets.GITHUB_TOKEN }}
