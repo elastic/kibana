@@ -26,7 +26,9 @@ export function useSnapshot(
   groupBy: InfraSnapshotGroupbyInput[],
   nodeType: InfraNodeType,
   sourceId: string,
-  currentTime: number
+  currentTime: number,
+  accountId: string,
+  region: string
 ) {
   const decodeResponse = (response: any) => {
     return pipe(
@@ -51,6 +53,8 @@ export function useSnapshot(
       timerange,
       filterQuery,
       sourceId,
+      accountId,
+      region,
     }),
     decodeResponse
   );

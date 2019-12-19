@@ -510,7 +510,7 @@ export const RuleEditorFlyout = injectI18n(
                 <h1 id="flyoutTitle">
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
-                    defaultMessage="Edit Rules"
+                    defaultMessage="Edit rules"
                   />
                 </h1>
               </EuiTitle>
@@ -569,12 +569,12 @@ export const RuleEditorFlyout = injectI18n(
                   {isCreate === true ? (
                     <FormattedMessage
                       id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
-                      defaultMessage="Create Rule"
+                      defaultMessage="Create rule"
                     />
                   ) : (
                     <FormattedMessage
                       id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
-                      defaultMessage="Edit Rule"
+                      defaultMessage="Edit rule"
                     />
                   )}
                 </h1>

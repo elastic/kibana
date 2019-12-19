@@ -31,7 +31,7 @@ import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { updateOldState } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IndexPattern } from '../../../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { VisSavedObject } from '../legacy_imports';
 
 import { createSavedSearchesService } from '../../discover';
@@ -122,7 +122,7 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
         extractReferences,
         injectReferences,
         id: (opts.id as string) || '',
-        indexPattern: opts.indexPattern as IndexPattern,
+        indexPattern: opts.indexPattern as IIndexPattern,
         defaults: {
           title: '',
           visState,

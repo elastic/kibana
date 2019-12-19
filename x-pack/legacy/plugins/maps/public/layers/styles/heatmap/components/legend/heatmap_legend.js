@@ -8,7 +8,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ColorGradient } from '../../../components/color_gradient';
-import { StyleLegendRow } from '../../../components/style_legend_row';
+import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import {
   DEFAULT_RGB_HEATMAP_COLOR_RAMP,
   DEFAULT_HEATMAP_COLOR_RAMP_NAME,
@@ -50,7 +50,7 @@ export class HeatmapLegend extends React.Component {
       );
 
     return (
-      <StyleLegendRow
+      <RangedStyleLegendRow
         header={header}
         minLabel={i18n.translate('xpack.maps.heatmapLegend.coldLabel', {
           defaultMessage: 'cold',
