@@ -38,8 +38,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`endpoint app shows 'Hello World'`, async () => {
         await pageObjects.common.navigateToApp('endpoint', {
-            basePath: '/s/custom_space',
-          });
+          basePath: '/s/custom_space',
+        });
         await testSubjects.existOrFail('welcomeTitle');
       });
     });
