@@ -15,14 +15,11 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const stop$ = new Subject();
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
-    const types: LicenseType[] = ['basic', 'gold'];
-
     const trigger$ = new Subject();
     const fetcher = jest
       .fn()
-      .mockImplementation(() =>
-        Promise.resolve(licenseMock.createLicense({ license: { type: types.shift() } }))
-      );
+      .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'basic' } }))
+      .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'gold' } }));
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
 
@@ -55,16 +52,11 @@ describe('licensing update', () => {
   it('does not emit if license has not changed', async () => {
     const trigger$ = new Subject();
 
-    let i = 0;
     const fetcher = jest
       .fn()
-      .mockImplementation(() =>
-        Promise.resolve(
-          ++i < 3
-            ? licenseMock.createLicense()
-            : licenseMock.createLicense({ license: { type: 'gold' } })
-        )
-      );
+      .mockResolvedValueOnce(licenseMock.createLicense())
+      .mockResolvedValueOnce(licenseMock.createLicense())
+      .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'gold' } }));
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     trigger$.next();
