@@ -79,7 +79,7 @@ export const createWithKibanaMock = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (Component: any) => (props: any) => {
-    return <Component {...props} kibana={kibana} />;
+    return React.createElement(Component, { ...props, kibana });
   };
 };
 
@@ -87,7 +87,9 @@ export const createKibanaContextProviderMock = () => {
   const kibana = createUseKibanaMock()();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ services, ...rest }: any) => (
-    <KibanaContextProvider {...rest} services={{ ...kibana.services, ...services }} />
-  );
+  return ({ services, ...rest }: any) =>
+    React.createElement(KibanaContextProvider, {
+      ...rest,
+      services: { ...kibana.services, ...services },
+    });
 };
