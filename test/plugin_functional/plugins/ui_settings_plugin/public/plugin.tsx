@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegacyCoreSetup, LegacyCoreStart } from 'kibana/public';
+
+import { CoreSetup, Plugin } from 'kibana/public';
 
 declare global {
   interface Window {
-    __coreProvider: {
-      setup: {
-        core: LegacyCoreSetup;
-        plugins: Record<string, any>;
-      };
-      start: {
-        core: LegacyCoreStart;
-        plugins: Record<string, any>;
-      };
-      testUtils: {
-        delay: (ms: number) => Promise<void>;
-      };
-    };
+    uiSettingsPlugin?: Record<string, any>;
+    uiSettingsPluginValue?: string;
   }
+}
+
+export class UiSettingsPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
+    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
+  }
+
+  public start() {}
+  public stop() {}
 }
