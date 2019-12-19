@@ -11,7 +11,8 @@ import { AbstractTMSSource } from '../tms_source';
 import { VectorTileLayer } from '../../vector_tile_layer';
 
 import { getEMSClient } from '../../../meta';
-import { EMSTMSCreateSourceEditor } from './create_source_editor';
+import { TileServiceSelect } from './tile_service_select';
+import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { EMS_TMS } from '../../../../common/constants';
@@ -41,7 +42,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       onPreviewSource(source);
     };
 
-    return <EMSTMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+    return <TileServiceSelect onTileSelect={onSourceConfigChange} />;
   }
 
   constructor(descriptor, inspectorAdapters) {
@@ -53,6 +54,11 @@ export class EMSTMSSource extends AbstractTMSSource {
       },
       inspectorAdapters
     );
+  }
+
+  renderSourceSettingsEditor({ onChange }) {
+    console.log(this._descriptor);
+    return <UpdateSourceEditor onChange={onChange} config={this._descriptor} />;
   }
 
   async getImmutableProperties() {
