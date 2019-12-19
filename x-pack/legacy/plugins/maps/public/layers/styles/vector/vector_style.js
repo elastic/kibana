@@ -36,6 +36,8 @@ import { StaticColorProperty } from './properties/static_color_property';
 import { DynamicColorProperty } from './properties/dynamic_color_property';
 import { StaticOrientationProperty } from './properties/static_orientation_property';
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
+import { StaticTextProperty } from './properties/static_text_property';
+import { DynamicTextProperty } from './properties/dynamic_text_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -85,6 +87,17 @@ export class VectorStyle extends AbstractStyle {
       this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
       VECTOR_STYLES.ICON_ORIENTATION
     );
+    this._labelStyleProperty = this._makeLabelProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_TEXT]
+    );
+    this._labelSizeStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE],
+      VECTOR_STYLES.LABEL_SIZE
+    );
+    this._labelColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
+      VECTOR_STYLES.LABEL_COLOR
+    );
   }
 
   _getAllStyleProperties() {
@@ -94,6 +107,9 @@ export class VectorStyle extends AbstractStyle {
       this._lineWidthStyleProperty,
       this._iconSizeStyleProperty,
       this._iconOrientationProperty,
+      this._labelStyleProperty,
+      this._labelSizeStyleProperty,
+      this._labelColorStyleProperty,
     ];
   }
 
@@ -114,16 +130,15 @@ export class VectorStyle extends AbstractStyle {
       return dynamicStyleProp.isFieldMetaEnabled();
     });
 
+    const styleProperties = {};
+    this._getAllStyleProperties().forEach(styleProperty => {
+      styleProperties[styleProperty.getStyleName()] = styleProperty;
+    });
+
     return (
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
-        styleProperties={{
-          lineColor: this._lineColorStyleProperty,
-          fillColor: this._fillColorStyleProperty,
-          lineWidth: this._lineWidthStyleProperty,
-          iconSize: this._iconSizeStyleProperty,
-          iconOrientation: this._iconOrientationProperty,
-        }}
+        styleProperties={styleProperties}
         symbolDescriptor={this._descriptor.properties[VECTOR_STYLES.SYMBOL]}
         layer={layer}
         loadIsPointsOnly={this._getIsPointsOnly}
@@ -391,12 +406,17 @@ export class VectorStyle extends AbstractStyle {
     const isPolygonsOnly = await this._getIsPolygonsOnly();
 
     return this.getDynamicPropertiesArray().filter(styleProperty => {
+      const styleName = styleProperty.getStyleName();
+      if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
+        return false;
+      }
+
       if (isLinesOnly) {
-        return LINE_STYLES.includes(styleProperty.getStyleName());
+        return LINE_STYLES.includes(styleName);
       }
 
       if (isPolygonsOnly) {
-        return POLYGON_STYLES.includes(styleProperty.getStyleName());
+        return POLYGON_STYLES.includes(styleName);
       }
 
       return true;
@@ -420,6 +440,7 @@ export class VectorStyle extends AbstractStyle {
       // To work around this limitation, some styling values must fall back to geojson property values.
       let supportsFeatureState;
       let isScaled;
+      // TODO move first check into DynamicSizeProperty.supportsFeatureState
       if (
         styleProperty.getStyleName() === VECTOR_STYLES.ICON_SIZE &&
         this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON
@@ -435,8 +456,10 @@ export class VectorStyle extends AbstractStyle {
       return {
         supportsFeatureState,
         isScaled,
+        isOrdinal: styleProperty.isOrdinal(),
         name: field.getName(),
         meta: this._getFieldMeta(field.getName()),
+        formatter: this._getFieldFormatter(field.getName()),
         computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
       };
     });
@@ -453,6 +476,20 @@ export class VectorStyle extends AbstractStyle {
       tmpFeatureIdentifier.id = feature.id;
       mbMap.removeFeatureState(tmpFeatureIdentifier);
     }
+  }
+
+  _getOrdinalValue(value, isScaled, range) {
+    const valueAsFloat = parseFloat(value);
+
+    if (isScaled) {
+      return scaleValue(valueAsFloat, range);
+    }
+
+    if (isNaN(valueAsFloat)) {
+      return 0;
+    }
+
+    return valueAsFloat;
   }
 
   setFeatureStateAndStyleProps(featureCollection, mbMap, mbSourceId) {
@@ -479,20 +516,20 @@ export class VectorStyle extends AbstractStyle {
         const {
           supportsFeatureState,
           isScaled,
+          isOrdinal,
           name,
           meta: range,
+          formatter,
           computedName,
         } = featureStateParams[j];
-        const value = parseFloat(feature.properties[name]);
+
         let styleValue;
-        if (isScaled) {
-          styleValue = scaleValue(value, range);
+        if (isOrdinal) {
+          styleValue = this._getOrdinalValue(feature.properties[name], isScaled, range);
+        } else if (formatter) {
+          styleValue = formatter(feature.properties[name]);
         } else {
-          if (isNaN(value)) {
-            styleValue = 0;
-          } else {
-            styleValue = value;
-          }
+          styleValue = feature.properties[name];
         }
 
         if (supportsFeatureState) {
@@ -528,6 +565,14 @@ export class VectorStyle extends AbstractStyle {
     this._lineColorStyleProperty.syncCircleStrokeWithMb(pointLayerId, mbMap, alpha);
     this._lineWidthStyleProperty.syncCircleStrokeWidthWithMb(pointLayerId, mbMap);
     this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
+  }
+
+  setMBPropertiesForLabelText({ alpha, mbMap, textLayerId }) {
+    mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
+    mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
+    this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
+    this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
+    this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
   }
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
@@ -615,6 +660,19 @@ export class VectorStyle extends AbstractStyle {
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
       return new DynamicOrientationProperty(descriptor.options, styleName, field);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
+
+  _makeLabelProperty(descriptor) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticTextProperty({ value: '' }, VECTOR_STYLES.LABEL_TEXT);
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      const field = this._makeField(descriptor.options.field);
+      return new DynamicTextProperty(descriptor.options, VECTOR_STYLES.LABEL_TEXT, field);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }
