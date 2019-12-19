@@ -6,11 +6,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import PropTypes from 'prop-types';
-import { dynamicOrientationShape } from '../style_option_shapes';
-import { FieldSelect, fieldShape } from '../field_select';
+import { FieldSelect } from '../field_select';
 
-export function DynamicOrientationSelection({ fields, styleOptions, onChange }) {
+export function DynamicLabelSelector({ fields, styleOptions, onChange }) {
   const onFieldChange = ({ field }) => {
     onChange({ ...styleOptions, field });
   };
@@ -24,9 +22,3 @@ export function DynamicOrientationSelection({ fields, styleOptions, onChange }) 
     />
   );
 }
-
-DynamicOrientationSelection.propTypes = {
-  fields: PropTypes.arrayOf(fieldShape).isRequired,
-  styleOptions: dynamicOrientationShape.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
