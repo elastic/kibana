@@ -62,8 +62,6 @@ export class Env {
   /** @internal */
   public readonly logDir: string;
   /** @internal */
-  public readonly staticFilesDir: string;
-  /** @internal */
   public readonly pluginSearchPaths: readonly string[];
 
   /**
@@ -101,7 +99,6 @@ export class Env {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
-    this.staticFilesDir = resolve(this.homeDir, 'ui');
 
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
