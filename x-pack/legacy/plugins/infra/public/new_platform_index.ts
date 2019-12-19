@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose } from '../lib/compose/kibana_compose';
-import { startApp } from './start_app';
-startApp(compose());
+import { PluginInitializerContext } from 'kibana/public';
+import { Plugin } from './new_platform_plugin';
+
+export function plugin(context: PluginInitializerContext) {
+  return new Plugin(context);
+}
