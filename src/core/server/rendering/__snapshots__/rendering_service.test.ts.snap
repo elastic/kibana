@@ -45,6 +45,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -115,6 +116,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -185,6 +187,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -259,6 +262,7 @@ Object {
     "translationsUrl": "/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -329,6 +333,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -399,6 +404,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -469,6 +475,7 @@ Object {
     "translationsUrl": "/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -539,6 +546,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -611,6 +619,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,
@@ -681,6 +690,7 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "app": Object {},
     "basePath": "/mock-server-basepath",
     "branch": Any<String>,
     "buildNum": Any<Number>,

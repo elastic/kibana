@@ -105,8 +105,7 @@ export interface IScopedRenderingClient {
    * Generate a KibanaResponse which renders an HTML page bootstrapped
    * with the `core` bundle.
    * Intended as a response body for HTTP route handlers.
-   *
-   * * @example
+   * @example
    * ```ts
    * router.get(
    *   { path: '/', validate: false },

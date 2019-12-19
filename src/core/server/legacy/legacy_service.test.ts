@@ -41,9 +41,9 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
-import { findLegacyPluginSpecs } from './plugins/find_legacy_plugin_specs';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
+import { findLegacyPluginSpecs } from './plugins';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 

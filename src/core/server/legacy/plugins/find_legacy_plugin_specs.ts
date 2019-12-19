@@ -30,10 +30,12 @@ import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/u
 import { LegacyConfig } from '../config';
 import { LegacyUiExports, LegacyNavLink, LegacyPluginSpec, LegacyPluginPack } from '../types';
 
+const REMOVE_FROM_ARRAY: any[] = [];
+
 function getUiApps({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
   return uiAppSpecs.flatMap(spec => {
     if (!spec) {
-      return [];
+      return REMOVE_FROM_ARRAY;
     }
 
     const id = spec.pluginId || spec.id;
@@ -49,7 +51,7 @@ function getUiApps({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPlug
     const listed = typeof spec.listed === 'boolean' ? spec.listed : true;
 
     if (spec.hidden || !listed) {
-      return [];
+      return REMOVE_FROM_ARRAY;
     }
 
     return {
