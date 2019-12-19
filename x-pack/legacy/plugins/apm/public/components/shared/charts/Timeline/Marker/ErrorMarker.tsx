@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiText } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useState } from 'react';
 import styled from 'styled-components';
@@ -27,12 +27,9 @@ const Popover = styled.div`
   max-width: ${px(280)};
 `;
 
-const Label = styled.div`
+const TimeLabel = styled.div`
   font-size: ${fontSizes.small};
   padding-bottom: ${px(unit)};
-  &:last-of-type {
-    padding-bottom: 0;
-  }
 `;
 
 const ErrorLink = styled(ErrorDetailLink)`
@@ -73,20 +70,21 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       anchorPosition="upCenter"
     >
       <Popover>
-        <Label>{`@ ${asDuration(mark.offset + mark.skew)}`}</Label>
+        <TimeLabel>{`@ ${asDuration(mark.offset + mark.skew)}`}</TimeLabel>
         <Legend
           key={mark.serviceColor}
           color={mark.serviceColor}
           text={mark.serviceName}
         />
-        <ErrorLink
-          serviceName={mark.serviceName}
-          errorGroupId={mark.error.error.grouping_key}
-          query={query}
-          size="l"
-        >
-          {mark.message}
-        </ErrorLink>
+        <EuiText size="s">
+          <ErrorLink
+            serviceName={mark.serviceName}
+            errorGroupId={mark.error.error.grouping_key}
+            query={query}
+          >
+            {mark.message}
+          </ErrorLink>
+        </EuiText>
       </Popover>
     </EuiPopover>
   );
