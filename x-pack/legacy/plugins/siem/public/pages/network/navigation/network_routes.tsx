@@ -21,6 +21,7 @@ import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
 import { TlsQueryTabBody } from './tls_query_tab_body';
 import { Anomaly } from '../../../components/ml/types';
+import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
 
 export const NetworkRoutes = ({
   networkPagePath,
@@ -142,6 +143,10 @@ export const NetworkRoutes = ({
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         )}
+      />
+      <Route
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}
+        render={() => <NetworkAlertsQueryTabBody {...tabProps} />}
       />
     </Switch>
   );
