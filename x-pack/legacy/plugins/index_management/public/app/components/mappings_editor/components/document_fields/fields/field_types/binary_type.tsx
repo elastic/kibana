@@ -6,16 +6,13 @@
 import React from 'react';
 
 import { StoreParameter, DocValuesParameter } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { AdvancedParametersSection } from '../edit_field';
 
 export const BinaryType = () => {
   return (
-    <AdvancedSettingsWrapper hasBasicSettings={false}>
-      <EditFieldSection>
-        <DocValuesParameter configPath="doc_values_binary" />
-
-        <StoreParameter />
-      </EditFieldSection>
-    </AdvancedSettingsWrapper>
+    <AdvancedParametersSection hasBasicSettings={false}>
+      <DocValuesParameter configPath="doc_values_binary" />
+      <StoreParameter />
+    </AdvancedParametersSection>
   );
 };

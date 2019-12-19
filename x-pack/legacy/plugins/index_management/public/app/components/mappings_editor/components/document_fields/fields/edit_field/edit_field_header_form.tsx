@@ -21,7 +21,6 @@ import { getFieldConfig, filterTypesForMultiField } from '../../../../lib';
 import { TYPE_DEFINITION, getTypeDescription } from '../../../../constants';
 
 import { NameParameter, TypeParameter } from '../../field_parameters';
-import { EditFieldSection } from './edit_field_section';
 
 interface Props {
   type: MainType;
@@ -65,76 +64,74 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
   };
 
   return (
-    <EditFieldSection>
-      <>
-        <EuiFlexGroup gutterSize="s">
-          {/* Field name */}
-          <EuiFlexItem>
-            <NameParameter />
-          </EuiFlexItem>
+    <>
+      <EuiFlexGroup gutterSize="s">
+        {/* Field name */}
+        <EuiFlexItem>
+          <NameParameter />
+        </EuiFlexItem>
 
-          {/* Field type */}
-          <EuiFlexItem>
-            <TypeParameter isMultiField={isMultiField} onTypeChange={onTypeChange} />
-          </EuiFlexItem>
+        {/* Field type */}
+        <EuiFlexItem>
+          <TypeParameter isMultiField={isMultiField} onTypeChange={onTypeChange} />
+        </EuiFlexItem>
 
-          {/* Field sub type (if any) */}
-          {hasSubType && (
-            <EuiFlexItem>
-              <UseField
-                path="subType"
-                config={{
-                  ...getFieldConfig('type'),
-                  label: typeDefinition.subTypes!.label,
-                  defaultValue: defaultValueSubType,
-                }}
-              >
-                {subTypeField => {
-                  return (
-                    <EuiFormRow label={subTypeField.label}>
-                      <EuiComboBox
-                        placeholder={i18n.translate(
-                          'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
-                          {
-                            defaultMessage: 'Select a type',
-                          }
-                        )}
-                        singleSelection={{ asPlainText: true }}
-                        options={
-                          isMultiField ? filterTypesForMultiField(subTypeOptions!) : subTypeOptions
+        {/* Field sub type (if any) */}
+        {hasSubType && (
+          <EuiFlexItem>
+            <UseField
+              path="subType"
+              config={{
+                ...getFieldConfig('type'),
+                label: typeDefinition.subTypes!.label,
+                defaultValue: defaultValueSubType,
+              }}
+            >
+              {subTypeField => {
+                return (
+                  <EuiFormRow label={subTypeField.label}>
+                    <EuiComboBox
+                      placeholder={i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
+                        {
+                          defaultMessage: 'Select a type',
                         }
-                        selectedOptions={subTypeField.value as ComboBoxOption[]}
-                        onChange={subType => subTypeField.setValue(subType)}
-                        isClearable={false}
-                      />
-                    </EuiFormRow>
-                  );
-                }}
-              </UseField>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+                      )}
+                      singleSelection={{ asPlainText: true }}
+                      options={
+                        isMultiField ? filterTypesForMultiField(subTypeOptions!) : subTypeOptions
+                      }
+                      selectedOptions={subTypeField.value as ComboBoxOption[]}
+                      onChange={subType => subTypeField.setValue(subType)}
+                      isClearable={false}
+                    />
+                  </EuiFormRow>
+                );
+              }}
+            </UseField>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
-        <EuiSpacer size="l" />
+      <EuiSpacer size="l" />
 
-        <EuiText size="s" color="subdued">
-          {isMultiField
-            ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldIntroductionText', {
-                defaultMessage:
-                  'This is a {type} multi-field. You can use multi-fields to index the same field in different ways.',
-                values: {
-                  type,
-                },
-              })
-            : i18n.translate('xpack.idxMgmt.mappingsEditor.fieldIntroductionText', {
-                defaultMessage: 'This is a {type} field.',
-                values: {
-                  type,
-                },
-              })}{' '}
-          {getTypeDescription(type)}
-        </EuiText>
-      </>
-    </EditFieldSection>
+      <EuiText size="s" color="subdued">
+        {isMultiField
+          ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldIntroductionText', {
+              defaultMessage:
+                'This is a {type} multi-field. You can use multi-fields to index the same field in different ways.',
+              values: {
+                type,
+              },
+            })
+          : i18n.translate('xpack.idxMgmt.mappingsEditor.fieldIntroductionText', {
+              defaultMessage: 'This is a {type} field.',
+              values: {
+                type,
+              },
+            })}{' '}
+        {getTypeDescription(type)}
+      </EuiText>
+    </>
   );
 });

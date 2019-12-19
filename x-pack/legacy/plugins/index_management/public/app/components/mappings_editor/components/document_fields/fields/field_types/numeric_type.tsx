@@ -19,7 +19,7 @@ import {
   IgnoreMalformedParameter,
   CopyToParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -44,7 +44,7 @@ interface Props {
 export const NumericType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         {/* scaling_factor */}
         <FormDataProvider pathsToWatch="subType">
           {formData =>
@@ -67,38 +67,36 @@ export const NumericType = ({ field }: Props) => {
         <IndexParameter hasIndexOptions={false} />
 
         <IgnoreMalformedParameter />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <CoerceParameter />
+      <AdvancedParametersSection>
+        <CoerceParameter />
 
-          <DocValuesParameter />
+        <DocValuesParameter />
 
-          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
+        <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
-          <NullValueParameter
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription',
-              {
-                defaultMessage:
-                  'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
-              }
-            )}
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-          >
-            <UseField
-              path="null_value"
-              component={NumericField}
-              config={getFieldConfig('null_value_numeric')}
-            />
-          </NullValueParameter>
+        <NullValueParameter
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription',
+            {
+              defaultMessage:
+                'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
+            }
+          )}
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+        >
+          <UseField
+            path="null_value"
+            component={NumericField}
+            config={getFieldConfig('null_value_numeric')}
+          />
+        </NullValueParameter>
 
-          <StoreParameter />
+        <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 };

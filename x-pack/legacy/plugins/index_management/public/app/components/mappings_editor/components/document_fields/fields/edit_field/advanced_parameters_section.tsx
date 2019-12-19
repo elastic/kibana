@@ -6,14 +6,13 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;
-  hasBasicSettings?: boolean;
 }
 
-export const AdvancedSettingsWrapper = ({ children, hasBasicSettings = true }: Props) => {
+export const AdvancedParametersSection = ({ children }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const toggleIsVisible = () => {
@@ -22,7 +21,7 @@ export const AdvancedSettingsWrapper = ({ children, hasBasicSettings = true }: P
 
   return (
     <div className="mappingsEditor__editField__advancedSettings">
-      {hasBasicSettings ? <EuiSpacer size="m" /> : null}
+      <EuiHorizontalRule />
 
       <EuiButtonEmpty onClick={toggleIsVisible} flush="left">
         {isVisible

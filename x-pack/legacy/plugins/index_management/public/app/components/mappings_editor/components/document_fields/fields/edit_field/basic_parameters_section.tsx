@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import {
+  EuiSpacer,
+} from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;
 }
 
-export const EditFieldSection = ({ children }: Props) => {
-  return <section className="mappingsEditor__editField__section">{children}</section>;
+export const BasicParametersSection = ({ children }: Props) => {
+  return (
+    <section>
+      <EuiSpacer size="l" />
+      {children}
+    </section>
+  );
 };

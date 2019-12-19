@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 import {
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
@@ -42,7 +42,7 @@ interface Props {
 export const ShapeType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.shapeType.ignoredMalformedFieldDescription',
@@ -51,18 +51,17 @@ export const ShapeType = ({ field }: Props) => {
             }
           )}
         />
-      </EditFieldSection>
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <OrientationParameter
-            defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
-          />
+      </BasicParametersSection>
 
-          <IgnoreZValueParameter />
+      <AdvancedParametersSection>
+        <OrientationParameter
+          defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
+        />
 
-          <CoerceParameter configPath="coerce_shape" />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <IgnoreZValueParameter />
+
+        <CoerceParameter configPath="coerce_shape" />
+      </AdvancedParametersSection>
     </>
   );
 };

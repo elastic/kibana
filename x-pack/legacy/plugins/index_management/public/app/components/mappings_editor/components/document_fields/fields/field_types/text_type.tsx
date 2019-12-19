@@ -29,7 +29,7 @@ import {
   TermVectorParameter,
   FieldDataParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -77,14 +77,14 @@ export const TextType = React.memo(({ field }: Props) => {
 
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
+      <AdvancedParametersSection>
         <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
-        <EditFieldSection>
+        <BasicParametersSection>
           <EagerGlobalOrdinalsParameter />
 
           {/* index_phrases */}
@@ -230,9 +230,9 @@ export const TextType = React.memo(({ field }: Props) => {
               }}
             </FormDataProvider>
           </EditFieldFormRow>
-        </EditFieldSection>
+        </BasicParametersSection>
 
-        <EditFieldSection>
+        <BasicParametersSection>
           <SimilarityParameter
             defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
@@ -249,8 +249,8 @@ export const TextType = React.memo(({ field }: Props) => {
           <StoreParameter />
 
           <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        </BasicParametersSection>
+      </AdvancedParametersSection>
     </>
   );
 });

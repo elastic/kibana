@@ -6,8 +6,8 @@
 
 export * from './edit_field_container';
 
-export * from './edit_field_section';
+export * from './basic_parameters_section';
 
 export * from './edit_field_form_row';
 
-export * from './advanced_settings_wrapper';
+export * from './advanced_parameters_section';

@@ -12,18 +12,6 @@
   min-width: 680px;
 }
 
-.mappingsEditor__editField__section {
-  padding-bottom: $euiSizeL;
-
-  & + & {
-    border-bottom: $euiBorderThin;
-  }
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
 .mappingsEditor {
   &__createFieldWrapper {
     background-color: $euiColorLightestShade;
