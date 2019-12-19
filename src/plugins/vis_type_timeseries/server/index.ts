@@ -17,6 +17,19 @@
  * under the License.
  */
 
-export async function getEsShardTimeout(req) {
-  return await req.getEsShardTimeout();
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'src/core/server';
+import { VisTypeTimeseriesPlugin } from './plugin';
+export { VisTypeTimeseriesSetup, Framework } from './plugin';
+
+export const config = {
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+};
+
+export type VisTypeTimeseriesConfig = TypeOf<typeof config.schema>;
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new VisTypeTimeseriesPlugin(initializerContext);
 }
