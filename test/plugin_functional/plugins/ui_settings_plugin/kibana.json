@@ -4,5 +4,5 @@
   "kibanaVersion": "kibana",
   "configPath": ["ui_settings_plugin"],
   "server": true,
-  "ui": false
+  "ui": true
 }
