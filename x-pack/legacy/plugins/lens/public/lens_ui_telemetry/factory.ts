@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { HttpServiceBase } from 'src/core/public';
+import { HttpSetup } from 'src/core/public';
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { BASE_API_URL } from '../../common';
@@ -44,10 +44,10 @@ export class LensReportManager {
   private suggestionEvents: Record<string, Record<string, number>> = {};
 
   private storage: IStorageWrapper;
-  private http: HttpServiceBase;
+  private http: HttpSetup;
   private timer: ReturnType<typeof setInterval>;
 
-  constructor({ storage, http }: { storage: IStorageWrapper; http: HttpServiceBase }) {
+  constructor({ storage, http }: { storage: IStorageWrapper; http: HttpSetup }) {
     this.storage = storage;
     this.http = http;
 
