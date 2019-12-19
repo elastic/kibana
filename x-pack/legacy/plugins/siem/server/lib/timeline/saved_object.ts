@@ -7,6 +7,7 @@
 import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
   ResponseTimeline,
   PageInfoTimeline,
@@ -66,7 +67,7 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string | null
   ): Promise<ResponseFavoriteTimeline> {
-    const userName = request.user?.username ?? '';
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
     const fullName = request.user?.full_name ?? '';
     try {
       let timeline: SavedTimeline = {};
@@ -211,7 +212,7 @@ export class Timeline {
   }
 
   private async getSavedTimeline(request: FrameworkRequest, timelineId: string) {
-    const userName = request.user?.username ?? '';
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
@@ -228,7 +229,7 @@ export class Timeline {
   }
 
   private async getAllSavedTimeline(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    const userName = request.user?.username ?? '';
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
     const savedObjectsClient = request.context.core.savedObjects.client;
     if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
       options.search = `${options.search != null ? options.search : ''} ${
