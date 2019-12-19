@@ -19,7 +19,6 @@
 
 import { Section } from './section';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
-import { Capabilities } from '../../../core/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { CreateSection } from './types';
@@ -36,7 +35,7 @@ export class ManagementService {
     getLegacyManagement: () => LegacyManagementSection
   ) {
     return (section: CreateSection) => {
-      if (this.get(section.id)) {
+      if (this.getSection(section.id)) {
         throw Error(`ManagementSection '${section.id}' already registered`);
       }
 
@@ -50,28 +49,12 @@ export class ManagementService {
       return newSection;
     };
   }
-  private get(sectionId: Section['id']) {
+  private getSection(sectionId: Section['id']) {
     return this.sections.find(section => section.id === sectionId);
   }
 
-  private getAvailable(capabilities: Capabilities) {
-    return () => {
-      // console.log('CAPABILITIES', capabilities.management);
-      // key and false
-      // todo filter based on capabilities
-      return [...this.sections];
-      /*
-      return this.sections.map(section => {
-        const capManagmentSection = capabilities.management[section.id];
-        if (capManagmentSection) {
-          // would be nice to get a copy with apps filtered
-          //section.apps.filter(app => capManagmentSection[app.id]);
-        } else {
-          return section;
-        }
-      });
-      */
-    };
+  private getAllSections() {
+    return this.sections;
   }
 
   public setup = (
@@ -91,17 +74,17 @@ export class ManagementService {
 
     return {
       register,
-      get: this.get.bind(this),
-      getAvailable: this.getAvailable.bind(this),
+      getSection: this.getSection.bind(this),
+      getAllSections: this.getAllSections.bind(this),
     };
   };
 
-  public start = (capabilities: Capabilities) => ({
-    getAvailable: this.getAvailable.bind(this)(capabilities),
-
+  public start = {
+    getSection: this.getSection.bind(this),
+    getAllSections: this.getAllSections.bind(this),
     navigateToApp: (appId: string, options?: { path?: string; state?: any }) => {
       // @ts-ignore
       // console.log('navigateToApp', appId, options);
     },
-  });
+  };
 }

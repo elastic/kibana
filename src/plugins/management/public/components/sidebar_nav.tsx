@@ -85,14 +85,13 @@ const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
 const sectionVisible = (section: LegacySection | LegacyApp) => !section.disabled && section.visible;
 
 export const sideNavItems = (sections: ManagementSection[], selectedId: string) =>
-  sections
-    // .filter(sectionVisible)
-    // .filter(section => section.items.filter(sectionVisible).length)
-    .map(section => ({
-      // items: section.items.filter(sectionVisible).map(sectionToNav(selectedId)),
-      items: section.apps.map(managementAppToNavItem(selectedId, section.id)),
-      ...managementSectionToNavSection(section),
-    }));
+  sections.map(section => ({
+    // todo review
+    items: section.apps
+      .filter(app => app.enabled)
+      .map(managementAppToNavItem(selectedId, section.id)),
+    ...managementSectionToNavSection(section),
+  }));
 
 const findOrAddSection = (navItems: NavSection[], legacySection: LegacySection): NavSection => {
   const foundSection = navItems.find(sec => sec.id === legacySection.id);

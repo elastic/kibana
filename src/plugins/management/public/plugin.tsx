@@ -36,7 +36,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public start(core: CoreStart) {
     return {
-      sections: this.managementSections.start(core.application.capabilities),
+      sections: this.managementSections.start,
       legacy: this.legacyManagement.init(core.application.capabilities),
     };
   }

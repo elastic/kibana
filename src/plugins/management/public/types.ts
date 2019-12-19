@@ -31,12 +31,14 @@ export interface ManagementStart {
 }
 
 interface SectionsServiceSetup {
-  get: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
+  getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
+  getAllSections: () => ManagementSection[];
   register: RegisterSection;
 }
 
 interface SectionsServiceStart {
-  getAvailable: () => Array<Omit<ManagementSection, 'registerApp'>>; // filtered based on capabilities
+  getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
+  getAllSections: () => ManagementSection[];
   // uses `core.application.navigateToApp` under the hood, automatically prepending the `path` for the link
   navigateToApp: (appId: string, options?: { path?: string; state?: any }) => void;
 }
