@@ -8,9 +8,9 @@ Elements in Canvas are all created using an *expression language* that defines h
 [[canvas-expressions-always-start-with-a-function]]
 === Expressions always start with a function
 
-Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some kind of output. That output can then be inserted into another function, and another after that, until it produces the output you need. Let’s start with the following expression, which uses random data available in Canvas to produce a table.
+Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some kind of output. That output can then be inserted into another function, and another after that, until it produces the output you need. 
 
-Run the following expression:
+To use random available data in Canvas to produce a table, run the following expression:
 
 [source,text]
 ----
@@ -40,11 +40,11 @@ filters
 | render
 ----
 
-To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn, pointseries>> function. Each unique value in the "state" column will have an associated "size" value, which in this case, will be the maximum value of the "price" column.
+To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn, pointseries>> function. Each unique value in the state column will have an associated size value, which in this case, will be the maximum value of the price column.
 
 If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is inserted into the <<pie_fn, pie>> function, which will produce an output that will render a pie visualization. And just like before, this is inserted into the <<render_fn, render>> function, which is useful for its arguments.
 
-The end result is a simple pie chart that uses the default color palette, but the <<pie_fn, pie>> function can take additional arguments that control how it gets rendered. For example, you can provide a hole argument to turn your pie chart into a donut chart by changing the expression to:
+The end result is a simple pie chart that uses the default color palette, but the <<pie_fn, pie>> function can take additional arguments that control how it gets rendered. For example, you can provide a `hole` argument to turn your pie chart into a donut chart by changing the expression to:
 
 
 image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart]
@@ -65,8 +65,8 @@ Argument definitions have one canonical name, which is always provided in the un
 
 For example, the <<mapColumn_fn, mapColumn>> function has 2 arguments:
 
-* `expression` - Produces a calculated value
-* `name` - The name of column
+* `expression` - Produces a calculated value.
+* `name` - The name of column.
 
 The `expression` argument includes some aliases, namely `exp`, `fn`, and `function`. That means that you can use any of those four options to provide that argument’s value. 
 
@@ -193,7 +193,7 @@ The expression does the following:
 
 That boolean value becomes the value for the `condition` argument. The output from the `then` expression is used as the output when `condition` is `true`. The output from the "else" expression is used when `condition` is false. In both cases, a base64-encoded image will be returned, and one of the two images will be displayed.
 
-You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly piped into <<getCell_fn, getCell>>. The answer is simple, but important to understand. When nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function, that its parent function receives. In this specific expression, demodata’s data table is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
+You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly inserted into <<getCell_fn, getCell>>. The answer is simple, but important to understand. When nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function that its parent function receives. In this specific expression, demodata’s data table is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
 
 The passing of the _context_ is automatic, and it happens no matter how deeply you nest your sub-expressions. To demonstrate this, let’s modify the expression slightly to compare the value of the price against multiple conditions using the <<all_fn, all>> function. 
 
@@ -211,11 +211,11 @@ This time, `getCell price` is run, and the result is passed into the next functi
 
 Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple sources. As an example, you could query an API for a value to use as part of the query provided to <<essql_fn, essql>>. 
 
-This whole section is really just scratching the surface, but hopefully after reading it you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing _context_ and sub-expressions together to turn any input into your desired output.
+This whole section is really just scratching the surface, but hopefully after reading it, you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing _context_ and sub-expressions together to turn any input into your desired output.
 
 [[canvas-handling-context-and-argument-types]]
 === Handling context and argument types
-If you look through the function docs, you may notice that all of them define what a function accepts and what it returns. Additionally, every argument includes a type property that specifies the kind of data that can be used. These two types of values are actually the same, and can be used as a guide for how to deal with piping to other functions and using subexpressions for argument values. 
+If you look through the <<canvas-function-reference,function docs>>, you may notice that all of them define what a function accepts and what it returns. Additionally, every argument includes a type property that specifies the kind of data that can be used. These two types of values are actually the same, and can be used as a guide for how to deal with piping to other functions and using subexpressions for argument values. 
 
 To explain how this works, consider the following expression from the previous section:
 
@@ -224,7 +224,7 @@ To explain how this works, consider the following expression from the previous s
 image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
 ----
 
-If you <<image_fn,look at the docs>> for the `image` function, you’ll see that it accepts the `null` data type and returns an `image` data type. Accepting `null` effectively means that it does not use context at all, so if you pipe anything to `image`, the value that was produced previously will be ignored. When the function executes, it will produce an `image` output, which is simply an object of type `image` that contains the information required to render an image. 
+If you <<image_fn,look at the docs>> for the `image` function, you’ll see that it accepts the `null` data type and returns an `image` data type. Accepting `null` effectively means that it does not use context at all, so if you insert anything to `image`, the value that was produced previously will be ignored. When the function executes, it will produce an `image` output, which is simply an object of type `image` that contains the information required to render an image. 
 
 NOTE: The function does not render an image itself.
 
@@ -244,11 +244,11 @@ string "0.4"
 
 If you <<revealImage_fn,check the docs>> for the `revealImage` function, you’ll see that it accepts a `number` but the `string` function returns a `string` type. In this case, because the string value is a number, it can be converted into a `number` type and used without you having to do anything else. 
 
-Most "primitive" types can be converted automatically, as you might expect. You just saw that a `string` can be cast into a `number`, but you can also pretty easily cast things into `boolean` too, and you can cast anything to `null`. 
+Most `primitive` types can be converted automatically, as you might expect. You just saw that a `string` can be cast into a `number`, but you can also pretty easily cast things into `boolean` too, and you can cast anything to `null`. 
 
 There are other useful type casting options available. For example, something of type `datatable` can be cast to a type `pointseries` simply by only preserving specific columns from the data (namely x, y, size, color, and text). This allows you to treat your source data, which is generally of type `datatable`, like a `pointseries` type simply by convention. 
 
-You can fetch data from Elasticsearch using `essql`, which allows you to aggregate the data, provide a custom name for the value, and pipe that data directly to another function that only accepts `pointseries` even though `essql` will output a `datatable` type. This makes the following example expression valid:
+You can fetch data from Elasticsearch using `essql`, which allows you to aggregate the data, provide a custom name for the value, and insert that data directly to another function that only accepts `pointseries` even though `essql` will output a `datatable` type. This makes the following example expression valid:
 
 [source,text]
 ----
