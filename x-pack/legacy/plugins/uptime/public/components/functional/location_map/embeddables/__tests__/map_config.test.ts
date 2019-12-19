@@ -33,7 +33,7 @@ describe('map_config', () => {
 
   describe('#getLayerList', () => {
     test('it returns the low poly layer', () => {
-      const layerList = getLayerList(upPoints, downPoints, { danger: 'red', gray: '#000' });
+      const layerList = getLayerList(upPoints, downPoints, { danger: '#BC261E', gray: '#000' });
       expect(layerList).toStrictEqual(mockLayerList);
     });
   });
