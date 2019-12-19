@@ -17,30 +17,9 @@
  * under the License.
  */
 
-import { Reporter, Storage } from '@kbn/analytics';
-import { HttpSetup } from 'kibana/public';
+import { loadingCountServiceMock } from './loading_count_service.mock';
 
-interface AnalyicsReporterConfig {
-  localStorage: Storage;
-  debug: boolean;
-  fetch: HttpSetup;
-}
-
-export function createReporter(config: AnalyicsReporterConfig): Reporter {
-  const { localStorage, debug, fetch } = config;
-
-  return new Reporter({
-    debug,
-    storage: localStorage,
-    async http(report) {
-      const response = await fetch.post('/api/ui_metric/report', {
-        body: JSON.stringify({ report }),
-      });
-
-      if (response.status !== 'ok') {
-        throw Error('Unable to store report.');
-      }
-      return response;
-    },
-  });
-}
+export const loadingServiceMock = loadingCountServiceMock.create();
+jest.doMock('./loading_count_service', () => ({
+  LoadingCountService: jest.fn(() => loadingServiceMock),
+}));
