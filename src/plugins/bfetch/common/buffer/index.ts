@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export * from './util';
-export * from './streaming';
-export * from './buffer';
+export * from './item_buffer';
+export * from './timed_item_buffer';
+export * from './create_batched_function';

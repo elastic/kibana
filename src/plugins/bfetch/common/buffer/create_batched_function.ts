@@ -22,28 +22,28 @@ import { TimedItemBufferParams, TimedItemBuffer } from './timed_item_buffer';
 
 type Fn = (...args: any) => any;
 
-export interface BatchedFunctionParams<F extends Fn> {
-  onCall: F;
-  onBatch: (items: Array<Parameters<F>>) => void;
+export interface BatchedFunctionParams<Func extends Fn, BatchEntry> {
+  onCall: (...args: Parameters<Func>) => [Func, BatchEntry];
+  onBatch: (items: BatchEntry[]) => void;
   flushOnMaxItems?: ItemBufferParams<any>['flushOnMaxItems'];
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
 }
 
-export const createBatchedFunction = <F extends Fn>(
-  params: BatchedFunctionParams<F>
-): [F, TimedItemBuffer<Parameters<F>>] => {
+export const createBatchedFunction = <Func extends Fn, BatchEntry>(
+  params: BatchedFunctionParams<Func, BatchEntry>
+): [Func, TimedItemBuffer<BatchEntry>] => {
   const { onCall, onBatch, maxItemAge = 10, flushOnMaxItems = 25 } = params;
-  const buffer = new TimedItemBuffer<Parameters<F>>({
+  const buffer = new TimedItemBuffer<BatchEntry>({
     onflush: onBatch,
     maxItemAge,
     flushOnMaxItems,
   });
 
-  const fn: F = ((...args) => {
-    const result = onCall(...args);
-    buffer.write(args);
+  const fn: Func = ((...args) => {
+    const [result, batchEntry] = onCall(...args);
+    buffer.write(batchEntry);
     return result;
-  }) as F;
+  }) as Func;
 
   return [fn, buffer];
 };

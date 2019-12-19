@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export * from './util';
-export * from './streaming';
-export * from './buffer';
+import { ItemBufferParams, TimedItemBufferParams } from '../../common';
+import { fetchStreaming } from '../streaming';
+
+export interface StreamingBatchedFunctionParams<Payload, Result> {
+  url: string;
+  fetchStreaming?: typeof fetchStreaming,
+  flushOnMaxItems?: ItemBufferParams<any>['flushOnMaxItems'];
+  maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
+}
+
+export const createStreamingBatchedFunction = <Payload, Result>(
+  params: StreamingBatchedFunctionParams<Payload, Result>
+): ((payload: Payload) => Promise<Result>) => {
+  createBatchedFunction<(payload: Payload) => Promise<Result>, any>({
+    onBatch: 
+  });
+  const fn: (payload: Payload) => Promise<Result> = payload => {};
+};
