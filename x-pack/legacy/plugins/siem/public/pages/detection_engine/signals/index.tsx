@@ -265,7 +265,9 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       [createTimelineCallback, filterGroup, kbnVersion]
     );
 
-    const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}`], [DEFAULT_SIGNALS_INDEX]);
+    const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}-default`], [
+      DEFAULT_SIGNALS_INDEX,
+    ]);
     const defaultFiltersMemo = useMemo(
       () => [
         ...defaultFilters,
