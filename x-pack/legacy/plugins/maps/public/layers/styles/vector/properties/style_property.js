@@ -24,6 +24,10 @@ export class AbstractStyleProperty {
     return true;
   }
 
+  formatField(value) {
+    return value;
+  }
+
   getStyleName() {
     return this._styleName;
   }
@@ -32,7 +36,11 @@ export class AbstractStyleProperty {
     return this._options || {};
   }
 
-  renderHeader() {
+  renderLegendHeader() {
+    return null;
+  }
+
+  renderLegendDetailRow() {
     return null;
   }
 }
