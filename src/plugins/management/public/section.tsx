@@ -17,24 +17,16 @@
  * under the License.
  */
 
-import * as React from 'react';
-import ReactDOM from 'react-dom';
-import {
-  ManagementApp,
-  CreateSection,
-  ManagementSection,
-  RegisterManagementAppArgs,
-} from './types';
+import { CreateSection, ManagementSection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
-import { Chrome } from './chrome';
-import { Unmount } from './types';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
+import { ManagementApp } from './management_app';
 
 export class Section implements ManagementSection {
   public readonly id: string = '';
   public readonly title: string = '';
-  public readonly apps: ManagementApp[] = []; // todo unused
+  public readonly apps: ManagementApp[] = [];
   public readonly order?: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
@@ -58,35 +50,14 @@ export class Section implements ManagementSection {
     this.getLegacyManagementSection = getLegacyManagementSection;
   }
 
-  // todo create class
-  registerApp({ id, title, order, mount }: RegisterManagementAppArgs): ManagementApp {
-    const legacyAppId = `management/${this.id}/${id}`;
-    this.registerLegacyApp({
-      id: legacyAppId,
-      title,
-      mount: async (appMountContext, params) => {
-        let appUnmount: Unmount;
-
-        ReactDOM.render(
-          <Chrome
-            sections={this.sections}
-            selectedId={id}
-            legacySections={this.getLegacyManagementSection().items}
-            mountedCallback={async element => {
-              appUnmount = await mount(appMountContext, { sectionBasePath: legacyAppId, element });
-            }}
-          />,
-          params.element
-        );
-
-        return async () => {
-          appUnmount();
-          ReactDOM.unmountComponentAtNode(params.element);
-        };
-      },
-    });
-
-    const app = { id, title, sectionId: this.id, order, basePath: legacyAppId, mount };
+  registerApp({ id, title, order, mount }: RegisterManagementAppArgs) {
+    const app = new ManagementApp(
+      { id, title, order, mount, basePath: '' },
+      this.id,
+      this.sections,
+      this.registerLegacyApp,
+      this.getLegacyManagementSection
+    );
     this.apps.push(app);
     return app;
   }

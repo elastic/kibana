@@ -25,11 +25,12 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // export * from './plugin';
+// todo review exports
 export {
   ManagementSetup,
   ManagementStart,
   ManagementSection,
-  ManagementApp,
   RegisterManagementApp,
 } from './types';
+export { ManagementApp } from './management_app';
 export { SidebarNav } from './components';

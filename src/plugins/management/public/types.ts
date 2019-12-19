@@ -19,6 +19,7 @@
 
 import { IconType } from '@elastic/eui';
 import { AppMountContext } from 'kibana/public';
+import { ManagementApp } from './management_app';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -61,21 +62,25 @@ export type RegisterManagementApp = (managementApp: RegisterManagementAppArgs) =
 
 export type Unmount = () => Promise<void> | void;
 
-interface ManagementSectionMountParams {
+interface ManagementAppMountParams {
   sectionBasePath: string; // base path for setting up your router
   element: HTMLElement; // element the section should render into
 }
 
 export type ManagementSectionMount = (
   context: AppMountContext,
-  params: ManagementSectionMountParams
+  params: ManagementAppMountParams
 ) => Unmount | Promise<Unmount>;
 
-export interface ManagementApp {
+export interface IManagementApp extends CreateManagementApp {
+  enable: () => void;
+  disable: () => void;
+}
+
+export interface CreateManagementApp {
   id: string;
   title: string;
   basePath: string;
-  sectionId: string;
   order?: number;
   mount: ManagementSectionMount;
 }
@@ -103,5 +108,3 @@ export interface LegacyApp {
   euiIconType?: IconType;
   icon?: string;
 }
-
-// export type GetLegacyManagement = () =>
