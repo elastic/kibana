@@ -630,6 +630,9 @@ export class VectorLayer extends AbstractLayer {
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
+    // Point layers symbolized as circles require 2 mapbox layers because
+    // "circle" layers do not support "text" style properties
+    // Point layers symbolized as icons only contain a single mapbox layer.
     let markerLayerId;
     let textLayerId;
     if (this._style.arePointsSymbolizedAsCircles()) {

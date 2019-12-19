@@ -13,6 +13,8 @@ const DEFAULT_ICON = 'airfield';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
+export const DEFAULT_MIN_SIZE = 4;
+export const DEFAULT_MAX_SIZE = 32;
 export const DEFAULT_SIGMA = 3;
 
 export const VECTOR_STYLES = {
@@ -146,8 +148,8 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.ICON_SIZE]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: 4,
-        maxSize: 32,
+        minSize: DEFAULT_MIN_SIZE,
+        maxSize: DEFAULT_MAX_SIZE,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -185,8 +187,8 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        minSize: 4,
-        maxSize: 32,
+        minSize: DEFAULT_MIN_SIZE,
+        maxSize: DEFAULT_MAX_SIZE,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,

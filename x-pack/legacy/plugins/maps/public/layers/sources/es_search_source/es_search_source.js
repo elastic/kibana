@@ -137,6 +137,7 @@ export class ESSearchSource extends AbstractESSource {
           return this.createField({ fieldName: field.name });
         });
     } catch (error) {
+      // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
     }
   }

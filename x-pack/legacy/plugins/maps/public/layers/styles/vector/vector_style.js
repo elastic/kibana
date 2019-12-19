@@ -580,7 +580,6 @@ export class VectorStyle extends AbstractStyle {
   }
 
   setMBPropertiesForLabelText({ alpha, mbMap, textLayerId }) {
-    mbMap.setLayoutProperty(textLayerId, 'visibility', 'visible');
     mbMap.setLayoutProperty(textLayerId, 'icon-allow-overlap', true);
     mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
