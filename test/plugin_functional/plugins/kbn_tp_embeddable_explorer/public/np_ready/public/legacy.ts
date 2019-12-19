@@ -22,6 +22,7 @@ import 'ui/autoload/all';
 import 'uiExports/interpreter';
 import 'uiExports/embeddableFactories';
 import 'uiExports/embeddableActions';
+import 'uiExports/visTypes';
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
