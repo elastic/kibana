@@ -229,7 +229,7 @@ export const vislibPointSeriesTypes = {
     const tooManySeries =
       defaults.charts.length && defaults.charts[0].series.length > cfg.heatmapMaxBuckets;
     if (hasCharts && tooManySeries) {
-      defaults.error = i18n.translate('common.ui.vislib.heatmap.maxBucketsText', {
+      defaults.error = i18n.translate('kbnVislibVisTypes.vislib.heatmap.maxBucketsText', {
         defaultMessage:
           'There are too many series defined ({nr}). The configured maximum is {max}.',
         values: {
