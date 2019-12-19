@@ -51,6 +51,7 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   max_signals: 100,
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
+  timeline_id: 'timeline-id',
 });
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -219,6 +220,7 @@ export const getResult = (): RuleAlertType => ({
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
+  consumer: 'siem',
   params: {
     createdAt: '2019-12-13T16:40:33.400Z',
     updatedAt: '2019-12-13T16:40:33.400Z',
@@ -227,14 +229,22 @@ export const getResult = (): RuleAlertType => ({
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     falsePositives: [],
     from: 'now-6m',
-    filter: null,
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     outputIndex: '.siem-signals',
-    savedId: null,
-    meta: null,
-    filters: null,
+    savedId: 'some-id',
+    timelineId: 'some-timeline-id',
+    meta: { someMeta: 'someField' },
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     riskScore: 50,
     maxSignals: 100,
     size: 1,
@@ -262,7 +272,7 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },
-  interval: '5m',
+  schedule: { interval: '5m' },
   enabled: true,
   actions: [],
   throttle: null,

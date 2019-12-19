@@ -263,7 +263,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   const sorting = {
     sort: {
       field: 'startTimeInMillis',
-      direction: 'desc',
+      direction: 'desc' as const,
     },
   };
 
@@ -354,7 +354,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'repository',
         name: i18n.translate('xpack.snapshotRestore.snapshotList.table.repositoryFilterLabel', {
           defaultMessage: 'Repository',
