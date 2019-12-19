@@ -8,14 +8,14 @@ import { ILicense } from '../../../../../../plugins/licensing/server';
 
 export interface UMLicenseStatusResponse {
   statusCode: number;
-  message?: string;
+  message: string;
 }
 export type UMLicenseCheck = (
-  license: Pick<ILicense, 'isActive' | 'hasAtLeast'> | null
+  license?: Pick<ILicense, 'isActive' | 'hasAtLeast'> | null
 ) => UMLicenseStatusResponse;
 
 export const licenseCheck: UMLicenseCheck = license => {
-  if (license === null) {
+  if (license === null || license === undefined) {
     return {
       message: 'Missing license information',
       statusCode: 400,
@@ -34,6 +34,7 @@ export const licenseCheck: UMLicenseCheck = license => {
     };
   }
   return {
+    message: 'License is valid and active',
     statusCode: 200,
   };
 };

@@ -2,7 +2,7 @@
 
 exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters when a location is specified 1`] = `
 Array [
-  Object {},
+  "search",
   Object {
     "body": Object {
       "aggs": Object {
@@ -74,7 +74,7 @@ Array [
 
 exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will run expected parameters when no location is specified 1`] = `
 Array [
-  Object {},
+  "search",
   Object {
     "body": Object {
       "aggs": Object {
