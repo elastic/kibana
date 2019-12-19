@@ -5,6 +5,7 @@
  */
 import React, { Fragment } from 'react';
 import {
+  EuiComboBox,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiForm,
@@ -20,6 +21,8 @@ interface AddDataSourceFormProps {
   onCheckboxChange: (name: string) => void;
   onTextChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
   datasetCheckboxes: EuiCheckboxGroupOption[];
+  policyOptions: FormState['policies'];
+  onPolicyChange: (selectedOptions: AddDataSourceFormProps['policyOptions']) => unknown;
 }
 
 export const StepOne = ({
@@ -27,6 +30,8 @@ export const StepOne = ({
   onCheckboxChange,
   onTextChange,
   datasetCheckboxes,
+  onPolicyChange,
+  policyOptions,
 }: AddDataSourceFormProps) => {
   return (
     <Fragment>
@@ -62,6 +67,25 @@ export const StepOne = ({
               options={datasetCheckboxes}
               idToSelectedMap={formState.datasets}
               onChange={onCheckboxChange}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+        <EuiHorizontalRule />
+        <EuiDescribedFormGroup
+          idAria="data-source-policy"
+          title={<h3>Assign data source to policy</h3>}
+          description={
+            <Fragment>
+              Policies can help you maintain a group of data sources across a fleet of agents.
+            </Fragment>
+          }
+        >
+          <EuiFormRow label="Policy name" describedByIds={['policy-name']}>
+            <EuiComboBox
+              placeholder="Select a policy"
+              options={policyOptions}
+              selectedOptions={formState.policies}
+              onChange={onPolicyChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

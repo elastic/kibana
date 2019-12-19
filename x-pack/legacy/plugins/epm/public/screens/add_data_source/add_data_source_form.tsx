@@ -5,6 +5,7 @@
  */
 import {
   EuiButton,
+  EuiComboBoxOptionProps,
   EuiHorizontalRule,
   EuiPanel,
   EuiSteps,
@@ -36,14 +37,28 @@ interface AddDataSourceStepsProps {
 export interface FormState {
   datasourceName: string;
   datasets: EuiCheckboxGroupIdToSelectedMap;
+  policies: Array<EuiComboBoxOptionProps<string>>;
 }
+
 const FormNav = styled.div`
   text-align: right;
 `;
 
 export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
+  const defaultPolicyOption = { label: 'Default policy', value: 'default' };
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
-  const [formState, setFormState] = useState<FormState>({ datasourceName: '', datasets: {} });
+  const [datasourceName, setDatasourceName] = useState<FormState['datasourceName']>('');
+  const [selectedDatasets, setSelectedDatasets] = useState<FormState['datasets']>({});
+  const [selectedPolicies, setSelectedPolicies] = useState<FormState['policies']>([
+    defaultPolicyOption,
+  ]);
+
+  const formState: FormState = {
+    datasourceName,
+    datasets: selectedDatasets,
+    policies: selectedPolicies,
+  };
+
   const { notifications } = useCore();
   const { toDetailView } = useLinks();
   const { pkgName, pkgTitle, pkgVersion, datasets } = props;
@@ -54,6 +69,8 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
         pkgkey: `${pkgName}-${pkgVersion}`,
         datasets: datasets.filter(d => formState.datasets[d.name] === true),
         datasourceName: formState.datasourceName,
+        // @ts-ignore not sure where/how to enforce a `value` key
+        policyIds: formState.policies.map(({ value }) => value),
       });
       setAddDataSourceSuccess(true);
       notifications.toasts.addSuccess({
@@ -68,20 +85,14 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
     }
   };
 
-  const onCheckboxChange = (name: string) => {
-    const newCheckboxStateMap = {
-      ...formState,
-      datasets: {
-        ...formState.datasets,
-        [name]: !formState.datasets[name],
-      },
-    };
-    setFormState(newCheckboxStateMap);
-  };
+  const onCheckboxChange = (id: string) =>
+    setSelectedDatasets({
+      ...selectedDatasets,
+      [id]: !selectedDatasets[id],
+    });
 
-  const onTextChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState({ ...formState, [evt.target.name]: evt.target.value });
-  };
+  const onTextChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+    setDatasourceName(evt.target.value);
 
   // create checkbox items from datasets for EuiCheckboxGroup
   const checkboxes = datasets.map(dataset => ({
@@ -97,6 +108,11 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
           datasetCheckboxes={checkboxes}
           onCheckboxChange={onCheckboxChange}
           onTextChange={onTextChange}
+          policyOptions={[
+            defaultPolicyOption,
+            { label: 'Foo policy', value: 'd09bbe00-21e0-11ea-9786-4545a9e62b25' },
+          ]}
+          onPolicyChange={setSelectedPolicies}
           formState={formState}
         />
       ),

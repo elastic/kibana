@@ -170,4 +170,5 @@ export interface DatasourcePayload {
   pkgkey: string;
   datasourceName: string;
   datasets: Dataset[];
+  policyIds: string[];
 }

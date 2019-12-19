@@ -26,7 +26,7 @@ export async function handleRequestInstallDatasource(
   request: CreateDatasourceRequest,
   extra: Extra
 ) {
-  const { pkgkey, datasets, datasourceName } = request.payload;
+  const { pkgkey, datasets, datasourceName, policyIds } = request.payload;
   const user = await request.server.plugins.security?.getUser(request);
   if (!user) return Boom.unauthorized('Must be logged in to perform this operation');
   if (!pkgkey) return Boom.badRequest('Please supply a value for pkgkey in the POST payload');
@@ -34,6 +34,7 @@ export async function handleRequestInstallDatasource(
   if (!datasourceName) {
     return Boom.badRequest('Please supply a value for datasourceName in the POST payload');
   }
+
   const savedObjectsClient = getClient(request);
   const callCluster = getClusterAccessor(extra.context.esClient, request);
   try {
@@ -46,6 +47,7 @@ export async function handleRequestInstallDatasource(
       // long-term, I don't want to pass `request` through
       // but this was the fastest/least invasive change way to make the change
       request,
+      policyIds,
     });
 
     return result;

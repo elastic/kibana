@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fetch from 'node-fetch';
 import yaml from 'js-yaml';
+import fetch from 'node-fetch';
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { Asset, Datasource, Stream } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
+import { createInput } from '../lib/agent/agent';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelinesForDataset } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
@@ -17,7 +18,6 @@ import { installTemplateForDataset } from '../lib/elasticsearch/template/install
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 import { Request } from '../types';
-import { createInput } from '../lib/agent/agent';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -26,8 +26,17 @@ export async function createDatasource(options: {
   pkgkey: string;
   datasourceName: string;
   datasets: Dataset[];
+  policyIds: string[];
 }) {
-  const { savedObjectsClient, callCluster, pkgkey, datasets, datasourceName, request } = options;
+  const {
+    savedObjectsClient,
+    callCluster,
+    pkgkey,
+    datasets,
+    datasourceName,
+    request,
+    policyIds,
+  } = options;
 
   const epmPackageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
   if (epmPackageInfo.status !== InstallationStatus.installed) {
@@ -90,6 +99,12 @@ export async function createDatasource(options: {
     request,
     streams,
   });
+
+  await Promise.all(
+    policyIds.map(policyId =>
+      ingestAddDatasourcesToPolicy({ datasources: [pkgkey], policyId, request })
+    )
+  );
 
   return toSave;
 }
@@ -167,7 +182,7 @@ async function getDatasource(options: {
   const { savedObjectsClient, pkg } = options;
   const datasource = await savedObjectsClient
     .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, Registry.pkgToPkgKey(pkg))
-    .catch(e => undefined);
+    .catch(() => undefined);
 
   return datasource?.attributes;
 }
@@ -183,7 +198,6 @@ interface CreateFakeDatasource {
 function createFakeDatasource({
   pkg,
   datasourceName,
-  datasets,
   assets = [],
   streams,
 }: CreateFakeDatasource): Datasource {
@@ -202,37 +216,6 @@ function createFakeDatasource({
   };
 }
 
-async function ingestDatasourceCreate({
-  request,
-  datasource,
-}: {
-  request: Request;
-  datasource: Datasource;
-}) {
-  // OMG, so gross! Will not keep
-  // if we end up keeping the "make another HTTP request" method,
-  // we'll clean this up via proxy or something else which prevents these functions from needing to know this.
-  // The key here is to show the Saved Object we create being stored/retrieved by Ingest
-
-  // node-fetch requires absolute urls because there isn't an origin on Node
-  const origin = request.server.info.uri; // e.g. http://localhost:5601
-  const basePath = request.getBasePath(); // e.g. /abc
-  const apiPath = '/api/ingest/datasources';
-  const url = `${origin}${basePath}${apiPath}`;
-  const body = { datasource };
-  delete request.headers['transfer-encoding'];
-  await fetch(url, {
-    method: 'post',
-    body: JSON.stringify(body),
-    headers: {
-      'kbn-xsrf': 'some value, any value',
-      'Content-Type': 'application/json',
-      // the main (only?) one we want is `authorization`
-      ...request.headers,
-    },
-  });
-}
-
 async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
   const vars = dataset.vars;
 
@@ -241,7 +224,7 @@ async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
     isDatasetInput(entry, dataset.name)
   );
 
-  if (paths.length === 1) {
+  if (paths.length === 1 && Array.isArray(vars)) {
     const buffer = Registry.getAsset(paths[0]);
     // Load input template from path
     return createInput(vars, buffer.toString());
@@ -255,3 +238,66 @@ const isDatasetInput = ({ path }: Registry.ArchiveEntry, datasetName: string) =>
 };
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
+
+async function ingestAddDatasourcesToPolicy({
+  request,
+  datasources,
+  policyId,
+}: {
+  request: Request;
+  datasources: Array<Datasource['id']>;
+  policyId: string;
+}) {
+  await ingestAPI({
+    method: 'post',
+    path: `/api/ingest/policies/${policyId}/addDatasources`,
+    body: { datasources },
+    request,
+  });
+}
+
+async function ingestDatasourceCreate({
+  request,
+  datasource,
+}: {
+  request: Request;
+  datasource: Datasource;
+}) {
+  await ingestAPI({
+    path: '/api/ingest/datasources',
+    method: 'post',
+    body: { datasource },
+    request,
+  });
+}
+
+// Temporary while we're iterating.
+// If we end up keeping the "make another HTTP request" method,
+// we'll clean this up via proxy or something else
+async function ingestAPI({
+  path,
+  method,
+  body,
+  request,
+}: {
+  path: string;
+  method: string;
+  body: Record<string, any>;
+  request: Request;
+}) {
+  // node-fetch requires absolute urls because there isn't an origin on Node
+  const origin = request.server.info.uri; // e.g. http://localhost:5601
+  const basePath = request.getBasePath(); // e.g. /abc
+  const url = `${origin}${basePath}${path}`;
+
+  return fetch(url, {
+    method,
+    body: JSON.stringify(body),
+    headers: {
+      'kbn-xsrf': 'some value, any value',
+      'Content-Type': 'application/json',
+      // the main (only?) one we want is `authorization`
+      ...request.headers,
+    },
+  });
+}
