@@ -45,7 +45,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     id: alert.id,
     immutable: alert.params.immutable,
     index: alert.params.index,
-    interval: alert.interval,
+    interval: alert.schedule.interval,
     rule_id: alert.params.ruleId,
     language: alert.params.language,
     output_index: alert.params.outputIndex,
