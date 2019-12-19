@@ -262,7 +262,7 @@ export const getMessages = () => {
           'The job configuration includes more than 3 influencers. ' +
           'Consider using fewer influencers or creating multiple jobs.',
       }),
-      url: `${createJobsDocsUrl}#influencers`,
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low: {
       status: 'WARNING',
@@ -270,7 +270,7 @@ export const getMessages = () => {
         defaultMessage:
           'No influencers have been configured. Picking an influencer is strongly recommended.',
       }),
-      url: `${createJobsDocsUrl}#influencers`,
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low_suggestion: {
       status: 'WARNING',
@@ -282,7 +282,7 @@ export const getMessages = () => {
           values: { influencerSuggestion: '{{influencerSuggestion}}' },
         }
       ),
-      url: `${createJobsDocsUrl}#influencers`,
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low_suggestions: {
       status: 'WARNING',
@@ -294,7 +294,7 @@ export const getMessages = () => {
           values: { influencerSuggestion: '{{influencerSuggestion}}' },
         }
       ),
-      url: `${createJobsDocsUrl}#influencers`,
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     job_id_empty: {
       status: 'ERROR',
@@ -421,7 +421,7 @@ export const getMessages = () => {
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successInfluencersMessage', {
         defaultMessage: 'Influencer configuration passed the validation checks.',
       }),
-      url: `${createJobsDocsUrl}#influencers`,
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     estimated_mml_greater_than_max_mml: {
       status: 'WARNING',
