@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uptimeSourceSettingsSavedObjectMappings } from './lib/sources';
-
-export const savedObjectMappings = uptimeSourceSettingsSavedObjectMappings;
+export { getSourceSettings } from './get_source_settings';

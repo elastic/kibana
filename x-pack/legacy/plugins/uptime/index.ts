@@ -17,7 +17,6 @@ export const uptime = (kibana: any) =>
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    mappings: savedObjectMappings,
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {
@@ -32,6 +31,7 @@ export const uptime = (kibana: any) =>
         main: 'plugins/uptime/app',
         order: 8900,
         url: '/app/uptime#/',
+        mappings: savedObjectMappings,
       },
       home: ['plugins/uptime/register_feature'],
     },
