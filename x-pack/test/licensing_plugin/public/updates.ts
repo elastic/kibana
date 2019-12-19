@@ -7,7 +7,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { createScenario } from '../scenario';
-import { CoreProvider } from '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function(ftrContext: FtrProviderContext) {
@@ -30,7 +30,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
+          const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -46,7 +46,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
+          const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -62,7 +62,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
+          const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -78,7 +78,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
+          const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');
@@ -94,7 +94,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       expect(
         await browser.executeAsync(async (cb: Function) => {
-          const { setup, testUtils } = ((window as unknown) as CoreProvider).__coreProvider;
+          const { setup, testUtils } = window.__coreProvider;
           // this call enforces signature check to detect license update
           // and causes license re-fetch
           await setup.core.http.get('/');

@@ -18,18 +18,20 @@
  */
 import { LegacyCoreSetup, LegacyCoreStart } from 'kibana/public';
 
-export interface CoreProvider {
-  __coreProvider: {
-    setup: {
-      core: LegacyCoreSetup;
-      plugins: Record<string, any>;
+declare global {
+  interface Window {
+    __coreProvider: {
+      setup: {
+        core: LegacyCoreSetup;
+        plugins: Record<string, any>;
+      };
+      start: {
+        core: LegacyCoreStart;
+        plugins: Record<string, any>;
+      };
+      testUtils: {
+        delay: (ms: number) => Promise<void>;
+      };
     };
-    start: {
-      core: LegacyCoreStart;
-      plugins: Record<string, any>;
-    };
-    testUtils: {
-      delay: (ms: number) => Promise<void>;
-    };
-  };
+  }
 }

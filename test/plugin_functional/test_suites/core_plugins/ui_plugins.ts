@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import { CoreProvider } from '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -35,8 +35,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       it('should run the new platform plugins', async () => {
         expect(
           await browser.execute(() => {
-            const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
-            return setup.plugins.core_plugin_b.sayHi();
+            return window.__coreProvider.setup.plugins.core_plugin_b.sayHi();
           })
         ).to.be('Plugin A said: Hello from Plugin A!');
       });
@@ -50,8 +49,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       it('to injectedMetadata service', async () => {
         expect(
           await browser.execute(() => {
-            const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
-            return setup.core.injectedMetadata.getKibanaBuildNumber();
+            return window.__coreProvider.setup.core.injectedMetadata.getKibanaBuildNumber();
           })
         ).to.be.a('number');
       });
@@ -59,8 +57,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       it('to start services via coreSetup.getStartServices', async () => {
         expect(
           await browser.executeAsync(async cb => {
-            const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
-            const [coreStart] = await setup.core.getStartServices();
+            const [coreStart] = await window.__coreProvider.setup.core.getStartServices();
             cb(Boolean(coreStart.overlays));
           })
         ).to.be(true);

@@ -18,7 +18,7 @@
  */
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import { CoreProvider } from '../../plugins/core_provider_plugin/types';
+import '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -33,8 +33,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
     it('client plugins have access to registered settings', async () => {
       const settings = await browser.execute(() => {
-        const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
-        return setup.core.uiSettings.getAll().ui_settings_plugin;
+        return window.__coreProvider.setup.core.uiSettings.getAll().ui_settings_plugin;
       });
 
       expect(settings).to.eql({
@@ -45,15 +44,15 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       });
 
       const settingsValue = await browser.execute(() => {
-        const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
-        return setup.core.uiSettings.get('ui_settings_plugin');
+        return window.__coreProvider.setup.core.uiSettings.get('ui_settings_plugin');
       });
 
       expect(settingsValue).to.be('2');
 
       const settingsValueViaObservables = await browser.executeAsync(async (callback: Function) => {
-        const { setup } = ((window as unknown) as CoreProvider).__coreProvider;
-        setup.core.uiSettings.get$('ui_settings_plugin').subscribe(v => callback(v));
+        window.__coreProvider.setup.core.uiSettings
+          .get$('ui_settings_plugin')
+          .subscribe(v => callback(v));
       });
 
       expect(settingsValueViaObservables).to.be('2');
