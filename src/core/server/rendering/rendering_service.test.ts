@@ -87,6 +87,16 @@ describe('RenderingService', () => {
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
+      it('renders "core" page for blank basepath', async () => {
+        mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
+
+        const content = await render(createKibanaRequest(), uiSettings);
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
       it('renders "core" page driven by settings', async () => {
         uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
         const content = await render(createKibanaRequest(), uiSettings);
@@ -115,6 +125,16 @@ describe('RenderingService', () => {
       });
 
       it('renders "legacy" page', async () => {
+        const content = await render(createRawRequest(), uiSettings, { appId: 'legacy' });
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+
+        expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "legacy" page for blank basepath', async () => {
+        mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
+
         const content = await render(createRawRequest(), uiSettings, { appId: 'legacy' });
         const dom = load(content);
         const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));

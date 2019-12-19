@@ -32,6 +32,7 @@ import {
   SavedObjectsClientProviderOptions,
   IUiSettingsClient,
   PackageInfo,
+  LegacyRequest,
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
@@ -41,7 +42,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig, ILegacyService } from '../../core/server/legacy';
+import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
@@ -108,19 +109,7 @@ export interface PluginsSetup {
   [key: string]: object;
 }
 
-export interface Platform {
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
-  setupDeps: {
-    core: CoreSetup;
-    plugins: PluginsSetup;
-  };
-  startDeps: {
-    core: CoreSetup;
-    plugins: Record<string, object>;
-  };
+export interface KibanaPlatform {
   __internals: {
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
@@ -129,9 +118,32 @@ export interface Platform {
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
     savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
     rendering: LegacyServiceSetupDeps['core']['rendering'];
-    legacy: ILegacyService;
+    legacy: ILegacyInternals;
   };
-  logger: LoggerFactory;
+  coreContext: {
+    logger: LoggerFactory;
+  };
+  env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
+  setup: {
+    core: CoreSetup;
+    plugins: PluginsSetup;
+  };
+  start: {
+    core: CoreSetup;
+    plugins: Record<string, object>;
+  };
+  stop: null;
+}
+
+export interface LegacyPlatform {
+  __internals: KibanaPlatform['__internals'];
+  env: KibanaPlatform['env'];
+  logger: KibanaPlatform['coreContext']['logger'];
+  setupDeps: KibanaPlatform['setup'];
+  startDeps: KibanaPlatform['start'];
 }
 
 export interface LegacyPlugins {
@@ -142,16 +154,7 @@ export interface LegacyPlugins {
 
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
-  public readonly newPlatform: {
-    __internals: Platform['__internals'];
-    env: Platform['env'];
-    coreContext: {
-      logger: Platform['logger'];
-    };
-    setup: Platform['setupDeps'];
-    start: Platform['startDeps'];
-    stop: null;
-  };
+  public readonly newPlatform: KibanaPlatform;
   public server: Server;
   public inject: Server['inject'];
   public pluginSpecs: any[];
@@ -159,7 +162,7 @@ export default class KbnServer {
   constructor(
     settings: Record<string, any>,
     config: KibanaConfig,
-    core: Platform,
+    core: LegacyPlatform,
     legacyPlugins: LegacyPlugins
   );
 

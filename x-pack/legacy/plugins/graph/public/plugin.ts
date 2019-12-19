@@ -5,7 +5,7 @@
  */
 
 // NP type imports
-import { LegacyCoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -25,7 +25,7 @@ export class GraphPlugin implements Plugin {
   private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private savedObjectsClient: SavedObjectsClientContract | null = null;
 
-  setup(core: LegacyCoreSetup, { licensing }: GraphPluginSetupDependencies) {
+  setup(core: CoreSetup, { licensing }: GraphPluginSetupDependencies) {
     core.application.register({
       id: 'graph',
       title: 'Graph',

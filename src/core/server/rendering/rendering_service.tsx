@@ -79,13 +79,14 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
             vars: injectedVarsOverrides,
             uiPlugins: await Promise.all(
-              [...plugins.uiPlugins.public].map(async ([pluginId, plugin]) => ({
-                id: pluginId,
+              [...plugins.uiPlugins.public].map(async ([id, plugin]) => ({
+                id,
                 plugin,
-                config: await getUiConfig(pluginId),
+                config: await getUiConfig(id),
               }))
             ),
             legacyMetadata: {
+              app: { getId: () => appId },
               bundleId: `app:${appId}`,
               nav: legacyPlugins.navLinks,
               version: env.packageInfo.version,

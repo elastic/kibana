@@ -18,5 +18,5 @@ export interface RequestHandlerContext
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core](./kibana-plugin-server.requesthandlercontext.core.md) | <code>{</code><br/><code>        rendering: IRenderingProvider;</code><br/><code>        savedObjects: {</code><br/><code>            client: SavedObjectsClientContract;</code><br/><code>        };</code><br/><code>        elasticsearch: {</code><br/><code>            dataClient: IScopedClusterClient;</code><br/><code>            adminClient: IScopedClusterClient;</code><br/><code>        };</code><br/><code>        uiSettings: {</code><br/><code>            client: IUiSettingsClient;</code><br/><code>        };</code><br/><code>    }</code> |  |
+|  [core](./kibana-plugin-server.requesthandlercontext.core.md) | <code>{</code><br/><code>        rendering: IScopedRenderingClient;</code><br/><code>        savedObjects: {</code><br/><code>            client: SavedObjectsClientContract;</code><br/><code>        };</code><br/><code>        elasticsearch: {</code><br/><code>            dataClient: IScopedClusterClient;</code><br/><code>            adminClient: IScopedClusterClient;</code><br/><code>        };</code><br/><code>        uiSettings: {</code><br/><code>            client: IUiSettingsClient;</code><br/><code>        };</code><br/><code>    }</code> |  |
 

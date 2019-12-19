@@ -22,7 +22,7 @@ import { difference, get, set } from 'lodash';
 import { getTransform } from '../../../../legacy/deprecation/index';
 import { unset, getFlattenedObject } from '../../../../legacy/utils';
 import { hasConfigPathIntersection } from '../../config';
-import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
+import { LegacyPluginSpec } from '../types';
 import { LegacyConfig } from './types';
 
 const getFlattenedKeys = (object: object) => Object.keys(getFlattenedObject(object));

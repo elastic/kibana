@@ -27,18 +27,60 @@ import {
 import { LoggerFactory } from '../../logging';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { LegacyConfig, LegacyConfigDeprecationProvider } from '../config';
-import { getNavLinks } from './get_nav_links';
+import { LegacyConfig } from '../config';
+import { LegacyUiExports, LegacyNavLink, LegacyPluginSpec, LegacyPluginPack } from '../types';
 
-export interface LegacyPluginPack {
-  getPath(): string;
+function getUiApps({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
+  return uiAppSpecs.flatMap(spec => {
+    if (!spec) {
+      return [];
+    }
+
+    const id = spec.pluginId || spec.id;
+
+    if (!id) {
+      throw new Error('Every app must specify an id');
+    }
+
+    if (spec.pluginId && !pluginSpecs.some(plugin => plugin.getId() === spec.pluginId)) {
+      throw new Error(`Unknown plugin id "${spec.pluginId}"`);
+    }
+
+    const listed = typeof spec.listed === 'boolean' ? spec.listed : true;
+
+    if (spec.hidden || !listed) {
+      return [];
+    }
+
+    return {
+      id,
+      title: spec.title,
+      order: typeof spec.order === 'number' ? spec.order : 0,
+      icon: spec.icon,
+      euiIconType: spec.euiIconType,
+      url: spec.url || `/app/${id}`,
+      linkToLastSubUrl: spec.linkToLastSubUrl,
+    };
+  });
 }
 
-export interface LegacyPluginSpec {
-  getId: () => unknown;
-  getExpectedKibanaVersion: () => string;
-  getConfigPrefix: () => string;
-  getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
+function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
+  const navLinkSpecs = uiExports.navLinkSpecs || [];
+  const navLinks = navLinkSpecs.map<LegacyNavLink>(spec => ({
+    id: spec.id,
+    title: spec.title,
+    order: typeof spec.order === 'number' ? spec.order : 0,
+    url: spec.url,
+    subUrlBase: spec.subUrlBase || spec.url,
+    icon: spec.icon,
+    euiIconType: spec.euiIconType,
+    linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
+    hidden: 'hidden' in spec ? spec.hidden : false,
+    disabled: 'disabled' in spec ? spec.disabled : false,
+    tooltip: spec.tooltip || '',
+  }));
+
+  return [...navLinks, ...getUiApps(uiExports, pluginSpecs)].sort((a, b) => a.order - b.order);
 }
 
 export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
@@ -130,7 +172,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
     log$.pipe(toArray())
   ).toPromise();
   const uiExports = collectLegacyUiExports(pluginSpecs);
-  const navLinks = getNavLinks(uiExports);
+  const navLinks = getNavLinks(uiExports, pluginSpecs);
 
   return {
     disabledPluginSpecs,

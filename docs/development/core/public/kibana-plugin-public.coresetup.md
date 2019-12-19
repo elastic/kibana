@@ -20,6 +20,7 @@ export interface CoreSetup<TPluginsStart extends object = object>
 |  [context](./kibana-plugin-public.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-public.contextsetup.md) |
 |  [fatalErrors](./kibana-plugin-public.coresetup.fatalerrors.md) | <code>FatalErrorsSetup</code> | [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) |
 |  [http](./kibana-plugin-public.coresetup.http.md) | <code>HttpSetup</code> | [HttpSetup](./kibana-plugin-public.httpsetup.md) |
+|  [injectedMetadata](./kibana-plugin-public.coresetup.injectedmetadata.md) | <code>{</code><br/><code>        getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown;</code><br/><code>    }</code> | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. Use the legacy platform API instead. |
 |  [notifications](./kibana-plugin-public.coresetup.notifications.md) | <code>NotificationsSetup</code> | [NotificationsSetup](./kibana-plugin-public.notificationssetup.md) |
 |  [uiSettings](./kibana-plugin-public.coresetup.uisettings.md) | <code>IUiSettingsClient</code> | [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 

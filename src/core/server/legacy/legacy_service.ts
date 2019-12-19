@@ -25,26 +25,18 @@ import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
-import {
-  BasePathProxyServer,
-  HttpConfig,
-  HttpConfigType,
-  LegacyRequest,
-  config as httpConfig,
-} from '../http';
+import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
-import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
 import { LegacyConfig, convertLegacyDeprecationProvider } from './config';
-import { mergeVars } from './merge_vars';
 import {
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
+  LegacyPlugins,
   LegacyServiceDiscoverPlugins,
-  LegacyUiExports,
-  VarsInjector,
 } from './types';
+import { LegacyInternals } from './legacy_internals';
 import { CoreSetup, CoreStart } from '..';
 
 type Vars = Record<string, any>;
@@ -81,7 +73,6 @@ export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
   private hasDiscovered = false;
-  private readonly varsInjectors = new Map<string, Set<VarsInjector>>();
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
@@ -90,14 +81,8 @@ export class LegacyService implements CoreService {
   private setupDeps?: LegacyServiceSetupDeps;
   private update$?: ConnectableObservable<[Config, PathConfigType]>;
   private legacyRawConfig?: LegacyConfig;
-  private legacyPlugins?: {
-    pluginSpecs: LegacyPluginSpec[];
-    disabledPluginSpecs: LegacyPluginSpec[];
-    uiExports: LegacyUiExports;
-    navLinks: Array<Record<string, unknown>>;
-  };
+  private legacyPlugins?: LegacyPlugins;
   private settings?: Vars;
-  private defaultVars?: Vars;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -110,60 +95,6 @@ export class LegacyService implements CoreService {
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
     ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
-  }
-
-  private replaceVars(vars: Vars, request: LegacyRequest) {
-    const { server } = this.setupDeps!.core.http;
-    const { injectedVarsReplacers = [] } = this.legacyPlugins!.uiExports;
-
-    return injectedVarsReplacers.reduce(
-      async (injected, replacer) => replacer(await injected, request, server),
-      Promise.resolve(vars)
-    );
-  }
-
-  /**
-   * Inject UI app vars for a particular plugin
-   */
-  public injectUiAppVars(id: string, injector: VarsInjector) {
-    if (!this.varsInjectors.has(id)) {
-      this.varsInjectors.set(id, new Set());
-    }
-
-    this.varsInjectors.get(id)!.add(injector);
-  }
-
-  /**
-   * Get all the merged injected UI app vars for a particular plugin
-   */
-  public async getInjectedUiAppVars(id: string) {
-    if (!this.setupDeps) {
-      throw new Error(
-        'Legacy service has not been set up yet. Ensure LegacyService.setup() is called before LegacyService.getInjectedUiAppVars()'
-      );
-    }
-
-    const { server } = this.setupDeps!.core.http;
-
-    return [...(this.varsInjectors.get(id) || [])].reduce(
-      async (promise, injector) => ({ ...(await promise), ...(await injector(server)) }),
-      Promise.resolve<Record<string, any>>({})
-    );
-  }
-
-  /**
-   * Get the metadata vars for a particular plugin
-   */
-  public async getVars(id: string, request: LegacyRequest, injected: Vars = {}) {
-    if (!this.setupDeps) {
-      throw new Error(
-        'Legacy service has not been set up yet. Ensure LegacyService.setup() is called before LegacyService.getVars()'
-      );
-    }
-
-    const vars = mergeVars(this.defaultVars!, await this.getInjectedUiAppVars(id), injected);
-
-    return this.replaceVars(vars, request);
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -233,9 +164,9 @@ export class LegacyService implements CoreService {
       pluginSpecs,
       disabledPluginSpecs,
       uiExports,
+      navLinks,
       pluginExtendedConfig,
       settings: this.settings,
-      navLinks,
     };
   }
 
@@ -248,17 +179,9 @@ export class LegacyService implements CoreService {
       );
     }
 
-    const { server } = setupDeps.core.http;
-    const { defaultInjectedVarProviders = [] } = this.legacyPlugins!.uiExports;
-
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
     this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
     this.setupDeps = setupDeps;
-    this.defaultVars = defaultInjectedVarProviders.reduce(
-      (vars, { fn, pluginSpec }) =>
-        mergeVars(vars, fn(server, pluginSpec.readConfigValue(this.legacyRawConfig!, []))),
-      {}
-    );
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
@@ -323,11 +246,7 @@ export class LegacyService implements CoreService {
     config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
     startDeps: LegacyServiceStartDeps,
-    legacyPlugins: {
-      pluginSpecs: LegacyPluginSpec[];
-      disabledPluginSpecs: LegacyPluginSpec[];
-      uiExports: LegacyUiExports;
-    }
+    legacyPlugins: LegacyPlugins
   ) {
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
@@ -397,11 +316,7 @@ export class LegacyService implements CoreService {
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
-          legacy: {
-            injectUiAppVars: (id: string, injector: VarsInjector) =>
-              this.injectUiAppVars(id, injector),
-            getInjectedUiAppVars: (id: string) => this.getInjectedUiAppVars(id),
-          },
+          legacy: new LegacyInternals(legacyPlugins, config, setupDeps.core.http.server),
         },
         logger: this.coreContext.logger,
       },

@@ -911,30 +911,18 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 export interface LegacyRequest extends Request {
 }
 
+// Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
+// 
 // @internal @deprecated (undocumented)
-export interface LegacyServiceDiscoverPlugins {
-    // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    disabledPluginSpecs: LegacyPluginSpec[];
-    // Warning: (ae-forgotten-export) The symbol "Spec" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    navLinks: Spec[];
+export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
     // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     pluginExtendedConfig: LegacyConfig;
-    // (undocumented)
-    pluginSpecs: LegacyPluginSpec[];
     // Warning: (ae-forgotten-export) The symbol "Vars" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     settings: Vars;
-    // Warning: (ae-forgotten-export) The symbol "LegacyUiExports" needs to be exported by the entry point index.d.ts
-    // 
-    // (undocumented)
-    uiExports: LegacyUiExports;
 }
 
 // @public @deprecated (undocumented)
@@ -943,6 +931,8 @@ export interface LegacyServiceSetupDeps {
     // 
     // (undocumented)
     core: LegacyCoreSetup;
+    // Warning: (ae-forgotten-export) The symbol "Spec" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     plugins: Spec;
 }

@@ -23,7 +23,9 @@ export { LegacyObjectToConfigAdapter, ensureValidConfiguration, LegacyConfig } f
 export { LegacyService, ILegacyService } from './legacy_service';
 /** @internal */
 export {
+  ILegacyInternals,
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
+  LegacyNavLink,
 } from './types';

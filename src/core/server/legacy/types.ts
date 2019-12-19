@@ -19,22 +19,41 @@
 
 import { Server } from 'hapi';
 
-import { InternalHttpServiceSetup, LegacyRequest } from '../http';
+import { ChromeNavLink } from '../../public';
+import { LegacyRequest } from '../http';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { RenderingServiceSetup } from '../rendering';
 import { SavedObjectsLegacyUiExports } from '../types';
-import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
-import { LegacyConfig } from './config';
+import { LegacyConfig, LegacyConfigDeprecationProvider } from './config';
 
-type Vars = Record<string, any>;
 type Spec = Record<string, unknown>;
-type MaybeSpec = Spec | undefined;
 type LegacyCoreSetup = InternalCoreSetup & {
   plugins: PluginsServiceSetup;
   rendering: RenderingServiceSetup;
 };
 type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
+
+export type Vars = Record<string, any>;
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface LegacyPluginPack {
+  getPath(): string;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface LegacyPluginSpec {
+  getId: () => unknown;
+  getExpectedKibanaVersion: () => string;
+  getConfigPrefix: () => string;
+  getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
+}
 
 /**
  * @internal
@@ -60,8 +79,27 @@ export type VarsInjector = (server: Server) => Vars | Promise<Vars>;
 export type VarsReplacer = (
   vars: Vars,
   request: LegacyRequest,
-  server: InternalHttpServiceSetup['server']
+  server: Server
 ) => Vars | Promise<Vars>;
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type LegacyNavLinkSpec = Spec & ChromeNavLink;
+
+export type LegacyAppSpec = Pick<
+  ChromeNavLink,
+  'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden'
+> & { pluginId?: string; id?: string; listed?: boolean };
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order'> & {
+  order: number;
+};
 
 /**
  * @internal
@@ -70,8 +108,8 @@ export type VarsReplacer = (
 export type LegacyUiExports = SavedObjectsLegacyUiExports & {
   defaultInjectedVarProviders?: VarsProvider[];
   injectedVarsReplacers?: VarsReplacer[];
-  navLinkSpecs?: Spec[];
-  uiAppSpecs?: MaybeSpec[];
+  navLinkSpecs?: LegacyNavLinkSpec[];
+  uiAppSpecs?: Array<LegacyAppSpec | undefined>;
   unknown?: [{ pluginSpec: { getId: () => unknown }; type: unknown }];
 };
 
@@ -97,11 +135,39 @@ export interface LegacyServiceStartDeps {
  * @internal
  * @deprecated
  */
-export interface LegacyServiceDiscoverPlugins {
+export interface ILegacyInternals {
+  /**
+   * Inject UI app vars for a particular plugin
+   */
+  injectUiAppVars(id: string, injector: VarsInjector): void;
+
+  /**
+   * Get all the merged injected UI app vars for a particular plugin
+   */
+  getInjectedUiAppVars(id: string): Promise<Vars>;
+
+  /**
+   * Get the metadata vars for a particular plugin
+   */
+  getVars(id: string, request: LegacyRequest, injected?: Vars): Promise<Vars>;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface LegacyPlugins {
   disabledPluginSpecs: LegacyPluginSpec[];
-  navLinks: Spec[];
-  pluginExtendedConfig: LegacyConfig;
   pluginSpecs: LegacyPluginSpec[];
-  settings: Vars;
   uiExports: LegacyUiExports;
+  navLinks: LegacyNavLink[];
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
+  pluginExtendedConfig: LegacyConfig;
+  settings: Vars;
 }

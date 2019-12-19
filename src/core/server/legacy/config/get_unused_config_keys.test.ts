@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
+import { LegacyPluginSpec } from '../types';
 import { LegacyConfig } from './types';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 

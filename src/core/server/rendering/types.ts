@@ -19,15 +19,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CspOptions, InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
-import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import { Env } from '../config';
+import { ICspConfig } from '../csp';
+import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
+import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
 import { PluginsServiceSetup, DiscoveredPlugin } from '../plugins';
-import { LegacyServiceDiscoverPlugins } from '../legacy';
+import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 
 /** @internal */
 export interface RenderingMetadata {
-  strictCsp: CspOptions['strict'];
+  strictCsp: ICspConfig['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
   i18n: typeof i18n.translate;
@@ -43,7 +44,7 @@ export interface RenderingMetadata {
     i18n: {
       translationsUrl: string;
     };
-    csp: Pick<CspOptions, 'warnLegacyBrowsers'>;
+    csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
     vars: Record<string, any>;
     uiPlugins: Array<{
       id: string;
@@ -51,8 +52,9 @@ export interface RenderingMetadata {
       config?: Record<string, unknown>;
     }>;
     legacyMetadata: {
+      app: { getId(): string };
       bundleId: string;
-      nav: Array<Record<string, unknown>>;
+      nav: LegacyNavLink[];
       version: string;
       branch: string;
       buildNum: number;

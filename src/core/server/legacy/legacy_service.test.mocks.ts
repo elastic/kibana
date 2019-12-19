@@ -28,6 +28,7 @@ export const findLegacyPluginSpecsMock = jest
     },
     disabledPluginSpecs: [],
     uiExports: {},
+    navLinks: [],
   }));
 jest.doMock('./plugins/find_legacy_plugin_specs.ts', () => ({
   findLegacyPluginSpecs: findLegacyPluginSpecsMock,

@@ -29,8 +29,10 @@ export default function({ getService }) {
       it('provides access to SavedObjects client', async () =>
         await supertest
           .get('/requestcontext/savedobjectsclient')
-          .expect(200, 'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}')
-      ));
+          .expect(
+            200,
+            'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}'
+          ));
 
       it('provides access to application rendering client', async () => {
         await supertest.get('/requestcontext/render').expect(200, /app:core/);

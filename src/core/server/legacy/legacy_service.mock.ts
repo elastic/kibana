@@ -25,6 +25,7 @@ type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId
 const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
   pluginSpecs: [],
   uiExports: {} as any,
+  navLinks: [],
   pluginExtendedConfig: {
     get: jest.fn(),
     has: jest.fn(),
@@ -32,13 +33,9 @@ const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
   },
   disabledPluginSpecs: [],
   settings: {},
-  navLinks: [],
 });
 const createLegacyServiceMock = (): LegacyServiceMock => ({
   legacyId: Symbol(),
-  getVars: jest.fn().mockResolvedValue({}),
-  injectUiAppVars: jest.fn(),
-  getInjectedUiAppVars: jest.fn().mockReturnValue({}),
   discoverPlugins: jest.fn().mockResolvedValue(createDiscoverPluginsMock()),
   setup: jest.fn(),
   start: jest.fn(),
