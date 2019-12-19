@@ -13,8 +13,6 @@ import {
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
-  SavedObjectsLegacyService,
-  LegacyRequest,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
@@ -43,7 +41,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -153,6 +150,12 @@ export class Plugin {
       featuresService: features,
     });
 
+    setupSavedObjects({
+      auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
+      authz,
+      savedObjects: core.savedObjects,
+    });
+
     core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
 
     defineRoutes({
@@ -166,7 +169,6 @@ export class Plugin {
       csp: core.http.csp,
     });
 
-    const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     return deepFreeze({
       authc,
 
@@ -185,16 +187,7 @@ export class Plugin {
       },
 
       __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-
-          setupSavedObjects({
-            auditLogger: new SecurityAuditLogger(legacyAPI.auditLogger),
-            adminClusterClient: adminClient,
-            authz,
-            legacyAPI,
-          });
-        },
+        registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
 
