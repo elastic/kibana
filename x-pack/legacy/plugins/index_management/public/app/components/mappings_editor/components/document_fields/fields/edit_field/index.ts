@@ -11,3 +11,5 @@ export * from './basic_parameters_section';
 export * from './edit_field_form_row';
 
 export * from './advanced_parameters_section';
+
+export * from './field_description_section';

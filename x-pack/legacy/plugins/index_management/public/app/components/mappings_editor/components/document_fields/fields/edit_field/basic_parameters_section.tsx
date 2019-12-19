@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;

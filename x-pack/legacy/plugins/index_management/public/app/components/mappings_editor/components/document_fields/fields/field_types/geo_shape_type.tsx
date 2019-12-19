@@ -6,7 +6,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
@@ -17,7 +17,12 @@ import {
   IgnoreZValueParameter,
   OrientationParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  EditFieldFormRow,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
@@ -39,34 +44,37 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean 
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
-export const GeoShapeType = ({ field }: Props) => {
+export const GeoShapeType = ({ field, isMultiField }: Props) => {
   return (
     <>
-      <BasicParametersSection>
-        <EuiCallOut color="primary">
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.mappingsEditor.geoShape.infoMessage"
-              defaultMessage="GeoShape types are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7 dimension point in a BKD tree. {docsLink}"
-              values={{
-                docsLink: (
-                  <EuiLink
-                    href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
-                    target="_blank"
-                  >
-                    {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.learnMoreLink', {
+      <FieldDescriptionSection isMultiField={isMultiField}>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.mappingsEditor.geoShapeType.fieldDescription"
+            defaultMessage="Geo-shapes are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7-dimensional point in a BKD tree. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink
+                  href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.geoShapeType.fieldDescription.learnMoreLink',
+                    {
                       defaultMessage: 'Learn more.',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiCallOut>
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </FieldDescriptionSection>
 
-        <EuiSpacer />
+      <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.ignoreMalformedFieldDescription',

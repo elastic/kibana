@@ -6,19 +6,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiComboBox,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 import { UseField, useFormContext } from '../../../../shared_imports';
 import { MainType, SubType, Field, ComboBoxOption } from '../../../../types';
 import { getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { TYPE_DEFINITION, getTypeDescription } from '../../../../constants';
+import { TYPE_DEFINITION } from '../../../../constants';
 
 import { NameParameter, TypeParameter } from '../../field_parameters';
 
@@ -112,26 +105,6 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
-      <EuiText size="s" color="subdued">
-        {isMultiField
-          ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldIntroductionText', {
-              defaultMessage:
-                'This is a {type} multi-field. You can use multi-fields to index the same field in different ways.',
-              values: {
-                type,
-              },
-            })
-          : i18n.translate('xpack.idxMgmt.mappingsEditor.fieldIntroductionText', {
-              defaultMessage: 'This is a {type} field.',
-              values: {
-                type,
-              },
-            })}{' '}
-        {getTypeDescription(type)}
-      </EuiText>
     </>
   );
 });

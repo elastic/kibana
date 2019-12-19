@@ -79,21 +79,14 @@ export const FlattenedType = React.memo(({ field }: Props) => {
             }
           )}
           docLink={{
-            text: i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.flattened.ignoreAboveDocLinkText',
-              {
-                defaultMessage: 'Ignore above documentation',
-              }
-            ),
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.flattened.ignoreAboveDocLinkText', {
+              defaultMessage: 'Ignore above documentation',
+            }),
             href: documentationService.getIgnoreAboveLink(),
           }}
           defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
         >
-          <UseField
-            path="ignore_above"
-            config={getFieldConfig('ignore_above')}
-            component={Field}
-          />
+          <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
         </EditFieldFormRow>
 
         <SplitQueriesOnWhitespaceParameter />

@@ -11,7 +11,7 @@ import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
 import { AnalyzersParameter } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import { EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -32,17 +32,14 @@ interface Props {
 
 export const CompletionType = ({ field }: Props) => {
   return (
-    <AdvancedParametersSection hasBasicSettings={false}>
+    <AdvancedParametersSection>
       <AnalyzersParameter field={field} />
 
       {/* max_input_length */}
       <EditFieldFormRow
-        title={i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle',
-          {
-            defaultMessage: 'Set max input length',
-          }
-        )}
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle', {
+          defaultMessage: 'Set max input length',
+        })}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldDescription',
           {

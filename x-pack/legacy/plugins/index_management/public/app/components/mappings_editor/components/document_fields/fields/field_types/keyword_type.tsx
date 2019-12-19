@@ -99,11 +99,7 @@ export const KeywordType = ({ field }: Props) => {
           }}
           defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
         >
-          <UseField
-            path="ignore_above"
-            config={getFieldConfig('ignore_above')}
-            component={Field}
-          />
+          <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
         </EditFieldFormRow>
 
         <NormsParameter configPath="norms_keyword" />
