@@ -9,7 +9,7 @@ import { pickBy } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
-import { createBulkErrorObject } from '../utils';
+import { createBulkErrorObject, BulkError } from '../utils';
 
 export const getIdError = ({
   id,
@@ -33,7 +33,7 @@ export const getIdBulkError = ({
 }: {
   id: string | undefined | null;
   ruleId: string | undefined | null;
-}) => {
+}): BulkError => {
   if (id != null) {
     return createBulkErrorObject({
       ruleId: id,
@@ -116,7 +116,7 @@ export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> |
 export const transformOrBulkError = (
   ruleId: string,
   alert: unknown
-): Partial<OutputRuleAlertRest> | Boom => {
+): Partial<OutputRuleAlertRest> | BulkError => {
   if (isAlertType(alert)) {
     return transformAlertToRule(alert);
   } else {
