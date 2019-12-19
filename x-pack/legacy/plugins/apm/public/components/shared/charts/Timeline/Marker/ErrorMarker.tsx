@@ -35,7 +35,8 @@ const Label = styled.div`
   }
 `;
 
-const Link = styled.div`
+const ErrorLink = styled(ErrorDetailLink)`
+  display: block;
   margin: ${px(unit)} 0 ${px(unit)} 0;
 `;
 
@@ -78,15 +79,14 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
           color={mark.serviceColor}
           text={mark.serviceName}
         />
-        <Link>
-          <ErrorDetailLink
-            serviceName={mark.serviceName}
-            errorGroupId={mark.error.error.grouping_key}
-            query={query}
-          >
-            {mark.message}
-          </ErrorDetailLink>
-        </Link>
+        <ErrorLink
+          serviceName={mark.serviceName}
+          errorGroupId={mark.error.error.grouping_key}
+          query={query}
+          size="l"
+        >
+          {mark.message}
+        </ErrorLink>
       </Popover>
     </EuiPopover>
   );
