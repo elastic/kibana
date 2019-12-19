@@ -1,0 +1,17 @@
+{
+  "rule_id": "cdfbcd5e-1d8e-47e6-b3f2-b09bce780640",
+  "risk_score": 50,
+  "description": "Suricata Possible SQL Injection - SQL Commands in HTTP Transactions",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Possible SQL Injection - SQL Commands in HTTP Transactions",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610117 or 2610118 or 2610118 or 2610119 or 2610121 or 2610122 or 2610123)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -56,7 +56,7 @@ chrome.navLinks.update('myPlugin', {
 "requiredPlugins": ["licensing"],
 
 // my_plugin/server/plugin.ts
-import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../licensing'
+import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../licensing/server'
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
@@ -77,7 +77,8 @@ class MyPlugin {
   }
 }
 
-// my_plugin/client/plugin.ts
+// my_plugin/public/plugin.ts
+import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../licensing/public'
 class MyPlugin {
   setup(core: CoreSetup, deps: SetupDeps) {
     deps.licensing.license$.subscribe(license => {

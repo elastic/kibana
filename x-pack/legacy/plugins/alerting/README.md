@@ -200,7 +200,7 @@ Payload:
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
+|schedule|The schedule specifying when this alert should run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
@@ -242,7 +242,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
@@ -303,6 +303,14 @@ Params:
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+
+##### Schedule Formats
+A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
+
+We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
+
+There are plans to support multiple other schedule formats in the near fuiture.
 
 ## Alert instance factory
 

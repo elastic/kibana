@@ -74,7 +74,7 @@ const mockedAlertTypeSavedObject = {
   attributes: {
     enabled: true,
     alertTypeId: '123',
-    interval: '10s',
+    schedule: { interval: '10s' },
     mutedInstanceIds: [],
     params: {
       bar: true,

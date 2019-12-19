@@ -43,6 +43,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         language,
         output_index: outputIndex,
         saved_id: savedId,
+        timeline_id: timelineId,
         meta,
         filters,
         rule_id: ruleId,
@@ -99,6 +100,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           language,
           outputIndex: finalIndex,
           savedId,
+          timelineId,
           meta,
           filters,
           ruleId: ruleId != null ? ruleId : uuid.v4(),
@@ -114,6 +116,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           threats,
           updatedAt,
           references,
+          version: 1,
         });
         return transformOrError(createdRule);
       } catch (err) {
