@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
+import {
+  EuiIconTip,
+  EuiLink,
+  EuiTextColor,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import React from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { ColumnTypes } from './index';
 
-const actions = [
+const actions: EuiTableActionsColumnType<ColumnTypes>['actions'] = [
   {
     available: (item: ColumnTypes) => item.status === 'Running',
     description: 'Stop',
@@ -31,38 +37,40 @@ const actions = [
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const columns = [
+export const columns: Array<EuiBasicTableColumn<ColumnTypes>> = [
   {
-    field: 'rule',
+    field: 'rule' as const,
     name: 'Rule',
-    render: (value: ColumnTypes['rule']) => <EuiLink href={value.href}>{value.name}</EuiLink>,
+    render: (value: ColumnTypes['rule'], _: ColumnTypes) => (
+      <EuiLink href={value.href}>{value.name}</EuiLink>
+    ),
     sortable: true,
     truncateText: true,
   },
   {
-    field: 'ran',
+    field: 'ran' as const,
     name: 'Ran',
-    render: (value: ColumnTypes['ran']) => '--',
+    render: (value: ColumnTypes['ran'], _: ColumnTypes) => '--',
     sortable: true,
     truncateText: true,
   },
   {
-    field: 'lookedBackTo',
+    field: 'lookedBackTo' as const,
     name: 'Looked back to',
-    render: (value: ColumnTypes['lookedBackTo']) => '--',
+    render: (value: ColumnTypes['lookedBackTo'], _: ColumnTypes) => '--',
     sortable: true,
     truncateText: true,
   },
   {
-    field: 'status',
+    field: 'status' as const,
     name: 'Status',
     sortable: true,
     truncateText: true,
   },
   {
-    field: 'response',
+    field: 'response' as const,
     name: 'Response',
-    render: (value: ColumnTypes['response']) => {
+    render: (value: ColumnTypes['response'], _: ColumnTypes) => {
       return value === undefined ? (
         getEmptyTagValue()
       ) : (

@@ -49,6 +49,7 @@ const datafeedStateRT = rt.keyof({
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
+  deleting: null,
   failed: null,
   opened: null,
   opening: null,
