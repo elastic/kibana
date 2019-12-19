@@ -44,6 +44,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         createdBy: null,
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
+        apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
