@@ -210,10 +210,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       max={20}
       min={0}
       onChange={[Function]}
