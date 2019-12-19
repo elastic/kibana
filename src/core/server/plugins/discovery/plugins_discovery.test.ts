@@ -18,13 +18,14 @@
  */
 
 import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugins_discovery.test.mocks';
+import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
 
 import { resolve } from 'path';
 import { first, map, toArray } from 'rxjs/operators';
+
 import { ConfigService, Env } from '../../config';
-import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { getEnvOptions } from '../../config/__mocks__/env';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { PluginWrapper } from '../plugin';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import { discover } from './plugins_discovery';
@@ -37,6 +38,7 @@ const TEST_PLUGIN_SEARCH_PATHS = {
 const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
 
 const logger = loggingServiceMock.create();
+
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
     if (path === TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins) {
@@ -183,11 +185,47 @@ test('properly iterates through plugin search locations', async () => {
     )})`,
   ]);
 
-  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] are only supported in development. Relative imports will not work in production.",
-  ],
-]
-`);
+  expect(loggingServiceMock.collect(logger).warn).toEqual([]);
+});
+
+test('logs a warning about --plugin-paths when used in production', async () => {
+  mockPackage.raw = {
+    branch: 'master',
+    version: '1.2.3',
+    build: {
+      distributable: true,
+      number: 1,
+      sha: '',
+    },
+  };
+
+  const env = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { dev: false, envName: 'production' },
+    })
+  );
+  const configService = new ConfigService(
+    rawConfigServiceMock.create({ rawConfig: { plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } } }),
+    env,
+    logger
+  );
+  await configService.setSchema(config.path, config.schema);
+
+  const rawConfig = await configService
+    .atPath<PluginsConfigType>('plugins')
+    .pipe(first())
+    .toPromise();
+
+  discover(new PluginsConfig(rawConfig, env), {
+    coreId: Symbol(),
+    configService,
+    env,
+    logger,
+  });
+
+  expect(loggingServiceMock.collect(logger).warn).toEqual([
+    [
+      `Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] should only be used in development. Relative imports may not work properly in production.`,
+    ],
+  ]);
 });
