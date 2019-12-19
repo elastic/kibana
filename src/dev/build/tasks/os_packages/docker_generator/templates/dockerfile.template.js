@@ -74,7 +74,13 @@ function generator({
   EXPOSE 5601
 
   # Add Reporting dependencies.
-  RUN ${packageManager()} update -y && ${packageManager()} install -y fontconfig freetype shadow-utils && ${packageManager()} clean all
+  RUN ${packageManager()} update -y && \\
+  ${packageManager()} install -y unzip fontconfig freetype shadow-utils && ${packageManager()} clean all
+
+  # Unpack chromium at image build time, rather than waiting until container run time
+  RUN unzip $(find /usr/share/kibana -type d -name .chromium)/chromium-*-linux.zip -d /usr/share/kibana/data
+  # Remove the chromium directory, it's not needed at runtime
+  RUN find /usr/share/kibana -type d -name ".chromium" -exec rm -rf {} \\; -prune
 
   # Add an init process, check the checksum to make sure it's a match
   RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
