@@ -21,12 +21,10 @@ import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { EuiSelectableList } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
 
 const indexPattern1 = {
   id: 'test1',
@@ -49,7 +47,11 @@ const defaultProps = {
 };
 
 function getIndexPatternPickerList(instance: ShallowWrapper) {
-  return findTestSubject(instance.find(ChangeIndexPattern), `indexPattern-switcher`);
+  return instance
+    .find(ChangeIndexPattern)
+    .first()
+    .dive()
+    .find(EuiSelectable);
 }
 
 function getIndexPatternPickerOptions(instance: ShallowWrapper) {
