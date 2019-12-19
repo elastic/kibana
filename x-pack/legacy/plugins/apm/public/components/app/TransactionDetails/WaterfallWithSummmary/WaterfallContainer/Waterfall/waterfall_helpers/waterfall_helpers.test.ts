@@ -353,10 +353,10 @@ describe('waterfall_helpers', () => {
       expect(getClockSkew(child, parent)).toBe(5);
     });
 
-    it('should return parent skew for error', () => {
+    it('should not adjust when error starts within parent duration', () => {
       const child = {
         docType: 'error',
-        offset: 10
+        timestamp: 200
       } as IWaterfallItem;
 
       const parent = {
@@ -365,13 +365,14 @@ describe('waterfall_helpers', () => {
         skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(child, parent)).toBe(5);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
 
-    it('should sum skew and duration when error timestamp hapened before its parent', () => {
+    it('should adjust when error starts before parent', () => {
       const child = {
         docType: 'error',
-        offset: -10
+        timestamp: 10,
+        duration: 0
       } as IWaterfallItem;
 
       const parent = {
@@ -380,7 +381,7 @@ describe('waterfall_helpers', () => {
         skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(child, parent)).toBe(105);
+      expect(getClockSkew(child, parent)).toBe(145);
     });
 
     it('should handle missing parent', () => {
