@@ -10,12 +10,18 @@ import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
-import { TimelineItem, DetailItem } from '../../../../graphql/types';
+import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../../skeleton_row';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import {
+  OnColumnResized,
+  OnPinEvent,
+  OnRowSelected,
+  OnUnPinEvent,
+  OnUpdateColumns,
+} from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
@@ -36,13 +42,17 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
+  loadingEventIds: Readonly<string[]>;
   maxDelay?: number;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   onUpdateColumns: OnUpdateColumns;
   isEventPinned: boolean;
   rowRenderers: RowRenderer[];
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
@@ -110,12 +120,16 @@ export const StatefulEvent = React.memo<Props>(
     getNotesByIds,
     isEventViewer = false,
     isEventPinned = false,
+    loadingEventIds,
     maxDelay = 0,
     onColumnResized,
     onPinEvent,
+    onRowSelected,
     onUnPinEvent,
     onUpdateColumns,
     rowRenderers,
+    selectedEventIds,
+    showCheckboxes,
     timelineId,
     toggleColumn,
     updateNote,
@@ -224,11 +238,15 @@ export const StatefulEvent = React.memo<Props>(
                           isEventPinned={isEventPinned}
                           isEventViewer={isEventViewer}
                           loading={loading}
+                          loadingEventIds={loadingEventIds}
                           onColumnResized={onColumnResized}
                           onPinEvent={onPinEvent}
+                          onRowSelected={onRowSelected}
                           onToggleExpanded={onToggleExpanded}
                           onToggleShowNotes={onToggleShowNotes}
                           onUnPinEvent={onUnPinEvent}
+                          selectedEventIds={selectedEventIds}
+                          showCheckboxes={showCheckboxes}
                           showNotes={!!showNotes[event._id]}
                           timelineId={timelineId}
                           updateNote={updateNote}
