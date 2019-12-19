@@ -183,13 +183,9 @@ export function getClockSkew(
     // agentMark doesnt have parent-child relationship, no adjustment is needed
     case 'agentMark':
       return 0;
+    // when an error happened before its parent, the skew has to be calculated with the parent skew and duration.
+    // e.g.: An error with a parent that is the entry transaction and it doesnt have parent (skew = 0).
     case 'error':
-      // when the errors offset is negative, it means that its timestamp is lower then its parent. In that case sum the skew and the duration of the parent is necessary.
-      // e.g.: An error with a parent that is the entry transaction and it doesnt have parent (skew = 0).
-      return item.offset > 0
-        ? parentItem.skew
-        : parentItem.skew + parentItem.duration;
-
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
       const parentStart = parentItem.timestamp + parentItem.skew;
