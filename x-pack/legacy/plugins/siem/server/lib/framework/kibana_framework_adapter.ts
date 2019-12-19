@@ -34,11 +34,11 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   private router: IRouter;
   private security: SiemPluginSecurity;
 
-  constructor(core: CoreSetup, plugin: PluginsSetup, env: PluginInitializerContext['env']) {
+  constructor(core: CoreSetup, plugins: PluginsSetup, env: PluginInitializerContext['env']) {
     this.version = env.packageInfo.version;
     this.isProductionMode = env.mode.prod;
     this.router = core.http.createRouter();
-    this.security = plugin.security;
+    this.security = plugins.security;
   }
 
   public async callWithRequest(

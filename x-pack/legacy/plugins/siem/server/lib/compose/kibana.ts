@@ -37,10 +37,10 @@ import { Alerts, ElasticsearchAlertsAdapter } from '../alerts';
 
 export function compose(
   core: CoreSetup,
-  plugin: PluginsSetup,
+  plugins: PluginsSetup,
   env: PluginInitializerContext['env']
 ): AppBackendLibs {
-  const framework = new KibanaBackendFrameworkAdapter(core, plugin, env);
+  const framework = new KibanaBackendFrameworkAdapter(core, plugins, env);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
