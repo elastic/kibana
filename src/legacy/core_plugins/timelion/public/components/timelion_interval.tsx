@@ -48,6 +48,12 @@ const intervalOptions = [
     value: '1h',
   },
   {
+    label: i18n.translate('timelion.vis.interval.day', {
+      defaultMessage: '1 day',
+    }),
+    value: '1d',
+  },
+  {
     label: i18n.translate('timelion.vis.interval.week', {
       defaultMessage: '1 week',
     }),

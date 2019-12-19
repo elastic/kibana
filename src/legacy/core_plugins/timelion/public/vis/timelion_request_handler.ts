@@ -47,7 +47,11 @@ export interface TimelionSuccessResponse {
 }
 
 export function getTimelionRequestHandler(dependencies: TimelionVisualizationDependencies) {
-  const { uiSettings, http, timefilter } = dependencies;
+  const {
+    core: { uiSettings, http },
+    timefilter,
+  } = dependencies;
+
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({

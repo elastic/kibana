@@ -22,20 +22,9 @@ import { EuiPanel } from '@elastic/eui';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
 import { VisParams } from '../timelion_vis_fn';
-import {
-  TimelionInterval,
-  TimelionExpressionInput,
-  TimelionExpressionInputDependencies,
-} from '../components';
+import { TimelionInterval, TimelionExpressionInput } from '../components';
 
-function TimelionOptions({
-  argValueSuggestions,
-  http,
-  stateParams,
-  setValue,
-  uiSettings,
-  setValidity,
-}: VisOptionsProps<VisParams> & TimelionExpressionInputDependencies) {
+function TimelionOptions({ stateParams, setValue, setValidity }: VisOptionsProps<VisParams>) {
   const setInterval = useCallback((value: VisParams['interval']) => setValue('interval', value), [
     setValue,
   ]);
@@ -51,13 +40,7 @@ function TimelionOptions({
         setValue={setInterval}
         setValidity={setValidity}
       />
-      <TimelionExpressionInput
-        argValueSuggestions={argValueSuggestions}
-        http={http}
-        uiSettings={uiSettings}
-        value={stateParams.expression}
-        setValue={setExpressionInput}
-      />
+      <TimelionExpressionInput value={stateParams.expression} setValue={setExpressionInput} />
     </EuiPanel>
   );
 }

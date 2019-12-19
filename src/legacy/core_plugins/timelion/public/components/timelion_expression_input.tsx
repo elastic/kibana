@@ -22,34 +22,22 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { IUiSettingsClient, HttpSetup } from 'kibana/public';
-import { CodeEditor, KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
+import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
-import { ArgValueSuggestions } from '../services/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
+import { TimelionServices } from '../services/types';
 
 const LANGUAGE_ID = 'timelion_expression';
 monacoEditor.languages.register({ id: LANGUAGE_ID });
-
-export interface TimelionExpressionInputDependencies {
-  argValueSuggestions: ArgValueSuggestions;
-  http: HttpSetup;
-  uiSettings: IUiSettingsClient;
-}
 
 interface TimelionExpressionInputProps {
   value: string;
   setValue(value: string): void;
 }
 
-function TimelionExpressionInput({
-  argValueSuggestions,
-  http,
-  uiSettings,
-  value,
-  setValue,
-}: TimelionExpressionInputProps & TimelionExpressionInputDependencies) {
+function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
   const functionList = useRef([]);
+  const kibana = useKibana<TimelionServices>();
 
   const provideCompletionItems = useCallback(
     async (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
@@ -68,7 +56,7 @@ function TimelionExpressionInput({
         // it's important to offset the cursor position on 1 point left
         // because of PEG parser starts the line with 0, but monaco with 1
         position.column - 1,
-        argValueSuggestions
+        kibana.services.argValueSuggestions
       );
 
       return {
@@ -79,7 +67,7 @@ function TimelionExpressionInput({
           : [],
       };
     },
-    [argValueSuggestions]
+    [kibana.services.argValueSuggestions]
   );
 
   const provideHover = useCallback(
@@ -90,7 +78,7 @@ function TimelionExpressionInput({
         // it's important to offset the cursor position on 1 point left
         // because of PEG parser starts the line with 0, but monaco with 1
         position.column - 1,
-        argValueSuggestions
+        kibana.services.argValueSuggestions
       );
 
       return {
@@ -101,59 +89,58 @@ function TimelionExpressionInput({
           : [],
       };
     },
-    [argValueSuggestions]
+    [kibana.services.argValueSuggestions]
   );
 
   useEffect(() => {
-    http.get('../api/timelion/functions').then(data => {
-      functionList.current = data;
-    });
-  }, [http]);
+    if (kibana.services.http) {
+      kibana.services.http.get('../api/timelion/functions').then(data => {
+        functionList.current = data;
+      });
+    }
+  }, [kibana.services.http]);
 
   return (
-    <KibanaContextProvider services={{ uiSettings }}>
-      <EuiFormRow
-        className="visEditor__timelionExpressionInput"
-        fullWidth
-        label={i18n.translate('timelion.vis.expressionLabel', {
-          defaultMessage: 'Timelion expression',
-        })}
-      >
-        <div className="timelionExpressionInput__editor">
-          <CodeEditor
-            languageId={LANGUAGE_ID}
-            value={value}
-            onChange={setValue}
-            suggestionProvider={{
-              triggerCharacters: ['.', '(', '=', ':'],
-              provideCompletionItems,
-            }}
-            hoverProvider={{ provideHover }}
-            options={{
-              automaticLayout: true,
-              fixedOverflowWidgets: true,
-              fontSize: 16,
-              scrollBeyondLastLine: false,
-              quickSuggestions: true,
-              minimap: {
-                enabled: false,
+    <EuiFormRow
+      className="visEditor__timelionExpressionInput"
+      fullWidth
+      label={i18n.translate('timelion.vis.expressionLabel', {
+        defaultMessage: 'Timelion expression',
+      })}
+    >
+      <div className="timelionExpressionInput__editor">
+        <CodeEditor
+          languageId={LANGUAGE_ID}
+          value={value}
+          onChange={setValue}
+          suggestionProvider={{
+            triggerCharacters: ['.', ',', '(', '=', ':'],
+            provideCompletionItems,
+          }}
+          hoverProvider={{ provideHover }}
+          options={{
+            automaticLayout: true,
+            fixedOverflowWidgets: true,
+            fontSize: 16,
+            scrollBeyondLastLine: false,
+            minimap: {
+              enabled: false,
+            },
+            wordBasedSuggestions: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+          }}
+          languageConfiguration={{
+            autoClosingPairs: [
+              {
+                open: '(',
+                close: ')',
               },
-              wordBasedSuggestions: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-            }}
-            languageConfiguration={{
-              autoClosingPairs: [
-                {
-                  open: '(',
-                  close: ')',
-                },
-              ],
-            }}
-          />
-        </div>
-      </EuiFormRow>
-    </KibanaContextProvider>
+            ],
+          }}
+        />
+      </div>
+    </EuiFormRow>
   );
 }
 

@@ -214,14 +214,20 @@ export function getSuggestion(
   suggestion: ITimelionFunction | TimelionFunctionArgs,
   type: SUGGESTION_TYPE,
   range: monacoEditor.Range
-) {
+): monacoEditor.languages.CompletionItem {
   let kind: monacoEditor.languages.CompletionItemKind =
     monacoEditor.languages.CompletionItemKind.Method;
   let insertText: string = suggestion.name;
+  let insertTextRules: monacoEditor.languages.CompletionItem['insertTextRules'];
   let detail: string = '';
+  let command: monacoEditor.languages.CompletionItem['command'];
 
   switch (type) {
     case SUGGESTION_TYPE.ARGUMENTS:
+      command = {
+        title: 'Trigger Suggestion Dialog',
+        id: 'editor.action.triggerSuggest',
+      };
       kind = monacoEditor.languages.CompletionItemKind.Property;
       insertText = `${insertText}=`;
       detail = `${i18n.translate(
@@ -233,7 +239,13 @@ export function getSuggestion(
 
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
+      command = {
+        title: 'Trigger Suggestion Dialog',
+        id: 'editor.action.triggerSuggest',
+      };
       kind = monacoEditor.languages.CompletionItemKind.Function;
+      insertText = `${insertText}($0)`;
+      insertTextRules = monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       detail = `(${
         (suggestion as ITimelionFunction).chainable
           ? i18n.translate('timelion.expressionSuggestions.func.description.chainableHelpText', {
@@ -246,8 +258,17 @@ export function getSuggestion(
 
       break;
     case SUGGESTION_TYPE.ARGUMENT_VALUE:
+      const param = suggestion.name.split(':');
+
+      if (param.length === 1 || param[1]) {
+        insertText = `${param.length === 1 ? insertText : param[1]},`;
+      }
+
+      command = {
+        title: 'Trigger Suggestion Dialog',
+        id: 'editor.action.triggerSuggest',
+      };
       kind = monacoEditor.languages.CompletionItemKind.Property;
-      insertText = suggestion.name.split(':')[1] || suggestion.name;
       detail = suggestion.help || '';
 
       break;
@@ -256,13 +277,11 @@ export function getSuggestion(
   return {
     detail,
     insertText,
+    insertTextRules,
     kind,
     label: suggestion.name,
     documentation: suggestion.help,
-    command: {
-      title: 'Trigger Suggestion Dialog',
-      id: 'editor.action.triggerSuggest',
-    },
+    command,
     range,
   };
 }

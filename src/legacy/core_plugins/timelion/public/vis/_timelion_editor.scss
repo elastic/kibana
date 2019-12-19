@@ -1,16 +1,12 @@
-.visEditor--timelion{
+.visEditor--timelion {
 
   vis-options-react-wrapper,
   .visEditorSidebar__options,
   .visEditorSidebar__timelionOptions,
   .visEditor__timelionExpressionInput {
-    @include flex-parent(1, 1, auto, column);
-
-    height: 100%;
-
-    > * {
-      flex-shrink: 1;
-    }
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -21,11 +17,11 @@
 }
 
 .timelionExpressionInput__editor {
-  height: 100%;
-  padding-top: $euiSize;
-
   @include euiBreakpoint('xs', 's', 'm') {
     height: $euiSize * 15;
     max-height: $euiSize * 15;
   }
+
+  height: 100%;
+  padding-top: $euiSize;
 }

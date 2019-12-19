@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { npStart } from 'ui/new_platform';
+import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import { TimelionVisualizationDependencies } from '../plugin';
@@ -34,11 +34,16 @@ import { getArgValueSuggestions } from '../services/arg_value_suggestions';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
-export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
+export async function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
+  const { core } = dependencies;
+  const { http, uiSettings } = core;
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+
+  const [coreStart, pluginsStart] = await core.getStartServices();
+
   const argValueSuggestions = getArgValueSuggestions(
-    npStart.plugins.data.indexPatterns,
-    npStart.core.savedObjects.client
+    pluginsStart.data.indexPatterns,
+    coreStart.savedObjects.client
   );
 
   // return the visType object, which kibana will use to display and configure new
@@ -60,12 +65,15 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
     },
     editorConfig: {
       optionsTemplate: (props: VisOptionsProps<VisParams>) => (
-        <TimelionOptions
-          {...props}
-          uiSettings={dependencies.uiSettings}
-          http={dependencies.http}
-          argValueSuggestions={argValueSuggestions}
-        />
+        <KibanaContextProvider
+          services={{
+            uiSettings,
+            http,
+            argValueSuggestions,
+          }}
+        >
+          <TimelionOptions {...props} />
+        </KibanaContextProvider>
       ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
