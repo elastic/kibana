@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import lowPolyLayerFeatures from '../low_poly_layer.json';
+import lowPolyLayerFeatures from '../../low_poly_layer.json';
 
 export const mockDownPointsLayer = {
   id: 'down_points',

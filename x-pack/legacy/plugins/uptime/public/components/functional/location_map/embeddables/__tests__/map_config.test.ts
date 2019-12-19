@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getLayerList } from './map_config';
+import { getLayerList } from '../map_config';
 import { mockLayerList } from './__mocks__/mock';
-import { LocationPoint } from './embedded_map';
+import { LocationPoint } from '../embedded_map';
 
 jest.mock('uuid', () => {
   return {
@@ -33,7 +33,7 @@ describe('map_config', () => {
 
   describe('#getLayerList', () => {
     test('it returns the low poly layer', () => {
-      const layerList = getLayerList(upPoints, downPoints);
+      const layerList = getLayerList(upPoints, downPoints, { danger: 'red', gray: '#000' });
       expect(layerList).toStrictEqual(mockLayerList);
     });
   });
