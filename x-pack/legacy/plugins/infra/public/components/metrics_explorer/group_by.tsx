@@ -8,14 +8,14 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { isDisplayable } from '../../utils/is_displayable';
 
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null) => void;
-  fields: FieldType[];
+  fields: IFieldType[];
 }
 
 export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {

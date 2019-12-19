@@ -7,11 +7,17 @@
 import React from 'react';
 
 import { BrowserFields } from '../../../../containers/source';
-import { TimelineItem } from '../../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { maxDelay } from '../../../../lib/helpers/scheduler';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent, OnUpdateColumns } from '../../events';
+import {
+  OnColumnResized,
+  OnPinEvent,
+  OnRowSelected,
+  OnUnPinEvent,
+  OnUpdateColumns,
+} from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -30,12 +36,16 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
   isEventViewer?: boolean;
+  loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
   onUpdateColumns: OnUpdateColumns;
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
 }
@@ -55,12 +65,16 @@ export const Events = React.memo<Props>(
     getNotesByIds,
     id,
     isEventViewer = false,
+    loadingEventIds,
     onColumnResized,
     onPinEvent,
+    onRowSelected,
     onUpdateColumns,
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
+    selectedEventIds,
+    showCheckboxes,
     toggleColumn,
     updateNote,
   }) => (
@@ -78,12 +92,16 @@ export const Events = React.memo<Props>(
           isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
           isEventViewer={isEventViewer}
           key={event._id}
+          loadingEventIds={loadingEventIds}
           maxDelay={maxDelay(i)}
           onColumnResized={onColumnResized}
           onPinEvent={onPinEvent}
+          onRowSelected={onRowSelected}
           onUnPinEvent={onUnPinEvent}
           onUpdateColumns={onUpdateColumns}
           rowRenderers={rowRenderers}
+          selectedEventIds={selectedEventIds}
+          showCheckboxes={showCheckboxes}
           timelineId={id}
           toggleColumn={toggleColumn}
           updateNote={updateNote}
