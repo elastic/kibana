@@ -20,7 +20,7 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
-import { debounce, compact, get, each, noop, cloneDeep, last, map } from 'lodash';
+import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
 import './timechart/flot';
 
@@ -34,20 +34,20 @@ import { useEventListener } from './useEventListener';
 
 import { getServices } from '../kibana_services';
 import { DEBOUNCE_DELAY, emptyCaption, staticDefaultOptions } from './constants';
-import { buildSeriesData } from './utils';
+import { buildSeriesData, buildOptions } from './utils';
 
 export interface Series {
+  _global?: boolean;
+  _hide?: boolean;
+  _id?: number;
+  _title?: string;
+  color?: string;
   data: any[];
   fit: string;
   label: string;
   split: string;
-  type: string;
-  _hide?: boolean;
-  _id?: number;
-  color?: string;
   stack?: boolean;
-  _global?: boolean;
-  _title?: string;
+  type: string;
 }
 
 interface SeriesList {
@@ -61,15 +61,14 @@ interface SeriesList {
 interface PanelProps {
   name: string;
   interval: string;
-  search?: string;
   seriesList: SeriesList;
   renderComplete(): void;
 }
 
-function Panel({ interval: intervalProp, search = noop, seriesList, renderComplete }: PanelProps) {
+function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProps) {
   console.log('Panel');
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const elementRef = useRef(null);
+  const elementRef = useRef<HTMLInputElement>(null);
   const [canvasElem, setCanvasElem] = useState();
   const { uiSettings, timefilter } = getServices();
   const formatters = tickFormatters() as any;
@@ -106,8 +105,6 @@ function Panel({ interval: intervalProp, search = noop, seriesList, renderComple
   // Used to toggle the series, and for displaying values on hover
   const [legendValueNumbers, setLegendValueNumbers] = useState();
   const [legendCaption, setLegendCaption] = useState();
-
-  let legendScope = {};
 
   useEffect(() => {
     if (plot && get(plot.getData(), '[0]._global.legend.showTime', true)) {
@@ -208,42 +205,17 @@ function Panel({ interval: intervalProp, search = noop, seriesList, renderComple
     [seriesList.render.grid, toggleSeries, focusSeries, highlightSeries]
   );
 
-  const options = useMemo(() => cloneDeep(defaultOptions), [defaultOptions]);
-
-  // Get the X-axis tick format
-  const time = timefilter.getBounds() as any;
-  const interval = calculateInterval(
-    time.min.valueOf(),
-    time.max.valueOf(),
-    uiSettings.get('timelion:target_buckets') || 200,
-    intervalProp,
-    uiSettings.get('timelion:min_interval') || '1ms'
+  const options = useMemo(
+    () =>
+      buildOptions(
+        defaultOptions,
+        timefilter,
+        intervalProp,
+        uiSettings,
+        elementRef && elementRef.current && elementRef.current.clientWidth || undefined
+      ),
+    [defaultOptions, timefilter, intervalProp, uiSettings, elementRef.current]
   );
-  const format = getxAxisFormatter(interval);
-
-  // Use moment to format ticks so we get timezone correction
-  options.xaxis.tickFormatter = (val: any) => moment(val).format(format);
-
-  // Calculate how many ticks can fit on the axis
-  const tickLetterWidth = 7;
-  const tickPadding = 45;
-  options.xaxis.ticks = Math.floor(
-    elementRef.current
-      ? elementRef.current.clientWidth
-      : 0 / (format.length * tickLetterWidth + tickPadding)
-  );
-
-  if (options.yaxes) {
-    options.yaxes.forEach((yaxis: any) => {
-      if (yaxis && yaxis.units) {
-        yaxis.tickFormatter = formatters[yaxis.units.type];
-        const byteModes = ['bytes', 'bytes/s'];
-        if (byteModes.includes(yaxis.units.type)) {
-          yaxis.tickGenerator = generateTicks;
-        }
-      }
-    });
-  }
 
   const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
 

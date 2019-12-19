@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { debounce, compact, get, each, noop, cloneDeep, defaults, merge } from 'lodash';
+import { cloneDeep, defaults, merge } from 'lodash';
+import moment from 'moment-timezone';
 
+// @ts-ignore
+import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../common/lib';
+import { tickFormatters } from '../services/tick_formatters';
+import { xaxisFormatterProvider } from './timechart/xaxis_formatter';
+import { generateTicksProvider } from './timechart/tick_generator';
 import { Series } from './panel';
 
 function buildSeriesData(chart: Series[], options: object) {
@@ -59,4 +65,43 @@ function buildSeriesData(chart: Series[], options: object) {
   });
 }
 
-export { buildSeriesData };
+function buildOptions(defaultOptions: any, timefilter: any, intervalValue: string, uiSettings: any, clientWidth = 0) {
+  const options = cloneDeep(defaultOptions);
+  // Get the X-axis tick format
+  const time = timefilter.getBounds() as any;
+  const interval = calculateInterval(
+    time.min.valueOf(),
+    time.max.valueOf(),
+    uiSettings.get('timelion:target_buckets') || 200,
+    intervalValue,
+    uiSettings.get('timelion:min_interval') || '1ms'
+  );
+  const format = xaxisFormatterProvider(uiSettings)(interval);
+
+  // Use moment to format ticks so we get timezone correction
+  options.xaxis.tickFormatter = (val: any) => moment(val).format(format);
+
+  // Calculate how many ticks can fit on the axis
+  const tickLetterWidth = 7;
+  const tickPadding = 45;
+  options.xaxis.ticks = Math.floor(
+    clientWidth / (format.length * tickLetterWidth + tickPadding)
+  );
+
+  if (options.yaxes) {
+    options.yaxes.forEach((yaxis: any) => {
+      if (yaxis && yaxis.units) {
+        const formatters = tickFormatters() as any;
+        yaxis.tickFormatter = formatters[yaxis.units.type];
+        const byteModes = ['bytes', 'bytes/s'];
+        if (byteModes.includes(yaxis.units.type)) {
+          yaxis.tickGenerator = generateTicksProvider();
+        }
+      }
+    });
+  }
+
+  return options;
+}
+
+export { buildSeriesData, buildOptions};
