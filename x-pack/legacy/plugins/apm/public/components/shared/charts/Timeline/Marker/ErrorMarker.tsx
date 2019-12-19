@@ -15,9 +15,9 @@ import {
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
+import { IWaterfallItemError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
-import { IWaterfallItemError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   mark: IWaterfallItemError;
@@ -36,14 +36,20 @@ const ErrorLink = styled(ErrorDetailLink)`
   margin: ${px(units.half)} 0 ${px(units.half)} 0;
 `;
 
+const Button = styled(Legend)`
+  height: 20px;
+  display: flex;
+  align-items: flex-end;
+`;
+
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   const { urlParams } = useUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
   const togglePopover = () => showPopover(!isPopoverOpen);
 
-  const legend = (
-    <Legend
+  const button = (
+    <Button
       clickable
       color={theme.euiColorDanger}
       shape={Shape.square}
@@ -63,7 +69,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   return (
     <EuiPopover
       id="popover"
-      button={legend}
+      button={button}
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
       anchorPosition="upCenter"
