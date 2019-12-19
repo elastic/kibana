@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
-  describe.only('endpoint', function() {
-    this.tags('ciGroup7');
-
-    loadTestFile(require.resolve('./feature_controls'));
+  describe('feature controls', function() {
+    this.tags('skipFirefox');
+    loadTestFile(require.resolve('./endpoint_spaces'));
   });
 }
