@@ -148,6 +148,10 @@ class DocumentationService {
   public getDateFormatLink() {
     return `${this.esDocsBase}/mapping-date-format.html`;
   }
+
+  public getIndexOptionsLink() {
+    return `${this.esDocsBase}/index-options.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();

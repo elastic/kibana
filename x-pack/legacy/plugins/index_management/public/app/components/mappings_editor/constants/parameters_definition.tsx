@@ -3,9 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { FieldConfig } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { EuiLink } from '@elastic/eui';
 import {
   FIELD_TYPES,
   fieldValidators,
@@ -15,6 +18,7 @@ import {
 } from '../shared_imports';
 import { INDEX_DEFAULT, TYPE_DEFINITION } from '../constants';
 import { AliasOption, DataType, ComboBoxOption } from '../types';
+import { documentationService } from '../../../services/documentation';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -59,10 +63,25 @@ const indexOptionsConfig = {
   label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
     defaultMessage: 'Index options',
   }),
+  helpText: () => (
+    <FormattedMessage
+      id="xpack.idxMgmt.mappingsEditor.indexOptionsHelpText"
+      defaultMessage="Information to store in the index. {docsLink}"
+      values={{
+        docsLink: (
+          <EuiLink href={documentationService.getIndexOptionsLink()} target="_blank">
+            {i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.configuration.indexOptionsdDocumentationLink',
+              {
+                defaultMessage: 'Learn more.',
+              }
+            )}
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
   type: FIELD_TYPES.SUPER_SELECT,
-  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
-    defaultMessage: 'Information to store in the index.',
-  }),
 };
 
 export const PARAMETERS_DEFINITION = {
