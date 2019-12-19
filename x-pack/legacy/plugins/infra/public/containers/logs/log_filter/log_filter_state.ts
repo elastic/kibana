@@ -42,34 +42,38 @@ export interface LogFilterCallbacks {
 
 export const useLogFilterState: (props: {
   indexPattern: IIndexPattern;
-}) => [LogFilterStateParams, LogFilterCallbacks] = ({ indexPattern }) => {
+}) => LogFilterStateParams & LogFilterCallbacks = ({ indexPattern }) => {
   const [state, setState] = useState(logFilterInitialState);
   const { filterQuery, filterQueryDraft } = state;
 
-  const callbacks: LogFilterCallbacks = useMemo(() => {
-    const setLogFilterQueryDraft = (payload: KueryFilterQuery) =>
-      setState({ ...state, filterQueryDraft: payload });
-    const applyLogFilterQuery = (payload: SerializedFilterQuery) =>
-      setState({ ...state, filterQueryDraft: payload.query, filterQuery: payload });
-    return {
-      setLogFilterQueryDraft: expression =>
-        setLogFilterQueryDraft({
+  const setLogFilterQueryDraft = useMemo(() => {
+    const setDraft = (payload: KueryFilterQuery) =>
+      setState(prevState => ({ ...prevState, filterQueryDraft: payload }));
+    return (expression: string) =>
+      setDraft({
+        kind: 'kuery',
+        expression,
+      });
+  }, []);
+  const applyLogFilterQuery = useMemo(() => {
+    const applyQuery = (payload: SerializedFilterQuery) =>
+      setState(prevState => ({
+        ...prevState,
+        filterQueryDraft: payload.query,
+        filterQuery: payload,
+      }));
+    return (expression: string) =>
+      applyQuery({
+        query: {
           kind: 'kuery',
           expression,
-        }),
-      applyLogFilterQuery: expression =>
-        applyLogFilterQuery({
-          query: {
-            kind: 'kuery',
-            expression,
-          },
-          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-        }),
-    };
-  }, [state, indexPattern]);
+        },
+        serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+      });
+  }, [indexPattern]);
 
   const isFilterQueryDraftValid = useMemo(() => {
-    if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
+    if (filterQueryDraft?.kind === 'kuery') {
       try {
         esKuery.fromKueryExpression(filterQueryDraft.expression);
       } catch (err) {
@@ -84,15 +88,14 @@ export const useLogFilterState: (props: {
     filterQuery,
   ]);
 
-  return [
-    {
-      ...state,
-      filterQueryAsKuery: state.filterQuery ? state.filterQuery.query : null,
-      filterQuery: serializedFilterQuery,
-      isFilterQueryDraftValid,
-    },
-    callbacks,
-  ];
+  return {
+    ...state,
+    filterQueryAsKuery: state.filterQuery ? state.filterQuery.query : null,
+    filterQuery: serializedFilterQuery,
+    isFilterQueryDraftValid,
+    setLogFilterQueryDraft,
+    applyLogFilterQuery,
+  };
 };
 
 export const LogFilterState = createContainer(useLogFilterState);

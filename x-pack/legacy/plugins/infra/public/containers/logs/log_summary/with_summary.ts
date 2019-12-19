@@ -30,7 +30,7 @@ export const WithSummary = connect((state: State) => ({
   }) => {
     const { intervalSize } = useContext(LogViewConfiguration.Context);
     const { sourceId } = useContext(Source.Context);
-    const [{ filterQuery }] = useContext(LogFilterState.Context);
+    const { filterQuery } = useContext(LogFilterState.Context);
 
     const { buckets, start, end } = useLogSummary(
       sourceId,

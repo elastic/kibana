@@ -11,7 +11,7 @@ import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/
 type LogFilterUrlState = LogFilterStateParams['filterQueryAsKuery'];
 
 export const WithLogFilterUrlState: React.FC = () => {
-  const [{ filterQueryAsKuery }, { applyLogFilterQuery }] = useContext(LogFilterState.Context);
+  const { filterQueryAsKuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
   return (
     <UrlStateContainer
       urlState={filterQueryAsKuery}

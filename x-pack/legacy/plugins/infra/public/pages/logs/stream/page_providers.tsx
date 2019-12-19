@@ -31,7 +31,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { timeKey, pagesBeforeStart, pagesAfterEnd, isAutoReloading } = useContext(
     LogPositionState.Context
   );
-  const [{ filterQuery }] = useContext(LogFilterState.Context);
+  const { filterQuery } = useContext(LogFilterState.Context);
   const entriesProps = {
     timeKey,
     pagesBeforeStart,
@@ -46,7 +46,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
   const { sourceId, version } = useContext(Source.Context);
   const [{ entriesStart, entriesEnd }] = useContext(LogEntriesState.Context);
-  const [{ filterQuery }] = useContext(LogFilterState.Context);
+  const { filterQuery } = useContext(LogFilterState.Context);
   const highlightsProps = {
     sourceId,
     sourceVersion: version,

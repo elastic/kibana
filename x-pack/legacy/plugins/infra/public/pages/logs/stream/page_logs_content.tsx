@@ -43,7 +43,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
-  const [, { applyLogFilterQuery }] = useContext(LogFilterState.Context);
+  const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   return (
     <>
       <LogHighlightsBridge />

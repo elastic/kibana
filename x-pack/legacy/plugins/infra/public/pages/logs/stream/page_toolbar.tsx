@@ -37,10 +37,12 @@ export const LogsToolbar = () => {
     textScale,
     textWrap,
   } = useContext(LogViewConfiguration.Context);
-  const [
-    { filterQueryDraft, isFilterQueryDraftValid },
-    { applyLogFilterQuery, setLogFilterQueryDraft },
-  ] = useContext(LogFilterState.Context);
+  const {
+    filterQueryDraft,
+    isFilterQueryDraftValid,
+    applyLogFilterQuery,
+    setLogFilterQueryDraft,
+  } = useContext(LogFilterState.Context);
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
 
   const {
