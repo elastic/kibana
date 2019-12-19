@@ -82,3 +82,14 @@ export const createNewVisualizationButton: string = i18n.translate(
     defaultMessage: 'Create new',
   }
 );
+
+export const addExistingVisualization: string = i18n.translate(
+  'kbn.dashboard.addExistingVisualizationText',
+  {
+    defaultMessage: 'Add an existing',
+  }
+);
+
+export const addNewVisualization: string = i18n.translate('kbn.dashboard.addNewVisualizationText', {
+  defaultMessage: 'or a new object to this dashboard',
+});

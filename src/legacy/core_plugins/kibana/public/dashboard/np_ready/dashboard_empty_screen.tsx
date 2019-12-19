@@ -25,6 +25,7 @@ import {
   EuiPageContent,
   EuiPageBody,
   EuiPage,
+  EuiEmptyPrompt,
   EuiText,
   EuiButton,
 } from '@elastic/eui';
@@ -45,6 +46,7 @@ export function DashboardEmptyScreen({
     <p data-test-subj="linkToVisualizeParagraph">
       <EuiButton
         iconSide="right"
+        size="s"
         fill
         iconType="arrowDown"
         onClick={onVisualizeClick}
@@ -73,40 +75,45 @@ export function DashboardEmptyScreen({
       </EuiText>
     );
   };
-  const addVisualizationParagraph = (
-    <React.Fragment>
-      {paragraph(
-        constants.addVisualizationDescription1,
-        constants.addVisualizationDescription2,
-        constants.addVisualizationLinkText,
-        constants.addVisualizationLinkAriaLabel,
-        'emptyDashboardAddPanelButton'
-      )}
-      <EuiSpacer size="m" />
-      {linkToVisualizeParagraph}
-    </React.Fragment>
-  );
   const enterEditModeParagraph = paragraph(
     constants.howToStartWorkingOnNewDashboardDescription1,
     constants.howToStartWorkingOnNewDashboardDescription2,
     constants.howToStartWorkingOnNewDashboardEditLinkText,
     constants.howToStartWorkingOnNewDashboardEditLinkAriaLabel
   );
-  return (
-    <I18nProvider>
-      <EuiPage className="dshStartScreen" restrictWidth="36em">
-        <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center">
-            <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
-            <EuiSpacer size="s" />
-            <EuiText grow={true}>
-              <h2 key={0.5}>{constants.fillDashboardTitle}</h2>
-            </EuiText>
-            <EuiSpacer size="m" />
-            {showLinkToVisualize ? addVisualizationParagraph : enterEditModeParagraph}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    </I18nProvider>
+  const viewMode = (
+    <EuiPage className="dshStartScreen" restrictWidth="36em">
+      <EuiPageBody>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center">
+          <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
+          <EuiSpacer size="s" />
+          <EuiText grow={true}>
+            <h2 key={0.5}>{constants.fillDashboardTitle}</h2>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {enterEditModeParagraph}
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
+  const editMode = (
+    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
+      <EuiText size="m">
+        <p>
+          <EuiLink
+            onClick={onLinkClick}
+            aria-label={constants.addVisualizationLinkAriaLabel}
+            data-test-subj="emptyDashboardAddPanelButton"
+          >
+            {constants.addExistingVisualization}
+          </EuiLink>
+          <span>&nbsp;</span>
+          {constants.addNewVisualization}
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      {linkToVisualizeParagraph}
+    </div>
+  );
+  return <I18nProvider>{showLinkToVisualize ? editMode : viewMode}</I18nProvider>;
 }
