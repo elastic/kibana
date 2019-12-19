@@ -13,64 +13,6 @@
         types="fieldTypes"
       >
       </discover-field-search>
-      <div data-test-subj="discoverFieldFilter" class="dscFieldFilter" ng-show="showFilter">
-        <div class="form-group" >
-          <label
-            for="discoverFieldChooserFilterAggregatable"
-            i18n-id="kbn.discover.fieldChooser.filter.aggregatableLabel"
-            i18n-default-message="Aggregatable"
-          ></label>
-          <select
-            id="discoverFieldChooserFilterAggregatable"
-            ng-options="opt.value as opt.label for opt in filter.boolOpts"
-            ng-model="filter.vals.aggregatable"
-            class="form-control">
-          </select>
-        </div>
-        <div class="form-group" ng-show="showFilter">
-          <label
-            for="discoverFieldChooserFilterSearchable"
-            i18n-id="kbn.discover.fieldChooser.filter.searchableLabel"
-            i18n-default-message="Searchable"
-          ></label>
-          <select
-            id="discoverFieldChooserFilterSearchable"
-            ng-options="opt.value as opt.label for opt in filter.boolOpts"
-            ng-model="filter.vals.searchable"
-            class="form-control">
-          </select>
-        </div>
-        <div class="form-group" ng-show="showFilter">
-          <label
-            for="discoverFieldChooserFilterType"
-            i18n-id="kbn.discover.fieldChooser.filter.typeLabel"
-            i18n-default-message="Type"
-          ></label>
-          <select
-            id="discoverFieldChooserFilterType"
-            ng-options="field as field for field in fieldTypes"
-            ng-model="filter.vals.type"
-            class="form-control">
-          </select>
-        </div>
-        <div class="form-group"  ng-show="showFilter">
-          <label for="discoverFieldChooserHideMissingFields">
-            <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
-            <span
-              i18n-id="kbn.discover.fieldChooser.filter.hideMissingFieldsLabel"
-              i18n-default-message="Hide missing fields"
-            ></span>
-          </label>
-        </div>
-        <button
-          ng-show="showFilter"
-          ng-click="filter.reset()"
-          ng-disabled="!filter.active"
-          class="kuiButton kuiButton--danger kuiButton--fullWidth"
-          i18n-id="kbn.discover.fieldChooser.filter.resetFiltersButtonLabel"
-          i18n-default-message="Reset filters"
-        ></button>
-      </div>
     </form>
   </div>
 

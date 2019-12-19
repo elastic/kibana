@@ -1551,7 +1551,6 @@
     "kbn.discover.fieldChooser.filter.hideMissingFieldsLabel": "未入力のフィールドを非表示",
     "kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel": "インデックスとフィールド",
     "kbn.discover.fieldChooser.filter.popularTitle": "人気",
-    "kbn.discover.fieldChooser.filter.resetFiltersButtonLabel": "フィルターをリセット",
     "kbn.discover.fieldChooser.filter.searchableLabel": "検索可能",
     "kbn.discover.fieldChooser.filter.selectedFieldsTitle": "スクリプトフィールド",
     "kbn.discover.fieldChooser.filter.typeLabel": "タイプ",

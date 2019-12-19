@@ -1552,7 +1552,6 @@
     "kbn.discover.fieldChooser.filter.hideMissingFieldsLabel": "隐藏缺失字段",
     "kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel": "索引和字段",
     "kbn.discover.fieldChooser.filter.popularTitle": "常用",
-    "kbn.discover.fieldChooser.filter.resetFiltersButtonLabel": "重置筛选",
     "kbn.discover.fieldChooser.filter.searchableLabel": "可搜索",
     "kbn.discover.fieldChooser.filter.selectedFieldsTitle": "选定字段",
     "kbn.discover.fieldChooser.filter.typeLabel": "类型",
