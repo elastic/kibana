@@ -20,12 +20,21 @@ import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/saved_objects';
+// @ts-ignore
+import { savedObjectManagementRegistry } from '../../../kibana/public/management/saved_object_registry';
 import { createVisualizeEditUrl } from '../../../kibana/public/visualize/visualize_constants';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { getTypes, getSavedObjectsClient } from '../np_ready/public/services';
 const app = uiModules.get('app/visualize');
+
+// Register this service with the saved object registry so it can be
+// edited by the object editor.
+savedObjectManagementRegistry.register({
+  service: 'savedVisualizations',
+  title: 'visualizations',
+});
 
 app.service('savedVisualizations', function() {
   const savedObjectsClient = getSavedObjectsClient();

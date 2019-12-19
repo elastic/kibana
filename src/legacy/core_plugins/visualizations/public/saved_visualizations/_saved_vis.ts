@@ -32,7 +32,9 @@ import { extractReferences, injectReferences } from './saved_visualization_refer
 import { IndexPattern } from '../../../../../plugins/data/public';
 import { createSavedSearchesService } from '../../../kibana/public/discover';
 import { VisSavedObject } from '../embeddable/visualize_embeddable';
-import { Vis, updateOldState } from '..';
+// the typescript compiler is wrong here, will be right when vis.js -> vis.ts
+// @ts-ignore
+import { updateOldState, Vis } from '..';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);
