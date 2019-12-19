@@ -103,7 +103,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: target url "http://slack.mynonexistent.com" is not in the Kibana whitelist',
+              'error validating action type secrets: error configuring slack action: target url "http://slack.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
           });
         });
     });

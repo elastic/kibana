@@ -15,12 +15,14 @@ export interface RectCoordinate {
   x0: number;
 }
 
-export interface TimeSeries {
+export interface TimeSeries<
+  TCoordinate extends { x: number } = Coordinate | RectCoordinate
+> {
   title: string;
   titleShort?: string;
   hideLegend?: boolean;
   hideTooltipValue?: boolean;
-  data: Array<Coordinate | RectCoordinate>;
+  data: TCoordinate[];
   legendValue?: string;
   type: string;
   color: string;
