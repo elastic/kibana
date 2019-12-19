@@ -147,10 +147,6 @@ export class KibanaFramework {
           headers,
           body: errorBody,
         });
-
-        // NP_TODO: Do we still need to re-throw this error in this case? if we do, can we
-        // still call the response.customError method to control the HTTP response?
-        // throw error;
       }
     }
     this.router.post(routeOptions, handler);
@@ -250,7 +246,7 @@ export class KibanaFramework {
     }
   }
 
-  // NP_TODO: This method needs to no longer require full KibanaRequest
+  // NP_TODO: [TSVB_GROUP] This method needs fixing when the metrics plugin has migrated to the New Platform
   public async makeTSVBRequest(
     request: KibanaRequest,
     model: TSVBMetricModel,

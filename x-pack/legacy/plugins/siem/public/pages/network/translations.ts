@@ -49,3 +49,7 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
     defaultMessage: 'Anomalies',
   }
 );
+
+export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.network.navigation.alertsTitle', {
+  defaultMessage: 'Alerts',
+});
