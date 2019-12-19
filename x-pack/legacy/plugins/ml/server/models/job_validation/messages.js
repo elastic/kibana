@@ -26,7 +26,7 @@ export const getMessages = () => {
         },
       }),
       url:
-        'https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-aggregation.html',
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
     },
     fields_not_aggregatable: {
       status: 'ERROR',
@@ -34,7 +34,7 @@ export const getMessages = () => {
         defaultMessage: 'One of the detector fields is not an aggregatable field.',
       }),
       url:
-        'https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-aggregation.html',
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
     },
     cardinality_by_field: {
       status: 'WARNING',
@@ -112,7 +112,7 @@ export const getMessages = () => {
         }
       ),
       url:
-        'https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/ml-configuring-categories.html',
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
     },
     categorization_filters_invalid: {
       status: 'ERROR',
