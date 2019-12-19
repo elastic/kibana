@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../../../types';
+import Joi from 'joi';
 
-export type QueryRequest = Omit<RequestFacade, 'query'> & {
-  query: { id: string | undefined; rule_id: string | undefined };
-};
+import { updateRulesSchema } from './update_rules_schema';
+
+export const updateRulesBulkSchema = Joi.array().items(updateRulesSchema);
