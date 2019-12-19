@@ -59,6 +59,8 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           body: logEntriesResponseRT.encode({
             data: {
               entries,
+              topCursor: entries[0].cursor,
+              bottomCursor: entries[entries.length - 1].cursor,
             },
           }),
         });

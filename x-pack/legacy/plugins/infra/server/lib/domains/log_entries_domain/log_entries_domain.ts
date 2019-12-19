@@ -5,7 +5,7 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { sortBy } from 'lodash';
+import { sortBy, get } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
@@ -13,6 +13,7 @@ import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
+  LogEntry,
   LogEntriesItem,
 } from '../../../../common/http_api';
 import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
@@ -107,7 +108,7 @@ export class InfraLogEntriesDomain {
     sourceId: string,
     startTimestamp: number,
     endTimestamp: number
-  ): Promise<any> {
+  ): Promise<LogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext,
       sourceId
@@ -120,7 +121,29 @@ export class InfraLogEntriesDomain {
       endTimestamp
     );
 
-    return documents;
+    const entries = documents.map((doc: any) => {
+      return {
+        id: doc._id,
+        cursor: {
+          time: doc.sort[0],
+          tiebreaker: doc.sort[1],
+        },
+        columns: configuration.logColumns.map(column => {
+          if ('timestampColumn' in column) {
+            return doc._source[configuration.fields.timestamp];
+          }
+          if ('messageColumn' in column) {
+            // FIXME
+            return doc._source.message;
+          }
+          if ('fieldColumn' in column) {
+            return get(doc._source, column.fieldColumn.field);
+          }
+        }),
+      };
+    });
+
+    return entries;
   }
 
   /** @deprecated */

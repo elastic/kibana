@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import { esDateRT } from './common';
+import { logEntriesCursorRT, esDateRT } from './common';
 
 export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
 
@@ -22,9 +22,19 @@ export const logEntriesRequestRT = rt.intersection([
 
 export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 
+export const logEntryRT = rt.type({
+  id: rt.string,
+  cursor: logEntriesCursorRT,
+  columns: rt.array(rt.any),
+});
+
+export type LogEntry = rt.TypeOf<typeof logEntryRT>;
+
 export const logEntriesResponseRT = rt.type({
   data: rt.type({
-    entries: rt.array(rt.any),
+    entries: rt.array(logEntryRT),
+    topCursor: logEntriesCursorRT,
+    bottomCursor: logEntriesCursorRT,
   }),
 });
 
