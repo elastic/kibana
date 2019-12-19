@@ -51,11 +51,20 @@ export const createBulkErrorObject = ({
   };
 };
 
-export const transformBulkError = (ruleId: string, err: Error & { statusCode?: number }) => {
+export const transformBulkError = (
+  ruleId: string,
+  err: Error & { statusCode?: number }
+): BulkError => {
   if (Boom.isBoom(err)) {
     return createBulkErrorObject({
       ruleId,
       statusCode: err.output.statusCode,
+      message: err.message,
+    });
+  } else if (err instanceof TypeError) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 400,
       message: err.message,
     });
   } else {
