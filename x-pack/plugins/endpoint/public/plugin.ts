@@ -33,7 +33,7 @@ export class EndpointPlugin
         defaultMessage: 'Endpoint',
       }),
       async mount(params) {
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');
         return renderApp(coreStart, params);
       },
