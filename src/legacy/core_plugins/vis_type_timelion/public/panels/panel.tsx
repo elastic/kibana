@@ -24,13 +24,8 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
 import './timechart/flot';
 
-import { tickFormatters } from '../services/tick_formatters';
 // @ts-ignore
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../common/lib';
-import { xaxisFormatterProvider } from './timechart/xaxis_formatter';
-import { generateTicksProvider } from './timechart/tick_generator';
-
-import { useEventListener } from './useEventListener';
+import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import { getServices } from '../kibana_services';
 import { DEBOUNCE_DELAY, emptyCaption, staticDefaultOptions } from './constants';
@@ -68,12 +63,8 @@ interface PanelProps {
 function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProps) {
   console.log('Panel');
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const elementRef = useRef<HTMLInputElement>(null);
   const [canvasElem, setCanvasElem] = useState();
-  const { uiSettings, timefilter } = getServices();
-  const formatters = tickFormatters() as any;
-  const getxAxisFormatter = useMemo(() => xaxisFormatterProvider(uiSettings), [uiSettings]);
-  const generateTicks = generateTicksProvider();
+  const [chartElem, setChartElem] = useState();
 
   const [originalColorMap, setOriginalColorMap] = useState(new Map());
 
@@ -85,6 +76,23 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     if (node !== null) {
       setCanvasElem(node);
     }
+  }, []);
+
+  const elementRef = useCallback(node => {
+    if (node !== null) {
+      const nodeJQ = $(node);
+      nodeJQ.on('plotselected', plotselectedHandler);
+      nodeJQ.on('plothover', plothoverHandler);
+      nodeJQ.on('mouseleave', mouseleaveHandler);
+      setChartElem(node);
+    }
+  }, []);
+
+  useEffect(() => () => {
+    const nodeJQ = $(chartElem);
+    nodeJQ.off('plotselected');
+    nodeJQ.off('plothover');
+    nodeJQ.off('mouseleave');
   }, []);
 
   useEffect(() => {
@@ -209,12 +217,12 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     () =>
       buildOptions(
         defaultOptions,
-        timefilter,
+        getServices().timefilter,
         intervalProp,
-        uiSettings,
-        elementRef && elementRef.current && elementRef.current.clientWidth || undefined
+        getServices().uiSettings,
+        chartElem && chartElem.clientWidth
       ),
-    [defaultOptions, timefilter, intervalProp, uiSettings, elementRef.current]
+    [defaultOptions, intervalProp, chartElem]
   );
 
   const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
@@ -224,7 +232,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     setPlot($.plot(canvasElem, compact(updatedSeries), options));
   }, [canvasElem, options, updatedSeries]);
 
-  moment.tz.setDefault(uiSettings.get('dateFormat:tz'));
+  moment.tz.setDefault(getServices().uiSettings.get('dateFormat:tz'));
 
   const unhighlightSeries = useCallback(() => {
     if (highlightedSeries === null) {
@@ -333,9 +341,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     });
   }, []);
 
-  useEventListener(elementRef, 'plothover', plothoverHandler);
-  useEventListener(elementRef, 'plotselected', plotselectedHandler);
-  useEventListener(elementRef, 'mouseleave', mouseleaveHandler);
+
 
   // const cancelResize = observeResize($elem, function() {
   //   drawPlot($scope.chart);
