@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpStart } from 'kibana/public';
 import { callApi } from './callApi';
 
 export interface LicenseApiResponse {
@@ -38,7 +38,7 @@ export interface LicenseApiResponse {
   };
 }
 
-export async function loadLicense(http: HttpServiceBase) {
+export async function loadLicense(http: HttpStart) {
   return callApi<LicenseApiResponse>(http, {
     pathname: `/api/xpack/v1/info`
   });
