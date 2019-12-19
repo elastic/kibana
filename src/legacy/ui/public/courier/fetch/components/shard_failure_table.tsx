@@ -113,20 +113,18 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
     },
   ];
 
-  const sorting = {
-    sort: {
-      field: 'index',
-      direction: 'desc',
-    },
-  };
-
   return (
     <EuiInMemoryTable
       itemId="id"
       items={itemList}
       columns={columns}
       pagination={true}
-      sorting={sorting}
+      sorting={{
+        sort: {
+          field: 'index',
+          direction: 'desc',
+        },
+      }}
       itemIdToExpandedRowMap={expandMap}
     />
   );
