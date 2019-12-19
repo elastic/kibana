@@ -47,13 +47,7 @@ export interface CreateSection {
   icon?: string; // URL to image file; fallback if no `euiIconType`
 }
 
-export type RegisterSection = (section: {
-  id: string;
-  title: string;
-  order?: number;
-  euiIconType?: string; // takes precedence over `icon` property.
-  icon?: string; // URL to image file; fallback if no `euiIconType`
-}) => ISection;
+export type RegisterSection = (section: CreateSection) => ISection;
 
 export interface RegisterManagementAppArgs {
   id: string;

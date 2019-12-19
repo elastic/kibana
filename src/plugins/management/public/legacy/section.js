@@ -54,7 +54,6 @@ export class ManagementSection {
   }
 
   get visibleItems() {
-    // console.log('CAPABILITIES', capabilities.get().management);
     return this.items.inOrder.filter(item => {
       const capabilityManagementSection = this.capabilities.management[this.id];
       const itemCapability = capabilityManagementSection

@@ -33,7 +33,7 @@ import {
 } from '../../../../plugins/management/public';
 
 interface LegacySection extends LegacyApp {
-  items: LegacyApp[];
+  visibleItems: LegacyApp[];
 }
 
 interface LegacyApp {
@@ -131,11 +131,13 @@ const mergeLegacyItems = (
   // todo make sure filtering disabled apps
   const filteredLegacySections = legacySections
     .filter(sectionVisible)
-    .filter(section => section.items.filter(sectionVisible).length);
+    .filter(section => section.visibleItems.filter(sectionVisible).length);
 
   filteredLegacySections.forEach(legacySection => {
     const section = findOrAddSection(navItems, legacySection);
-    legacySection.items.forEach(app => section.items.push(legacyAppToNavItem(app, selectedId)));
+    legacySection.visibleItems.forEach(app =>
+      section.items.push(legacyAppToNavItem(app, selectedId))
+    );
   });
 
   return navItems;

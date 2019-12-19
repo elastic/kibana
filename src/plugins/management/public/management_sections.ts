@@ -22,6 +22,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { Capabilities } from '../../../core/public';
 // @ts-ignore
 import { ManagementSection } from './legacy/section';
+import { CreateSection } from './types';
 
 export class ManagementSections {
   private sections: Section[] = [];
@@ -34,13 +35,11 @@ export class ManagementSections {
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagement: () => ManagementSection
   ) {
-    return (section: {
-      id: string;
-      title: string;
-      order?: number;
-      euiIconType?: string; // takes precedence over `icon` property.
-      icon?: string; // URL to image file; fallback if no `euiIconType`
-    }) => {
+    return (section: CreateSection) => {
+      if (this.get(section.id)) {
+        throw Error(`ManagementSection '${section.id}' already registered`);
+      }
+
       const newSection = new Section(
         section,
         this.sections,
@@ -57,7 +56,8 @@ export class ManagementSections {
 
   private getAvailable(capabilities: Capabilities) {
     return () => {
-      // console.log('CAPABILITIES', capabilities);
+      // console.log('CAPABILITIES', capabilities.management);
+      // key and false
       // todo filter based on capabilities
       return [...this.sections];
     };
@@ -66,11 +66,24 @@ export class ManagementSections {
   public setup = (
     kibanaLegacy: KibanaLegacySetup,
     getLegacyManagement: () => ManagementSections
-  ) => ({
-    register: this.register.bind(this)(kibanaLegacy.registerLegacyApp, getLegacyManagement),
-    get: this.get.bind(this),
-    getAvailable: this.getAvailable.bind(this),
-  });
+  ) => {
+    const register = this.register.bind(this)(kibanaLegacy.registerLegacyApp, getLegacyManagement);
+
+    register({ id: 'kibana', title: 'Kibana', order: 30, euiIconType: 'logoKibana' });
+    register({ id: 'logstash', title: 'Logstash', order: 30, euiIconType: 'logoLogstash' });
+    register({
+      id: 'elasticsearch',
+      title: 'Elasticsearch',
+      order: 20,
+      euiIconType: 'logoElasticsearch',
+    });
+
+    return {
+      register,
+      get: this.get.bind(this),
+      getAvailable: this.getAvailable.bind(this),
+    };
+  };
 
   public start = (capabilities: Capabilities) => ({
     getAvailable: this.getAvailable.bind(this)(capabilities),
