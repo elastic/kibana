@@ -17,6 +17,7 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: false,
       showLinks: false,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-es-unavailable',
@@ -34,6 +35,7 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: false,
       showLinks: false,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-xpack-unavailable',
@@ -63,6 +65,7 @@ describe('license features', function() {
             "layout": "error-xpack-unavailable",
             "showLinks": false,
             "showLogin": true,
+            "showRoleMappingsManagement": false,
           },
         ]
       `);
@@ -79,6 +82,7 @@ describe('license features', function() {
             "linksMessage": "Access is denied because Security is disabled in Elasticsearch.",
             "showLinks": false,
             "showLogin": false,
+            "showRoleMappingsManagement": false,
           },
         ]
       `);
@@ -87,10 +91,12 @@ describe('license features', function() {
     }
   });
 
-  it('should show login page and other security elements, allow RBAC but forbid document level security if license is not platinum or trial.', () => {
-    const mockRawLicense = licensingMock.createLicenseMock();
-    mockRawLicense.hasAtLeast.mockReturnValue(false);
-    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
+  it('should show login page and other security elements, allow RBAC but forbid role m appings and document level security if license is basic.', () => {
+    const mockRawLicense = licensingMock.createLicense({
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const getFeatureSpy = jest.spyOn(mockRawLicense, 'getFeature');
 
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
@@ -99,18 +105,19 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
     });
-    expect(mockRawLicense.getFeature).toHaveBeenCalledTimes(1);
-    expect(mockRawLicense.getFeature).toHaveBeenCalledWith('security');
+    expect(getFeatureSpy).toHaveBeenCalledTimes(1);
+    expect(getFeatureSpy).toHaveBeenCalledWith('security');
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
-    const mockRawLicense = licensingMock.createLicenseMock();
-    mockRawLicense.hasAtLeast.mockReturnValue(false);
-    mockRawLicense.getFeature.mockReturnValue({ isEnabled: false, isAvailable: true });
+    const mockRawLicense = licensingMock.createLicense({
+      features: { security: { isEnabled: false, isAvailable: true } },
+    });
 
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
@@ -119,6 +126,7 @@ describe('license features', function() {
       showLogin: false,
       allowLogin: false,
       showLinks: false,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
@@ -126,12 +134,11 @@ describe('license features', function() {
     });
   });
 
-  it('should allow to login, allow RBAC and document level security if license >= platinum', () => {
-    const mockRawLicense = licensingMock.createLicenseMock();
-    mockRawLicense.hasAtLeast.mockImplementation(license => {
-      return license === 'trial' || license === 'platinum' || license === 'enterprise';
+  it('should allow role mappings, but not DLS/FLS if license = gold', () => {
+    const mockRawLicense = licensingMock.createLicense({
+      license: { mode: 'gold', type: 'gold' },
+      features: { security: { isEnabled: true, isAvailable: true } },
     });
-    mockRawLicense.getFeature.mockReturnValue({ isEnabled: true, isAvailable: true });
 
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
@@ -140,6 +147,27 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
+      showRoleMappingsManagement: true,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
+    });
+  });
+
+  it('should allow to login, allow RBAC, allow role mappings, and document level security if license >= platinum', () => {
+    const mockRawLicense = licensingMock.createLicense({
+      license: { mode: 'platinum', type: 'platinum' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const serviceSetup = new SecurityLicenseService().setup({
+      license$: of(mockRawLicense),
+    });
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
+      showRoleMappingsManagement: true,
       allowRoleDocumentLevelSecurity: true,
       allowRoleFieldLevelSecurity: true,
       allowRbac: true,

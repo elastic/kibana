@@ -21,6 +21,7 @@ import { format as formatUrl } from 'url';
 
 import { Role } from './role';
 import { User } from './user';
+import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SecurityServiceProvider({ getService }: FtrProviderContext) {
@@ -30,6 +31,7 @@ export function SecurityServiceProvider({ getService }: FtrProviderContext) {
 
   return new (class SecurityService {
     role = new Role(url, log);
+    roleMappings = new RoleMappings(url, log);
     user = new User(url, log);
   })();
 }

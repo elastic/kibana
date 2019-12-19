@@ -70,6 +70,7 @@ export class SecurityLicenseService {
         showLogin: true,
         allowLogin: false,
         showLinks: false,
+        showRoleMappingsManagement: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -85,6 +86,7 @@ export class SecurityLicenseService {
         showLogin: false,
         allowLogin: false,
         showLinks: false,
+        showRoleMappingsManagement: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -92,11 +94,13 @@ export class SecurityLicenseService {
       };
     }
 
+    const showRoleMappingsManagement = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
+      showRoleMappingsManagement,
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,

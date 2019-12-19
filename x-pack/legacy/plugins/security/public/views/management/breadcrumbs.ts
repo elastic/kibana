@@ -86,3 +86,30 @@ export function getApiKeysBreadcrumbs() {
     },
   ];
 }
+
+export function getRoleMappingBreadcrumbs() {
+  return [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
+        defaultMessage: 'Role Mappings',
+      }),
+      href: '#/management/security/role_mappings',
+    },
+  ];
+}
+
+export function getEditRoleMappingBreadcrumbs($route: Record<string, any>) {
+  const { name } = $route.current.params;
+  return [
+    ...getRoleMappingBreadcrumbs(),
+    {
+      text:
+        name ||
+        i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
+          defaultMessage: 'Create',
+        }),
+      href: `#/management/security/role_mappings/edit/${name}`,
+    },
+  ];
+}

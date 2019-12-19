@@ -28,6 +28,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '\\.(css|less|scss)$': `${kibanaDirectory}/src/dev/jest/mocks/style_mock.js`,
       '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
       '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
+      '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
     },
     coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
     coverageReporters: ['html'],

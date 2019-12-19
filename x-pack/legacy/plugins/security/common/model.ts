@@ -21,3 +21,5 @@ export {
   canUserChangePassword,
   getUserDisplayName,
 } from '../../../../plugins/security/common/model';
+
+export * from './role_mapping';
