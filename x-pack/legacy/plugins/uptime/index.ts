@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import { PluginInitializerContext } from 'src/core/server';
 import { PLUGIN } from './common/constants';
 import { KibanaServer, plugin } from './server';
+import { savedObjectMappings } from './server/saved_objects';
 
 export const uptime = (kibana: any) =>
   new kibana.Plugin({
@@ -16,6 +17,7 @@ export const uptime = (kibana: any) =>
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
+    mappings: savedObjectMappings,
     uiExports: {
       app: {
         description: i18n.translate('xpack.uptime.pluginDescription', {

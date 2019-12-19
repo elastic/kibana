@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMSavedObjectsQueryFn } from '../framework';
-
-export interface UMSavedObjectsAdapter {
-  getUptimeIndexPattern: UMSavedObjectsQueryFn;
-  getUptimeSourceSettings: UMSavedObjectsQueryFn;
-}
+export { createGetSourceSettingsRoute } from './get_source_settings';

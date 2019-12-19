@@ -6,6 +6,7 @@
 
 import { UMSavedObjectsAdapter } from './types';
 import uptimeIndexPattern from './heartbeat_index_pattern.json';
+import { uptimeSourceConfigurationSavedObjectType, uptimeSourceConfigurationSavedObjectId, defaultSourceConfiguration } from '../../sources';
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeIndexPattern: async client => {
@@ -22,4 +23,14 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       );
     }
   },
+  getUptimeSourceSettings: async client => {
+    try {
+      return await client.get(uptimeSourceConfigurationSavedObjectType, uptimeSourceConfigurationSavedObjectId)
+    } catch (e) {
+      return await client.create(
+        uptimeSourceConfigurationSavedObjectType,
+        defaultSourceConfiguration,
+      )
+    }
+  }
 };
