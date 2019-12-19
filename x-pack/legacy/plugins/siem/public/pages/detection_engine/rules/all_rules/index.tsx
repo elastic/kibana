@@ -198,7 +198,7 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
                   filterOptions: {
                     ...filterOptions,
                     sortField: 'enabled', // Only enabled is supported for sorting currently
-                    sortOrder: sort.direction,
+                    sortOrder: sort!.direction,
                   },
                 });
               }}

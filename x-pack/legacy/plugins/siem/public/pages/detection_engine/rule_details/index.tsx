@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiBasicTable,
+  EuiBasicTable as _EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -45,6 +45,9 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../c
 import { SpyRoute } from '../../../utils/route/spy_routes';
 import { DetectionEngineEmptyPage } from '../detection_engine_empty_page';
 import * as i18n from './translations';
+
+// there are a number of type mismatches across this file
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // Michael: Will need to change this to get the current datetime format from Kibana settings.
 const dateTimeFormat = (value: string) => {

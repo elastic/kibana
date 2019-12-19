@@ -20,14 +20,14 @@
 import _, { forEach } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { PersistedState } from '../../../../ui/public/persisted_state';
-import { SavedObject } from '../../../../ui/public/saved_objects/types';
-import { queryGeohashBounds } from '../../../../ui/public/visualize/loader/utils';
-import { getTableAggs } from '../../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-import { AppState } from '../../../../ui/public/state_management/app_state';
-import { npStart } from '../../../../ui/public/new_platform';
-import { IExpressionLoaderParams } from '../../../../../plugins/expressions/public';
-import { SearchSourceContract } from '../../../../ui/public/courier';
+import { PersistedState } from 'ui/persisted_state';
+import { SavedObject } from 'ui/saved_objects/types';
+import { queryGeohashBounds } from 'ui/visualize/loader/utils';
+import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { AppState } from 'ui/state_management/app_state';
+import { npStart } from 'ui/new_platform';
+import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { SearchSourceContract } from 'ui/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -45,6 +45,7 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SavedSearch } from '../../../kibana/public/discover/types';
 import { Vis, buildPipeline } from '..';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -56,6 +57,10 @@ export interface VisSavedObject extends SavedObject {
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
+  savedSearchRefName?: string;
+  savedSearchId?: string;
+  savedSearch?: SavedSearch;
+  visState: any;
 }
 
 export interface VisualizeEmbeddableConfiguration {

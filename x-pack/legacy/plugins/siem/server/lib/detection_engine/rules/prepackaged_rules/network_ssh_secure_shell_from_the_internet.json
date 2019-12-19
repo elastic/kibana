@@ -1,0 +1,17 @@
+{
+  "rule_id": "ea0784f0-a4d7-4fea-ae86-4baaf27a6f17",
+  "risk_score": 50,
+  "description": "Network - SSH (Secure Shell) from the Internet\t",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network - SSH (Secure Shell) from the Internet\t",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "destination.port:22 and not source.ip:10.0.0.0/8 and not source.ip:172.16.0.0/12 and not source.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

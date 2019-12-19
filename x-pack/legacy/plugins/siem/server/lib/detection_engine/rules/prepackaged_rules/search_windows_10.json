@@ -1,0 +1,66 @@
+{
+  "rule_id": "5d00c579-794c-4f64-be52-1ed8cae2b11e",
+  "risk_score": 50,
+  "description": "(Search) Windows 10",
+  "immutable": true,
+  "interval": "5m",
+  "name": "(Search) Windows 10",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "$state": {
+        "store": "appState"
+      },
+      "meta": {
+        "alias": null,
+        "disabled": false,
+        "key": "agent.hostname",
+        "negate": false,
+        "params": {
+          "query": "LAPTOP-CQNI37L2"
+        },
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "agent.hostname": {
+            "query": "LAPTOP-CQNI37L2",
+            "type": "phrase"
+          }
+        }
+      }
+    },
+    {
+      "meta": {
+        "alias": null,
+        "negate": false,
+        "disabled": false,
+        "type": "phrase",
+        "key": "event.provider",
+        "params": {
+          "query": "Microsoft-Windows-Sysmon"
+        },
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.provider": {
+            "query": "Microsoft-Windows-Sysmon",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

@@ -38,17 +38,21 @@ import {
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const LogEntryRateResultsContent = ({
-  sourceId,
-  isFirstUse,
-}: {
-  sourceId: string;
-  isFirstUse: boolean;
-}) => {
+export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'MMMM D, YYYY h:mm A');
+
+  const {
+    fetchJobStatus,
+    jobStatus,
+    setupStatus,
+    viewSetupForReconfiguration,
+    viewSetupForUpdate,
+    jobIds,
+    sourceConfiguration: { sourceId },
+  } = useLogEntryRateModuleContext();
 
   const {
     timeRange: selectedTimeRange,
@@ -126,14 +130,7 @@ export const LogEntryRateResultsContent = ({
     [setAutoRefresh]
   );
 
-  const {
-    fetchJobStatus,
-    jobStatus,
-    setupStatus,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
-    jobIds,
-  } = useLogEntryRateModuleContext();
+  const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
 
   useEffect(() => {
     getLogEntryRate();
