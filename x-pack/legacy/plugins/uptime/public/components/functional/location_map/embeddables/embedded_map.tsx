@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
@@ -15,6 +15,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
 
 import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
+import { UptimeSettingsContext } from '../../../../contexts';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
@@ -45,12 +46,13 @@ const EmbeddedPanel = styled.div`
 `;
 
 export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
+  const { colors } = useContext(UptimeSettingsContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
 
   useEffect(() => {
     async function setupEmbeddable() {
       const mapState = {
-        layerList: getLayerList(upPoints, downPoints),
+        layerList: getLayerList(upPoints, downPoints, colors),
         title: i18n.MAP_TITLE,
       };
       // @ts-ignore
@@ -63,7 +65,7 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.setLayerList(getLayerList(upPoints, downPoints));
+      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
   }, [upPoints, downPoints]);
 
@@ -88,6 +90,8 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     disableInteractive: true,
     disableTooltipControl: true,
     hideToolbarOverlay: true,
+    hideLayerControl: true,
+    hideViewControl: true,
   };
 
   const embeddableRoot: React.RefObject<HTMLDivElement> = React.createRef();

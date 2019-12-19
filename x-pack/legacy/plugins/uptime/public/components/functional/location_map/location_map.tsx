@@ -6,11 +6,14 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 
 const MapPanel = styled.div`
-  height: 400px;
+  height: 330px;
   width: 520px;
+  margin-right: 10px;
 `;
 
 interface LocationMapProps {
@@ -31,8 +34,15 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
     });
   }
   return (
-    <MapPanel>
-      <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
-    </MapPanel>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <LocationStatusTags monitorLocations={monitorLocations} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <MapPanel>
+          <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
+        </MapPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
