@@ -17,6 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { Alert } from '../../../../alerting/server/types';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';
@@ -28,12 +30,12 @@ export interface AlertsStatusProps {
 }
 
 export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusProps) => {
-  const { clusterUuid, emailAddress } = props;
+  const { emailAddress } = props;
 
   const [setupModeEnabled, setSetupModeEnabled] = React.useState(getSetupModeState().enabled);
   const [kibanaAlerts, setKibanaAlerts] = React.useState<Alert[]>([]);
-
   const [showMigrationFlyout, setShowMigrationFlyout] = React.useState(false);
+  const [isSecurityConfigured, setIsSecurityConfigured] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchAlertsStatus() {
@@ -45,7 +47,8 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
     }
 
     fetchAlertsStatus();
-  }, [clusterUuid, setupModeEnabled, showMigrationFlyout]);
+    fetchSecurityConfigured();
+  }, [setupModeEnabled, showMigrationFlyout]);
 
   React.useEffect(() => {
     if (!setupModeEnabled && showMigrationFlyout) {
@@ -53,11 +56,58 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
     }
   }, [setupModeEnabled, showMigrationFlyout]);
 
+  async function fetchSecurityConfigured() {
+    const response = await kfetch({ pathname: '/internal/security/api_key/privileges' });
+    setIsSecurityConfigured(response.areApiKeysEnabled);
+  }
+
   addSetupModeCallback(() => setSetupModeEnabled(getSetupModeState().enabled));
 
   function enterSetupModeAndOpenFlyout() {
     toggleSetupMode(true);
     setShowMigrationFlyout(true);
+  }
+
+  function getSecurityConfigurationErrorUi() {
+    if (isSecurityConfigured) {
+      return null;
+    }
+
+    const link = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/security-settings.html#api-key-service-settings`;
+    return (
+      <Fragment>
+        <EuiSpacer />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.monitoring.alerts.configuration.securityConfigurationErrorTitle',
+            {
+              defaultMessage: 'API keys are not enabled in Elasticsearch',
+            }
+          )}
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.monitoring.alerts.configuration.securityConfigurationErrorMessage"
+              defaultMessage="Refer to the {link} to enable API keys."
+              values={{
+                link: (
+                  <EuiLink href={link} target="_blank">
+                    {i18n.translate(
+                      'xpack.monitoring.alerts.configuration.securityConfigurationError.docsLinkLabel',
+                      {
+                        defaultMessage: 'docs',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiCallOut>
+      </Fragment>
+    );
   }
 
   function renderContent() {
@@ -80,10 +130,18 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
                 })}
               </p>
             </EuiText>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              size="s"
+              title={i18n.translate('xpack.monitoring.alerts.status.flyoutNote', {
+                defaultMessage: 'Note: These alerts work across all monitored clusters.',
+              })}
+              iconType="pin"
+            />
+            {getSecurityConfigurationErrorUi()}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <AlertsConfiguration
-              clusterUuid={clusterUuid}
               emailAddress={emailAddress}
               onDone={() => setShowMigrationFlyout(false)}
             />

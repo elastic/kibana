@@ -46,7 +46,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
         method: 'PUT',
         pathname: `/api/action/${props.editAction.id}`,
         body: JSON.stringify({
-          description: props.editAction.description,
+          name: props.editAction.name,
           config: omit(data, ['user', 'password']),
           secrets: pick(data, ['user', 'password']),
         }),
@@ -57,12 +57,9 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
         method: 'POST',
         pathname: '/api/action',
         body: JSON.stringify({
-          description: i18n.translate(
-            'xpack.monitoring.alerts.configuration.emailAction.description',
-            {
-              defaultMessage: 'Email action for Stack Monitoring alerts',
-            }
-          ),
+          name: i18n.translate('xpack.monitoring.alerts.configuration.emailAction.name', {
+            defaultMessage: 'Email action for Stack Monitoring alerts',
+          }),
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
           config: omit(data, ['user', 'password']),
           secrets: pick(data, ['user', 'password']),

@@ -81,7 +81,12 @@ export const monitoring = kibana =>
         usageCollection,
       };
 
-      new Plugin().setup(serverFacade, plugins);
+      const plugin = new Plugin();
+      const { initializeAlerting } = plugin.setup(serverFacade, plugins);
+      const { kbnServer } = server.plugins.xpack_main.status.plugin;
+      kbnServer.afterPluginsInit(() => {
+        initializeAlerting(server.newPlatform.coreContext, server.plugins.alerting);
+      });
     },
     config,
     deprecations,

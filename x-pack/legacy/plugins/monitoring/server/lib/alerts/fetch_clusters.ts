@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { License } from '../../alerts/types';
+import { AlertCluster } from '../../alerts/types';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../common/constants';
 
-export async function fetchLicense(callCluster: any, clusterUuid: string): Promise<License> {
+interface AggregationResult {
+  key: string;
+}
+
+export async function fetchClusters(callCluster: any): Promise<AlertCluster[]> {
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    filterPath: 'hits.hits._source.license.*',
+    filterPath: 'aggregations.clusters.buckets',
     body: {
-      size: 1,
-      sort: [{ timestamp: { order: 'desc' } }],
+      size: 0,
       query: {
         bool: {
           filter: [
-            {
-              term: {
-                cluster_uuid: clusterUuid,
-              },
-            },
             {
               term: {
                 type: 'cluster_stats',
@@ -37,9 +35,19 @@ export async function fetchLicense(callCluster: any, clusterUuid: string): Promi
           ],
         },
       },
+      aggs: {
+        clusters: {
+          terms: {
+            field: 'cluster_uuid',
+            size: 1000,
+          },
+        },
+      },
     },
   };
 
   const response = await callCluster('search', params);
-  return get(response, 'hits.hits[0]._source.license');
+  return get(response, 'aggregations.clusters.buckets', []).map((bucket: AggregationResult) => ({
+    cluster_uuid: bucket.key,
+  }));
 }

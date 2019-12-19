@@ -348,7 +348,6 @@ export const getCollectionStatus = async (
       },
     };
   }
-  console.log('OKOKOKOK');
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
   const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 

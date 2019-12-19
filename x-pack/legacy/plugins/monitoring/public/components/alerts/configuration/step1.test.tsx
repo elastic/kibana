@@ -25,7 +25,7 @@ describe('Step1', () => {
     {
       id: '1',
       actionTypeId: '1abc',
-      description: 'Testing',
+      name: 'Testing',
       config: {},
     },
   ];
@@ -81,7 +81,7 @@ describe('Step1', () => {
           {
             id: 'foo',
             actionTypeId: '.email',
-            description: '',
+            name: '',
             config: {},
           },
         ],
@@ -127,7 +127,7 @@ describe('Step1', () => {
         method: 'POST',
         pathname: `/api/action`,
         body: JSON.stringify({
-          description: 'Email action for Stack Monitoring alerts',
+          name: 'Email action for Stack Monitoring alerts',
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
           config: omit(data, ['user', 'password']),
           secrets: pick(data, ['user', 'password']),
@@ -181,7 +181,7 @@ describe('Step1', () => {
         method: 'PUT',
         pathname: `/api/action/${emailActions[0].id}`,
         body: JSON.stringify({
-          description: emailActions[0].description,
+          name: emailActions[0].name,
           config: omit(data, ['user', 'password']),
           secrets: pick(data, ['user', 'password']),
         }),

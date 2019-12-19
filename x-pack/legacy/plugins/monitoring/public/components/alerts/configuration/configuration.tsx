@@ -16,7 +16,6 @@ import { Step2 } from './step2';
 import { Step3 } from './step3';
 
 export interface AlertsConfigurationProps {
-  clusterUuid: string;
   emailAddress: string;
   onDone: Function;
 }
@@ -36,7 +35,7 @@ export const NEW_ACTION_ID = '__new__';
 export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   props: AlertsConfigurationProps
 ) => {
-  const { clusterUuid, onDone } = props;
+  const { onDone } = props;
 
   const [emailActions, setEmailActions] = React.useState<ActionResult[]>([]);
   const [selectedEmailActionId, setSelectedEmailActionId] = React.useState('');
@@ -45,6 +44,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
   const [formErrors, setFormErrors] = React.useState<AlertsConfigurationForm>({ email: null });
   const [showFormErrors, setShowFormErrors] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState('');
 
   React.useEffect(() => {
     async function fetchData() {
@@ -52,7 +52,7 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
     }
 
     fetchData();
-  }, [clusterUuid]);
+  }, []);
 
   React.useEffect(() => {
     setFormErrors(getMissingFieldErrors({ email: emailAddress }, { email: '' }));
@@ -83,11 +83,17 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
     setIsSaving(true);
     setShowFormErrors(false);
 
-    await kfetch({
-      method: 'POST',
-      pathname: `/api/monitoring/v1/clusters/${clusterUuid}/alerts`,
-      body: JSON.stringify({ selectedEmailActionId, emailAddress }),
-    });
+    try {
+      await kfetch({
+        method: 'POST',
+        pathname: `/api/monitoring/v1/alerts`,
+        body: JSON.stringify({ selectedEmailActionId, emailAddress }),
+      });
+    } catch (err) {
+      setIsSaving(false);
+      setSaveError(err.body.message);
+      return;
+    }
 
     onDone();
   }
@@ -168,7 +174,9 @@ export const AlertsConfiguration: React.FC<AlertsConfigurationProps> = (
         defaultMessage: 'Confirm and save',
       }),
       status: getStep2Status(),
-      children: <Step3 isSaving={isSaving} save={save} isDisabled={isStep3Disabled()} />,
+      children: (
+        <Step3 isSaving={isSaving} save={save} isDisabled={isStep3Disabled()} error={saveError} />
+      ),
     },
   ];
 

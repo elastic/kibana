@@ -135,7 +135,7 @@ export class Plugin {
     });
 
     return {
-      initializeAlerting: alerting => {
+      initializeAlerting: (coreContext, alerting) => {
         if (KIBANA_ALERTING_ENABLED && alerting) {
           // this is not ready right away but we need to register alerts right away
           async function getMonitoringCluster() {
@@ -158,7 +158,7 @@ export class Plugin {
           }
 
           function getLogger(contexts) {
-            return core.newPlatform.coreContext.logger.get('plugins', LOGGING_TAG, ...contexts);
+            return coreContext.logger.get('plugins', LOGGING_TAG, ...contexts);
           }
           alerting.setup.registerType(getLicenseExpiration(getMonitoringCluster, getLogger));
         }

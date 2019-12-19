@@ -24,7 +24,7 @@ exports[`Step1 editing should allow for editing 1`] = `
       Object {
         "actionTypeId": "1abc",
         "config": Object {},
-        "description": "Testing",
+        "name": "Testing",
         "id": "1",
       }
     }
@@ -47,10 +47,10 @@ exports[`Step1 should render normally 1`] = `
       Array [
         Object {
           "dropdownDisplay": <EuiText>
-            From: , Service: 
+            From: , Service:
           </EuiText>,
           "inputDisplay": <EuiText>
-            From: , Service: 
+            From: , Service:
           </EuiText>,
           "value": "1",
         },
@@ -140,10 +140,10 @@ exports[`Step1 testing should show a failed test error 1`] = `
       Array [
         Object {
           "dropdownDisplay": <EuiText>
-            From: , Service: 
+            From: , Service:
           </EuiText>,
           "inputDisplay": <EuiText>
-            From: , Service: 
+            From: , Service:
           </EuiText>,
           "value": "1",
         },
@@ -225,10 +225,10 @@ exports[`Step1 testing should show a successful test 1`] = `
       Array [
         Object {
           "dropdownDisplay": <EuiText>
-            From: , Service: 
+            From: , Service:
           </EuiText>,
           "inputDisplay": <EuiText>
-            From: , Service: 
+            From: , Service:
           </EuiText>,
           "value": "1",
         },
