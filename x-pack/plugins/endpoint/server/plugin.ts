@@ -39,6 +39,14 @@ export class EndpointPlugin
           },
           ui: ['save'],
         },
+        read: {
+          api: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
       },
     });
     const router = core.http.createRouter();
