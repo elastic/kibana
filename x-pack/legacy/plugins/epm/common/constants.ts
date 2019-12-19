@@ -18,4 +18,4 @@ export const PLUGIN = {
 };
 
 export const SAVED_OBJECT_TYPE_PACKAGES = 'epm-package';
-export const SAVED_OBJECT_TYPE_DATASOURCES = 'epm-datasource';
+export const SAVED_OBJECT_TYPE_DATASOURCES = 'datasources'; // From Ingest

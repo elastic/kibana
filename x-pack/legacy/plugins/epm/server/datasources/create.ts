@@ -5,11 +5,11 @@
  */
 
 import yaml from 'js-yaml';
-import fetch from 'node-fetch';
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { Asset, Datasource, Stream } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
+import * as Ingest from '../ingest';
 import { createInput } from '../lib/agent/agent';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
@@ -90,19 +90,23 @@ export async function createDatasource(options: {
 
   const streams = await getStreams(pkgkey, datasets);
 
-  await saveDatasourceReferences({
+  const datasource = await constructDatasource({
     savedObjectsClient,
     pkg: registryPackageInfo,
     datasourceName,
-    datasets,
     toSave,
-    request,
     streams,
   });
 
+  // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
+  // or something similar, but it's a class not an object so many pieces are missing
+  // we'd still need `user` from the request object, but that's not terrible
+  // lacking that we make another http request to Ingest
+  const savedDatasource = await Ingest.createDatasource({ request, datasource });
+
   await Promise.all(
     policyIds.map(policyId =>
-      ingestAddDatasourcesToPolicy({ datasources: [pkgkey], policyId, request })
+      Ingest.addDatasourcesToPolicy({ datasources: [savedDatasource.id], policyId, request })
     )
   );
 
@@ -122,40 +126,37 @@ async function baseSetup(callCluster: CallESAsCurrentUser) {
   }
 }
 
-async function saveDatasourceReferences(options: {
+async function constructDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkg: RegistryPackage;
-  datasets: Dataset[];
   datasourceName: string;
   toSave: AssetReference[];
-  request: Request;
   streams: Stream[];
 }) {
-  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request, streams } = options;
-  const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
-  const savedAssets = savedDatasource?.package.assets;
+  const { savedObjectsClient, pkg, toSave, datasourceName, streams } = options;
+  const savedDatasource = await getDatasource({ savedObjectsClient, name: datasourceName });
+  const savedAssets = savedDatasource?.package.assets || [];
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
     const hasAsset = current.find(c => c.id === pending.id && c.type === pending.type);
     if (!hasAsset) current.push(pending);
     return current;
   };
 
-  const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
-  const datasource: Datasource = createFakeDatasource({
-    pkg,
-    datasourceName,
-    datasets,
-    assets: toInstall,
+  const assetsToInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
+  const datasource: Datasource = {
+    name: datasourceName,
+    read_alias: 'read_alias',
+    package: {
+      name: pkg.name,
+      version: pkg.version,
+      description: pkg.description,
+      title: pkg.title,
+      assets: assetsToInstall,
+    },
     streams,
-  });
+  };
 
-  // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
-  // or something similar, but it's a class not an object so many pieces are missing
-  // we'd still need `user` from the request object, but that's not terrible
-  // lacking that we make another http request to Ingest
-  await ingestDatasourceCreate({ request, datasource });
-
-  return toInstall;
+  return datasource;
 }
 
 async function getStreams(pkgkey: string, datasets: Dataset[]) {
@@ -177,43 +178,35 @@ async function getStreams(pkgkey: string, datasets: Dataset[]) {
 
 async function getDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkg: RegistryPackage;
+  name?: Datasource['name'];
+  id?: Datasource['id'];
 }) {
-  const { savedObjectsClient, pkg } = options;
-  const datasource = await savedObjectsClient
-    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, Registry.pkgToPkgKey(pkg))
-    .catch(() => undefined);
+  const { savedObjectsClient, name, id } = options;
+  if (id) {
+    const datasource = await savedObjectsClient.get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, id);
+    return datasource?.attributes;
+  }
 
-  return datasource?.attributes;
-}
+  if (name) {
+    const results = await savedObjectsClient.find<Datasource>({
+      type: SAVED_OBJECT_TYPE_DATASOURCES,
+      searchFields: ['attributes.name'],
+      search: name,
+    });
+    if (results.total === 0) {
+      return;
+    }
 
-interface CreateFakeDatasource {
-  pkg: RegistryPackage;
-  datasourceName: string;
-  datasets: Dataset[];
-  assets: Asset[] | undefined;
-  streams: Stream[];
-}
+    if (results.total === 1) {
+      return results.saved_objects[0]?.attributes;
+    }
 
-function createFakeDatasource({
-  pkg,
-  datasourceName,
-  assets = [],
-  streams,
-}: CreateFakeDatasource): Datasource {
-  return {
-    id: Registry.pkgToPkgKey(pkg),
-    name: datasourceName,
-    read_alias: 'read_alias',
-    package: {
-      name: pkg.name,
-      version: pkg.version,
-      description: pkg.description,
-      title: pkg.title,
-      assets,
-    },
-    streams,
-  };
+    if (results.total > 1) {
+      throw new Error(`More than 1 datasource with name: '${name}'`);
+    }
+  }
+
+  throw new Error('Must provide a data source name or id');
 }
 
 async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
@@ -238,66 +231,3 @@ const isDatasetInput = ({ path }: Registry.ArchiveEntry, datasetName: string) =>
 };
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
-
-async function ingestAddDatasourcesToPolicy({
-  request,
-  datasources,
-  policyId,
-}: {
-  request: Request;
-  datasources: Array<Datasource['id']>;
-  policyId: string;
-}) {
-  await ingestAPI({
-    method: 'post',
-    path: `/api/ingest/policies/${policyId}/addDatasources`,
-    body: { datasources },
-    request,
-  });
-}
-
-async function ingestDatasourceCreate({
-  request,
-  datasource,
-}: {
-  request: Request;
-  datasource: Datasource;
-}) {
-  await ingestAPI({
-    path: '/api/ingest/datasources',
-    method: 'post',
-    body: { datasource },
-    request,
-  });
-}
-
-// Temporary while we're iterating.
-// If we end up keeping the "make another HTTP request" method,
-// we'll clean this up via proxy or something else
-async function ingestAPI({
-  path,
-  method,
-  body,
-  request,
-}: {
-  path: string;
-  method: string;
-  body: Record<string, any>;
-  request: Request;
-}) {
-  // node-fetch requires absolute urls because there isn't an origin on Node
-  const origin = request.server.info.uri; // e.g. http://localhost:5601
-  const basePath = request.getBasePath(); // e.g. /abc
-  const url = `${origin}${basePath}${path}`;
-
-  return fetch(url, {
-    method,
-    body: JSON.stringify(body),
-    headers: {
-      'kbn-xsrf': 'some value, any value',
-      'Content-Type': 'application/json',
-      // the main (only?) one we want is `authorization`
-      ...request.headers,
-    },
-  });
-}
