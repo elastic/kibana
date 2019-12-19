@@ -29,7 +29,7 @@ export const NullValueParameter = ({ defaultToggleValue, description, children }
         ? description
         : i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldDescription', {
             defaultMessage:
-              'Accepts a string value which is substituted for any explicit null values.',
+              'Replace explicit null values with the specified value so that it can be indexed and searched.',
           })
     }
     docLink={{

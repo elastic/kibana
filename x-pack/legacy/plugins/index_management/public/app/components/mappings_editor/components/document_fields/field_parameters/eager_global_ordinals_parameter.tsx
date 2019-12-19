@@ -14,12 +14,13 @@ import { documentationService } from '../../../../../services/documentation';
 export const EagerGlobalOrdinalsParameter = () => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldTitle', {
-      defaultMessage: 'Use eager global ordinals',
+      defaultMessage: 'Build global ordinals at index time',
     })}
     description={i18n.translate(
       'xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldDescription',
       {
-        defaultMessage: 'Whether to load global ordinals on refresh.',
+        defaultMessage:
+          'By default, global ordinals are built at search time, which optimizes for index speed. You can optimize for search performance by building them at index time instead.',
       }
     )}
     docLink={{

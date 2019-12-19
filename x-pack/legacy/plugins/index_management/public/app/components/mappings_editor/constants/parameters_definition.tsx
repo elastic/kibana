@@ -3,9 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { FieldConfig } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { EuiLink } from '@elastic/eui';
 import {
   FIELD_TYPES,
   fieldValidators,
@@ -15,6 +18,7 @@ import {
 } from '../shared_imports';
 import { INDEX_DEFAULT, TYPE_DEFINITION } from '../constants';
 import { AliasOption, DataType, ComboBoxOption } from '../types';
+import { documentationService } from '../../../services/documentation';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -48,7 +52,7 @@ const nullValueValidateEmptyField = emptyField(
   i18n.translate(
     'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
     {
-      defaultMessage: 'Specify a null value.',
+      defaultMessage: 'Null value is required.',
     }
   )
 );
@@ -59,10 +63,25 @@ const indexOptionsConfig = {
   label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
     defaultMessage: 'Index options',
   }),
+  helpText: () => (
+    <FormattedMessage
+      id="xpack.idxMgmt.mappingsEditor.indexOptionsHelpText"
+      defaultMessage="Information to store in the index. {docsLink}"
+      values={{
+        docsLink: (
+          <EuiLink href={documentationService.getIndexOptionsLink()} target="_blank">
+            {i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.configuration.indexOptionsdDocumentationLink',
+              {
+                defaultMessage: 'Learn more.',
+              }
+            )}
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
   type: FIELD_TYPES.SUPER_SELECT,
-  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
-    defaultMessage: 'Information that should be stored in the index.',
-  }),
 };
 
 export const PARAMETERS_DEFINITION = {
@@ -270,7 +289,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.copyToLabel', {
-        defaultMessage: 'Destination field name',
+        defaultMessage: 'Group field name',
       }),
       validations: [
         {
@@ -278,7 +297,7 @@ export const PARAMETERS_DEFINITION = {
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.copyToIsRequiredErrorMessage',
               {
-                defaultMessage: 'Specify a copy value.',
+                defaultMessage: 'Group field name is required.',
               }
             )
           ),
@@ -498,7 +517,7 @@ export const PARAMETERS_DEFINITION = {
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.normalizerIsRequiredErrorMessage',
               {
-                defaultMessage: 'Give a name to the normalizer.',
+                defaultMessage: 'Normalizer name is required.',
               }
             )
           ),
@@ -510,6 +529,9 @@ export const PARAMETERS_DEFINITION = {
           }),
         },
       ],
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.normalizerHelpText', {
+        defaultMessage: `The name of a normalizer defined in the index's settings.`,
+      }),
     },
   },
   index_options: {
@@ -659,9 +681,6 @@ export const PARAMETERS_DEFINITION = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityLabel', {
         defaultMessage: 'Similarity algorithm',
       }),
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityHelpText', {
-        defaultMessage: 'Defaults to BM25.',
-      }),
     },
   },
   split_queries_on_whitespace: {
@@ -680,6 +699,16 @@ export const PARAMETERS_DEFINITION = {
       }),
       formatters: [toInt],
       validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.ignoreAboveIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Character length limit is required.',
+              }
+            )
+          ),
+        },
         {
           validator: (({ value }: ValidationFuncArg<any, number>) => {
             if ((value as number) < 0) {
