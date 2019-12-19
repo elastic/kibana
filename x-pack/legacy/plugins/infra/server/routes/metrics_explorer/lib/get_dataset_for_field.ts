@@ -9,8 +9,8 @@ import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framewor
 
 interface EventDatasetHit {
   _source: {
-    event: {
-      dataset: string;
+    event?: {
+      dataset?: string;
     };
   };
 }
@@ -42,5 +42,5 @@ export const getDatasetForField = async (
     return null;
   }
 
-  return response.hits.hits?.[0]._source.event.dataset;
+  return response.hits.hits?.[0]._source.event?.dataset;
 };
