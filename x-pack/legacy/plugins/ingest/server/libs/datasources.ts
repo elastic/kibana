@@ -25,7 +25,11 @@ export class DatasourcesLib {
       throw new Error('Could not get version information about Kibana from xpack');
     }
 
-    return await this.adapter.create(withUser, datasource);
+    return await this.adapter.create(
+      withUser,
+      datasource,
+      datasource.id ? { id: datasource.id } : {}
+    );
   }
 
   public async get(user: FrameworkUser, id: string): Promise<Datasource | null> {
