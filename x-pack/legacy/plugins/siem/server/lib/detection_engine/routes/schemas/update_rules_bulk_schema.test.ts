@@ -9,7 +9,7 @@ import { UpdateRuleAlertParamsRest } from '../../rules/types';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests
-// this this just wraps updateRulesSchema in an array
+// this just wraps updateRulesSchema in an array
 describe('update_rules_bulk_schema', () => {
   test('can take an empty array and validate it', () => {
     expect(

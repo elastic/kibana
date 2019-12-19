@@ -9,7 +9,7 @@ import { UpdateRuleAlertParamsRest } from '../../rules/types';
 
 // only the basics of testing are here.
 // see: query_rules_bulk_schema.test.ts for the bulk of the validation tests
-// this this just wraps queryRulesSchema in an array
+// this just wraps queryRulesSchema in an array
 describe('query_rules_bulk_schema', () => {
   test('can take an empty array and validate it', () => {
     expect(
