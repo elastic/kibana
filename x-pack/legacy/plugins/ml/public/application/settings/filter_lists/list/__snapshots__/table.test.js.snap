@@ -31,7 +31,6 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
       ]
     }
     data-test-subj="mlFilterListsTable"
-    executeQueryOptions={Object {}}
     isSelectable={true}
     itemId="filter_id"
     items={
@@ -139,7 +138,6 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
       ]
     }
     data-test-subj="mlFilterListsTable"
-    executeQueryOptions={Object {}}
     isSelectable={true}
     itemId="filter_id"
     items={
