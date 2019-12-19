@@ -5,10 +5,10 @@
  */
 import { BehaviorSubject } from 'rxjs';
 import { LicensingPluginSetup } from './types';
-import { licenseMock } from '../common/licensing.mocks';
+import { licenseMock } from '../common/licensing.mock';
 
 const createSetupMock = () => {
-  const license = licenseMock.create();
+  const license = licenseMock.createLicense();
   const mock: jest.Mocked<LicensingPluginSetup> = {
     license$: new BehaviorSubject(license),
     refresh: jest.fn(),
@@ -25,5 +25,5 @@ const createSetupMock = () => {
 
 export const licensingMock = {
   createSetup: createSetupMock,
-  createLicense: licenseMock.create,
+  createLicense: licenseMock.createLicense,
 };
