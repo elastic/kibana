@@ -70,7 +70,7 @@ export class FeatureTable extends Component<Props, {}> {
         id: 'xpack.spaces.management.enabledSpaceFeaturesFeatureColumnTitle',
         defaultMessage: 'Feature',
       }),
-      render: (feature: Feature) => {
+      render: (feature: Feature, _item: { feature: Feature; space: Props['space'] }) => {
         return (
           <EuiText>
             <EuiIcon size="m" type={feature.icon as IconType} />

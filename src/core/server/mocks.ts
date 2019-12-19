@@ -121,6 +121,7 @@ function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   return mock;
@@ -143,6 +144,7 @@ function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   return startDeps;
 }

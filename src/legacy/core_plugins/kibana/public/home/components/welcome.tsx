@@ -23,7 +23,7 @@
  * in Elasticsearch.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiLink,
   EuiTextColor,
@@ -39,12 +39,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
-
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
   onOptInSeen: () => any;
-  showTelemetryDisclaimer: boolean;
+  currentOptInStatus: boolean;
 }
 
 /**
@@ -84,9 +83,42 @@ export class Welcome extends React.Component<Props> {
     document.removeEventListener('keydown', this.hideOnEsc);
   }
 
-  render() {
-    const { urlBasePath, showTelemetryDisclaimer } = this.props;
+  private renderTelemetryEnabledOrDisabledText = () => {
+    if (this.props.currentOptInStatus) {
+      return (
+        <Fragment>
+          <FormattedMessage
+            id="kbn.home.dataManagementDisableCollection"
+            defaultMessage="To stop collection, "
+          />
+          <EuiLink href="#/management/kibana/settings">
+            <FormattedMessage
+              id="kbn.home.dataManagementDisableCollectionLink"
+              defaultMessage="disable usage data here."
+            />
+          </EuiLink>
+        </Fragment>
+      );
+    } else {
+      return (
+        <Fragment>
+          <FormattedMessage
+            id="kbn.home.dataManagementEnableCollection"
+            defaultMessage=" To start collection, "
+          />
+          <EuiLink href="#/management/kibana/settings">
+            <FormattedMessage
+              id="kbn.home.dataManagementEnableCollectionLink"
+              defaultMessage="enable usage data here."
+            />
+          </EuiLink>
+        </Fragment>
+      );
+    }
+  };
 
+  render() {
+    const { urlBasePath } = this.props;
     return (
       <EuiPortal>
         <div className="homWelcome">
@@ -121,34 +153,23 @@ export class Welcome extends React.Component<Props> {
                   onDecline={this.onSampleDataDecline}
                 />
                 <EuiSpacer size="s" />
-                {showTelemetryDisclaimer && (
-                  <EuiTextColor className="euiText--small" color="subdued">
+                <EuiTextColor className="euiText--small" color="subdued">
+                  <FormattedMessage
+                    id="kbn.home.dataManagementDisclaimerPrivacy"
+                    defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                  />
+                  <EuiLink
+                    href="https://www.elastic.co/legal/privacy-statement"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     <FormattedMessage
-                      id="kbn.home.dataManagementDisclaimerPrivacy"
-                      defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                      id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                      defaultMessage="Privacy Statement."
                     />
-                    <EuiLink
-                      href="https://www.elastic.co/legal/privacy-statement"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      <FormattedMessage
-                        id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                        defaultMessage="Privacy Statement."
-                      />
-                    </EuiLink>
-                    <FormattedMessage
-                      id="kbn.home.dataManagementDisableCollection"
-                      defaultMessage=" To stop collection, "
-                    />
-                    <EuiLink href="#/management/kibana/settings">
-                      <FormattedMessage
-                        id="kbn.home.dataManagementDisableCollectionLink"
-                        defaultMessage="disable usage data here."
-                      />
-                    </EuiLink>
-                  </EuiTextColor>
-                )}
+                  </EuiLink>
+                  {this.renderTelemetryEnabledOrDisabledText()}
+                </EuiTextColor>
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>

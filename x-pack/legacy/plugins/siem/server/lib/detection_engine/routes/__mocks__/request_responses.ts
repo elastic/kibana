@@ -13,14 +13,48 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   INTERNAL_RULE_ID_KEY,
+  INTERNAL_IMMUTABLE_KEY,
 } from '../../../../../common/constants';
 import { RuleAlertType } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
 
-// The Omit of filter is because of a Hapi Server Typing issue that I am unclear
-// where it comes from. I would hope to remove the "filter" as an omit at some point
-// when we upgrade and Hapi Server is ok with the filter.
-export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> => ({
+export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
+  rule_id: 'rule-1',
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  risk_score: 50,
+  type: 'query',
+  from: 'now-6m',
+  to: 'now',
+  severity: 'high',
+  query: 'user.name: root or user.name: admin',
+  language: 'kuery',
+  threats: [
+    {
+      framework: 'fake',
+      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+    },
+  ],
+  enabled: true,
+  filters: [],
+  immutable: false,
+  references: [],
+  meta: {},
+  tags: [],
+  version: 1,
+  false_positives: [],
+  saved_id: 'some-id',
+  max_signals: 100,
+  created_at: '2019-12-13T16:40:33.400Z',
+  updated_at: '2019-12-13T16:40:33.400Z',
+  timeline_id: 'timeline-id',
+});
+
+export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -109,12 +143,24 @@ export const getFindResultWithSingleHit = (): FindHit => ({
   data: [getResult()],
 });
 
-export const getFindResultWithMultiHits = (data: RuleAlertType[]): FindHit => ({
-  page: 1,
-  perPage: 1,
-  total: 2,
+export const getFindResultWithMultiHits = ({
   data,
-});
+  page = 1,
+  perPage = 1,
+  total,
+}: {
+  data: RuleAlertType[];
+  page?: number;
+  perPage?: number;
+  total?: number;
+}) => {
+  return {
+    page,
+    perPage,
+    total: total != null ? total : data.length,
+    data,
+  };
+};
 
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
@@ -172,22 +218,33 @@ export const createActionResult = (): ActionResult => ({
 export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`],
+  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
+  consumer: 'siem',
   params: {
+    createdAt: '2019-12-13T16:40:33.400Z',
+    updatedAt: '2019-12-13T16:40:33.400Z',
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     falsePositives: [],
     from: 'now-6m',
-    filter: null,
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     outputIndex: '.siem-signals',
-    savedId: null,
-    meta: null,
-    filters: null,
+    savedId: 'some-id',
+    timelineId: 'some-timeline-id',
+    meta: { someMeta: 'someField' },
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     riskScore: 50,
     maxSignals: 100,
     size: 1,
@@ -213,8 +270,9 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
+    version: 1,
   },
-  interval: '5m',
+  schedule: { interval: '5m' },
   enabled: true,
   actions: [],
   throttle: null,
