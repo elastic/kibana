@@ -16,9 +16,10 @@ import {
   ValidationFuncArg,
   fieldFormatters,
 } from '../shared_imports';
-import { INDEX_DEFAULT, TYPE_DEFINITION } from '../constants';
 import { AliasOption, DataType, ComboBoxOption } from '../types';
 import { documentationService } from '../../../services/documentation';
+import { INDEX_DEFAULT } from './default_values';
+import { TYPE_DEFINITION } from './data_types_definition';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -39,7 +40,7 @@ const commonErrorMessages = {
   analyzerIsRequired: i18n.translate(
     'xpack.idxMgmt.mappingsEditor.parameters.validations.analyzerIsRequiredErrorMessage',
     {
-      defaultMessage: 'Give a name to the analyzer.',
+      defaultMessage: 'Specify the custom analyzer name or choose a built-in analyzer.',
     }
   ),
 };
@@ -83,6 +84,18 @@ const indexOptionsConfig = {
   ),
   type: FIELD_TYPES.SUPER_SELECT,
 };
+
+const analyzerValidations = [
+  {
+    validator: emptyField(commonErrorMessages.analyzerIsRequired),
+  },
+  {
+    validator: containsCharsField({
+      chars: ' ',
+      message: commonErrorMessages.spacesNotAllowed,
+    }),
+  },
+];
 
 export const PARAMETERS_DEFINITION = {
   name: {
@@ -457,53 +470,29 @@ export const PARAMETERS_DEFINITION = {
   },
   analyzer: {
     fieldConfig: {
-      label: 'Analyzer',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.analyzerFieldLabel', {
+        defaultMessage: 'Analyzer',
+      }),
       defaultValue: INDEX_DEFAULT,
-      validations: [
-        {
-          validator: emptyField(commonErrorMessages.analyzerIsRequired),
-        },
-        {
-          validator: containsCharsField({
-            chars: ' ',
-            message: commonErrorMessages.spacesNotAllowed,
-          }),
-        },
-      ],
+      validations: analyzerValidations,
     },
   },
   search_analyzer: {
     fieldConfig: {
-      label: 'Search analyzer',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.searchAnalyzerFieldLabel', {
+        defaultMessage: 'Search analyzer',
+      }),
       defaultValue: INDEX_DEFAULT,
-      validations: [
-        {
-          validator: emptyField(commonErrorMessages.analyzerIsRequired),
-        },
-        {
-          validator: containsCharsField({
-            chars: ' ',
-            message: commonErrorMessages.spacesNotAllowed,
-          }),
-        },
-      ],
+      validations: analyzerValidations,
     },
   },
   search_quote_analyzer: {
     fieldConfig: {
-      label: 'Search quote analyzer',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.searchQuoteAnalyzerFieldLabel', {
+        defaultMessage: 'Search quote analyzer',
+      }),
       defaultValue: INDEX_DEFAULT,
-      validations: [
-        {
-          validator: emptyField(commonErrorMessages.analyzerIsRequired),
-        },
-        {
-          validator: containsCharsField({
-            chars: ' ',
-            message: commonErrorMessages.spacesNotAllowed,
-          }),
-        },
-      ],
+      validations: analyzerValidations,
     },
   },
   normalizer: {
