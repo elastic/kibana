@@ -60,6 +60,13 @@ export class TaskPool {
   }
 
   /**
+   * Gets how many workers are currently available.
+   */
+  public get hasAvailableWorkers() {
+    return this.availableWorkers > 0;
+  }
+
+  /**
    * Attempts to run the specified list of tasks. Returns true if it was able
    * to start every task in the list, false if there was not enough capacity
    * to run every task.
@@ -85,18 +92,18 @@ export class TaskPool {
       performance.mark('attemptToRun_start');
       await Promise.all(
         tasksToRun.map(
-          async task =>
-            await task
+          async taskRunner =>
+            await taskRunner
               .markTaskAsRunning()
               .then((hasTaskBeenMarkAsRunning: boolean) =>
                 hasTaskBeenMarkAsRunning
-                  ? this.handleMarkAsRunning(task)
-                  : this.handleFailureOfMarkAsRunning(task, {
+                  ? this.handleMarkAsRunning(taskRunner)
+                  : this.handleFailureOfMarkAsRunning(taskRunner, {
                       name: 'TaskPoolVersionConflictError',
                       message: VERSION_CONFLICT_MESSAGE,
                     })
               )
-              .catch(ex => this.handleFailureOfMarkAsRunning(task, ex))
+              .catch(err => this.handleFailureOfMarkAsRunning(taskRunner, err))
         )
       );
 
@@ -113,14 +120,14 @@ export class TaskPool {
     return TaskPoolRunResult.RunningAllClaimedTasks;
   }
 
-  private handleMarkAsRunning(task: TaskRunner) {
-    this.running.add(task);
-    task
+  private handleMarkAsRunning(taskRunner: TaskRunner) {
+    this.running.add(taskRunner);
+    taskRunner
       .run()
       .catch(err => {
-        this.logger.warn(`Task ${task.toString()} failed in attempt to run: ${err.message}`);
+        this.logger.warn(`Task ${taskRunner.toString()} failed in attempt to run: ${err.message}`);
       })
-      .then(() => this.running.delete(task));
+      .then(() => this.running.delete(taskRunner));
   }
 
   private handleFailureOfMarkAsRunning(task: TaskRunner, err: Error) {

@@ -30,7 +30,7 @@
     "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.5",
+    "@babel/core": "^7.5.5",
     "@elastic/eui": "0.0.55",
     "@kbn/babel-preset": "1.0.0",
     "autoprefixer": "9.6.1",
@@ -38,7 +38,7 @@
     "brace": "0.11.1",
     "chalk": "^2.4.2",
     "chokidar": "3.2.1",
-    "core-js": "^3.5.0",
+    "core-js": "^3.2.1",
     "css-loader": "^2.1.1",
     "expose-loader": "^0.7.5",
     "file-loader": "^4.2.0",

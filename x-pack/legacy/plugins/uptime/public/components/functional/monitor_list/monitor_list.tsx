@@ -79,7 +79,7 @@ export const MonitorListComponent = (props: Props) => {
 
   const columns = [
     {
-      align: 'left',
+      align: 'left' as const,
       width: '20%',
       field: 'state.monitor.status',
       name: labels.STATUS_COLUMN_LABEL,
@@ -88,7 +88,7 @@ export const MonitorListComponent = (props: Props) => {
       },
     },
     {
-      align: 'left',
+      align: 'left' as const,
       width: '30%',
       field: 'state.monitor.name',
       name: labels.NAME_COLUMN_LABEL,
@@ -100,7 +100,7 @@ export const MonitorListComponent = (props: Props) => {
       sortable: true,
     },
     {
-      align: 'center',
+      align: 'center' as const,
       field: 'histogram.points',
       name: labels.HISTORY_COLUMN_LABEL,
       mobileOptions: {
@@ -116,7 +116,7 @@ export const MonitorListComponent = (props: Props) => {
       ),
     },
     {
-      align: 'right',
+      align: 'right' as const,
       field: 'monitor_id',
       name: '',
       sortable: true,

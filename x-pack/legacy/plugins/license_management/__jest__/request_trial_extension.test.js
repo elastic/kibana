@@ -75,6 +75,20 @@ describe('RequestTrialExtension component', () => {
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
+  test('should display when enterprise license is not active and trial has been used', () => {
+    const rendered = getComponent(
+      {
+        trialStatus: {
+          canStartTrial: false,
+        },
+        license: createMockLicense('enterprise', 0),
+      },
+      RequestTrialExtension
+    );
+    const html = rendered.html();
+    expect(html).not.toBeNull();
+    expect(html).toMatchSnapshot();
+  });
   test('should not display when platinum license is active and trial has been used', () => {
     const rendered = getComponent(
       {

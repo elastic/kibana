@@ -16,28 +16,28 @@ experimental["The underlying Spaces concepts are stable, but the APIs for managi
 [[spaces-api-post-request-body]]
 ==== Request body
 
-`id`:: 
+`id`::
   (Required, string) The space ID that is part of the Kibana URL when inside the space. You are unable to change the ID with the update operation.
 
-`name`:: 
+`name`::
   (Required, string) The display name for the space.
 
-`description`:: 
+`description`::
   (Optional, string) The description for the space.
 
-`disabledFeatures`:: 
+`disabledFeatures`::
   (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <<features-api-get, Features API>>.
 
-`initials`:: 
+`initials`::
   (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
 
-`color`:: 
+`color`::
   (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
 
-`imageUrl`:: 
+`imageUrl`::
   (Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
   For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
-  
+
 [[spaces-api-post-response-codes]]
 ==== Response codes
 
