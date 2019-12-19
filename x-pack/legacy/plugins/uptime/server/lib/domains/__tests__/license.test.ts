@@ -8,7 +8,7 @@ import { ILicense } from '../../../../../../../plugins/licensing/server';
 import { licenseCheck } from '../license';
 
 describe('license check', () => {
-  let mockLicense: Pick<ILicense, 'isActive' | 'isOneOf'>;
+  let mockLicense: Pick<ILicense, 'isActive' | 'hasAtLeast'>;
 
   it('throws for null license', () => {
     expect(licenseCheck(undefined)).toMatchSnapshot();
@@ -16,7 +16,7 @@ describe('license check', () => {
 
   it('throws for unsupported license type', () => {
     mockLicense = {
-      isOneOf: jest.fn().mockReturnValue(false),
+      hasAtLeast: jest.fn().mockReturnValue(false),
       isActive: false,
     };
     expect(licenseCheck(mockLicense)).toMatchSnapshot();
@@ -24,7 +24,7 @@ describe('license check', () => {
 
   it('throws for inactive license', () => {
     mockLicense = {
-      isOneOf: jest.fn().mockReturnValue(true),
+      hasAtLeast: jest.fn().mockReturnValue(true),
       isActive: false,
     };
     expect(licenseCheck(mockLicense)).toMatchSnapshot();
@@ -32,7 +32,7 @@ describe('license check', () => {
 
   it('returns result for a valid license', () => {
     mockLicense = {
-      isOneOf: jest.fn().mockReturnValue(true),
+      hasAtLeast: jest.fn().mockReturnValue(true),
       isActive: true,
     };
     expect(licenseCheck(mockLicense)).toMatchSnapshot();

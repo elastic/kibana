@@ -10,14 +10,14 @@ import PropTypes from 'prop-types';
 import { dynamicOrientationShape } from '../style_option_shapes';
 import { FieldSelect, fieldShape } from '../field_select';
 
-export function DynamicOrientationSelection({ ordinalFields, styleOptions, onChange }) {
+export function DynamicOrientationSelection({ fields, styleOptions, onChange }) {
   const onFieldChange = ({ field }) => {
     onChange({ ...styleOptions, field });
   };
 
   return (
     <FieldSelect
-      fields={ordinalFields}
+      fields={fields}
       selectedFieldName={_.get(styleOptions, 'field.name')}
       onChange={onFieldChange}
       compressed
@@ -26,7 +26,7 @@ export function DynamicOrientationSelection({ ordinalFields, styleOptions, onCha
 }
 
 DynamicOrientationSelection.propTypes = {
-  ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
+  fields: PropTypes.arrayOf(fieldShape).isRequired,
   styleOptions: dynamicOrientationShape.isRequired,
   onChange: PropTypes.func.isRequired,
 };
