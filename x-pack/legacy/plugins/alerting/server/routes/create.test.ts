@@ -12,6 +12,7 @@ server.route(createAlertRoute);
 
 const mockedAlert = {
   alertTypeId: '1',
+  consumer: 'bar',
   name: 'abc',
   schedule: { interval: '10s' },
   tags: ['foo'],
@@ -64,6 +65,7 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
+      "consumer": "bar",
       "id": "123",
       "name": "abc",
       "params": Object {
@@ -92,6 +94,7 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
+          "consumer": "bar",
           "enabled": true,
           "name": "abc",
           "params": Object {

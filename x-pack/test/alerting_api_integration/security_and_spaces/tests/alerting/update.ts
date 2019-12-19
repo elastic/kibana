@@ -73,6 +73,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 alertTypeId: 'test.noop',
+                consumer: 'bar',
                 createdBy: 'elastic',
                 enabled: true,
                 updatedBy: user.username,
@@ -283,7 +284,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .put(`${getUrlPrefix(space.id)}/api/alert/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData({ schedule: { interval: '10x' }, enabled: undefined }));
+            .send(
+              getTestAlertData({
+                schedule: { interval: '10x' },
+                enabled: undefined,
+                consumer: undefined,
+              })
+            );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':

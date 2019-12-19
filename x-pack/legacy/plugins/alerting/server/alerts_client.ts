@@ -291,6 +291,7 @@ export class AlertsClient {
   public async enable({ id }: { id: string }) {
     const { attributes, version } = await this.savedObjectsClient.get('alert', id);
     if (attributes.enabled === false) {
+      const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(

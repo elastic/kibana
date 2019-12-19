@@ -234,6 +234,8 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
  *      admin client which uses the credentials of the incoming request
+ *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
+ *      which uses the credentials of the incoming request
  *
  * @public
  */
