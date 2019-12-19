@@ -37,7 +37,7 @@ import {
   UrlFormat,
 } from '../../plugins/data/public/';
 
-export const getFieldFormatsRegistry = (npSetup: CoreSetup) => {
+export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormats = new FieldFormatRegisty();
 
   fieldFormats.register([
@@ -58,7 +58,7 @@ export const getFieldFormatsRegistry = (npSetup: CoreSetup) => {
     UrlFormat,
   ]);
 
-  fieldFormats.init(npSetup);
+  fieldFormats.init(core);
 
   return fieldFormats;
 };

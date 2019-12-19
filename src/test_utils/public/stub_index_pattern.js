@@ -40,8 +40,8 @@ setFieldFormats({
 
 import { getFieldFormatsRegistry } from './stub_field_formats';
 
-export default function StubIndexPattern(pattern, getConfig, timeField, fields, npSetup) {
-  const registeredFieldFormats = getFieldFormatsRegistry(npSetup);
+export default function StubIndexPattern(pattern, getConfig, timeField, fields, core) {
+  const registeredFieldFormats = getFieldFormatsRegistry(core);
 
   this.id = pattern;
   this.title = pattern;

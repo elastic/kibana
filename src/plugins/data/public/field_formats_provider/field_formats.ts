@@ -75,10 +75,10 @@ export class FieldFormatRegisty {
    * Get a derived FieldFormat class by its id.
    *
    * @param  {IFieldFormatId} formatId - the format id
-   * @return {FieldFormat}
+   * @return {FieldFormat | void}
    */
-  getType = (formatId: IFieldFormatId): IFieldFormatType | undefined => {
-    const decoratedFieldFormat: any = this.decorateFieldFormatWithParams(formatId);
+  getType = (formatId: IFieldFormatId): IFieldFormatType | void => {
+    const decoratedFieldFormat: any = this.fieldFormatMetaParamsDecorator(formatId);
 
     if (decoratedFieldFormat) {
       return decoratedFieldFormat as IFieldFormatType;
@@ -92,12 +92,12 @@ export class FieldFormatRegisty {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {FieldFormat}
+   * @return {FieldFormat | void}
    */
   getDefaultType = (
     fieldType: KBN_FIELD_TYPES,
     esTypes: ES_FIELD_TYPES[]
-  ): IFieldFormatType | undefined => {
+  ): IFieldFormatType | void => {
     const config = this.getDefaultConfig(fieldType, esTypes);
 
     return this.getType(config.id);
@@ -108,9 +108,9 @@ export class FieldFormatRegisty {
    * using the format:defaultTypeMap config map
    *
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {ES_FIELD_TYPES}
+   * @return {ES_FIELD_TYPES | void}
    */
-  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[] | undefined): ES_FIELD_TYPES | undefined => {
+  getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[] | undefined): ES_FIELD_TYPES | void => {
     if (!Array.isArray(esTypes)) {
       return;
     }
@@ -228,7 +228,14 @@ export class FieldFormatRegisty {
     return this;
   };
 
-  private decorateFieldFormatWithParams = (formatId: IFieldFormatId): Function | undefined => {
+  /**
+   * FieldFormat decorator - provide a one way to add meta-params for all field formatters
+   *
+   * @private
+   * @param  {IFieldFormatId} formatId - the format id
+   * @return {FieldFormat | void}
+   */
+  private fieldFormatMetaParamsDecorator = (formatId: IFieldFormatId): Function | void => {
     const concreteFieldFormat = this.fieldFormats.get(formatId);
     const decorateMetaParams = (customOptions: Record<string, any> = {}) => ({
       parsedUrl: {
