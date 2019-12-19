@@ -31,11 +31,19 @@ import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 const getNodeTooltip = node => {
   const { nodeTypeLabel, nodeTypeClass } = node;
+
+  const nodeTypeLabelContent =
+    nodeTypeLabel ||
+    i18n.translate('xpack.monitoring.elasticsearch.nodes.unknownNodeTypeLabel', {
+      defaultMessage: 'Unknown',
+    });
+  const nodeTypeClassIcon = nodeTypeClass || 'empty';
+
   if (nodeTypeLabel) {
     return (
       <>
-        <EuiToolTip position="bottom" content={nodeTypeLabel}>
-          {nodeTypeClass && <EuiIcon type={nodeTypeClass} />}
+        <EuiToolTip position="bottom" content={nodeTypeLabelContent}>
+          <EuiIcon type={nodeTypeClassIcon} />
         </EuiToolTip>{' '}
         &nbsp;
       </>

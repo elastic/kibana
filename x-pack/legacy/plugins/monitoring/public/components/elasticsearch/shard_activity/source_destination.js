@@ -7,9 +7,15 @@
 import React from 'react';
 import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { SourceTooltip } from './source_tooltip';
+import { i18n } from '@kbn/i18n';
 
 export const SourceDestination = props => {
   const { sourceName, targetName, targetTransportAddress } = props;
+  const targetTransportAddressContent =
+    targetTransportAddress ||
+    i18n.translate('xpack.monitoring.elasticsearch.shardActivity.unknownTargetAddressContent', {
+      defaultMessage: 'Unknown',
+    });
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       <EuiFlexItem grow={false}>
@@ -18,13 +24,11 @@ export const SourceDestination = props => {
       <EuiFlexItem grow={false}>
         <EuiIcon type="arrowRight" size="s" />
       </EuiFlexItem>
-      {targetTransportAddress && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={targetTransportAddress} position="bottom">
-            <EuiLink>{targetName}</EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={targetTransportAddressContent} position="bottom">
+          <EuiLink>{targetName}</EuiLink>
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

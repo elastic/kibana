@@ -45,11 +45,12 @@ const IsAlertsSupported = props => {
     return <span>{props.children}</span>;
   }
 
-  const message = alertsMeta.message || clusterMeta.message;
-
-  if (!message || !message.length) {
-    return null;
-  }
+  const message =
+    alertsMeta.message ||
+    clusterMeta.message ||
+    i18n.translate('xpack.monitoring.cluster.listing.unknownHealthMessage', {
+      defaultMessage: 'Unknown',
+    });
 
   return (
     <EuiToolTip content={message} position="bottom">

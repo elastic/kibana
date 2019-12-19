@@ -29,11 +29,16 @@ const getColumns = (kbnUrl, scope) => [
     field: 'status',
     sortable: true,
     render: severity => {
-      const severityIcon = mapSeverity(severity);
-
-      if (!severityIcon || !severityIcon.title) {
-        return null;
-      }
+      const severityIconDefaults = {
+        title: i18n.translate('xpack.monitoring.alerts.severityTitle.unknown', {
+          defaultMessage: 'Unknown',
+        }),
+        color: 'subdued',
+        value: i18n.translate('xpack.monitoring.alerts.severityValue.unknown', {
+          defaultMessage: 'N/A',
+        }),
+      };
+      const severityIcon = { ...severityIconDefaults, ...mapSeverity(severity) };
 
       return (
         <EuiToolTip content={severityIcon.title} position="bottom">
