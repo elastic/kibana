@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { SourceConfigurationSettings } from '../../../components/source_configuration/source_configuration_settings';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
-interface SettingsPageProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const SettingsPage = injectUICapabilities(({ uiCapabilities }: SettingsPageProps) => (
-  <SourceConfigurationSettings shouldAllowEdit={uiCapabilities.logs.configureSource as boolean} />
-));
+export const SettingsPage = () => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  return (
+    <SourceConfigurationSettings
+      shouldAllowEdit={uiCapabilities?.logs?.configureSource as boolean}
+    />
+  );
+};

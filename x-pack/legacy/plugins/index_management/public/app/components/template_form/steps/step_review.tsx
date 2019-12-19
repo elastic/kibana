@@ -163,6 +163,10 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
     const templateString = JSON.stringify(serializedTemplate, null, 2);
     const request = `${endpoint}\n${templateString}`;
 
+    // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
+    // levels. This way we prevent that happening for very large requests.
+    const language = request.length < 60000 ? 'json' : undefined;
+
     return (
       <div data-test-subj="requestTab">
         <EuiSpacer size="m" />
@@ -178,7 +182,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
 
         <EuiSpacer size="m" />
 
-        <EuiCodeBlock language="json" isCopyable>
+        <EuiCodeBlock language={language} isCopyable>
           {request}
         </EuiCodeBlock>
       </div>

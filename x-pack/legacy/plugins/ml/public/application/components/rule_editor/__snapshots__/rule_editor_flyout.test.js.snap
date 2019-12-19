@@ -26,7 +26,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Create Rule"
+            defaultMessage="Create rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
             values={Object {}}
           />
@@ -276,7 +276,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Edit Rule"
+            defaultMessage="Edit rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
             values={Object {}}
           />
@@ -540,7 +540,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Create Rule"
+            defaultMessage="Create rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
             values={Object {}}
           />
@@ -782,7 +782,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Edit Rules"
+            defaultMessage="Edit rules"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
             values={Object {}}
           />

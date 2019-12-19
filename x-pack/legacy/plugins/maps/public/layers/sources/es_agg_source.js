@@ -82,6 +82,11 @@ export class AbstractESAggSource extends AbstractESSource {
     });
   }
 
+  hasMatchingMetricField(fieldName) {
+    const matchingField = this.getMetricFieldForName(fieldName);
+    return !!matchingField;
+  }
+
   getMetricFieldForName(fieldName) {
     return this.getMetricFields().find(metricField => {
       return metricField.getName() === fieldName;

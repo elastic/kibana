@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { licenseMock } from '../licensing/index.mock';
+import { licenseMock } from '../../common/licensing/index.mock';
 
 jest.mock('./api_keys');
 jest.mock('./authenticator');
@@ -43,7 +43,7 @@ import {
   InvalidateAPIKeyResult,
   InvalidateAPIKeyParams,
 } from './api_keys';
-import { SecurityLicense } from '../licensing';
+import { SecurityLicense } from '../../common/licensing';
 
 describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {

@@ -101,6 +101,8 @@ export class XPackInfo {
           error: license.error,
         };
       }
+
+      this._licenseInfoChangedListeners.forEach(fn => fn());
     });
 
     this._license = new XPackInfoLicense(() => this._cache.license);
