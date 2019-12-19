@@ -31,8 +31,8 @@ export const uptime = (kibana: any) =>
         main: 'plugins/uptime/app',
         order: 8900,
         url: '/app/uptime#/',
-        mappings: savedObjectMappings,
       },
+      mappings: savedObjectMappings,
       home: ['plugins/uptime/register_feature'],
     },
     init(server: KibanaServer) {
