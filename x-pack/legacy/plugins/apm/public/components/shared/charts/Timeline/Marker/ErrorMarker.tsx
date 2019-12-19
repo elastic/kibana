@@ -13,7 +13,7 @@ import {
   TRANSACTION_ID
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
-import { fontSizes, px, unit } from '../../../../../style/variables';
+import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
@@ -27,14 +27,13 @@ const Popover = styled.div`
   max-width: ${px(280)};
 `;
 
-const TimeLabel = styled.div`
-  font-size: ${fontSizes.small};
-  padding-bottom: ${px(unit)};
+const TimeLegend = styled(Legend)`
+  margin-bottom: ${px(unit)};
 `;
 
 const ErrorLink = styled(ErrorDetailLink)`
   display: block;
-  margin: ${px(unit)} 0 ${px(unit)} 0;
+  margin: ${px(units.half)} 0 ${px(units.half)} 0;
 `;
 
 export const ErrorMarker: React.FC<Props> = ({ mark }) => {
@@ -70,7 +69,12 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
       anchorPosition="upCenter"
     >
       <Popover>
-        <TimeLabel>{`@ ${asDuration(mark.offset + mark.skew)}`}</TimeLabel>
+        <TimeLegend
+          text={asDuration(mark.offset + mark.skew)}
+          indicator={() => (
+            <div style={{ marginRight: px(units.quarter) }}>@</div>
+          )}
+        />
         <Legend
           key={mark.serviceColor}
           color={mark.serviceColor}

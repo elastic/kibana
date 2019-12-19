@@ -20,9 +20,10 @@ exports[`ErrorMarker renders 1`] = `
   panelPaddingSize="m"
 >
   <styled.div>
-    <styled.div>
-      @ 10,000 μs
-    </styled.div>
+    <Styled(Legend)
+      indicator={[Function]}
+      text="10,000 μs"
+    />
     <Legend
       color="#fff"
       key="#fff"
