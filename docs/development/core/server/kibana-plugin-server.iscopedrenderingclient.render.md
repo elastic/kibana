@@ -6,8 +6,6 @@
 
 Generate a KibanaResponse which renders an HTML page bootstrapped with the `core` bundle. Intended as a response body for HTTP route handlers.
 
-\*
-
 <b>Signature:</b>
 
 ```typescript

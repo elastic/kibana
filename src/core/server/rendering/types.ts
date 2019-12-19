@@ -102,9 +102,9 @@ interface LegacyRenderOptions extends IRenderOptions {
 /** @public */
 export interface IScopedRenderingClient {
   /**
-   * Generate a KibanaResponse which renders an HTML page bootstrapped
-   * with the `core` bundle.
-   * Intended as a response body for HTTP route handlers.
+   * Generate a `KibanaResponse` which renders an HTML page bootstrapped
+   * with the `core` bundle. Intended as a response body for HTTP route handlers.
+   *
    * @example
    * ```ts
    * router.get(
@@ -125,10 +125,10 @@ export interface IScopedRenderingClient {
 /** @internal */
 export interface RenderingServiceSetup {
   /**
-   * Generate a KibanaResponse which renders an HTML page bootstrapped
+   * Generate a `KibanaResponse` which renders an HTML page bootstrapped
    * with the `core` bundle or the ID of another specified legacy bundle.
    *
-   * * @example
+   * @example
    * ```ts
    * const html = await rendering.render(request, uiSettings);
    * ```

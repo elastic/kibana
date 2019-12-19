@@ -150,7 +150,7 @@ export {
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
-export { RenderingServiceSetup, IRenderOptions, IScopedRenderingClient } from './rendering';
+export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -310,6 +310,7 @@ export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
+  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
