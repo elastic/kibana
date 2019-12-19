@@ -93,3 +93,43 @@ class MyPlugin {
   }
 }
 ```
+### The list of breaking changes
+### The full list of breaking changes
+
+#### state
+**LP**: The plugin allows consumers to calculate state on `license change` event and store this
+The signature calculation is based on this state + license content
+**NP**: We decided that license service doesn't keep plugins state https://github.com/elastic/kibana/pull/49345#issuecomment-553451472. Plugins have to react on license change and calculate license state on every license change. If another plugin needs that information, it should be exposed via a plugin contract.
+This change makes NP & LP licensing service not compatible. We have to keep both until all plugins migrate to the new platform service. The legacy plugin consumes license data from the LP plugin.
+
+#### Network request failures
+**LP**: The licensing plugin didn’t emit a license in case of network errors. 
+**NP**: Emits the license even if the request failed.
+
+#### clusterSource
+**LP**: Allows specifying cluster source to perform polling.
+**NP**: The plugin always uses a `data` client. Provides `createLicensePoller` on the server-side to create a license poller with custom ES cluster.
+
+#### Initial value on the client
+**LP**: Passed on the page via inlined `xpackInitialInfo`
+**NP**: Should be fetched
+
+#### Config
+**LP**: `xpack.xpack_main.xpack_api_polling_frequency_millis`
+**NP**: `xpack.licensing.api_polling_frequency`
+
+#### License
+**NP**: `mode` field is provided, but deprecated.
+
+#### sessionStorage
+**LP**: License and signature were stored under different keys in session storage
+**NP**: License and signature were stored under one key `xpack.licensing`
+
+### isOneOf
+`isOneOf` removed, use `check` or `hasAtLeast` instead
+
+### Endpoint
+`/api/xpack/v1/info` API endpoint is going to be removed. switch to `/api/licensing/info` instead
+
+#### Fetch error
+`getUnavailableReason` doesn't return `Error` object anymore, but `string`
