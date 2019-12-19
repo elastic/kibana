@@ -34,7 +34,7 @@ export interface PulseServiceSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PulseServiceStart {}
 
-const channelNames = ['default', 'notifications'];
+const channelNames = ['default'];
 
 export class PulseService {
   private retriableErrors = 0;
