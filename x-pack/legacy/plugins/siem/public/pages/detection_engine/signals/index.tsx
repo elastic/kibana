@@ -119,7 +119,9 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
 
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
-    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([DEFAULT_SIGNALS_INDEX]); // TODO Get from new FrankInspired XavierHook
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([
+      `${DEFAULT_SIGNALS_INDEX}-default`,
+    ]); // TODO Get from new FrankInspired XavierHook
     const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
     const core = useKibanaCore();
 
@@ -266,7 +268,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     );
 
     const defaultIndices = useMemo(() => [`${DEFAULT_SIGNALS_INDEX}-default`], [
-      DEFAULT_SIGNALS_INDEX,
+      `${DEFAULT_SIGNALS_INDEX}-default`,
     ]);
     const defaultFiltersMemo = useMemo(
       () => [
