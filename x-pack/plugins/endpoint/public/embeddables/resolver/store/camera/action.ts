@@ -6,20 +6,27 @@
 
 import { Vector2 } from '../../types';
 
-// Sets scaling directly. This is not what mouse interactions should use, more like programatic zooming
 interface UserScaled {
   readonly type: 'userScaled';
+  /**
+   * A vector who's `x` and `y` component will be the new scaling factors for the projection.
+   */
   readonly payload: Vector2;
 }
 
 interface UserZoomed {
   readonly type: 'userZoomed';
-  // generally pass mouse wheels deltaY (when deltaMode is pixel) divided by -renderHeight
+  /**
+   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`, pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
+   */
   payload: number;
 }
 
 interface UserSetRasterSize {
   readonly type: 'userSetRasterSize';
+  /**
+   * The dimensions of the Resolver component in pixels. The Resolver component should not be scrollable itself.
+   */
   readonly payload: Vector2;
 }
 

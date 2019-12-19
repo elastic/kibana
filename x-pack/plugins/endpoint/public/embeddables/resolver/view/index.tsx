@@ -64,7 +64,6 @@ const Diagnostic = styled(
       (event: React.MouseEvent<HTMLDivElement>) => {
         dispatch({
           type: 'userStartedPanning',
-          // TODO why is this negative?
           payload: [event.clientX, event.clientY],
         });
       },
@@ -76,7 +75,6 @@ const Diagnostic = styled(
         if (event.buttons === 1 && userIsPanning) {
           dispatch({
             type: 'userContinuedPanning',
-            // TODO why is this negative?
             payload: [event.clientX, event.clientY],
           });
         }
