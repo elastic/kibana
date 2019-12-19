@@ -137,6 +137,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
+|  [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |  |
 |  [UserProvidedValues](./kibana-plugin-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 |  [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
 

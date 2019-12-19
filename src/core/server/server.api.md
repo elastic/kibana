@@ -574,6 +574,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+    // (undocumented)
+    uiSettings: UiSettingsServiceStart;
 }
 
 // @public
@@ -1820,6 +1822,11 @@ export interface UiSettingsParams {
 // @public (undocumented)
 export interface UiSettingsServiceSetup {
     register(settings: Record<string, UiSettingsParams>): void;
+}
+
+// @public (undocumented)
+export interface UiSettingsServiceStart {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 
 // @public
