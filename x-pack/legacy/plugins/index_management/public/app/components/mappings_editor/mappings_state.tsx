@@ -45,7 +45,7 @@ export interface Props {
     editor: FieldsEditor;
     getProperties(): Mappings['properties'];
   }) => React.ReactNode;
-  defaultValue: { fields: { [key: string]: Field } };
+  defaultValue: { configuration: MappingsConfiguration; fields: { [key: string]: Field } };
   onUpdate: OnUpdateHandler;
 }
 
@@ -59,6 +59,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   const initialState: State = {
     isValid: undefined,
     configuration: {
+      defaultValue: defaultValue.configuration,
       data: {
         raw: {},
         format: () => ({} as Mappings),

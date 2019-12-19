@@ -31,7 +31,7 @@ export const MappingsEditor = React.memo(
   ({ onUpdate, defaultValue = {}, indexSettings }: Props) => {
     const [selectedTab, selectTab] = useState<TabName>('fields');
 
-    const { configurationDefaultValue, fieldsDefaultValue } = useMemo(() => {
+    const parsedDefaultValue = useMemo(() => {
       const {
         _source = {},
         dynamic,
@@ -42,14 +42,14 @@ export const MappingsEditor = React.memo(
       } = defaultValue;
 
       return {
-        configurationDefaultValue: {
+        configuration: {
           _source,
           dynamic,
           numeric_detection,
           date_detection,
           dynamic_date_formats,
         },
-        fieldsDefaultValue: properties,
+        fields: properties,
       };
     }, [defaultValue]);
 
@@ -82,7 +82,7 @@ export const MappingsEditor = React.memo(
         dispatch({
           type: 'configuration.update',
           value: {
-            defaultValue: data,
+            defaultValue: data!,
             isValid,
             data: { raw: state.configuration.data.raw, format: () => data! },
             validate: () => Promise.resolve(true),
@@ -95,7 +95,7 @@ export const MappingsEditor = React.memo(
 
     return (
       <IndexSettingsProvider indexSettings={indexSettings}>
-        <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
+        <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue}>
           {({ editor: editorType, state, dispatch, getProperties }) => {
             const editor =
               editorType === 'json' ? (
@@ -112,9 +112,7 @@ export const MappingsEditor = React.memo(
                   {editor}
                 </>
               ) : (
-                <ConfigurationForm
-                  defaultValue={state.configuration.defaultValue ?? configurationDefaultValue}
-                />
+                <ConfigurationForm defaultValue={state.configuration.defaultValue} />
               );
 
             return (
