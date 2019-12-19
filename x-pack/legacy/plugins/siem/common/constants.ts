@@ -11,6 +11,7 @@ export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
 export const DEFAULT_DARK_MODE = 'theme:darkMode';
 export const DEFAULT_INDEX_KEY = 'siem:defaultIndex';
+export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults';
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults';
 export const DEFAULT_SIEM_TIME_RANGE = 'siem:timeDefaults';
