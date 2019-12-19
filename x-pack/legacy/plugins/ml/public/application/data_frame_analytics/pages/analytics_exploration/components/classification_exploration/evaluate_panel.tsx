@@ -7,6 +7,7 @@
 import React, { FC, useState, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IndexPattern } from 'ui/index_patterns';
 import {
   EuiDataGrid,
   EuiFlexGroup,
@@ -37,8 +38,12 @@ import {
 } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
 import { getColumnData } from './column_data';
+import { useKibanaContext } from '../../../../../contexts/kibana';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { getIndexPatternIdFromName } from '../../../../../../application/util/index_utils';
 
 const defaultPanelWidth = 500;
+const NO_KEYWORD_FIELDTYPES = ['boolean', 'integer'];
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
@@ -55,17 +60,19 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
   const [panelWidth, setPanelWidth] = useState<number>(defaultPanelWidth);
-
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() =>
     columns.map(({ id }: { id: string }) => id)
   );
+  const kibanaContext = useKibanaContext();
 
   const index = jobConfig.dest.index;
+  const sourceIndex = jobConfig.source.index[0];
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
   const resultsField = jobConfig.dest.results_field;
+  let noKeywordRequired = false;
 
   const loadData = async ({
     isTrainingClause,
@@ -76,6 +83,25 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }) => {
     setIsLoading(true);
 
+    try {
+      const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+
+      if (indexPattern !== undefined) {
+        await newJobCapsService.initializeFromIndexPattern(indexPattern);
+        // Check dependent_variable field type to see if .keyword suffix is required for evaluate endpoint
+        const { fields } = newJobCapsService;
+        const depVarFieldType = fields.find((field: any) => field.name === dependentVariable)?.type;
+
+        if (depVarFieldType !== undefined) {
+          noKeywordRequired = NO_KEYWORD_FIELDTYPES.includes(depVarFieldType);
+        }
+      }
+    } catch (e) {
+      // Additional error handling due to missing field type is handled by loadEvalData
+      console.error('Unable to load new field types', error); // eslint-disable-line no-console
+    }
+
     const evalData = await loadEvalData({
       isTraining: false,
       index,
@@ -85,6 +111,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       searchQuery,
       ignoreDefaultQuery,
       jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
+      requiresKeyword: noKeywordRequired === false,
     });
 
     const docsCountResp = await loadDocsCount({
