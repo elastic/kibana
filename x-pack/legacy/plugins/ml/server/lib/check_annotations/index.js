@@ -9,7 +9,7 @@ import { mlLog } from '../../client/log';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-  ML_ANNOTATIONS_INDEX_PATTERN
+  ML_ANNOTATIONS_INDEX_PATTERN,
 } from '../../../common/constants/index_patterns';
 
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../../common/constants/feature_flags';
@@ -29,16 +29,15 @@ export async function isAnnotationsFeatureAvailable(callWithRequest) {
     if (!annotationsIndexExists) return false;
 
     const annotationsReadAliasExists = await callWithRequest('indices.existsAlias', {
-      name: ML_ANNOTATIONS_INDEX_ALIAS_READ
+      name: ML_ANNOTATIONS_INDEX_ALIAS_READ,
     });
 
     if (!annotationsReadAliasExists) return false;
 
     const annotationsWriteAliasExists = await callWithRequest('indices.existsAlias', {
-      name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE
+      name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
     });
     if (!annotationsWriteAliasExists) return false;
-
   } catch (err) {
     mlLog.info('Disabling ML annotations feature because the index/alias integrity check failed.');
     return false;

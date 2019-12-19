@@ -8,7 +8,14 @@ import Boom from 'boom';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
-import { Alert, RawAlert, AlertTypeRegistry, AlertAction, AlertType } from './types';
+import {
+  Alert,
+  RawAlert,
+  AlertTypeRegistry,
+  AlertAction,
+  AlertType,
+  IntervalSchedule,
+} from './types';
 import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
 import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
@@ -21,6 +28,7 @@ interface SuccessCreateAPIKeyResult {
   result: SecurityPluginCreateAPIKeyResult;
 }
 export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
+type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 
 interface ConstructorOptions {
   logger: Logger;
@@ -62,9 +70,15 @@ interface CreateOptions {
     Alert,
     Exclude<
       keyof Alert,
-      'createdBy' | 'updatedBy' | 'apiKey' | 'apiKeyOwner' | 'muteAll' | 'mutedInstanceIds'
+      | 'createdBy'
+      | 'updatedBy'
+      | 'apiKey'
+      | 'apiKeyOwner'
+      | 'muteAll'
+      | 'mutedInstanceIds'
+      | 'actions'
     >
-  >;
+  > & { actions: NormalizedAlertAction[] };
   options?: {
     migrationVersion?: Record<string, string>;
   };
@@ -75,8 +89,8 @@ interface UpdateOptions {
   data: {
     name: string;
     tags: string[];
-    interval: string;
-    actions: AlertAction[];
+    schedule: IntervalSchedule;
+    actions: NormalizedAlertAction[];
     params: Record<string, any>;
   };
 }
@@ -117,8 +131,10 @@ export class AlertsClient {
 
     this.validateActions(alertType, data.actions);
 
-    const { alert: rawAlert, references } = this.getRawAlert({
+    const { references, actions } = await this.denormalizeActions(data.actions);
+    const rawAlert: RawAlert = {
       ...data,
+      actions,
       createdBy: username,
       updatedBy: username,
       apiKeyOwner: apiKey.created && username ? username : undefined,
@@ -128,7 +144,7 @@ export class AlertsClient {
       params: validatedAlertTypeParams,
       muteAll: false,
       mutedInstanceIds: [],
-    });
+    };
     const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
       ...options,
       references,
@@ -136,11 +152,7 @@ export class AlertsClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(
-          createdAlert.id,
-          rawAlert.alertTypeId,
-          rawAlert.interval
-        );
+        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -202,7 +214,7 @@ export class AlertsClient {
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     this.validateActions(alertType, data.actions);
 
-    const { actions, references } = this.extractReferences(data.actions);
+    const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
     const updatedObject = await this.savedObjectsClient.update(
       'alert',
@@ -250,11 +262,7 @@ export class AlertsClient {
     const { attributes, version } = await this.savedObjectsClient.get('alert', id);
     if (attributes.enabled === false) {
       const apiKey = await this.createAPIKey();
-      const scheduledTask = await this.scheduleAlert(
-        id,
-        attributes.alertTypeId,
-        attributes.interval
-      );
+      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
@@ -355,7 +363,7 @@ export class AlertsClient {
     }
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string, interval: string) {
+  private async scheduleAlert(id: string, alertTypeId: string) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
       params: {
@@ -369,26 +377,6 @@ export class AlertsClient {
       },
       scope: ['alerting'],
     });
-  }
-
-  private extractReferences(actions: Alert['actions']) {
-    const references: SavedObjectReference[] = [];
-    const rawActions = actions.map((action, i) => {
-      const actionRef = `action_${i}`;
-      references.push({
-        name: actionRef,
-        type: 'action',
-        id: action.id,
-      });
-      return {
-        ...omit(action, 'id'),
-        actionRef,
-      };
-    }) as RawAlert['actions'];
-    return {
-      actions: rawActions,
-      references,
-    };
   }
 
   private injectReferencesIntoActions(
@@ -426,19 +414,7 @@ export class AlertsClient {
     };
   }
 
-  private getRawAlert(alert: Alert): { alert: RawAlert; references: SavedObjectReference[] } {
-    const { references, actions } = this.extractReferences(alert.actions);
-    return {
-      alert: {
-        ...alert,
-        actions,
-      },
-      references,
-    };
-  }
-
-  private validateActions(alertType: AlertType, actions: Alert['actions']) {
-    // TODO: Should also ensure user has access to each action
+  private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map(action => action.group);
     const invalidActionGroups = usedAlertActionGroups.filter(
@@ -454,5 +430,42 @@ export class AlertsClient {
         })
       );
     }
+  }
+
+  private async denormalizeActions(
+    alertActions: NormalizedAlertAction[]
+  ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
+    // Fetch action objects in bulk
+    const actionIds = [...new Set(alertActions.map(alertAction => alertAction.id))];
+    const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
+    const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
+    const actionMap = new Map<string, any>();
+    for (const action of bulkGetResult.saved_objects) {
+      if (action.error) {
+        throw Boom.badRequest(
+          `Failed to load action ${action.id} (${action.error.statusCode}): ${action.error.message}`
+        );
+      }
+      actionMap.set(action.id, action);
+    }
+    // Extract references and set actionTypeId
+    const references: SavedObjectReference[] = [];
+    const actions = alertActions.map(({ id, ...alertAction }, i) => {
+      const actionRef = `action_${i}`;
+      references.push({
+        id,
+        name: actionRef,
+        type: 'action',
+      });
+      return {
+        ...alertAction,
+        actionRef,
+        actionTypeId: actionMap.get(id).attributes.actionTypeId,
+      };
+    });
+    return {
+      actions,
+      references,
+    };
   }
 }

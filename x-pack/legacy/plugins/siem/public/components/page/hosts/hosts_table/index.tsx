@@ -115,6 +115,26 @@ const HostsTableComponent = React.memo<HostsTableProps>(
     updateTableActivePage,
     updateTableLimit,
   }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        }),
+      [type, updateTableLimit]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        }),
+      [type, updateTableActivePage]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
@@ -130,7 +150,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
           }
         }
       },
-      [direction, sortField, type]
+      [direction, sortField, type, updateHostsSort]
     );
 
     const hostsColumns = useMemo(() => getHostsColumns(), []);
@@ -153,26 +173,14 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={sorting}
         totalCount={fakeTotalCount}
-        updateLimitPagination={newLimit =>
-          updateTableLimit({
-            hostsType: type,
-            limit: newLimit,
-            tableType,
-          })
-        }
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            hostsType: type,
-            tableType,
-          })
-        }
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
       />
     );
   }
@@ -214,3 +222,5 @@ export const HostsTable = connect(makeMapStateToProps, {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
 })(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';

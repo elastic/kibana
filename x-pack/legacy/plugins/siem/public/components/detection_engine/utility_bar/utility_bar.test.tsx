@@ -47,7 +47,7 @@ describe('UtilityBar', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('UtilityBar'))).toMatchSnapshot();
   });
 
   test('it applies border styles when border is true', () => {

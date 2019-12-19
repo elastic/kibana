@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DefaultDraggable } from '../draggables';
 import { getEmptyValue } from '../empty_value';
@@ -26,7 +25,7 @@ export const PORT_NAMES = [
   URL_PORT_FIELD_NAME,
 ];
 
-export const Port = pure<{
+export const Port = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;

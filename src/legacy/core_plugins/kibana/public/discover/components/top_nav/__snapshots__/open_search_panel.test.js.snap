@@ -26,7 +26,7 @@ exports[`render 1`] = `
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <SavedObjectFinder
+    <SavedObjectFinderUi
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
@@ -44,6 +44,8 @@ exports[`render 1`] = `
           },
         ]
       }
+      savedObjects={Object {}}
+      uiSettings={Object {}}
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>

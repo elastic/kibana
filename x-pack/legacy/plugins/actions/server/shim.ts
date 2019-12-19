@@ -9,7 +9,7 @@ import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
 import { ActionsConfigType } from './types';
 import { TaskManager } from '../../task_manager';
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
 import {
@@ -110,6 +110,7 @@ export function shim(
         return Rx.of({
           enabled: server.config().get('xpack.actions.enabled') as boolean,
           whitelistedHosts: server.config().get('xpack.actions.whitelistedHosts') as string[],
+          enabledActionTypes: server.config().get('xpack.actions.enabledActionTypes') as string[],
         }) as Rx.Observable<ActionsConfigType>;
       },
     },

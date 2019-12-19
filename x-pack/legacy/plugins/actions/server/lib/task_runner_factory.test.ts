@@ -34,7 +34,7 @@ beforeAll(() => {
     state: {},
     attempts: 0,
     ownerId: '',
-    status: 'running' as TaskStatus,
+    status: TaskStatus.Running,
     startedAt: new Date(),
     scheduledAt: new Date(),
     retryAt: new Date(Date.now() + 5 * 60 * 1000),
@@ -94,7 +94,7 @@ test('executes the task by calling the executor with proper parameters', async (
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -154,6 +154,7 @@ test('throws an error with suggested retry logic when return status is error', a
   });
   mockedActionExecutor.execute.mockResolvedValueOnce({
     status: 'error',
+    actionId: '2',
     message: 'Error message',
     data: { foo: true },
     retry: false,
@@ -174,7 +175,7 @@ test('uses API key when provided', async () => {
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -217,7 +218,7 @@ test(`doesn't use API key when not provided`, async () => {
   factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',

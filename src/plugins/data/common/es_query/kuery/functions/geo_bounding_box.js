@@ -35,8 +35,11 @@ export function buildNodeParams(fieldName, params) {
 }
 
 export function toElasticsearchQuery(node, indexPattern, config, context = {}) {
-  const [ fieldNameArg, ...args ] = node.arguments;
-  const fullFieldNameArg = { ...fieldNameArg, value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value };
+  const [fieldNameArg, ...args] = node.arguments;
+  const fullFieldNameArg = {
+    ...fieldNameArg,
+    value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
+  };
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg);
   const field = _.get(indexPattern, 'fields', []).find(field => field.name === fieldName);
   const queryParams = args.reduce((acc, arg) => {

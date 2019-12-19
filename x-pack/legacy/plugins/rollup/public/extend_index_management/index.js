@@ -6,31 +6,30 @@
 import { i18n } from '@kbn/i18n';
 import {
   addToggleExtension,
-  addBadgeExtension
+  addBadgeExtension,
 } from '../../../index_management/public/index_management_extensions';
 import { get } from 'lodash';
 
 const propertyPath = 'isRollupIndex';
 export const rollupToggleExtension = {
-  matchIndex: (index) => {
+  matchIndex: index => {
     return get(index, propertyPath);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtToggle.toggleLabel', {
     defaultMessage: 'Include rollup indices',
   }),
-  name: 'rollupToggle'
+  name: 'rollupToggle',
 };
 export const rollupBadgeExtension = {
-  matchIndex: (index) => {
+  matchIndex: index => {
     return get(index, propertyPath);
   },
   label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
     defaultMessage: 'Rollup',
   }),
   color: 'secondary',
-  filterExpression: 'isRollupIndex:true'
+  filterExpression: 'isRollupIndex:true',
 };
 
 addBadgeExtension(rollupBadgeExtension);
 addToggleExtension(rollupToggleExtension);
-

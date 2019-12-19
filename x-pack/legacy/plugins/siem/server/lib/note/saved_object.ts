@@ -6,7 +6,6 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { RequestAuth } from 'hapi';
-import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 import uuid from 'uuid';
 
@@ -15,7 +14,6 @@ import { SavedObjectsFindOptions } from 'src/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { Pick3 } from '../../../common/utility_types';
 import {
   PageInfoNote,
   ResponseNote,
@@ -31,20 +29,11 @@ import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 
 export class Note {
-  constructor(
-    private readonly libs: {
-      savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-        Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isConflictError'>;
-    }
-  ) {}
-
   public async deleteNote(request: FrameworkRequest, noteIds: string[]) {
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
     await Promise.all(
-      noteIds.map(noteId =>
-        this.libs.savedObjects
-          .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-          .delete(noteSavedObjectType, noteId)
-      )
+      noteIds.map(noteId => savedObjectsClient.delete(noteSavedObjectType, noteId))
     );
   }
 
@@ -55,11 +44,11 @@ export class Note {
       searchFields: ['timelineId'],
     };
     const notesToBeDeleted = await this.getAllSavedNote(request, options);
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
     await Promise.all(
       notesToBeDeleted.notes.map(note =>
-        this.libs.savedObjects
-          .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-          .delete(noteSavedObjectType, note.noteId)
+        savedObjectsClient.delete(noteSavedObjectType, note.noteId)
       )
     );
   }
@@ -119,17 +108,17 @@ export class Note {
     note: SavedNote
   ): Promise<ResponseNote> {
     try {
+      const savedObjectsClient = request.context.core.savedObjects.client;
+
       if (noteId == null) {
         const timelineVersionSavedObject =
           note.timelineId == null
             ? await (async () => {
                 const timelineResult = convertSavedObjectToSavedTimeline(
-                  await this.libs.savedObjects
-                    .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-                    .create(
-                      timelineSavedObjectType,
-                      pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-                    )
+                  await savedObjectsClient.create(
+                    timelineSavedObjectType,
+                    pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
+                  )
                 );
                 note.timelineId = timelineResult.savedObjectId;
                 return timelineResult.version;
@@ -141,12 +130,10 @@ export class Note {
           code: 200,
           message: 'success',
           note: convertSavedObjectToSavedNote(
-            await this.libs.savedObjects
-              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-              .create(
-                noteSavedObjectType,
-                pickSavedNote(noteId, note, request[internalFrameworkRequest].auth || null)
-              ),
+            await savedObjectsClient.create(
+              noteSavedObjectType,
+              pickSavedNote(noteId, note, request[internalFrameworkRequest].auth || null)
+            ),
             timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
           ),
         };
@@ -157,16 +144,14 @@ export class Note {
         code: 200,
         message: 'success',
         note: convertSavedObjectToSavedNote(
-          await this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .update(
-              noteSavedObjectType,
-              noteId,
-              pickSavedNote(noteId, note, request[internalFrameworkRequest].auth || null),
-              {
-                version: version || undefined,
-              }
-            )
+          await savedObjectsClient.update(
+            noteSavedObjectType,
+            noteId,
+            pickSavedNote(noteId, note, request[internalFrameworkRequest].auth || null),
+            {
+              version: version || undefined,
+            }
+          )
         ),
       };
     } catch (err) {
@@ -189,20 +174,14 @@ export class Note {
   }
 
   private async getSavedNote(request: FrameworkRequest, NoteId: string) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
-
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(noteSavedObjectType, NoteId);
 
     return convertSavedObjectToSavedNote(savedObject);
   }
 
   private async getAllSavedNote(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
-
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObjects = await savedObjectsClient.find(options);
 
     return {

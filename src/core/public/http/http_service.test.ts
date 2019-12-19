@@ -24,7 +24,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
-import { HttpResponse } from './types';
+import { IHttpResponse } from './types';
 
 function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
@@ -101,30 +101,30 @@ describe('http requests', () => {
 
   it('should return response', async () => {
     const { http } = setup();
-
     fetchMock.get('*', { foo: 'bar' });
-
     const json = await http.fetch('/my/path');
-
     expect(json).toEqual({ foo: 'bar' });
   });
 
   it('should prepend url with basepath by default', async () => {
     const { http } = setup();
-
     fetchMock.get('*', {});
     await http.fetch('/my/path');
-
     expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
   });
 
   it('should not prepend url with basepath when disabled', async () => {
     const { http } = setup();
-
     fetchMock.get('*', {});
     await http.fetch('my/path', { prependBasePath: false });
-
     expect(fetchMock.lastUrl()).toBe('/my/path');
+  });
+
+  it('should not include undefined query params', async () => {
+    const { http } = setup();
+    fetchMock.get('*', {});
+    await http.fetch('/my/path', { query: { a: undefined } });
+    expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
   });
 
   it('should make request with defaults', async () => {
@@ -143,6 +143,18 @@ describe('http requests', () => {
         'kbn-version': 'kibanaVersion',
       },
     });
+  });
+
+  it('should expose detailed response object when asResponse = true', async () => {
+    const { http } = setup();
+
+    fetchMock.get('*', { foo: 'bar' });
+
+    const response = await http.fetch('/my/path', { asResponse: true });
+
+    expect(response.request).toBeInstanceOf(Request);
+    expect(response.response).toBeInstanceOf(Response);
+    expect(response.body).toEqual({ foo: 'bar' });
   });
 
   it('should reject on network error', async () => {
@@ -496,7 +508,7 @@ describe('interception', () => {
 
   it('should accumulate response information', async () => {
     const bodies = ['alpha', 'beta', 'gamma'];
-    const createResponse = jest.fn((httpResponse: HttpResponse) => ({
+    const createResponse = jest.fn((httpResponse: IHttpResponse) => ({
       body: bodies.shift(),
     }));
 

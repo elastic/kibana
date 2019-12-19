@@ -27,6 +27,7 @@ export interface ActionsPlugin {
 export interface ActionsConfigType {
   enabled: boolean;
   whitelistedHosts: string[];
+  enabledActionTypes: string[];
 }
 
 // the parameters passed to an action type executor function
@@ -51,8 +52,10 @@ export interface FindActionResult extends ActionResult {
 
 // the result returned from an action type executor function
 export interface ActionTypeExecutorResult {
+  actionId: string;
   status: 'ok' | 'error';
   message?: string;
+  serviceMessage?: string;
   data?: any;
   retry?: null | boolean | Date;
 }

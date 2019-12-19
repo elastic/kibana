@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 
@@ -18,7 +17,7 @@ const IP_FIELD_TYPE = 'ip';
  * Renders text containing a draggable IP address (e.g. `source.ip`,
  * `destination.ip`) that contains a hyperlink
  */
-export const Ip = pure<{
+export const Ip = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;

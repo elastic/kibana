@@ -23,7 +23,7 @@ import { TableHeader } from './table_header';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
-import { IndexPattern, FieldType } from '../../../../kibana_services';
+import { IndexPattern, IFieldType } from '../../../../kibana_services';
 
 function getMockIndexPattern() {
   return ({
@@ -40,7 +40,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: true,
-        } as FieldType;
+        } as IFieldType;
       } else {
         return {
           name,
@@ -48,7 +48,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: false,
-        } as FieldType;
+        } as IFieldType;
       }
     },
   } as unknown) as IndexPattern;

@@ -12,13 +12,18 @@ import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import {
-  initLogAnalysisGetLogEntryRateRoute,
-  initIndexPatternsValidateRoute,
+  initGetLogEntryRateRoute,
+  initValidateLogAnalysisIndicesRoute,
 } from './routes/log_analysis';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
+import {
+  initLogEntriesSummaryRoute,
+  initLogEntriesSummaryHighlightsRoute,
+} from './routes/log_entries';
+import { initInventoryMetaRoute } from './routes/inventory_metadata';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -30,13 +35,16 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
     typeDefs: schemas,
   });
 
-  libs.framework.registerGraphQLEndpoint('/api/infra/graphql', schema);
+  libs.framework.registerGraphQLEndpoint('/graphql', schema);
 
   initIpToHostName(libs);
-  initLogAnalysisGetLogEntryRateRoute(libs);
+  initGetLogEntryRateRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
-  initIndexPatternsValidateRoute(libs);
+  initValidateLogAnalysisIndicesRoute(libs);
+  initLogEntriesSummaryRoute(libs);
+  initLogEntriesSummaryHighlightsRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
+  initInventoryMetaRoute(libs);
 };

@@ -38,7 +38,6 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
 }));
 
-
 function getHandlerMock(config = {}, data = {}) {
   return {
     visConfig: { get: (id, fallback) => config[id] || fallback },

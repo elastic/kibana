@@ -15,4 +15,11 @@ export const defaultValue: AboutStepRule = {
   references: [''],
   falsePositives: [''],
   tags: [],
+  threats: [
+    {
+      framework: 'MITRE ATT&CK',
+      tactic: { id: 'none', name: 'none', reference: 'none' },
+      techniques: [],
+    },
+  ],
 };

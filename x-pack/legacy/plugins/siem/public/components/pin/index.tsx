@@ -7,7 +7,6 @@
 import { EuiButtonIcon, IconSize } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import * as i18n from '../../components/timeline/body/translations';
 
@@ -22,15 +21,17 @@ interface Props {
   pinned: boolean;
 }
 
-export const Pin = pure<Props>(({ allowUnpinning, iconSize = 'm', onClick = noop, pinned }) => (
-  <EuiButtonIcon
-    aria-label={pinned ? i18n.PINNED : i18n.UNPINNED}
-    data-test-subj="pin"
-    iconSize={iconSize}
-    iconType={getPinIcon(pinned)}
-    isDisabled={allowUnpinning ? false : true}
-    onClick={onClick}
-  />
-));
+export const Pin = React.memo<Props>(
+  ({ allowUnpinning, iconSize = 'm', onClick = noop, pinned }) => (
+    <EuiButtonIcon
+      aria-label={pinned ? i18n.PINNED : i18n.UNPINNED}
+      data-test-subj="pin"
+      iconSize={iconSize}
+      iconType={getPinIcon(pinned)}
+      isDisabled={allowUnpinning ? false : true}
+      onClick={onClick}
+    />
+  )
+);
 
 Pin.displayName = 'Pin';
