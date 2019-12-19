@@ -10,8 +10,7 @@ import { getMapsTelemetry, TELEMETRY_TYPE } from '../maps_telemetry';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  savedObjectsClient: any,
-  config: Function
+  server: any
 ): void {
   if (!usageCollection) {
     return;
@@ -20,7 +19,7 @@ export function registerMapsUsageCollector(
   const mapsUsageCollector = usageCollection.makeUsageCollector({
     type: TELEMETRY_TYPE,
     isReady: () => true,
-    fetch: async () => await getMapsTelemetry(savedObjectsClient, config),
+    fetch: async () => await getMapsTelemetry(server),
   });
 
   usageCollection.registerCollector(mapsUsageCollector);
