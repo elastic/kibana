@@ -10,13 +10,6 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle',
   defaultMessage: 'Detection engine',
 });
 
-export const PANEL_SUBTITLE_SHOWING = i18n.translate(
-  'xpack.siem.detectionEngine.panelSubtitleShowing',
-  {
-    defaultMessage: 'Showing',
-  }
-);
-
 export const SIGNALS_TABLE_TITLE = i18n.translate('xpack.siem.detectionEngine.signals.tableTitle', {
   defaultMessage: 'All signals',
 });
@@ -25,6 +18,24 @@ export const SIGNALS_DOCUMENT_TYPE = i18n.translate(
   'xpack.siem.detectionEngine.signals.documentTypeTitle',
   {
     defaultMessage: 'Signals',
+  }
+);
+
+export const OPEN_SIGNALS = i18n.translate('xpack.siem.detectionEngine.signals.openSignalsTitle', {
+  defaultMessage: 'Open signals',
+});
+
+export const CLOSED_SIGNALS = i18n.translate(
+  'xpack.siem.detectionEngine.signals.closedSignalsTitle',
+  {
+    defaultMessage: 'Closed signals',
+  }
+);
+
+export const LOADING_SIGNALS = i18n.translate(
+  'xpack.siem.detectionEngine.signals.loadingSignalsTitle',
+  {
+    defaultMessage: 'Loading Signals',
   }
 );
 
@@ -60,5 +71,26 @@ export const SIGNALS_HEADERS_RISK_SCORE = i18n.translate(
   'xpack.siem.eventsViewer.signals.defaultHeaders.riskScoreTitle',
   {
     defaultMessage: 'Risk Score',
+  }
+);
+
+export const ACTION_OPEN_SIGNAL = i18n.translate(
+  'xpack.siem.detectionEngine.signals.actions.openSignalTitle',
+  {
+    defaultMessage: 'Open signal',
+  }
+);
+
+export const ACTION_CLOSE_SIGNAL = i18n.translate(
+  'xpack.siem.detectionEngine.signals.actions.closeSignalTitle',
+  {
+    defaultMessage: 'Close signal',
+  }
+);
+
+export const ACTION_VIEW_IN_TIMELINE = i18n.translate(
+  'xpack.siem.detectionEngine.signals.actions.viewInTimelineTitle',
+  {
+    defaultMessage: 'View in timeline',
   }
 );
