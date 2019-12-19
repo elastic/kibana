@@ -18,7 +18,6 @@
  */
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -32,30 +31,15 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
 
     it('client plugins have access to registered settings', async () => {
-      const settings = await browser.execute(() => {
-        return window.__coreProvider.setup.core.uiSettings.getAll().ui_settings_plugin;
-      });
-
+      const settings = await browser.execute('return window.uiSettingsPlugin');
       expect(settings).to.eql({
         category: ['any'],
         description: 'just for testing',
         name: 'from_ui_settings_plugin',
         value: '2',
       });
-
-      const settingsValue = await browser.execute(() => {
-        return window.__coreProvider.setup.core.uiSettings.get('ui_settings_plugin');
-      });
-
+      const settingsValue = await browser.execute('return window.uiSettingsPluginValue');
       expect(settingsValue).to.be('2');
-
-      const settingsValueViaObservables = await browser.executeAsync(async (callback: Function) => {
-        window.__coreProvider.setup.core.uiSettings
-          .get$('ui_settings_plugin')
-          .subscribe(v => callback(v));
-      });
-
-      expect(settingsValueViaObservables).to.be('2');
     });
 
     it('server plugins have access to registered settings', async () => {
