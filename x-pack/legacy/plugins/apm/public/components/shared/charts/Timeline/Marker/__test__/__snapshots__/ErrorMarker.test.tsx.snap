@@ -28,19 +28,18 @@ exports[`ErrorMarker renders 1`] = `
       key="#fff"
       text="bar"
     />
-    <styled.div>
-      <ErrorDetailLink
-        errorGroupId="123"
-        query={
-          Object {
-            "kuery": "trace.id%20%3A%20%22123%22%20and%20transaction.id%20%3A%20%22456%22",
-            "rangeFrom": undefined,
-            "rangeTo": undefined,
-          }
+    <Styled(ErrorDetailLink)
+      errorGroupId="123"
+      query={
+        Object {
+          "kuery": "trace.id%20%3A%20%22123%22%20and%20transaction.id%20%3A%20%22456%22",
+          "rangeFrom": undefined,
+          "rangeTo": undefined,
         }
-        serviceName="bar"
-      />
-    </styled.div>
+      }
+      serviceName="bar"
+      size="l"
+    />
   </styled.div>
 </EuiPopover>
 `;
