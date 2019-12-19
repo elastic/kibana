@@ -33,8 +33,7 @@ export function WaterfallContainer({
       <ServiceLegends serviceColors={waterfall.serviceColors} />
       <Waterfall
         location={location}
-        serviceColors={waterfall.serviceColors}
-        urlParams={urlParams}
+        waterfallItemId={urlParams.waterfallItemId}
         waterfall={waterfall}
         exceedsMax={exceedsMax}
       />

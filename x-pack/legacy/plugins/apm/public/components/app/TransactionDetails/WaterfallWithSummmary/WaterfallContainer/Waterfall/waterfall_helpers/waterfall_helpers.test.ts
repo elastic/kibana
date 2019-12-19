@@ -135,11 +135,11 @@ describe('waterfall_helpers', () => {
         entryTransactionId
       );
 
-      const agentMarks = waterfall.orderedItems.filter(
+      const agentMarks = waterfall.items.filter(
         item => item.docType === 'agentMark'
       );
-      expect(waterfall.orderedItems.length).toBe(7);
-      expect(waterfall.orderedItems[0].id).toBe('myTransactionId1');
+      expect(waterfall.items.length).toBe(7);
+      expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(agentMarks.length).toEqual(0);
       expect(waterfall.errorCount).toEqual(1);
       expect(waterfall).toMatchSnapshot();
@@ -159,12 +159,12 @@ describe('waterfall_helpers', () => {
         entryTransactionId
       );
 
-      const agentMarks = waterfall.orderedItems.filter(
+      const agentMarks = waterfall.items.filter(
         item => item.docType === 'agentMark'
       );
 
-      expect(waterfall.orderedItems.length).toBe(7);
-      expect(waterfall.orderedItems[0].id).toBe('myTransactionId2');
+      expect(waterfall.items.length).toBe(7);
+      expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(agentMarks.length).toEqual(3);
       expect(waterfall.errorCount).toEqual(0);
       expect(waterfall).toMatchSnapshot();

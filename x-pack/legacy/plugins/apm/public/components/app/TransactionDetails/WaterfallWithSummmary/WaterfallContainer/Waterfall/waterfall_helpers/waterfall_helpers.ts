@@ -31,14 +31,13 @@ interface IWaterfallGroup {
 
 export interface IWaterfall {
   entryTransaction?: Transaction;
-  traceRoot?: Transaction;
-  traceRootDuration?: number;
+  rootTransaction?: Transaction;
 
   /**
    * Duration in us
    */
   duration: number;
-  orderedItems: IWaterfallItem[];
+  items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
   errorCountByTransactionId: TraceAPIResponse['errorsPerTransaction'];
@@ -263,7 +262,7 @@ function getServiceColors(items: IWaterfallItem[]) {
   return zipObject(services, assignedColors) as IServiceColors;
 }
 
-const getTraceDuration = (items: IWaterfallItem[]) =>
+const getWaterfallDuration = (items: IWaterfallItem[]) =>
   Math.max(...items.map(item => item.offset + item.skew + item.duration), 0);
 
 function createGetTransactionById(itemsById: IWaterfallIndex) {
@@ -316,7 +315,7 @@ export function getWaterfall(
   if (isEmpty(trace.items) || !entryTransactionId) {
     return {
       duration: 0,
-      orderedItems: [],
+      items: [],
       itemsById: {},
       getTransactionById: () => undefined,
       errorCountByTransactionId: errorsPerTransaction,
@@ -339,23 +338,22 @@ export function getWaterfall(
 
   const entryTransaction = entryWaterfallTransaction?.transaction;
 
-  const orderedItems = entryWaterfallTransaction
+  const items = entryWaterfallTransaction
     ? getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction)
     : [];
 
-  const traceRoot = getRootTransaction(childrenByParentId);
-  const duration = getTraceDuration(orderedItems);
-  const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
-  const serviceColors = getServiceColors(orderedItems);
+  const rootTransaction = getRootTransaction(childrenByParentId);
+  const duration = getWaterfallDuration(items);
+  const serviceColors = getServiceColors(items);
 
-  // the agentMarks should be added direct inside orderedItems, as it doesnt have parent-child relationship
-  orderedItems.push(...getAgentMarks(entryTransaction));
+  // the agentMarks should be added direct inside items, as it doesnt have parent-child relationship
+  items.push(...getAgentMarks(entryTransaction));
 
   const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
   const getTransactionById = createGetTransactionById(itemsById);
 
   // Add the service color into the error waterfall item
-  const waterfallErrors = orderedItems.filter(
+  const waterfallErrors = items.filter(
     item => item.docType === 'error'
   ) as IWaterfallItemError[];
 
@@ -366,10 +364,9 @@ export function getWaterfall(
 
   return {
     entryTransaction,
-    traceRoot,
-    traceRootDuration,
+    rootTransaction,
     duration,
-    orderedItems,
+    items,
     itemsById,
     getTransactionById,
     errorCountByTransactionId: errorsPerTransaction,
