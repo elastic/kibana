@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
@@ -60,6 +60,8 @@ interface PanelProps {
   renderComplete(): void;
 }
 
+const SERIES_ID_ATTR = 'data-series-id';
+
 function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProps) {
   console.log('Panel');
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
@@ -80,10 +82,6 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
 
   const elementRef = useCallback(node => {
     if (node !== null) {
-      const nodeJQ = $(node);
-      nodeJQ.on('plotselected', plotselectedHandler);
-      nodeJQ.on('plothover', plothoverHandler);
-      nodeJQ.on('mouseleave', mouseleaveHandler);
       setChartElem(node);
     }
   }, []);
@@ -124,7 +122,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
 
       canvasNode.find('div.legend table').append(caption);
 
-      setLegendValueNumbers(canvasNode.find('.ngLegendValueNumber'));
+      setLegendValueNumbers(canvasNode.find('.legendValueNumber'));
       // legend has been re-created. Apply focus on legend element when previously set
       if (focusedSeries || focusedSeries === 0) {
         const $legendLabels = canvasNode.find('div.legend table .legendLabel>span');
@@ -134,7 +132,8 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   }, [plot, focusedSeries, canvasElem]);
 
   const highlightSeries = useCallback(
-    debounce((id: number) => {
+    debounce((event: JQuery.Event) => {
+      const id = Number(event.currentTarget.getAttribute(SERIES_ID_ATTR));
       if (highlightedSeries === id) {
         return;
       }
@@ -156,15 +155,17 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   );
 
   const focusSeries = useCallback(
-    (id: number) => {
+    (event: JQuery.Event) => {
+      const id = Number(event.currentTarget.getAttribute(SERIES_ID_ATTR));
       setFocusedSeries(id);
-      highlightSeries(id);
+      highlightSeries(event);
     },
     [highlightSeries]
   );
 
   const toggleSeries = useCallback(
-    (id: number) => {
+    ({ currentTarget }: JQuery.Event) => {
+      const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
       setChart(
         chart.map((series: Series, seriesIndex: number) => {
           return seriesIndex === id ? { ...series, _hide: !series._hide } : { ...series };
@@ -195,13 +196,11 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
           const labelSpan = document.createElement('span');
           const numberSpan = document.createElement('span');
 
-          wrapperSpan.setAttribute('class', 'ngLegendValue');
-          wrapperSpan.addEventListener('click', () => toggleSeries(series._id));
-          wrapperSpan.addEventListener('onFocus', () => focusSeries(series._id));
-          wrapperSpan.addEventListener('onMouseOver', () => highlightSeries(series._id));
+          wrapperSpan.setAttribute('class', 'legendValue');
+          wrapperSpan.setAttribute(SERIES_ID_ATTR, series._id);
 
           labelSpan.appendChild(document.createTextNode(label));
-          numberSpan.setAttribute('class', 'ngLegendValueNumber');
+          numberSpan.setAttribute('class', 'legendValueNumber');
 
           wrapperSpan.appendChild(labelSpan);
           wrapperSpan.appendChild(numberSpan);
@@ -210,7 +209,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
         },
       },
     }),
-    [seriesList.render.grid, toggleSeries, focusSeries, highlightSeries]
+    [seriesList.render.grid]
   );
 
   const options = useMemo(
@@ -228,9 +227,17 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
 
   useEffect(() => {
-    // @ts-ignore
-    setPlot($.plot(canvasElem, compact(updatedSeries), options));
-  }, [canvasElem, options, updatedSeries]);
+    if (canvasElem) {
+      // @ts-ignore
+      setPlot($.plot(canvasElem, compact(updatedSeries), options));
+      const legend = $(canvasElem).find('.legendValue');
+      if (legend) {
+        legend.click(toggleSeries);
+        legend.focus(focusSeries);
+        legend.mouseover(highlightSeries);
+      }
+    }
+  }, [canvasElem, options, updatedSeries, toggleSeries, focusSeries, highlightSeries]);
 
   moment.tz.setDefault(getServices().uiSettings.get('dateFormat:tz'));
 
@@ -318,12 +325,12 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   }, [legendCaption, legendValueNumbers]);
 
   const plothoverHandler = useCallback(
-    (event: any, pos: any, item: any) => {
+    (event: any, pos: any) => {
       if (!plot) {
         return;
       }
-      plot.setCrosshair(item);
-      debouncedSetLegendNumbers(item);
+      plot.setCrosshair(pos);
+      debouncedSetLegendNumbers(pos);
     },
     [plot, debouncedSetLegendNumbers]
   );
@@ -342,6 +349,15 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   }, []);
 
 
+  useEffect(() => {
+    if (chartElem) {
+      const nodeJQ = $(chartElem);
+      nodeJQ.off('plotselected').off('plothover').off('mouseleave');
+      nodeJQ.on('plotselected', plotselectedHandler);
+      nodeJQ.on('plothover', plothoverHandler);
+      nodeJQ.on('mouseleave', mouseleaveHandler);
+    }
+  }, [plotselectedHandler, plothoverHandler, mouseleaveHandler])
 
   // const cancelResize = observeResize($elem, function() {
   //   drawPlot($scope.chart);
