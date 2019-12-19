@@ -8,19 +8,11 @@ import { LicenseState, verifyApiAccessFactory } from './lib/license_state';
 export function extendRouteWithLicenseCheck(route: any, licenseState: LicenseState) {
   const verifyApiAccessPreRouting = verifyApiAccessFactory(licenseState);
 
-  if (route.options) {
-    return {
-      ...route,
-      ['options']: {
-        ...route.options,
-        pre: [verifyApiAccessPreRouting],
-      },
-    };
-  }
+  const key = route.options ? 'options' : 'config';
   return {
     ...route,
-    ['config']: {
-      ...route.config,
+    [key]: {
+      ...route[key],
       pre: [verifyApiAccessPreRouting],
     },
   };

@@ -19,20 +19,18 @@ export interface ActionsLicenseInformation {
 
 export class LicenseState {
   private licenseInformation: ActionsLicenseInformation = this.checkLicense(undefined);
-  private subscription: Subscription | null = null;
+  private subscription: Subscription;
+
+  constructor(license$: Observable<ILicense>) {
+    this.subscription = license$.subscribe(this.updateInformation.bind(this));
+  }
 
   private updateInformation(license: ILicense | undefined) {
     this.licenseInformation = this.checkLicense(license);
   }
 
-  public start(license$: Observable<ILicense>) {
-    this.subscription = license$.subscribe(this.updateInformation.bind(this));
-  }
-
-  public stop() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+  public clean() {
+    this.subscription.unsubscribe();
   }
 
   public getLicenseInformation() {
@@ -53,9 +51,6 @@ export class LicenseState {
         ),
       };
     }
-
-    // TODO: feature validation?
-    // const actionsFeature = license.getFeature('actions');
 
     const check = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
 

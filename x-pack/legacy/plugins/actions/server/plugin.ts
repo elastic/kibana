@@ -72,9 +72,7 @@ export class Plugin {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
-    const licenseState = new LicenseState();
-    licenseState.start(plugins.licensing.license$);
-    this.licenseState = licenseState;
+    this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
     // - `secrets` properties will be encrypted
@@ -188,7 +186,7 @@ export class Plugin {
 
   public stop() {
     if (this.licenseState) {
-      this.licenseState.stop();
+      this.licenseState.clean();
     }
   }
 }

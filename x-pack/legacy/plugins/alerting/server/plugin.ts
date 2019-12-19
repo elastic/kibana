@@ -63,9 +63,7 @@ export class Plugin {
   ): Promise<PluginSetupContract> {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
-    const licenseState = new LicenseState();
-    licenseState.start(plugins.licensing.license$);
-    this.licenseState = licenseState;
+    this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
@@ -150,7 +148,7 @@ export class Plugin {
 
   public stop() {
     if (this.licenseState) {
-      this.licenseState.stop();
+      this.licenseState.clean();
     }
   }
 }

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { LicenseState } from './license_state';
-import { licensingMock } from '../../../../../plugins/licensing/server/licensing.mock';
+import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
 import { LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/server';
 
 describe('license_state', () => {
@@ -19,13 +19,16 @@ describe('license_state', () => {
   describe('status is LICENSE_STATUS_INVALID', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'invalid' } });
-      license.check = jest.fn().mockReturnValue({ status: LICENSE_CHECK_STATE.Invalid });
+      license.check = jest.fn(() => ({
+        state: LICENSE_CHECK_STATE.Invalid,
+      }));
       getRawLicense.mockReturnValue(license);
     });
 
-    it('replies with 403', () => {
-      const licenseState = new LicenseState();
-      const actionsLicenseInfo = licenseState.checkLicense(getRawLicense);
+    it('check application link should be disabled', () => {
+      const licensing = licensingMock.createSetup();
+      const licenseState = new LicenseState(licensing.license$);
+      const actionsLicenseInfo = licenseState.checkLicense(getRawLicense());
       expect(actionsLicenseInfo.enableAppLink).to.be(false);
     });
   });
@@ -33,13 +36,16 @@ describe('license_state', () => {
   describe('status is LICENSE_STATUS_VALID', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'active' } });
-      license.check = jest.fn().mockReturnValue({ status: LICENSE_CHECK_STATE.Valid });
+      license.check = jest.fn(() => ({
+        state: LICENSE_CHECK_STATE.Valid,
+      }));
       getRawLicense.mockReturnValue(license);
     });
 
-    it('replies with nothing', () => {
-      const licenseState = new LicenseState();
-      const actionsLicenseInfo = licenseState.checkLicense(getRawLicense);
+    it('check application link should be enabled', () => {
+      const licensing = licensingMock.createSetup();
+      const licenseState = new LicenseState(licensing.license$);
+      const actionsLicenseInfo = licenseState.checkLicense(getRawLicense());
       expect(actionsLicenseInfo.showAppLink).to.be(true);
     });
   });
