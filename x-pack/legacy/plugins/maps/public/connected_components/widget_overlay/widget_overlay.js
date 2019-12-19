@@ -10,7 +10,7 @@ import { LayerControl } from './layer_control';
 import { ViewControl } from './view_control';
 import { AttributionControl } from './attribution_control';
 
-export function WidgetOverlay() {
+export function WidgetOverlay({ hideLayerControl, hideViewControl }) {
   return (
     <EuiFlexGroup
       className="mapWidgetOverlay"
@@ -20,11 +20,9 @@ export function WidgetOverlay() {
       gutterSize="s"
     >
       <EuiFlexItem className="mapWidgetOverlay__layerWrapper">
-        <LayerControl />
+        {!hideLayerControl && <LayerControl />}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ViewControl />
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{!hideViewControl && <ViewControl />}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AttributionControl />
       </EuiFlexItem>

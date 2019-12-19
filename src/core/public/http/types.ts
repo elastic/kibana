@@ -20,10 +20,7 @@
 import { Observable } from 'rxjs';
 
 /** @public */
-export interface HttpServiceBase {
-  /** @internal */
-  stop(): void;
-
+export interface HttpSetup {
   /**
    * APIs for manipulating the basePath on URL segments.
    */
@@ -40,11 +37,6 @@ export interface HttpServiceBase {
    * @returns a function for removing the attached interceptor.
    */
   intercept(interceptor: HttpInterceptor): () => void;
-
-  /**
-   * Removes all configured interceptors.
-   */
-  removeAllInterceptors(): void;
 
   /** Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options. */
   fetch: HttpHandler;
@@ -68,13 +60,19 @@ export interface HttpServiceBase {
    * more than 0.
    * @param countSource$ an Observable to subscribe to for loading count updates.
    */
-  addLoadingCount(countSource$: Observable<number>): void;
+  addLoadingCountSource(countSource$: Observable<number>): void;
 
   /**
    * Get the sum of all loading count sources as a single Observable.
    */
   getLoadingCount$(): Observable<number>;
 }
+
+/**
+ * See {@link HttpSetup}
+ * @public
+ */
+export type HttpStart = HttpSetup;
 
 /**
  * APIs for manipulating the basePath on URL segments.
@@ -111,18 +109,6 @@ export interface IAnonymousPaths {
    */
   register(path: string): void;
 }
-
-/**
- * See {@link HttpServiceBase}
- * @public
- */
-export type HttpSetup = HttpServiceBase;
-
-/**
- * See {@link HttpServiceBase}
- * @public
- */
-export type HttpStart = HttpServiceBase;
 
 /** @public */
 export interface HttpHeadersInit {
