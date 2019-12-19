@@ -7,6 +7,9 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
+// kbn_vislib_vis_types UI styles
+@import 'src/legacy/core_plugins/kbn_vislib_vis_types/public/index';
+
 // Dev tools styles
 @import './dev_tools/index';
 
