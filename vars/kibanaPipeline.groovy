@@ -188,6 +188,11 @@ def downloadCoverageArtifacts() {
   sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
 }
 
+def uploadCoverageArtifacts(prefix, pattern) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
+  uploadGcsArtifact(uploadPrefix, pattern)
+}
+
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [

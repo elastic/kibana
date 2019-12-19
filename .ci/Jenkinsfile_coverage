@@ -97,11 +97,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 "run `yarn kbn bootstrap && merge coverage`"
               )
               sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
-              kibanaPipeline.uploadGcsArtifact("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
+              kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
               sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
-              kibanaPipeline.uploadGcsArtifact("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
+              kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
               sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
-              kibanaPipeline.uploadGcsArtifact("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
+              kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
             }
           }
         }
