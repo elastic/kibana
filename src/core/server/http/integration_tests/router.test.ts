@@ -650,11 +650,11 @@ describe('Response factory', () => {
         {
           path: '/',
           validate: {
-            body: ({ ok, fail }, { bar, baz } = {}) => {
+            body: ({ bar, baz } = {}, { ok, badRequest }) => {
               if (typeof bar === 'string' && typeof baz === 'number') {
                 return ok({ bar, baz });
               } else {
-                return fail('Wrong payload', ['body']);
+                return badRequest('Wrong payload', ['body']);
               }
             },
           },

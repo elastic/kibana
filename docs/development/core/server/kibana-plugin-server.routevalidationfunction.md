@@ -6,6 +6,20 @@
 
 The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements.
 
+<b>Signature:</b>
+
+```typescript
+export declare type RouteValidationFunction<T> = (data: any, validationResult: RouteValidationResultFactory) => {
+    value: T;
+    error?: never;
+} | {
+    value?: never;
+    error: RouteValidationError;
+};
+```
+
+## Example
+
 The validation should look something like:
 
 ```typescript
@@ -14,26 +28,15 @@ interface MyExpectedBody {
   baz: number;
 }
 
-const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (validationResolver, data) => {
-  const { ok, fail } = validationResolver;
+const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (data, validationResult) => {
+  const { ok, badRequest } = validationResult;
   const { bar, baz } = data || {};
   if (typeof bar === 'string' && typeof baz === 'number') {
     return ok({ bar, baz });
   } else {
-    return fail('Wrong payload', ['body']);
+    return badRequest('Wrong payload', ['body']);
   }
 }
 
 ```
 
-<b>Signature:</b>
-
-```typescript
-export declare type RouteValidationFunction<T> = (validationResolver: RouteValidationResolver, data: any) => {
-    value: T;
-    error?: never;
-} | {
-    value?: never;
-    error: RouteValidationError;
-};
-```

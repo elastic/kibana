@@ -142,7 +142,7 @@ export {
   RouteValidationFunction,
   RouteValidatorOptions,
   RouteValidatorFullConfig,
-  RouteValidationResolver,
+  RouteValidationResultFactory,
   RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,

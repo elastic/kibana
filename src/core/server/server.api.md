@@ -1238,7 +1238,7 @@ export class RouteValidationError extends SchemaTypeError {
 }
 
 // @public
-export type RouteValidationFunction<T> = (validationResolver: RouteValidationResolver, data: any) => {
+export type RouteValidationFunction<T> = (data: any, validationResult: RouteValidationResultFactory) => {
     value: T;
     error?: never;
 } | {
@@ -1247,9 +1247,9 @@ export type RouteValidationFunction<T> = (validationResolver: RouteValidationRes
 };
 
 // @public
-export interface RouteValidationResolver {
+export interface RouteValidationResultFactory {
     // (undocumented)
-    fail: (error: Error | string, path?: string[]) => {
+    badRequest: (error: Error | string, path?: string[]) => {
         error: RouteValidationError;
     };
     // (undocumented)

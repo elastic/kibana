@@ -22,19 +22,21 @@ import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
 /**
- * Validation resolver to be used in the custom validation function
+ * Validation result factory to be used in the custom validation function to return the valid data or validation errors
  *
  * See {@link RouteValidationFunction}.
  *
  * @public
  */
-export interface RouteValidationResolver {
+export interface RouteValidationResultFactory {
   ok: <T>(value: T) => { value: T };
-  fail: (error: Error | string, path?: string[]) => { error: RouteValidationError };
+  badRequest: (error: Error | string, path?: string[]) => { error: RouteValidationError };
 }
 
 /**
  * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
+ *
+ * @example
  *
  * The validation should look something like:
  * ```typescript
@@ -43,13 +45,13 @@ export interface RouteValidationResolver {
  *   baz: number;
  * }
  *
- * const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (validationResolver, data) => {
- *   const { ok, fail } = validationResolver;
+ * const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (data, validationResult) => {
+ *   const { ok, badRequest } = validationResult;
  *   const { bar, baz } = data || {};
  *   if (typeof bar === 'string' && typeof baz === 'number') {
  *     return ok({ bar, baz });
  *   } else {
- *     return fail('Wrong payload', ['body']);
+ *     return badRequest('Wrong payload', ['body']);
  *   }
  * }
  * ```
@@ -57,8 +59,8 @@ export interface RouteValidationResolver {
  * @public
  */
 export type RouteValidationFunction<T> = (
-  validationResolver: RouteValidationResolver,
-  data: any
+  data: any,
+  validationResult: RouteValidationResultFactory
 ) =>
   | {
       value: T;
@@ -151,6 +153,13 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     return new RouteValidator({ params, query, body }, options);
   }
 
+  private static ResultFactory: RouteValidationResultFactory = {
+    ok: <T>(value: T) => ({ value }),
+    badRequest: (error: Error | string, path?: string[]) => ({
+      error: new RouteValidationError(error, path),
+    }),
+  };
+
   private constructor(
     private readonly config: RouteValidatorConfig<P, Q, B>,
     private readonly options: RouteValidatorOptions = {}
@@ -223,13 +232,11 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
   }
 
   private customValidation<T>(
-    validationRule?: RouteValidationSpec<T>,
+    validationRule: RouteValidationSpec<T>,
     data?: unknown,
     namespace?: string
   ): RouteValidationResultType<typeof validationRule> {
-    if (typeof validationRule === 'undefined') {
-      return {};
-    } else if (validationRule instanceof Type) {
+    if (validationRule instanceof Type) {
       return validationRule.validate(data, {}, namespace);
     } else if (typeof validationRule === 'function') {
       return this.validateFunction(validationRule, data, namespace);
@@ -246,16 +253,9 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     data: unknown,
     namespace?: string
   ): T {
-    const routeValidationResolver: RouteValidationResolver = {
-      ok: <T>(value: T) => ({ value }),
-      fail: (error: Error | string, path?: string[]) => ({
-        error: new RouteValidationError(error, path),
-      }),
-    };
-
     let result: ReturnType<typeof validateFn>;
     try {
-      result = validateFn(routeValidationResolver, data);
+      result = validateFn(data, RouteValidator.ResultFactory);
     } catch (err) {
       result = { error: new RouteValidationError(err) };
     }

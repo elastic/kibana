@@ -23,11 +23,11 @@ import { schema, Type } from '@kbn/config-schema';
 describe('Router validator', () => {
   it('should validate and infer the type from a function', () => {
     const validator = RouteValidator.from({
-      params: (resolver, { foo }) => {
+      params: ({ foo }, validationResult) => {
         if (typeof foo === 'string') {
-          return resolver.ok({ foo });
+          return validationResult.ok({ foo });
         }
-        return resolver.fail('Not a string', ['foo']);
+        return validationResult.badRequest('Not a string', ['foo']);
       },
     });
     expect(validator.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
@@ -46,7 +46,7 @@ describe('Router validator', () => {
 
   it('should validate and infer the type from a function that does not use the resolver', () => {
     const validator = RouteValidator.from({
-      params: (resolver, data) => {
+      params: data => {
         if (typeof data.foo === 'string') {
           return { value: { foo: data.foo as string } };
         }

@@ -95,7 +95,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md) | Additional body options for a route |
-|  [RouteValidationResolver](./kibana-plugin-server.routevalidationresolver.md) | Validation resolver to be used in the custom validation function<!-- -->See [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md)<!-- -->. |
+|  [RouteValidationResultFactory](./kibana-plugin-server.routevalidationresultfactory.md) | Validation result factory to be used in the custom validation function to return the valid data or validation errors<!-- -->See [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md)<!-- -->. |
 |  [RouteValidatorConfig](./kibana-plugin-server.routevalidatorconfig.md) | The configuration object to the RouteValidator class. Set <code>params</code>, <code>query</code> and/or <code>body</code> to specify the validation logic to follow for that property. |
 |  [RouteValidatorOptions](./kibana-plugin-server.routevalidatoroptions.md) | Additional options for the RouteValidator class to modify its default behaviour. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
@@ -202,25 +202,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteContentType](./kibana-plugin-server.routecontenttype.md) | The set of supported parseable Content-Types |
 |  [RouteMethod](./kibana-plugin-server.routemethod.md) | The set of common HTTP methods supported by Kibana routing. |
 |  [RouteRegistrar](./kibana-plugin-server.routeregistrar.md) | Route handler common definition |
-|  [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) | The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements.<!-- -->The validation should look something like:
-```typescript
-interface MyExpectedBody {
-  bar: string;
-  baz: number;
-}
-
-const myBodyValidation: RouteValidationFunction<MyExpectedBody> = (validationResolver, data) => {
-  const { ok, fail } = validationResolver;
-  const { bar, baz } = data || {};
-  if (typeof bar === 'string' && typeof baz === 'number') {
-    return ok({ bar, baz });
-  } else {
-    return fail('Wrong payload', ['body']);
-  }
-}
-
-```
- |
+|  [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) | The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements. |
 |  [RouteValidationSpec](./kibana-plugin-server.routevalidationspec.md) | Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions<!-- -->See [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) for custom validation. |
 |  [RouteValidatorFullConfig](./kibana-plugin-server.routevalidatorfullconfig.md) | Route validations config and options merged into one object |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |

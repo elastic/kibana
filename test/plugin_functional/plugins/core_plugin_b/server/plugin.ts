@@ -41,11 +41,11 @@ export class CorePluginBPlugin implements Plugin {
         path: '/core_plugin_b',
         validate: {
           query: schema.object({ id: schema.string() }),
-          body: ({ ok, fail }, { bar, baz } = {}) => {
+          body: ({ bar, baz } = {}, { ok, badRequest }) => {
             if (typeof bar === 'string' && bar === baz) {
               return ok({ bar, baz });
             } else {
-              return fail(`bar: ${bar} !== baz: ${baz} or they are not string`);
+              return badRequest(`bar: ${bar} !== baz: ${baz} or they are not string`);
             }
           },
         },

@@ -32,7 +32,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
-  RouteValidationResolver,
+  RouteValidationResultFactory,
   RouteValidationFunction,
 } from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
@@ -303,11 +303,11 @@ test('valid body with validate function', async () => {
     {
       path: '/',
       validate: {
-        body: ({ ok, fail }, { bar, baz } = {}) => {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return ok({ bar, baz });
           } else {
-            return fail('Wrong payload', ['body']);
+            return badRequest('Wrong payload', ['body']);
           }
         },
       },
@@ -337,11 +337,14 @@ test('valid body with validate function', async () => {
 test('not inline validation - specifying params', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
-  const bodyValidation = ({ ok, fail }: RouteValidationResolver, { bar, baz }: any = {}) => {
+  const bodyValidation = (
+    { bar, baz }: any = {},
+    { ok, badRequest }: RouteValidationResultFactory
+  ) => {
     if (typeof bar === 'string' && typeof baz === 'number') {
       return ok({ bar, baz });
     } else {
-      return fail('Wrong payload', ['body']);
+      return badRequest('Wrong payload', ['body']);
     }
   };
 
@@ -378,13 +381,13 @@ test('not inline validation - specifying validation handler', async () => {
   const router = new Router('/foo', logger, enhanceWithContext);
 
   const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
-    { ok, fail },
-    { bar, baz } = {}
+    { bar, baz } = {},
+    { ok, badRequest }
   ) => {
     if (typeof bar === 'string' && typeof baz === 'number') {
       return ok({ bar, baz });
     } else {
-      return fail('Wrong payload', ['body']);
+      return badRequest('Wrong payload', ['body']);
     }
   };
 
@@ -438,11 +441,11 @@ test('not inline handler - KibanaRequest', async () => {
     {
       path: '/',
       validate: {
-        body: ({ ok, fail }, { bar, baz } = {}) => {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return ok({ bar, baz });
           } else {
-            return fail('Wrong payload', ['body']);
+            return badRequest('Wrong payload', ['body']);
           }
         },
       },
@@ -487,11 +490,11 @@ test('not inline handler - RequestHandler', async () => {
     {
       path: '/',
       validate: {
-        body: ({ ok, fail }, { bar, baz } = {}) => {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return ok({ bar, baz });
           } else {
-            return fail('Wrong payload', ['body']);
+            return badRequest('Wrong payload', ['body']);
           }
         },
       },
