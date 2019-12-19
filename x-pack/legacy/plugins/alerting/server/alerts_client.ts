@@ -131,7 +131,6 @@ export class AlertsClient {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
-    const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
 
     this.validateActions(alertType, data.actions);
@@ -139,13 +138,10 @@ export class AlertsClient {
     const { references, actions } = await this.denormalizeActions(data.actions);
     const rawAlert: RawAlert = {
       ...data,
+      ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
       actions,
       createdBy: username,
       updatedBy: username,
-      apiKeyOwner: apiKey.created && username ? username : undefined,
-      apiKey: apiKey.created
-        ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-        : undefined,
       params: validatedAlertTypeParams,
       muteAll: false,
       mutedInstanceIds: [],
@@ -233,7 +229,6 @@ export class AlertsClient {
     { attributes, version }: SavedObject<RawAlert>
   ) {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
-    const apiKey = await this.createAPIKey();
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
@@ -241,19 +236,18 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const updatedObject = await this.savedObjectsClient.update(
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(await this.createAPIKey(), username);
+
+    const updatedObject = await this.savedObjectsClient.update<RawAlert>(
       'alert',
       id,
       {
         ...attributes,
         ...data,
+        ...apiKeyAttributes,
         params: validatedAlertTypeParams,
         actions,
         updatedBy: username,
-        apiKeyOwner: apiKey.created ? username : null,
-        apiKey: apiKey.created
-          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-          : null,
       },
       {
         version,
@@ -263,21 +257,32 @@ export class AlertsClient {
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
+  private apiKeyAsAlertAttributes(
+    apiKey: CreateAPIKeyResult,
+    username: string | null
+  ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
+    return apiKey.created
+      ? {
+          apiKeyOwner: username,
+          apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
+        }
+      : {
+          apiKeyOwner: null,
+          apiKey: null,
+        };
+  }
+
   public async updateApiKey({ id }: { id: string }) {
     const { version, attributes } = await this.savedObjectsClient.get('alert', id);
 
-    const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
     await this.savedObjectsClient.update(
       'alert',
       id,
       {
         ...attributes,
+        ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
         updatedBy: username,
-        apiKeyOwner: apiKey.created ? username : null,
-        apiKey: apiKey.created
-          ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-          : null,
       },
       { version }
     );
@@ -286,7 +291,6 @@ export class AlertsClient {
   public async enable({ id }: { id: string }) {
     const { attributes, version } = await this.savedObjectsClient.get('alert', id);
     if (attributes.enabled === false) {
-      const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
@@ -295,12 +299,9 @@ export class AlertsClient {
         {
           ...attributes,
           enabled: true,
+          ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
           updatedBy: username,
-          apiKeyOwner: apiKey.created ? username : null,
           scheduledTaskId: scheduledTask.id,
-          apiKey: apiKey.created
-            ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
-            : null,
         },
         { version }
       );
