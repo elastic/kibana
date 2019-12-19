@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/color_maps';
-import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
-import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
-import { Positions } from './utils/collections';
+import { vislibColorMaps } from './color_maps';
 
-export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
-  type: 'heatmap';
-  addLegend: boolean;
-  enableHover: boolean;
-  colorsNumber: number | '';
-  colorsRange: RangeValues[];
-  valueAxes: ValueAxis[];
-  setColorRange: boolean;
-  percentageMode: boolean;
-  times: TimeMarker[];
+export const truncatedColorMaps = {};
+
+const colormaps = vislibColorMaps;
+for (const key in colormaps) {
+  if (colormaps.hasOwnProperty(key)) {
+    // slice off lightest colors
+    truncatedColorMaps[key] = {
+      ...colormaps[key],
+      value: colormaps[key].value.slice(Math.floor(colormaps[key].value.length / 4)),
+    };
+  }
 }
+
+export const truncatedColorSchemas = Object.values(truncatedColorMaps).map(({ id, label }) => ({
+  value: id,
+  text: label,
+}));

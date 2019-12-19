@@ -22,7 +22,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorMaps } from 'ui/color_maps';
 import * as colorUtil from 'ui/vis/map/color_util';
 
 export class ScaledCirclesMarkers extends EventEmitter {

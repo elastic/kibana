@@ -107,7 +107,7 @@ export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, rad
 }
 
 // this replicates Kibana's filterAxisLabels() behavior
-// which can be found in ui/vislib/lib/axis/axis_labels.js
+// which can be found in src/legacy/core_plugins/kbn_vislib_vis_types/public/vislib/lib/axis/axis_labels.js
 // axis labels which overflow the chart's boundaries will be removed
 export function filterAxisLabels(selection, chartWidth) {
   if (selection === undefined || selection.selectAll === undefined) {

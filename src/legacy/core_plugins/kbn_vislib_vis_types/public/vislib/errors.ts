@@ -19,7 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { KbnError } from '../../../../plugins/kibana_utils/public';
+import { KbnError } from '../../../../../plugins/kibana_utils/public';
 
 export class VislibError extends KbnError {
   constructor(message: string) {

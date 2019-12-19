@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
-import { TimeMarker } from 'ui/vislib/visualizations/time_marker';
+import { ColorSchemas } from 'ui/color_maps';
+import { TimeMarker } from './vislib/visualizations/time_marker';
 import {
   Positions,
   ChartModes,

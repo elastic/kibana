@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/color_maps';
 import { getLegendColors, getColor } from 'ui/vis/map/color_util';
 import { ColorGradient } from './components/color_gradient';
 import { palettes } from '@elastic/eui/lib/services';

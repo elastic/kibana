@@ -22,7 +22,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { ColorSchemas } from 'ui/color_maps';
 import { ColorRanges, ColorSchemaOptions, SwitchOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 import { ColorSchemaVislibParams } from '../../../types';

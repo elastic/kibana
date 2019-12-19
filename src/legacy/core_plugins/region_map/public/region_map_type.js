@@ -19,7 +19,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
+import { truncatedColorSchemas as colorSchemas } from 'ui/color_maps';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from '../../visualizations/public';

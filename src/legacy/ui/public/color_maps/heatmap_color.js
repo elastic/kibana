@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { vislibColorMaps } from './colormaps';
+import { vislibColorMaps } from './color_maps';
 
 function enforceBounds(x) {
   if (x < 0) {

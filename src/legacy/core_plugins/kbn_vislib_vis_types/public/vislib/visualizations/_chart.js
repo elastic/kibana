@@ -21,10 +21,10 @@ import d3 from 'd3';
 import _ from 'lodash';
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';
-import { Tooltip } from '../../vis/components/tooltip';
-import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
-import { getHierarchicalTooltipFormatter } from '../../vis/components/tooltip/_hierarchical_tooltip_formatter';
-import { getPointSeriesTooltipFormatter } from '../../vis/components/tooltip/_pointseries_tooltip_formatter';
+import { Tooltip } from '../../../../../ui/public/vis/components/tooltip';
+import { getFormat } from '../../../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+import { getHierarchicalTooltipFormatter } from '../../../../../ui/public/vis/components/tooltip/_hierarchical_tooltip_formatter';
+import { getPointSeriesTooltipFormatter } from '../../../../../ui/public/vis/components/tooltip/_pointseries_tooltip_formatter';
 
 /**
  * The Base Class for all visualizations.

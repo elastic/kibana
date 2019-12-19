@@ -9,7 +9,7 @@ bower_components
 /built_assets
 /html_docs
 /src/plugins/data/common/es_query/kuery/ast/_generated_/**
-/src/fixtures/vislib/mock_data
+src/legacy/core_plugins/kbn_vislib_vis_types/public/vislib/__tests__/lib/fixtures/mock_data
 /src/legacy/ui/public/angular-bootstrap
 /src/legacy/ui/public/flot-charts
 /test/fixtures/scenarios

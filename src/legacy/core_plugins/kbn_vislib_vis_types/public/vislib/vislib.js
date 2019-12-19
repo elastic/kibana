@@ -23,7 +23,7 @@ import './lib/types';
 import './lib/layout/layout_types';
 import './lib/data';
 import './visualizations/vis_types';
-import { mappedColors } from '../vis/components/color/mapped_colors';
+import { mappedColors } from 'ui/color_maps';
 import { VislibVisProvider } from './vis';
 
 // prefetched for faster optimization runs

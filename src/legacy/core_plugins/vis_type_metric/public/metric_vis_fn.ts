@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vislibColorMaps, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps, ColorSchemas } from 'ui/color_maps';
 import {
   ExpressionFunction,
   KibanaDatatable,

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { colorSchemas } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas } from 'ui/color_maps';
 
 export enum Positions {
   RIGHT = 'right',

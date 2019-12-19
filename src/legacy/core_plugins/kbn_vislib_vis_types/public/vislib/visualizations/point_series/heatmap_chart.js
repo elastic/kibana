@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { PointSeries } from './_point_series';
-import { getHeatmapColors } from '../../components/color/heatmap_color';
+import { getHeatmapColors } from 'ui/color_maps';
 import { isColorDark } from '@elastic/eui';
 
 const defaults = {

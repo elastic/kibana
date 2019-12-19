@@ -23,7 +23,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { ColorSchema } from 'ui/vislib/components/color/colormaps';
+import { ColorSchema } from 'ui/color_maps';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';
 import { ColorSchemaVislibParams } from '../../types';

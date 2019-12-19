@@ -25,5 +25,4 @@
 
 // Can't import vis folder here because of cascading issues, it's imported in core_plugins/kibana
 // @import './vis/index';
-@import './vislib/index';
 @import './visualize/index';

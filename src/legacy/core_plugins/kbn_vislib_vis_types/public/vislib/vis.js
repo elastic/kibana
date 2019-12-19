@@ -20,12 +20,12 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
-import chrome from '../chrome';
+import chrome from '../../../../ui/public/chrome';
 import { VislibError } from './errors';
 import { VisConfig } from './lib/vis_config';
 import { Handler } from './lib/handler';
-import { setHierarchicalTooltipFormatter } from '../vis/components/tooltip/_hierarchical_tooltip_formatter';
-import { setPointSeriesTooltipFormatter } from '../vis/components/tooltip/_pointseries_tooltip_formatter';
+import { setHierarchicalTooltipFormatter } from '../../../../ui/public/vis/components/tooltip/_hierarchical_tooltip_formatter';
+import { setPointSeriesTooltipFormatter } from '../../../../ui/public/vis/components/tooltip/_pointseries_tooltip_formatter';
 
 const config = chrome.getUiSettingsClient();
 

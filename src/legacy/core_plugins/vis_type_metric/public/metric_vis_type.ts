@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 
 import { AggGroupNames } from 'ui/vis/editors/default';
-import { colorSchemas, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas, ColorSchemas } from 'ui/color_maps';
 
 // @ts-ignore
 import { MetricVisComponent } from './components/metric_vis_controller';

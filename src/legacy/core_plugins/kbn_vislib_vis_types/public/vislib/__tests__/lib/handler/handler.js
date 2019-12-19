@@ -21,13 +21,13 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
 // Data
-import series from 'fixtures/vislib/mock_data/date_histogram/_series';
-import columns from 'fixtures/vislib/mock_data/date_histogram/_columns';
-import rows from 'fixtures/vislib/mock_data/date_histogram/_rows';
-import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import series from '../fixtures/mock_data/date_histogram/_series';
+import columns from '../fixtures/mock_data/date_histogram/_columns';
+import rows from '../fixtures/mock_data/date_histogram/_rows';
+import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
-import '../../../../persisted_state';
+import FixturesVislibVisFixtureProvider from '../fixtures/_vis_fixture';
+import 'ui/persisted_state';
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
