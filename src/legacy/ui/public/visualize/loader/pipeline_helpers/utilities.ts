@@ -146,7 +146,7 @@ export const getFormat: FormatFactory = mapping => {
             basePath: npStart.core.http.basePath,
           };
           // @ts-ignore
-          return format.convert(val, undefined, undefined, parsedUrl);
+          return format.getConverterFor(type)(val, false, false, parsedUrl);
         };
       },
       convert: (val: string, type: string) => {
@@ -163,7 +163,7 @@ export const getFormat: FormatFactory = mapping => {
           basePath: npStart.core.http.basePath,
         };
         // @ts-ignore
-        return format.convert(val, type, undefined, parsedUrl);
+        return format.getConverterFor(type)(val, false, false, parsedUrl);
       },
     } as FieldFormat;
   } else {
