@@ -17,24 +17,10 @@ When you add elements to your workpad, you can:
 * <<element-save,Save your elements>>
 
 [float]
-[[canvas-supported-datasources]]
-=== Supported data sources
-
-By default, every element you add to a workpad uses demo data until you change the data source. The demo data includes a small sample data set that you can use to experiment with your element. When you have finished using the demo data, connect the element to one of the following data sources:
-
-Elasticsearch SQL:: Allows you to access your data in Elasticsearch using SQL syntax. Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
-
-Elasticsearch raw data:: Allows you to access your raw data in Elasticsearch without the use of aggregations. Use Elasticsearch raw data when you have low volume datasets, or to plot exact, non-aggregated values.
-To use targeted queries, you can enter a query using the Lucene query string syntax. For more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
-
-Timelion:: To use time series data in Canvas, connect elements to Timelion, which uses Timelion queries to pull time series data in a tabular format. Timelion queries use the Lucene query string syntax. For information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
-For information about Timelion, refer to <<timelion,Timelion>>.
-
-[float]
 [[add-canvas-element]]
 === Add elements to your workpad
 
-Choose the elements to display on your workpad, then familiarize yourself with the element using the preconfigured demo data.
+Choose the elements to display on your workpad, then familiarize yourself with the element using the preconfigured demo data. By default, every element you add to a workpad uses demo data until you change the data source. The demo data includes a small sample data set that you can use to experiment with your element.
 
 . Click *Add element*.
 
@@ -45,13 +31,13 @@ image::images/canvas-element-select.gif[Canvas elements]
 
 . Play around with the default settings and see what the element can do.
 
-TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right corner, then selecting *Delete*.
+TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right, then selecting *Delete*.
 
 [float]
 [[connect-element-data]]
 === Connect the element to your data
 
-When you are ready to move on from the demo data, connect the element to your own data.
+When you have finished using the demo data, connect the element to a data source.
 
 . Make sure that the element is selected, then select *Data*.
 
@@ -59,27 +45,25 @@ When you are ready to move on from the demo data, connect the element to your ow
 
 [float]
 [[elasticsearch-sql-data-source]]
-==== Connect to Elasticsearch SQL
+==== Connect to {es} SQL
 
-Access your data in Elasticsearch using the Elasticsearch SQL syntax.
+Access your data in {es} using SQL syntax. For information about SQL syntax, refer to {ref}/sql-spec.html[SQL language].
 
-Unfamiliar with writing Elasticsearch SQL queries? For more information, refer to {ref}/sql-spec.html[SQL language].
+. Click *{es} SQL*.
 
-. Click *Elasticsearch SQL*.
-
-. In the *Elasticearch SQL query* box, enter your query, then *Preview* it.
+. In the *{es} SQL query* box, enter your query, then *Preview* it.
 
 . If everything looks correct, *Save* it.
 
 [float]
 [[elasticsearch-raw-doc-data-source]]
-==== Connect to Elasticsearch raw data
+==== Connect to {es} raw data
 
-Use the Lucene query syntax to use your raw data in Elasticsearch.
+Access your raw data in {es} without the use of aggregations. Use {es} raw data when you have low volume datasets, or to plot exact, non-aggregated values.
 
-For for more information about the Lucene query string sytax, refer to <<lucene-query,Lucene Query Syntax>>.
+To use targeted queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
-. Click *Elasticsearch raw documents*.
+. Click *{es} raw documents*.
 
 . In the *Index* field, enter the index pattern that you want to display.
 
@@ -97,13 +81,11 @@ For for more information about the Lucene query string sytax, refer to <<lucene-
 [[timelion-data-source]]
 ==== Connect to Timelion
 
-Use <<timelion,Timelion>> queries to use your time series data.
+Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
 . Click *Timelion*.
 
 . Enter a *Query* using the Lucene query string syntax.
-+
-For for more information about the Lucene query string syntax, refer to <<lucene-query,Lucene Query Syntax>>.
 
 . Enter the *Interval*, then *Preview* the query.
 
