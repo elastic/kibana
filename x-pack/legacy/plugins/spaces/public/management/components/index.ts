@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SpacesPlugin } from './plugin';
 
-export { SpaceAvatar } from './space_avatar';
-
-export const plugin = () => {
-  return new SpacesPlugin();
-};
+export { ConfirmDeleteModal } from './confirm_delete_modal';
+export { UnauthorizedPrompt } from './unauthorized_prompt';
+export { SecureSpaceMessage } from './secure_space_message';

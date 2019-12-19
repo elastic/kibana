@@ -5,71 +5,53 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFieldSearch,
-  EuiPopover,
   EuiText,
+  EuiLoadingContent,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import { SpaceAvatar } from '../../../../../../../spaces/public/space_avatar';
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../../../../plugins/spaces/common/constants';
-import { Space } from '../../../../../../../../../plugins/spaces/common/model/space';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import React, { Component, ReactElement } from 'react';
+import { Capabilities } from 'src/core/public';
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common/constants';
+import { Space } from '../../../common/model/space';
+import { ManageSpacesButton } from './manage_spaces_button';
+import { SpaceAvatar } from '../../space_avatar';
 
 interface Props {
   spaces: Space[];
+  isLoading: boolean;
+  onSelectSpace: (space: Space) => void;
+  onManageSpacesClick: () => void;
   intl: InjectedIntl;
-  buttonText: string;
+  capabilities: Capabilities;
 }
 
 interface State {
   searchTerm: string;
   allowSpacesListFocus: boolean;
-  isPopoverOpen: boolean;
 }
 
-export class SpacesPopoverList extends Component<Props, State> {
+class SpacesMenuUI extends Component<Props, State> {
   public state = {
     searchTerm: '',
     allowSpacesListFocus: false,
-    isPopoverOpen: false,
   };
 
   public render() {
-    const button = (
-      <EuiButtonEmpty size={'xs'} onClick={this.onButtonClick}>
-        <span className="secSpacesPopoverList__buttonText">{this.props.buttonText}</span>
-      </EuiButtonEmpty>
-    );
-
-    return (
-      <EuiPopover
-        id={'spacesPopoverList'}
-        button={button}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        ownFocus
-      >
-        {this.getMenuPanel()}
-      </EuiPopover>
-    );
-  }
-
-  private getMenuPanel = () => {
-    const { intl } = this.props;
+    const { intl, isLoading } = this.props;
     const { searchTerm } = this.state;
 
-    const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
+    const items = isLoading
+      ? [1, 2, 3].map(this.renderPlaceholderMenuItem)
+      : this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spcMenu',
       title: intl.formatMessage({
-        id: 'xpack.security.management.editRole.spacesPopoverList.popoverTitle',
-        defaultMessage: 'Spaces',
+        id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
+        defaultMessage: 'Change current space',
       }),
       watchedItemProps: ['data-search-term'],
     };
@@ -79,26 +61,15 @@ export class SpacesPopoverList extends Component<Props, State> {
         <EuiContextMenuPanel {...panelProps}>
           {this.renderSearchField()}
           {this.renderSpacesListPanel(items, searchTerm)}
+          {this.renderManageButton()}
         </EuiContextMenuPanel>
       );
     }
 
+    items.push(this.renderManageButton());
+
     return <EuiContextMenuPanel {...panelProps} items={items} />;
-  };
-
-  private onButtonClick = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-      searchTerm: '',
-    });
-  };
-
-  private closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-      searchTerm: '',
-    });
-  };
+  }
 
   private getVisibleSpaces = (searchTerm: string): Space[] => {
     const { spaces } = this.props;
@@ -117,12 +88,12 @@ export class SpacesPopoverList extends Component<Props, State> {
     return filteredSpaces;
   };
 
-  private renderSpacesListPanel = (items: JSX.Element[], searchTerm: string) => {
+  private renderSpacesListPanel = (items: ReactElement[], searchTerm: string) => {
     if (items.length === 0) {
       return (
         <EuiText color="subdued" className="eui-textCenter">
           <FormattedMessage
-            id="xpack.security.management.editRole.spacesPopoverList.noSpacesFoundTitle"
+            id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
             defaultMessage=" no spaces found "
           />
         </EuiText>
@@ -146,13 +117,14 @@ export class SpacesPopoverList extends Component<Props, State> {
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         {
-          // @ts-ignore onSearch isn't defined on the type
+          // @ts-ignore
           <EuiFieldSearch
             placeholder={intl.formatMessage({
-              id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
+              id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
               defaultMessage: 'Find a space',
             })}
             incremental={true}
+            // FIXME needs updated typedef
             onSearch={this.onSearch}
             onKeyDown={this.onSearchKeyDown}
             onFocus={this.onSearchFocus}
@@ -184,6 +156,18 @@ export class SpacesPopoverList extends Component<Props, State> {
     });
   };
 
+  private renderManageButton = () => {
+    return (
+      <ManageSpacesButton
+        key="manageSpacesButton"
+        className="spcMenu__manageButton"
+        size="s"
+        onClick={this.props.onManageSpacesClick}
+        capabilities={this.props.capabilities}
+      />
+    );
+  };
+
   private onSearch = (searchTerm: string) => {
     this.setState({
       searchTerm: searchTerm.trim().toLowerCase(),
@@ -196,6 +180,7 @@ export class SpacesPopoverList extends Component<Props, State> {
       <EuiContextMenuItem
         key={space.id}
         icon={icon}
+        onClick={this.props.onSelectSpace.bind(this, space)}
         toolTipTitle={space.description && space.name}
         toolTipContent={space.description}
       >
@@ -203,4 +188,14 @@ export class SpacesPopoverList extends Component<Props, State> {
       </EuiContextMenuItem>
     );
   };
+
+  private renderPlaceholderMenuItem = (key: string | number): JSX.Element => {
+    return (
+      <EuiContextMenuItem key={key} disabled={true}>
+        <EuiLoadingContent lines={1} />
+      </EuiContextMenuItem>
+    );
+  };
 }
+
+export const SpacesMenu = injectI18n(SpacesMenuUI);
