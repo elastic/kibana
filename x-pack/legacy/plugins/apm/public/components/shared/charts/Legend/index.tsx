@@ -55,7 +55,7 @@ interface Props {
   disabled?: boolean;
   clickable?: boolean;
   shape?: Shape;
-  indicator: () => React.ReactNode;
+  indicator?: () => React.ReactNode;
 }
 
 export const Legend: React.FC<Props> = ({
