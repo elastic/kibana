@@ -117,8 +117,11 @@
 .indexPattern__container {
   display: flex;
   align-items: center;
+  height: $euiSize * 3;
+  margin-top: -$euiSizeS;
 }
 
 .indexPattern__triggerButton {
   @include euiTitle('xs');
+  line-height: $euiSizeXXL;
 }
