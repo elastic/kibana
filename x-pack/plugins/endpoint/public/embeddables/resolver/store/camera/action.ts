@@ -30,18 +30,32 @@ interface UserSetRasterSize {
   readonly payload: Vector2;
 }
 
+// TODO, fix and rename this. or remove it
+// this is used to directly set the transform of the camera,
+// it should be named something like 'userSetPositionOfCamera'. It should work in conjunction with panning (it doesn't, or at least its not tested or tried.)
 interface UserSetPanningOffset {
   readonly type: 'userSetPanningOffset';
+  /**
+   * The world transform of the camera
+   */
   readonly payload: Vector2;
 }
 
 interface UserStartedPanning {
   readonly type: 'userStartedPanning';
+  /**
+   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen.)
+   * Represents a starting position during panning for a pointing device.
+   */
   readonly payload: Vector2;
 }
 
 interface UserContinuedPanning {
   readonly type: 'userContinuedPanning';
+  /**
+   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen.)
+   * Represents the current position during panning for a pointing device.
+   */
   readonly payload: Vector2;
 }
 
@@ -56,7 +70,10 @@ interface UserCanceledPanning {
 // This action is blacklisted in redux dev tools
 interface UserFocusedOnWorldCoordinates {
   readonly type: 'userFocusedOnWorldCoordinates';
-  // client X and Y of mouse event, adjusted for position of resolver on the page
+  /**
+   * World coordinates indicating a point that the user's pointing device is hoving over.
+   * When the camera's scale is changed, we make sure to adjust its tranform so that the these world coordinates are in the same place on the screen
+   */
   readonly payload: Vector2;
 }
 

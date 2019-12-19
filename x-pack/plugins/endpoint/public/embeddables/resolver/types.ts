@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ResolverAction } from './actions';
+
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
  */
@@ -13,8 +15,6 @@ export interface ResolverState {
    */
   readonly camera: CameraState;
 }
-
-export { ResolverAction } from './actions';
 
 interface PanningState {
   /**

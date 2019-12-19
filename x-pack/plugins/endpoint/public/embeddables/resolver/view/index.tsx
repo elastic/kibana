@@ -7,7 +7,6 @@
 import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
@@ -21,11 +20,9 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
   );
 });
 
-const useResolverDispatch = () => useDispatch<Dispatch<ResolverAction>>();
-
 const Diagnostic = styled(
   React.memo(({ className }: { className?: string }) => {
-    const dispatch = useResolverDispatch();
+    const dispatch: (action: ResolverAction) => unknown = useDispatch();
 
     const [ref, setRef] = useState<null | HTMLDivElement>(null);
 
