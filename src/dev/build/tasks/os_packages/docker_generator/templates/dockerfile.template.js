@@ -77,10 +77,6 @@ function generator({
   RUN ${packageManager()} update -y && \\
   ${packageManager()} install -y unzip fontconfig freetype shadow-utils && ${packageManager()} clean all
 
-  # Unpack chromium at image build time, rather than waiting until container run time
-  RUN unzip $(find /usr/share/kibana -type d -name .chromium)/chromium-*-linux.zip -d /usr/share/kibana/data
-  # Remove the chromium directory, it's not needed at runtime
-  RUN find /usr/share/kibana -type d -name ".chromium" -exec rm -rf {} \\; -prune
 
   # Add an init process, check the checksum to make sure it's a match
   RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
@@ -92,6 +88,11 @@ function generator({
   COPY --from=prep_files --chown=1000:0 /usr/share/kibana /usr/share/kibana
   WORKDIR /usr/share/kibana
   RUN ln -s /usr/share/kibana /opt/kibana
+
+  # Unpack chromium at image build time, rather than waiting until container run time
+  RUN unzip $(find /usr/share/kibana -type d -name .chromium)/chromium-*-linux.zip -d /usr/share/kibana/data
+  # Remove the chromium directory, it's not needed at runtime
+  RUN find /usr/share/kibana -type d -name ".chromium" -exec rm -rf {} \\; -prune
 
   ENV ELASTIC_CONTAINER true
   ENV PATH=/usr/share/kibana/bin:$PATH
