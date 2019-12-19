@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConfigurationForm } from './configuration_form';
+export { DynamicMappingSection } from './dynamic_mapping_section';
