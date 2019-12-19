@@ -99,18 +99,13 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       }
     }
 
-    async createAndAddMarkdown({ name, markdown }, checkForAddPanel = true) {
+    async createAndAddMarkdown({ name, markdown }) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      if (checkForAddPanel) {
-        await dashboardAddPanel.ensureAddPanelIsShowing();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
-      } else {
-        await this.ensureNewVisualizationDialogIsShowing();
-      }
+      await this.ensureNewVisualizationDialogIsShowing();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();

@@ -28,7 +28,6 @@ export default function({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/48236
   describe('empty dashboard', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
@@ -59,10 +58,10 @@ export default function({ getService, getPageObjects }) {
     it('should add new visualization from dashboard', async () => {
       await testSubjects.exists('addVisualizationButton');
       await testSubjects.click('addVisualizationButton');
-      await dashboardVisualizations.createAndAddMarkdown(
-        { name: 'Dashboard Test Markdown', markdown: 'Markdown text' },
-        false
-      );
+      await dashboardVisualizations.createAndAddMarkdown({
+        name: 'Dashboard Test Markdown',
+        markdown: 'Markdown text',
+      });
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Markdown text']);
     });
