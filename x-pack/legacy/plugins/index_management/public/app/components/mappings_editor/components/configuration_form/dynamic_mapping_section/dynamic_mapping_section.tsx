@@ -54,6 +54,11 @@ export const DynamicMappingSection = () => (
           'dynamicMapping.date_detection': dateDetection,
         } = formData;
 
+        if (enabled === undefined) {
+          // If enabled is not yet defined don't go any further.
+          return null;
+        }
+
         if (enabled) {
           return (
             <>

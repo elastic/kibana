@@ -56,6 +56,7 @@ export interface State {
 }
 
 export type Action =
+  | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
   | { type: 'configuration.update'; value: Partial<State['configuration']> }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
@@ -222,6 +223,23 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case 'editor.replaceMappings': {
+      return {
+        ...state,
+        fieldForm: undefined,
+        fields: action.value.fields,
+        configuration: {
+          ...state.configuration,
+          defaultValue: action.value.configuration,
+        },
+        documentFields: {
+          ...state.documentFields,
+          status: 'idle',
+          fieldToAddFieldTo: undefined,
+          fieldToEdit: undefined,
+        },
+      };
+    }
     case 'configuration.update': {
       const nextState = {
         ...state,

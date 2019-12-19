@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useEffect, createContext, useContext, useMemo } from 'react';
+import React, { useReducer, useEffect, createContext, useContext, useMemo, useRef } from 'react';
 
 import {
   reducer,
@@ -50,10 +50,13 @@ export interface Props {
 }
 
 export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
-  const { byId, aliases, rootLevelFields, maxNestedDepth } = useMemo(
-    () => normalize(defaultValue.fields),
-    [defaultValue.fields]
-  );
+  const didMountRef = useRef(false);
+
+  const parsedFieldsDefaultValue = useMemo(() => normalize(defaultValue.fields), [
+    defaultValue.fields,
+  ]);
+
+  const { maxNestedDepth } = parsedFieldsDefaultValue;
 
   const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
   const initialState: State = {
@@ -66,12 +69,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       },
       validate: () => Promise.resolve(true),
     },
-    fields: {
-      byId,
-      rootLevelFields,
-      aliases,
-      maxNestedDepth,
-    },
+    fields: parsedFieldsDefaultValue,
     documentFields: {
       status: 'idle',
       editor: canUseDefaultEditor ? 'default' : 'json',
@@ -140,6 +138,24 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       isValid: state.isValid,
     });
   }, [state]);
+
+  useEffect(() => {
+    /**
+     * If the defaultValue has changed that probably means that we have loaded
+     * new data from JSON. We need to update our state witht the new mappings.
+     */
+    if (didMountRef.current) {
+      dispatch({
+        type: 'editor.replaceMappings',
+        value: {
+          configuration: defaultValue.configuration,
+          fields: parsedFieldsDefaultValue,
+        },
+      });
+    } else {
+      didMountRef.current = true;
+    }
+  }, [defaultValue]);
 
   return (
     <StateContext.Provider value={state}>

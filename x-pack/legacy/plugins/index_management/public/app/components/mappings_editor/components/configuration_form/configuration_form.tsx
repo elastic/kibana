@@ -82,6 +82,12 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
     return subscription.unsubscribe;
   }, [form]);
 
+  useEffect(() => {
+    // If the defaultValue has changed it means that we have loaded a new JSON
+    // we need to reset the form to update the fields values.
+    form.reset({ resetValues: true });
+  }, [defaultValue]);
+
   return (
     <Form form={form}>
       <DynamicMappingSection />
