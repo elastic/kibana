@@ -122,7 +122,6 @@ export {
 } from './saved_objects';
 
 export {
-  HttpServiceBase,
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchOptions,
