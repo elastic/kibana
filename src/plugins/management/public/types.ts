@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { IconType } from '@elastic/eui';
 import { AppMountContext } from 'kibana/public';
 
 export interface ManagementSetup {
@@ -29,12 +30,12 @@ export interface ManagementStart {
 }
 
 interface SectionsServiceSetup {
-  get: (sectionId: ISection['id']) => ISection | undefined;
+  get: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
   register: RegisterSection;
 }
 
 interface SectionsServiceStart {
-  getAvailable: () => Array<Omit<ISection, 'registerApp'>>; // filtered based on capabilities
+  getAvailable: () => Array<Omit<ManagementSection, 'registerApp'>>; // filtered based on capabilities
   // uses `core.application.navigateToApp` under the hood, automatically prepending the `path` for the link
   navigateToApp: (appId: string, options?: { path?: string; state?: any }) => void;
 }
@@ -47,7 +48,7 @@ export interface CreateSection {
   icon?: string; // URL to image file; fallback if no `euiIconType`
 }
 
-export type RegisterSection = (section: CreateSection) => ISection;
+export type RegisterSection = (section: CreateSection) => ManagementSection;
 
 export interface RegisterManagementAppArgs {
   id: string;
@@ -76,10 +77,10 @@ export interface ManagementApp {
   basePath: string;
   sectionId: string;
   order?: number;
-  mount: ManagementSectionMount; // todo added this, is it needed?
+  mount: ManagementSectionMount;
 }
 
-export interface ISection {
+export interface ManagementSection {
   id: string;
   title: string;
   apps: ManagementApp[];

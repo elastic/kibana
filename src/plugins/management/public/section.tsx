@@ -19,14 +19,19 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { ManagementApp, CreateSection, ISection, RegisterManagementAppArgs } from './types';
+import {
+  ManagementApp,
+  CreateSection,
+  ManagementSection,
+  RegisterManagementAppArgs,
+} from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { Chrome } from './chrome';
 import { Unmount } from './types';
 // @ts-ignore
-import { ManagementSection } from './legacy/section';
+import { LegacyManagementSection } from './legacy';
 
-export class Section implements ISection {
+export class Section implements ManagementSection {
   public readonly id: string = '';
   public readonly title: string = '';
   public readonly apps: ManagementApp[] = []; // todo unused
@@ -35,7 +40,7 @@ export class Section implements ISection {
   public readonly icon?: string;
   private readonly sections: Section[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
-  private readonly getLegacyManagementSection: () => ManagementSection;
+  private readonly getLegacyManagementSection: () => LegacyManagementSection;
 
   constructor(
     section: CreateSection,
@@ -67,7 +72,7 @@ export class Section implements ISection {
             sections={this.sections}
             selectedId={id}
             legacySections={this.getLegacyManagementSection().items}
-            callback={async element => {
+            mountedCallback={async element => {
               appUnmount = await mount(appMountContext, { sectionBasePath: legacyAppId, element });
             }}
           />,

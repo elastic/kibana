@@ -28,7 +28,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export {
   ManagementSetup,
   ManagementStart,
-  ISection,
+  ManagementSection,
   ManagementApp,
   RegisterManagementApp,
 } from './types';

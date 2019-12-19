@@ -18,3 +18,4 @@
  */
 
 export { legacyManagementAdapter } from './sections_register';
+export { LegacyManagementSection } from './section';

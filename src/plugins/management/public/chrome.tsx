@@ -21,20 +21,20 @@ import * as React from 'react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { SidebarNav } from './components';
-import { ISection, LegacySection } from './types';
+import { ManagementSection, LegacySection } from './types';
 
 interface Props {
-  sections: ISection[];
+  sections: ManagementSection[];
   legacySections: LegacySection[];
   selectedId: string;
-  callback: (element: HTMLDivElement) => void;
+  mountedCallback: (element: HTMLDivElement) => void;
 }
 
 export class Chrome extends React.Component<Props> {
   private container = React.createRef<HTMLDivElement>();
   componentDidMount() {
     if (this.container.current) {
-      this.props.callback(this.container.current);
+      this.props.mountedCallback(this.container.current);
     }
   }
   render() {

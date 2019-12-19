@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
+import { LegacyManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
 
 export class legacyManagementAdapter {
   main = undefined;
   init = capabilities => {
-    this.main = new ManagementSection(
+    this.main = new LegacyManagementSection(
       'management',
       {
         display: i18n.translate('management.displayName', {

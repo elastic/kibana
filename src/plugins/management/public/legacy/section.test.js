@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
+import { LegacyManagementSection } from './section';
 import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
 
 const capabilitiesMock = {
@@ -29,42 +29,42 @@ const capabilitiesMock = {
 describe('ManagementSection', () => {
   describe('constructor', () => {
     it('defaults display to id', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.display).toBe('kibana');
     });
 
     it('defaults visible to true', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.visible).toBe(true);
     });
 
     it('defaults disabled to false', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.disabled).toBe(false);
     });
 
     it('defaults tooltip to empty string', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.tooltip).toBe('');
     });
 
     it('defaults url to empty string', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.url).toBe('');
     });
 
     it('exposes items', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.items).toHaveLength(0);
     });
 
     it('exposes visibleItems', () => {
-      const section = new ManagementSection('kibana', {}, capabilitiesMock);
+      const section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       expect(section.visibleItems).toHaveLength(0);
     });
 
     it('assigns all options', () => {
-      const section = new ManagementSection(
+      const section = new LegacyManagementSection(
         'kibana',
         { description: 'test', url: 'foobar' },
         capabilitiesMock
@@ -78,11 +78,11 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
     });
 
     it('returns a ManagementSection', () => {
-      expect(section.register('about')).toBeInstanceOf(ManagementSection);
+      expect(section.register('about')).toBeInstanceOf(LegacyManagementSection);
     });
 
     it('provides a reference to the parent', () => {
@@ -93,7 +93,7 @@ describe('ManagementSection', () => {
       section.register('about', { description: 'test' });
 
       expect(section.items).toHaveLength(1);
-      expect(section.items[0]).toBeInstanceOf(ManagementSection);
+      expect(section.items[0]).toBeInstanceOf(LegacyManagementSection);
       expect(section.items[0].id).toBe('about');
     });
 
@@ -126,7 +126,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       section.register('about');
     });
 
@@ -157,12 +157,12 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
       section.register('about');
     });
 
     it('returns registered section', () => {
-      expect(section.getSection('about')).toBeInstanceOf(ManagementSection);
+      expect(section.getSection('about')).toBeInstanceOf(LegacyManagementSection);
     });
 
     it('returns undefined if un-registered', () => {
@@ -171,7 +171,7 @@ describe('ManagementSection', () => {
 
     it('returns sub-sections specified via a /-separated path', () => {
       section.getSection('about').register('time');
-      expect(section.getSection('about/time')).toBeInstanceOf(ManagementSection);
+      expect(section.getSection('about/time')).toBeInstanceOf(LegacyManagementSection);
       expect(section.getSection('about/time')).toBe(section.getSection('about').getSection('time'));
     });
 
@@ -184,7 +184,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
 
       section.register('three', { order: 3 });
       section.register('one', { order: 1 });
@@ -214,7 +214,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
     });
 
     it('hide sets visible to false', () => {
@@ -233,7 +233,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
     });
 
     it('disable sets disabled to true', () => {
@@ -251,7 +251,7 @@ describe('ManagementSection', () => {
     let section;
 
     beforeEach(() => {
-      section = new ManagementSection('kibana', {}, capabilitiesMock);
+      section = new LegacyManagementSection('kibana', {}, capabilitiesMock);
 
       section.register('three', { order: 3 });
       section.register('one', { order: 1 });
