@@ -25,9 +25,9 @@ export class EndpointPlugin
       EndpointPluginSetupDependencies,
       EndpointPluginStartDependencies
     > {
-  public setup(_core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
+  public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
     const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
-    _core.application.register({
+    core.application.register({
       id: 'endpoint',
       title: i18n.translate('xpack.endpoint.pluginTitle', {
         defaultMessage: 'Endpoint',
