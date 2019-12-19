@@ -15,7 +15,8 @@ See map.regionmap.* in <<settings>> for details.
 *Documents*:: Vector data from a Kibana index pattern.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
-NOTE: Document results are limited to `index.max_result_window` index setting, which defaults to 10000. Use <<maps-aggregations, aggregations>> to plot large data sets.
+NOTE: Document results are limited to `index.max_result_window` index setting, which defaults to 10000.
+Use <<maps-aggregations, aggregations>> to plot large data sets.
 
 *Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
 Set *Show as* to *grid rectangles* or *points*.
