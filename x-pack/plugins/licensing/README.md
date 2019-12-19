@@ -94,7 +94,6 @@ class MyPlugin {
 }
 ```
 ### The list of breaking changes
-### The full list of breaking changes
 
 #### state
 **LP**: The plugin allows consumers to calculate state on `license change` event and store this
@@ -125,10 +124,10 @@ This change makes NP & LP licensing service not compatible. We have to keep both
 **LP**: License and signature were stored under different keys in session storage
 **NP**: License and signature were stored under one key `xpack.licensing`
 
-### isOneOf
+#### isOneOf
 `isOneOf` removed, use `check` or `hasAtLeast` instead
 
-### Endpoint
+#### Endpoint
 `/api/xpack/v1/info` API endpoint is going to be removed. switch to `/api/licensing/info` instead
 
 #### Fetch error
