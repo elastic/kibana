@@ -7,6 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 
+const AppCategory = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management',
+};
+
 /**
  * Configuration of dependency objects for the UI, which are needed for the
  * Monitoring UI app and views and data for outside the monitoring
@@ -26,6 +33,7 @@ export const getUiExports = () => ({
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
+    category: AppCategory.management,
   },
   injectDefaultVars(server) {
     const config = server.config();

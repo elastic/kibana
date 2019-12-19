@@ -32,6 +32,20 @@ import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 
+export const AppCategoryObj = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management',
+};
+
+enum AppCategory {
+  analyze,
+  observability,
+  security,
+  management,
+}
+
 /** @public */
 export interface AppBase {
   id: string;
@@ -40,6 +54,11 @@ export interface AppBase {
    * The title of the application.
    */
   title: string;
+
+  /**
+   * The category the app lives in
+   */
+  category?: AppCategory;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.

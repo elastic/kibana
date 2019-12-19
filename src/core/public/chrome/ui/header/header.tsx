@@ -43,6 +43,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
+import { groupBy, sortBy } from 'lodash';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
@@ -58,6 +59,7 @@ import {
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
+import { NavLinkWrapper } from '../../nav_links/nav_link';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -65,7 +67,6 @@ const TRUNCATE_LIMIT: number = 64;
 const TRUNCATE_AT: number = 58;
 
 /**
- *
  * @param {string} url - a relative or root relative url.  If a relative path is given then the
  * absolute url returned will depend on the current page where this function is called from. For example
  * if you are on page "http://www.mysite.com/shopping/kids" and you pass this function "adults", you would get
@@ -74,52 +75,95 @@ const TRUNCATE_AT: number = 58;
  * @return {string} the relative url transformed into an absolute url
  */
 function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
   const a = document.createElement('a');
   a.setAttribute('href', url);
   return a.href;
 }
 
-function extendRecentlyAccessedHistoryItem(
+function euiRecentItem(
   navLinks: ChromeNavLink[],
   recentlyAccessed: ChromeRecentlyAccessedHistoryItem,
   basePath: HttpStart['basePath']
 ) {
   const href = relativeToAbsolute(basePath.prepend(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
-
   let titleAndAriaLabel = recentlyAccessed.label;
+
   if (navLink) {
-    const objectTypeForAriaAppendix = navLink.title;
     titleAndAriaLabel = i18n.translate('core.ui.recentLinks.linkItem.screenReaderLabel', {
       defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
       values: {
         recentlyAccessedItemLinklabel: recentlyAccessed.label,
-        pageType: objectTypeForAriaAppendix,
+        pageType: navLink.title,
       },
     });
   }
 
   return {
-    ...recentlyAccessed,
     href,
-    euiIconType: navLink ? navLink.euiIconType : undefined,
+    label: truncateRecentItemLabel(recentlyAccessed.label),
     title: titleAndAriaLabel,
+    'aria-label': titleAndAriaLabel,
+    euiIconType: navLink?.euiIconType,
   };
 }
 
-function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['getUrlForApp']) {
-  if (navLink.legacy) {
-    return {
-      ...navLink,
-      href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
-    };
+function euiNavLink(
+  navLink: ChromeNavLink,
+  urlForApp: ApplicationStart['getUrlForApp'],
+  legacyMode: boolean,
+  navigateToApp: ApplicationStart['navigateToApp'],
+  currentAppId: string | undefined,
+  basePath: HttpStart['basePath']
+) {
+  const {
+    legacy,
+    url,
+    active,
+    baseUrl,
+    id,
+    title,
+    disabled,
+    euiIconType,
+    icon,
+    category,
+    order,
+  } = navLink;
+  let href = urlForApp(id);
+
+  if (legacy) {
+    href = url && !active ? url : baseUrl;
   }
 
   return {
-    ...navLink,
-    href: urlForApp(navLink.id),
+    category,
+    key: id,
+    label: title,
+    href, // Use href and onClick to support "open in new tab" and SPA navigation in the same link
+    onClick(event: MouseEvent) {
+      if (
+        !legacyMode && // ignore when in legacy mode
+        !legacy && // ignore links to legacy apps
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        !isModifiedEvent(event) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        navigateToApp(id);
+      }
+    },
+    // Legacy apps use `active` property, NP apps should match the current app
+    isActive: active || currentAppId === id,
+    isDisabled: disabled,
+    iconType: euiIconType,
+    icon: !euiIconType && icon ? renderLinkIcon(basePath.prepend(`/${icon}`)) : undefined,
+    order,
+    'data-test-subj': 'navDrawerAppsMenuLink',
   };
+}
+
+function renderLinkIcon(url: string) {
+  return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
 }
 
 function isModifiedEvent(event: MouseEvent) {
@@ -139,6 +183,15 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
 
     current = current.parentElement;
   }
+}
+
+// TODO@myasonik use an enum or something
+const categoryIcon = {
+  management: 'managementApp',
+};
+
+function getGroupIcon(groupName: string) {
+  return categoryIcon[groupName];
 }
 
 function truncateRecentItemLabel(label: string): string {
@@ -174,12 +227,13 @@ interface Props {
   onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
+type ExtendedRecentlyAccessedHistoryItem = ReturnType<typeof euiRecentItem>;
+
 interface State {
   appTitle: string;
-  currentAppId?: string;
   isVisible: boolean;
-  navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
-  recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
+  navLinks: ReadonlyArray<ReturnType<typeof euiNavLink>>;
+  recentlyAccessed: ExtendedRecentlyAccessedHistoryItem[];
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
@@ -229,15 +283,23 @@ class HeaderUI extends Component<Props, State> {
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.map(navLink =>
-            extendNavLink(navLink, this.props.application.getUrlForApp)
-          ),
+          navLinks: navLinks
+            .filter(navLink => !navLink.hidden)
+            .map(navLink =>
+              euiNavLink(
+                navLink,
+                this.props.application.getUrlForApp,
+                this.props.legacyMode,
+                this.props.application.navigateToApp,
+                currentAppId,
+                this.props.basePath
+              )
+            ),
           recentlyAccessed: recentlyAccessed.map(ra =>
-            extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
+            euiRecentItem(navLinks, ra, this.props.basePath)
           ),
           navControlsLeft,
           navControlsRight,
-          currentAppId,
         });
       },
     });
@@ -250,15 +312,14 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public renderLogo() {
-    const { homeHref, intl } = this.props;
+    const { homeHref } = this.props;
     return (
       <EuiHeaderLogo
         data-test-subj="logo"
         iconType="logoKibana"
         onClick={this.onNavClick}
         href={homeHref}
-        aria-label={intl.formatMessage({
-          id: 'core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
           defaultMessage: 'Go to home page',
         })}
       />
@@ -268,7 +329,9 @@ class HeaderUI extends Component<Props, State> {
   public renderMenuTrigger() {
     return (
       <EuiHeaderSectionItemButton
-        aria-label="Toggle side navigation"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
+          defaultMessage: 'Toggle side navigation',
+        })}
         onClick={() => this.navDrawerRef.current.toggleOpen()}
       >
         <EuiIcon type="apps" size="m" />
@@ -276,24 +339,108 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
+  public renderRecentLinks(recentlyAccessed: ExtendedRecentlyAccessedHistoryItem[]) {
+    return (
+      <EuiNavDrawerGroup
+        listItems={[
+          {
+            label: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsLabel', {
+              defaultMessage: 'Recently viewed',
+            }),
+            iconType: 'clock',
+            isDisabled: !(recentlyAccessed.length > 0),
+            flyoutMenu: {
+              title: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle', {
+                defaultMessage: 'Recent items',
+              }),
+              listItems: recentlyAccessed,
+            },
+          },
+        ]}
+        aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
+          defaultMessage: 'Recently viewed links, navigation',
+        })}
+      />
+    );
+  }
+
+  public renderNavLinks(navLinks: NavLinkWrapper[]) {
+    const isOSS = false; // TODO@myasonik
+    if (navLinks.length < 6 || isOSS) {
+      return (
+        <EuiNavDrawerGroup
+          data-test-subj="navDrawerAppsMenu"
+          listItems={navLinks}
+          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+            defaultMessage: 'Primary navigation links',
+          })}
+        />
+      );
+    }
+
+    // TODO@myasonik use an enum or something
+    const { undefined: unknowns, management, ...mainNav } = groupBy(navLinks, 'category');
+    return (
+      <EuiNavDrawerGroup
+        data-test-subj="navDrawerAppsMenu"
+        aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+          defaultMessage: 'Primary navigation links',
+        })}
+        listItems={[
+          ...Object.keys(mainNav).map(groupName => ({
+            label: groupName,
+            iconType: getGroupIcon(groupName),
+            flyoutMenu: { title: groupName, listItems: sortBy(mainNav[groupName], 'order') },
+          })),
+          ...sortBy(unknowns, 'order'),
+        ]}
+      />
+    );
+  }
+  // <>
+  //   <EuiNavDrawerGroup
+  //     data-test-subj="navDrawerAppsMenu"
+  //     aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+  //       defaultMessage: 'Primary navigation links',
+  //     })}
+  //     listItems={[
+  //       ...Object.keys(mainNav).map(groupName => ({
+  //         label: groupName,
+  //         iconType: getGroupIcon(groupName),
+  //         flyoutMenu: { title: groupName, listItems: sortBy(mainNav[groupName], 'order') },
+  //       })),
+  //       ...sortBy(unknowns, 'order'),
+  //     ]}
+  //   />
+  //   <EuiHorizontalRule margin="none" />
+  //   <EuiNavDrawerGroup
+  //     data-test-subj="navDrawerManagementMenu"
+  //     aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
+  //       defaultMessage: 'Management navigation links',
+  //     })}
+  //     listItems={[
+  //       {
+  //         label: 'management',
+  //         iconType: getGroupIcon('management'),
+  //         flyoutMenu: { title: 'management', listItems: sortBy(management, 'order') },
+  //       },
+  //     ]}
+  //   />
+  // </>
+
   public render() {
     const {
-      application,
       badge$,
-      basePath,
       breadcrumbs$,
       helpExtension$,
       helpSupportUrl$,
-      intl,
       isLocked,
       kibanaDocLink,
       kibanaVersion,
       onIsLockedUpdate,
-      legacyMode,
     } = this.props;
     const {
       appTitle,
-      currentAppId,
       isVisible,
       navControlsLeft,
       navControlsRight,
@@ -304,70 +451,6 @@ class HeaderUI extends Component<Props, State> {
     if (!isVisible) {
       return null;
     }
-
-    const navLinksArray = navLinks
-      .filter(navLink => !navLink.hidden)
-      .map(navLink => ({
-        key: navLink.id,
-        label: navLink.title,
-
-        // Use href and onClick to support "open in new tab" and SPA navigation in the same link
-        href: navLink.href,
-        onClick: (event: MouseEvent) => {
-          if (
-            !legacyMode && // ignore when in legacy mode
-            !navLink.legacy && // ignore links to legacy apps
-            !event.defaultPrevented && // onClick prevented default
-            event.button === 0 && // ignore everything but left clicks
-            !isModifiedEvent(event) // ignore clicks with modifier keys
-          ) {
-            event.preventDefault();
-            application.navigateToApp(navLink.id);
-          }
-        },
-
-        // Legacy apps use `active` property, NP apps should match the current app
-        isActive: navLink.active || currentAppId === navLink.id,
-        isDisabled: navLink.disabled,
-
-        iconType: navLink.euiIconType,
-        icon:
-          !navLink.euiIconType && navLink.icon ? (
-            <EuiImage
-              size="s"
-              alt=""
-              aria-hidden={true}
-              url={basePath.prepend(`/${navLink.icon}`)}
-            />
-          ) : (
-            undefined
-          ),
-        'data-test-subj': 'navDrawerAppsMenuLink',
-      }));
-
-    const recentLinksArray = [
-      {
-        label: intl.formatMessage({
-          id: 'core.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
-          defaultMessage: 'Recently viewed',
-        }),
-        iconType: 'clock',
-        isDisabled: recentlyAccessed.length > 0 ? false : true,
-        flyoutMenu: {
-          title: intl.formatMessage({
-            id: 'core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
-            defaultMessage: 'Recent items',
-          }),
-          listItems: recentlyAccessed.map(item => ({
-            label: truncateRecentItemLabel(item.label),
-            title: item.title,
-            'aria-label': item.title,
-            href: item.href,
-            iconType: item.euiIconType,
-          })),
-        },
-      },
-    ];
 
     return (
       <header>
@@ -411,20 +494,9 @@ class HeaderUI extends Component<Props, State> {
             defaultMessage: 'Primary',
           })}
         >
-          <EuiNavDrawerGroup
-            listItems={recentLinksArray}
-            aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
-              defaultMessage: 'Recently viewed links, navigation',
-            })}
-          />
+          {this.renderRecentLinks(recentlyAccessed)}
           <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            listItems={navLinksArray}
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-          />
+          {this.renderNavLinks(navLinks)}
         </EuiNavDrawer>
       </header>
     );
@@ -437,7 +509,7 @@ class HeaderUI extends Component<Props, State> {
     }
 
     const navLink = this.state.navLinks.find(item => item.href === anchor.href);
-    if (navLink && navLink.disabled) {
+    if (navLink && navLink.isDisabled) {
       event.preventDefault();
       return;
     }

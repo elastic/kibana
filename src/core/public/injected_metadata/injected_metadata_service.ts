@@ -27,9 +27,17 @@ import {
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
 
+enum AppCategory {
+  analyze,
+  observability,
+  security,
+  management,
+}
+
 /** @public */
 export interface LegacyNavLink {
   id: string;
+  category: AppCategory;
   title: string;
   order: number;
   url: string;
@@ -52,6 +60,7 @@ export interface InjectedMetadataParams {
     buildNumber: number;
     branch: string;
     basePath: string;
+    category: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
     };
@@ -108,6 +117,10 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
+      getCategory: () => {
+        return this.state.category;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -154,6 +167,7 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getCategory: () => AppCategory;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;
@@ -168,6 +182,7 @@ export interface InjectedMetadataSetup {
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
     app: unknown;
+    category?: AppCategory;
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

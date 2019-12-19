@@ -19,6 +19,13 @@
 
 import { pick } from '../../../utils';
 
+enum AppCategory {
+  analyze,
+  observability,
+  security,
+  management,
+}
+
 /**
  * @public
  */
@@ -32,6 +39,11 @@ export interface ChromeNavLink {
    * The title of the application.
    */
   readonly title: string;
+
+  /**
+   * The category the app lives in
+   */
+  readonly category?: AppCategory;
 
   /**
    * The base route used to open the root of an application.
