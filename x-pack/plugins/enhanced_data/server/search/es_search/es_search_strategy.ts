@@ -19,23 +19,31 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   return {
     search: async (request, options) => {
-      const { index, ...params } = request.params;
-
-      const esSearchResponse = (await caller(
+      // If we have an ID, then just poll for that ID, otherwise send the entire request body
+      const args = [
         'transport.request',
-        {
-          path: `${index}/_async_search`,
-          method: 'POST',
-          ...params,
-        },
-        options
-      )) as SearchResponse<any>;
+        request.id
+          ? {
+              path: `_async_search/${request.id}`,
+              method: 'GET',
+            }
+          : {
+              path: `${request.params.index}/_async_search`,
+              method: 'POST',
+              ...request.params,
+            },
+        options,
+      ];
 
+      const esSearchResponse = (await caller(...args)) as SearchResponse<any>;
+
+      // TODO: This can be simplified once the async API is updated
       const { id, response: rawResponse } = esSearchResponse;
-      const {
-        _shards: { total, successful, skipped, failed },
-      } = rawResponse;
-      const loaded = failed + skipped + successful;
+      const failed = rawResponse._shards?.failed ?? rawResponse.shard_failures;
+      const total = rawResponse._shards?.total ?? rawResponse.total_shards;
+      const successful = rawResponse._shards?.successful ?? rawResponse.successful_shards;
+      const skipped = rawResponse._shards?.skipped ?? 0;
+      const loaded = failed + successful + skipped;
       return { id, total, loaded, rawResponse };
     },
   };
