@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BasePath } from './base_path_service';
+import { BasePath } from './base_path';
 
 describe('BasePath', () => {
   describe('#get()', () => {
