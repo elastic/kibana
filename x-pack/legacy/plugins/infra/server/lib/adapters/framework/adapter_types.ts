@@ -11,21 +11,19 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../../../../../plugins/apm/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  metrics: {
-    getVisData: any;
-  };
+  metrics: VisTypeTimeseriesSetup;
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
   features: FeaturesPluginSetup;
   apm: APMPluginContract;
-  ___legacy: any;
 }
 
 export interface CallWithRequestParams extends GenericParams {

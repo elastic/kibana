@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
-import { PluginInitializerContext, CoreSetup } from 'kibana/server';
-
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 // @ts-ignore
@@ -28,30 +25,15 @@ import { visDataRoutes } from './routes/vis';
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 // @ts-ignore
 import { getVisData } from './lib/get_vis_data';
+import { Framework } from '../../../../plugins/vis_type_timeseries/server';
 
-// TODO: Remove as CoreSetup is completed.
-export interface CustomCoreSetup {
-  http: {
-    server: Legacy.Server;
-  };
-}
+export const init = async (framework: Framework, __LEGACY: any) => {
+  const { core } = framework;
+  const router = core.http.createRouter();
 
-export class MetricsServerPlugin {
-  public initializerContext: PluginInitializerContext;
+  visDataRoutes(router, framework);
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-  }
-
-  public setup(core: CoreSetup & CustomCoreSetup) {
-    const { http } = core;
-
-    fieldsRoutes(http.server);
-    visDataRoutes(http.server);
-
-    // Expose getVisData to allow plugins to use TSVB's backend for metrics
-    http.server.expose('getVisData', getVisData);
-
-    SearchStrategiesRegister.init(http.server);
-  }
-}
+  // [LEGACY_TODO]
+  fieldsRoutes(__LEGACY.server);
+  SearchStrategiesRegister.init(__LEGACY.server);
+};
