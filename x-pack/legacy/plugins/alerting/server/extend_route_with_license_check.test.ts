@@ -20,7 +20,7 @@ describe('extendRouteWithLicenseCheck', () => {
       );
       expect(newRoute.config.pre.length > 0);
     });
-    test('extends route object with license check uder config.pro, if config property not exists', () => {
+    test('extends route object with license check under config.pre, if config property not exists', () => {
       const newRoute = extendRouteWithLicenseCheck({ someProperty: 'test' }, licenseState);
       expect(newRoute.config.pre.length > 0);
     });
