@@ -32,7 +32,7 @@ export const WithLogFilterUrlState: React.FC = () => {
 };
 
 const mapToFilterQuery = (value: any): LogFilterUrlState | undefined =>
-  value && value.kind === 'kuery' && typeof value.expression === 'string'
+  value?.kind === 'kuery' && typeof value.expression === 'string'
     ? {
         kind: value.kind,
         expression: value.expression,

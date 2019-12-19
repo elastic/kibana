@@ -33,8 +33,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const currentUrl = await browser.getCurrentUrl();
         const [, currentHash] = decodeURIComponent(currentUrl).split('#');
         // Account for unpredictable location of the g parameter in the search string
-        expect(currentHash.slice(0, 13)).to.be(expectedRedirectPath);
-        expect(currentHash.slice(13)).to.contain(expectedSearchString);
+        expect(currentHash.slice(0, expectedRedirectPath.length)).to.be(expectedRedirectPath);
+        expect(currentHash.slice(expectedRedirectPath.length)).to.contain(expectedSearchString);
       });
     });
   });
