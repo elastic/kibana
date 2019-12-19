@@ -47,6 +47,7 @@ function getMockData(overwrites: Record<string, any> = {}) {
     name: 'abc',
     tags: ['foo'],
     alertTypeId: '123',
+    consumer: 'bar',
     schedule: { interval: '10s' },
     throttle: null,
     params: {
@@ -184,6 +185,7 @@ describe('create()', () => {
         "alertTypeId": "123",
         "apiKey": undefined,
         "apiKeyOwner": undefined,
+        "consumer": "bar",
         "createdBy": "elastic",
         "enabled": true,
         "muteAll": false,
@@ -795,6 +797,7 @@ describe('create()', () => {
           },
         ],
         alertTypeId: '123',
+        consumer: 'bar',
         name: 'abc',
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
