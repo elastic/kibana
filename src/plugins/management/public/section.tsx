@@ -19,18 +19,17 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
-import { SidebarNav } from './components';
 import { ManagementApp, CreateSection, ISection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { Chrome } from './chrome';
+import { Unmount } from './types';
 // @ts-ignore
 import { ManagementSection } from './legacy/section';
 
 export class Section implements ISection {
   public readonly id: string = '';
   public readonly title: string = '';
-  public readonly apps: ManagementApp[] = [];
+  public readonly apps: ManagementApp[] = []; // todo unused
   public readonly order?: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
@@ -56,53 +55,33 @@ export class Section implements ISection {
 
   // todo create class
   registerApp({ id, title, order, mount }: RegisterManagementAppArgs): ManagementApp {
-    // this.apps.push(new ManagementApp(app));
+    const legacyAppId = `management/${this.id}/${id}`;
     this.registerLegacyApp({
-      id: `management/${this.id}/${id}`,
+      id: legacyAppId,
       title,
       mount: async (appMountContext, params) => {
-        // return await mount(appMountContext, { sectionBasePath: '', ...params });
-
-        // TODO - move SidebarNav, get access to management
+        let appUnmount: Unmount;
 
         ReactDOM.render(
-          <I18nProvider>
-            <EuiPage>
-              <SidebarNav
-                sections={this.sections}
-                legacySections={this.getLegacyManagementSection().items}
-                selectedId={id}
-              />
-              <EuiPageBody>hihihi</EuiPageBody>
-            </EuiPage>
-          </I18nProvider>,
+          <Chrome
+            sections={this.sections}
+            selectedId={id}
+            legacySections={this.getLegacyManagementSection().items}
+            callback={async element => {
+              appUnmount = await mount(appMountContext, { sectionBasePath: legacyAppId, element });
+            }}
+          />,
           params.element
         );
-        /*
-        ReactDOM.render(
-          <I18nProvider>
-            <EuiPage>
-              <SidebarNav
-                sections={this.sections}
-                // legacySections={management.getVisible()}
-                legacySections={[]}
-                selectedId={id}
-                className="mgtSideNav"
-              />
-              <EuiPageBody>hihihi</EuiPageBody>
-            </EuiPage>
-          </I18nProvider>,
-          params.element
-        );
-        */
 
-        return () => {
+        return async () => {
+          appUnmount();
           ReactDOM.unmountComponentAtNode(params.element);
         };
       },
     });
 
-    const app = { id, title, sectionId: this.id, order, basePath: 'basePath', mount };
+    const app = { id, title, sectionId: this.id, order, basePath: legacyAppId, mount };
     this.apps.push(app);
     return app;
   }

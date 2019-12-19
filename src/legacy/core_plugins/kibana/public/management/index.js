@@ -110,9 +110,6 @@ export function updateSidebar(items, id) {
     return;
   }
 
-  // ManagementSection
-  // active, disabled, items, visible
-
   const npSections = npStart.plugins.management.sections.getAvailable();
 
   //todo merge

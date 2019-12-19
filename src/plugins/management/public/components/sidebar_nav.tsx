@@ -27,24 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ManagementApp,
-  ISection as ManagementSection,
-} from '../../../../plugins/management/public';
-
-interface LegacySection extends LegacyApp {
-  visibleItems: LegacyApp[];
-}
-
-interface LegacyApp {
-  disabled: boolean;
-  visible: boolean;
-  id: string;
-  display: string;
-  url?: string;
-  euiIconType?: IconType;
-  icon?: string;
-}
+import { ManagementApp, ISection as ManagementSection, LegacySection, LegacyApp } from '../types';
 
 interface NavApp {
   [key: string]: unknown;

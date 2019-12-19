@@ -94,12 +94,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  public setup(
-    core: CoreSetup,
-    { kibana_legacy: { registerLegacyApp } }: { kibana_legacy: KibanaLegacySetup }
-  ) {
-    // kibana_legacy.registerLegacyApp({
-    registerLegacyApp({
+  public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
+    kibana_legacy.registerLegacyApp({
       id: 'dev_tools',
       title: 'Dev Tools',
       mount: async (appMountContext, params) => {

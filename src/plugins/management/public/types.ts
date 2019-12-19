@@ -58,7 +58,7 @@ export interface RegisterManagementAppArgs {
 
 export type RegisterManagementApp = (managementApp: RegisterManagementAppArgs) => ManagementApp;
 
-type Unmount = () => Promise<void> | void;
+export type Unmount = () => Promise<void> | void;
 
 interface ManagementSectionMountParams {
   sectionBasePath: string; // base path for setting up your router
@@ -86,6 +86,20 @@ export interface ISection {
   registerApp: RegisterManagementApp;
   order?: number;
   euiIconType?: string;
+  icon?: string;
+}
+
+export interface LegacySection extends LegacyApp {
+  visibleItems: LegacyApp[];
+}
+
+export interface LegacyApp {
+  disabled: boolean;
+  visible: boolean;
+  id: string;
+  display: string;
+  url?: string;
+  euiIconType?: IconType;
   icon?: string;
 }
 

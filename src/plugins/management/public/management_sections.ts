@@ -60,6 +60,17 @@ export class ManagementSections {
       // key and false
       // todo filter based on capabilities
       return [...this.sections];
+      /*
+      return this.sections.map(section => {
+        const capManagmentSection = capabilities.management[section.id];
+        if (capManagmentSection) {
+          // would be nice to get a copy with apps filtered
+          //section.apps.filter(app => capManagmentSection[app.id]);
+        } else {
+          return section;
+        }
+      });
+      */
     };
   }
 
