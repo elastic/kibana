@@ -32,12 +32,9 @@ export interface SagaContext {
 /**
  * See https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v%3dpandp.10)
  */
-// TODO: Type this library
 export function createSagaMiddleware(
   saga: (storeContext: SagaContext) => Promise<void>
 ): Middleware & { run: () => void } {
-  // Q. Are we following the Flux standard? https://github.com/redux-utilities/flux-standard-action
-
   const iteratorInstances = new Set<IteratorInstance>();
 
   async function* getActionsAndStateIterator(): StoreActionsAndState {
@@ -84,7 +81,6 @@ export function createSagaMiddleware(
     });
     return (next: Dispatch<StoreAction>) => (action: StoreAction) => {
       // Call the next dispatch method in the middleware chain.
-
       const returnValue = next(action);
 
       enqueue({

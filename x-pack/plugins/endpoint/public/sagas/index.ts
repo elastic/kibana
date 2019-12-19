@@ -13,7 +13,6 @@ import { endpointsListSaga } from './endpoints_list';
 import { homeSaga } from './home';
 import { SagaContext } from '../lib/saga';
 
-// TODO: Type this properly
 // eslint-disable-next-line import/no-default-export
 export default function sagas(context: AppMountContext, history: History) {
   return async function(sagaContext: SagaContext) {

@@ -1,0 +1,311 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Nav it renders 1`] = `
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "createHref": [Function],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [MockFunction],
+      "replace": [Function],
+    }
+  }
+>
+  <withRouter()>
+    <Component
+      history={
+        Object {
+          "action": "POP",
+          "block": [Function],
+          "createHref": [Function],
+          "go": [Function],
+          "goBack": [Function],
+          "goForward": [Function],
+          "length": 1,
+          "listen": [Function],
+          "location": Object {
+            "hash": "",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+          "push": [MockFunction],
+          "replace": [Function],
+        }
+      }
+      location={
+        Object {
+          "hash": "",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        }
+      }
+      match={
+        Object {
+          "isExact": true,
+          "params": Object {},
+          "path": "/",
+          "url": "/",
+        }
+      }
+    >
+      <EuiSideNav
+        data-test-subj="menuEndpoint"
+        items={
+          Array [
+            Object {
+              "id": "endpoint",
+              "items": Array [
+                Object {
+                  "id": "home",
+                  "name": "Home",
+                  "onClick": [Function],
+                },
+                Object {
+                  "id": "management",
+                  "name": "Management",
+                  "onClick": [Function],
+                },
+                Object {
+                  "id": "endpoints",
+                  "name": "Endpoints",
+                  "onClick": [Function],
+                },
+                Object {
+                  "id": "alerts",
+                  "name": "Alerts",
+                  "onClick": [Function],
+                },
+              ],
+              "name": "Endpoint",
+            },
+          ]
+        }
+      >
+        <nav
+          className="euiSideNav"
+          data-test-subj="menuEndpoint"
+        >
+          <button
+            className="euiSideNav__mobileToggle euiLink"
+            type="button"
+          >
+            <span
+              className="euiSideNav__mobileWrap"
+            >
+              <span
+                className="euiSideNav__mobileTitle"
+              />
+              <EuiIcon
+                aria-hidden="true"
+                className="euiSideNav__mobileIcon"
+                size="m"
+                type="apps"
+              >
+                <EuiIconEmpty
+                  aria-hidden="true"
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSideNav__mobileIcon"
+                  focusable="false"
+                  style={null}
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiSideNav__mobileIcon"
+                    focusable="false"
+                    height={16}
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </EuiIconEmpty>
+              </EuiIcon>
+            </span>
+          </button>
+          <div
+            className="euiSideNav__content"
+          >
+            <EuiSideNavItem
+              depth={0}
+              isOpen={true}
+              isParent={true}
+              items={
+                Array [
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    onClick={[Function]}
+                  >
+                    Home
+                  </EuiSideNavItem>,
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    onClick={[Function]}
+                  >
+                    Management
+                  </EuiSideNavItem>,
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    onClick={[Function]}
+                  >
+                    Endpoints
+                  </EuiSideNavItem>,
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    onClick={[Function]}
+                  >
+                    Alerts
+                  </EuiSideNavItem>,
+                ]
+              }
+              key="endpoint"
+            >
+              <div
+                className="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+              >
+                <div
+                  className="euiSideNavItemButton"
+                >
+                  <span
+                    className="euiSideNavItemButton__content"
+                  >
+                    <span
+                      className="euiSideNavItemButton__label"
+                    >
+                      Endpoint
+                    </span>
+                  </span>
+                </div>
+                <div
+                  className="euiSideNavItem__items"
+                >
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    key="home"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiSideNavItem euiSideNavItem--trunk"
+                    >
+                      <button
+                        className="euiSideNavItemButton euiSideNavItemButton--isClickable"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <span
+                          className="euiSideNavItemButton__content"
+                        >
+                          <span
+                            className="euiSideNavItemButton__label"
+                          >
+                            Home
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </EuiSideNavItem>
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    key="management"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiSideNavItem euiSideNavItem--trunk"
+                    >
+                      <button
+                        className="euiSideNavItemButton euiSideNavItemButton--isClickable"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <span
+                          className="euiSideNavItemButton__content"
+                        >
+                          <span
+                            className="euiSideNavItemButton__label"
+                          >
+                            Management
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </EuiSideNavItem>
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    key="endpoints"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiSideNavItem euiSideNavItem--trunk"
+                    >
+                      <button
+                        className="euiSideNavItemButton euiSideNavItemButton--isClickable"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <span
+                          className="euiSideNavItemButton__content"
+                        >
+                          <span
+                            className="euiSideNavItemButton__label"
+                          >
+                            Endpoints
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </EuiSideNavItem>
+                  <EuiSideNavItem
+                    depth={1}
+                    isParent={false}
+                    key="alerts"
+                    onClick={[Function]}
+                  >
+                    <div
+                      className="euiSideNavItem euiSideNavItem--trunk"
+                    >
+                      <button
+                        className="euiSideNavItemButton euiSideNavItemButton--isClickable"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <span
+                          className="euiSideNavItemButton__content"
+                        >
+                          <span
+                            className="euiSideNavItemButton__label"
+                          >
+                            Alerts
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </EuiSideNavItem>
+                </div>
+              </div>
+            </EuiSideNavItem>
+          </div>
+        </nav>
+      </EuiSideNav>
+    </Component>
+  </withRouter()>
+</Router>
+`;

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, useLocation, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Route, useLocation } from 'react-router-dom';
 
 import { createBrowserHistory, History } from 'history';
 import { Provider, useDispatch } from 'react-redux';
@@ -20,8 +20,7 @@ import { AlertList } from './components/alert_list';
 import { AlertDetails } from './components/alert_details';
 import { EndpointsPage } from './components/endpoints_page';
 
-const LocationChangeWrapper = function({ children }) {
-  // TODO: Find another way that doesn't require updating react-router-dom to 5.1.0
+const LocationChangeWrapper = function({ children }: { children: ReactElement }) {
   const location = useLocation();
   const dispatch = useDispatch();
   useEffect(() => {
