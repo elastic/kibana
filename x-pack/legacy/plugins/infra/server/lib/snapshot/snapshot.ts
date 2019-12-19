@@ -90,18 +90,7 @@ const requestGroupedNodes = async (
     body: {
       query: {
         bool: {
-          filter: [
-            ...createQueryFilterClauses(options.filterQuery),
-            {
-              range: {
-                [options.sourceConfiguration.fields.timestamp]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
+          filter: buildFilters(options),
         },
       },
       size: 0,
@@ -150,17 +139,7 @@ const requestNodeMetrics = async (
     body: {
       query: {
         bool: {
-          filter: [
-            {
-              range: {
-                [options.sourceConfiguration.fields.timestamp]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ],
+          filter: buildFilters(options, false),
         },
       },
       size: 0,
@@ -220,3 +199,39 @@ const mergeNodeBuckets = (
 
 const createQueryFilterClauses = (filterQuery: JsonObject | undefined) =>
   filterQuery ? [filterQuery] : [];
+
+const buildFilters = (options: InfraSnapshotRequestOptions, withQuery = true) => {
+  let filters: any = [
+    {
+      range: {
+        [options.sourceConfiguration.fields.timestamp]: {
+          gte: options.timerange.from,
+          lte: options.timerange.to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
+
+  if (withQuery) {
+    filters = [...createQueryFilterClauses(options.filterQuery), ...filters];
+  }
+
+  if (options.accountId) {
+    filters.push({
+      term: {
+        'cloud.account.id': options.accountId,
+      },
+    });
+  }
+
+  if (options.region) {
+    filters.push({
+      term: {
+        'cloud.region': options.region,
+      },
+    });
+  }
+
+  return filters;
+};

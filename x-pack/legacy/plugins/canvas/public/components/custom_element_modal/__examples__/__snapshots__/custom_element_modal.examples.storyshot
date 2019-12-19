@@ -55,10 +55,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -209,10 +210,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -255,9 +257,11 @@ Array [
                     className="euiCard__top"
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -412,10 +416,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -566,10 +571,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -766,10 +772,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -920,10 +927,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -966,9 +974,11 @@ Array [
                     className="euiCard__top"
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1122,10 +1132,11 @@ Array [
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -1276,10 +1287,11 @@ Array [
                           className="euiFilePicker__prompt"
                         >
                           <svg
-                            aria-hidden="true"
+                            aria-hidden={true}
                             className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -1322,9 +1334,11 @@ Array [
                     className="euiCard__top"
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading euiCard__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
