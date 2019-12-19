@@ -44,6 +44,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           id: createdAlert.id,
           tags: ['bar'],
           alertTypeId: 'test.noop',
+          consumer: 'bar',
           createdBy: null,
           enabled: true,
           updatedBy: null,
