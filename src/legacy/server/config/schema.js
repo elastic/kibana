@@ -193,7 +193,7 @@ export default () =>
         .default('localhost'),
       watchPrebuild: Joi.boolean().default(false),
       watchProxyTimeout: Joi.number().default(10 * 60000),
-      useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
+      useBundleCache: Joi.boolean().default(!!process.env.CODE_COVERAGE ? true : Joi.ref('$prod')),
       sourceMaps: Joi.when('$prod', {
         is: true,
         then: Joi.boolean().valid(false),

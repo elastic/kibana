@@ -1,0 +1,112 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load() // load from the Jenkins instance
+
+stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
+  timeout(time: 180, unit: 'MINUTES') {
+    timestamps {
+      ansiColor('xterm') {
+        catchError {
+          withEnv([
+            'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
+          ]) {
+            parallel([
+              'kibana-intake-agent': {
+                withEnv([
+                  'NODE_ENV=test' // Needed for jest tests only
+                ]) {
+                  kibanaPipeline.legacyJobRunner('kibana-intake')()
+                }
+              },
+              'x-pack-intake-agent': {
+                withEnv([
+                  'NODE_ENV=test' // Needed for jest tests only
+                ]) {
+                  kibanaPipeline.legacyJobRunner('x-pack-intake')()
+                }
+              },
+              'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
+                'oss-ciGroup1': kibanaPipeline.getOssCiGroupWorker(1),
+                'oss-ciGroup2': kibanaPipeline.getOssCiGroupWorker(2),
+                'oss-ciGroup3': kibanaPipeline.getOssCiGroupWorker(3),
+                'oss-ciGroup4': kibanaPipeline.getOssCiGroupWorker(4),
+                'oss-ciGroup5': kibanaPipeline.getOssCiGroupWorker(5),
+                'oss-ciGroup6': kibanaPipeline.getOssCiGroupWorker(6),
+                'oss-ciGroup7': kibanaPipeline.getOssCiGroupWorker(7),
+                'oss-ciGroup8': kibanaPipeline.getOssCiGroupWorker(8),
+                'oss-ciGroup9': kibanaPipeline.getOssCiGroupWorker(9),
+                'oss-ciGroup10': kibanaPipeline.getOssCiGroupWorker(10),
+                'oss-ciGroup11': kibanaPipeline.getOssCiGroupWorker(11),
+                'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
+              ]),
+              'kibana-xpack-agent-1': kibanaPipeline.withWorkers('kibana-xpack-tests-1', { kibanaPipeline.buildXpack() }, [
+                'xpack-ciGroup1': kibanaPipeline.getXpackCiGroupWorker(1),
+                'xpack-ciGroup2': kibanaPipeline.getXpackCiGroupWorker(2),
+              ]),
+              'kibana-xpack-agent-2': kibanaPipeline.withWorkers('kibana-xpack-tests-2', { kibanaPipeline.buildXpack() }, [
+                'xpack-ciGroup3': kibanaPipeline.getXpackCiGroupWorker(3),
+                'xpack-ciGroup4': kibanaPipeline.getXpackCiGroupWorker(4),
+              ]),
+
+              'kibana-xpack-agent-3': kibanaPipeline.withWorkers('kibana-xpack-tests-3', { kibanaPipeline.buildXpack() }, [
+                'xpack-ciGroup5': kibanaPipeline.getXpackCiGroupWorker(5),
+                'xpack-ciGroup6': kibanaPipeline.getXpackCiGroupWorker(6),
+                'xpack-ciGroup7': kibanaPipeline.getXpackCiGroupWorker(7),
+                'xpack-ciGroup8': kibanaPipeline.getXpackCiGroupWorker(8),
+                'xpack-ciGroup9': kibanaPipeline.getXpackCiGroupWorker(9),
+                'xpack-ciGroup10': kibanaPipeline.getXpackCiGroupWorker(10),
+              ]),
+            ])
+            kibanaPipeline.jobRunner('tests-l', false) {
+              kibanaPipeline.downloadCoverageArtifacts()
+              kibanaPipeline.bash(
+                """
+                  # bootstrap from x-pack folder
+                  source src/dev/ci_setup/setup_env.sh
+                  cd x-pack
+                  yarn kbn bootstrap --prefer-offline
+                  cd ..
+                  # extract archives
+                  mkdir -p /tmp/extracted_coverage
+                  echo extracting intakes
+                  tar -xzf /tmp/downloaded_coverage/coverage/kibana-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+                  tar -xzf /tmp/downloaded_coverage/coverage/x-pack-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+                  echo extracting kibana-oss-tests
+                  tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+                  echo extracting kibana-xpack-tests
+                  for i in {1..3}; do
+                    tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-\${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+                  done
+                  # replace path in json files to have valid html report
+                  pwd=\$(pwd)
+                  du -sh /tmp/extracted_coverage/target/kibana-coverage/
+                  echo replacing path in json files
+                  for i in {1..9}; do
+                    sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/\${i}*.json &
+                  done
+                  wait
+                  # merge oss & x-pack reports
+                  echo merging coverage reports
+                  yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/jest --report-dir target/kibana-coverage/jest-combined --reporter=html --reporter=json-summary
+                  yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/functional --report-dir target/kibana-coverage/functional-combined --reporter=html --reporter=json-summary
+                  echo copy mocha reports
+                  mkdir -p target/kibana-coverage/mocha-combined
+                  cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
+                """,
+                "run `yarn kbn bootstrap && merge coverage`"
+              )
+              sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
+              kibanaPipeline.uploadGcsArtifact("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
+              sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
+              kibanaPipeline.uploadGcsArtifact("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
+              sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
+              kibanaPipeline.uploadGcsArtifact("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
+            }
+          }
+        }
+        kibanaPipeline.sendMail()
+      }
+    }
+  }
+}
