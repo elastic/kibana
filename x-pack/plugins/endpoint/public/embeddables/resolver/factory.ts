@@ -5,21 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpServiceBase } from 'kibana/public';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory, EmbeddableInput, IContainer } from 'src/plugins/embeddable/public';
+import { HttpSetup } from 'kibana/public';
 import { ResolverEmbeddable } from './';
 
 export class ResolverEmbeddableFactory extends EmbeddableFactory {
   public readonly type = 'resolver';
-  private httpServiceBase: HttpServiceBase;
+  private httpService: HttpSetup;
 
-  constructor(httpServiceBase: HttpServiceBase) {
+  constructor(httpService: HttpSetup) {
     super();
-    this.httpServiceBase = httpServiceBase;
+    this.httpService = httpService;
   }
 
   public isEditable() {
@@ -27,7 +23,7 @@ export class ResolverEmbeddableFactory extends EmbeddableFactory {
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    return new ResolverEmbeddable(initialInput, this.httpServiceBase, parent);
+    return new ResolverEmbeddable(initialInput, this.httpService, parent);
   }
 
   public getDisplayName() {

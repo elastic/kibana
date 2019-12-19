@@ -13,17 +13,13 @@ import {
   IContainer,
   Embeddable,
 } from '../../../../../../src/plugins/embeddable/public';
-import { HttpServiceBase } from '../../../../../../src/core/public';
+import { HttpSetup } from '../../../../../../src/core/public';
 
 export class ResolverEmbeddable extends Embeddable {
   public readonly type = 'resolver';
-  private httpServiceBase: HttpServiceBase;
+  private httpService: HttpSetup;
   private lastRenderTarget?: Element;
-  constructor(
-    initialInput: EmbeddableInput,
-    httpServiceBase: HttpServiceBase,
-    parent?: IContainer
-  ) {
+  constructor(initialInput: EmbeddableInput, httpService: HttpSetup, parent?: IContainer) {
     super(
       // Input state is irrelevant to this embeddable, just pass it along.
       initialInput,
@@ -33,7 +29,7 @@ export class ResolverEmbeddable extends Embeddable {
       // Optional parent component, this embeddable can optionally be rendered inside a container.
       parent
     );
-    this.httpServiceBase = httpServiceBase;
+    this.httpService = httpService;
   }
 
   public render(node: HTMLElement) {
@@ -42,7 +38,7 @@ export class ResolverEmbeddable extends Embeddable {
     }
     this.lastRenderTarget = node;
     // TODO, figure out how to destroy middleware
-    const { store } = storeFactory({ httpServiceBase: this.httpServiceBase });
+    const { store } = storeFactory({ httpServiceBase: this.httpService });
     ReactDOM.render(<AppRoot store={store} />, node);
   }
 
