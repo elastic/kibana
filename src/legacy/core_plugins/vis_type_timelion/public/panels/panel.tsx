@@ -28,8 +28,7 @@ import './timechart/flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import { getServices } from '../kibana_services';
-import { DEBOUNCE_DELAY, emptyCaption, staticDefaultOptions } from './constants';
-import { buildSeriesData, buildOptions } from './utils';
+import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from './utils';
 
 export interface Series {
   _global?: boolean;
@@ -49,7 +48,7 @@ interface SeriesList {
   list: Series[];
   render: {
     type: string;
-    grid?: unknown;
+    grid?: boolean;
   };
   type: string;
 }
@@ -60,7 +59,9 @@ interface PanelProps {
   renderComplete(): void;
 }
 
-const SERIES_ID_ATTR = 'data-series-id';
+const DEBOUNCE_DELAY = 50;
+// ensure legend is the same height with or without a caption so legend items do not move around
+const emptyCaption = '<br>';
 
 function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProps) {
   console.log('Panel');
@@ -86,20 +87,23 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     }
   }, []);
 
-  useEffect(() => () => {
-    const nodeJQ = $(chartElem);
-    nodeJQ.off('plotselected');
-    nodeJQ.off('plothover');
-    nodeJQ.off('mouseleave');
-  }, []);
+  useEffect(
+    () => () => {
+      const nodeJQ = $(chartElem);
+      nodeJQ.off('plotselected');
+      nodeJQ.off('plothover');
+      nodeJQ.off('mouseleave');
+    },
+    [chartElem]
+  );
 
   useEffect(() => {
     setChart(
       seriesList.list.map((series: Series, seriesIndex: number) => {
         const newSeries = { ...series };
         if (!newSeries.color) {
-          const colorIndex = seriesIndex % staticDefaultOptions.colors.length;
-          newSeries.color = staticDefaultOptions.colors[colorIndex];
+          const colorIndex = seriesIndex % colors.length;
+          newSeries.color = colors[colorIndex];
         }
         // setting originalColorMap
         setOriginalColorMap(stateMap => new Map(stateMap.set(newSeries, newSeries.color)));
@@ -132,8 +136,8 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   }, [plot, focusedSeries, canvasElem]);
 
   const highlightSeries = useCallback(
-    debounce((event: JQuery.Event) => {
-      const id = Number(event.currentTarget.getAttribute(SERIES_ID_ATTR));
+    debounce(({ currentTarget }: JQuery.TriggeredEvent) => {
+      const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
       if (highlightedSeries === id) {
         return;
       }
@@ -149,13 +153,12 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
           return { ...series, color };
         })
       );
-      // drawPlot(chart);
     }, DEBOUNCE_DELAY),
     [highlightedSeries, chart, originalColorMap]
   );
 
   const focusSeries = useCallback(
-    (event: JQuery.Event) => {
+    (event: JQuery.TriggeredEvent) => {
       const id = Number(event.currentTarget.getAttribute(SERIES_ID_ATTR));
       setFocusedSeries(id);
       highlightSeries(event);
@@ -164,64 +167,27 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
   );
 
   const toggleSeries = useCallback(
-    ({ currentTarget }: JQuery.Event) => {
+    ({ currentTarget }: JQuery.TriggeredEvent) => {
       const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
       setChart(
         chart.map((series: Series, seriesIndex: number) => {
           return seriesIndex === id ? { ...series, _hide: !series._hide } : { ...series };
         })
       );
-      // drawPlot(chart);
     },
     [chart]
-  );
-
-  const defaultOptions = useMemo(
-    () => ({
-      ...staticDefaultOptions,
-      grid: {
-        show: seriesList.render.grid,
-        borderWidth: 0,
-        borderColor: null,
-        margin: 10,
-        hoverable: true,
-        autoHighlight: false,
-      },
-      legend: {
-        backgroundColor: 'rgb(255,255,255,0)',
-        position: 'nw',
-        labelBoxBorderColor: 'rgb(255,255,255,0)',
-        labelFormatter(label: any, series: any) {
-          const wrapperSpan = document.createElement('span');
-          const labelSpan = document.createElement('span');
-          const numberSpan = document.createElement('span');
-
-          wrapperSpan.setAttribute('class', 'legendValue');
-          wrapperSpan.setAttribute(SERIES_ID_ATTR, series._id);
-
-          labelSpan.appendChild(document.createTextNode(label));
-          numberSpan.setAttribute('class', 'legendValueNumber');
-
-          wrapperSpan.appendChild(labelSpan);
-          wrapperSpan.appendChild(numberSpan);
-
-          return wrapperSpan.outerHTML;
-        },
-      },
-    }),
-    [seriesList.render.grid]
   );
 
   const options = useMemo(
     () =>
       buildOptions(
-        defaultOptions,
         getServices().timefilter,
         intervalProp,
         getServices().uiSettings,
-        chartElem && chartElem.clientWidth
+        chartElem && chartElem.clientWidth,
+        seriesList.render.grid
       ),
-    [defaultOptions, intervalProp, chartElem]
+    [seriesList.render.grid, intervalProp, chartElem]
   );
 
   const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
@@ -253,7 +219,6 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
         return { ...series, color: originalColorMap.get(series) }; // reset the colors
       })
     );
-    // drawPlot(chart);
   }, [chart, originalColorMap, highlightedSeries]);
 
   // Shamelessly borrowed from the flotCrosshairs example
@@ -324,7 +289,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     });
   }, [legendCaption, legendValueNumbers]);
 
-  const plothoverHandler = useCallback(
+  const plotHoverHandler = useCallback(
     (event: any, pos: any) => {
       if (!plot) {
         return;
@@ -334,41 +299,34 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     },
     [plot, debouncedSetLegendNumbers]
   );
-  const mouseleaveHandler = useCallback(() => {
+  const mouseLeaveHandler = useCallback(() => {
     if (!plot) {
       return;
     }
     plot.clearCrosshair();
     clearLegendNumbers();
   }, [plot, clearLegendNumbers]);
-  const plotselectedHandler = useCallback((event: any, ranges: any) => {
+
+  const plotSelectedHandler = useCallback((event: any, ranges: any) => {
     getServices().timefilter.setTime({
       from: moment(ranges.xaxis.from),
       to: moment(ranges.xaxis.to),
     });
   }, []);
 
-
   useEffect(() => {
     if (chartElem) {
-      const nodeJQ = $(chartElem);
-      nodeJQ.off('plotselected').off('plothover').off('mouseleave');
-      nodeJQ.on('plotselected', plotselectedHandler);
-      nodeJQ.on('plothover', plothoverHandler);
-      nodeJQ.on('mouseleave', mouseleaveHandler);
+      const $chart = $(chartElem);
+      $chart
+        .off('plotselected')
+        .off('plothover')
+        .off('mouseleave');
+      $chart
+        .on('plotselected', plotSelectedHandler)
+        .on('plothover', plotHoverHandler)
+        .on('mouseleave', mouseLeaveHandler);
     }
-  }, [plotselectedHandler, plothoverHandler, mouseleaveHandler])
-
-  // const cancelResize = observeResize($elem, function() {
-  //   drawPlot($scope.chart);
-  // });
-
-  // $scope.$on('$destroy', function() {
-  //   cancelResize();
-  // });
-
-  // we can't use `$.plot` to draw the chart when the height or width is 0
-  // so, we'll need another event to trigger drawPlot to actually draw it
+  }, [chartElem, plotSelectedHandler, plotHoverHandler, mouseLeaveHandler]);
 
   const title: string = last(compact(map(chart, '_title'))) || '';
 

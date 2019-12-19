@@ -20,6 +20,9 @@
 import { cloneDeep, defaults, merge } from 'lodash';
 import moment from 'moment-timezone';
 
+import { TimefilterContract } from 'src/plugins/data/public';
+import { IUiSettingsClient } from 'kibana/public';
+
 // @ts-ignore
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../common/lib';
 import { tickFormatters } from '../services/tick_formatters';
@@ -65,8 +68,63 @@ function buildSeriesData(chart: Series[], options: object) {
   });
 }
 
-function buildOptions(defaultOptions: any, timefilter: any, intervalValue: string, uiSettings: any, clientWidth = 0) {
-  const options = cloneDeep(defaultOptions);
+const SERIES_ID_ATTR = 'data-series-id';
+
+interface IOptions {
+  xaxis: {
+    mode: string;
+    tickLength: number;
+    timezone: string;
+    ticks: number;
+    tickFormatter(val: number): string;
+  };
+  yaxes?: [];
+  selection: {
+    mode: string;
+    color: string;
+  };
+  crosshair: {
+    mode: string;
+    color: string;
+    lineWidth: number;
+  };
+  colors: string[];
+  grid: {
+    show?: boolean;
+    borderWidth: number;
+    borderColor: string | null;
+    margin: number;
+    hoverable: boolean;
+    autoHighlight: boolean;
+  };
+  legend: {
+    backgroundColor: string;
+    position: string;
+    labelBoxBorderColor: string;
+    labelFormatter(label: string, series: any): string;
+  };
+}
+
+const colors = [
+  '#01A4A4',
+  '#C66',
+  '#D0D102',
+  '#616161',
+  '#00A1CB',
+  '#32742C',
+  '#F18D05',
+  '#113F8C',
+  '#61AE24',
+  '#D70060',
+];
+
+function buildOptions(
+  timefilter: TimefilterContract,
+  intervalValue: string,
+  uiSettings: IUiSettingsClient,
+  clientWidth = 0,
+  showGrid?: boolean
+) {
   // Get the X-axis tick format
   const time = timefilter.getBounds() as any;
   const interval = calculateInterval(
@@ -78,15 +136,59 @@ function buildOptions(defaultOptions: any, timefilter: any, intervalValue: strin
   );
   const format = xaxisFormatterProvider(uiSettings)(interval);
 
-  // Use moment to format ticks so we get timezone correction
-  options.xaxis.tickFormatter = (val: any) => moment(val).format(format);
-
-  // Calculate how many ticks can fit on the axis
   const tickLetterWidth = 7;
   const tickPadding = 45;
-  options.xaxis.ticks = Math.floor(
-    clientWidth / (format.length * tickLetterWidth + tickPadding)
-  );
+
+  const options: IOptions = {
+    xaxis: {
+      mode: 'time',
+      tickLength: 5,
+      timezone: 'browser',
+      // Calculate how many ticks can fit on the axis
+      ticks: Math.floor(clientWidth / (format.length * tickLetterWidth + tickPadding)),
+      // Use moment to format ticks so we get timezone correction
+      tickFormatter: (val: number) => moment(val).format(format),
+    },
+    selection: {
+      mode: 'x',
+      color: '#ccc',
+    },
+    crosshair: {
+      mode: 'x',
+      color: '#C66',
+      lineWidth: 2,
+    },
+    colors,
+    grid: {
+      show: showGrid,
+      borderWidth: 0,
+      borderColor: null,
+      margin: 10,
+      hoverable: true,
+      autoHighlight: false,
+    },
+    legend: {
+      backgroundColor: 'rgb(255,255,255,0)',
+      position: 'nw',
+      labelBoxBorderColor: 'rgb(255,255,255,0)',
+      labelFormatter(label: string, series: any) {
+        const wrapperSpan = document.createElement('span');
+        const labelSpan = document.createElement('span');
+        const numberSpan = document.createElement('span');
+
+        wrapperSpan.setAttribute('class', 'legendValue');
+        wrapperSpan.setAttribute(SERIES_ID_ATTR, series._id);
+
+        labelSpan.appendChild(document.createTextNode(label));
+        numberSpan.setAttribute('class', 'legendValueNumber');
+
+        wrapperSpan.appendChild(labelSpan);
+        wrapperSpan.appendChild(numberSpan);
+
+        return wrapperSpan.outerHTML;
+      },
+    },
+  };
 
   if (options.yaxes) {
     options.yaxes.forEach((yaxis: any) => {
@@ -104,4 +206,4 @@ function buildOptions(defaultOptions: any, timefilter: any, intervalValue: strin
   return options;
 }
 
-export { buildSeriesData, buildOptions};
+export { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors };
