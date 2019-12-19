@@ -15,7 +15,7 @@ import { PageContent } from '../../../components/page';
 
 import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { LogFilterState } from '../../../containers/logs/log_filter';
+import { LogFilterState, useLogFilterUrlState } from '../../../containers/logs/log_filter';
 import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
@@ -42,6 +42,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     flyoutItem,
     isLoading,
   } = useContext(LogFlyoutState.Context);
+
+  useLogFilterUrlState();
+
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   return (

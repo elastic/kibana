@@ -5,4 +5,4 @@
  */
 
 export * from './log_filter_state';
-export * from './with_log_filter_url_state';
+export * from './use_log_filter_url_state';
