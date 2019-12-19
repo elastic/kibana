@@ -9,6 +9,8 @@ import { ActionsConfigurationUtilities } from './actions_config';
 export const configUtilsMock: ActionsConfigurationUtilities = {
   isWhitelistedHostname: _ => true,
   isWhitelistedUri: _ => true,
+  isActionTypeEnabled: _ => true,
   ensureWhitelistedHostname: _ => {},
   ensureWhitelistedUri: _ => {},
+  ensureActionTypeEnabled: _ => {},
 };
