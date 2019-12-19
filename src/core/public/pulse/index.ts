@@ -1,82 +1,47 @@
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-import { readdirSync } from 'fs';
-import { resolve } from 'path';
+import { InstructionsResponse } from '../../server/pulse';
+import { PulseChannel, PulseInstruction } from '../../server/pulse/channel';
+import { Fetcher, sendPulse } from '../../server/pulse/send_pulse';
+import { CoreContext } from '../core_system';
 import { Subject } from 'rxjs';
-// @ts-ignore
-import fetch from 'node-fetch';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { PulseChannel, PulseInstruction } from './channel';
-import { sendPulse, Fetcher } from './send_pulse';
 
-export interface InternalPulseService {
+export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
 }
 
-export interface PulseSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
+export interface PulseServiceStart {
+
 }
 
-export interface ChannelResponse {
-  id: string;
-  instructions: PulseInstruction[];
-}
 
-export interface InstructionsResponse {
-  channels: ChannelResponse[];
-}
+// import { PulseChannel, PulseInstruction } from '../../server/pulse';
 
-const channelNames = readdirSync(resolve(__dirname, 'collectors'))
-  .filter((fileName: string) => !fileName.startsWith('.'))
-  .map((fileName: string) => {
-    return fileName.slice(0, -3);
-  });
+const channelNames = [
+  'default',
+  'notifications',
+];
 
 export class PulseService {
   private retriableErrors = 0;
-  private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
-  private readonly instructions$: Map<string, Subject<any>> = new Map();
+  private readonly instructions: Map<string, Subject<any>> = new Map();
 
   constructor(coreContext: CoreContext) {
-    this.log = coreContext.logger.get('pulse-service');
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
         const instructions$ = new Subject<PulseInstruction>();
-        this.instructions$.set(id, instructions$);
+        this.instructions.set(id, instructions$);
         const channel = new PulseChannel({ id, instructions$ });
         return [channel.id, channel];
       })
     );
   }
 
-  public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
-    this.log.debug('Setting up pulse service');
-
+  public async setup(): Promise<PulseServiceSetup> {
     // poll for instructions every second for this deployment
     setInterval(() => {
       // eslint-disable-next-line no-console
       this.loadInstructions().catch(err => console.error(err.stack));
-    }, 1000);
+    }, 10000);
 
     // eslint-disable-next-line no-console
     console.log('Will attempt first telemetry collection in 5 seconds...');
@@ -96,6 +61,24 @@ export class PulseService {
         return channel;
       },
     };
+  }
+
+  private async sendTelemetry() {
+    const fetcher: Fetcher<Response> = async (url, channels) => {
+      return await fetch(url, {
+        method: 'post',
+
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
+        body: JSON.stringify({
+          channels,
+        }),
+      })
+    }
+
+    return await sendPulse(this.channels, fetcher);
   }
 
   private async loadInstructions() {
@@ -123,7 +106,7 @@ export class PulseService {
     const responseBody: InstructionsResponse = await response.json();
 
     responseBody.channels.forEach(channel => {
-      const instructions$ = this.instructions$.get(channel.id);
+      const instructions$ = this.instructions.get(channel.id);
       if (!instructions$) {
         throw new Error(
           `Channel (${channel.id}) from service has no corresponding channel handler in client`
@@ -146,21 +129,11 @@ export class PulseService {
     }
   }
 
-  private async sendTelemetry() {
-    const fetcher: Fetcher<any> = async (url, channels) => {
-      return await fetch(url, {
-        method: 'post',
-
-        headers: {
-          'content-type': 'application/json',
-          'kbn-xsrf': 'true',
-        },
-        body: JSON.stringify({
-          channels,
-        }),
-      })
+  async start(): Promise<PulseServiceStart> {
+    return {
     }
-
-    return await sendPulse(this.channels, fetcher);
+  }
+  public stop() {
+    // nothing to do here currently
   }
 }

@@ -66,6 +66,7 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
+import { PulseServiceSetup, PulseServiceStart } from './pulse';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
   IContextContainer,
@@ -159,6 +160,7 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  pulse: PulseServiceSetup;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -194,6 +196,7 @@ export interface CoreStart {
   i18n: I18nStart;
   /** {@link NotificationsStart} */
   notifications: NotificationsStart;
+  pulse: PulseServiceStart;
   /** {@link OverlayStart} */
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
@@ -283,4 +286,6 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  PulseServiceSetup,
+  PulseServiceStart,
 };

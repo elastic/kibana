@@ -26,6 +26,7 @@ import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
+import { PulseService } from './pulse';
 import {
   InjectedMetadataParams,
   InjectedMetadataService,
@@ -100,6 +101,7 @@ export class CoreSystem {
   private readonly rendering: RenderingService;
   private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
+  private readonly pulse: PulseService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
@@ -137,6 +139,7 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.pulse = new PulseService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -162,6 +165,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const pulse = await this.pulse.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -184,6 +188,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        pulse,
       };
 
       // Services that do not expose contracts at setup
@@ -216,6 +221,7 @@ export class CoreSystem {
       const i18n = await this.i18n.start();
       const application = await this.application.start({ http, injectedMetadata });
       await this.integrations.start({ uiSettings });
+      const pulse = await this.pulse.start();
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
@@ -270,6 +276,7 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        pulse,
       };
 
       const plugins = await this.plugins.start(core);

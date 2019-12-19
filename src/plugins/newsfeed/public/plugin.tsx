@@ -38,7 +38,13 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): Setup {}
+  public setup(core: CoreSetup): Setup {
+    const instructions$ = core.pulse.getChannel('notifications').instructions$();
+    instructions$.subscribe(instruction => {
+      console.log('instruction::', instruction)
+      // instruction = { owner: 'my', id: 'foo_instruction', value: { foo: 'bar' } }
+    });
+  }
 
   public start(core: CoreStart): Start {
     const api$ = this.fetchNewsfeed(core);
