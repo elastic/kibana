@@ -14,7 +14,8 @@ import {
   KibanaResponseFactory,
   RequestHandlerContext,
   PluginInitializerContext,
-} from 'src/core/server';
+  KibanaRequest,
+} from '../../../../../../../src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
 import { RequestFacade } from '../../types';
@@ -80,7 +81,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       },
       async (context, request, response) => {
         try {
-          const user = await this.security.authc.getCurrentUser(request);
+          const user = await this.getCurrentUserInfo(request);
           const gqlResponse = await runHttpQuery([request], {
             method: 'POST',
             options: (req: RequestFacade) => ({
@@ -113,7 +114,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
         },
         async (context, request, response) => {
           try {
-            const user = await this.security.authc.getCurrentUser(request);
+            const user = await this.getCurrentUserInfo(request);
             const { query } = request;
             const gqlResponse = await runHttpQuery([request], {
               method: 'GET',
@@ -162,6 +163,15 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           });
         }
       );
+    }
+  }
+
+  private async getCurrentUserInfo(request: KibanaRequest): Promise<AuthenticatedUser | null> {
+    try {
+      const user = await this.security.authc.getCurrentUser(request);
+      return user;
+    } catch {
+      return null;
     }
   }
 
