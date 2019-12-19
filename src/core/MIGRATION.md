@@ -1458,11 +1458,14 @@ For example, the plugin creates a custom elasticsearch client and want to use it
 ```ts
 import { CoreSetup, IScopedClusterClient } from 'kibana/server';
 
+export interface MyPluginContext {
+  client: IScopedClusterClient;
+}
+
+// extend RequestHandlerContext when a dependent plugin imports MyPluginContext from the file
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    myPlugin: {
-      client: IScopedClusterClient;
-    };
+    myPlugin?: MyPluginContext;
   }
 }
 
