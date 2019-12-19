@@ -6,24 +6,19 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
+  first,
   flatten,
   groupBy,
-  indexBy,
-  sortBy,
-  uniq,
-  zipObject,
   isEmpty,
-  first,
-  sum
+  sortBy,
+  sum,
+  uniq,
+  zipObject
 } from 'lodash';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
+import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
-
-interface IWaterfallIndex {
-  [key: string]: IWaterfallItem | undefined;
-}
 
 interface IWaterfallGroup {
   [key: string]: IWaterfallItem[];
@@ -38,16 +33,15 @@ export interface IWaterfall {
    */
   duration: number;
   items: IWaterfallItem[];
-  itemsById: IWaterfallIndex;
-  getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
   errorCountByTransactionId: TraceAPIResponse['errorsPerTransaction'];
   errorCount: number;
   serviceColors: IServiceColors;
 }
 
 interface IWaterfallItemBase {
-  id: string | number;
+  id: string;
   parentId?: string;
+  parent?: IWaterfallItem;
   serviceName: string;
   name: string;
 
@@ -107,7 +101,7 @@ function getTransactionItem(
 ): IWaterfallItemTransaction {
   return {
     id: transaction.transaction.id,
-    parentId: transaction.parent && transaction.parent.id,
+    parentId: transaction.parent?.id,
     serviceName: transaction.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
@@ -123,7 +117,7 @@ function getTransactionItem(
 function getSpanItem(span: Span): IWaterfallItemSpan {
   return {
     id: span.span.id,
-    parentId: span.parent && span.parent.id,
+    parentId: span.parent?.id,
     serviceName: span.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
@@ -218,6 +212,7 @@ export function getOrderedWaterfallItems(
     visitedWaterfallItemSet.add(item);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
+    item.parent = parentItem;
     item.childIds = children.map(child => child.id);
     // get offset from the beginning of trace
     item.offset = item.timestamp - entryTransactionItem.timestamp;
@@ -265,20 +260,6 @@ function getServiceColors(items: IWaterfallItem[]) {
 const getWaterfallDuration = (items: IWaterfallItem[]) =>
   Math.max(...items.map(item => item.offset + item.skew + item.duration), 0);
 
-function createGetTransactionById(itemsById: IWaterfallIndex) {
-  return (id?: IWaterfallItem['id']) => {
-    if (!id) {
-      return undefined;
-    }
-
-    const item = itemsById[id];
-    const isTransaction = item?.docType === 'transaction';
-    if (isTransaction) {
-      return (item as IWaterfallItemTransaction).transaction;
-    }
-  };
-}
-
 const getWaterfallItems = (
   items: TraceAPIResponse['trace']['items'],
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction']
@@ -316,8 +297,6 @@ export function getWaterfall(
     return {
       duration: 0,
       items: [],
-      itemsById: {},
-      getTransactionById: () => undefined,
       errorCountByTransactionId: errorsPerTransaction,
       errorCount: sum(Object.values(errorsPerTransaction)),
       serviceColors: {}
@@ -349,9 +328,6 @@ export function getWaterfall(
   // the agentMarks should be added direct inside items, as it doesnt have parent-child relationship
   items.push(...getAgentMarks(entryTransaction));
 
-  const itemsById: IWaterfallIndex = indexBy(waterfallItems, 'id');
-  const getTransactionById = createGetTransactionById(itemsById);
-
   // Add the service color into the error waterfall item
   const waterfallErrors = items.filter(
     item => item.docType === 'error'
@@ -367,8 +343,6 @@ export function getWaterfall(
     rootTransaction,
     duration,
     items,
-    itemsById,
-    getTransactionById,
     errorCountByTransactionId: errorsPerTransaction,
     errorCount: waterfallErrors.length,
     serviceColors

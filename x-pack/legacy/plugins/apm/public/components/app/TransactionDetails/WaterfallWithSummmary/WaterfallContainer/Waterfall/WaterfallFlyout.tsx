@@ -29,9 +29,10 @@ export const WaterfallFlyout: React.FC<Props> = ({
 
   switch (currentItem.docType) {
     case 'span':
-      const parentTransaction = waterfall.getTransactionById(
-        currentItem.parentId
-      );
+      const parentTransaction =
+        currentItem.parent?.docType === 'transaction'
+          ? currentItem.parent.transaction
+          : undefined;
 
       return (
         <SpanFlyout

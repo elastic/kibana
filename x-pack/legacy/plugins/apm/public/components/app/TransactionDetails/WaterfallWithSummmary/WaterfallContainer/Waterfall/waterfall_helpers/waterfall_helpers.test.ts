@@ -169,23 +169,6 @@ describe('waterfall_helpers', () => {
       expect(waterfall.errorCount).toEqual(0);
       expect(waterfall).toMatchSnapshot();
     });
-
-    it('getTransactionById', () => {
-      const entryTransactionId = 'myTransactionId1';
-      const errorsPerTransaction = {
-        myTransactionId1: 2,
-        myTransactionId2: 3
-      };
-      const waterfall = getWaterfall(
-        {
-          trace: { items: hits, exceedsMax: false },
-          errorsPerTransaction
-        },
-        entryTransactionId
-      );
-      const transaction = waterfall.getTransactionById('myTransactionId2');
-      expect(transaction!.transaction.id).toBe('myTransactionId2');
-    });
   });
 
   describe('getWaterfallItems', () => {
