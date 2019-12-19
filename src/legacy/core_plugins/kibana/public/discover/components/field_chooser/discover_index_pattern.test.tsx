@@ -18,13 +18,15 @@
  */
 import React from 'react';
 import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
+
 // @ts-ignore
 import { ShallowWrapper } from 'enzyme';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { SavedObject } from 'kibana/server';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { EuiSelectable, EuiSelectableList } from '@elastic/eui';
+import { EuiSelectableList } from '@elastic/eui';
 
 const indexPattern1 = {
   id: 'test1',
@@ -60,7 +62,7 @@ function getIndexPatternPickerOptions(instance: ShallowWrapper) {
 function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
   const options: Array<{ label: string; checked?: 'on' | 'off' }> = getIndexPatternPickerOptions(
     instance
-  ).map(option =>
+  ).map((option: any) =>
     option.label === selectedLabel
       ? { ...option, checked: 'on' }
       : { ...option, checked: undefined }
@@ -81,7 +83,7 @@ describe('DiscoverIndexPattern', () => {
   test('should list all index patterns', () => {
     const instance = shallow(<DiscoverIndexPattern {...defaultProps} />);
 
-    expect(getIndexPatternPickerOptions(instance)!.map(option => option.label)).toEqual([
+    expect(getIndexPatternPickerOptions(instance)!.map((option: any) => option.label)).toEqual([
       'test1 title',
       'test2 title',
     ]);
