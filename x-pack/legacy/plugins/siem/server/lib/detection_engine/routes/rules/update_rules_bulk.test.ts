@@ -17,7 +17,6 @@ import {
   getFindResult,
   getResult,
   updateActionResult,
-  getUpdateRequest,
   typicalPayload,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
