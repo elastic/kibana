@@ -7,7 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
-import { dataAnalyticsJobConfigSchema } from '../new_platform/data_analytics_schema';
+import {
+  dataAnalyticsJobConfigSchema,
+  dataAnalyticsEvaluateSchema,
+  dataAnalyticsExplainSchema,
+} from '../new_platform/data_analytics_schema';
 
 export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
   async function dfAnalyticsGetAllHandler(context, request, response) {
@@ -18,7 +22,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -43,7 +47,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -65,7 +69,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -88,7 +92,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -114,7 +118,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -125,7 +129,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
         params: schema.object({
           analyticsId: schema.string(),
         }),
-        body: schema.object({ ...dataAnalyticsJobConfigSchema }, { allowUnknowns: true }),
+        body: schema.object({ ...dataAnalyticsJobConfigSchema }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsCreateJobHandler)
@@ -141,7 +145,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -149,7 +153,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
     {
       path: '/api/ml/data_frame/_evaluate',
       validate: {
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({ ...dataAnalyticsEvaluateSchema }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsEvaluateHandler)
@@ -168,7 +172,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -176,7 +180,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
     {
       path: '/api/ml/data_frame/analytics/_explain',
       validate: {
-        body: schema.object({}, { allowUnknowns: true }),
+        body: schema.object({ ...dataAnalyticsExplainSchema }),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, dfAnalyticsExplainHandler)
@@ -193,7 +197,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -220,7 +224,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -255,7 +259,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 
@@ -285,7 +289,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }) {
       });
     } catch (e) {
       // Case: default
-      return response.internalError({ body: e });
+      return response.internalError({ body: e.message });
     }
   }
 

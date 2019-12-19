@@ -19,3 +19,25 @@ export const dataAnalyticsJobConfigSchema = {
   analyzed_fields: schema.any(),
   model_memory_limit: schema.string(),
 };
+
+export const dataAnalyticsEvaluateSchema = {
+  index: schema.string(),
+  query: schema.maybe(schema.any()),
+  evaluation: schema.maybe(
+    schema.object({
+      regression: schema.maybe(schema.any()),
+      classification: schema.maybe(schema.any()),
+    })
+  ),
+};
+
+export const dataAnalyticsExplainSchema = {
+  description: schema.maybe(schema.string()),
+  dest: schema.maybe(schema.any()),
+  source: schema.object({
+    index: schema.string(),
+  }),
+  analysis: schema.any(),
+  analyzed_fields: schema.maybe(schema.any()),
+  model_memory_limit: schema.maybe(schema.string()),
+};
