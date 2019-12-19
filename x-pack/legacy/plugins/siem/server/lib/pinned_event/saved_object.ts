@@ -12,6 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { FrameworkRequest } from '../framework';
 import {
   PinnedEventSavedObject,
@@ -212,12 +213,12 @@ const pickSavedPinnedEvent = (
   const dateNow = new Date().valueOf();
   if (pinnedEventId == null) {
     savedPinnedEvent.created = dateNow;
-    savedPinnedEvent.createdBy = userInfo?.username ?? '';
+    savedPinnedEvent.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
     savedPinnedEvent.updated = dateNow;
-    savedPinnedEvent.updatedBy = userInfo?.username ?? '';
+    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (pinnedEventId != null) {
     savedPinnedEvent.updated = dateNow;
-    savedPinnedEvent.updatedBy = userInfo?.username ?? '';
+    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
   return savedPinnedEvent;
 };

@@ -14,7 +14,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
-
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
   PageInfoNote,
   ResponseNote,
@@ -226,12 +226,12 @@ const pickSavedNote = (
 ): any => {
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
-    savedNote.createdBy = userInfo?.username ?? '';
+    savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
     savedNote.updated = new Date().valueOf();
-    savedNote.updatedBy = userInfo?.username ?? '';
+    savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (noteId != null) {
     savedNote.updated = new Date().valueOf();
-    savedNote.updatedBy = userInfo?.username ?? '';
+    savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
   return savedNote;
 };
