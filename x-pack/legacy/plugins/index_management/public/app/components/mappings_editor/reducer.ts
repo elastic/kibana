@@ -45,7 +45,7 @@ interface DocumentFieldsState {
 
 export interface State {
   isValid: boolean | undefined;
-  configuration: OnFormUpdateArg<MappingsConfiguration>;
+  configuration: { defaultValue?: MappingsConfiguration } & OnFormUpdateArg<MappingsConfiguration>;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
@@ -57,7 +57,7 @@ export interface State {
 
 export type Action =
   | { type: 'configuration.update'; value: OnFormUpdateArg<MappingsConfiguration> }
-  | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
+  | { type: 'fieldForm.update'; value: State['configuration'] }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
   | { type: 'field.edit'; value: Field }

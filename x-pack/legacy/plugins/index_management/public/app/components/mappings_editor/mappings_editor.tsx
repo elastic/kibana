@@ -15,6 +15,7 @@ import {
   DocumentFieldsJsonEditor,
 } from './components';
 import { IndexSettings } from './types';
+import { State, Dispatch, MappingsConfiguration } from './reducer';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
 
@@ -24,21 +25,23 @@ interface Props {
   indexSettings?: IndexSettings;
 }
 
+type TabName = 'fields' | 'advanced';
+
 export const MappingsEditor = React.memo(
   ({ onUpdate, defaultValue = {}, indexSettings }: Props) => {
-    const [selectedTab, selectTab] = useState<'fields' | 'advanced'>('fields');
+    const [selectedTab, selectTab] = useState<TabName>('fields');
 
-    const {
-      _source = {},
-      dynamic,
-      numeric_detection,
-      date_detection,
-      dynamic_date_formats,
-      properties = {},
-    } = defaultValue;
+    const { configurationDefaultValue, fieldsDefaultValue } = useMemo(() => {
+      const {
+        _source = {},
+        dynamic,
+        numeric_detection,
+        date_detection,
+        dynamic_date_formats,
+        properties = {},
+      } = defaultValue;
 
-    const { configurationDefaultValue, fieldsDefaultValue } = useMemo(
-      () => ({
+      return {
         configurationDefaultValue: {
           _source,
           dynamic,
@@ -47,14 +50,53 @@ export const MappingsEditor = React.memo(
           dynamic_date_formats,
         },
         fieldsDefaultValue: properties,
-      }),
-      [defaultValue]
-    );
+      };
+    }, [defaultValue]);
+
+    const validateConfigurationForm = async (
+      configuration: State['configuration']
+    ): Promise<{ isValid: boolean; data?: MappingsConfiguration }> => {
+      const isValid = await configuration.validate();
+
+      if (!isValid) {
+        return { isValid };
+      }
+
+      // We create a snapshot of the configuration form data.
+      const formData = configuration.data.format();
+
+      return { isValid, data: formData };
+    };
+
+    const changeTab = async (tab: TabName, [state, dispatch]: [State, Dispatch]) => {
+      if (tab === 'fields') {
+        // Navigating away from the configuration form === "sending" the form: we need to validate its data first.
+        const { isValid, data } = await validateConfigurationForm(state.configuration);
+
+        if (!isValid) {
+          return;
+        }
+
+        // We need to update our state "configuration" with this snapshot.
+        // It will be used as "defaultValue" when navigating back to the form.
+        dispatch({
+          type: 'configuration.update',
+          value: {
+            defaultValue: data,
+            isValid,
+            data: { raw: state.configuration.data.raw, format: () => data! },
+            validate: () => Promise.resolve(true),
+          },
+        });
+      }
+
+      selectTab(tab);
+    };
 
     return (
       <IndexSettingsProvider indexSettings={indexSettings}>
         <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-          {({ editor: editorType, getProperties }) => {
+          {({ editor: editorType, state, dispatch, getProperties }) => {
             const editor =
               editorType === 'json' ? (
                 <DocumentFieldsJsonEditor defaultValue={getProperties()} />
@@ -70,19 +112,24 @@ export const MappingsEditor = React.memo(
                   {editor}
                 </>
               ) : (
-                <ConfigurationForm defaultValue={configurationDefaultValue} />
+                <ConfigurationForm
+                  defaultValue={state.configuration.defaultValue ?? configurationDefaultValue}
+                />
               );
 
             return (
               <div className="mappingsEditor">
                 <EuiTabs>
-                  <EuiTab onClick={() => selectTab('fields')} isSelected={selectedTab === 'fields'}>
+                  <EuiTab
+                    onClick={() => changeTab('fields', [state, dispatch])}
+                    isSelected={selectedTab === 'fields'}
+                  >
                     {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
                       defaultMessage: 'Mapped fields',
                     })}
                   </EuiTab>
                   <EuiTab
-                    onClick={() => selectTab('advanced')}
+                    onClick={() => changeTab('advanced', [state, dispatch])}
                     isSelected={selectedTab === 'advanced'}
                   >
                     {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
