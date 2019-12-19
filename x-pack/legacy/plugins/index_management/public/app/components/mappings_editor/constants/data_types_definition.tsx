@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
 
+import { documentationService } from '../../../services/documentation';
 import { MainType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
@@ -17,6 +21,24 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/text.html',
     },
+    description: () => (
+      <FormattedMessage
+        id="xpack.idxMgmt.mappingsEditor.dataType.textLongDescription"
+        defaultMessage="Text fields support full text search by breaking a string into individual terms, each of which can be searched for. Text fields aren't used for sorting and aggregations. If you need to index structured content such as email addresses or status codes, you should use the {keyword}."
+        values={{
+          keyword: (
+            <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+              {i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.dataType.textLongDescription.keywordTypeLink',
+                {
+                  defaultMessage: 'keyword data type',
+                }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
   },
   keyword: {
     value: 'keyword',
@@ -354,3 +376,7 @@ export const MAIN_DATA_TYPE_DEFINITION: {
   }),
   {} as { [key in MainType]: DataTypeDefinition }
 );
+
+export const getTypeDescription = type => {
+  return TYPE_DEFINITION[type].description ? TYPE_DEFINITION[type].description() : undefined;
+};
