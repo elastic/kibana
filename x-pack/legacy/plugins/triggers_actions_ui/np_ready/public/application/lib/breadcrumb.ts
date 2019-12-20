@@ -7,16 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { routeToHome, routeToConnectors, routeToAlerts } from '../constants';
 
-export const getCurrentBreadcrumb = (type: string): any => {
+export const getCurrentBreadcrumb = (type: string): { text: string; href: string } => {
   // Home and sections
   switch (type) {
-    case 'home':
-      return {
-        text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerts and Actions',
-        }),
-        href: `#${routeToHome}`,
-      };
     case 'connectors':
       return {
         text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
@@ -30,6 +23,13 @@ export const getCurrentBreadcrumb = (type: string): any => {
           defaultMessage: 'Alerts',
         }),
         href: `#${routeToAlerts}`,
+      };
+    default:
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
+          defaultMessage: 'Alerts and Actions',
+        }),
+        href: `#${routeToHome}`,
       };
   }
 };

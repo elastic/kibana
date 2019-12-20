@@ -5,35 +5,24 @@
  */
 import { i18n } from '@kbn/i18n';
 
-class DocTitleService {
-  private changeDocTitle: any = () => {};
+export const getCurrentDocTitle = (page: string): string => {
+  let updatedTitle: string;
 
-  public init(changeDocTitle: any): void {
-    this.changeDocTitle = changeDocTitle;
+  switch (page) {
+    case 'connectors':
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
+        defaultMessage: 'Connectors',
+      });
+      break;
+    case 'alerts':
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
+        defaultMessage: 'Alerts',
+      });
+      break;
+    default:
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
+        defaultMessage: 'Alerts and Actions',
+      });
   }
-
-  public setTitle(page?: string): void {
-    let updatedTitle: string;
-
-    switch (page) {
-      case 'connectors':
-        updatedTitle = i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
-          defaultMessage: 'Connectors',
-        });
-        break;
-      case 'alerts':
-        updatedTitle = i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
-          defaultMessage: 'Alerts',
-        });
-        break;
-      default:
-        updatedTitle = i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerts and Actions',
-        });
-    }
-
-    this.changeDocTitle(updatedTitle);
-  }
-}
-
-export const docTitleService = new DocTitleService();
+  return updatedTitle;
+};

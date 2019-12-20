@@ -20,7 +20,7 @@ import {
 
 import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
 import { getCurrentBreadcrumb } from './lib/breadcrumb';
-import { docTitleService } from './lib/doc_title';
+import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
 import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
 
@@ -80,7 +80,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   // Set breadcrumb and page title
   useEffect(() => {
     chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, getCurrentBreadcrumb(section || 'home')]);
-    docTitleService.setTitle(section || 'home');
+    chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
   }, [section, chrome, MANAGEMENT_BREADCRUMB]);
 
   return (
