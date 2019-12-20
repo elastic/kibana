@@ -20,7 +20,9 @@ import {
   RawAlert,
   SpaceIdToNamespaceFunction,
   IntervalSchedule,
+  Services,
 } from '../types';
+import { promiseResult, map } from './result_type';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -143,50 +145,37 @@ export class TaskRunnerFactory {
         return executionHandler({ actionGroup, context, state, alertInstanceId });
       },
 
-      async run() {
+      async executeAlertInstances(
+        services: Services,
+        { params, throttle, muteAll, mutedInstanceIds }: SavedObject['attributes'],
+        executionHandler: ReturnType<typeof createExecutionHandler>
+      ): Promise<Record<string, any>> {
         const {
-          params: { alertId, spaceId },
-          state: { alertInstances: alertRawInstances = {} },
+          params: { alertId },
+          state: { alertInstances: alertRawInstances = {}, alertTypeState = {} },
         } = taskInstance;
-        const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
-        const services = await this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
-
-        // Ensure API key is still valid and user has access
-        const {
-          attributes: { params, actions, schedule, throttle, muteAll, mutedInstanceIds },
-          references,
-        } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
-
-        // Validate
-        const validatedAlertTypeParams = validateAlertTypeParams(alertType, params);
 
         const alertInstances = mapValues(alertRawInstances, alert => new AlertInstance(alert));
 
-        const alertTypeState = await alertType.executor({
+        const updatedAlertTypeState = await alertType.executor({
           alertId,
           services: {
             ...services,
             alertInstanceFactory: createAlertInstanceFactory(alertInstances),
           },
-          params: validatedAlertTypeParams,
-          state: taskInstance.state.alertTypeState || {},
+          params,
+          state: alertTypeState,
           startedAt: taskInstance.startedAt!,
           previousStartedAt: taskInstance.state.previousStartedAt,
         });
 
+        // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
         const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
           alertInstances,
           alertInstance => alertInstance.hasScheduledActions()
         );
 
         if (!muteAll) {
-          const executionHandler = this.getExecutionHandler(
-            alertId,
-            spaceId,
-            apiKey,
-            actions,
-            references
-          );
           const enabledAlertInstances = omit<AlertInstances, AlertInstances>(
             instancesWithScheduledActions,
             ...mutedInstanceIds
@@ -203,22 +192,61 @@ export class TaskRunnerFactory {
           );
         }
 
-        const nextRunAt = getNextRunAt(
-          new Date(taskInstance.startedAt!),
-          // we do not currently have a good way of returning the type
-          // from SavedObjectsClient, and as we currenrtly require a schedule
-          // and we only support `interval`, we can cast this safely
-          schedule as IntervalSchedule
+        return {
+          alertTypeState: updatedAlertTypeState,
+          alertInstances: instancesWithScheduledActions,
+        };
+      },
+
+      async run() {
+        const {
+          params: { alertId, spaceId },
+        } = taskInstance;
+
+        const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+        const services = await this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+
+        // Ensure API key is still valid and user has access
+        const { attributes, references } = await services.savedObjectsClient.get<RawAlert>(
+          'alert',
+          alertId
+        );
+
+        // Validate
+        const params = validateAlertTypeParams(alertType, attributes.params);
+        const executionHandler = this.getExecutionHandler(
+          alertId,
+          spaceId,
+          apiKey,
+          attributes.actions,
+          references
         );
 
         return {
-          state: {
-            alertTypeState,
-            // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-            alertInstances: instancesWithScheduledActions,
-            previousStartedAt: taskInstance.startedAt!,
-          },
-          runAt: nextRunAt,
+          state: map<Record<string, any>, Error, Record<string, any>>(
+            await promiseResult<Record<string, any>, Error>(
+              this.executeAlertInstances(services, { ...attributes, params }, executionHandler)
+            ),
+            (stateUpdates: Record<string, any>) => {
+              return {
+                ...stateUpdates,
+                previousStartedAt: taskInstance.startedAt!,
+              };
+            },
+            (err: Error) => {
+              return {
+                ...taskInstance.state,
+                previousStartedAt: taskInstance.startedAt!,
+              };
+            }
+          ),
+          runAt: getNextRunAt(
+            new Date(taskInstance.startedAt!),
+            // we do not currently have a good way of returning the type
+            // from SavedObjectsClient, and as we currenrtly require a schedule
+            // and we only support `interval`, we can cast this safely
+            attributes.schedule as IntervalSchedule
+          ),
         };
       },
     };

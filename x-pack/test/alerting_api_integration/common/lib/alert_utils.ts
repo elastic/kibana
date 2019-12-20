@@ -207,4 +207,47 @@ export class AlertUtils {
     }
     return response;
   }
+
+  public async createAlwaysFailingAction({
+    objectRemover,
+    overwrites = {},
+    indexRecordActionId,
+    reference,
+  }: CreateAlwaysFiringActionOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+    const actionId = indexRecordActionId || this.indexRecordActionId;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+    if (!actionId) {
+      throw new Error('indexRecordActionId is required ');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    const response = await request.send({
+      enabled: true,
+      name: 'fail',
+      schedule: { interval: '30s' },
+      throttle: '30s',
+      tags: [],
+      alertTypeId: 'test.failing',
+      consumer: 'bar',
+      params: {
+        index: ES_TEST_INDEX_NAME,
+        reference,
+      },
+      actions: [],
+      ...overwrites,
+    });
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'alert');
+    }
+    return response;
+  }
 }
