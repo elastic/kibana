@@ -48,7 +48,7 @@ function isTermsFieldFormat(
 const config = chrome.getUiSettingsClient();
 
 const getConfig = (...args: any[]): any => config.get(...args);
-const getDefaultFieldFormat = () => ({ convert: identity });
+const getDefaultFieldFormat = () => ({ convert: identity, getConverterFor: () => identity });
 
 const getFieldFormat = (id: string | undefined, params: object = {}) => {
   const Format = fieldFormats.getType(id);
