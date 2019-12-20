@@ -31,7 +31,7 @@ const services = {
   overlays: npStart.core.overlays,
 };
 
-export const savedObjectLoaderVisualize = createSavedVisLoader(services);
+const savedObjectLoaderVisualize = createSavedVisLoader(services);
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.

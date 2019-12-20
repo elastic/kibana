@@ -45,7 +45,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   return {
     legacyChrome,
     editorTypes,
-    savedVisualizations: injector.get('savedVisualizations'),
   };
 }
 

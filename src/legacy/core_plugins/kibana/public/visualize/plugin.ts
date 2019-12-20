@@ -43,12 +43,11 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
-import { SavedVisualizations } from './types';
+import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
   editorTypes: any;
-  savedVisualizations: SavedVisualizations;
 }
 
 export interface VisualizePluginStartDependencies {
@@ -99,6 +98,12 @@ export class VisualizePlugin implements Plugin {
         } = this.startDependencies;
 
         const angularDependencies = await getAngularDependencies();
+        const savedVisualizations = createSavedVisLoader({
+          savedObjectsClient,
+          indexPatterns: data.indexPatterns,
+          chrome: contextCore.chrome,
+          overlays: contextCore.overlays,
+        });
         const deps: VisualizeKibanaServices = {
           ...angularDependencies,
           addBasePath: contextCore.http.basePath.prepend,
@@ -111,6 +116,7 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
+          savedVisualizations,
           savedQueryService: data.query.savedQueries,
           share,
           toastNotifications: contextCore.notifications.toasts,

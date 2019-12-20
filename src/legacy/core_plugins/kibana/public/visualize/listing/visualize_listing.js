@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
 import { wrapInI18nContext } from '../legacy_imports';
-import { savedObjectLoaderVisualize } from '../saved_visualizations/saved_visualization_register';
 
 export function initListingDirective(app) {
   app.directive('visualizeListingTable', reactDirective =>
@@ -49,6 +48,7 @@ export function VisualizeListingController($injector, createNewVis) {
     chrome,
     legacyChrome,
     savedObjectsClient,
+    savedVisualizations,
     data: {
       query: {
         timefilter: { timefilter },
@@ -94,12 +94,11 @@ export function VisualizeListingController($injector, createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
     this.createNewVis();
   }
-  const visualizationService = savedObjectLoaderVisualize;
   this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
-    return visualizationService
+    return savedVisualizations
       .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
