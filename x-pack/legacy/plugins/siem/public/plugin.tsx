@@ -11,6 +11,7 @@ import {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '../../../../../src/core/public';
+import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
@@ -19,8 +20,9 @@ import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../common/constants';
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupPlugins {}
+export interface SetupPlugins {
+  home: HomePublicPluginSetup;
+}
 export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: IEmbeddableStart;
@@ -33,7 +35,8 @@ export type Setup = ReturnType<Plugin['setup']>;
 export type Start = ReturnType<Plugin['start']>;
 
 export class Plugin implements IPlugin<Setup, Start> {
-  public name = 'siem';
+  public id = 'siem';
+  public name = 'SIEM';
   constructor(
     // @ts-ignore this is added to satisfy the New Platform typing constraint,
     // but we're not leveraging any of its functionality yet.
@@ -46,8 +49,8 @@ export class Plugin implements IPlugin<Setup, Start> {
     core.uiSettings.set(DEFAULT_TIMEZONE_BROWSER, 'UTC');
 
     core.application.register({
-      id: this.name,
-      title: 'Siem',
+      id: this.id,
+      title: this.name,
       async mount(context, params) {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
