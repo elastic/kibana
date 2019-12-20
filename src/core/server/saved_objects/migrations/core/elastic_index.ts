@@ -34,6 +34,7 @@ export interface FullIndexInfo {
   exists: boolean;
   indexName: string;
   mappings: IndexMapping;
+  settings: { [name: string]: any };
 }
 
 /**
@@ -51,6 +52,9 @@ export async function fetchInfo(callCluster: CallCluster, index: string): Promis
       aliases: {},
       exists: false,
       indexName: index,
+      settings: {
+        'indices.id_field_data.enabled': true,
+      },
       mappings: { dynamic: 'strict', properties: {} },
     };
   }
