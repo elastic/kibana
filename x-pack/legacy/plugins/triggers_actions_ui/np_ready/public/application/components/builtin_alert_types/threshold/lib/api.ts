@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 
 const WATCHER_API_ROOT = '/api/watcher';
 
@@ -14,7 +14,7 @@ export async function getMatchingIndicesForThresholdAlertType({
   http,
 }: {
   pattern: string;
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<Record<string, any>> {
   if (!pattern.startsWith('*')) {
     pattern = `*${pattern}`;
@@ -33,7 +33,7 @@ export async function getThresholdAlertTypeFields({
   http,
 }: {
   indexes: string[];
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<Record<string, any>> {
   const { fields } = await http.post(`${WATCHER_API_ROOT}/fields`, {
     body: JSON.stringify({ indexes }),
@@ -67,7 +67,7 @@ export async function getThresholdAlertVisualizationData({
 }: {
   model: any;
   visualizeOptions: any;
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<Record<string, any>> {
   const { visualizeData } = await http.post(`${WATCHER_API_ROOT}/watch/visualize`, {
     body: JSON.stringify({

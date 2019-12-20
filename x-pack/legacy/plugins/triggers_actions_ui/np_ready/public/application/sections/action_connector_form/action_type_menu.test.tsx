@@ -5,24 +5,29 @@
  */
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { setAppDependencies } from '../../app_dependencies';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { AppDependencies } from '../../../../../public/shim';
 import { ActionTypeMenu } from './action_type_menu';
 import { ValidationResult } from '../../../types';
+import { AppContextProvider } from '../../app_context';
 jest.mock('../../context/actions_connectors_context');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let AppDependenciesProvider: React.ProviderExoticComponent<React.ProviderProps<AppDependencies>>;
   let deps: any;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     deps = {
-      core: coreMock.createStart(),
-      plugins: {
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -33,12 +38,12 @@ describe('connector_add_flyout', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
-    AppDependenciesProvider = setAppDependencies(deps);
   });
 
   it('renders action type menu with proper EuiCards for registered action types', () => {
@@ -60,7 +65,7 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
-      <AppDependenciesProvider value={deps}>
+      <AppContextProvider value={deps}>
         <ActionsConnectorsContext.Provider
           value={{
             addFlyoutVisible: true,
@@ -78,7 +83,7 @@ describe('connector_add_flyout', () => {
         >
           <ActionTypeMenu onActionTypeChange={onActionTypeChange} />
         </ActionsConnectorsContext.Provider>
-      </AppDependenciesProvider>
+      </AppContextProvider>
     );
 
     expect(wrapper.find('[data-test-subj="first-action-type-card"]').exists()).toBeTruthy();

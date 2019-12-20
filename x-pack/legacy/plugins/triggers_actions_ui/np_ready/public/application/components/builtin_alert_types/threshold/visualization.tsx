@@ -97,10 +97,7 @@ interface Props {
 }
 
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }) => {
-  const {
-    core: { http, uiSettings },
-    plugins: { toastNotifications },
-  } = useAppDependencies();
+  const { http, uiSettings, toastNotifications } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);

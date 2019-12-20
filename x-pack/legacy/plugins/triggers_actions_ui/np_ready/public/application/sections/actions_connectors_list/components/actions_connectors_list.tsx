@@ -202,6 +202,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       },
     },
     {
+      field: '',
       name: '',
       actions: [
         {
@@ -264,7 +265,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                         setSelectedItems(updatedSelectedItemsList);
                       },
                     }
-                  : null
+                  : undefined
               }
               search={{
                 filters: [
