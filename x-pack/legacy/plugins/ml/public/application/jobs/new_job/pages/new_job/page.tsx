@@ -127,14 +127,20 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     if (isCategorizationJobCreator(jobCreator)) {
       // categorization job will always use a count agg, so give it
       // to the job creator now
-      const count = newJobCapsService.getAggById('count');
-      const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
-      jobCreator.setDefaultDetectorProperties(count, eventRate);
       jobCreator.modelPlot = true;
     }
 
     // auto set the time range if creating a new advanced job
     autoSetTimeRange = isAdvancedJobCreator(jobCreator);
+  }
+
+  if (isCategorizationJobCreator(jobCreator)) {
+    // categorization job will always use a count agg, so give it
+    // to the job creator now
+    const count = newJobCapsService.getAggById('count');
+    const rare = newJobCapsService.getAggById('rare');
+    const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
+    jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
   }
 
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {

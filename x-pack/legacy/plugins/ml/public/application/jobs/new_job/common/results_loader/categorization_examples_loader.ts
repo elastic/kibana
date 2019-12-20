@@ -45,7 +45,7 @@ export class CategorizationExamplesLoader {
     this._analyzer = anomalyDetectors.categorization_analyzer!;
   }
 
-  async loadExamples() {
+  public async loadExamples() {
     const categorizationFieldName = this._jobCreator.categorizationFieldName;
     if (categorizationFieldName === null) {
       return { valid: 0, examples: [] };

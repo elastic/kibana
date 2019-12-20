@@ -11,15 +11,21 @@ import { Field, Aggregation, mlCategory } from '../../../../../../common/types/f
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
+import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
 
+// type DETECTOR_TYPE = ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE;
+
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
-  private _createDetector: () => void = () => {};
+  private _createCountDetector: () => void = () => {};
+  private _createRareDetector: () => void = () => {};
   private _examplesLoader: CategorizationExamplesLoader;
   private _categoryFieldExamples: CategoryExample[] = [];
   private _categoryFieldValid: number = 0;
+  private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
+    ML_JOB_AGGREGATION.COUNT;
 
   constructor(
     indexPattern: IndexPattern,
@@ -31,24 +37,44 @@ export class CategorizationJobCreator extends JobCreator {
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
   }
 
-  public setDefaultDetectorProperties(count: Aggregation | null, eventRate: Field | null) {
-    if (count === null || eventRate === null) {
+  public setDefaultDetectorProperties(
+    count: Aggregation | null,
+    rare: Aggregation | null,
+    eventRate: Field | null
+  ) {
+    if (count === null || rare === null || eventRate === null) {
       return;
     }
-    const dtr: Detector = createBasicDetector(count, eventRate);
-    dtr.by_field_name = mlCategory.id;
-    this._createDetector = () => {
-      this._addDetector(dtr, count, mlCategory);
+
+    this._createCountDetector = () => {
+      this._createDetector(count, eventRate);
+    };
+    this._createRareDetector = () => {
+      this._createDetector(rare, eventRate);
     };
   }
 
-  public set categorizationFieldName(fieldName: string | null) {
+  private _createDetector(agg: Aggregation, field: Field) {
+    const dtr: Detector = createBasicDetector(agg, field);
+    dtr.by_field_name = mlCategory.id;
+    this._addDetector(dtr, agg, mlCategory);
+  }
+
+  public setDetectorType(type: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE) {
+    this._detectorType = type;
     this.removeAllDetectors();
     this.removeAllInfluencers();
+    if (type === ML_JOB_AGGREGATION.COUNT) {
+      this._createCountDetector();
+    } else {
+      this._createRareDetector();
+    }
+  }
 
+  public set categorizationFieldName(fieldName: string | null) {
     if (fieldName !== null) {
       this._job_config.analysis_config.categorization_field_name = fieldName;
-      this._createDetector();
+      this.setDetectorType(this._detectorType);
       this.addInfluencer(mlCategory.id);
     } else {
       delete this._job_config.analysis_config.categorization_field_name;
@@ -74,17 +100,24 @@ export class CategorizationJobCreator extends JobCreator {
     return this._categoryFieldValid;
   }
 
+  public get selectedDetectorType() {
+    return this._detectorType;
+  }
+
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
     const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
 
-    this.removeAllDetectors();
+    // this.removeAllDetectors();
 
     const dtr = detectors[0];
     if (detectors.length && dtr.agg !== null && dtr.field !== null) {
-      this.setDefaultDetectorProperties(dtr.agg, dtr.field);
-      this._createDetector();
+      this._detectorType =
+        dtr.agg.id === ML_JOB_AGGREGATION.COUNT
+          ? ML_JOB_AGGREGATION.COUNT
+          : ML_JOB_AGGREGATION.RARE;
+      this.setDetectorType(this._detectorType);
     }
   }
 }

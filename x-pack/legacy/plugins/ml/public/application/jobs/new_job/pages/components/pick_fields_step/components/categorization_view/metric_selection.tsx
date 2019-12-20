@@ -10,6 +10,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 // import { ml } from '../../../../../../../services/ml_api_service';
 import { CategorizationField } from '../categorization_field';
+import { CategorizationDetector } from '../categorization_detector';
 // import { useKibanaContext } from '../../../../../../../contexts/kibana';
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
@@ -73,6 +74,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
 
   return (
     <Fragment>
+      <CategorizationDetector />
       <CategorizationField />
       <FieldExamples fieldExamples={fieldExamples} />
       {fieldExamples !== null && <ExamplesValidCallout examplesValid={examplesValid} />}
