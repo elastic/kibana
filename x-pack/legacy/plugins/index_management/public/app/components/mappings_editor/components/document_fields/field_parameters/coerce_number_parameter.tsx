@@ -18,7 +18,7 @@ export const CoerceNumberParameter = () => (
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDescription', {
       defaultMessage:
-        'Convert strings to numbers and truncate fractions for integers. Coercion is useful to clean up dirty values to fit the datatype of a field.',
+        'Convert strings to numbers. If this field is an integer type, fractions will be truncated. If coercion is disabled then documents with imperfectly formatted values will be rejected.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDocLinkText', {

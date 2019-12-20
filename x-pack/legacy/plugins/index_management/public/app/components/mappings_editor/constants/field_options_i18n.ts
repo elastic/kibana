@@ -362,7 +362,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.orientation.counterclockwiseDescription',
       {
         defaultMessage:
-          'Defines outer polygon vertices in counterclockwise order and interior shape vertices int clockwise order. This is the Open Geospatial Consortium (OGC) and GeoJSON standard.',
+          'Defines outer polygon vertices in counterclockwise order and interior shape vertices in clockwise order. This is the Open Geospatial Consortium (OGC) and GeoJSON standard.',
       }
     ),
   },

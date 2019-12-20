@@ -49,7 +49,7 @@ export const ShapeType = ({ field }: Props) => {
             'xpack.idxMgmt.mappingsEditor.shapeType.ignoredMalformedFieldDescription',
             {
               defaultMessage:
-                'Malformed GeoJSON or WKT shapes will not be indexed, but other fields in the document will be processed normally. The number of documents that have a malformed field should be contained, or queries on this field will become meaningless.',
+                'By default, documents that contain malformed GeoJSON or WKT shapes will not be indexed. Enable this setting to index these documents normally, but filter out fields that have malformed shapes. Be careful: if you index too many documents this way then queries on this field will become meaningless.',
             }
           )}
         />
