@@ -9,3 +9,5 @@ export * from './utils';
 export * from './serializers';
 
 export * from './validators';
+
+export * from './properties_serializer';

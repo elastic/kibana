@@ -59,6 +59,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   const { maxNestedDepth } = parsedFieldsDefaultValue;
 
   const canUseDefaultEditor = canUseMappingsEditor(maxNestedDepth);
+
   const initialState: State = {
     isValid: undefined,
     configuration: {
