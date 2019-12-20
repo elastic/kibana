@@ -30,27 +30,7 @@ export const PulseNotificationsTrigger = () => {
     setShowBadge(false);
     setFlyoutVisible(!flyoutVisible);
   }
-  // these will be the instruction notifications for the current deployment that are returned from making a call to the `check` functions of the Pulse channels.
-  // const showBadge = instructions && instructions.length ? true : false; // showBadge should only be true when we have instructions/notifications from Pulse for the current deployment
-  // let flyoutVisible = false; // when the bell is clicked we toggle between an open and closed state
-  // return (
-  //   <EuiHeaderSectionItemButton
-  //       data-test-subj="newsfeed"
-  //       aria-controls="keyPadMenu"
-  //       aria-expanded={flyoutVisible}
-  //       aria-haspopup="true"
-  //       aria-label="Newsfeed menu"
-  //       onClick={showFlyout}
-  //     >
-  //       <EuiIcon type="email" size="m" />
-  //       {showBadge ? (
-  //         <EuiNotificationBadge className="euiHeaderNotification" data-test-subj="showBadgeNews">
-  //           &#9642;
-  //         </EuiNotificationBadge>
-  //       ) : null}
-  //     </EuiHeaderSectionItemButton>
-  //     {flyoutVisible ? <NewsfeedFlyout /> : null}
-  // )
+
   return (
     <EuiHeaderSectionItemButton aria-label="Pulse Notifications menu" onClick={showFlyout}>
       <EuiIcon type="bell" size="m" />
