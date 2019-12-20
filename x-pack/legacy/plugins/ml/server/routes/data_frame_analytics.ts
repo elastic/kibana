@@ -24,7 +24,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        const results = await context.ml.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
         return response.ok({
           body: { ...results },
         });
@@ -44,7 +44,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
           analyticsId,
         });
         return response.ok({
@@ -63,7 +63,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        const results = await context.ml.mlClient.callAsCurrentUser(
+        const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.getDataFrameAnalyticsStats'
         );
         return response.ok({
@@ -85,7 +85,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml.mlClient.callAsCurrentUser(
+        const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.getDataFrameAnalyticsStats',
           {
             analyticsId,
@@ -113,10 +113,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml.mlClient.callAsCurrentUser('ml.createDataFrameAnalytics', {
-          body: request.body,
-          analyticsId,
-        });
+        const results = await context.ml!.mlClient.callAsCurrentUser(
+          'ml.createDataFrameAnalytics',
+          {
+            body: request.body,
+            analyticsId,
+          }
+        );
         return response.ok({
           body: { ...results },
         });
@@ -135,7 +138,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        const results = await context.ml.mlClient.callAsCurrentUser(
+        const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.evaluateDataFrameAnalytics',
           {
             body: request.body,
@@ -159,7 +162,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
-        const results = await context.ml.mlClient.callAsCurrentUser(
+        const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.estimateDataFrameAnalyticsMemoryUsage',
           {
             body: request.body,
@@ -186,9 +189,12 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
-          analyticsId,
-        });
+        const results = await context.ml!.mlClient.callAsCurrentUser(
+          'ml.deleteDataFrameAnalytics',
+          {
+            analyticsId,
+          }
+        );
         return response.ok({
           body: { ...results },
         });
@@ -210,7 +216,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
+        const results = await context.ml!.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
           analyticsId,
         });
         return response.ok({
@@ -243,7 +249,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           options.force = request.url.query.force;
         }
 
-        const results = await context.ml.mlClient.callAsCurrentUser(
+        const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.stopDataFrameAnalytics',
           options
         );
@@ -267,7 +273,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
       try {
         const { analyticsId } = request.params;
         const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(
-          context.ml.mlClient.callAsCurrentUser
+          context.ml!.mlClient.callAsCurrentUser
         );
 
         const results = await getAnalyticsAuditMessages(analyticsId);

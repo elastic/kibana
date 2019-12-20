@@ -8,7 +8,13 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { ServerRoute } from 'hapi';
 import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_server';
-import { Logger, PluginInitializerContext, CoreSetup, IRouter } from 'src/core/server';
+import {
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  IRouter,
+  IScopedClusterClient,
+} from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ElasticsearchServiceSetup } from 'src/core/server';
@@ -110,7 +116,9 @@ export interface UsageInitialization {
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
-    ml?: any;
+    ml?: {
+      mlClient: IScopedClusterClient;
+    };
   }
 }
 
