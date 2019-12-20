@@ -59,7 +59,6 @@ import {
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
-import { NavLinkWrapper } from '../../nav_links/nav_link';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -191,6 +190,7 @@ const categoryIcon = {
 };
 
 function getGroupIcon(groupName: string) {
+  // @ts-ignore TODO@myasonik
   return categoryIcon[groupName];
 }
 
@@ -366,7 +366,8 @@ class HeaderUI extends Component<Props, State> {
 
   public renderNavLinks() {
     const isOSS = false; // TODO@myasonik
-    if (isOSS || this.state.navLinks.length < 7) {
+    const disableGroupedNavSetting = false; // TODO@myasonik
+    if (isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7) {
       return (
         <EuiNavDrawer
           ref={this.navDrawerRef}

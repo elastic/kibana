@@ -12,6 +12,13 @@ import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
 
+export const AppCategoryObj = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management',
+};
+
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     id: 'graph',
@@ -25,6 +32,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
         main: 'plugins/graph/index',
+        category: AppCategoryObj.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,

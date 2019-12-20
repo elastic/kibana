@@ -10,6 +10,13 @@ import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 import { migrations } from './migrations';
 
+export const AppCategoryObj = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management',
+};
+
 export function canvas(kibana) {
   return new kibana.Plugin({
     id: CANVAS_APP,
@@ -23,6 +30,7 @@ export function canvas(kibana) {
         icon: 'plugins/canvas/icon.svg',
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/legacy_start',
+        category: AppCategoryObj.analyze,
       },
       interpreter: [
         'plugins/canvas/browser_functions',

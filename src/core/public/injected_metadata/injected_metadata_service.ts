@@ -84,6 +84,7 @@ export interface InjectedMetadataParams {
       basePath: string;
       serverName: string;
       devMode: boolean;
+      category: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;

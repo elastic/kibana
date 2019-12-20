@@ -14,6 +14,13 @@ import _ from 'lodash';
 import { MapPlugin } from './server/plugin';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
 
+export const AppCategoryObj = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management',
+};
+
 export function maps(kibana) {
   return new kibana.Plugin({
     // task_manager could be required, but is only used for telemetry
@@ -30,6 +37,7 @@ export function maps(kibana) {
         main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
+        category: AppCategoryObj.analyze,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
