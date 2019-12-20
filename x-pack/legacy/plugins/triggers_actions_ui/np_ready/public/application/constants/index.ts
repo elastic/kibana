@@ -15,7 +15,7 @@ export const routeToConnectors = `${BASE_PATH}/connectors`;
 export const routeToAlerts = `${BASE_PATH}/alerts`;
 
 export { TIME_UNITS } from './time_units';
-export const SORT_ORDERS: { [key: string]: string } = {
-  ASCENDING: 'asc',
-  DESCENDING: 'desc',
-};
+export enum SORT_ORDERS {
+  ASCENDING = 'asc',
+  DESCENDING = 'desc',
+}
