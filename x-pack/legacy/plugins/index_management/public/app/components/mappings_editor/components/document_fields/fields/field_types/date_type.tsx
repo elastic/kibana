@@ -20,7 +20,12 @@ import {
   IgnoreMalformedParameter,
   FormatParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  EditFieldFormRow,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -39,11 +44,14 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
-export const DateType = ({ field }: Props) => {
+export const DateType = ({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
 

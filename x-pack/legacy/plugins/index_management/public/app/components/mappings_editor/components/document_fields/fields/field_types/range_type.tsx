@@ -13,7 +13,11 @@ import {
   BoostParameter,
   CoerceParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
@@ -21,11 +25,14 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
-export const RangeType = ({ field }: Props) => {
+export const RangeType = ({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
       </BasicParametersSection>

@@ -19,7 +19,12 @@ import {
   IgnoreMalformedParameter,
   CopyToParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  EditFieldFormRow,
+  AdvancedParametersSection,
+} from '../edit_field';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -39,11 +44,14 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
-export const NumericType = ({ field }: Props) => {
+export const NumericType = ({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         {/* scaling_factor */}
         <FormDataProvider pathsToWatch="subType">

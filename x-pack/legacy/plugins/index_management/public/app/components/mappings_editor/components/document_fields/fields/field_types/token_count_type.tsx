@@ -20,7 +20,12 @@ import {
   AnalyzerParameter,
   NullValueParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  EditFieldFormRow,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -38,11 +43,14 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
-export const TokenCountType = ({ field }: Props) => {
+export const TokenCountType = ({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         <EditFieldFormRow
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerSectionTitle', {

@@ -15,7 +15,11 @@ import {
   NullValueParameter,
   IgnoreZValueParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -29,11 +33,14 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
-export const GeoPointType = ({ field }: Props) => {
+export const GeoPointType = ({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(

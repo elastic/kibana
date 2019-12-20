@@ -20,10 +20,16 @@ import {
   SimilarityParameter,
   SplitQueriesOnWhitespaceParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  EditFieldFormRow,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -40,9 +46,11 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   }
 };
 
-export const FlattenedType = React.memo(({ field }: Props) => {
+export const FlattenedType = React.memo(({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         <IndexParameter
           config={getFieldConfig('index_options_flattened')}

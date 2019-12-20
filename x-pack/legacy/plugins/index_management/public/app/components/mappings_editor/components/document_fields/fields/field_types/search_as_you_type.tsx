@@ -15,10 +15,15 @@ import {
   SimilarityParameter,
   TermVectorParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import {
+  FieldDescriptionSection,
+  BasicParametersSection,
+  AdvancedParametersSection,
+} from '../edit_field';
 
 interface Props {
   field: NormalizedField;
+  isMultiField: boolean;
 }
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -35,9 +40,11 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   }
 };
 
-export const SearchAsYouType = React.memo(({ field }: Props) => {
+export const SearchAsYouType = React.memo(({ field, isMultiField }: Props) => {
   return (
     <>
+      <FieldDescriptionSection isMultiField={isMultiField} />
+
       <BasicParametersSection>
         <IndexParameter
           config={{ ...getFieldConfig('index_options'), defaultValue: 'positions' }}
