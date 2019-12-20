@@ -176,9 +176,11 @@ declare interface Ml {
       query: object,
       size: number,
       field: string,
+      timeField: string | undefined,
       start: number,
-      end: number
-    ): Promise<any[]>;
+      end: number,
+      analyzer: any
+    ): Promise<{ valid: number; examples: any[] }>;
     topCategories(jobId: string, count: number): Promise<{ total: number; categories: any[] }>;
   };
 

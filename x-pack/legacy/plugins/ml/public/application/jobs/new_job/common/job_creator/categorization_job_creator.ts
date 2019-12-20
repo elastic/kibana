@@ -12,10 +12,14 @@ import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
+import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
   private _createDetector: () => void = () => {};
+  private _examplesLoader: CategorizationExamplesLoader;
+  private _categoryFieldExamples: CategoryExample[] = [];
+  private _categoryFieldValid: number = 0;
 
   constructor(
     indexPattern: IndexPattern,
@@ -24,6 +28,7 @@ export class CategorizationJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
+    this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
   }
 
   public setDefaultDetectorProperties(count: Aggregation | null, eventRate: Field | null) {
@@ -52,6 +57,21 @@ export class CategorizationJobCreator extends JobCreator {
 
   public get categorizationFieldName(): string | null {
     return this._job_config.analysis_config.categorization_field_name || null;
+  }
+
+  public async loadCategorizationFieldExamples() {
+    const { valid, examples } = await this._examplesLoader.loadExamples();
+    this._categoryFieldExamples = examples;
+    this._categoryFieldValid = valid;
+    return { valid, examples };
+  }
+
+  public get categoryFieldExamples() {
+    return this._categoryFieldExamples;
+  }
+
+  public get categoryFieldValid() {
+    return this._categoryFieldValid;
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {

@@ -26,26 +26,52 @@ interface Category {
   grok_pattern: string;
 }
 
-const testCat: Category = {
-  job_id: 'dasdasdd',
-  category_id: 100,
-  terms: 'HEAD projects xdotool HTTP IrssiUrlLog',
-  regex: '.*?HEAD.+?projects.+?xdotool.+?HTTP.+?IrssiUrlLog.*',
-  max_matching_length: 119,
-  examples: [''],
-  grok_pattern:
-    '.*?%{IP:ipaddress}.+?%{HTTPDATE:timestamp}.+?HEAD.+?%{PATH:path}.*?projects.*?%{PATH:path2}.*?xdotool.*?%{PATH:path3}.+?HTTP.*?%{PATH:path4}.*?%{QUOTEDSTRING:field}.+?%{QUOTEDSTRING:field2}.*?IrssiUrlLog.*?%{PATH:path5}.*',
-};
+// const testCat: Category = {
+//   job_id: 'dasdasdd',
+//   category_id: 100,
+//   terms: 'HEAD projects xdotool HTTP IrssiUrlLog',
+//   regex: '.*?HEAD.+?projects.+?xdotool.+?HTTP.+?IrssiUrlLog.*',
+//   max_matching_length: 119,
+//   examples: [''],
+//   grok_pattern:
+//     '.*?%{IP:ipaddress}.+?%{HTTPDATE:timestamp}.+?HEAD.+?%{PATH:path}.*?projects.*?%{PATH:path2}.*?xdotool.*?%{PATH:path3}.+?HTTP.*?%{PATH:path4}.*?%{QUOTEDSTRING:field}.+?%{QUOTEDSTRING:field2}.*?IrssiUrlLog.*?%{PATH:path5}.*',
+// };
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
   async function categorizationExamples(
     indexPatternTitle: string,
-    query: object,
+    query: any,
     size: number,
     categorizationFieldName: string,
+    timeField: string | undefined,
     start: number,
-    end: number
+    end: number,
+    analyzer?: any
   ) {
+    if (timeField !== undefined) {
+      const range = {
+        range: {
+          [timeField]: {
+            gte: start,
+            format: 'epoch_millis',
+          },
+        },
+      };
+
+      if (query.bool === undefined) {
+        query.bool = {};
+      }
+      if (query.bool.filter === undefined) {
+        query.bool.filter = range;
+      } else {
+        if (Array.isArray(query.bool.filter)) {
+          query.bool.filter.push(range);
+        } else {
+          query.bool.filter.range = range;
+        }
+      }
+    }
+
     const results = await callWithRequest('search', {
       index: indexPatternTitle,
       size,
@@ -62,13 +88,13 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     try {
       const { tokens: tempTokens } = await callWithRequest('indices.analyze', {
         body: {
-          analyzer: 'standard',
+          ...getAnalyzer(analyzer),
           text: examples,
         },
       });
       tokens = tempTokens;
     } catch (error) {
-      // do somehting with this error
+      // do something with this error
     }
 
     const lengths = examples.map(e => e.length);
@@ -77,11 +103,8 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const tokensPerExample: Token[][] = lengths.map(l => []);
     tokens.forEach((t, i) => {
       for (let g = 0; g < sumLengths.length; g++) {
-        if (t.token === 'dashboard2') {
-          const d = 0;
-        }
         if (t.start_offset <= sumLengths[g]) {
-          const offset = g > 0 ? sumLengths[g - 1] + g : 0;
+          const offset = g > 0 ? sumLengths[g - 1] : 0;
           tokensPerExample[g].push({
             ...t,
             start_offset: t.start_offset - offset,
@@ -93,6 +116,45 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     });
 
     return examples.map((e, i) => ({ text: e, tokens: tokensPerExample[i] }));
+  }
+
+  function getAnalyzer(analyzer: any) {
+    if (typeof analyzer === 'object' && analyzer.tokenizer !== undefined) {
+      return analyzer;
+    } else {
+      return { analyzer: 'standard' };
+    }
+  }
+
+  async function validateCategoryExamples(
+    indexPatternTitle: string,
+    query: any,
+    size: number,
+    categorizationFieldName: string,
+    timeField: string | undefined,
+    start: number,
+    end: number,
+    analyzer?: any
+  ) {
+    const MULTIPLIER = 20;
+    const examples = await categorizationExamples(
+      indexPatternTitle,
+      query,
+      size * MULTIPLIER,
+      categorizationFieldName,
+      timeField,
+      start,
+      end,
+      analyzer
+    );
+
+    const sortedExamples = examples.sort((a, b) => b.tokens.length - a.tokens.length);
+    const validExamples = sortedExamples.filter(e => e.tokens.length > 1);
+
+    return {
+      valid: sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length,
+      examples: examples.filter((e, i) => i / MULTIPLIER - Math.floor(i / MULTIPLIER) === 0),
+    };
   }
 
   async function getCategories(
@@ -214,6 +276,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
 
   return {
     categorizationExamples,
+    validateCategoryExamples,
     topCategories,
   };
 }

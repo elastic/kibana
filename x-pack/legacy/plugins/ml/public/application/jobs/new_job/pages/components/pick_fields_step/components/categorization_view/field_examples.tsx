@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 
 interface Props {
-  fieldExamples: Cat[];
+  fieldExamples: Cat[] | null;
 }
 
 interface Token {
@@ -24,10 +24,10 @@ interface Cat {
   tokens: Token[];
 }
 
-const TOKEN_HIGHLIGHT_COLOR = '#e9f2ff';
+const TOKEN_HIGHLIGHT_COLOR = '#b0ccf7';
 
 export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
-  if (fieldExamples.length === 0) {
+  if (fieldExamples === null || fieldExamples.length === 0) {
     return null;
   }
 

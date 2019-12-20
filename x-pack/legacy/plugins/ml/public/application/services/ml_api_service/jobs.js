@@ -207,7 +207,16 @@ export const jobs = {
     });
   },
 
-  categorizationFieldExamples(indexPatternTitle, query, size, field, start, end) {
+  categorizationFieldExamples(
+    indexPatternTitle,
+    query,
+    size,
+    field,
+    timeField,
+    start,
+    end,
+    analyzer
+  ) {
     return http({
       url: `${basePath}/jobs/categorization_field_examples`,
       method: 'POST',
@@ -216,8 +225,10 @@ export const jobs = {
         query,
         size,
         field,
+        timeField,
         start,
         end,
+        analyzer,
       },
     });
   },

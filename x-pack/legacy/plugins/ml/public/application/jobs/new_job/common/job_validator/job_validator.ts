@@ -12,7 +12,7 @@ import {
   basicDatafeedValidation,
 } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { JobCreator, JobCreatorType } from '../job_creator';
+import { JobCreator, JobCreatorType, isCategorizationJobCreator } from '../job_creator';
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { cardinalityValidator, CardinalityValidatorResult } from './validators';
@@ -51,6 +51,10 @@ export interface BasicValidations {
   scrollSize: Validation;
 }
 
+export interface AdvancedValidations {
+  categorizationFieldValid: Validation;
+}
+
 export class JobValidator {
   private _jobCreator: JobCreatorType;
   private _validationSummary: ValidationSummary;
@@ -70,6 +74,9 @@ export class JobValidator {
     queryDelay: { valid: true },
     frequency: { valid: true },
     scrollSize: { valid: true },
+  };
+  private _advancedValidations: AdvancedValidations = {
+    categorizationFieldValid: { valid: true },
   };
   private _validating: boolean = false;
   private _basicValidationResult$ = new ReplaySubject<JobValidationResult>(2);
@@ -141,6 +148,7 @@ export class JobValidator {
       this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
+        this._runAdvancedValidation();
 
         this._jobCreatorSubject$.next(this._jobCreator);
 
@@ -195,6 +203,13 @@ export class JobValidator {
     this._basicValidationResult$.next(this._basicValidations);
   }
 
+  private _runAdvancedValidation() {
+    if (isCategorizationJobCreator(this._jobCreator)) {
+      this._advancedValidations.categorizationFieldValid.valid =
+        this._jobCreator.categoryFieldValid > 0.2;
+    }
+  }
+
   private _isOverallBasicValid() {
     return Object.values(this._basicValidations).some(v => v.valid === false) === false;
   }
@@ -245,5 +260,13 @@ export class JobValidator {
 
   public get validating(): boolean {
     return this._validating;
+  }
+
+  public get categorizationField() {
+    return this._advancedValidations.categorizationFieldValid.valid;
+  }
+
+  public set categorizationField(valid: boolean) {
+    this._advancedValidations.categorizationFieldValid.valid = valid;
   }
 }

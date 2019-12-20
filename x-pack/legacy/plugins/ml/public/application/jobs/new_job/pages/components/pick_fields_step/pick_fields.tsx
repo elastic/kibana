@@ -31,7 +31,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
         (jobCreator.type === JOB_TYPE.ADVANCED && jobValidator.modelMemoryLimit.valid)) &&
       jobValidator.bucketSpan.valid &&
       jobValidator.duplicateDetectors.valid &&
-      jobValidator.validating === false;
+      jobValidator.validating === false &&
+      (jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (jobCreator.type === JOB_TYPE.CATEGORIZATION && jobValidator.categorizationField));
     setNextActive(active);
   }, [jobValidatorUpdated]);
 

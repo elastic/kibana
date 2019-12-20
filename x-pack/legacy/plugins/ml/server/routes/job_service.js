@@ -276,11 +276,27 @@ export function jobServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route
     path: '/api/ml/jobs/categorization_field_examples',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const { categorizationExamples } = jobServiceProvider(callWithRequest);
-      const { indexPatternTitle, query, size, field, start, end } = request.payload;
-      return categorizationExamples(indexPatternTitle, query, size, field, start, end).catch(resp =>
-        wrapError(resp)
-      );
+      const { validateCategoryExamples } = jobServiceProvider(callWithRequest);
+      const {
+        indexPatternTitle,
+        timeField,
+        query,
+        size,
+        field,
+        start,
+        end,
+        analyzer,
+      } = request.payload;
+      return validateCategoryExamples(
+        indexPatternTitle,
+        query,
+        size,
+        field,
+        timeField,
+        start,
+        end,
+        analyzer
+      ).catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig,
