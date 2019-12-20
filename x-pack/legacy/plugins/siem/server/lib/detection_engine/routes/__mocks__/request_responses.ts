@@ -314,6 +314,7 @@ export const getResult = (): RuleAlertType => ({
   throttle: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  apiKey: null,
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],
