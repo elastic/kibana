@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
+import { getJobCreatorTitle } from '../../common/job_creator/util/general';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -164,7 +165,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
-                  <h2>Create job: {jobType} </h2>
+                  <h2>Create job: {getJobCreatorTitle(jobCreator)} </h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
