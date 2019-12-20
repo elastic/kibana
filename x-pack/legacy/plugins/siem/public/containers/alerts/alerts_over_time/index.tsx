@@ -9,9 +9,9 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
+import { useUiSetting } from '../../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
@@ -70,7 +70,7 @@ class AlertsOverTimeComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
