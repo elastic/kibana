@@ -7,7 +7,7 @@
 import { refinePotentialMatches } from './refine_potential_matches';
 import { findPotentialMatches } from './find_potential_matches';
 import { ChunkFetcher, ChunkResult } from './monitor_group_iterator';
-import {QueryContext} from "./query_context";
+import { QueryContext } from './query_context';
 
 /**
  * Fetches a single 'chunk' of data with a single query, then uses a secondary query to filter out erroneous matches.
@@ -29,7 +29,7 @@ export const fetchChunk: ChunkFetcher = async (
   const { monitorIds, checkGroups, searchAfter: foundSearchAfter } = await findPotentialMatches(
     queryContext,
     searchAfter,
-    size,
+    size
   );
   const matching = await refinePotentialMatches(queryContext, monitorIds, checkGroups);
 

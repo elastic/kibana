@@ -7,7 +7,7 @@
 import { get, set } from 'lodash';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../../../common/constants';
-import {QueryContext} from "./query_context";
+import { QueryContext } from './query_context';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
 // Note that these check groups may not be the most recent groups for the matching monitor ID! We'll filter those
@@ -79,8 +79,8 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
     aggs: {
       has_timespan: {
         filter: {
-          exists: { field: "monitor.timespan" }
-        }
+          exists: { field: 'monitor.timespan' },
+        },
       },
       monitors: {
         composite: {
