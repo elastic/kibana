@@ -92,6 +92,16 @@ export const Template: FunctionComponent<Props> = ({
               <div className="kibanaWelcomeLogo" />
             </div>
           </div>
+
+          <div
+            className="kibanaWelcomeText"
+            data-error-message={i18n('core.ui.welcomeErrorMessage', {
+              defaultMessage:
+                'Kibana did not load properly. Check the server output for more information.',
+            })}
+          >
+            {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Kibana' })}
+          </div>
         </div>
 
         <div
@@ -106,12 +116,12 @@ export const Template: FunctionComponent<Props> = ({
           </div>
 
           <h2 className="kibanaWelcomeTitle">
-            {i18n('common.ui.legacyBrowserTitle', {
+            {i18n('core.ui.legacyBrowserTitle', {
               defaultMessage: 'Please upgrade your browser',
             })}
           </h2>
           <div className="kibanaWelcomeText">
-            {i18n('common.ui.legacyBrowserMessage', {
+            {i18n('core.ui.legacyBrowserMessage', {
               defaultMessage:
                 'This Kibana installation has strict security requirements enabled that your current browser does not meet.',
             })}
