@@ -22,11 +22,11 @@ import { ManagementSetup, ManagementStart } from './types';
 import { ManagementService } from './management_service';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
-import { legacyManagementAdapter } from './legacy';
+import { LegacyManagementAdapter } from './legacy';
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
   private managementSections = new ManagementService();
-  private legacyManagement = new legacyManagementAdapter();
+  private legacyManagement = new LegacyManagementAdapter();
 
   public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
     return {
