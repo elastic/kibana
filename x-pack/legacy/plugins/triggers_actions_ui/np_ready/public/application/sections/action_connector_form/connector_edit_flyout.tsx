@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnectorForm } from './action_connector_form';
-import { useAppDependencies } from '../../app_dependencies';
+import { useAppDependencies } from '../../app_context';
 import { ActionConnectorTableItem } from '../../../types';
 
 export interface ConnectorEditProps {

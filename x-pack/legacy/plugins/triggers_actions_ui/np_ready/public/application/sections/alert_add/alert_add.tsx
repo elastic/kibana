@@ -34,7 +34,7 @@ import {
   EuiAccordion,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { useAppDependencies } from '../../app_dependencies';
+import { useAppDependencies } from '../../app_context';
 import { createAlert } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertsContext } from '../../context/alerts_context';
@@ -91,12 +91,7 @@ function validateBaseProperties(alertObject: Alert) {
 }
 
 export const AlertAdd = ({ refreshList }: Props) => {
-  const {
-    core: { http },
-    plugins: { toastNotifications },
-    alertTypeRegistry,
-    actionTypeRegistry,
-  } = useAppDependencies();
+  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
   const initialAlert = {
     params: {},
     alertTypeId: null,

@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ACTION_GROUPS: { [key: string]: string } = {
-  ALERT: 'alert',
-
-  WARNING: 'warning',
-
-  UNACKNOWLEDGED: 'unacknowledged',
-};
+export enum ACTION_GROUPS {
+  ALERT = 'alert',
+  WARNING = 'warning',
+  UNACKNOWLEDGED = 'unacknowledged',
+}

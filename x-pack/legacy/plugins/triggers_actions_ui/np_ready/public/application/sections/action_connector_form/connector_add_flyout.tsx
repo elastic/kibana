@@ -18,7 +18,7 @@ import { ActionsConnectorsContext } from '../../context/actions_connectors_conte
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm } from './action_connector_form';
 import { ActionType, ActionConnector } from '../../../types';
-import { useAppDependencies } from '../../app_dependencies';
+import { useAppDependencies } from '../../app_context';
 
 export const ConnectorAddFlyout = () => {
   const { actionTypeRegistry } = useAppDependencies();

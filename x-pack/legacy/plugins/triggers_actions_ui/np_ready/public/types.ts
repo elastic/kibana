@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { capabilities } from 'ui/capabilities';
 import { ActionTypeRegistry } from './application/action_type_registry';
 import { AlertTypeRegistry } from './application/alert_type_registry';
 
@@ -112,4 +113,9 @@ export interface AlertTypeModel {
 
 export interface IErrorObject {
   [key: string]: string[];
+}
+
+export interface LegacyDependencies {
+  MANAGEMENT_BREADCRUMB: { text: string; href?: string };
+  capabilities: typeof capabilities;
 }

@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../np_ready/public/legacy';
+export const PLUGIN = {
+  ID: 'triggers_actions_ui',
+  getI18nName: (i18n: any): string => {
+    return i18n.translate('xpack.triggers_actions_ui.appName', {
+      defaultMessage: 'Alerts and actions',
+    });
+  },
+};

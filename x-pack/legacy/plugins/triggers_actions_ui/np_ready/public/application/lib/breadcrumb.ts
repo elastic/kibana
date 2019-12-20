@@ -7,72 +7,29 @@
 import { i18n } from '@kbn/i18n';
 import { routeToHome, routeToConnectors, routeToAlerts } from '../constants';
 
-class BreadcrumbService {
-  private chrome: any;
-  private breadcrumbs: {
-    [key: string]: Array<{
-      text: string;
-      href?: string;
-    }>;
-  } = {
-    management: [],
-    home: [],
-    actions: [],
-  };
-
-  public init(chrome: any, managementBreadcrumb: any): void {
-    this.chrome = chrome;
-    this.breadcrumbs.management = [managementBreadcrumb];
-
-    // Home and sections
-    this.breadcrumbs.home = [
-      ...this.breadcrumbs.management,
-      {
+export const getCurrentBreadcrumb = (type: string): any => {
+  // Home and sections
+  switch (type) {
+    case 'home':
+      return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
           defaultMessage: 'Alerts and actions',
         }),
         href: `#${routeToHome}`,
-      },
-    ];
-    this.breadcrumbs.connectors = [
-      ...this.breadcrumbs.home,
-      {
+      };
+    case 'connectors':
+      return {
         text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
           defaultMessage: 'Connectors',
         }),
         href: `#${routeToConnectors}`,
-      },
-    ];
-    this.breadcrumbs.alerts = [
-      ...this.breadcrumbs.home,
-      {
+      };
+    case 'alerts':
+      return {
         text: i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
           defaultMessage: 'Alerts',
         }),
         href: `#${routeToAlerts}`,
-      },
-    ];
+      };
   }
-
-  public setBreadcrumbs(type: string): void {
-    const newBreadcrumbs = this.breadcrumbs[type]
-      ? [...this.breadcrumbs[type]]
-      : [...this.breadcrumbs.home];
-
-    // Pop off last breadcrumb
-    const lastBreadcrumb = newBreadcrumbs.pop() as {
-      text: string;
-      href?: string;
-    };
-
-    // Put last breadcrumb back without href
-    newBreadcrumbs.push({
-      ...lastBreadcrumb,
-      href: undefined,
-    });
-
-    this.chrome.setBreadcrumbs(newBreadcrumbs);
-  }
-}
-
-export const breadcrumbService = new BreadcrumbService();
+};

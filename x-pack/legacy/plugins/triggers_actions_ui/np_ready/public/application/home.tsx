@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 
 import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
-import { breadcrumbService } from './lib/breadcrumb';
+import { getCurrentBreadcrumb } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
-import { useAppDependencies } from './app_dependencies';
+import { useAppDependencies } from './app_context';
 import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
@@ -38,7 +38,8 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   history,
 }) => {
   const {
-    plugins: { capabilities },
+    chrome,
+    legacy: { MANAGEMENT_BREADCRUMB, capabilities },
   } = useAppDependencies();
 
   const canShowActions = hasShowActionsCapability(capabilities.get());
@@ -78,9 +79,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   // Set breadcrumb and page title
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs(section || 'home');
+    chrome.setBreadcrumbs([MANAGEMENT_BREADCRUMB, getCurrentBreadcrumb(section || 'home')]);
     docTitleService.setTitle(section || 'home');
-  }, [section]);
+  }, [section, chrome, MANAGEMENT_BREADCRUMB]);
 
   return (
     <EuiPageBody>

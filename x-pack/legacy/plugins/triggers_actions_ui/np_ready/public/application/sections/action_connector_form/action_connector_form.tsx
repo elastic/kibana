@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createActionConnector, updateActionConnector } from '../../lib/action_connector_api';
 import { SectionError, ErrableFormRow } from '../../components/page_error';
-import { useAppDependencies } from '../../app_dependencies';
+import { useAppDependencies } from '../../app_context';
 import { connectorReducer } from './connector_reducer';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnector, IErrorObject } from '../../../types';
@@ -40,8 +40,9 @@ export const ActionConnectorForm = ({
   setFlyoutVisibility,
 }: ActionConnectorProps) => {
   const {
-    core: { http },
-    plugins: { capabilities, toastNotifications },
+    http,
+    toastNotifications,
+    legacy: { capabilities },
     actionTypeRegistry,
   } = useAppDependencies();
 

@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionType } from '../../../types';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
-import { useAppDependencies } from '../../app_dependencies';
+import { useAppDependencies } from '../../app_context';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;

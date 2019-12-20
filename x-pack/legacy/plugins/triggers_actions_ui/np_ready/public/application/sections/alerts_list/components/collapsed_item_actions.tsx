@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
-import { useAppDependencies } from '../../../app_dependencies';
+import { useAppDependencies } from '../../../app_context';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import {
   deleteAlerts,
@@ -37,8 +37,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   onAlertChanged,
 }: ComponentOpts) => {
   const {
-    core: { http },
-    plugins: { capabilities },
+    http,
+    legacy: { capabilities },
   } = useAppDependencies();
 
   const canDelete = hasDeleteAlertsCapability(capabilities.get());

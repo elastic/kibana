@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionsConnectorsContext } from '../../../context/actions_connectors_context';
-import { useAppDependencies } from '../../../app_dependencies';
+import { useAppDependencies } from '../../../app_context';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
@@ -26,8 +26,9 @@ import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../l
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
-    core: { http },
-    plugins: { capabilities, toastNotifications },
+    http,
+    toastNotifications,
+    legacy: { capabilities },
   } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities.get());
   const canSave = hasSaveActionsCapability(capabilities.get());

@@ -11,7 +11,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiButton, EuiFilterButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 
 import { AlertsContext } from '../../../context/alerts_context';
-import { useAppDependencies } from '../../../app_dependencies';
+import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
 import { BulkActionPopover } from './bulk_action_popover';
@@ -24,8 +24,10 @@ import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
-    core: { http, injectedMetadata },
-    plugins: { capabilities, toastNotifications },
+    http,
+    injectedMetadata,
+    toastNotifications,
+    legacy: { capabilities },
   } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities.get());
   const canSave = hasSaveAlertsCapability(capabilities.get());

@@ -30,7 +30,7 @@ export function triggersActionsUI(kibana: any) {
     },
     uiExports: {
       hacks: ['plugins/triggers_actions_ui/hacks/register'],
-      managementSections: ['plugins/triggers_actions_ui'],
+      managementSections: ['plugins/triggers_actions_ui/legacy'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       injectDefaultVars(server: Legacy.Server) {
         const serverConfig = server.config();

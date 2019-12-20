@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFormRow, EuiPopover } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
-import { useAppDependencies } from '../../../app_dependencies';
+import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
   disableAlerts,
@@ -30,10 +30,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
   onPerformingAction,
   onActionPerformed,
 }: ComponentOpts) => {
-  const {
-    core: { http },
-    plugins: { toastNotifications },
-  } = useAppDependencies();
+  const { http, toastNotifications } = useAppDependencies();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isMutingAlerts, setIsMutingAlerts] = useState<boolean>(false);
