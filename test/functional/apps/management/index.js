@@ -43,6 +43,7 @@ export default function({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_scripted_fields_preview'));
       loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
+      loadTestFile(require.resolve('./_saved_objects_compatibility'));
     });
 
     describe('', function() {
