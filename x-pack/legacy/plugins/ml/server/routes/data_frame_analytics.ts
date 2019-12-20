@@ -5,23 +5,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
-import { MlXpackMainPlugin } from '../new_platform/plugin';
+import { RouteInitialization } from '../new_platform/plugin';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
 } from '../new_platform/data_analytics_schema';
 
-export function dataFrameAnalyticsRoutes({
-  xpackMainPlugin,
-  router,
-}: {
-  xpackMainPlugin: MlXpackMainPlugin;
-  router: IRouter;
-}) {
+export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
