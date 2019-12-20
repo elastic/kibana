@@ -12,7 +12,7 @@ import { createDescriptionList } from './create_description_list';
 import { EuiDescriptionList } from '@elastic/eui';
 import { Anomaly } from '../types';
 
-jest.mock('../../../lib/kibana');
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 

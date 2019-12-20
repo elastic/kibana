@@ -10,6 +10,7 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
+import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowTargetSourceDest,
@@ -19,7 +20,6 @@ import {
   PageInfoPaginated,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } from '../../store';
-import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -54,7 +54,7 @@ export interface NetworkTopCountriesComponentReduxProps {
   sort: NetworkTopTablesSortField;
 }
 
-type NetworkTopCountriesProps = OwnProps & NetworkTopCountriesComponentReduxProps & WithKibanaProps;
+type NetworkTopCountriesProps = OwnProps & NetworkTopCountriesComponentReduxProps;
 
 class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
   NetworkTopCountriesProps,
@@ -68,7 +68,6 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       endDate,
       flowTarget,
       filterQuery,
-      kibana,
       id = `${ID}-${flowTarget}`,
       ip,
       isInspected,
@@ -79,7 +78,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       sort,
     } = this.props;
     const variables: GetNetworkTopCountriesQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
@@ -155,6 +154,5 @@ const makeMapStateToProps = () => {
 };
 
 export const NetworkTopCountriesQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
+  connect(makeMapStateToProps)
 )(NetworkTopCountriesComponentQuery);

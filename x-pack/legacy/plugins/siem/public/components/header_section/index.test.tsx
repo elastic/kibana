@@ -10,7 +10,10 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
+import '../../mock/ui_settings';
 import { HeaderSection } from './index';
+
+jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('HeaderSection', () => {
   test('it renders', () => {

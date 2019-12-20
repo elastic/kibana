@@ -8,9 +8,9 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
-import { useUiSetting$ } from '../kibana';
+import { useKibanaUiSetting } from '../settings/use_kibana_ui_setting';
 
 export const useEuiTheme = () => {
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   return darkMode ? darkTheme : lightTheme;
 };

@@ -18,7 +18,7 @@ import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
-jest.mock('../../../../lib/kibana');
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
 const mockFramework = mockFrameworks.default_UTC;
 

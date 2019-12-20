@@ -8,8 +8,11 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 
+import '../../../mock/ui_settings';
 import { TestProviders } from '../../../mock';
 import { UtilityBarGroup, UtilityBarSection, UtilityBarText } from './index';
+
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('UtilityBarSection', () => {
   test('it renders', () => {

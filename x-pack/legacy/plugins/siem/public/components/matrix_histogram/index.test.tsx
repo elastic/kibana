@@ -9,12 +9,21 @@ import * as React from 'react';
 
 import { MatrixHistogram } from '.';
 
-jest.mock('../../lib/kibana');
+jest.mock('@elastic/eui', () => {
+  return {
+    EuiPanel: (children: JSX.Element) => <>{children}</>,
+    EuiLoadingContent: () => <div className="euiLoadingContent" />,
+  };
+});
 
 jest.mock('../loader', () => {
   return {
     Loader: () => <div className="loader" />,
   };
+});
+
+jest.mock('../../lib/settings/use_kibana_ui_setting', () => {
+  return { useKibanaUiSetting: () => [false] };
 });
 
 jest.mock('../header_section', () => {

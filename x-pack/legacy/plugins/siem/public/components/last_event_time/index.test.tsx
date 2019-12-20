@@ -13,6 +13,7 @@ import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
+import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
 

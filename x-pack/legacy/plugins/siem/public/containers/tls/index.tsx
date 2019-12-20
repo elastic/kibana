@@ -10,6 +10,7 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
+import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   PageInfoPaginated,
@@ -19,7 +20,6 @@ import {
   FlowTargetSourceDest,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -53,7 +53,7 @@ export interface TlsComponentReduxProps {
   sort: TlsSortField;
 }
 
-type TlsProps = OwnProps & TlsComponentReduxProps & WithKibanaProps;
+type TlsProps = OwnProps & TlsComponentReduxProps;
 
 class TlsComponentQuery extends QueryTemplatePaginated<
   TlsProps,
@@ -70,7 +70,6 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       id = ID,
       ip,
       isInspected,
-      kibana,
       limit,
       skip,
       sourceId,
@@ -78,7 +77,7 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       sort,
     } = this.props;
     const variables: GetTlsQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
@@ -153,7 +152,6 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const TlsQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(TlsComponentQuery);
+export const TlsQuery = compose<React.ComponentClass<OwnProps>>(connect(makeMapStateToProps))(
+  TlsComponentQuery
+);

@@ -10,11 +10,17 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 
-import { TestProviders } from '../../mock';
-import { mocksSource } from '../../containers/source/mock';
 import { Overview } from './index';
 
-jest.mock('../../lib/kibana');
+import '../../mock/ui_settings';
+import { mocksSource } from '../../containers/source/mock';
+import { TestProviders } from '../../mock';
+
+jest.mock('ui/documentation_links', () => ({
+  documentationLinks: {
+    kibana: 'http://www.example.com',
+  },
+}));
 
 let localSource: Array<{
   request: {};

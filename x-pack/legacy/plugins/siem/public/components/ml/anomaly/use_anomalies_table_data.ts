@@ -14,7 +14,7 @@ import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import {
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_TIMEZONE_BROWSER,
@@ -67,9 +67,9 @@ export const useAnomaliesTableData = ({
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
-  const [timezone] = useUiSetting$<string>(DEFAULT_TIMEZONE_BROWSER);
-  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
+  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
+  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
   const siemJobIds = siemJobs.filter(job => job.isInstalled).map(job => job.id);
 

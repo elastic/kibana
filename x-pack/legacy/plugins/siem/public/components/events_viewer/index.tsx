@@ -8,6 +8,7 @@ import { isEqual } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import chrome from 'ui/chrome';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
@@ -17,7 +18,6 @@ import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
 import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
 
-import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
@@ -116,7 +116,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
   }) => {
     const [showInspect, setShowInspect] = useState(false);
     const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
-      defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
+      defaultIndices ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY)
     );
 
     useEffect(() => {

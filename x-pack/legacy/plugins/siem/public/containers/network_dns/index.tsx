@@ -8,8 +8,8 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 
+import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetNetworkDnsQuery,
@@ -19,7 +19,6 @@ import {
   MatrixOverOrdinalHistogramData,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
-import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -54,7 +53,7 @@ export interface NetworkDnsComponentReduxProps {
   limit: number;
 }
 
-type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps & WithKibanaProps;
+type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps;
 
 export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
   NetworkDnsProps,
@@ -71,14 +70,13 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
       id = ID,
       isInspected,
       isPtrIncluded,
-      kibana,
       limit,
       skip,
       sourceId,
       startDate,
     } = this.props;
     const variables: GetNetworkDnsQuery.Variables = {
-      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       inspect: isInspected,
       isPtrIncluded,
@@ -174,12 +172,7 @@ const makeMapHistogramStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkDnsQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(NetworkDnsComponentQuery);
-
-export const NetworkDnsHistogramQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapHistogramStateToProps),
-  withKibana
-)(NetworkDnsComponentQuery);
+export const NetworkDnsQuery = connect(makeMapStateToProps)(NetworkDnsComponentQuery);
+export const NetworkDnsHistogramQuery = connect(makeMapHistogramStateToProps)(
+  NetworkDnsComponentQuery
+);

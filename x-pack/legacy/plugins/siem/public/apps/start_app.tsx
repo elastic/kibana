@@ -9,6 +9,8 @@ import React, { memo, FC } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
+import { LegacyCoreStart } from 'kibana/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -17,14 +19,16 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { I18nContext } from 'ui/i18n';
 
-import { KibanaContextProvider, useUiSetting$ } from '../lib/kibana';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';
 import { compose } from '../lib/compose/kibana_compose';
 import { AppFrontendLibs } from '../lib/lib';
-import { StartCore, StartPlugins } from './plugin';
+import { KibanaCoreContextProvider } from '../lib/compose/kibana_core';
+import { KibanaPluginsContextProvider } from '../lib/compose/kibana_plugins';
+import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
@@ -40,7 +44,7 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
   const store = createStore(undefined, libs$.pipe(pluck('apolloClient')));
 
   const AppPluginRoot = memo(() => {
-    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
     return (
       <EuiErrorBoundary>
         <I18nContext>
@@ -73,15 +77,21 @@ const StartApp: FC<AppFrontendLibs> = memo(libs => {
 
 export const ROOT_ELEMENT_ID = 'react-siem-root';
 
-export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core, plugins }) => (
-  <KibanaContextProvider
-    services={{
-      appName: 'siem',
-      data: plugins.data,
-      storage: new Storage(localStorage),
-      ...core,
-    }}
-  >
-    <StartApp {...compose()} />
-  </KibanaContextProvider>
-));
+export const SiemApp = memo<{ core: LegacyCoreStart; plugins: PluginsStart }>(
+  ({ core, plugins }) => (
+    <KibanaContextProvider
+      services={{
+        appName: 'siem',
+        data: plugins.data,
+        storage: new Storage(localStorage),
+        ...core,
+      }}
+    >
+      <KibanaCoreContextProvider core={core}>
+        <KibanaPluginsContextProvider plugins={plugins}>
+          <StartApp {...compose()} />
+        </KibanaPluginsContextProvider>
+      </KibanaCoreContextProvider>
+    </KibanaContextProvider>
+  )
+);

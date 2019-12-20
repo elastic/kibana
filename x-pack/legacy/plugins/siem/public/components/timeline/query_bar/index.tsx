@@ -19,7 +19,7 @@ import {
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
-import { useKibana } from '../../../lib/kibana';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../utils/saved_query_services';
@@ -92,8 +92,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
-    const kibana = useKibana();
-    const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
+    const core = useKibanaCore();
+    const [filterManager] = useState<FilterManager>(new FilterManager(core.uiSettings));
 
     const savedQueryServices = useSavedQueryServices();
 

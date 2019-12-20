@@ -35,6 +35,8 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('SourceDestinationIp', () => {
   const mount = useMountAppended();
 

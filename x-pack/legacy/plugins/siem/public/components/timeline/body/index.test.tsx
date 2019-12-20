@@ -17,6 +17,8 @@ import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {

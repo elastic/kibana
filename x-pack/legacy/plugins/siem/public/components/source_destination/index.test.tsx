@@ -47,6 +47,8 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 const getSourceDestinationInstance = () => (
   <SourceDestination
     contextId="test"

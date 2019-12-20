@@ -13,7 +13,7 @@ export interface Group {
 }
 
 export interface CheckRecognizerProps {
-  indexPatternName: string[];
+  indexPatternName: string;
   kbnVersion: string;
   signal: AbortSignal;
 }

@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { FetchRulesResponse, FilterOptions, PaginationOptions } from './types';
 import { useStateToaster } from '../../../components/toasters';
@@ -35,7 +35,7 @@ export const useRules = (
     data: [],
   });
   const [loading, setLoading] = useState(true);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
