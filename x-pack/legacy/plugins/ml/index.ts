@@ -23,6 +23,13 @@ interface MlServer extends Server {
   addAppLinksToSampleDataset: () => {};
 }
 
+enum AppCategory {
+  analyze,
+  observability,
+  security,
+  management,
+}
+
 export const ml = (kibana: any) => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -42,6 +49,7 @@ export const ml = (kibana: any) => {
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/legacy',
+        category: AppCategory.management,
       },
       styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],

@@ -12,6 +12,13 @@ import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
+export const AppCategoryObj = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management'
+};
+
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
@@ -28,7 +35,8 @@ export const apm: LegacyPluginInitializer = kibana => {
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
-        order: 8100
+        order: 8100,
+        category: AppCategoryObj.observability
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/legacy_register_feature'],

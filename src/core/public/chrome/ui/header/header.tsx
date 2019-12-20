@@ -364,89 +364,102 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  public renderNavLinks(navLinks: NavLinkWrapper[]) {
+  public renderNavLinks() {
     const isOSS = false; // TODO@myasonik
-    if (navLinks.length < 6 || isOSS) {
+    if (isOSS || this.state.navLinks.length < 7) {
       return (
-        <EuiNavDrawerGroup
-          data-test-subj="navDrawerAppsMenu"
-          listItems={navLinks}
-          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-            defaultMessage: 'Primary navigation links',
+        <EuiNavDrawer
+          ref={this.navDrawerRef}
+          data-test-subj="navDrawer"
+          isLocked={this.props.isLocked}
+          onIsLockedUpdate={this.props.onIsLockedUpdate}
+          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+            defaultMessage: 'Primary',
           })}
-        />
+        >
+          {this.renderRecentLinks(this.state.recentlyAccessed)}
+          <EuiHorizontalRule margin="none" />
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={this.state.navLinks}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
+        </EuiNavDrawer>
       );
     }
 
     // TODO@myasonik use an enum or something
-    const { undefined: unknowns, management, ...mainNav } = groupBy(navLinks, 'category');
+    const { undefined: unknowns, management, ...mainNav } = groupBy(
+      this.state.navLinks,
+      'category'
+    );
+
+    // Have to conditional the whole nav because of an EUI bug
+    // https://github.com/elastic/eui/issues/2709)
     return (
-      <EuiNavDrawerGroup
-        data-test-subj="navDrawerAppsMenu"
-        aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-          defaultMessage: 'Primary navigation links',
+      <EuiNavDrawer
+        ref={this.navDrawerRef}
+        data-test-subj="navDrawer"
+        isLocked={this.props.isLocked}
+        onIsLockedUpdate={this.props.onIsLockedUpdate}
+        aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+          defaultMessage: 'Primary',
         })}
-        listItems={[
-          ...Object.keys(mainNav).map(groupName => ({
-            label: groupName,
-            iconType: getGroupIcon(groupName),
-            flyoutMenu: { title: groupName, listItems: sortBy(mainNav[groupName], 'order') },
-          })),
-          ...sortBy(unknowns, 'order'),
-        ]}
-      />
+      >
+        {this.renderRecentLinks(this.state.recentlyAccessed)}
+        <EuiHorizontalRule margin="none" />
+        <EuiNavDrawerGroup
+          data-test-subj="navDrawerAppsMenu"
+          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+            defaultMessage: 'Primary navigation links',
+          })}
+          listItems={[
+            ...Object.keys(mainNav).map(groupName => {
+              const childLinks = mainNav[groupName];
+
+              if (childLinks.length === 1) {
+                return { ...childLinks[0], label: groupName, iconType: getGroupIcon(groupName) };
+              }
+
+              return {
+                label: groupName,
+                iconType: getGroupIcon(groupName),
+                flyoutMenu: { title: groupName, listItems: sortBy(childLinks, 'order') },
+              };
+            }),
+            ...sortBy(unknowns, 'order'),
+          ]}
+        />
+        <EuiHorizontalRule margin="none" />
+        <EuiNavDrawerGroup
+          data-test-subj="navDrawerManagementMenu"
+          aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
+            defaultMessage: 'Management navigation links',
+          })}
+          listItems={[
+            {
+              label: 'management',
+              iconType: getGroupIcon('management'),
+              flyoutMenu: { title: 'management', listItems: sortBy(management, 'order') },
+            },
+          ]}
+        />
+      </EuiNavDrawer>
     );
   }
-  // <>
-  //   <EuiNavDrawerGroup
-  //     data-test-subj="navDrawerAppsMenu"
-  //     aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-  //       defaultMessage: 'Primary navigation links',
-  //     })}
-  //     listItems={[
-  //       ...Object.keys(mainNav).map(groupName => ({
-  //         label: groupName,
-  //         iconType: getGroupIcon(groupName),
-  //         flyoutMenu: { title: groupName, listItems: sortBy(mainNav[groupName], 'order') },
-  //       })),
-  //       ...sortBy(unknowns, 'order'),
-  //     ]}
-  //   />
-  //   <EuiHorizontalRule margin="none" />
-  //   <EuiNavDrawerGroup
-  //     data-test-subj="navDrawerManagementMenu"
-  //     aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-  //       defaultMessage: 'Management navigation links',
-  //     })}
-  //     listItems={[
-  //       {
-  //         label: 'management',
-  //         iconType: getGroupIcon('management'),
-  //         flyoutMenu: { title: 'management', listItems: sortBy(management, 'order') },
-  //       },
-  //     ]}
-  //   />
-  // </>
 
   public render() {
+    const { appTitle, isVisible, navControlsLeft, navControlsRight } = this.state;
     const {
       badge$,
       breadcrumbs$,
       helpExtension$,
       helpSupportUrl$,
-      isLocked,
       kibanaDocLink,
       kibanaVersion,
-      onIsLockedUpdate,
     } = this.props;
-    const {
-      appTitle,
-      isVisible,
-      navControlsLeft,
-      navControlsRight,
-      navLinks,
-      recentlyAccessed,
-    } = this.state;
 
     if (!isVisible) {
       return null;
@@ -485,19 +498,7 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        <EuiNavDrawer
-          ref={this.navDrawerRef}
-          data-test-subj="navDrawer"
-          isLocked={isLocked}
-          onIsLockedUpdate={onIsLockedUpdate}
-          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-            defaultMessage: 'Primary',
-          })}
-        >
-          {this.renderRecentLinks(recentlyAccessed)}
-          <EuiHorizontalRule margin="none" />
-          {this.renderNavLinks(navLinks)}
-        </EuiNavDrawer>
+        {this.renderNavLinks()}
       </header>
     );
   }

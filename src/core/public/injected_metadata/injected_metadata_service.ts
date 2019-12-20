@@ -182,7 +182,7 @@ export interface InjectedMetadataSetup {
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
     app: unknown;
-    category?: AppCategory;
+    category: AppCategory;
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

@@ -58,7 +58,7 @@ export interface AppBase {
   /**
    * The category the app lives in
    */
-  category?: AppCategory;
+  category: AppCategory;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.

@@ -21,6 +21,13 @@ const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel'
   defaultMessage: 'Logs',
 });
 
+export const AppCategoryObj = {
+  analyze: 'analyze',
+  observability: 'observability',
+  security: 'security',
+  management: 'management',
+};
+
 export function infra(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,
@@ -55,6 +62,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Metrics',
           }),
           url: `/app/${APP_ID}#/infrastructure`,
+          category: AppCategoryObj.observability,
         },
         {
           description: i18n.translate('xpack.infra.linkLogsDescription', {
@@ -68,6 +76,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Logs',
           }),
           url: `/app/${APP_ID}#/logs`,
+          category: AppCategoryObj.observability,
         },
       ],
       mappings: savedObjectMappings,
