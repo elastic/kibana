@@ -17,7 +17,7 @@ import {
   BoostParameter,
   NullValueParameter,
 } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -58,42 +58,40 @@ interface Props {
 export const BooleanType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <DocValuesParameter />
+      <AdvancedParametersSection>
+        <DocValuesParameter />
 
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
-              {
-                defaultMessage:
-                  'Replace explicit null values with the selected boolean value so that it can be indexed and searched.',
-              }
-            )}
-          >
-            <UseField
-              path="null_value"
-              config={getFieldConfig('null_value_boolean')}
-              component={SelectField}
-              componentProps={{
-                euiFieldProps: {
-                  options: nullValueOptions,
-                  fullWidth: true,
-                },
-              }}
-            />
-          </NullValueParameter>
+        <NullValueParameter
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
+            {
+              defaultMessage:
+                'Replace explicit null values with the selected boolean value so that it can be indexed and searched.',
+            }
+          )}
+        >
+          <UseField
+            path="null_value"
+            config={getFieldConfig('null_value_boolean')}
+            component={SelectField}
+            componentProps={{
+              euiFieldProps: {
+                options: nullValueOptions,
+                fullWidth: true,
+              },
+            }}
+          />
+        </NullValueParameter>
 
-          <StoreParameter />
+        <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 };

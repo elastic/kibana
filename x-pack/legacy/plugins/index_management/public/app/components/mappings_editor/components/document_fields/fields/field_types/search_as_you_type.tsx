@@ -15,7 +15,7 @@ import {
   SimilarityParameter,
   TermVectorParameter,
 } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -38,30 +38,28 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 export const SearchAsYouType = React.memo(({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter
           config={{ ...getFieldConfig('index_options'), defaultValue: 'positions' }}
         />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
+      <AdvancedParametersSection>
         <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
-        <EditFieldSection>
-          <NormsParameter />
+        <NormsParameter />
 
-          <SimilarityParameter
-            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
-          />
+        <SimilarityParameter
+          defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
+        />
 
-          <TermVectorParameter
-            field={field}
-            defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
-          />
+        <TermVectorParameter
+          field={field}
+          defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
+        />
 
-          <StoreParameter />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <StoreParameter />
+      </AdvancedParametersSection>
     </>
   );
 });

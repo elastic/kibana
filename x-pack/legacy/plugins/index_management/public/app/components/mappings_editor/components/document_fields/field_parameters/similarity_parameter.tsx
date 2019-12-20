@@ -23,7 +23,7 @@ export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
       defaultMessage: 'Set similarity',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDescription', {
-      defaultMessage: 'Which scoring algorithm or similarity should be used.',
+      defaultMessage: 'The scoring algorithm or similarity to use.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.similarityDocLinkText', {

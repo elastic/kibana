@@ -28,7 +28,7 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
         defaultMessage: 'Set term vector',
       })}
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
-        defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
+        defaultMessage: 'Store term vectors for an analyzed field.',
       })}
       docLink={{
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorDocLinkText', {

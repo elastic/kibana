@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from './form.schema';
-
-export * from './configuration_form';
-
-export const CONFIGURATION_FIELDS = Object.keys(schema);
+export { ConfigurationForm } from './configuration_form';

@@ -26,6 +26,7 @@ import {
   mockSavedObjectsService,
   mockContextService,
   mockEnsureValidConfiguration,
+  mockUiSettingsService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -57,6 +58,7 @@ test('sets up services on "setup"', async () => {
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -65,6 +67,7 @@ test('sets up services on "setup"', async () => {
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
+  expect(mockUiSettingsService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -100,11 +103,14 @@ test('runs services on "start"', async () => {
   expect(mockHttpService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.start).not.toHaveBeenCalled();
+
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+  expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -125,6 +131,7 @@ test('stops services on "stop"', async () => {
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -133,6 +140,7 @@ test('stops services on "stop"', async () => {
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
+  expect(mockUiSettingsService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {
@@ -146,6 +154,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't setup core services if legacy config validation fails`, async () => {
@@ -164,4 +173,5 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
 });

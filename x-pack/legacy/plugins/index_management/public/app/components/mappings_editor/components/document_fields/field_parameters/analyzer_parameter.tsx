@@ -157,10 +157,10 @@ export const AnalyzerParameter = ({
           >
             {isCustom
               ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
-                  defaultMessage: 'Use predefined',
+                  defaultMessage: 'Use built-in analyzer',
                 })
               : i18n.translate('xpack.idxMgmt.mappingsEditor.customButtonLabel', {
-                  defaultMessage: 'Add custom',
+                  defaultMessage: 'Use custom analyzer',
                 })}
           </EuiButtonEmpty>
 

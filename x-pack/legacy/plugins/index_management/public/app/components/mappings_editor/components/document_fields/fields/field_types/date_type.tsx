@@ -20,7 +20,7 @@ import {
   IgnoreMalformedParameter,
   FormatParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -44,7 +44,7 @@ interface Props {
 export const DateType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
 
         <FormatParameter
@@ -53,40 +53,38 @@ export const DateType = ({ field }: Props) => {
         />
 
         <IgnoreMalformedParameter />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          {/* locale */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
-              defaultMessage: 'Set locale',
-            })}
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldDescription', {
-              defaultMessage: 'The locale to use when parsing dates.',
-            })}
-            defaultToggleValue={getDefaultToggleValue('locale', field.source)}
-          >
-            <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
-          </EditFieldFormRow>
+      <AdvancedParametersSection>
+        {/* locale */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
+            defaultMessage: 'Set locale',
+          })}
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldDescription', {
+            defaultMessage: 'The locale to use when parsing dates.',
+          })}
+          defaultToggleValue={getDefaultToggleValue('locale', field.source)}
+        >
+          <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
+        </EditFieldFormRow>
 
-          <DocValuesParameter />
+        <DocValuesParameter />
 
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
-              {
-                defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
-              }
-            )}
-          />
+        <NullValueParameter
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
+            {
+              defaultMessage: `Accepts a date value in one of the configured format's as the field which is substituted for any explicit null values.`,
+            }
+          )}
+        />
 
-          <StoreParameter />
+        <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 };

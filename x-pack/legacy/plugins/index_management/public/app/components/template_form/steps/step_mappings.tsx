@@ -76,7 +76,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
       {/* Mappings code editor */}
       <MappingsEditor

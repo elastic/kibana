@@ -5,9 +5,8 @@
  */
 
 import { DocLinksStart } from '../../../../../../../src/core/public';
-import { DataType, ConfigType } from '../components/mappings_editor/types';
+import { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
-import { schema as CONFIG_DEFINITION } from '../components/mappings_editor/components/configuration_form/form.schema';
 
 class DocumentationService {
   private esDocsBase: string = '';
@@ -37,14 +36,8 @@ class DocumentationService {
     return `${this.kibanaDocsBase}/managing-indices.html`;
   }
 
-  public getTypeDocLink = (type: DataType | ConfigType, uri = 'main'): string | undefined => {
-    const TYPES = { ...CONFIG_DEFINITION, ...TYPE_DEFINITION } as {
-      [key: string]: any;
-      documentation?: {
-        [key: string]: string;
-      };
-    };
-    const typeDefinition = TYPES[type];
+  public getTypeDocLink = (type: DataType, uri = 'main'): string | undefined => {
+    const typeDefinition = TYPE_DEFINITION[type];
 
     if (!typeDefinition || !typeDefinition.documentation || !typeDefinition.documentation[uri]) {
       return undefined;
@@ -54,6 +47,18 @@ class DocumentationService {
 
   public getMappingTypesLink() {
     return `${this.esDocsBase}/mapping-types.html`;
+  }
+
+  public getDynamicMappingLink() {
+    return `${this.esDocsBase}/dynamic-field-mapping.html`;
+  }
+
+  public getMappingSourceFieldLink() {
+    return `${this.esDocsBase}/mapping-source-field.html`;
+  }
+
+  public getDisablingMappingSourceFieldLink() {
+    return `${this.esDocsBase}/mapping-source-field.html#disable-source-field`;
   }
 
   public getNullValueLink() {
@@ -134,6 +139,18 @@ class DocumentationService {
 
   public getAnalyzerLink() {
     return `${this.esDocsBase}/analyzer.html`;
+  }
+
+  public getEnablingFielddataLink() {
+    return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
+  }
+
+  public getDateFormatLink() {
+    return `${this.esDocsBase}/mapping-date-format.html`;
+  }
+
+  public getIndexOptionsLink() {
+    return `${this.esDocsBase}/index-options.html`;
   }
 }
 

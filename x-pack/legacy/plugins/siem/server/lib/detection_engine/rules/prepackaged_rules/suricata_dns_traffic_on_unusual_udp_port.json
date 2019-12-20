@@ -1,0 +1,17 @@
+{
+  "rule_id": "2343d9a4-365b-45b2-acb0-76934d43c75b",
+  "risk_score": 50,
+  "description": "Suricata DNS Traffic on Unusual UDP Port",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata DNS Traffic on Unusual UDP Port",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610015 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
