@@ -16,6 +16,7 @@ export interface DataTypeDefinition {
     [key: string]: string;
   };
   subTypes?: { label: string; types: SubType[] };
+  description?: () => ReactNode;
 }
 
 export type ConfigType =

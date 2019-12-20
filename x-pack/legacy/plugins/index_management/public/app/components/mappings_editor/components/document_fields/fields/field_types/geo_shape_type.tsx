@@ -5,10 +5,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink } from '@elastic/eui';
 
-import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
