@@ -25,6 +25,7 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -40,7 +41,10 @@ export interface Server extends Legacy.Server {
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
+export type TaskManagerStartContract = Pick<
+  TaskManager,
+  'schedule' | 'fetch' | 'remove' | 'runNow'
+>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
@@ -73,6 +77,7 @@ export interface AlertingPluginsSetup {
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  licensing: LicensingPluginSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -121,6 +126,7 @@ export function shim(
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+    licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
   };
 
   const pluginsStart: AlertingPluginsStart = {

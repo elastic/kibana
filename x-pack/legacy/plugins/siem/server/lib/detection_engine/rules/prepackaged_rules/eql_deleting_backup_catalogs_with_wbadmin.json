@@ -1,0 +1,17 @@
+{
+  "rule_id": "581add16-df76-42bb-af8e-c979bfb39a59",
+  "risk_score": 50,
+  "description": "EQL - Deleting Backup Catalogs with wbadmin",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Deleting Backup Catalogs with wbadmin",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"wbadmin.exe\" and  process.args:(\"delete\" and \"catalog\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
