@@ -56,15 +56,17 @@ export default function({ getService }: PluginFunctionalProviderContext) {
     });
 
     it('renders core application implicitly', async () => {
-      await supertest.get('/render').expect(200, /app:core/);
+      await supertest.get('/requestcontext/render').expect(200, /app:core/);
     });
 
     it('renders core application explicitly', async () => {
-      await supertest.get('/render/core').expect(200, /app:core/);
+      await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
     });
 
-    it('renders other application', async () => {
-      await supertest.get('/render/core_plugin_b').expect(200, /app:core_plugin_b/);
+    it('renders legacy application', async () => {
+      await supertest
+        .get('/requestcontext/render/core_plugin_legacy')
+        .expect(200, /app:core_plugin_legacy/);
     });
   });
 }

@@ -798,6 +798,12 @@ export interface IndexSettingsDeprecationInfo {
     [indexName: string]: DeprecationInfo[];
 }
 
+// @internal @deprecated (undocumented)
+export interface InternalRenderOptions extends IRenderOptions {
+    appId?: string;
+    injectedVarsOverrides?: Record<string, any>;
+}
+
 // @public (undocumented)
 export interface IRenderOptions {
     includeUserSettings?: boolean;
@@ -1185,8 +1191,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @internal (undocumented)
 export interface RenderingServiceSetup {
-    // Warning: (ae-forgotten-export) The symbol "LegacyRenderOptions" needs to be exported by the entry point index.d.ts
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? InternalRenderOptions : IRenderOptions): Promise<string>;
 }
 
 // @public

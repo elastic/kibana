@@ -26,7 +26,12 @@ import { i18n } from '@kbn/i18n';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
-import { RenderingSetupDeps, RenderingServiceSetup, RenderingMetadata } from './types';
+import {
+  RenderingSetupDeps,
+  RenderingServiceSetup,
+  RenderingMetadata,
+  InternalRenderOptions,
+} from './types';
 
 /** @internal */
 export class RenderingService implements CoreService<RenderingServiceSetup> {
@@ -44,14 +49,16 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
     }
 
     return {
-      render: async (request, uiSettings, options) => {
+      render: async (
+        request,
+        uiSettings,
+        {
+          appId = 'core',
+          includeUserSettings = true,
+          injectedVarsOverrides = {},
+        }: InternalRenderOptions = {}
+      ) => {
         const { env } = this.coreContext;
-        const { appId, includeUserSettings, injectedVarsOverrides } = {
-          appId: 'core',
-          includeUserSettings: true,
-          injectedVarsOverrides: {},
-          ...(options || {}),
-        };
         const basePath = http.basePath.get(request);
         const settings = {
           defaults: uiSettings.getRegistered(),

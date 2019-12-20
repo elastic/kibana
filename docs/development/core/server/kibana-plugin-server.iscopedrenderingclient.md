@@ -15,5 +15,5 @@ export interface IScopedRenderingClient
 
 |  Method | Description |
 |  --- | --- |
-|  [render(options)](./kibana-plugin-server.iscopedrenderingclient.render.md) | Generate a KibanaResponse which renders an HTML page bootstrapped with the <code>core</code> bundle. Intended as a response body for HTTP route handlers.<!-- -->\* |
+|  [render(options)](./kibana-plugin-server.iscopedrenderingclient.render.md) | Generate a <code>KibanaResponse</code> which renders an HTML page bootstrapped with the <code>core</code> bundle. Intended as a response body for HTTP route handlers. |
 

@@ -85,8 +85,11 @@ export interface IRenderOptions {
   includeUserSettings?: boolean;
 }
 
-/** @deprecated for legacy use only, remove with ui_render_mixin */
-interface LegacyRenderOptions extends IRenderOptions {
+/**
+ * @internal
+ * @deprecated for legacy use only, remove with ui_render_mixin
+ */
+export interface InternalRenderOptions extends IRenderOptions {
   /**
    * Render the bootstrapped HTML content for an optional legacy bundle.
    * Defaults to `core`.
@@ -136,6 +139,6 @@ export interface RenderingServiceSetup {
   render<R extends KibanaRequest | LegacyRequest>(
     request: R,
     uiSettings: IUiSettingsClient,
-    options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions
+    options?: R extends LegacyRequest ? InternalRenderOptions : IRenderOptions
   ): Promise<string>;
 }
