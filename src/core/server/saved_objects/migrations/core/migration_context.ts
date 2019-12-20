@@ -106,7 +106,7 @@ function createSourceContext(source: FullIndexInfo, alias: string) {
 function createDestContext(
   source: FullIndexInfo,
   alias: string,
-  mappingProperties: MappingProperties,
+  mappingProperties: MappingProperties
 ): FullIndexInfo {
   const activeMappings = buildActiveMappings({ properties: mappingProperties });
 
