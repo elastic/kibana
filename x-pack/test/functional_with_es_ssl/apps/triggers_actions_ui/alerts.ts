@@ -75,7 +75,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('should disable single alert', async () => {
+    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
+    it.skip('should disable single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -96,7 +97,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    it('should re-enable single alert', async () => {
+    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
+    it.skip('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -125,7 +127,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    it('should mute single alert', async () => {
+    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
+    it.skip('should mute single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -146,7 +149,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    it('should unmute single alert', async () => {
+    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
+    it.skip('should unmute single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
