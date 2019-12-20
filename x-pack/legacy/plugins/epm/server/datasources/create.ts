@@ -51,9 +51,9 @@ export async function createDatasource({
   });
 
   // TODO: This should be moved out of the initial data source creation in the end
-  await baseSetup(callCluster);
+  await basePolicySetup(callCluster);
 
-  const datasource = await constructDatasource({
+  const datasource = await createDatasourceObject({
     savedObjectsClient,
     pkg: registryPackageInfo,
     datasourceName,
@@ -61,10 +61,6 @@ export async function createDatasource({
     datasets,
   });
 
-  // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
-  // or something similar, but it's a class not an object so many pieces are missing
-  // we'd still need `user` from the request object, but that's not terrible
-  // lacking that we make another http request to Ingest
   const savedDatasource = await Ingest.createDatasource({ request, datasource });
 
   await Promise.all(
@@ -78,9 +74,9 @@ export async function createDatasource({
 
 /**
  * Makes the basic setup of the assets like global ILM policies. Creates them if they do
- * not exist yet but will not overwrite existing once.
+ * not exist yet but will not overwrite existing ones.
  */
-async function baseSetup(callCluster: CallESAsCurrentUser) {
+async function basePolicySetup(callCluster: CallESAsCurrentUser) {
   if (!(await policyExists('logs-default', callCluster))) {
     await installILMPolicy('logs-default', callCluster);
   }
@@ -89,7 +85,7 @@ async function baseSetup(callCluster: CallESAsCurrentUser) {
   }
 }
 
-async function constructDatasource(options: {
+async function createDatasourceObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkg: RegistryPackage;
   datasourceName: string;
