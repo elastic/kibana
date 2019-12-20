@@ -194,7 +194,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.booleanLongDescription"
-          defaultMessage="Boolean fields accept JSON {true} and {false} values, as well as strings which are interpreted true or false."
+          defaultMessage="Boolean fields accept JSON {true} and {false} values, as well as strings which are interpreted as true or false."
           values={{
             true: <EuiCode>true</EuiCode>,
             false: <EuiCode>false</EuiCode>,
