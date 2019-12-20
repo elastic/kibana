@@ -33,6 +33,36 @@ export const DocumentFields = React.memo(() => {
       <DocumentFieldsTreeEditor />
     );
 
+  const renderCreateField = () => {
+    // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.
+    const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === undefined;
+
+    if (!isCreateFieldFormVisible) {
+      return null;
+    }
+
+    return <CreateField isCancelable={fields.length > 0} allFields={byId} isRootLevelField />;
+  };
+
+  const renderAddFieldButton = () => {
+    const isDisabled = status !== 'idle';
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiButtonEmpty
+          disabled={isDisabled}
+          onClick={addField}
+          iconType="plusInCircleFilled"
+          data-test-subj="addFieldButton"
+        >
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.addFieldButtonLabel', {
+            defaultMessage: 'Add field',
+          })}
+        </EuiButtonEmpty>
+      </>
+    );
+  };
+
   const renderEditField = () => {
     if (status !== 'editingField') {
       return null;
