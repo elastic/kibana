@@ -465,18 +465,18 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
 
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
-                  setTimeFieldOptions(getTimeFieldOptions([], firstFieldOption));
+                  setTimeFieldOptions([firstFieldOption]);
                   setAlertParams('timeFields', []);
 
                   setDefaultExpressionValues();
                   return;
                 }
                 const currentEsFields = await getFields(indices);
-                const timeFields = getTimeFieldOptions(currentEsFields, firstFieldOption);
+                const timeFields = getTimeFieldOptions(currentEsFields as any);
 
                 setEsFields(currentEsFields);
                 setAlertParams('timeFields', timeFields);
-                setTimeFieldOptions(timeFields);
+                setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }}
               onSearchChange={async search => {
                 setIsIndiciesLoading(true);

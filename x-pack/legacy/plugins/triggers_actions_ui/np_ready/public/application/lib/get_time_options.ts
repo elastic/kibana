@@ -15,10 +15,17 @@ export const getTimeOptions = (unitSize: string) =>
     };
   });
 
-export const getTimeFieldOptions = (fields: any, firstFieldOption: any) => {
-  const options = [firstFieldOption];
+interface TimeFieldOptions {
+  text: string;
+  value: string;
+}
 
-  fields.forEach((field: any) => {
+export const getTimeFieldOptions = (
+  fields: Array<{ type: string; name: string }>
+): TimeFieldOptions[] => {
+  const options: TimeFieldOptions[] = [];
+
+  fields.forEach((field: { type: string; name: string }) => {
     if (field.type === 'date') {
       options.push({
         text: field.name,

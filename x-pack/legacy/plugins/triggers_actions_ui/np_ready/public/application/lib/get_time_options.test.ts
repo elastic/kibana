@@ -27,22 +27,10 @@ describe('get_time_options', () => {
   });
 
   test('if getTimeFieldOptions return only date type fields', () => {
-    const timeOnlyTypeFields = getTimeFieldOptions(
-      [
-        { type: 'date', name: 'order_date' },
-        { type: 'number', name: 'sum' },
-      ],
-      {
-        text: 'select',
-        value: '',
-      }
-    );
-    expect(timeOnlyTypeFields).toMatchObject([
-      {
-        text: 'select',
-        value: '',
-      },
-      { text: 'order_date', value: 'order_date' },
+    const timeOnlyTypeFields = getTimeFieldOptions([
+      { type: 'date', name: 'order_date' },
+      { type: 'number', name: 'sum' },
     ]);
+    expect(timeOnlyTypeFields).toMatchObject([{ text: 'order_date', value: 'order_date' }]);
   });
 });
