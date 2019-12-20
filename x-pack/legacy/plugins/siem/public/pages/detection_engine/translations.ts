@@ -18,7 +18,7 @@ export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSign
   defaultMessage: 'Total',
 });
 
-export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signaltitle', {
+export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
   defaultMessage: 'Signals',
 });
 

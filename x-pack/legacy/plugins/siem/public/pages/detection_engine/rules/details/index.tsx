@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
@@ -50,43 +50,51 @@ export const RuleDetailsComponent = memo(() => {
   const [lastSignals] = useSignalInfo({ ruleId });
 
   const title = loading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
-  const subTitle =
-    loading === true || rule === null ? (
-      <EuiLoadingSpinner size="m" />
-    ) : (
-      [
-        <FormattedMessage
-          id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
-          defaultMessage="Created by: {by} on {date}"
-          values={{
-            by: rule?.created_by ?? i18n.UNKNOWN,
-            date: (
-              <FormattedDate
-                value={rule?.created_at ?? new Date().toISOString()}
-                fieldName="createdAt"
-              />
-            ),
-          }}
-        />,
-        rule?.updated_by != null ? (
+  const subTitle = useMemo(
+    () =>
+      loading === true || rule === null ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        [
           <FormattedMessage
-            id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
-            defaultMessage="Updated by: {by} on {date}"
+            id="xpack.siem.detectionEngine.ruleDetails.ruleCreationDescription"
+            defaultMessage="Created by: {by} on {date}"
             values={{
-              by: rule?.updated_by ?? i18n.UNKNOWN,
+              by: rule?.created_by ?? i18n.UNKNOWN,
               date: (
                 <FormattedDate
-                  value={rule?.updated_at ?? new Date().toISOString()}
-                  fieldName="updatedAt"
+                  value={rule?.created_at ?? new Date().toISOString()}
+                  fieldName="createdAt"
                 />
               ),
             }}
-          />
-        ) : (
-          ''
-        ),
-      ]
-    );
+          />,
+          rule?.updated_by != null ? (
+            <FormattedMessage
+              id="xpack.siem.detectionEngine.ruleDetails.ruleUpdateDescription"
+              defaultMessage="Updated by: {by} on {date}"
+              values={{
+                by: rule?.updated_by ?? i18n.UNKNOWN,
+                date: (
+                  <FormattedDate
+                    value={rule?.updated_at ?? new Date().toISOString()}
+                    fieldName="updatedAt"
+                  />
+                ),
+              }}
+            />
+          ) : (
+            ''
+          ),
+        ]
+      ),
+    [loading, rule]
+  );
+
+  const signalDefaultFilters = useMemo(
+    () => (ruleId != null ? buildSignalsRuleIdFilter(ruleId) : []),
+    [ruleId]
+  );
   return (
     <>
       <WithSource sourceId="default">
@@ -192,11 +200,7 @@ export const RuleDetailsComponent = memo(() => {
                     <EuiSpacer />
 
                     {ruleId != null && (
-                      <SignalsTable
-                        from={from}
-                        to={to}
-                        defaultFilters={buildSignalsRuleIdFilter(ruleId)}
-                      />
+                      <SignalsTable from={from} to={to} defaultFilters={signalDefaultFilters} />
                     )}
                   </WrapperPage>
                 </StickyContainer>
