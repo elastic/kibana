@@ -17,6 +17,7 @@ export {
   CreateAPIKeyResult,
 } from './authentication';
 export { PluginSetupContract } from './plugin';
+export { AuthenticatedUser } from '../common/model/authenticated_user';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>

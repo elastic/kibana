@@ -43,7 +43,7 @@ export class CasePlugin {
     );
 
     const caseService = await service.setup({
-      authentication: plugins.security ? plugins.security.authc : null,
+      authentication: plugins.security.authc,
     });
 
     const router = core.http.createRouter();

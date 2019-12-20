@@ -21,8 +21,10 @@ import {
   UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
-import { AuthenticatedUser } from '../../../security/common/model';
+import {
+  AuthenticatedUser,
+  PluginSetupContract as SecurityPluginSetup,
+} from '../../../security/server';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;
@@ -57,7 +59,7 @@ interface GetUserArgs {
 }
 
 interface CaseServiceDeps {
-  authentication: SecurityPluginSetup['authc'] | null;
+  authentication: SecurityPluginSetup['authc'];
 }
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
