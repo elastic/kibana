@@ -22,9 +22,8 @@ import {
   PromiseServiceCreator,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
+  npStart,
 } from '../legacy_imports';
-
-import { start as navigation } from '../../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 
 type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
 
@@ -40,7 +39,7 @@ export const localAppModule = (core: AppMountContext['core']) => {
   createLocalKbnUrlModule();
   createLocalStateModule();
   createLocalPersistedStateModule();
-  createLocalTopNavModule(navigation);
+  createLocalTopNavModule(npStart.plugins.navigation);
   createHrefModule(core);
 
   const appModule = angular.module(appModuleName, [
@@ -52,7 +51,7 @@ export const localAppModule = (core: AppMountContext['core']) => {
     'monitoring/TopNav',
     'monitoring/State',
     'monitoring/Storage',
-    'monitoring/herf',
+    'monitoring/href',
     'monitoring/services',
     'monitoring/filters',
     'monitoring/directives',
@@ -142,7 +141,7 @@ function createLocalI18nModule() {
 
 function createHrefModule(core: AppMountContext['core']) {
   const name: string = 'kbnHref';
-  angular.module('monitoring/herf', []).directive(name, () => {
+  angular.module('monitoring/href', []).directive(name, () => {
     return {
       restrict: 'A',
       link: {

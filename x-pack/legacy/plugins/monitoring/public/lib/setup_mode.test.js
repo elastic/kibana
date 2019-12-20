@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock, overlayServiceMock, notificationServiceMock } from 'src/core/public/mocks'; // eslint-disable-line import/no-unresolved
+import {
+  coreMock,
+  overlayServiceMock,
+  notificationServiceMock,
+} from '../../../../../../src/core/public/mocks';
 
 let toggleSetupMode;
 let initSetupModeState;
@@ -111,7 +115,8 @@ function setModulesAndMocks(isOnCloud = false) {
     },
     npStart: {
       plugins: {
-        data: pluginData
+        data: pluginData,
+        navigation: { ui: {} },
       },
       core: {
         ...coreMock.createStart(),

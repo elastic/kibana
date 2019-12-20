@@ -8,7 +8,7 @@ import angular from 'angular';
 import { npStart, npSetup } from '../legacy_imports';
 
 class Chrome {
-  public dangerouslyGetActiveInjector = (): Promise<angular.auto.IInjectorService | void> => {
+  public dangerouslyGetActiveInjector = (): Promise<angular.auto.IInjectorService> => {
     const targetDomElement: HTMLElement | null = document.getElementById('monitoring-angular-app');
     const $injector = angular.element(targetDomElement!).injector();
     if (!$injector) {

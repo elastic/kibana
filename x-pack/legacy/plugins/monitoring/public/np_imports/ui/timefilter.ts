@@ -7,14 +7,25 @@
 import { IModule, IRootScopeService } from 'angular';
 import { npStart, registerTimefilterWithGlobalStateFactory } from '../legacy_imports';
 
+const {
+  core: { uiSettings },
+} = npStart;
 export const { timefilter } = npStart.plugins.data.query.timefilter;
+
+uiSettings.overrideLocalDefault(
+  'timepicker:refreshIntervalDefaults',
+  JSON.stringify({ value: 10000, pause: false })
+);
+uiSettings.overrideLocalDefault(
+  'timepicker:timeDefaults',
+  JSON.stringify({ from: 'now-1h', to: 'now' })
+);
 
 export const registerTimefilterWithGlobalState = (app: IModule) => {
   app.run((globalState: any, $rootScope: IRootScopeService) => {
+    globalState.fetch();
+    globalState.$inheritedGlobalState = true;
+    globalState.save();
     registerTimefilterWithGlobalStateFactory(timefilter, globalState, $rootScope);
-    $rootScope.$applyAsync(() => {
-      timefilter.setRefreshInterval({ value: 10000, pause: false });
-      timefilter.setTime({ from: 'now-1h', to: 'now' });
-    });
   });
 };

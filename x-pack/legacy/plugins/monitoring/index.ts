@@ -9,7 +9,7 @@ import { Server } from 'src/legacy/server/kbn_server';
 import KbnServer from 'src/legacy/server/kbn_server';
 import { i18n } from '@kbn/i18n';
 
-import { LegacyPluginApi, LegacyPluginSpec, ArrayOrItem } from 'src/legacy/plugin_discovery/types';
+import { LegacyPluginApi, LegacyPluginSpec } from 'src/legacy/plugin_discovery/types';
 
 // @ts-ignore
 import { config as configDefaults } from './config';
@@ -81,7 +81,7 @@ const validConfigOptions: string[] = [
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
-export const monitoring = (kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> => {
+export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     id: 'monitoring',
@@ -123,11 +123,12 @@ export const monitoring = (kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpe
       const { xpack_main, elasticsearch, infra } = legacyPlugins;
       const {
         core: coreSetup,
-        plugins: { usageCollection },
+        plugins: { usageCollection, licensing },
       } = server.newPlatform.setup;
 
       const pluginsSetup: PluginsSetup = {
         usageCollection,
+        licensing,
       };
 
       const __LEGACY: LegacySetup = {

@@ -29,14 +29,13 @@ export class AngularApp {
     const app: IModule = localAppModule(core);
     app.config(($routeProvider: any) => {
       $routeProvider.eagerInstantiationEnabled(false);
-      uiRoutes._addToProvider($routeProvider);
+      uiRoutes.addToProvider($routeProvider);
     });
     configureAppAngularModule(app, core as LegacyCoreStart, true);
     registerTimefilterWithGlobalState(app);
     const appElement = document.createElement('div');
     appElement.setAttribute('style', 'height: 100%');
     appElement.innerHTML = `<div ng-app="monitoring">
-        <base href="${appBasePath}" style="display: none" />
         <div ng-view style="height: 100%" id="monitoring-angular-app"></div>
       </div>`;
     this.injector = angular.bootstrap(appElement, [appModuleName]);
