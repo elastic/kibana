@@ -604,52 +604,56 @@ export default function alertTests({ getService }: FtrProviderContext) {
         /**
          * Skipping due to an issue we've discovered in the `muteAll` api
          * which corrupts the apiKey and causes this test to exhibit flaky behaviour.
+         * Failed CIs for example:
+         * 1. https://github.com/elastic/kibana/issues/53690
+         * 2. https://github.com/elastic/kibana/issues/53683
+         *
          * This will be fixed and reverted in PR: https://github.com/elastic/kibana/pull/53333
          */
-        // it(`shouldn't schedule actions when alert is muted`, async () => {
-        //   const testStart = new Date();
-        //   const reference = alertUtils.generateReference();
-        //   const response = await alertUtils.createAlwaysFiringAction({
-        //     reference,
-        //     overwrites: {
-        //       enabled: false,
-        //       schedule: { interval: '1s' },
-        //     },
-        //   });
+        it.skip(`shouldn't schedule actions when alert is muted`, async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              schedule: { interval: '1s' },
+            },
+          });
 
-        //   switch (scenario.id) {
-        //     case 'no_kibana_privileges at space1':
-        //     case 'space_1_all at space2':
-        //     case 'global_read at space1':
-        //       expect(response.statusCode).to.eql(404);
-        //       expect(response.body).to.eql({
-        //         statusCode: 404,
-        //         error: 'Not Found',
-        //         message: 'Not Found',
-        //       });
-        //       break;
-        //     case 'space_1_all at space1':
-        //     case 'superuser at space1':
-        //       await alertUtils.muteAll(response.body.id);
-        //       await alertUtils.enable(response.body.id);
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'superuser at space1':
+              await alertUtils.muteAll(response.body.id);
+              await alertUtils.enable(response.body.id);
 
-        //       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
-        //       // execution once before disabling the alert and waiting for tasks to finish
-        //       await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
-        //       await alertUtils.disable(response.body.id);
-        //       await taskManagerUtils.waitForIdle(testStart);
+              // Wait until alerts schedule actions twice to ensure actions had a chance to skip
+              // execution once before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
 
-        //       // Should not have executed any action
-        //       const executedActionsResult = await esTestIndexTool.search(
-        //         'action:test.index-record',
-        //         reference
-        //       );
-        //       expect(executedActionsResult.hits.total.value).to.eql(0);
-        //       break;
-        //     default:
-        //       throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-        //   }
-        // });
+              // Should not have executed any action
+              const executedActionsResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(executedActionsResult.hits.total.value).to.eql(0);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
 
         it(`shouldn't schedule actions when alert instance is muted`, async () => {
           const testStart = new Date();
