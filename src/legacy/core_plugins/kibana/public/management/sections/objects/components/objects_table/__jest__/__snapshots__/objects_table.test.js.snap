@@ -54,7 +54,6 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
         },
       ]
     }
-    executeQueryOptions={Object {}}
     items={
       Array [
         Object {

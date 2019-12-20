@@ -1,0 +1,17 @@
+{
+  "rule_id": "e9fc5bd3-c8a1-442c-be6d-032da07c508b",
+  "risk_score": 50,
+  "description": "Suricata Category - Decode of an RPC Query",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Decode of an RPC Query",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Decode of an RPC Query\" or rule.category: \"Decode of an RPC Query\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

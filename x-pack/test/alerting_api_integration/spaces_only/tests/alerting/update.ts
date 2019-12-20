@@ -31,7 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         params: {
           foo: true,
         },
-        interval: '12s',
+        schedule: { interval: '12s' },
         actions: [],
         throttle: '1m',
       };
@@ -44,6 +44,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           id: createdAlert.id,
           tags: ['bar'],
           alertTypeId: 'test.noop',
+          consumer: 'bar',
           createdBy: null,
           enabled: true,
           updatedBy: null,
@@ -71,7 +72,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           params: {
             foo: true,
           },
-          interval: '12s',
+          schedule: { interval: '12s' },
           actions: [],
           throttle: '1m',
         })

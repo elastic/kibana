@@ -46,6 +46,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
+  syncLabelColorWithMb(mbLayerId, mbMap, alpha) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'text-color', color);
+    mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
+  }
+
   isCustomColorRamp() {
     return this._options.useCustomColorRamp;
   }
@@ -111,7 +117,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return getColorRampStops(this._options.color);
   }
 
-  renderHeader() {
+  renderLegendHeader() {
     if (this._options.color) {
       return <ColorGradient colorRampName={this._options.color} />;
     } else {
