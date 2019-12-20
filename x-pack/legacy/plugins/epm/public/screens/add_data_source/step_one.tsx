@@ -18,8 +18,8 @@ import { FormState } from './add_data_source_form';
 
 interface AddDataSourceFormProps {
   formState: FormState;
-  onCheckboxChange: (name: string) => void;
-  onTextChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
+  onDatasetChange: (name: string) => void;
+  onNameChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
   datasetCheckboxes: EuiCheckboxGroupOption[];
   policyOptions: FormState['policies'];
   onPolicyChange: (selectedOptions: AddDataSourceFormProps['policyOptions']) => unknown;
@@ -27,8 +27,8 @@ interface AddDataSourceFormProps {
 
 export const StepOne = ({
   formState,
-  onCheckboxChange,
-  onTextChange,
+  onDatasetChange,
+  onNameChange,
   datasetCheckboxes,
   onPolicyChange,
   policyOptions,
@@ -50,7 +50,7 @@ export const StepOne = ({
             <EuiFieldText
               name="datasourceName"
               value={formState.datasourceName}
-              onChange={onTextChange}
+              onChange={onNameChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -66,7 +66,7 @@ export const StepOne = ({
             <EuiCheckboxGroup
               options={datasetCheckboxes}
               idToSelectedMap={formState.datasets}
-              onChange={onCheckboxChange}
+              onChange={onDatasetChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

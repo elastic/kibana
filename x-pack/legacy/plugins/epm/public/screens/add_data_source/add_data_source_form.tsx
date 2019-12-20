@@ -65,7 +65,7 @@ export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => 
         pkgkey: `${pkg.name}-${pkg.version}`,
         datasets: datasets.filter(d => formState.datasets[d.name] === true),
         datasourceName: formState.datasourceName,
-        // @ts-ignore not sure where/how to enforce a `value` key
+        // @ts-ignore not sure where/how to enforce a `value` key on options
         policyIds: formState.policies.map(({ value }) => value),
       });
       setAddDataSourceSuccess(true);
@@ -81,13 +81,13 @@ export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => 
     }
   };
 
-  const onCheckboxChange = (id: string) =>
+  const onDatasetChange = (id: string) =>
     setSelectedDatasets({
       ...selectedDatasets,
       [id]: !selectedDatasets[id],
     });
 
-  const onTextChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+  const onNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
     setDatasourceName(evt.target.value);
 
   // create checkbox items from datasets for EuiCheckboxGroup
@@ -102,12 +102,12 @@ export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => 
       children: (
         <StepOne
           datasetCheckboxes={checkboxes}
-          onCheckboxChange={onCheckboxChange}
-          onTextChange={onTextChange}
           policyOptions={[
             defaultPolicyOption,
             { label: 'Foo policy', value: 'd09bbe00-21e0-11ea-9786-4545a9e62b25' },
           ]}
+          onDatasetChange={onDatasetChange}
+          onNameChange={onNameChange}
           onPolicyChange={setSelectedPolicies}
           formState={formState}
         />
