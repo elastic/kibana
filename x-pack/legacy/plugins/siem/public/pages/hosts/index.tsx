@@ -21,14 +21,16 @@ const getHostsTabPath = (pagePath: string) =>
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events})`;
+  `${HostsTableType.events}|` +
+  `${HostsTableType.alerts})`;
 
 const getHostDetailsTabPath = (pagePath: string) =>
   `${hostDetailsPagePath}/:tabName(` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events})`;
+  `${HostsTableType.events}|` +
+  `${HostsTableType.alerts})`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
