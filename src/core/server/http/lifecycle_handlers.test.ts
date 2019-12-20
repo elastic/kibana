@@ -22,7 +22,7 @@ import {
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
-import { lifecycleMock } from './lifecycle/lifecycle_mock';
+import { httpServerMock } from './http_server.mocks';
 import { HttpConfig } from './http_config';
 import { KibanaRequest, RouteMethod } from './router';
 
@@ -47,12 +47,12 @@ const forgeRequest = ({
 };
 
 describe('xsrf post-auth handler', () => {
-  let toolkit: ReturnType<typeof lifecycleMock.createToolkit>;
-  let responseFactory: ReturnType<typeof lifecycleMock.createLifecycleResponseFactory>;
+  let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
+  let responseFactory: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
 
   beforeEach(() => {
-    toolkit = lifecycleMock.createToolkit();
-    responseFactory = lifecycleMock.createLifecycleResponseFactory();
+    toolkit = httpServerMock.createToolkit();
+    responseFactory = httpServerMock.createLifecycleResponseFactory();
   });
 
   describe('non destructive methods', () => {
@@ -152,12 +152,12 @@ describe('xsrf post-auth handler', () => {
 });
 
 describe('versionCheck post-auth handler', () => {
-  let toolkit: ReturnType<typeof lifecycleMock.createToolkit>;
-  let responseFactory: ReturnType<typeof lifecycleMock.createLifecycleResponseFactory>;
+  let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
+  let responseFactory: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
 
   beforeEach(() => {
-    toolkit = lifecycleMock.createToolkit();
-    responseFactory = lifecycleMock.createLifecycleResponseFactory();
+    toolkit = httpServerMock.createToolkit();
+    responseFactory = httpServerMock.createLifecycleResponseFactory();
   });
 
   it('forward the request to the next interceptor if header matches', () => {
@@ -212,10 +212,10 @@ describe('versionCheck post-auth handler', () => {
 });
 
 describe('customHeaders pre-response handler', () => {
-  let toolkit: ReturnType<typeof lifecycleMock.createToolkit>;
+  let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
 
   beforeEach(() => {
-    toolkit = lifecycleMock.createToolkit();
+    toolkit = httpServerMock.createToolkit();
   });
 
   it('adds the kbn-name header to the response', () => {

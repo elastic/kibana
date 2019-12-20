@@ -38,7 +38,6 @@ export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-export { lifecycleMock } from './http/lifecycle/lifecycle_mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
