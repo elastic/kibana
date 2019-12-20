@@ -38,7 +38,7 @@ export interface LogEntriesParams {
   startTimestamp: number;
   endTimestamp: number;
   query?: JsonObject;
-  cursor?: { after: LogEntriesCursor | 'first' };
+  cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
 }
 
 export class InfraLogEntriesDomain {

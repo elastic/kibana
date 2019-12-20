@@ -91,14 +91,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   ): Promise<any> {
     const { startTimestamp, endTimestamp, cursor } = params;
 
-    const sortDirection = 'asc';
-    let searchAfterClause = {};
-
-    if (cursor?.after && cursor.after !== 'first') {
-      searchAfterClause = {
-        search_after: [cursor.after.time, cursor.after.tiebreaker],
-      };
-    }
+    const { sortDirection, searchAfterClause } = processCursor(cursor);
 
     const sort = {
       [sourceConfiguration.fields.timestamp]: sortDirection,
@@ -127,7 +120,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     };
 
     const documents = await this.framework.callWithRequest(requestContext, 'search', query);
-    return documents.hits.hits;
+
+    return sortDirection === 'asc' ? documents.hits.hits : documents.hits.hits.reverse();
   }
 
   /** @deprecated */
@@ -403,6 +397,31 @@ const convertDateRangeBucketToSummaryBucket = (
 
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
   filterQuery ? [filterQuery] : [];
+
+function processCursor(
+  cursor: LogEntriesParams['cursor']
+): {
+  sortDirection: 'asc' | 'desc';
+  searchAfterClause: { search_after?: readonly [number, number] };
+} {
+  let sortDirection: 'asc' | 'desc' = 'asc';
+  let searchAfterClause = {};
+
+  if (!cursor) {
+    return { sortDirection, searchAfterClause };
+  }
+
+  if ('before' in cursor) {
+    sortDirection = 'desc';
+    if (cursor.before !== 'last') {
+      searchAfterClause = { search_after: [cursor.before.time, cursor.before.tiebreaker] as const };
+    }
+  } else if ('after' in cursor && cursor.after !== 'first') {
+    searchAfterClause = { search_after: [cursor.after.time, cursor.after.tiebreaker] as const };
+  }
+
+  return { sortDirection, searchAfterClause };
+}
 
 const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({

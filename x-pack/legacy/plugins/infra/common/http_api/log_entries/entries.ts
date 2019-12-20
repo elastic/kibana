@@ -20,12 +20,21 @@ export const logEntriesBaseRequestRT = rt.intersection([
   }),
 ]);
 
+export const logEntriesBeforeRequestRT = rt.intersection([
+  logEntriesBaseRequestRT,
+  rt.type({ before: rt.union([logEntriesCursorRT, rt.literal('last')]) }),
+]);
+
 export const logEntriesAfterRequestRT = rt.intersection([
   logEntriesBaseRequestRT,
   rt.type({ after: rt.union([logEntriesCursorRT, rt.literal('first')]) }),
 ]);
 
-export const logEntriesRequestRT = rt.union([logEntriesBaseRequestRT, logEntriesAfterRequestRT]);
+export const logEntriesRequestRT = rt.union([
+  logEntriesBaseRequestRT,
+  logEntriesBeforeRequestRT,
+  logEntriesAfterRequestRT,
+]);
 
 export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 

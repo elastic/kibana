@@ -42,7 +42,9 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
         const { startDate, endDate, sourceId, query } = payload;
 
         let cursor;
-        if ('after' in payload) {
+        if ('before' in payload) {
+          cursor = { before: payload.before };
+        } else if ('after' in payload) {
           cursor = { after: payload.after };
         }
 
