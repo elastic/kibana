@@ -48,6 +48,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         actions: [],
         params: {},
         createdBy: null,
+        apiKeyOwner: null,
         scheduledTaskId: match.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
