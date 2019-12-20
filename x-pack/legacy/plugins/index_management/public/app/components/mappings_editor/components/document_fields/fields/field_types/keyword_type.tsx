@@ -84,13 +84,10 @@ export const KeywordType = ({ field }: Props) => {
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldTitle', {
             defaultMessage: 'Set length limit',
           })}
-          description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription',
-            {
-              defaultMessage:
-                'Strings longer than this value will not be indexed. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
-            }
-          )}
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription', {
+            defaultMessage:
+              'Strings longer than this value will not be indexed. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
+          })}
           docLink={{
             text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveDocLinkText', {
               defaultMessage: 'Ignore above documentation',
