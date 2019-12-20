@@ -21,6 +21,15 @@ import $ from 'jquery';
 import _ from 'lodash';
 import tableCellFilterHtml from './table_cell_filter.html';
 
+function getFormattedValue(formatter, value) {
+  const parsedUrl = {
+    origin: window.location.origin,
+    pathname: window.location.pathname,
+  };
+
+  return formatter.getConverterFor('html')(value, undefined, undefined, parsedUrl);
+}
+
 export function KbnRows($compile) {
   return {
     restrict: 'A',
@@ -72,7 +81,7 @@ export function KbnRows($compile) {
 
         // An AggConfigResult can "enrich" cell contents by applying a field formatter,
         // which we want to do if possible.
-        contents = contentsIsDefined ? column.formatter.convert(contents, 'html') : '';
+        contents = contentsIsDefined ? getFormattedValue(column.formatter, contents) : '';
 
         if (_.isObject(contents)) {
           if (contents.attr) {

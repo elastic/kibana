@@ -36,13 +36,17 @@ describe('Table Vis - Paginated table', function() {
 
     if (_.isNumber(colCount)) {
       _.times(colCount, function(i) {
-        columns.push({ id: i, title: 'column' + i, formatter: { convert: _.identity } });
+        columns.push({
+          id: i,
+          title: 'column' + i,
+          formatter: { convert: _.identity, getConverterFor: () => _.identity },
+        });
       });
     } else {
       columns = colCount.map((col, i) => ({
         id: i,
         title: col.title,
-        formatter: col.formatter || { convert: _.identity },
+        formatter: col.formatter || { convert: _.identity, getConverterFor: () => _.identity },
       }));
     }
 
@@ -626,6 +630,9 @@ describe('Table Vis - Paginated table', function() {
           id: 0,
           formatter: {
             convert: val => {
+              return val === 'zzz' ? '<h1>hello</h1>' : val;
+            },
+            getConverterFor: () => val => {
               return val === 'zzz' ? '<h1>hello</h1>' : val;
             },
           },
