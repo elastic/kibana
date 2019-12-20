@@ -45,7 +45,7 @@ export interface Policy {
  * have multiple streams.
  */
 export interface Datasource extends SavedObjectAttributes {
-  id?: string;
+  id: string;
   name: string;
   package: Package;
   read_alias?: string;

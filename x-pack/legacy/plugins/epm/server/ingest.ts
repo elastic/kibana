@@ -38,7 +38,7 @@ export async function createDatasource({
   datasource,
 }: {
   request: Request;
-  datasource: Datasource;
+  datasource: Omit<Datasource, 'id'>;
 }) {
   const result: ReturnTypeCreate<Datasource> = await ingestAPI({
     path: '/api/ingest/datasources',

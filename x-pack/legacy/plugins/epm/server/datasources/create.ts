@@ -143,7 +143,7 @@ async function constructDatasource(options: {
   };
 
   const assetsToInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
-  const datasource: Datasource = {
+  const datasource: Omit<Datasource, 'id'> = {
     name: datasourceName,
     read_alias: 'read_alias',
     package: {
