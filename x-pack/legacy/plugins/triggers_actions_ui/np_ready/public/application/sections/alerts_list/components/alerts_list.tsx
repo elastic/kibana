@@ -272,7 +272,7 @@ export const AlertsList: React.FunctionComponent = () => {
                       setSelectedIds(updatedSelectedItemsList.map(item => item.id));
                     },
                   }
-                : null
+                : undefined
             }
             onChange={({ page: changedPage }: { page: Pagination }) => {
               setPage(changedPage);
