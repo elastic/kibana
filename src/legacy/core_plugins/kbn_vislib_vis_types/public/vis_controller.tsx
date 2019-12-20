@@ -18,15 +18,19 @@
  */
 
 import $ from 'jquery';
-import React from 'react';
+import React, { RefObject } from 'react';
+
+import { Vis, VisParams } from 'ui/vis';
 
 import {
   CUSTOM_LEGEND_VIS_TYPES,
   VisLegend,
 } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
+// @ts-ignore
 import { VislibVisProvider } from './vislib/vis';
 import chrome from '../../../ui/public/chrome';
 import { mountReactNode } from '../../../../core/public/utils';
+import { Positions } from './utils/collections';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -35,8 +39,17 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
-export class vislibVisController {
-  constructor(el, vis) {
+export class VislibVisController {
+  unmount: (() => void) | null = null;
+  visParams?: VisParams;
+  legendRef: RefObject<VisLegend>;
+  container: HTMLDivElement;
+  chartEl: HTMLDivElement;
+  legendEl: HTMLDivElement;
+  vislibVis: any;
+  Vislib: any;
+
+  constructor(public el: Element, public vis: Vis) {
     this.el = el;
     this.vis = vis;
     this.unmount = null;
@@ -51,21 +64,22 @@ export class vislibVisController {
     this.chartEl = document.createElement('div');
     this.chartEl.className = 'visLib__chart';
     this.container.appendChild(this.chartEl);
+
     // legend mount point
     this.legendEl = document.createElement('div');
     this.legendEl.className = 'visLib__legend';
     this.container.appendChild(this.legendEl);
   }
 
-  render(esResponse, visParams) {
+  render(esResponse: any, visParams: VisParams) {
     if (this.vislibVis) {
       this.destroy();
     }
 
     return new Promise(async resolve => {
-      if (!this.vislib) {
+      if (!this.Vislib) {
         const $injector = await chrome.dangerouslyGetActiveInjector();
-        const Private = $injector.get('Private');
+        const Private: any = $injector.get('Private');
         this.Vislib = Private(VislibVisProvider);
       }
 
@@ -85,7 +99,7 @@ export class vislibVisController {
           .attr('class', (i, cls) => {
             return cls.replace(/visLib--legend-\S+/g, '');
           })
-          .addClass(legendClassName[visParams.legendPosition]);
+          .addClass((legendClassName as any)[visParams.legendPosition]);
 
         this.mountLegend(esResponse, visParams.legendPosition);
       }
@@ -106,7 +120,7 @@ export class vislibVisController {
     });
   }
 
-  mountLegend(visData, position) {
+  mountLegend(visData: any, position: Positions) {
     this.unmount = mountReactNode(
       <VisLegend
         ref={this.legendRef}

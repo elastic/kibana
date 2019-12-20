@@ -18,14 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 import { colorSchemas } from 'ui/color_maps';
 
-export enum Positions {
-  RIGHT = 'right',
-  LEFT = 'left',
-  TOP = 'top',
-  BOTTOM = 'bottom',
-}
+export const Positions = Object.freeze({
+  RIGHT: 'right' as 'right',
+  LEFT: 'left' as 'left',
+  TOP: 'top' as 'top',
+  BOTTOM: 'bottom' as 'bottom',
+});
+export type Positions = $Values<typeof Positions>;
 
 const getPositions = () => [
   {
@@ -54,11 +56,12 @@ const getPositions = () => [
   },
 ];
 
-export enum ChartTypes {
-  LINE = 'line',
-  AREA = 'area',
-  HISTOGRAM = 'histogram',
-}
+export const ChartTypes = Object.freeze({
+  LINE: 'line' as 'line',
+  AREA: 'area' as 'area',
+  HISTOGRAM: 'histogram' as 'histogram',
+});
+export type ChartTypes = $Values<typeof ChartTypes>;
 
 const getChartTypes = () => [
   {
@@ -81,10 +84,11 @@ const getChartTypes = () => [
   },
 ];
 
-export enum ChartModes {
-  NORMAL = 'normal',
-  STACKED = 'stacked',
-}
+export const ChartModes = Object.freeze({
+  NORMAL: 'normal' as 'normal',
+  STACKED: 'stacked' as 'stacked',
+});
+export type ChartModes = $Values<typeof ChartModes>;
 
 const getChartModes = () => [
   {
@@ -101,11 +105,12 @@ const getChartModes = () => [
   },
 ];
 
-export enum InterpolationModes {
-  LINEAR = 'linear',
-  CARDINAL = 'cardinal',
-  STEP_AFTER = 'step-after',
-}
+export const InterpolationModes = Object.freeze({
+  LINEAR: 'linear' as 'linear',
+  CARDINAL: 'cardinal' as 'cardinal',
+  STEP_AFTER: 'step-after' as 'step-after',
+});
+export type InterpolationModes = $Values<typeof InterpolationModes>;
 
 const getInterpolationModes = () => [
   {
@@ -128,16 +133,18 @@ const getInterpolationModes = () => [
   },
 ];
 
-export enum AxisTypes {
-  CATEGORY = 'category',
-  VALUE = 'value',
-}
+export const AxisTypes = Object.freeze({
+  CATEGORY: 'category' as 'category',
+  VALUE: 'value' as 'value',
+});
+export type AxisTypes = $Values<typeof AxisTypes>;
 
-export enum ScaleTypes {
-  LINEAR = 'linear',
-  LOG = 'log',
-  SQUARE_ROOT = 'square root',
-}
+export const ScaleTypes = Object.freeze({
+  LINEAR: 'linear' as 'linear',
+  LOG: 'log' as 'log',
+  SQUARE_ROOT: 'square root' as 'square root',
+});
+export type ScaleTypes = $Values<typeof ScaleTypes>;
 
 const getScaleTypes = () => [
   {
@@ -160,12 +167,13 @@ const getScaleTypes = () => [
   },
 ];
 
-export enum AxisModes {
-  NORMAL = 'normal',
-  PERCENTAGE = 'percentage',
-  WIGGLE = 'wiggle',
-  SILHOUETTE = 'silhouette',
-}
+export const AxisModes = Object.freeze({
+  NORMAL: 'normal' as 'normal',
+  PERCENTAGE: 'percentage' as 'percentage',
+  WIGGLE: 'wiggle' as 'wiggle',
+  SILHOUETTE: 'silhouette' as 'silhouette',
+});
+export type AxisModes = $Values<typeof AxisModes>;
 
 const getAxisModes = () => [
   {
@@ -194,17 +202,19 @@ const getAxisModes = () => [
   },
 ];
 
-export enum Rotates {
-  HORIZONTAL = 0,
-  VERTICAL = 90,
-  ANGLED = 75,
-}
+export const Rotates = Object.freeze({
+  HORIZONTAL: 0,
+  VERTICAL: 90,
+  ANGLED: 75,
+});
+export type Rotates = $Values<typeof Rotates>;
 
-export enum ThresholdLineStyles {
-  FULL = 'full',
-  DASHED = 'dashed',
-  DOT_DASHED = 'dot-dashed',
-}
+export const ThresholdLineStyles = Object.freeze({
+  FULL: 'full' as 'full',
+  DASHED: 'dashed' as 'dashed',
+  DOT_DASHED: 'dot-dashed' as 'dot-dashed',
+});
+export type ThresholdLineStyles = $Values<typeof ThresholdLineStyles>;
 
 const getThresholdLineStyles = () => [
   {
@@ -248,16 +258,18 @@ const getRotateOptions = () => [
   },
 ];
 
-export enum GaugeTypes {
-  ARC = 'Arc',
-  CIRCLE = 'Circle',
-}
+export const GaugeTypes = Object.freeze({
+  ARC: 'Arc' as 'Arc',
+  CIRCLE: 'Circle' as 'Circle',
+});
+export type GaugeTypes = $Values<typeof GaugeTypes>;
 
-export enum ColorModes {
-  BACKGROUND = 'Background',
-  LABELS = 'Labels',
-  NONE = 'None',
-}
+export const ColorModes = Object.freeze({
+  BACKGROUND: 'Background' as 'Background',
+  LABELS: 'Labels' as 'Labels',
+  NONE: 'None' as 'None',
+});
+export type ColorModes = $Values<typeof ColorModes>;
 
 const getGaugeTypes = () => [
   {
@@ -274,11 +286,12 @@ const getGaugeTypes = () => [
   },
 ];
 
-export enum Alignments {
-  AUTOMATIC = 'automatic',
-  HORIZONTAL = 'horizontal',
-  VERTICAL = 'vertical',
-}
+export const Alignments = Object.freeze({
+  AUTOMATIC: 'automatic' as 'automatic',
+  HORIZONTAL: 'horizontal' as 'horizontal',
+  VERTICAL: 'vertical' as 'vertical',
+});
+export type Alignments = $Values<typeof Alignments>;
 
 const getAlignments = () => [
   {

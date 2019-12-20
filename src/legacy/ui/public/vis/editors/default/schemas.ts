@@ -18,13 +18,43 @@
  */
 
 import _ from 'lodash';
+
+import { Optional } from '@kbn/utility-types';
+
+import { AggParam } from '../../../agg_types';
 import { IndexedArray } from '../../../indexed_array';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { AggGroupNames } from './agg_groups';
+import { AggControlProps } from './controls/agg_control_props';
+
+export interface Schema {
+  aggFilter: string | string[];
+  editor: boolean | string;
+  group: AggGroupNames;
+  max: number;
+  min: number;
+  name: string;
+  params: AggParam[];
+  title: string;
+  defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  editorComponent?: React.ComponentType<AggControlProps>;
+}
 
 class Schemas {
-  constructor(schemas) {
+  // @ts-ignore
+  all: IndexedArray<Schema>;
+
+  constructor(
+    schemas: Array<
+      Optional<
+        Schema,
+        'min' | 'max' | 'group' | 'title' | 'aggFilter' | 'editor' | 'params' | 'defaults'
+      >
+    >
+  ) {
     _(schemas || [])
       .map(schema => {
         if (!schema.name) throw new Error('all schema must have a unique name');
@@ -35,7 +65,7 @@ class Schemas {
               name: 'row',
               default: true,
             },
-          ];
+          ] as AggParam[];
           schema.editorComponent = RowsOrColumnsControl;
         } else if (schema.name === 'radius') {
           schema.editorComponent = RadiusRatioOptionControl;
@@ -51,21 +81,23 @@ class Schemas {
           params: [],
         });
 
-        return schema;
+        return schema as Schema;
       })
-      .tap(schemas => {
+      .tap((fullSchemas: Schema[]) => {
         this.all = new IndexedArray({
           index: ['name'],
           group: ['group'],
           immutable: true,
-          initialSet: schemas,
+          initialSet: fullSchemas,
         });
       })
       .groupBy('group')
       .forOwn((group, groupName) => {
+        // @ts-ignore
         this[groupName] = new IndexedArray({
           index: ['name'],
           immutable: true,
+          // @ts-ignore
           initialSet: group,
         });
       })

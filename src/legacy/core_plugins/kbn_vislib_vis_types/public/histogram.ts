@@ -18,13 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { palettes } from '@elastic/eui/lib/services';
+
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
+
 import {
   Positions,
   ChartTypes,
   ChartModes,
-  InterpolationModes,
   AxisTypes,
   ScaleTypes,
   AxisModes,
@@ -33,20 +35,21 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { palettes } from '@elastic/eui/lib/services';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './vis_controller';
 
-export const areaDefinition = {
-  name: 'area',
-  title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
-  icon: 'visArea',
-  description: i18n.translate('kbnVislibVisTypes.area.areaDescription', {
-    defaultMessage: 'Emphasize the quantity beneath a line chart',
+export const histogramDefinition = {
+  name: 'histogram',
+  title: i18n.translate('kbnVislibVisTypes.histogram.histogramTitle', {
+    defaultMessage: 'Vertical Bar',
   }),
-  visualization: vislibVisController,
+  icon: 'visBarVertical',
+  description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription', {
+    defaultMessage: 'Assign a continuous variable to each axis',
+  }),
+  visualization: VislibVisController,
   visConfig: {
     defaults: {
-      type: 'area',
+      type: 'histogram',
       grid: {
         categoryLines: false,
       },
@@ -94,17 +97,16 @@ export const areaDefinition = {
       seriesParams: [
         {
           show: true,
-          type: ChartTypes.AREA,
+          type: ChartTypes.HISTOGRAM,
           mode: ChartModes.STACKED,
           data: {
             label: countLabel,
             id: '1',
           },
+          valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          interpolate: InterpolationModes.LINEAR,
-          valueAxis: 'ValueAxis-1',
         },
       ],
       addTooltip: true,
@@ -112,6 +114,9 @@ export const areaDefinition = {
       legendPosition: Positions.RIGHT,
       times: [],
       addTimeMarker: false,
+      labels: {
+        show: false,
+      },
       thresholdLine: {
         show: false,
         value: 10,
@@ -119,7 +124,6 @@ export const areaDefinition = {
         style: ThresholdLineStyles.FULL,
         color: palettes.euiPaletteColorBlind.colors[9],
       },
-      labels: {},
     },
   },
   events: {
@@ -132,15 +136,19 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', { defaultMessage: 'Y-axis' }),
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        title: i18n.translate('kbnVislibVisTypes.histogram.metricTitle', {
+          defaultMessage: 'Y-axis',
+        }),
         min: 1,
+        aggFilter: ['!geo_centroid', '!geo_bounds'],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', { defaultMessage: 'Dot size' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.radiusTitle', {
+          defaultMessage: 'Dot size',
+        }),
         min: 0,
         max: 1,
         aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
@@ -148,7 +156,9 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', { defaultMessage: 'X-axis' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.segmentTitle', {
+          defaultMessage: 'X-axis',
+        }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
@@ -156,7 +166,7 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.area.groupTitle', {
+        title: i18n.translate('kbnVislibVisTypes.histogram.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -166,7 +176,7 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.area.splitTitle', {
+        title: i18n.translate('kbnVislibVisTypes.histogram.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,

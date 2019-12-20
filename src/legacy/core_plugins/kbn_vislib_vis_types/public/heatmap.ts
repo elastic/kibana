@@ -18,12 +18,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { ColorSchemas } from 'ui/color_maps';
+import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+
 import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
 import { HeatmapOptions } from './components/options';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './vis_controller';
+import { TimeMarker } from './vislib/visualizations/time_marker';
+import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
+
+export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
+  type: 'heatmap';
+  addLegend: boolean;
+  enableHover: boolean;
+  colorsNumber: number | '';
+  colorsRange: RangeValues[];
+  valueAxes: ValueAxis[];
+  setColorRange: boolean;
+  percentageMode: boolean;
+  times: TimeMarker[];
+}
 
 export const heatmapDefinition = {
   name: 'heatmap',
@@ -32,7 +49,7 @@ export const heatmapDefinition = {
   description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', {
     defaultMessage: 'Shade cells within a matrix',
   }),
-  visualization: vislibVisController,
+  visualization: VislibVisController,
   visConfig: {
     defaults: {
       type: 'heatmap',

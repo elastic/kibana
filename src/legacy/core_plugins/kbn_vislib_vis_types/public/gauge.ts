@@ -18,12 +18,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
 import { ColorSchemas } from 'ui/color_maps';
+import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './vis_controller';
+import { ColorSchemaVislibParams, Labels, Style } from './types';
+
+interface Gauge extends ColorSchemaVislibParams {
+  backStyle: 'Full';
+  gaugeStyle: 'Full';
+  orientation: 'vertical';
+  type: 'meter';
+  alignment: Alignments;
+  colorsRange: RangeValues[];
+  extendRange: boolean;
+  gaugeType: GaugeTypes;
+  labels: Labels;
+  percentageMode: boolean;
+  outline?: boolean;
+  scale: {
+    show: boolean;
+    labels: false;
+    color: 'rgba(105,112,125,0.2)';
+  };
+  style: Style;
+}
+
+export interface GaugeVisParams {
+  type: 'gauge';
+  addTooltip: boolean;
+  addLegend: boolean;
+  isDisplayWarning: boolean;
+  gauge: Gauge;
+}
 
 export const gaugeDefinition = {
   name: 'gauge',
@@ -79,7 +111,7 @@ export const gaugeDefinition = {
       },
     },
   },
-  visualization: vislibVisController,
+  visualization: VislibVisController,
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,

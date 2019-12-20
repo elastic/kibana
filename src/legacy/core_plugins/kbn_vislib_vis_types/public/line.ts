@@ -18,8 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { palettes } from '@elastic/eui/lib/services';
+
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
+
 import {
   Positions,
   ChartTypes,
@@ -29,25 +33,23 @@ import {
   AxisModes,
   Rotates,
   ThresholdLineStyles,
+  InterpolationModes,
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { palettes } from '@elastic/eui/lib/services';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './vis_controller';
 
-export const horizontalBarDefinition = {
-  name: 'horizontal_bar',
-  title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', {
-    defaultMessage: 'Horizontal Bar',
+export const lineDefinition = {
+  name: 'line',
+  title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
+  icon: 'visLine',
+  description: i18n.translate('kbnVislibVisTypes.line.lineDescription', {
+    defaultMessage: 'Emphasize trends',
   }),
-  icon: 'visBarHorizontal',
-  description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription', {
-    defaultMessage: 'Assign a continuous variable to each axis',
-  }),
-  visualization: vislibVisController,
+  visualization: VislibVisController,
   visConfig: {
     defaults: {
-      type: 'histogram',
+      type: 'line',
       grid: {
         categoryLines: false,
       },
@@ -55,7 +57,7 @@ export const horizontalBarDefinition = {
         {
           id: 'CategoryAxis-1',
           type: AxisTypes.CATEGORY,
-          position: Positions.LEFT,
+          position: Positions.BOTTOM,
           show: true,
           style: {},
           scale: {
@@ -63,9 +65,8 @@ export const horizontalBarDefinition = {
           },
           labels: {
             show: true,
-            rotate: Rotates.HORIZONTAL,
-            filter: false,
-            truncate: 200,
+            filter: true,
+            truncate: 100,
           },
           title: {},
         },
@@ -75,7 +76,7 @@ export const horizontalBarDefinition = {
           id: 'ValueAxis-1',
           name: 'LeftAxis-1',
           type: AxisTypes.VALUE,
-          position: Positions.BOTTOM,
+          position: Positions.LEFT,
           show: true,
           style: {},
           scale: {
@@ -84,8 +85,8 @@ export const horizontalBarDefinition = {
           },
           labels: {
             show: true,
-            rotate: Rotates.ANGLED,
-            filter: true,
+            rotate: Rotates.HORIZONTAL,
+            filter: false,
             truncate: 100,
           },
           title: {
@@ -96,7 +97,7 @@ export const horizontalBarDefinition = {
       seriesParams: [
         {
           show: true,
-          type: ChartTypes.HISTOGRAM,
+          type: ChartTypes.LINE,
           mode: ChartModes.NORMAL,
           data: {
             label: countLabel,
@@ -105,6 +106,7 @@ export const horizontalBarDefinition = {
           valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           lineWidth: 2,
+          interpolate: InterpolationModes.LINEAR,
           showCircles: true,
         },
       ],
@@ -133,9 +135,7 @@ export const horizontalBarDefinition = {
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', {
-          defaultMessage: 'Y-axis',
-        }),
+        title: i18n.translate('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
         aggFilter: ['!geo_centroid', '!geo_bounds'],
         defaults: [{ schema: 'metric', type: 'count' }],
@@ -143,19 +143,15 @@ export const horizontalBarDefinition = {
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', {
-          defaultMessage: 'Dot size',
-        }),
+        title: i18n.translate('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot size' }),
         min: 0,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', {
-          defaultMessage: 'X-axis',
-        }),
+        title: i18n.translate('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-axis' }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
@@ -163,7 +159,7 @@ export const horizontalBarDefinition = {
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', {
+        title: i18n.translate('kbnVislibVisTypes.line.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -173,7 +169,7 @@ export const horizontalBarDefinition = {
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', {
+        title: i18n.translate('kbnVislibVisTypes.line.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,

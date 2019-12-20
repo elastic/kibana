@@ -23,7 +23,7 @@ import { AggGroupNames } from 'ui/vis/editors/default';
 import { ColorSchemas } from 'ui/color_maps';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './vis_controller';
 
 export const goalDefinition = {
   name: 'goal',
@@ -32,7 +32,7 @@ export const goalDefinition = {
   description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
-  visualization: vislibVisController,
+  visualization: VislibVisController,
   visConfig: {
     defaults: {
       addTooltip: true,

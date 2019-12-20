@@ -22,6 +22,9 @@ import { functionWrapper } from '../../../../plugins/expressions/public/function
 import { createPieVisFn } from './pie_fn';
 
 jest.mock('ui/new_platform');
+jest.mock('ui/vis/response_handlers/vislib', () => ({
+  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+}));
 
 const mockResponseHandler = jest.fn().mockReturnValue(
   Promise.resolve({
@@ -39,9 +42,6 @@ const mockResponseHandler = jest.fn().mockReturnValue(
     },
   })
 );
-jest.mock('ui/vis/response_handlers/vislib', () => ({
-  vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
-}));
 
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(createPieVisFn);
@@ -51,8 +51,6 @@ describe('interpreter/functions#pie', () => {
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
   const visConfig = {
-    addTooltip: true,
-    addLegend: false,
     type: 'pie',
     addTooltip: true,
     addLegend: true,

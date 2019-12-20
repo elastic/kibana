@@ -18,11 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggGroupNames } from 'ui/vis/editors/default';
+
 import { PieOptions } from './components/options';
 import { getPositions, Positions } from './utils/collections';
-import { vislibVisController } from './controller';
+import { VislibVisController } from './vis_controller';
+import { CommonVislibParams } from './types';
+
+export interface PieVisParams extends CommonVislibParams {
+  type: 'pie';
+  addLegend: boolean;
+  isDonut: boolean;
+  labels: {
+    show: boolean;
+    values: boolean;
+    last_level: boolean;
+    truncate: number | null;
+  };
+}
 
 export const pieDefinition = {
   name: 'pie',
@@ -31,7 +46,7 @@ export const pieDefinition = {
   description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', {
     defaultMessage: 'Compare parts of a whole',
   }),
-  visualization: vislibVisController,
+  visualization: VislibVisController,
   visConfig: {
     defaults: {
       type: 'pie',
