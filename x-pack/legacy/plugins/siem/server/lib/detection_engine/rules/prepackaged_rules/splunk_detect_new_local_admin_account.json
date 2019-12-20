@@ -1,0 +1,17 @@
+{
+  "rule_id": "030fc8e4-2c5f-4cc9-a6bd-2b6b7b98ae16",
+  "risk_score": 50,
+  "description": "Splunk - Detect New Local Admin account",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Detect New Local Admin account",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.code:(4720 or 4732) and winlog.event_data.TargetUserName:Administrators",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

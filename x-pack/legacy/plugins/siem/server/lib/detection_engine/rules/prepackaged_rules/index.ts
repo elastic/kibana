@@ -273,6 +273,16 @@ import rule263 from './windows_mimikatz_activity.json';
 import rule264 from './suricata_nonssh_traffic_on_port_22.json';
 import rule265 from './windows_data_compression_using_powershell.json';
 import rule266 from './windows_nmap_scan_activity.json';
+import rule267 from './splunk_windows_event_log_cleared.json';
+import rule268 from './splunk_detect_long_dns_txt_record_response.json';
+import rule269 from './splunk_processes_launching_netsh.json';
+import rule270 from './splunk_detect_large_outbound_icmp_packets.json';
+import rule271 from './splunk_detect_new_local_admin_account.json';
+import rule272 from './splunk_protocols_passing_authentication_in_cleartext.json';
+import rule273 from './splunk_detect_use_of_cmdexe_to_launch_script_interpreters.json';
+import rule274 from './splunk_child_processes_of_spoolsvexe.json';
+import rule275 from './splunk_detect_psexec_with_accepteula_flag.json';
+import rule276 from './splunk_processes_created_by_netsh.json';
 
 export const rawRules = [
   rule1,
@@ -541,4 +551,14 @@ export const rawRules = [
   rule264,
   rule265,
   rule266,
+  rule267,
+  rule268,
+  rule269,
+  rule270,
+  rule271,
+  rule272,
+  rule273,
+  rule274,
+  rule275,
+  rule276,
 ];
