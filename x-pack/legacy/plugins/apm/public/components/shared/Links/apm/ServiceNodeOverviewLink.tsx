@@ -19,7 +19,8 @@ const ServiceNodeOverviewLink = ({ serviceName, ...rest }: Props) => {
     urlParams,
     'host',
     'containerId',
-    'podName'
+    'podName',
+    'serviceVersion'
   );
 
   return (
