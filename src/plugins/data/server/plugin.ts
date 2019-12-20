@@ -46,7 +46,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup> {
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
   }
 
-  public async setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
+  public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.autocompleteService.setup(core);

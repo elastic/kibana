@@ -26,7 +26,7 @@ import { makeKQLUsageCollector } from './usage_collector';
 export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     { http, savedObjects }: CoreSetup,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ) {
@@ -37,10 +37,15 @@ export class KqlTelemetryService implements Plugin<void> {
     );
 
     if (usageCollection) {
-      const config = await this.initializerContext.config.legacy.globalConfig$
+      this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
-        .toPromise();
-      makeKQLUsageCollector(usageCollection, config.kibana.index);
+        .toPromise()
+        .then(config => makeKQLUsageCollector(usageCollection, config.kibana.index))
+        .catch(e => {
+          this.initializerContext.logger
+            .get('kql-telemetry')
+            .warn(`Registering KQL telemetry collector failed: ${e}`);
+        });
     }
   }
 
