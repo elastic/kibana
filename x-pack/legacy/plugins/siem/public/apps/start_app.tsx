@@ -77,9 +77,9 @@ export const SiemApp = memo<{ core: StartCore; plugins: StartPlugins }>(({ core,
   <KibanaContextProvider
     services={{
       appName: 'siem',
-      data: plugins.data,
       storage: new Storage(localStorage),
       ...core,
+      ...plugins,
     }}
   >
     <StartApp {...compose()} />

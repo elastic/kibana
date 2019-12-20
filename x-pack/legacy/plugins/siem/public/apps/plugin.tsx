@@ -10,6 +10,7 @@ import { LegacyCoreStart, PluginInitializerContext } from 'src/core/public';
 import { PluginsStart } from 'ui/new_platform/new_platform';
 import { Chrome } from 'ui/chrome';
 
+import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../../common/constants';
 import { SiemApp } from './start_app';
 import template from './template.html';
 
@@ -32,6 +33,10 @@ export class Plugin {
   }
 
   public start(core: StartCore, plugins: StartPlugins) {
+    // TODO(rylnd): These are unknown by uiSettings by default
+    core.uiSettings.set(DEFAULT_KBN_VERSION, '8.0.0');
+    core.uiSettings.set(DEFAULT_TIMEZONE_BROWSER, 'UTC');
+
     // @ts-ignore improper type description
     this.chrome.setRootTemplate(template);
     const checkForRoot = () => {
