@@ -21,8 +21,8 @@ export const DashboardConstants = {
   ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
   LANDING_PAGE_PATH: '/dashboards',
   CREATE_NEW_DASHBOARD_URL: '/dashboard',
-  EMBEDDABLE_ID: 'embeddableId',
-  EMBEDDABLE_TYPE: 'embeddableType',
+  ADD_EMBEDDABLE_ID: 'addEmbeddableId',
+  ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
 };
 
 export function createDashboardEditUrl(id: string) {

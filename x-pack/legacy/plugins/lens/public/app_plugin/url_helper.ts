@@ -34,7 +34,7 @@ export function getKibanaBasePathFromDashboardUrl(url: string | undefined): stri
  * Returns dashboard URL with added embeddableType and embeddableId query params
  * eg.
  * input: url: http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345, embeddableType: 'lens'
- * output: http://localhost:5601/lib/app/kibana#dashboard?embeddableType=lens&embeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
+ * output: http://localhost:5601/lib/app/kibana#dashboard?addEmbeddableType=lens&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
  * @param url dasbhoard absolute url
  * @param embeddableId id of the saved visualization
  * @param embeddableType 'lens' or 'visualization'
@@ -42,7 +42,7 @@ export function getKibanaBasePathFromDashboardUrl(url: string | undefined): stri
 export function addEmbeddableToDashboardUrl(
   url: string | undefined,
   embeddableId: string,
-  embeddableType: 'lens' | 'visualization'
+  embeddableType: 'lens'
 ): string | null {
   if (!url) {
     return null;
@@ -54,5 +54,5 @@ export function addEmbeddableToDashboardUrl(
   }
   const base = regex[1];
   const dashboardState = regex[2];
-  return `${base}${DashboardConstants.EMBEDDABLE_TYPE}=${embeddableType}&${DashboardConstants.EMBEDDABLE_ID}=${embeddableId}&${dashboardState}`;
+  return `${base}${DashboardConstants.ADD_EMBEDDABLE_TYPE}=${embeddableType}&${DashboardConstants.ADD_EMBEDDABLE_ID}=${embeddableId}&${dashboardState}`;
 }

@@ -35,6 +35,7 @@ import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../embeddable/constants';
 
 import {
   subscribeWithScope,
@@ -588,10 +589,13 @@ function VisualizeAppController(
                 getBasePath()
               );
               dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.EMBEDDABLE_TYPE,
-                'visualization'
+                DashboardConstants.ADD_EMBEDDABLE_TYPE,
+                VISUALIZE_EMBEDDABLE_TYPE
               );
-              dashboardParsedUrl.addQueryParameter(DashboardConstants.EMBEDDABLE_ID, savedVis.id);
+              dashboardParsedUrl.addQueryParameter(
+                DashboardConstants.ADD_EMBEDDABLE_ID,
+                savedVis.id
+              );
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
