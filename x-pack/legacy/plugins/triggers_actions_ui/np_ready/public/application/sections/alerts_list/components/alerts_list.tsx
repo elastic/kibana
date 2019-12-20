@@ -166,7 +166,7 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-alertType',
     },
     {
-      field: 'interval',
+      field: 'schedule.interval',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.intervalTitle',
         { defaultMessage: 'Runs every' }
