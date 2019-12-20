@@ -76,7 +76,6 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
   const alias = opts.index;
   const source = createSourceContext(await fetchInfo(callCluster, alias), alias);
   const dest = createDestContext(source, alias, opts.mappingProperties);
-
   return {
     callCluster,
     alias,
@@ -107,7 +106,7 @@ function createSourceContext(source: FullIndexInfo, alias: string) {
 function createDestContext(
   source: FullIndexInfo,
   alias: string,
-  mappingProperties: MappingProperties
+  mappingProperties: MappingProperties,
 ): FullIndexInfo {
   const activeMappings = buildActiveMappings({ properties: mappingProperties });
 
@@ -115,6 +114,7 @@ function createDestContext(
     aliases: {},
     exists: false,
     indexName: nextIndexName(source.indexName, alias),
+    settings: source.settings,
     mappings: {
       ...activeMappings,
       properties: {
