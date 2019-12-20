@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 
-import { transformError } from './utils';
+import { transformError, transformBulkError, BulkError } from './utils';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -43,6 +43,67 @@ describe('utils', () => {
       };
       const transformed = transformError(error);
       expect(Boom.isBoom(transformed)).toBe(false);
+    });
+
+    test('it detects a TypeError and returns a Boom', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(true);
+    });
+
+    test('it detects a TypeError and returns a Boom status of 400', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformError(error) as Boom;
+      expect(transformed.output.statusCode).toBe(400);
+    });
+  });
+
+  describe('transformBulkError', () => {
+    test('returns transformed object if it is a boom object', () => {
+      const boom = new Boom('some boom message', { statusCode: 400 });
+      const transformed = transformBulkError('rule-1', boom);
+      const expected: BulkError = {
+        id: 'rule-1',
+        error: { message: 'some boom message', statusCode: 400 },
+      };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('returns a normal error if it is some non boom object that has a statusCode', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformBulkError('rule-1', error);
+      const expected: BulkError = {
+        id: 'rule-1',
+        error: { message: 'some message', statusCode: 403 },
+      };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('returns a 500 if the status code is not set', () => {
+      const error: Error & { statusCode?: number } = {
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformBulkError('rule-1', error);
+      const expected: BulkError = {
+        id: 'rule-1',
+        error: { message: 'some message', statusCode: 500 },
+      };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('it detects a TypeError and returns a Boom status of 400', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformBulkError('rule-1', error);
+      const expected: BulkError = {
+        id: 'rule-1',
+        error: { message: 'I have a type error', statusCode: 400 },
+      };
+      expect(transformed).toEqual(expected);
     });
   });
 });

@@ -59,7 +59,7 @@ export function SelectRuleAction({
           <EuiText style={{ display: 'inline' }}>
             <FormattedMessage
               id="xpack.ml.ruleEditor.selectRuleAction.orText"
-              defaultMessage="or&nbsp;"
+              defaultMessage="Or&nbsp;"
             />
           </EuiText>
         </React.Fragment>

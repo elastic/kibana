@@ -1,0 +1,17 @@
+{
+  "rule_id": "4426de6f-6103-44aa-a77e-49d672836c27",
+  "risk_score": 50,
+  "description": "EQL - User Added to Administrator Group",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - User Added to Administrator Group",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"net.exe\" or \"net1.exe\") and not process.parent.name:\"net.exe\" and process.args:(\"group\" and \"admin\" and \"/add\") ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
