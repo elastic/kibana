@@ -6,7 +6,7 @@
 
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { Action } from 'typescript-fsa';
 import { GraphStoreDependencies } from './store';
 import { loadFields } from './fields';

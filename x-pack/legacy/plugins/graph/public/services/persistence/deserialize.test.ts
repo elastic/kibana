@@ -6,7 +6,7 @@
 
 import { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 

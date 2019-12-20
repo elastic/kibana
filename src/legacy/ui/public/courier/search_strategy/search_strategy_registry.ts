@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../core_plugins/data/public';
+import { IndexPattern } from '../../../../../plugins/data/public';
 import { SearchStrategyProvider } from './types';
 import { noOpSearchStrategy } from './no_op_search_strategy';
 import { SearchResponse } from '../types';

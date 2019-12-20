@@ -19,7 +19,9 @@
 
 import { indexPatterns as npIndexPatterns } from '../../../../../plugins/data/public';
 
-export const flattenHitWrapper = npIndexPatterns.flattenHitWrapper;
+const flattenHitWrapper = npIndexPatterns.flattenHitWrapper;
+const getFromSavedObject = npIndexPatterns.getFromSavedObject;
+const getRoutes = npIndexPatterns.getRoutes;
 
 // static code
-export { getFromSavedObject, getRoutes } from '../../../../core_plugins/data/public';
+export { getFromSavedObject, getRoutes, flattenHitWrapper };

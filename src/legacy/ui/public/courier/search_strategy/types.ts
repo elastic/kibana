@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../core_plugins/data/public';
+import { IndexPattern } from '../../../../../plugins/data/public';
 import { FetchHandlers } from '../fetch/types';
 import { SearchRequest, SearchResponse } from '../types';
 

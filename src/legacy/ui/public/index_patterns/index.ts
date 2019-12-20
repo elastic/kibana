@@ -24,7 +24,7 @@
  * from ui/index_patterns for backwards compatibility.
  */
 
-import { indexPatterns } from '../../../../plugins/data/public';
+import { indexPatterns, IFieldType } from '../../../../plugins/data/public';
 
 // static code
 export const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
@@ -37,4 +37,5 @@ export const getFromSavedObject = indexPatterns.getFromSavedObject;
 export const getRoutes = indexPatterns.getRoutes;
 
 // types
-export { Field, FieldType, IFieldList, IndexPattern } from '../../../core_plugins/data/public';
+export { IFieldType as FieldType };
+export { Field, IFieldList, IndexPattern } from '../../../../plugins/data/public';

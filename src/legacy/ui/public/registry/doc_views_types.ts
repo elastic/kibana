@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { ComponentType } from 'react';
 import { IScope } from 'angular';
 

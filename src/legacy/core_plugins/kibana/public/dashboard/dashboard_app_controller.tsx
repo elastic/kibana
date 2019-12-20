@@ -38,8 +38,13 @@ import {
   SavedObjectSaveOpts,
   unhashUrl,
 } from './legacy_imports';
-import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
+import { FilterStateManager } from '../../../data/public';
+import {
+  Query,
+  SavedQuery,
+  IndexPatternsContract,
+  IndexPattern,
+} from '../../../../../plugins/data/public';
 
 import {
   DashboardContainer,

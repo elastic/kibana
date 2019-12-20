@@ -10,7 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
-import { IndexPattern } from '../../../../../../src/legacy/core_plugins/data/public';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 import { openSourceModal } from '../services/source_modal';
 import {
   GraphState,

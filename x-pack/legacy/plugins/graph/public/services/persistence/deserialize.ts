@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'src/legacy/core_plugins/data/public/';
+import { IndexPattern } from 'src/plugins/data/public';
 import {
   SerializedNode,
   UrlTemplate,
