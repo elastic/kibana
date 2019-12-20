@@ -15,6 +15,7 @@ import {
   LogEntriesSummaryHighlightsBucket,
   LogEntry,
   LogEntriesItem,
+  LogEntriesCursor,
 } from '../../../../common/http_api';
 import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
@@ -32,6 +33,13 @@ import {
   Highlights,
   compileFormattingRules,
 } from './message';
+
+export interface LogEntriesParams {
+  startTimestamp: number;
+  endTimestamp: number;
+  query?: JsonObject;
+  cursor?: { after: LogEntriesCursor | 'first' };
+}
 
 export class InfraLogEntriesDomain {
   constructor(
@@ -106,19 +114,23 @@ export class InfraLogEntriesDomain {
   public async getLogEntries(
     requestContext: RequestHandlerContext,
     sourceId: string,
-    startTimestamp: number,
-    endTimestamp: number
+    params: LogEntriesParams
   ): Promise<LogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext,
       sourceId
     );
 
+    const messageFormattingRules = compileFormattingRules(
+      getBuiltinRules(configuration.fields.message)
+    );
+    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+
     const documents = await this.adapter.getLogEntries(
       requestContext,
       configuration,
-      startTimestamp,
-      endTimestamp
+      requiredFields,
+      params
     );
 
     const entries = documents.map((doc: any) => {
@@ -372,8 +384,8 @@ export interface LogEntriesAdapter {
   getLogEntries(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
-    startTimestamp: number,
-    endTimestamp: number
+    fields: string[],
+    params: LogEntriesParams
   ): Promise<any>;
 
   getContainedLogEntryDocuments(

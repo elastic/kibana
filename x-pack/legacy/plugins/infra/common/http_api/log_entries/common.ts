@@ -10,6 +10,7 @@ export const logEntriesCursorRT = rt.type({
   time: rt.number,
   tiebreaker: rt.number,
 });
+export type LogEntriesCursor = rt.TypeOf<typeof logEntriesCursorRT>;
 
 export const esDateRT = rt.union([rt.string, rt.number]);
 export type ESDate = rt.TypeOf<typeof esDateRT>;

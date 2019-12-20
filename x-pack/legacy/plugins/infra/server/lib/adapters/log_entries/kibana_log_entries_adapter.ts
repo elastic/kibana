@@ -20,6 +20,7 @@ import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
+  LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
   LogSummaryBucket,
@@ -85,27 +86,43 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   public async getLogEntries(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
-    startTimestamp: number,
-    endTimestamp: number
+    fields: string[],
+    params: LogEntriesParams
   ): Promise<any> {
+    const { startTimestamp, endTimestamp, cursor } = params;
+
+    const sortDirection = 'asc';
+    let searchAfterClause = {};
+
+    if (cursor?.after && cursor.after !== 'first') {
+      searchAfterClause = {
+        search_after: [cursor.after.time, cursor.after.tiebreaker],
+      };
+    }
+
+    const sort = {
+      [sourceConfiguration.fields.timestamp]: sortDirection,
+      [sourceConfiguration.fields.tiebreaker]: sortDirection,
+    };
+
     const query = {
       allowNoIndices: true,
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
         size: 10,
+        track_total_hits: false,
         query: {
           range: {
             [sourceConfiguration.fields.timestamp]: {
               gte: startTimestamp,
               lte: endTimestamp,
+              format: TIMESTAMP_FORMAT,
             },
           },
         },
-        sort: {
-          [sourceConfiguration.fields.timestamp]: 'asc',
-          [sourceConfiguration.fields.tiebreaker]: 'asc',
-        },
+        sort,
+        ...searchAfterClause,
       },
     };
 

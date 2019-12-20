@@ -9,7 +9,7 @@ import { logEntriesCursorRT, esDateRT } from './common';
 
 export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
 
-export const logEntriesRequestRT = rt.intersection([
+export const logEntriesBaseRequestRT = rt.intersection([
   rt.type({
     sourceId: rt.string,
     startDate: esDateRT,
@@ -19,6 +19,13 @@ export const logEntriesRequestRT = rt.intersection([
     query: rt.string,
   }),
 ]);
+
+export const logEntriesAfterRequestRT = rt.intersection([
+  logEntriesBaseRequestRT,
+  rt.type({ after: rt.union([logEntriesCursorRT, rt.literal('first')]) }),
+]);
+
+export const logEntriesRequestRT = rt.union([logEntriesBaseRequestRT, logEntriesAfterRequestRT]);
 
 export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 

@@ -41,6 +41,11 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
 
         const { startDate, endDate, sourceId, query } = payload;
 
+        let cursor;
+        if ('after' in payload) {
+          cursor = { after: payload.after };
+        }
+
         const startTimestamp = parseDate(startDate);
         const endTimestamp = parseDate(endDate);
 
@@ -48,12 +53,12 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           return response.badRequest();
         }
 
-        const entries = await logEntries.getLogEntries(
-          requestContext,
-          sourceId,
+        const entries = await logEntries.getLogEntries(requestContext, sourceId, {
           startTimestamp,
-          endTimestamp
-        );
+          endTimestamp,
+          query: parseFilterQuery(query),
+          cursor,
+        });
 
         return response.ok({
           body: logEntriesResponseRT.encode({
