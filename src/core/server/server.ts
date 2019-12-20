@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import {
@@ -28,6 +28,7 @@ import {
   coreDeprecationProvider,
 } from './config';
 import { ElasticsearchService } from './elasticsearch';
+import { PulseService } from './pulse';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -59,6 +60,7 @@ export class Server {
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
+  private readonly pulse: PulseService;
   private readonly http: HttpService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
@@ -81,6 +83,7 @@ export class Server {
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
+    this.pulse = new PulseService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
@@ -123,6 +126,35 @@ export class Server {
       http: httpSetup,
     });
 
+    const pulseSetup = await this.pulse.setup({
+      elasticsearch: elasticsearchServiceSetup,
+    });
+
+    // example of retrieving instructions for a specific channel
+    const defaultChannelInstructions$ = pulseSetup.getChannel('default').instructions$();
+
+    // example of retrieving only instructions that you "own"
+    // use this to only pay attention to pulse instructions you care about
+    const coreInstructions$ = defaultChannelInstructions$.pipe(
+      filter(instruction => instruction.owner === 'core')
+    );
+
+    // example of retrieving only instructions of a specific type
+    // use this to only pay attention to specific instructions
+    const pulseTelemetryInstructions$ = coreInstructions$.pipe(
+      filter(instruction => instruction.id === 'pulse_telemetry')
+    );
+
+    // example of retrieving only instructions with a specific value
+    // use this when you want to handle a specific scenario/use case for some type of instruction
+    const retryTelemetryInstructions$ = pulseTelemetryInstructions$.pipe(
+      filter(instruction => instruction.value === 'try_again')
+    );
+
+    retryTelemetryInstructions$.subscribe(() => {
+      this.log.info(`Received instructions to retry telemetry collection`);
+    });
+
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
     });
@@ -136,6 +168,7 @@ export class Server {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
+      pulse: pulseSetup,
       http: httpSetup,
       uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,

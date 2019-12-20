@@ -18,6 +18,7 @@
  */
 
 import { InternalElasticsearchServiceSetup } from './elasticsearch';
+import { InternalPulseService } from './pulse';
 import { InternalHttpServiceSetup } from './http';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { ContextSetup } from './context';
@@ -34,6 +35,7 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  pulse: InternalPulseService;
   uiSettings: InternalUiSettingsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   uuid: UuidServiceSetup;
