@@ -32,6 +32,9 @@ import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
+export * from './np_ready/visualize_constants';
+export { showNewVisModal } from './np_ready/wizard';
+
 /**
  * Get dependencies relying on the global angular context.
  * They also have to get resolved together with the legacy imports above

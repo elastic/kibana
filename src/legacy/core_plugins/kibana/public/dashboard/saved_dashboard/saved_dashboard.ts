@@ -20,9 +20,9 @@ import { SearchSourceContract } from 'ui/courier';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
-import { createDashboardEditUrl } from '../dashboard_constants';
 
 import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
+import { createDashboardEditUrl } from '..';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;
