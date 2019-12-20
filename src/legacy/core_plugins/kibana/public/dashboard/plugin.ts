@@ -26,14 +26,14 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { RenderDeps } from './application';
+import { RenderDeps } from './np_ready/application';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { DashboardConstants } from './dashboard_constants';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import { DashboardConstants } from './np_ready/dashboard_constants';
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
@@ -105,7 +105,7 @@ export class DashboardPlugin implements Plugin {
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
         };
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./np_ready/application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
