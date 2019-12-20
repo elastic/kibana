@@ -2493,8 +2493,6 @@
     "kbn.context.olderDocumentsWarning": "仅可以找到 {docCount} 个比定位标记旧的文档。",
     "kbn.context.olderDocumentsWarningZero": "找不到比定位标记旧的文档。",
     "kbn.discover.fieldChooser.fieldFilterFacetButtonLabel": "已筛选字段",
-    "kbn.discover.fieldChooser.indexPattern.changeLinkTooltip": "更改当前索引模式",
-    "kbn.discover.fieldChooser.indexPattern.changeLinkAriaLabel": "更改当前索引模式",
     "kbn.discover.fieldChooser.searchPlaceHolder": "搜索字段",
     "kbn.discover.histogram.partialData.bucketTooltipText": "选定的时间范围不包括此整个存储桶，其可能包含部分数据。",
     "kbn.doc.failedToLocateIndexPattern": "无索引模式匹配 ID {indexPatternId}",

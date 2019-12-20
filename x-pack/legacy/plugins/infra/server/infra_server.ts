@@ -22,6 +22,7 @@ import { initNodeDetailsRoute } from './routes/node_details';
 import {
   initLogEntriesSummaryRoute,
   initLogEntriesSummaryHighlightsRoute,
+  initLogEntriesItemRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 
@@ -44,6 +45,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initValidateLogAnalysisIndicesRoute(libs);
   initLogEntriesSummaryRoute(libs);
   initLogEntriesSummaryHighlightsRoute(libs);
+  initLogEntriesItemRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
