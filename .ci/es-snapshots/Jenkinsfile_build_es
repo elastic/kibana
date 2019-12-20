@@ -18,7 +18,8 @@ if (!ES_BRANCH) {
   error "Parameter 'ES_BRANCH' must be specified."
 }
 
-currentBuild.displayName += " ES ${params.ES_BRANCH} / Kibana ${params.branch_specifier}"
+currentBuild.displayName += " ${params.ES_BRANCH}"
+currentBuild.description = "ES: ${params.ES_BRANCH}\nKibana: ${params.branch_specifier}"
 
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {

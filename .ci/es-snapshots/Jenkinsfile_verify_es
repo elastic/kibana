@@ -14,7 +14,8 @@ if (!SNAPSHOT_ID) {
   error "Parameter SNAPSHOT_ID must be specified"
 }
 
-currentBuild.displayName += "ES ${SNAPSHOT_VERSION} / Kibana ${params.branch_specifier}"
+currentBuild.displayName += " ${SNAPSHOT_VERSION}"
+currentBuild.description = "ES: ${SNAPSHOT_VERSION}\nKibana: ${params.branch_specifier}"
 
 def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
 
