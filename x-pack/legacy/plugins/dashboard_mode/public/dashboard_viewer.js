@@ -30,7 +30,6 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'plugins/kibana/dashboard';
 import 'ui/color_maps';
 import 'ui/agg_response';
 import 'ui/agg_types';
@@ -39,10 +38,7 @@ import { npStart } from 'ui/new_platform';
 import { localApplicationService } from 'plugins/kibana/local_application_service';
 
 import { showAppRedirectNotification } from 'ui/notify';
-import {
-  DashboardConstants,
-  createDashboardEditUrl,
-} from 'plugins/kibana/dashboard/dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
 uiModules
   .get('kibana')
