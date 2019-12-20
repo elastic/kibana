@@ -25,23 +25,32 @@ import {
   EuiPageContent,
   EuiPageBody,
   EuiPage,
-  EuiEmptyPrompt,
+  EuiImage,
   EuiText,
   EuiButton,
 } from '@elastic/eui';
+import { IUiSettingsClient, HttpStart } from 'kibana/public';
 import * as constants from './dashboard_empty_screen_constants';
 
 export interface DashboardEmptyScreenProps {
   showLinkToVisualize: boolean;
   onLinkClick: () => void;
   onVisualizeClick?: () => void;
+  uiSettings: IUiSettingsClient;
+  http: HttpStart;
 }
 
 export function DashboardEmptyScreen({
   showLinkToVisualize,
   onLinkClick,
   onVisualizeClick,
+  uiSettings,
+  http,
 }: DashboardEmptyScreenProps) {
+  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const emptyStateGraphicURL = IS_DARK_THEME
+    ? '/plugins/kibana/home/assets/welcome_graphic_light_2x.png'
+    : '/plugins/kibana/home/assets/welcome_graphic_light_2x.png';
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
       <EuiButton
@@ -51,25 +60,28 @@ export function DashboardEmptyScreen({
         iconType="arrowDown"
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
+        aria-label={constants.createNewVisualizationButtonAriaLabel}
       >
         {constants.createNewVisualizationButton}
       </EuiButton>
     </p>
   );
   const paragraph = (
-    description1: string,
+    description1?: string,
     description2: string,
     linkText: string,
     ariaLabel: string,
     dataTestSubj?: string
   ) => {
     return (
-      <EuiText size="m">
+      <EuiText size="m" color="subdued">
         <p>
           {description1}
+          {description1 && <span>&nbsp;</span>}
           <EuiLink onClick={onLinkClick} aria-label={ariaLabel} data-test-subj={dataTestSubj || ''}>
             {linkText}
           </EuiLink>
+          <span>&nbsp;</span>
           {description2}
         </p>
       </EuiText>
@@ -81,14 +93,23 @@ export function DashboardEmptyScreen({
     constants.howToStartWorkingOnNewDashboardEditLinkText,
     constants.howToStartWorkingOnNewDashboardEditLinkAriaLabel
   );
+  const enterViewModeParagraph = paragraph(
+    null,
+    constants.addNewVisualizationDescription,
+    constants.addExistingVisualizationLinkText,
+    constants.addExistingVisualizationLinkAriaLabel
+  );
   const viewMode = (
     <EuiPage className="dshStartScreen" restrictWidth="36em">
       <EuiPageBody>
         <EuiPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiIcon type="dashboardApp" size="xxl" color="subdued" />
-          <EuiSpacer size="s" />
-          <EuiText grow={true}>
-            <h2 key={0.5}>{constants.fillDashboardTitle}</h2>
+          <EuiImage
+            style={{ width: 480 }}
+            url={http.basePath.prepend(emptyStateGraphicURL)}
+            alt=""
+          />
+          <EuiText size="m">
+            <p style={{ fontWeight: 'bold' }}>{constants.fillDashboardTitle}</p>
           </EuiText>
           <EuiSpacer size="m" />
           {enterEditModeParagraph}
@@ -98,19 +119,7 @@ export function DashboardEmptyScreen({
   );
   const editMode = (
     <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
-      <EuiText size="m">
-        <p>
-          <EuiLink
-            onClick={onLinkClick}
-            aria-label={constants.addVisualizationLinkAriaLabel}
-            data-test-subj="emptyDashboardAddPanelButton"
-          >
-            {constants.addExistingVisualization}
-          </EuiLink>
-          <span>&nbsp;</span>
-          {constants.addNewVisualization}
-        </p>
-      </EuiText>
+      {enterViewModeParagraph}
       <EuiSpacer size="m" />
       {linkToVisualizeParagraph}
     </div>
