@@ -25,6 +25,7 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -73,6 +74,7 @@ export interface AlertingPluginsSetup {
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  licensing: LicensingPluginSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -121,6 +123,7 @@ export function shim(
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+    licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
   };
 
   const pluginsStart: AlertingPluginsStart = {
