@@ -8,6 +8,7 @@ export default function({ getPageObjects, getService }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
   describe('empty dashboard', function() {
@@ -54,10 +55,11 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.lens.save(title);
     }
 
-    it.skip('adds Lens visualization to empty dashboard', async () => {
+    it('adds Lens visualization to empty dashboard', async () => {
       const title = 'Dashboard Test Lens';
       await testSubjects.exists('addVisualizationButton');
       await testSubjects.click('addVisualizationButton');
+      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await createAndAddLens(title);
       await PageObjects.dashboard.waitForRenderComplete();
       await testSubjects.exists(`embeddablePanelHeading-${title}`);
