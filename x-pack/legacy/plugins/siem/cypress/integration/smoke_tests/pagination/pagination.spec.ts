@@ -55,12 +55,16 @@ describe('Pagination', () => {
 
   it('pagination keeps track of page results when tabs change', () => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
 
     cy.get(ROWS_PER_PAGE).click({ force: true });
     cy.get(FIVE_ROWS).click();
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
 
-    cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(0), { timeout: DEFAULT_TIMEOUT }).should(
+      'have.class',
+      'euiPaginationButton-isActive'
+    );
     let thirdPageResult: string;
     cy.get(getPageButtonSelector(2)).click({ force: true });
     // wait for table to be done loading
@@ -75,7 +79,10 @@ describe('Pagination', () => {
     cy.get(NAVIGATION_AUTHENTICATIONS).click({ force: true });
     waitForTableLoad(AUTHENTICATIONS_TABLE);
     // check authentications table starts at 1
-    cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(0), { timeout: DEFAULT_TIMEOUT }).should(
+      'have.class',
+      'euiPaginationButton-isActive'
+    );
 
     cy.get(NAVIGATION_UNCOMMON_PROCESSES).click({ force: true });
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
