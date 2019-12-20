@@ -7,22 +7,25 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ErrorMarker } from '../ErrorMarker';
-import { IWaterfallItemError } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallError } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 describe('ErrorMarker', () => {
   const mark = ({
-    error: {
-      trace: { id: '123' },
-      transaction: { id: '456' },
-      error: { grouping_key: '123' }
+    doc: {
+      id: '123',
+      name: 'foo',
+      error: {
+        trace: { id: '123' },
+        transaction: { id: '456' },
+        error: { grouping_key: '123' }
+      },
+      serviceColor: '#fff',
+      serviceName: 'bar'
     },
-    id: '123',
-    name: 'foo',
     offset: 10000,
     skew: 0,
-    serviceColor: '#fff',
-    serviceName: 'bar'
-  } as unknown) as IWaterfallItemError;
+    docType: 'error'
+  } as unknown) as IWaterfallError;
   it('renders', () => {
     const component = shallow(<ErrorMarker mark={mark} />);
     expect(component).toMatchSnapshot();

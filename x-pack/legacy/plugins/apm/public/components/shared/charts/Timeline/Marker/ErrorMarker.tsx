@@ -15,12 +15,12 @@ import {
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { px, unit, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
-import { IWaterfallItemError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
 
 interface Props {
-  mark: IWaterfallItemError;
+  mark: IWaterfallError;
 }
 
 const Popover = styled.div`
@@ -57,10 +57,12 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     />
   );
 
+  const errorMark = mark.doc;
+
   const { rangeTo, rangeFrom } = urlParams;
   const query = {
     kuery: encodeURIComponent(
-      `${TRACE_ID} : "${mark.error.trace?.id}" and ${TRANSACTION_ID} : "${mark.error.transaction?.id}"`
+      `${TRACE_ID} : "${errorMark.error.trace?.id}" and ${TRANSACTION_ID} : "${errorMark.error.transaction?.id}"`
     ),
     rangeFrom,
     rangeTo
@@ -82,17 +84,17 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
           )}
         />
         <Legend
-          key={mark.serviceColor}
-          color={mark.serviceColor}
-          text={mark.serviceName}
+          key={errorMark.serviceColor}
+          color={errorMark.serviceColor}
+          text={errorMark.serviceName}
         />
         <EuiText size="s">
           <ErrorLink
-            serviceName={mark.serviceName}
-            errorGroupId={mark.error.error.grouping_key}
+            serviceName={errorMark.serviceName}
+            errorGroupId={errorMark.error.error.grouping_key}
             query={query}
           >
-            {mark.message}
+            {errorMark.message}
           </ErrorLink>
         </EuiText>
       </Popover>

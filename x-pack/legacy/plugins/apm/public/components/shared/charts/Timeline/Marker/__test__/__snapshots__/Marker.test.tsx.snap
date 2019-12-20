@@ -11,9 +11,10 @@ exports[`Marker renders agent marker 1`] = `
   <AgentMarker
     mark={
       Object {
+        "doc": Object {
+          "mark": "agent",
+        },
         "docType": "agentMark",
-        "id": "agent",
-        "name": "agent",
         "offset": 1000,
       }
     }
@@ -32,23 +33,25 @@ exports[`Marker renders error marker 1`] = `
   <ErrorMarker
     mark={
       Object {
-        "docType": "error",
-        "error": Object {
+        "doc": Object {
           "error": Object {
-            "grouping_key": "123",
+            "error": Object {
+              "grouping_key": "123",
+            },
+            "trace": Object {
+              "id": "123",
+            },
+            "transaction": Object {
+              "id": "456",
+            },
           },
-          "trace": Object {
-            "id": "123",
-          },
-          "transaction": Object {
-            "id": "456",
-          },
+          "id": "123",
+          "name": "foo",
+          "serviceColor": "#fff",
+          "serviceName": "bar",
         },
-        "id": "123",
-        "name": "foo",
+        "docType": "error",
         "offset": 10000,
-        "serviceColor": "#fff",
-        "serviceName": "bar",
       }
     }
   />

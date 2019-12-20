@@ -10,12 +10,12 @@ import { px } from '../../../../../style/variables';
 import { AgentMarker } from './AgentMarker';
 import { ErrorMarker } from './ErrorMarker';
 import {
-  IWaterfallItemError,
-  IWaterfallItemAgentMark
+  IWaterfallError,
+  IWaterfallAgentMark
 } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
-  mark: IWaterfallItemError | IWaterfallItemAgentMark;
+  mark: IWaterfallError | IWaterfallAgentMark;
   x: number;
 }
 

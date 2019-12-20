@@ -84,7 +84,7 @@ function TimelineAxis({ plotValues, marks, topTraceDuration }) {
 
               {marks.map(mark => (
                 <Marker
-                  key={mark.id}
+                  key={mark.doc.id || mark.doc.mark}
                   mark={mark}
                   x={xScale(mark.offset + mark.skew)}
                 />

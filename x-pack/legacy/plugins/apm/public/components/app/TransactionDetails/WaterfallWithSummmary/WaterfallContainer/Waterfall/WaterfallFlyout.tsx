@@ -21,7 +21,9 @@ export const WaterfallFlyout: React.FC<Props> = ({
   location,
   toggleFlyout
 }) => {
-  const currentItem = waterfall.items.find(item => item.id === waterfallItemId);
+  const currentItem = waterfall.items.find(
+    item => item.docType !== 'agentMark' && item.doc.id === waterfallItemId
+  );
 
   if (!currentItem) {
     return null;
@@ -30,14 +32,14 @@ export const WaterfallFlyout: React.FC<Props> = ({
   switch (currentItem.docType) {
     case 'span':
       const parentTransaction =
-        currentItem.parent?.docType === 'transaction'
-          ? currentItem.parent.transaction
+        currentItem.doc.parent?.docType === 'transaction'
+          ? currentItem.doc.parent?.doc.transaction
           : undefined;
 
       return (
         <SpanFlyout
           totalDuration={waterfall.duration}
-          span={currentItem.span}
+          span={currentItem.doc.span}
           parentTransaction={parentTransaction}
           onClose={() => toggleFlyout({ location })}
         />
@@ -45,12 +47,12 @@ export const WaterfallFlyout: React.FC<Props> = ({
     case 'transaction':
       return (
         <TransactionFlyout
-          transaction={currentItem.transaction}
+          transaction={currentItem.doc.transaction}
           onClose={() => toggleFlyout({ location })}
           rootTransactionDuration={
             waterfall.rootTransaction?.transaction.duration.us
           }
-          errorCount={currentItem.errorCount}
+          errorCount={currentItem.doc.errorsCount}
         />
       );
     default:

@@ -14,14 +14,11 @@ import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCount } from '../../ErrorCount';
-import {
-  IWaterfallItemTransaction,
-  IWaterfallItemSpan
-} from './waterfall_helpers/waterfall_helpers';
+import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 
-type ItemType = 'transaction' | 'span';
+type ItemType = 'transaction' | 'span' | 'error' | 'agentMark';
 
 interface IContainerStyleProps {
   type: ItemType;
@@ -81,51 +78,54 @@ interface ITimelineMargins {
   bottom: number;
 }
 
-type WaterfallItem = IWaterfallItemTransaction | IWaterfallItemSpan;
-
 interface IWaterfallItemProps {
   timelineMargins: ITimelineMargins;
   totalDuration?: number;
-  item: WaterfallItem;
+  item: IWaterfallItem;
   color: string;
   isSelected: boolean;
   errorCount: number;
   onClick: () => unknown;
 }
 
-function PrefixIcon({ item }: { item: WaterfallItem }) {
-  if (item.docType === 'span') {
-    // icon for database spans
-    const isDbType = item.span.span.type.startsWith('db');
-    if (isDbType) {
-      return <EuiIcon type="database" />;
+function PrefixIcon({ item }: { item: IWaterfallItem }) {
+  switch (item.docType) {
+    case 'span': {
+      // icon for database spans
+      const isDbType = item.doc.span.span.type.startsWith('db');
+      if (isDbType) {
+        return <EuiIcon type="database" />;
+      }
+
+      // omit icon for other spans
+      return null;
     }
+    case 'transaction': {
+      // icon for RUM agent transactions
+      if (isRumAgentName(item.doc.transaction.agent.name)) {
+        return <EuiIcon type="globe" />;
+      }
 
-    // omit icon for other spans
-    return null;
+      // icon for other transactions
+      return <EuiIcon type="merge" />;
+    }
+    default:
+      return null;
   }
-
-  // icon for RUM agent transactions
-  if (isRumAgentName(item.transaction.agent.name)) {
-    return <EuiIcon type="globe" />;
-  }
-
-  // icon for other transactions
-  return <EuiIcon type="merge" />;
 }
 
 interface SpanActionToolTipProps {
-  item?: WaterfallItem;
+  item?: IWaterfallItem;
 }
 
 const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   item,
   children
 }) => {
-  if (item && item.docType === 'span') {
+  if (item?.docType === 'span') {
     return (
       <EuiToolTip
-        content={`${item.span.span.subtype}.${item.span.span.action}`}
+        content={`${item.doc.span.span.subtype}.${item.doc.span.span.action}`}
       >
         <>{children}</>
       </EuiToolTip>
@@ -134,7 +134,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   return <>{children}</>;
 };
 
-function Duration({ item }: { item: WaterfallItem }) {
+function Duration({ item }: { item: IWaterfallItem }) {
   return (
     <EuiText color="subdued" size="xs">
       {asDuration(item.duration)}
@@ -142,12 +142,12 @@ function Duration({ item }: { item: WaterfallItem }) {
   );
 }
 
-function HttpStatusCode({ item }: { item: WaterfallItem }) {
+function HttpStatusCode({ item }: { item: IWaterfallItem }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
     item.docType === 'transaction' &&
-    item.transaction.transaction.type === 'request'
-      ? item.transaction.transaction.result
+    item.doc.transaction.transaction.type === 'request'
+      ? item.doc.transaction.transaction.result
       : undefined;
 
   if (!httpStatusCode) {
@@ -157,15 +157,19 @@ function HttpStatusCode({ item }: { item: WaterfallItem }) {
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
 }
 
-function NameLabel({ item }: { item: WaterfallItem }) {
-  if (item.docType === 'span') {
-    return <EuiText size="s">{item.name}</EuiText>;
+function NameLabel({ item }: { item: IWaterfallItem }) {
+  switch (item.docType) {
+    case 'span':
+      return <EuiText size="s">{item.doc.name}</EuiText>;
+    case 'transaction':
+      return (
+        <EuiTitle size="xxs">
+          <h5>{item.doc.name}</h5>
+        </EuiTitle>
+      );
+    default:
+      return null;
   }
-  return (
-    <EuiTitle size="xxs">
-      <h5>{item.name}</h5>
-    </EuiTitle>
-  );
 }
 
 export function WaterfallItem({
@@ -215,10 +219,10 @@ export function WaterfallItem({
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
           <ErrorOverviewLink
-            serviceName={item.transaction.service.name}
+            serviceName={item.doc.transaction.service.name}
             query={{
               kuery: encodeURIComponent(
-                `${TRACE_ID} : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
+                `${TRACE_ID} : "${item.doc.transaction.trace.id}" and transaction.id : "${item.doc.transaction.transaction.id}"`
               )
             }}
             color="danger"

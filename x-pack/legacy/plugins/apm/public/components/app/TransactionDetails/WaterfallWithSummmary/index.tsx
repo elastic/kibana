@@ -139,7 +139,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       <EuiSpacer size="s" />
 
       <TransactionSummary
-        errorCount={waterfall.errorCount}
+        errorCount={waterfall.errorsCount}
         totalDuration={waterfall.rootTransaction?.timestamp.us}
         transaction={entryTransaction}
       />

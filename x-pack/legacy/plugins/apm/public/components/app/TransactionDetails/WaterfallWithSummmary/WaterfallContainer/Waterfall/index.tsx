@@ -20,7 +20,9 @@ import { WaterfallFlyout } from './WaterfallFlyout';
 import { WaterfallItem } from './WaterfallItem';
 import {
   IWaterfall,
-  IWaterfallItem
+  IWaterfallItem,
+  IWaterfallTransaction,
+  IWaterfallSpan
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = styled.div`
@@ -40,7 +42,7 @@ const toggleFlyout = ({
   item,
   location
 }: {
-  item?: IWaterfallItem;
+  item?: IWaterfallTransaction | IWaterfallSpan;
   location: Location;
 }) => {
   history.replace({
@@ -49,7 +51,7 @@ const toggleFlyout = ({
       ...toQuery(location.search),
       ...{
         flyoutDetailTab: undefined,
-        waterfallItemId: item ? String(item.id) : undefined
+        waterfallItemId: item ? String(item.doc.id) : undefined
       }
     })
   });
@@ -87,19 +89,20 @@ export const Waterfall: React.FC<Props> = ({
     if (item.docType === 'error' || item.docType === 'agentMark') {
       return null;
     }
+
     const errorCount =
       item.docType === 'transaction'
-        ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
+        ? waterfall.errorsPerTransaction[item.doc.transaction.transaction.id]
         : 0;
 
     return (
       <WaterfallItem
-        key={item.id}
+        key={item.doc.id}
         timelineMargins={TIMELINE_MARGINS}
-        color={serviceColors[item.serviceName]}
+        color={serviceColors[item.doc.serviceName]}
         item={item}
         totalDuration={duration}
-        isSelected={item.id === waterfallItemId}
+        isSelected={item.doc.id === waterfallItemId}
         errorCount={errorCount}
         onClick={() => toggleFlyout({ item, location })}
       />

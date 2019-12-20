@@ -8,36 +8,39 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Marker } from '../';
 import {
-  IWaterfallItemAgentMark,
-  IWaterfallItemError
+  IWaterfallAgentMark,
+  IWaterfallError
 } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 describe('Marker', () => {
   it('renders agent marker', () => {
     const mark = {
-      id: 'agent',
-      name: 'agent',
+      doc: {
+        mark: 'agent'
+      },
       offset: 1000,
       docType: 'agentMark'
-    } as IWaterfallItemAgentMark;
+    } as IWaterfallAgentMark;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
   });
 
   it('renders error marker', () => {
     const mark = ({
-      error: {
-        trace: { id: '123' },
-        transaction: { id: '456' },
-        error: { grouping_key: '123' }
+      doc: {
+        id: '123',
+        name: 'foo',
+        error: {
+          trace: { id: '123' },
+          transaction: { id: '456' },
+          error: { grouping_key: '123' }
+        },
+        serviceColor: '#fff',
+        serviceName: 'bar'
       },
-      id: '123',
-      name: 'foo',
       offset: 10000,
-      serviceColor: '#fff',
-      serviceName: 'bar',
       docType: 'error'
-    } as unknown) as IWaterfallItemError;
+    } as unknown) as IWaterfallError;
     const component = shallow(<Marker mark={mark} x={10} />);
     expect(component).toMatchSnapshot();
   });

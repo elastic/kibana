@@ -7,14 +7,16 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { AgentMarker } from '../AgentMarker';
-import { IWaterfallItemAgentMark } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallAgentMark } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 describe('AgentMarker', () => {
   const mark = {
-    id: 'foo',
-    name: 'foo',
-    offset: 10000
-  } as IWaterfallItemAgentMark;
+    doc: {
+      mark: 'foo'
+    },
+    offset: 10000,
+    docType: 'agentMark'
+  } as IWaterfallAgentMark;
   it('renders', () => {
     const component = shallow(<AgentMarker mark={mark} />);
     expect(component).toMatchSnapshot();
