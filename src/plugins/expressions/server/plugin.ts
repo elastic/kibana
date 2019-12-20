@@ -18,6 +18,7 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
+import { LegacyInterpreterServerApi, createLegacyServerInterpreterApi } from './legacy';
 
 // eslint-disable-next-line
 export interface ExpressionsServerSetupDependencies {}
@@ -25,8 +26,9 @@ export interface ExpressionsServerSetupDependencies {}
 // eslint-disable-next-line
 export interface ExpressionsServerStartDependencies {}
 
-// eslint-disable-next-line
-export interface ExpressionsServerSetup {}
+export interface ExpressionsServerSetup {
+  __LEGACY: LegacyInterpreterServerApi;
+}
 
 // eslint-disable-next-line
 export interface ExpressionsServerStart {}
@@ -45,7 +47,9 @@ export class ExpressionsServerPlugin
     core: CoreSetup,
     plugins: ExpressionsServerSetupDependencies
   ): ExpressionsServerSetup {
-    return {};
+    return {
+      __LEGACY: createLegacyServerInterpreterApi(),
+    };
   }
 
   public start(

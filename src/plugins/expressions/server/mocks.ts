@@ -25,7 +25,12 @@ export type Setup = jest.Mocked<ExpressionsServerSetup>;
 export type Start = jest.Mocked<ExpressionsServerStart>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {};
+  const setupContract: Setup = {
+    __LEGACY: {
+      register: jest.fn(),
+      registries: jest.fn(),
+    },
+  };
   return setupContract;
 };
 
