@@ -6,7 +6,7 @@
 
 import yaml from 'js-yaml';
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { Asset, Datasource, Stream } from '../../../ingest/server/libs/types';
+import { Datasource, Stream } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, Dataset, InstallationStatus, RegistryPackage } from '../../common/types';
 import * as Ingest from '../ingest';
@@ -43,7 +43,7 @@ export async function createDatasource({
   }
 
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  const toSave = await installAssets({
+  const installedAssetReferences = await installAssets({
     pkg: registryPackageInfo,
     datasets,
     callCluster,
@@ -57,7 +57,7 @@ export async function createDatasource({
     savedObjectsClient,
     pkg: registryPackageInfo,
     datasourceName,
-    toSave,
+    toSave: installedAssetReferences,
     datasets,
   });
 
@@ -69,7 +69,7 @@ export async function createDatasource({
     )
   );
 
-  return toSave;
+  return installedAssetReferences;
 }
 
 /**
@@ -95,15 +95,9 @@ async function createDatasourceObject(options: {
   const { savedObjectsClient, pkg, toSave, datasets, datasourceName } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, name: datasourceName });
   const savedAssets = savedDatasource?.package.assets || [];
-  const assetsReducer = (current: Asset[] = [], pending: Asset) => {
-    const hasAsset = current.find(c => c.id === pending.id && c.type === pending.type);
-    if (!hasAsset) current.push(pending);
-    return current;
-  };
-
-  const assetsToInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
-
+  const combinedAssets = toSave.reduce(mergeReferencesReducer, savedAssets);
   const streams = await getStreams(Registry.pkgToPkgKey(pkg), datasets);
+
   const datasource: Omit<Datasource, 'id'> = {
     name: datasourceName,
     read_alias: 'read_alias',
@@ -112,7 +106,7 @@ async function createDatasourceObject(options: {
       version: pkg.version,
       description: pkg.description,
       title: pkg.title,
-      assets: assetsToInstall,
+      assets: combinedAssets,
     },
     streams,
   };
@@ -238,6 +232,12 @@ async function installAssets({
 
   return templatesToSave.concat(pipelinesToSave);
 }
+
+const mergeReferencesReducer = (current: AssetReference[] = [], pending: AssetReference) => {
+  const hasReference = current.find(c => c.id === pending.id && c.type === pending.type);
+  if (!hasReference) current.push(pending);
+  return current;
+};
 
 const isDatasetInput = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
   const pathParts = Registry.pathParts(path);
