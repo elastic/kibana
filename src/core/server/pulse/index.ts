@@ -19,7 +19,7 @@
 
 import { readdirSync } from 'fs';
 import { resolve, parse } from 'path';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
 
