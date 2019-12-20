@@ -40,7 +40,10 @@ export interface Server extends Legacy.Server {
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
+export type TaskManagerStartContract = Pick<
+  TaskManager,
+  'schedule' | 'fetch' | 'remove' | 'runNow'
+>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
