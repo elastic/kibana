@@ -88,14 +88,12 @@ export async function createDatasource(options: {
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
 
-  const streams = await getStreams(pkgkey, datasets);
-
   const datasource = await constructDatasource({
     savedObjectsClient,
     pkg: registryPackageInfo,
     datasourceName,
     toSave,
-    streams,
+    datasets,
   });
 
   // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
@@ -131,9 +129,9 @@ async function constructDatasource(options: {
   pkg: RegistryPackage;
   datasourceName: string;
   toSave: AssetReference[];
-  streams: Stream[];
+  datasets: Dataset[];
 }) {
-  const { savedObjectsClient, pkg, toSave, datasourceName, streams } = options;
+  const { savedObjectsClient, pkg, toSave, datasets, datasourceName } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, name: datasourceName });
   const savedAssets = savedDatasource?.package.assets || [];
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -143,6 +141,8 @@ async function constructDatasource(options: {
   };
 
   const assetsToInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
+
+  const streams = await getStreams(Registry.pkgToPkgKey(pkg), datasets);
   const datasource: Omit<Datasource, 'id'> = {
     name: datasourceName,
     read_alias: 'read_alias',
