@@ -25,6 +25,6 @@ export type BatchRequestData<Item> = Item[];
 
 export interface BatchResponseItem<Result extends object, Error extends ErrorLike> {
   id: number;
-  data?: Result;
+  result?: Result;
   error?: Error;
 }

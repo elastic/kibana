@@ -76,8 +76,8 @@ export const createStreamingBatchedFunction = <
             const error = new Error(response.error.message);
             for (const [key, value] of Object.entries(response.error)) (error as any)[key] = value;
             items[response.id].future.reject(error);
-          } else if (response.data) {
-            items[response.id].future.resolve(response.data);
+          } else if (response.result) {
+            items[response.id].future.resolve(response.result);
           }
         });
         await promise;
