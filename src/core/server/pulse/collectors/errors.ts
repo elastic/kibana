@@ -22,10 +22,5 @@
 // be stored as an individual document in the errors channel index
 // by the service
 export async function getRecords() {
-  return [
-    {
-      plugin: 'foo',
-      type: 'bar',
-    },
-  ];
+  return [{}];
 }
