@@ -7,7 +7,6 @@
 import React, { FC, useState, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern } from 'ui/index_patterns';
 import {
   EuiDataGrid,
   EuiFlexGroup,
@@ -36,14 +35,16 @@ import {
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
+import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import { LoadingPanel } from '../loading_panel';
 import { getColumnData } from './column_data';
 import { useKibanaContext } from '../../../../../contexts/kibana';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
-import { getIndexPatternIdFromName } from '../../../../../../application/util/index_utils';
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
 
 const defaultPanelWidth = 500;
-const NO_KEYWORD_FIELDTYPES = ['boolean', 'integer'];
+const NO_KEYWORD_FIELDTYPES = [ES_FIELD_TYPES.BOOLEAN, ES_FIELD_TYPES.INTEGER];
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
@@ -85,13 +86,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     try {
       const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-      const indexPattern: IndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+      const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
 
       if (indexPattern !== undefined) {
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
         // Check dependent_variable field type to see if .keyword suffix is required for evaluate endpoint
         const { fields } = newJobCapsService;
-        const depVarFieldType = fields.find((field: any) => field.name === dependentVariable)?.type;
+        const depVarFieldType = fields.find(field => field.name === dependentVariable)?.type;
 
         if (depVarFieldType !== undefined) {
           noKeywordRequired = NO_KEYWORD_FIELDTYPES.includes(depVarFieldType);

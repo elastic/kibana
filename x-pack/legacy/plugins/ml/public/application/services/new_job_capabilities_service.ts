@@ -14,6 +14,7 @@ import {
 } from '../../../common/types/fields';
 import {
   ES_FIELD_TYPES,
+  IIndexPattern,
   IndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
@@ -89,7 +90,7 @@ class NewJobCapsService {
   }
 
   public async initializeFromIndexPattern(
-    indexPattern: IndexPattern,
+    indexPattern: IIndexPattern,
     includeEventRateField = true,
     removeTextFields = true
   ) {
