@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './item';
-export * from './summary';
-export * from './summary_highlights';
+import * as rt from 'io-ts';
+
+export const logEntriesCursorRT = rt.type({
+  time: rt.number,
+  tiebreaker: rt.number,
+});
