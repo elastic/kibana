@@ -23,21 +23,21 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { TimelineTypeContextProps } from '../timeline/timeline_context';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import * as i18n from './translations';
 
 export interface OwnProps {
   defaultIndices?: string[];
-  defaultFilters?: esFilters.Filter[];
   defaultModel: SubsetTimelineModel;
   end: number;
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
+  pageFilters?: esFilters.Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (totalCount: number) => React.ReactNode;
 }
 
 interface StateReduxProps {
-  activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
   filters: esFilters.Filter[];
@@ -45,9 +45,12 @@ interface StateReduxProps {
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
   kqlMode: KqlMode;
+  deletedEventIds: Readonly<string[]>;
   query: Query;
   pageCount?: number;
   sort?: Sort;
+  showCheckboxes: boolean;
+  showRowRenderers: boolean;
 }
 
 interface DispatchProps {
@@ -56,6 +59,8 @@ interface DispatchProps {
     columns: ColumnHeader[];
     itemsPerPage?: number;
     sort?: Sort;
+    showCheckboxes?: boolean;
+    showRowRenderers?: boolean;
   }>;
   deleteEventQuery: ActionCreator<{
     id: string;
@@ -83,8 +88,8 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
-    defaultFilters = [],
     defaultModel,
+    deletedEventIds,
     defaultIndices,
     deleteEventQuery,
     end,
@@ -95,13 +100,15 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
+    pageFilters = [],
     query,
     removeColumn,
     start,
+    showCheckboxes,
+    showRowRenderers,
     sort,
     timelineTypeContext = {
-      showCheckboxes: false,
-      showRowRenderers: true,
+      loadingText: i18n.LOADING_EVENTS,
     },
     updateItemsPerPage,
     upsertColumn,
@@ -114,7 +121,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null) {
-        createTimeline({ id, columns, sort, itemsPerPage });
+        createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
       }
       return () => {
         deleteEventQuery({ id, inputId: 'global' });
@@ -158,8 +165,9 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           columns={columns}
           id={id}
           dataProviders={dataProviders!}
+          deletedEventIds={deletedEventIds}
           end={end}
-          filters={[...filters, ...defaultFilters]}
+          filters={filters}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
@@ -180,9 +188,9 @@ const StatefulEventsViewerComponent = React.memo<Props>(
   },
   (prevProps, nextProps) =>
     prevProps.id === nextProps.id &&
-    prevProps.activePage === nextProps.activePage &&
     isEqual(prevProps.columns, nextProps.columns) &&
     isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     isEqual(prevProps.filters, nextProps.filters) &&
     prevProps.isLive === nextProps.isLive &&
@@ -192,7 +200,13 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     isEqual(prevProps.query, nextProps.query) &&
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
-    prevProps.start === nextProps.start
+    prevProps.start === nextProps.start &&
+    isEqual(prevProps.pageFilters, nextProps.pageFilters) &&
+    prevProps.showCheckboxes === nextProps.showCheckboxes &&
+    prevProps.showRowRenderers === nextProps.showRowRenderers &&
+    prevProps.start === nextProps.start &&
+    isEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
+    prevProps.utilityBar === nextProps.utilityBar
 );
 
 StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';
@@ -202,15 +216,26 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id, defaultFilters = [], defaultModel }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, pageFilters = [], defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
-    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
+    const {
+      columns,
+      dataProviders,
+      deletedEventIds,
+      itemsPerPage,
+      itemsPerPageOptions,
+      kqlMode,
+      sort,
+      showCheckboxes,
+      showRowRenderers,
+    } = events;
 
     return {
       columns,
       dataProviders,
-      filters: [...getGlobalFiltersQuerySelector(state), ...defaultFilters],
+      deletedEventIds,
+      filters: [...getGlobalFiltersQuerySelector(state), ...pageFilters],
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
@@ -218,6 +243,8 @@ const makeMapStateToProps = () => {
       kqlMode,
       query: getGlobalQuerySelector(state),
       sort,
+      showCheckboxes,
+      showRowRenderers,
     };
   };
   return mapStateToProps;
@@ -227,7 +254,6 @@ export const StatefulEventsViewer = connect(makeMapStateToProps, {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
-  updateSort: timelineActions.updateSort,
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
 })(StatefulEventsViewerComponent);

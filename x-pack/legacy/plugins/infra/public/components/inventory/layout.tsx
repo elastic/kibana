@@ -33,17 +33,21 @@ export interface LayoutProps {
   metric: InfraSnapshotMetricInput;
   groupBy: InfraSnapshotGroupbyInput[];
   sourceId: string;
+  accountId: string;
+  region: string;
 }
 
 export const Layout = (props: LayoutProps) => {
   const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
-  const { loading, nodes, reload } = useSnapshot(
+  const { loading, nodes, reload, interval } = useSnapshot(
     props.filterQuery,
     props.metric,
     props.groupBy,
     props.nodeType,
     props.sourceId,
-    props.currentTime
+    props.currentTime,
+    props.accountId,
+    props.region
   );
 
   return (
@@ -62,6 +66,7 @@ export const Layout = (props: LayoutProps) => {
           view={props.view}
           autoBounds={props.autoBounds}
           boundsOverride={props.boundsOverride}
+          interval={interval}
         />
       </PageContent>
     </>
