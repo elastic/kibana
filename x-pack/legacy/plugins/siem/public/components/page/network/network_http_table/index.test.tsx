@@ -18,6 +18,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('NetworkHttp Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;

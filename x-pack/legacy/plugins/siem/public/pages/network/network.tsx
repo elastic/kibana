@@ -23,7 +23,7 @@ import { WrapperPage } from '../../components/wrapper_page';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { useKibana } from '../../lib/kibana';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -51,7 +51,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     hasMlUserPermissions,
     capabilitiesFetched,
   }) => {
-    const kibana = useKibana();
+    const core = useKibanaCore();
     const { tabName } = useParams();
 
     const networkFilters = useMemo(() => {
@@ -72,7 +72,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         <WithSource sourceId={sourceId}>
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters: networkFilters,

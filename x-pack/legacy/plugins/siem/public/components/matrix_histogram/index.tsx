@@ -14,7 +14,7 @@ import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { ChartSeriesData } from '../charts/common';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
-import { useUiSetting$ } from '../../lib/kibana';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
@@ -45,7 +45,7 @@ export const MatrixHistogram = ({
     showLegend,
   });
   const [showInspect, setShowInspect] = useState(false);
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
 
   const barChartData: ChartSeriesData[] = getCustomChartData(data, mapping);

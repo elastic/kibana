@@ -9,6 +9,7 @@ import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 import { createPortalNode } from 'react-reverse-portal';
 
 jest.mock('ui/new_platform');
+jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 jest.mock('uuid', () => {
   return {

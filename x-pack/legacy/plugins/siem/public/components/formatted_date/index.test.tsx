@@ -9,18 +9,24 @@ import toJson from 'enzyme-to-json';
 import moment from 'moment-timezone';
 import * as React from 'react';
 
-import { useUiSetting$ } from '../../lib/kibana';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 
 import { mockFrameworks, TestProviders, MockFrameworks, getMockKibanaUiSetting } from '../../mock';
-import { getEmptyString, getEmptyValue } from '../empty_value';
-import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 
-jest.mock('../../lib/kibana');
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
+import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
+import { getEmptyString, getEmptyValue } from '../empty_value';
+
+const mockUseKibanaUiSetting: jest.Mock = useKibanaUiSetting as jest.Mock;
+jest.mock('../../lib/settings/use_kibana_ui_setting', () => ({
+  useKibanaUiSetting: jest.fn(),
+}));
 
 describe('formatted_date', () => {
   describe('PreferenceFormattedDate', () => {
     describe('rendering', () => {
+      beforeEach(() => {
+        mockUseKibanaUiSetting.mockClear();
+      });
       const isoDateString = '2019-02-25T22:27:05.000Z';
       const isoDate = new Date(isoDateString);
       const configFormattedDateString = (dateString: string, config: MockFrameworks): string =>
@@ -32,19 +38,21 @@ describe('formatted_date', () => {
           .format(config.dateFormat);
 
       test('renders correctly against snapshot', () => {
-        mockUseUiSetting$.mockImplementation(() => [null]);
+        mockUseKibanaUiSetting.mockImplementation(() => [null]);
         const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(toJson(wrapper)).toMatchSnapshot();
       });
 
       test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {
-        mockUseUiSetting$.mockImplementation(() => [null]);
+        mockUseKibanaUiSetting.mockImplementation(() => [null]);
         const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(isoDateString);
       });
 
       test('it renders the UTC ISO8601 date supplied when the default configuration exists', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
 
         const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(
@@ -53,7 +61,7 @@ describe('formatted_date', () => {
       });
 
       test('it renders the correct tz when the default browser configuration exists', () => {
-        mockUseUiSetting$.mockImplementation(
+        mockUseKibanaUiSetting.mockImplementation(
           getMockKibanaUiSetting(mockFrameworks.default_browser)
         );
         const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
@@ -63,7 +71,9 @@ describe('formatted_date', () => {
       });
 
       test('it renders the correct tz when a non-UTC configuration exists', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_MT));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_MT)
+        );
         const wrapper = mount(<PreferenceFormattedDate value={isoDate} />);
         expect(wrapper.text()).toEqual(
           configFormattedDateString(isoDateString, mockFrameworks.default_MT)
@@ -74,20 +84,30 @@ describe('formatted_date', () => {
 
   describe('FormattedDate', () => {
     describe('rendering', () => {
+      beforeEach(() => {
+        mockUseKibanaUiSetting.mockClear();
+      });
+
       test('it renders against a numeric epoch', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(<FormattedDate fieldName="@timestamp" value={1559079339000} />);
         expect(wrapper.text()).toEqual('May 28, 2019 @ 21:35:39.000');
       });
 
       test('it renders against a string epoch', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(<FormattedDate fieldName="@timestamp" value={'1559079339000'} />);
         expect(wrapper.text()).toEqual('May 28, 2019 @ 21:35:39.000');
       });
 
       test('it renders against a ISO string', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <FormattedDate fieldName="@timestamp" value={'2019-05-28T22:04:49.957Z'} />
         );
@@ -95,7 +115,9 @@ describe('formatted_date', () => {
       });
 
       test('it renders against an empty string as an empty string placeholder', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
             <FormattedDate fieldName="@timestamp" value={''} />
@@ -105,7 +127,9 @@ describe('formatted_date', () => {
       });
 
       test('it renders against an null as a EMPTY_VALUE', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
             <FormattedDate fieldName="@timestamp" value={null} />
@@ -115,7 +139,9 @@ describe('formatted_date', () => {
       });
 
       test('it renders against an undefined as a EMPTY_VALUE', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
             <FormattedDate fieldName="@timestamp" value={undefined} />
@@ -125,7 +151,9 @@ describe('formatted_date', () => {
       });
 
       test('it renders against an invalid date time as just the string its self', () => {
-        mockUseUiSetting$.mockImplementation(getMockKibanaUiSetting(mockFrameworks.default_UTC));
+        mockUseKibanaUiSetting.mockImplementation(
+          getMockKibanaUiSetting(mockFrameworks.default_UTC)
+        );
         const wrapper = mount(
           <TestProviders>
             <FormattedDate fieldName="@timestamp" value={'Rebecca Evan Braden'} />

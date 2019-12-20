@@ -6,8 +6,8 @@
 
 import React from 'react';
 import chrome from 'ui/chrome';
+import { documentationLinks } from 'ui/documentation_links';
 
-import { useKibana } from '../../lib/kibana';
 import { EmptyPage } from '../../components/empty_page';
 import * as i18n from './translations';
 
@@ -21,7 +21,7 @@ export const DetectionEngineEmptyPage = React.memo(() => (
     actionSecondaryIcon="popout"
     actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
     actionSecondaryTarget="_blank"
-    actionSecondaryUrl={useKibana().services.docLinks.links.siem}
+    actionSecondaryUrl={documentationLinks.siem}
     data-test-subj="empty-page"
     title={i18n.EMPTY_TITLE}
   />

@@ -11,7 +11,7 @@ import React, { memo, useCallback, useState } from 'react';
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
-import { useUiSetting$ } from '../../../../../lib/kibana';
+import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import * as CreateRuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
@@ -29,7 +29,7 @@ export const StepDefineRule = memo<RuleStepProps>(
       { indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
       setIndices,
     ] = useFetchIndexPatterns();
-    const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+    const [indicesConfig] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
     const [myStepData, setMyStepData] = useState<DefineStepRule>({
       index: indicesConfig || [],
       isNew: true,

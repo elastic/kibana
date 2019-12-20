@@ -7,14 +7,12 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import chrome from 'ui/chrome';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
-
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
-import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 
 import { HostOverviewQuery } from './host_overview.gql_query';
 import { GetHostOverviewQuery, HostItem } from '../../../graphql/types';
@@ -42,10 +40,8 @@ export interface OwnProps extends QueryTemplateProps {
   endDate: number;
 }
 
-type HostsOverViewProps = OwnProps & HostOverviewReduxProps & WithKibanaProps;
-
 class HostOverviewByNameComponentQuery extends QueryTemplate<
-  HostsOverViewProps,
+  OwnProps & HostOverviewReduxProps,
   GetHostOverviewQuery.Query,
   GetHostOverviewQuery.Variables
 > {
@@ -55,7 +51,6 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
       isInspected,
       children,
       hostName,
-      kibana,
       skip,
       sourceId,
       startDate,
@@ -75,7 +70,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
             from: startDate,
             to: endDate,
           },
-          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
@@ -107,7 +102,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostOverviewByNameQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(HostOverviewByNameComponentQuery);
+export const HostOverviewByNameQuery = connect(makeMapStateToProps)(
+  HostOverviewByNameComponentQuery
+);

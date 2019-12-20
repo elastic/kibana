@@ -12,7 +12,7 @@ import { AnomaliesOverTimeHistogram } from '../../../components/anomalies_over_t
 import { AnomaliesOverTimeQuery } from '../anomalies_over_time';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 
 const AnomaliesOverTimeManage = manageQuery(AnomaliesOverTimeHistogram);
@@ -33,7 +33,7 @@ export const AnomaliesQueryTabBody = ({
   ip,
 }: AnomaliesQueryTabBodyProps) => {
   const [siemJobsLoading, siemJobs] = useSiemJobs(true);
-  const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
+  const [anomalyScore] = useKibanaUiSetting(DEFAULT_ANOMALY_SCORE);
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
     filterQuery,

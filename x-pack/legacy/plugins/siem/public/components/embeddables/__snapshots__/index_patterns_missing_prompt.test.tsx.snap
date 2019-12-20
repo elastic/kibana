@@ -21,7 +21,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
           values={
             Object {
               "beats": <a
-                href="https://www.elastic.co/guide/en/beats/libbeat/mocked-test-branch/getting-started.html"
+                href="https://www.elastic.coguide/en/beats/libbeat/current/getting-started.html"
                 rel="noopener noreferrer"
                 target="_blank"
               >

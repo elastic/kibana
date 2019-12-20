@@ -16,7 +16,7 @@ import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 
 import { OpenTimelineModal } from '.';
 
-jest.mock('../../../lib/kibana');
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
 jest.mock('../../../utils/apollo_context', () => ({
   useApolloClient: () => ({}),
 }));

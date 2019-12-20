@@ -19,17 +19,16 @@ import { getOr, get, isNumber } from 'lodash/fp';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
+  browserTimezone,
   chartDefaultSettings,
   ChartSeriesConfigs,
   ChartSeriesData,
   checkIfAllValuesAreZero,
+  getSeriesStyle,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
   SeriesType,
   WrappedByAutoSizer,
-  useBrowserTimeZone,
-  useTheme,
 } from './common';
 
 const checkIfAllTheDataInTheSeriesAreValid = (series: ChartSeriesData): series is ChartSeriesData =>
@@ -54,8 +53,6 @@ export const BarChartBaseComponent = ({
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }) => {
-  const theme = useTheme();
-  const timeZone = useBrowserTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
@@ -63,7 +60,6 @@ export const BarChartBaseComponent = ({
   const yAxisId = getAxisId(`stat-items-barchart-${data[0].key}-y`);
   const settings = {
     ...chartDefaultSettings,
-    theme,
     ...get('configs.settings', chartConfigs),
   };
 
@@ -83,7 +79,7 @@ export const BarChartBaseComponent = ({
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
             yAccessors={['y']}
-            timeZone={timeZone}
+            timeZone={browserTimezone}
             splitSeriesAccessors={['g']}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}

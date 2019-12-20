@@ -10,13 +10,21 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
+import { mockUiSettings } from '../../../mock/ui_settings';
 import { HostDetailsTabs } from './details_tabs';
 import { SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
+import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
-jest.mock('../../../lib/kibana');
+jest.mock('../../../lib/settings/use_kibana_ui_setting');
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 jest.mock('../../../containers/source', () => ({
   indicesExistOrDataTemporarilyUnavailable: () => true,

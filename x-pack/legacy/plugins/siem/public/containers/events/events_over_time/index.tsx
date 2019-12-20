@@ -8,13 +8,12 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 
+import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
-import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 
 import { EventsOverTimeGqlQuery } from './events_over_time.gql_query';
 import { GetEventsOverTimeQuery, MatrixOverTimeHistogramData } from '../../../graphql/types';
@@ -41,7 +40,7 @@ export interface EventsOverTimeComponentReduxProps {
   isInspected: boolean;
 }
 
-type EventsOverTimeProps = OwnProps & EventsOverTimeComponentReduxProps & WithKibanaProps;
+type EventsOverTimeProps = OwnProps & EventsOverTimeComponentReduxProps;
 
 class EventsOverTimeComponentQuery extends QueryTemplate<
   EventsOverTimeProps,
@@ -55,7 +54,6 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
       filterQuery,
       id = ID,
       isInspected,
-      kibana,
       sourceId,
       startDate,
     } = this.props;
@@ -72,7 +70,7 @@ class EventsOverTimeComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
@@ -107,7 +105,4 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const EventsOverTimeQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
-)(EventsOverTimeComponentQuery);
+export const EventsOverTimeQuery = connect(makeMapStateToProps)(EventsOverTimeComponentQuery);

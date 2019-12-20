@@ -30,7 +30,7 @@ import { getBatchItems } from './batch_actions';
 import { EuiBasicTableOnChange, TableData } from '../types';
 import { allRulesReducer, State } from './reducer';
 import * as i18n from '../translations';
-import { useUiSetting$ } from '../../../../lib/kibana';
+import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
 import { JSONDownloader } from '../components/json_downloader';
 import { useStateToaster } from '../../../../components/toasters';
@@ -77,7 +77,7 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   const getBatchItemsPopoverContent = useCallback(

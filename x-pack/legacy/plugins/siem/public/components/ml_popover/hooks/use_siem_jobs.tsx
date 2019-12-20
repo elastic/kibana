@@ -12,7 +12,7 @@ import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissio
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { DEFAULT_INDEX_KEY, DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
@@ -33,8 +33,8 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   const [loading, setLoading] = useState(true);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
-  const [siemDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
+  const [siemDefaultIndex] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
+  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {

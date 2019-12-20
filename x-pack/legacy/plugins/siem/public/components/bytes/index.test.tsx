@@ -12,6 +12,8 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Bytes } from '.';
 
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
 describe('Bytes', () => {
   const mount = useMountAppended();
 

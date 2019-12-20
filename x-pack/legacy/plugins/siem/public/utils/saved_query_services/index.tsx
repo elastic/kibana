@@ -10,18 +10,16 @@ import {
   createSavedQueryService,
 } from '../../../../../../../src/plugins/data/public';
 
-import { useKibana } from '../../lib/kibana';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 
 export const useSavedQueryServices = () => {
-  const kibana = useKibana();
-  const client = kibana.services.savedObjects.client;
-
+  const core = useKibanaCore();
   const [savedQueryService, setSavedQueryService] = useState<SavedQueryService>(
-    createSavedQueryService(client)
+    createSavedQueryService(core.savedObjects.client)
   );
 
   useEffect(() => {
-    setSavedQueryService(createSavedQueryService(client));
-  }, [client]);
+    setSavedQueryService(createSavedQueryService(core.savedObjects.client));
+  }, [core.savedObjects.client]);
   return savedQueryService;
 };
