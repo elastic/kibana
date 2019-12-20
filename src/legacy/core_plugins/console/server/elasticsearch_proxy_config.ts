@@ -25,7 +25,7 @@ import url from 'url';
 
 const readFile = (file: string) => readFileSync(file, 'utf8');
 
-const createAgent = (legacyConfig: any) => {
+const createAgent = (legacyConfig: any): http.Agent | https.Agent => {
   const target = url.parse(_.head(legacyConfig.hosts));
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
