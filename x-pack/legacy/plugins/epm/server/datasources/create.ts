@@ -228,7 +228,7 @@ async function installAssets({
   // the promises from template installation resolve to template references
   const templatesToSave = await Promise.all(templateRefs);
   // the promises from pipeline installation resolve to arrays of pipeline references
-  const pipelinesToSave = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
+  const pipelinesToSave = (await Promise.all(pipelineRefs)).flat();
 
   return templatesToSave.concat(pipelinesToSave);
 }
