@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -25,7 +24,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  return new class DashboardAddPanel {
+  return new (class DashboardAddPanel {
     async clickOpenAddPanel() {
       log.debug('DashboardAddPanel.clickOpenAddPanel');
       await testSubjects.click('dashboardAddPanelButton');
@@ -172,7 +171,9 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async addEmbeddable(embeddableName, embeddableType) {
-      log.debug(`DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`);
+      log.debug(
+        `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
+      );
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter(embeddableType);
       await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
@@ -195,5 +196,5 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.filterEmbeddableNames(`"${name}"`);
       return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
-  };
+  })();
 }

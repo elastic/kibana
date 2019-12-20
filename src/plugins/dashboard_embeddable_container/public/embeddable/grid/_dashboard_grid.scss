@@ -34,7 +34,7 @@
  .dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
   width: 100%;
-  position: absolute;
+  position: absolute !important; /* 1 */
 }
 
 /**

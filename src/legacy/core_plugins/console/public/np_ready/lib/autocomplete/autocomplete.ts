@@ -990,7 +990,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
               score: 0,
               context,
             };
-            // we only need out custom insertMatch behavior for the body
+            // we only need our custom insertMatch behavior for the body
             if (context.autoCompleteType === 'body') {
               defaults.completer = {
                 insertMatch() {

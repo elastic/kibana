@@ -7,22 +7,55 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import { Subject, Observable } from 'rxjs';
+import { omit, difference } from 'lodash';
 
-import { omit } from 'lodash';
 import {
   SavedObjectsClientContract,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
+  // Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under task_manager/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'src/core/server';
+
+import { asOk, asErr } from './lib/result_type';
+
 import {
   ConcreteTaskInstance,
   ElasticJs,
   TaskDefinition,
   TaskDictionary,
   TaskInstance,
+  TaskLifecycle,
+  TaskLifecycleResult,
 } from './task';
+
+import { TaskClaim, asTaskClaimEvent } from './task_events';
+
+import {
+  asUpdateByQuery,
+  shouldBeOneOf,
+  mustBeAllOf,
+  ExistsBoolClause,
+  TermBoolClause,
+  RangeBoolClause,
+  BoolClause,
+  IDsClause,
+} from './queries/query_clauses';
+
+import {
+  updateFields,
+  IdleTaskWithExpiredRunAt,
+  RunningOrClaimingTaskWithExpiredRetryAt,
+  TaskWithSchedule,
+  taskWithLessThanMaxAttempts,
+  SortByRunAtAndRetryAt,
+  taskWithIDsAndRunnableStatus,
+  sortByIdsThenByScheduling,
+} from './queries/mark_available_tasks_as_claimed';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
@@ -57,6 +90,7 @@ export interface UpdateByQueryOpts extends SearchOpts {
 
 export interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
+  claimTasksById?: string[];
   size: number;
 }
 
@@ -89,10 +123,12 @@ export class TaskStore {
   public readonly maxAttempts: number;
   public readonly index: string;
   public readonly taskManagerId: string;
+
   private callCluster: ElasticJs;
   private definitions: TaskDictionary<TaskDefinition>;
   private savedObjectsRepository: SavedObjectsClientContract;
   private serializer: SavedObjectsSerializer;
+  private events$: Subject<TaskClaim>;
 
   /**
    * Constructs a new TaskStore.
@@ -112,7 +148,16 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.events$ = new Subject<TaskClaim>();
   }
+
+  public get events(): Observable<TaskClaim> {
+    return this.events$;
+  }
+
+  private emitEvent = (event: TaskClaim) => {
+    this.events$.next(event);
+  };
 
   /**
    * Schedules a task.
@@ -160,101 +205,85 @@ export class TaskStore {
    * @param {OwnershipClaimingOpts} options
    * @returns {Promise<ClaimOwnershipResult>}
    */
-  public async claimAvailableTasks(opts: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> {
-    const claimedTasks = await this.markAvailableTasksAsClaimed(opts);
-    const docs = claimedTasks > 0 ? await this.sweepForClaimedTasks(opts) : [];
+  public claimAvailableTasks = async ({
+    claimOwnershipUntil,
+    claimTasksById = [],
+    size,
+  }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
+    const claimTasksByIdWithRawIds = claimTasksById.map(id =>
+      this.serializer.generateRawId(undefined, 'task', id)
+    );
+
+    const claimedTasks = await this.markAvailableTasksAsClaimed(
+      claimOwnershipUntil,
+      claimTasksByIdWithRawIds,
+      size
+    );
+    const docs =
+      claimedTasks > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
+
+    // emit success/fail events for claimed tasks by id
+    if (claimTasksById && claimTasksById.length) {
+      docs.map(doc => asTaskClaimEvent(doc.id, asOk(doc))).forEach(this.emitEvent);
+
+      difference(
+        claimTasksById,
+        docs.map(doc => doc.id)
+      )
+        .map(id => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
+        .forEach(this.emitEvent);
+    }
+
     return {
       claimedTasks,
       docs,
     };
-  }
+  };
 
-  private async markAvailableTasksAsClaimed({
-    size,
-    claimOwnershipUntil,
-  }: OwnershipClaimingOpts): Promise<number> {
+  private async markAvailableTasksAsClaimed(
+    claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
+    claimTasksById: OwnershipClaimingOpts['claimTasksById'],
+    size: OwnershipClaimingOpts['size']
+  ): Promise<number> {
+    const queryForScheduledTasks = mustBeAllOf(
+      // Either a task with idle status and runAt <= now or
+      // status running or claiming with a retryAt <= now.
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      // Either task has a schedule or the attempts < the maximum configured
+      shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
+        TaskWithSchedule,
+        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
+          taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
+        )
+      )
+    );
+
+    const { query, sort } =
+      claimTasksById && claimTasksById.length
+        ? {
+            query: shouldBeOneOf<
+              | ExistsBoolClause
+              | TermBoolClause
+              | RangeBoolClause
+              | BoolClause<TermBoolClause | IDsClause>
+            >(queryForScheduledTasks, taskWithIDsAndRunnableStatus(claimTasksById)),
+            sort: sortByIdsThenByScheduling(claimTasksById),
+          }
+        : {
+            query: queryForScheduledTasks,
+            sort: SortByRunAtAndRetryAt,
+          };
+
     const { updated } = await this.updateByQuery(
-      {
-        query: {
-          bool: {
-            must: [
-              // Either a task with idle status and runAt <= now or
-              // status running or claiming with a retryAt <= now.
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          { term: { 'task.status': 'idle' } },
-                          { range: { 'task.runAt': { lte: 'now' } } },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          {
-                            bool: {
-                              should: [
-                                { term: { 'task.status': 'running' } },
-                                { term: { 'task.status': 'claiming' } },
-                              ],
-                            },
-                          },
-                          { range: { 'task.retryAt': { lte: 'now' } } },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-              // Either task has an interval or the attempts < the maximum configured
-              {
-                bool: {
-                  should: [
-                    { exists: { field: 'task.interval' } },
-                    ...Object.entries(this.definitions).map(([type, definition]) => ({
-                      bool: {
-                        must: [
-                          { term: { 'task.taskType': type } },
-                          {
-                            range: {
-                              'task.attempts': {
-                                lt: definition.maxAttempts || this.maxAttempts,
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    })),
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        sort: {
-          _script: {
-            type: 'number',
-            order: 'asc',
-            script: {
-              lang: 'expression',
-              source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-            },
-          },
-        },
-        seq_no_primary_term: true,
-        script: {
-          source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
-          lang: 'painless',
-          params: {
-            ownerId: this.taskManagerId,
-            retryAt: claimOwnershipUntil,
-            status: 'claiming',
-          },
-        },
-      },
+      asUpdateByQuery({
+        query,
+        update: updateFields({
+          ownerId: this.taskManagerId,
+          status: 'claiming',
+          retryAt: claimOwnershipUntil,
+        }),
+        sort,
+      }),
       {
         max_docs: size,
       }
@@ -265,9 +294,10 @@ export class TaskStore {
   /**
    * Fetches tasks from the index, which are owned by the current Kibana instance
    */
-  private async sweepForClaimedTasks({
-    size,
-  }: OwnershipClaimingOpts): Promise<ConcreteTaskInstance[]> {
+  private async sweepForClaimedTasks(
+    claimTasksById: OwnershipClaimingOpts['claimTasksById'],
+    size: OwnershipClaimingOpts['size']
+  ): Promise<ConcreteTaskInstance[]> {
     const { docs } = await this.search({
       query: {
         bool: {
@@ -282,16 +312,10 @@ export class TaskStore {
         },
       },
       size,
-      sort: {
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'expression',
-            source: `doc['task.retryAt'].value || doc['task.runAt'].value`,
-          },
-        },
-      },
+      sort:
+        claimTasksById && claimTasksById.length
+          ? sortByIdsThenByScheduling(claimTasksById)
+          : SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
     });
 
@@ -327,6 +351,34 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     await this.savedObjectsRepository.delete('task', id);
+  }
+
+  /**
+   * Gets a task by id
+   *
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  public async get(id: string): Promise<ConcreteTaskInstance> {
+    return savedObjectToConcreteTaskInstance(await this.savedObjectsRepository.get('task', id));
+  }
+
+  /**
+   * Gets task lifecycle step by id
+   *
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  public async getLifecycle(id: string): Promise<TaskLifecycle> {
+    try {
+      const task = await this.get(id);
+      return task.status;
+    } catch (err) {
+      if (err.output && err.output.statusCode === 404) {
+        return TaskLifecycleResult.NotFound;
+      }
+      throw err;
+    }
   }
 
   private async search(opts: SearchOpts = {}): Promise<FetchResult> {
@@ -406,7 +458,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
   };
 }
 
-function savedObjectToConcreteTaskInstance(
+export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject, 'references'>
 ): ConcreteTaskInstance {
   return {

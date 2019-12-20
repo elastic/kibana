@@ -27,7 +27,7 @@ import {
 import { LoggerFactory } from '../../logging';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { LegacyConfig } from '../config';
+import { LegacyConfig, LegacyConfigDeprecationProvider } from '../config';
 
 export interface LegacyPluginPack {
   getPath(): string;
@@ -37,6 +37,7 @@ export interface LegacyPluginSpec {
   getId: () => unknown;
   getExpectedKibanaVersion: () => string;
   getConfigPrefix: () => string;
+  getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
 }
 
 export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {

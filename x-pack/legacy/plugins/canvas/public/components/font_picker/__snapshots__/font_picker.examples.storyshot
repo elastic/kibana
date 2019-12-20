@@ -47,10 +47,11 @@ exports[`Storyshots components/FontPicker default 1`] = `
             className="euiFormControlLayoutCustomIcon"
           >
             <svg
-              aria-hidden="true"
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
@@ -129,10 +130,11 @@ exports[`Storyshots components/FontPicker with value 1`] = `
             className="euiFormControlLayoutCustomIcon"
           >
             <svg
-              aria-hidden="true"
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}

@@ -96,7 +96,7 @@ const ProviderContainer = styled.div<{ isDragging: boolean }>`
         &,
         & .euiBadge,
         & .euiBadge__text {
-          cursor: move; //Fallback for IE11
+          cursor: move; /* Fallback for IE11 */
           cursor: grab;
         }
       }

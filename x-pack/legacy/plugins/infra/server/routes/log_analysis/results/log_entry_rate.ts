@@ -22,10 +22,7 @@ import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
 
 const anyObject = schema.object({}, { allowUnknowns: true });
 
-export const initLogAnalysisGetLogEntryRateRoute = ({
-  framework,
-  logAnalysis,
-}: InfraBackendLibs) => {
+export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -36,12 +33,12 @@ export const initLogAnalysisGetLogEntryRateRoute = ({
       },
     },
     async (requestContext, request, response) => {
-      const payload = pipe(
-        getLogEntryRateRequestPayloadRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
       try {
+        const payload = pipe(
+          getLogEntryRateRequestPayloadRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
         const logEntryRateBuckets = await logAnalysis.getLogEntryRateBuckets(
           requestContext,
           payload.data.sourceId,

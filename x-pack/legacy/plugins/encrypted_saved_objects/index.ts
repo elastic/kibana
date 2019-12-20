@@ -33,7 +33,6 @@ export const encryptedSavedObjects = (kibana: {
       }
 
       encryptedSavedObjectsPlugin.__legacyCompat.registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(
           server,
           'encryptedSavedObjects',

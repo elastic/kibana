@@ -93,7 +93,7 @@ export class Table extends React.Component<TableProps, TableState> {
     };
 
     const selectionOptions = hideTableControls
-      ? null
+      ? undefined
       : {
           onSelectionChange: this.setSelection,
           selectable: () => true,
@@ -148,7 +148,7 @@ export class Table extends React.Component<TableProps, TableState> {
     );
   }
 
-  private onTableChange = (page: { index: number; size: number } = { index: 0, size: 50 }) => {
+  private onTableChange = ({ page }: { page: { index: number; size: number } }) => {
     if (this.props.onTableChange) {
       this.props.onTableChange(page.index, page.size);
     }

@@ -23,11 +23,12 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
-import { SearchTypes, OutputRuleAlertRest } from './detection_engine/alerts/types';
+import { Alerts } from './alerts';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
+  alerts: Alerts;
   anomalies: Anomalies;
   authentications: Authentications;
   events: Events;
@@ -53,25 +54,6 @@ export interface AppBackendLibs extends AppDomainLibs {
 
 export interface SiemContext {
   req: FrameworkRequest;
-}
-
-export interface Signal {
-  rule: Partial<OutputRuleAlertRest>;
-  parent: {
-    id: string;
-    type: string;
-    index: string;
-    depth: number;
-  };
-  original_time: string;
-  original_event?: SearchTypes;
-  status: 'open' | 'closed';
-}
-
-export interface SignalHit {
-  '@timestamp': string;
-  event: object;
-  signal: Partial<Signal>;
 }
 
 export interface TotalValue {

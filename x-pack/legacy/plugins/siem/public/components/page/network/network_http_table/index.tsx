@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
 import {
+  Direction,
   NetworkHttpEdges,
   NetworkHttpFields,
   NetworkHttpSortField,
@@ -76,23 +77,50 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
     type,
     updateNetworkTable,
   }) => {
-    const onChange = (criteria: Criteria, tableType: networkModel.HttpTableType) => {
-      if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: {
-            sort: {
-              direction: criteria.sort.direction,
-            },
-          },
-        });
-      }
-    };
     const tableType =
       type === networkModel.NetworkType.page
         ? networkModel.NetworkTableType.http
         : networkModel.IpDetailsTableType.http;
+
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
+          updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: {
+              sort: {
+                direction: criteria.sort.direction as Direction,
+              },
+            },
+          });
+        }
+      },
+      [tableType, sort.direction, type, updateNetworkTable]
+    );
+
+    const sorting = { field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction };
+
     return (
       <PaginatedTable
         activePage={activePage}
@@ -106,26 +134,14 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
         isInspect={isInspect}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={criteria => onChange(criteria, tableType)}
+        loadPage={loadPage}
+        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
-        sorting={{ field: `node.${NetworkHttpFields.requestCount}`, direction: sort.direction }}
+        sorting={sorting}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }

@@ -41,9 +41,9 @@ export const ml = (kibana: any) => {
         }),
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/application/app',
+        main: 'plugins/ml/legacy',
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
@@ -78,17 +78,17 @@ export const ml = (kibana: any) => {
       };
 
       const core: MlCoreSetup = {
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         savedObjects: server.savedObjects,
       };
-      const { usageCollection, cloud } = kbnServer.newPlatform.setup.plugins;
+      const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
         elasticsearch: server.plugins.elasticsearch,
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
+        home,
         usageCollection: usageCollection as UsageCollectionSetup,
         cloud: cloud as CloudSetup,
         ml: this,

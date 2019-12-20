@@ -5,7 +5,19 @@
 # App
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
 /x-pack/legacy/plugins/graph/ @elastic/kibana-app
+/src/plugins/share/ @elastic/kibana-app
+/src/legacy/server/url_shortening/ @elastic/kibana-app
 /src/legacy/server/sample_data/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
+/src/plugins/home/ @elastic/kibana-app
+/src/plugins/kibana_legacy/ @elastic/kibana-app
+/src/plugins/timelion/ @elastic/kibana-app
+/src/plugins/dev_tools/ @elastic/kibana-app
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -14,7 +26,6 @@
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
-/src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
 /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
@@ -28,7 +39,6 @@
 /src/legacy/core_plugins/kibana/server/routes/api/suggestions/ @elastic/kibana-app-arch
 /src/legacy/core_plugins/visualizations/ @elastic/kibana-app-arch
 /src/legacy/server/index_patterns/ @elastic/kibana-app-arch
-/src/legacy/server/url_shortening/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
@@ -57,6 +67,13 @@
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
 /x-pack/test/functional/services/transform.ts @elastic/ml-ui
 
+# Maps
+/x-pack/legacy/plugins/maps/ @elastic/kibana-gis
+/x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
+/x-pack/test/functional/apps/maps/ @elastic/kibana-gis
+/x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
+/x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
+
 # Operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
@@ -80,7 +97,6 @@
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
-/src/legacy/server/csp/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
 /src/legacy/server/i18n/ @elastic/kibana-platform
 /src/legacy/server/logging/ @elastic/kibana-platform
@@ -88,24 +104,31 @@
 /src/legacy/server/status/ @elastic/kibana-platform
 
 # Security
+/src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
 /x-pack/legacy/plugins/security/  @elastic/kibana-security
 /x-pack/legacy/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/legacy/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
-/src/legacy/server/csp/ @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
-# Kibana Stack Services
-/src/dev/i18n @elastic/kibana-stack-services
-/packages/kbn-analytics/ @elastic/kibana-stack-services
-/src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
-/src/plugins/usage_collection/ @elastic/kibana-stack-services
-/x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
-/x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
-/x-pack/legacy/plugins/actions @elastic/kibana-stack-services
-/x-pack/legacy/plugins/task_manager @elastic/kibana-stack-services
+# Kibana Localization
+/src/dev/i18n @elastic/kibana-localization
+
+# Pulse
+/packages/kbn-analytics/ @elastic/pulse
+/src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/usage_collection/ @elastic/pulse
+/x-pack/legacy/plugins/telemetry @elastic/pulse
+
+# Kibana Alerting Services
+/x-pack/legacy/plugins/alerting @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/actions @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
+/x-pack/test/alerting_api_integration @elastic/kibana-alerting-services
+/x-pack/test/plugin_api_integration/plugins/task_manager @elastic/kibana-alerting-services
+/x-pack/test/plugin_api_integration/test_suites/task_manager @elastic/kibana-alerting-services
 
 # Design
 **/*.scss  @elastic/kibana-design

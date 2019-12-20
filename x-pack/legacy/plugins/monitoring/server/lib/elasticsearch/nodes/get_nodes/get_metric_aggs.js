@@ -28,25 +28,27 @@ export function getMetricAggs(listingMetrics) {
       return;
     }
 
-    if (!metric.aggs) { // if metric does not have custom agg defined
+    if (!metric.aggs) {
+      // if metric does not have custom agg defined
       metricAgg = {
         metric: {
-          [metric.metricAgg]: { // max, sum, etc
-            field: metric.field
-          }
+          [metric.metricAgg]: {
+            // max, sum, etc
+            field: metric.field,
+          },
         },
         metric_deriv: {
           derivative: {
             buckets_path: 'metric',
-            unit: NORMALIZED_DERIVATIVE_UNIT
-          }
-        }
+            unit: NORMALIZED_DERIVATIVE_UNIT,
+          },
+        },
       };
     }
 
     aggItems = {
       ...aggItems,
-      ...convertMetricNames(metricName, metric.aggs || metricAgg)
+      ...convertMetricNames(metricName, metric.aggs || metricAgg),
     };
   });
 

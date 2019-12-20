@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 /**
  * We don't want to output system template (whose name starts with a ".") which don't
@@ -21,13 +18,13 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
  * @param {Array} indexPatterns Index patterns
  */
 function isReservedSystemTemplate(templateName, indexPatterns) {
-  return templateName.startsWith('kibana_index_template') ||
-    (
-      templateName.startsWith('.') &&
-        indexPatterns.every((pattern) => {
-          return !pattern.includes('*');
-        })
-    );
+  return (
+    templateName.startsWith('kibana_index_template') ||
+    (templateName.startsWith('.') &&
+      indexPatterns.every(pattern => {
+        return !pattern.includes('*');
+      }))
+  );
 }
 
 function filterAndFormatTemplates(templates) {
@@ -39,9 +36,11 @@ function filterAndFormatTemplates(templates) {
       continue;
     }
     const formattedTemplate = {
-      index_lifecycle_name: settings.index && settings.index.lifecycle ? settings.index.lifecycle.name : undefined,
+      index_lifecycle_name:
+        settings.index && settings.index.lifecycle ? settings.index.lifecycle.name : undefined,
       index_patterns,
-      allocation_rules: settings.index && settings.index.routing ? settings.index.routing : undefined,
+      allocation_rules:
+        settings.index && settings.index.routing ? settings.index.routing : undefined,
       settings,
       name: templateName,
     };
@@ -55,7 +54,7 @@ async function fetchTemplates(callWithRequest) {
     method: 'GET',
     path: '/_template',
     // we allow 404 incase the user shutdown security in-between the check and now
-    ignore: [ 404 ]
+    ignore: [404],
   };
 
   return await callWithRequest('transport.request', params);
@@ -67,7 +66,7 @@ export function registerFetchRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/templates',
     method: 'GET',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -82,7 +81,7 @@ export function registerFetchRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }
