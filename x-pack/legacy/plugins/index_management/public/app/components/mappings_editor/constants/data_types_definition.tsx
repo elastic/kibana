@@ -145,10 +145,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.binaryLongDescription"
           defaultMessage="Binary fields accept a binary value as a Base64-encoded string. By default, binary fields are not stored or searchable."
-          values={{
-            true: <EuiCode>true</EuiCode>,
-            false: <EuiCode>false</EuiCode>,
-          }}
         />
       </p>
     ),
