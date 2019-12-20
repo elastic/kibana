@@ -19,8 +19,8 @@ export const config = {
 };
 
 export const plugin: PluginInitializer<
-  EndpointPluginStart,
   EndpointPluginSetup,
-  EndpointPluginStartDependencies,
-  EndpointPluginSetupDependencies
+  EndpointPluginStart,
+  EndpointPluginSetupDependencies,
+  EndpointPluginStartDependencies
 > = () => new EndpointPlugin();
