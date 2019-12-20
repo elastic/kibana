@@ -45,6 +45,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       );
       const matrix = inverseProjectionMatrix(stateWithNewScaling);
       const worldCoordinateThereNow = applyMatrix3(rasterOfLastFocusedWorldCoordinates, matrix);
+      // TODO, use vector subtraction method
       const delta = [
         worldCoordinateThereNow[0] - state.latestFocusedWorldCoordinates[0],
         worldCoordinateThereNow[1] - state.latestFocusedWorldCoordinates[1],
@@ -94,15 +95,8 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       rasterSize: action.payload,
     };
   } else if (action.type === 'userMovedPointer') {
-    return {
+    const stateWithUpdatedPanning = {
       ...state,
-      /**
-       * keep track of the last world coordinates the user moved over.
-       * When the scale of the projection matrix changes, we adjust the camera's world transform in order
-       * to keep the same point under the pointer.
-       * In order to do this, we need to know the position of the mouse when changing the scale.
-       */
-      latestFocusedWorldCoordinates: applyMatrix3(action.payload, inverseProjectionMatrix(state)),
       /**
        * If the user is panning, adjust the panning offset
        */
@@ -112,6 +106,19 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
             currentOffset: action.payload,
           }
         : state.panning,
+    };
+    return {
+      ...stateWithUpdatedPanning,
+      /**
+       * keep track of the last world coordinates the user moved over.
+       * When the scale of the projection matrix changes, we adjust the camera's world transform in order
+       * to keep the same point under the pointer.
+       * In order to do this, we need to know the position of the mouse when changing the scale.
+       */
+      latestFocusedWorldCoordinates: applyMatrix3(
+        action.payload,
+        inverseProjectionMatrix(stateWithUpdatedPanning)
+      ),
     };
   } else {
     return state;
