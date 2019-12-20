@@ -5,12 +5,13 @@
  */
 
 import { getActionType as getThresholdAlertType } from './threshold/expression';
-import { AlertTypeRegistry } from '../../alert_type_registry';
+import { TypeRegistry } from '../../type_registry';
+import { AlertTypeModel } from '../../../types';
 
 export function registerBuiltInAlertTypes({
   alertTypeRegistry,
 }: {
-  alertTypeRegistry: AlertTypeRegistry;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }) {
   alertTypeRegistry.register(getThresholdAlertType());
 }

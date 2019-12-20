@@ -12,13 +12,12 @@ import {
 } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
-import { ActionTypeRegistry } from './application/action_type_registry';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
-import { AlertTypeRegistry } from './application/alert_type_registry';
 import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
 import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 import { PLUGIN } from './application/constants/plugin';
-import { LegacyDependencies } from './types';
+import { LegacyDependencies, ActionTypeModel, AlertTypeModel } from './types';
+import { TypeRegistry } from './application/type_registry';
 
 export type Setup = void;
 export type Start = void;
@@ -28,14 +27,14 @@ interface LegacyPlugins {
 }
 
 export class Plugin implements CorePlugin<Setup, Start> {
-  private actionTypeRegistry: ActionTypeRegistry;
-  private alertTypeRegistry: AlertTypeRegistry;
+  private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.actionTypeRegistry = actionTypeRegistry;
 
-    const alertTypeRegistry = new AlertTypeRegistry();
+    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
     this.alertTypeRegistry = alertTypeRegistry;
   }
 

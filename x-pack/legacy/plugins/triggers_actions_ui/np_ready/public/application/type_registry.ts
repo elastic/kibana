@@ -14,22 +14,22 @@ export class TypeRegistry<T extends BaseObjectType> {
   private readonly objectTypes: Map<string, T> = new Map();
 
   /**
-   * Returns if the action type registry has the given action type registered
+   * Returns if the object type registry has the given type registered
    */
   public has(id: string) {
     return this.objectTypes.has(id);
   }
 
   /**
-   * Registers an action type to the action type registry
+   * Registers an object type to the type registry
    */
   public register(objectType: T) {
     if (this.has(objectType.id)) {
       throw new Error(
         i18n.translate(
-          'xpack.triggersActionsUI.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
+          'xpack.triggersActionsUI.typeRegistry.register.duplicateObjectTypeErrorMessage',
           {
-            defaultMessage: 'Action type "{id}" is already registered.',
+            defaultMessage: 'Object type "{id}" is already registered.',
             values: {
               id: objectType.id,
             },
@@ -41,7 +41,7 @@ export class TypeRegistry<T extends BaseObjectType> {
   }
 
   /**
-   * Returns an action type, null if not registered
+   * Returns an object type, null if not registered
    */
   public get(id: string): T | null {
     if (!this.has(id)) {

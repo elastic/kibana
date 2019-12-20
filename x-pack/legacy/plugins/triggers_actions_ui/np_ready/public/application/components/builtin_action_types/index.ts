@@ -10,12 +10,13 @@ import { getActionType as getEmailActionType } from './email';
 import { getActionType as getIndexActionType } from './es_index';
 import { getActionType as getPagerDutyActionType } from './pagerduty';
 import { getActionType as getWebhookActionType } from './webhook';
-import { ActionTypeRegistry } from '../../action_type_registry';
+import { TypeRegistry } from '../../type_registry';
+import { ActionTypeModel } from '../../../types';
 
 export function registerBuiltInActionTypes({
   actionTypeRegistry,
 }: {
-  actionTypeRegistry: ActionTypeRegistry;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 }) {
   actionTypeRegistry.register(getServerLogActionType());
   actionTypeRegistry.register(getSlackActionType());

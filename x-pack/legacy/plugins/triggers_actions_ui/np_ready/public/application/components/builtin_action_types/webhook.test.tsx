@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ActionTypeRegistry } from '../../action_type_registry';
+import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionConnector } from '../../../types';
 
@@ -13,7 +13,7 @@ const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
-  const actionTypeRegistry = new ActionTypeRegistry();
+  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {

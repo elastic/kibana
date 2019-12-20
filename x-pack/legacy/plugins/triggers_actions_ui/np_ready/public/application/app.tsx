@@ -17,9 +17,8 @@ import { BASE_PATH, Section } from './constants';
 import { TriggersActionsUIHome } from './home';
 import { AppContextProvider, useAppDependencies } from './app_context';
 import { hasShowAlertsCapability } from './lib/capabilities';
-import { ActionTypeRegistry } from './action_type_registry';
-import { AlertTypeRegistry } from './alert_type_registry';
-import { LegacyDependencies } from '../types';
+import { LegacyDependencies, ActionTypeModel, AlertTypeModel } from '../types';
+import { TypeRegistry } from './type_registry';
 
 export interface AppDeps {
   chrome: ChromeStart;
@@ -29,8 +28,8 @@ export interface AppDeps {
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   legacy: LegacyDependencies;
-  actionTypeRegistry: ActionTypeRegistry;
-  alertTypeRegistry: AlertTypeRegistry;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }
 
 class ShareRouter extends Component {

@@ -4,8 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionTypeRegistry } from './action_type_registry';
-import { ValidationResult } from '../types';
+import { TypeRegistry } from './type_registry';
+import { ValidationResult, AlertTypeModel, ActionTypeModel } from '../types';
+
+export const ExpressionComponent: React.FunctionComponent = () => {
+  return null;
+};
+
+const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
+  return {
+    id: id || 'test-alet-type',
+    name: name || 'Test alert type',
+    iconClass: iconClass || 'icon',
+    validate: (): ValidationResult => {
+      return { errors: {} };
+    },
+    alertParamsExpression: ExpressionComponent,
+  };
+};
 
 const getTestActionType = (id?: string, iconClass?: string, selectedMessage?: string) => {
   return {
@@ -27,26 +43,26 @@ const getTestActionType = (id?: string, iconClass?: string, selectedMessage?: st
 beforeEach(() => jest.resetAllMocks());
 
 describe('register()', () => {
-  test('able to register action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
-    actionTypeRegistry.register(getTestActionType());
-    expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
+  test('able to register alert types', () => {
+    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    alertTypeRegistry.register(getTestAlertType());
+    expect(alertTypeRegistry.has('test-alet-type')).toEqual(true);
   });
 
-  test('throws error if action type already registered', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
-    actionTypeRegistry.register(getTestActionType('my-test-action-type-1'));
+  test('throws error if alert type already registered', () => {
+    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    alertTypeRegistry.register(getTestAlertType('my-test-alert-type-1'));
     expect(() =>
-      actionTypeRegistry.register(getTestActionType('my-test-action-type-1'))
+      alertTypeRegistry.register(getTestAlertType('my-test-alert-type-1'))
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"my-test-action-type-1\\" is already registered."`
+      `"Object type \\"my-test-alert-type-1\\" is already registered."`
     );
   });
 });
 
 describe('get()', () => {
   test('returns action type', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getTestActionType('my-action-type-snapshot'));
     const actionType = actionTypeRegistry.get('my-action-type-snapshot');
     expect(actionType).toMatchInlineSnapshot(`
@@ -63,14 +79,14 @@ describe('get()', () => {
   });
 
   test(`return null when action type doesn't exist`, () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     expect(actionTypeRegistry.get('not-exist-action-type')).toBeNull();
   });
 });
 
 describe('list()', () => {
   test('returns list of action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getTestActionType());
     const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
@@ -88,14 +104,14 @@ describe('list()', () => {
 });
 
 describe('has()', () => {
-  test('returns false for unregistered action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
-    expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
+  test('returns false for unregistered alert types', () => {
+    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    expect(alertTypeRegistry.has('my-alert-type')).toEqual(false);
   });
 
-  test('returns true after registering an action type', () => {
-    const actionTypeRegistry = new ActionTypeRegistry();
-    actionTypeRegistry.register(getTestActionType());
-    expect(actionTypeRegistry.has('my-action-type'));
+  test('returns true after registering an alert type', () => {
+    const alertTypeRegistry = new TypeRegistry<AlertTypeModel>();
+    alertTypeRegistry.register(getTestAlertType());
+    expect(alertTypeRegistry.has('test-alet-type'));
   });
 });
