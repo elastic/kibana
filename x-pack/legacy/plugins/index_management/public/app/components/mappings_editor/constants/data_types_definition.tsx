@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
 
+import { documentationService } from '../../../services/documentation';
 import { MainType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
@@ -17,6 +21,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/text.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.textLongDescription"
+          defaultMessage="Text fields support full text search by breaking a string into individual terms, each of which can be searched for. Text fields aren't used for sorting and aggregations. If you need to index structured content such as email addresses or status codes, you should use the {keyword}."
+          values={{
+            keyword: (
+              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.textLongDescription.keywordTypeLink',
+                  {
+                    defaultMessage: 'keyword data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   keyword: {
     value: 'keyword',
@@ -243,6 +267,29 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       main: '/geo-shape.html',
       learnMore: '/geo-shape.html#geoshape-indexing-approach',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.geoShapeType.fieldDescription"
+          defaultMessage="Geo-shapes are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7-dimensional point in a BKD tree. {docsLink}"
+          values={{
+            docsLink: (
+              <EuiLink
+                href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.geoShapeType.fieldDescription.learnMoreLink',
+                  {
+                    defaultMessage: 'Learn more.',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   completion: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.completionSuggesterDescription', {
@@ -277,7 +324,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'join',
     documentation: {
-      main: '/join.html',
+      main: '/parent-join.html',
     },
   },
   alias: {

@@ -15,7 +15,7 @@ import {
   NullValueParameter,
   IgnoreZValueParameter,
 } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -34,7 +34,7 @@ interface Props {
 export const GeoPointType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
@@ -43,30 +43,28 @@ export const GeoPointType = ({ field }: Props) => {
             }
           )}
         />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <IgnoreZValueParameter />
+      <AdvancedParametersSection>
+        <IgnoreZValueParameter />
 
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
-              {
-                defaultMessage:
-                  'Accepts a geopoint value which is substituted for any explicit null values.',
-              }
-            )}
-          >
-            <UseField
-              path="null_value"
-              component={TextAreaField}
-              config={getFieldConfig('null_value_geo_point')}
-            />
-          </NullValueParameter>
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <NullValueParameter
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
+            {
+              defaultMessage:
+                'Accepts a geopoint value which is substituted for any explicit null values.',
+            }
+          )}
+        >
+          <UseField
+            path="null_value"
+            component={TextAreaField}
+            config={getFieldConfig('null_value_geo_point')}
+          />
+        </NullValueParameter>
+      </AdvancedParametersSection>
     </>
   );
 };

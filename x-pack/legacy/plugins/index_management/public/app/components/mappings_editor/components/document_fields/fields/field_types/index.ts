@@ -49,7 +49,13 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
 export const getParametersFormForType = (
   type: MainType,
   subType?: SubType
-): ComponentType<{ field: NormalizedField; allFields: NormalizedFields['byId'] }> | undefined =>
+):
+  | ComponentType<{
+      field: NormalizedField;
+      allFields: NormalizedFields['byId'];
+      isMultiField: boolean;
+    }>
+  | undefined =>
   subType === undefined
     ? typeToParametersFormMap[type]
     : typeToParametersFormMap[subType] || typeToParametersFormMap[type];
