@@ -1530,13 +1530,11 @@ export class TimeSeriesExplorer extends React.Component {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
-              <AnomaliesTable
-                tableData={tableData}
-                filter={this.tableFilter}
-                timefilter={timefilter}
-              />
             </EuiText>
           )}
+        {arePartitioningFieldsProvided && jobs.length > 0 && (
+          <AnomaliesTable tableData={tableData} filter={this.tableFilter} timefilter={timefilter} />
+        )}
       </TimeSeriesExplorerPage>
     );
   }

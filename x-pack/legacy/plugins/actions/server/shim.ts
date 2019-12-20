@@ -22,6 +22,7 @@ import {
   LoggerFactory,
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
@@ -76,6 +77,7 @@ export interface ActionsPluginsSetup {
   task_manager: TaskManagerSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  licensing: LicensingPluginSetup;
 }
 export interface ActionsPluginsStart {
   security?: SecurityPluginStartContract;
@@ -110,6 +112,7 @@ export function shim(
         return Rx.of({
           enabled: server.config().get('xpack.actions.enabled') as boolean,
           whitelistedHosts: server.config().get('xpack.actions.whitelistedHosts') as string[],
+          enabledActionTypes: server.config().get('xpack.actions.enabledActionTypes') as string[],
         }) as Rx.Observable<ActionsConfigType>;
       },
     },
@@ -133,6 +136,7 @@ export function shim(
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+    licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
   };
 
   const pluginsStart: ActionsPluginsStart = {

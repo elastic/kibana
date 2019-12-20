@@ -14,6 +14,7 @@ import {
   FetchRulesResponse,
   NewRule,
   Rule,
+  FetchRuleProps,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
@@ -27,7 +28,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
  */
 export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Promise<NewRule> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
-    method: 'POST',
+    method: rule.id != null ? 'PUT' : 'POST',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
@@ -94,6 +95,28 @@ export const fetchRules = async ({
         data: response.json(),
       }
     : response.json();
+};
+
+/**
+ * Fetch a Rule by providing a Rule ID
+ *
+ * @param id Rule ID's (not rule_id)
+ * @param kbnVersion current Kibana Version to use for headers
+ */
+export const fetchRuleById = async ({ id, kbnVersion, signal }: FetchRuleProps): Promise<Rule> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    signal,
+  });
+  await throwIfNotOk(response);
+  const rule: Rule = await response.json();
+  return rule;
 };
 
 /**
@@ -177,11 +200,14 @@ export const duplicateRules = async ({
       body: JSON.stringify({
         ...rule,
         name: `${rule.name} [Duplicate]`,
+        created_at: undefined,
         created_by: undefined,
         id: undefined,
         rule_id: undefined,
+        updated_at: undefined,
         updated_by: undefined,
         enabled: rule.enabled,
+        immutable: false,
       }),
     })
   );
