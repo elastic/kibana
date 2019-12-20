@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular from 'angular';
-import { IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './helpers/register_feature';
 import './kibana_services';
@@ -46,7 +46,7 @@ export interface DiscoverSetup {
 }
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
-  uiActions: IUiActionsStart;
+  uiActions: IUiActionsSetup;
   embeddable: IEmbeddableSetup;
   kibana_legacy: KibanaLegacySetup;
   __LEGACY: {
