@@ -40,7 +40,7 @@ export const GeoPointType = ({ field }: Props) => {
             'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
             {
               defaultMessage:
-                'By default, documents that contain malformed geo-points will not be indexed. Enable this setting to index these documents normally, but filter out fields that have malformed geo-points. Be careful: if you index too many documents this way then queries on this field will become meaningless.',
+                'By default, documents that contain malformed geo-points are not indexed. If enabled, these documents are indexed, but fields with malformed geo-points are filtered out. Be careful: if too many documents are indexed this way, queries on the field become meaningless.',
             }
           )}
         />

@@ -22,7 +22,7 @@ export const OrientationParameter = ({ defaultToggleValue }: { defaultToggleValu
       'xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldDescription',
       {
         defaultMessage:
-          'Interpret the vertex order for polygons and multipolygons as either counterclockwise (default) or clockwise.',
+          'Interpret the vertex order for polygons and multipolygons as either clockwise or counterclockwise (default).',
       }
     )}
     defaultToggleValue={defaultToggleValue}

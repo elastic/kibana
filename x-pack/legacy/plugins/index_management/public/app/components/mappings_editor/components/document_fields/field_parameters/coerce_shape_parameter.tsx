@@ -18,7 +18,7 @@ export const CoerceShapeParameter = () => (
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceShapeDescription', {
       defaultMessage:
-        'If coercion is disabled then documents with unclosed linear rings in polygons will be rejected.',
+        'If disabled, then documents that contain polygons with unclosed linear rings are rejected.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.coerceShapeDocLinkText', {

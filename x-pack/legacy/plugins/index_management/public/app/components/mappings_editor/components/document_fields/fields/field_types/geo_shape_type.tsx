@@ -47,7 +47,7 @@ export const GeoShapeType = ({ field }: Props) => {
             'xpack.idxMgmt.mappingsEditor.geoShape.ignoreMalformedFieldDescription',
             {
               defaultMessage:
-                'By default, documents that contain malformed GeoJSON or WKT shapes will not be indexed. Enable this setting to index these documents normally, but filter out fields that have malformed geo-shapes. Be careful: if you index too many documents this way then queries on this field will become meaningless.',
+                'By default, documents that contain malformed GeoJSON or WKT shapes are not indexed. If enabled, these documents are indexed, but fields with malformed shapes are filtered out. Be careful: if too many documents are indexed this way, queries on the field become meaningless.',
             }
           )}
         />
@@ -67,7 +67,7 @@ export const GeoShapeType = ({ field }: Props) => {
             'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
             {
               defaultMessage:
-                'Optimizes geo-shape queries as long as this field only contains geo-points. Shapes, including multi-point shapes, will be rejected.',
+                'Optimizes geo-shape queries if this field contains only geo-points. Shapes, including multi-point shapes, will be rejected.',
             }
           )}
           formFieldPath="points_only"
