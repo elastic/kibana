@@ -49,12 +49,12 @@ export class AlertsClientFactory {
         const user = await securityPluginSetup.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
-      async createAPIKey() {
+      async createAPIKey(id: string) {
         if (!securityPluginSetup) {
           return { created: false };
         }
         const createAPIKeyResult = await securityPluginSetup.authc.createAPIKey(request, {
-          name: `source: alerting, generated uuid: "${uuid.v4()}"`,
+          name: `{"alertTypeId": "${id}", "source": "alerting", "guid": "${uuid.v4()}"}`,
           role_descriptors: {},
         });
         if (!createAPIKeyResult) {

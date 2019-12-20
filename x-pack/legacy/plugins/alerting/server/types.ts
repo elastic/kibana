@@ -84,6 +84,7 @@ export interface Alert {
 }
 
 export interface RawAlert extends SavedObjectAttributes {
+  apiKeyName: string | null;
   enabled: boolean;
   name: string;
   tags: string[];

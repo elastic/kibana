@@ -42,7 +42,7 @@ interface ConstructorOptions {
   alertTypeRegistry: AlertTypeRegistry;
   spaceId?: string;
   getUserName: () => Promise<string | null>;
-  createAPIKey: () => Promise<CreateAPIKeyResult>;
+  createAPIKey: (id: string) => Promise<CreateAPIKeyResult>;
 }
 
 export interface FindOptions {
@@ -107,7 +107,7 @@ export class AlertsClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
+  private readonly createAPIKey: (id: string) => Promise<CreateAPIKeyResult>;
 
   constructor({
     alertTypeRegistry,
@@ -138,7 +138,7 @@ export class AlertsClient {
     const { references, actions } = await this.denormalizeActions(data.actions);
     const rawAlert: RawAlert = {
       ...data,
-      ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+      ...this.apiKeyAsAlertAttributes(await this.createAPIKey(alertType.id), username),
       actions,
       createdBy: username,
       updatedBy: username,
@@ -236,7 +236,10 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const apiKeyAttributes = this.apiKeyAsAlertAttributes(await this.createAPIKey(), username);
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(
+      await this.createAPIKey(alertType.id),
+      username
+    );
 
     const updatedObject = await this.savedObjectsClient.update<RawAlert>(
       'alert',
@@ -260,20 +263,23 @@ export class AlertsClient {
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult,
     username: string | null
-  ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
+  ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner' | 'apiKeyName'> {
     return apiKey.created
       ? {
           apiKeyOwner: username,
           apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
+          apiKeyName: apiKey.result.name,
         }
       : {
           apiKeyOwner: null,
           apiKey: null,
+          apiKeyName: null,
         };
   }
 
   public async updateApiKey({ id }: { id: string }) {
     const { version, attributes } = await this.savedObjectsClient.get('alert', id);
+    const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
     const username = await this.getUserName();
     await this.savedObjectsClient.update(
@@ -281,7 +287,7 @@ export class AlertsClient {
       id,
       {
         ...attributes,
-        ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+        ...this.apiKeyAsAlertAttributes(await this.createAPIKey(alertType.id), username),
         updatedBy: username,
       },
       { version }
@@ -290,6 +296,8 @@ export class AlertsClient {
 
   public async enable({ id }: { id: string }) {
     const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
+
     if (attributes.enabled === false) {
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
@@ -299,7 +307,7 @@ export class AlertsClient {
         {
           ...attributes,
           enabled: true,
-          ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+          ...this.apiKeyAsAlertAttributes(await this.createAPIKey(alertType.id), username),
           updatedBy: username,
           scheduledTaskId: scheduledTask.id,
         },

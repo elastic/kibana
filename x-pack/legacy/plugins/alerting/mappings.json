@@ -1,6 +1,9 @@
 {
   "alert": {
     "properties": {
+      "apiKeyName": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
