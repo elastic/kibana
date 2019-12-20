@@ -16,7 +16,6 @@ import {
 } from './components';
 import { IndexSettings } from './types';
 import { State, Dispatch } from './reducer';
-import { serializeProperties } from './lib';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
 
@@ -39,9 +38,8 @@ export const MappingsEditor = React.memo(
         numeric_detection,
         date_detection,
         dynamic_date_formats,
+        properties,
       } = defaultValue;
-
-      const properties = serializeProperties(defaultValue.properties);
 
       return {
         configuration: {

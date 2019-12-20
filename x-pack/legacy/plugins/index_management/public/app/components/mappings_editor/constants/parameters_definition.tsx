@@ -181,33 +181,33 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   index: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   doc_values: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   doc_values_binary: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   fielddata: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   fielddata_frequency_filter: {
     fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
@@ -247,19 +247,19 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   coerce_shape: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   ignore_malformed: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   null_value: {
     fieldConfig: {
@@ -299,7 +299,7 @@ export const PARAMETERS_DEFINITION = {
       deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
       serializer: (value: number) => mapIndexToValue[value],
     },
-    schema: Joi.any().allow([true, false, 'true', 'false']),
+    schema: Joi.any().valid([true, false, 'true', 'false']),
   },
   null_value_geo_point: {
     fieldConfig: {
@@ -500,7 +500,7 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   enabled: {
     fieldConfig: {
@@ -510,7 +510,7 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   format: {
     fieldConfig: {
@@ -609,49 +609,49 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   preserve_separators: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   preserve_position_increments: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   ignore_z_value: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   points_only: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   norms: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   norms_keyword: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   term_vector: {
     fieldConfig: {
@@ -756,7 +756,7 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   ignore_above: {
     fieldConfig: {
@@ -794,7 +794,7 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean(),
+    schema: Joi.boolean().strict(),
   },
   depth_limit: {
     fieldConfig: {

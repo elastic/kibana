@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 import { JsonEditor, OnUpdateHandler } from '../../../json_editor';
+import { serializeMappings } from '../../lib';
 
 type OpenJsonModalFunc = () => void;
 
@@ -61,10 +62,16 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   };
 
   const loadJson = () => {
-    const isValid = jsonContent.current!.validate();
+    const isValidJson = jsonContent.current!.validate();
 
-    if (isValid) {
-      onJson(jsonContent.current!.data.format());
+    if (isValidJson) {
+      // Parse it to make sure it won't break the UI
+      const { value } = serializeMappings(jsonContent.current!.data.format());
+
+      // console.log(value);
+      // console.log(propertiesRemoved);
+
+      onJson(value);
       closeModal();
     }
   };
