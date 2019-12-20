@@ -60,7 +60,7 @@ The summary shows the distribution of values in the time range.
 To view the data information, navigate to a data field, then click *i*.
 
 [role="screenshot"]
-image::images/lens_data_info.gif[]
+image::images/lens_data_info.png[]
 
 [float]
 [[change-the-visualization-type]]

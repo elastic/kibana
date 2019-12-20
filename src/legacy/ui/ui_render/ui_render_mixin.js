@@ -28,6 +28,7 @@ import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
+import { getApmConfig } from '../apm';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -282,6 +283,8 @@ export function uiRenderMixin(kbnServer, server, config) {
         uiPlugins,
 
         legacyMetadata,
+
+        apm: getApmConfig(legacyMetadata.app),
       },
     });
 

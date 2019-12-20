@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiRange, EuiSelect } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
@@ -21,7 +21,7 @@ const defaultProps = {
   uiSettings: {} as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
-  http: {} as HttpServiceBase,
+  http: {} as HttpSetup,
 };
 
 describe('terms', () => {

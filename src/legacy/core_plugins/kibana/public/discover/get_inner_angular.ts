@@ -68,7 +68,7 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { configureAppAngularModule } from 'ui/legacy_compat';
 import { IndexPatterns } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { NavigationStart } from '../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { createDocTableDirective } from './angular/doc_table/doc_table';
 import { createTableHeaderDirective } from './angular/doc_table/components/table_header';
 import {

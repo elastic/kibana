@@ -23,9 +23,17 @@ import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
+import { InfraStaticSourceConfiguration } from './lib/sources/types';
 
 export interface KbnServer extends Server {
   usage: any;
+}
+
+export interface InfraPluginSetup {
+  defineInternalSourceConfiguration: (
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) => void;
 }
 
 const DEFAULT_CONFIG: InfraConfig = {
@@ -103,5 +111,11 @@ export class InfraServerPlugin {
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    return {
+      defineInternalSourceConfiguration(sourceId, sourceProperties) {
+        sources.defineInternalSourceConfiguration(sourceId, sourceProperties);
+      },
+    } as InfraPluginSetup;
   }
 }

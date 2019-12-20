@@ -17,28 +17,11 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  KibanaRequest,
-  RequestHandlerContext,
-  APICaller,
-  CallAPIOptions,
-} from '../../../../core/server';
+import { HttpServiceSetup, RequestHandlerContext } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
 
-export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup['elasticsearch']) {
-  const getIndexPatternsService = async (request: KibanaRequest): Promise<IndexPatternsFetcher> => {
-    const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-    const callCluster: APICaller = (
-      endpoint: string,
-      params?: Record<string, any>,
-      options?: CallAPIOptions
-    ) => client.asScoped(request).callAsCurrentUser(endpoint, params, options);
-    return new Promise(resolve => resolve(new IndexPatternsFetcher(callCluster)));
-  };
-
+export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
     let parsedFields: string[] = [];
     if (typeof metaFields === 'string') {
@@ -62,8 +45,9 @@ export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup
         }),
       },
     },
-    async (context: RequestHandlerContext, request: any, response: any) => {
-      const indexPatterns = await getIndexPatternsService(request);
+    async (context, request, response) => {
+      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];
@@ -106,7 +90,8 @@ export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const indexPatterns = await getIndexPatternsService(request);
+      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];
