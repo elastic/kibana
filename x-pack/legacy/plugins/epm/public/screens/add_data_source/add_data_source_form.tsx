@@ -11,10 +11,10 @@ import {
   EuiSteps,
   EuiCheckboxGroupIdToSelectedMap,
 } from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
-import { installDatasource } from '../../data';
+import { installDatasource, getPolicies } from '../../data';
 import { useCore, useLinks } from '../../hooks';
 import { StepOne } from './step_one';
 import { PackageInfo } from '../../../common/types';
@@ -31,6 +31,10 @@ const StyledSteps = styled.div`
 interface AddDataSourceStepsProps {
   package: PackageInfo;
 }
+interface PolicyOption {
+  label: string;
+  value: string;
+}
 export interface FormState {
   datasourceName: string;
   datasets: EuiCheckboxGroupIdToSelectedMap;
@@ -42,7 +46,15 @@ const FormNav = styled.div`
 `;
 
 export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => {
-  const defaultPolicyOption = { label: 'Default policy', value: 'default' };
+  const defaultPolicyOption: PolicyOption = { label: 'Default policy', value: 'default' };
+  const [policyOptions, setPolicyOptions] = useState<PolicyOption[]>([defaultPolicyOption]);
+  useEffect(() => {
+    getPolicies()
+      .then(response => response.list)
+      .then(policies => policies.map(policy => ({ label: policy.name, value: policy.id })))
+      .then(setPolicyOptions);
+  }, []);
+
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
   const [datasourceName, setDatasourceName] = useState<FormState['datasourceName']>('');
   const [selectedDatasets, setSelectedDatasets] = useState<FormState['datasets']>({});
@@ -102,12 +114,9 @@ export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => 
       children: (
         <StepOne
           datasetCheckboxes={checkboxes}
-          policyOptions={[
-            defaultPolicyOption,
-            { label: 'Foo policy', value: 'd09bbe00-21e0-11ea-9786-4545a9e62b25' },
-          ]}
           onDatasetChange={onDatasetChange}
           onNameChange={onNameChange}
+          policyOptions={policyOptions}
           onPolicyChange={setSelectedPolicies}
           formState={formState}
         />
