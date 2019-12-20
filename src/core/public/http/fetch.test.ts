@@ -53,6 +53,16 @@ describe('Fetch', () => {
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'CustomContentType',
+        'kbn-version': 'VERSION',
+      });
+    });
+
+    it('should not set Content-Type if undefined', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', { headers: { 'Content-Type': undefined } });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-version': 'VERSION',
       });
     });
 
@@ -72,6 +82,21 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toEqual({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
+        myheader: 'foo',
+      });
+    });
+
+    it('should set kbn-system-api header', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemApi: true,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toEqual({
+        'content-type': 'application/json',
+        'kbn-version': 'VERSION',
+        'kbn-system-api': 'true',
         myheader: 'foo',
       });
     });

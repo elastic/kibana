@@ -95,33 +95,28 @@ export class Fetch {
     });
   };
 
-  private createRequest(path: string, options?: HttpFetchOptions): Request {
+  private createRequest(path: string, options: HttpFetchOptions = {}): Request {
     // Merge and destructure options out that are not applicable to the Fetch API.
     const { query, prependBasePath: shouldPrependBasePath, asResponse, ...fetchOptions } = merge(
       {
         method: 'GET',
         credentials: 'same-origin',
         prependBasePath: true,
-        headers: {
-          'kbn-version': this.params.kibanaVersion,
-          'Content-Type': 'application/json',
-        },
       },
-      options || {}
+      options,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-version': this.params.kibanaVersion,
+          'kbn-system-api': options.asSystemApi ? 'true' : undefined,
+          ...options.headers,
+        },
+      }
     );
     const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(path) : path,
       query,
     });
-
-    if (
-      options &&
-      options.headers &&
-      'Content-Type' in options.headers &&
-      options.headers['Content-Type'] === undefined
-    ) {
-      delete fetchOptions.headers['Content-Type'];
-    }
 
     return new Request(url, fetchOptions);
   }
