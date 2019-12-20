@@ -65,6 +65,12 @@ jest.doMock('./context/context_service', () => ({
   ContextService: jest.fn(() => mockContextService),
 }));
 
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
+export const mockUiSettingsService = uiSettingsServiceMock.create();
+jest.doMock('./ui_settings/ui_settings_service', () => ({
+  UiSettingsService: jest.fn(() => mockUiSettingsService),
+}));
+
 export const mockEnsureValidConfiguration = jest.fn();
 jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
