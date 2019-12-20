@@ -356,12 +356,6 @@ supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
 
-`telemetry.enabled`:: *Default: true* Set to `true` to send cluster statistics
-to Elastic. Reporting your cluster statistics helps us improve your user
-experience. Your data is never shared with anyone. Set to `false` to disable
-statistics reporting. You can also opt out through the *Advanced Settings* in
-{kib}.
-
 `telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`,
 users are able to change the telemetry setting at a later time in
 <<advanced-options, Advanced Settings>>.  If `false`,
@@ -373,6 +367,12 @@ cannot be `false` at the same time.
  If `false`, collection of telemetry data is disabled.  
  To enable telemetry and prevent users from disabling it,
  set `telemetry.allowChangingOptInStatus` to `false` and `telemetry.optIn` to `true`.
+
+`telemetry.enabled`:: *Default: true* Set to `true` to enable telemetry
+capabilities. Reporting your cluster statistics helps us improve your user
+experience. Your data is never shared with anyone. Set to `false` to disable
+telemetry entirely. You can alternatively opt out through the *Advanced Settings*
+in {kib}.
 
 `vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
 
