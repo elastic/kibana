@@ -28,13 +28,13 @@ describe('Lens URL Helper', () => {
     let url =
       "http://localhost:5601/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
     expect(addEmbeddableToDashboardUrl(url, id, type)).toEqual(
-      `http://localhost:5601/app/kibana#/dashboard?embeddableType=${type}&embeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
+      `http://localhost:5601/app/kibana#/dashboard?addEmbeddableType=${type}&addEmbeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
     );
 
     url =
       "http://mybusiness.mydomain.com/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
     expect(addEmbeddableToDashboardUrl(url, id, type)).toEqual(
-      `http://mybusiness.mydomain.com/app/kibana#/dashboard?embeddableType=${type}&embeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
+      `http://mybusiness.mydomain.com/app/kibana#/dashboard?addEmbeddableType=${type}&addEmbeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:\'\',filters:!()`
     );
 
     url = 'http://invalidUrl';
@@ -43,7 +43,7 @@ describe('Lens URL Helper', () => {
     url =
       "http://localhost:5601/app/kibana#/dashboard/777182?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()";
     expect(addEmbeddableToDashboardUrl(url, id, type)).toBe(
-      `http://localhost:5601/app/kibana#/dashboard/777182?embeddableType=${type}&embeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()`
+      `http://localhost:5601/app/kibana#/dashboard/777182?addEmbeddableType=${type}&addEmbeddableId=${id}&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,to:now))&_a=(description:'',filters:!()`
     );
   });
 });
