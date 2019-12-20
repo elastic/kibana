@@ -67,6 +67,13 @@
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
 /x-pack/test/functional/services/transform.ts @elastic/ml-ui
 
+# Maps
+/x-pack/legacy/plugins/maps/ @elastic/kibana-gis
+/x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
+/x-pack/test/functional/apps/maps/ @elastic/kibana-gis
+/x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
+/x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
+
 # Operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations

@@ -117,6 +117,42 @@ export const getFindRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_RULES_URL}/_find`,
 });
 
+export const getReadBulkRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+  payload: [typicalPayload()],
+});
+
+export const getUpdateBulkRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+  payload: [typicalPayload()],
+});
+
+export const getDeleteBulkRequest = (): ServerInjectOptions => ({
+  method: 'DELETE',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ rule_id: 'rule-1' }],
+});
+
+export const getDeleteBulkRequestById = (): ServerInjectOptions => ({
+  method: 'DELETE',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+});
+
+export const getDeleteAsPostBulkRequestById = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ id: 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
+});
+
+export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+  payload: [{ rule_id: 'rule-1' }],
+});
+
 export const getPrivilegeRequest = (): ServerInjectOptions => ({
   method: 'GET',
   url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
@@ -220,6 +256,7 @@ export const getResult = (): RuleAlertType => ({
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
   alertTypeId: 'siem.signals',
+  consumer: 'siem',
   params: {
     createdAt: '2019-12-13T16:40:33.400Z',
     updatedAt: '2019-12-13T16:40:33.400Z',
@@ -271,12 +308,13 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },
-  interval: '5m',
+  schedule: { interval: '5m' },
   enabled: true,
   actions: [],
   throttle: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
+  apiKey: null,
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],

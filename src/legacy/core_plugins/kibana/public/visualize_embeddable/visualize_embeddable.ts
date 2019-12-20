@@ -47,6 +47,7 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SavedSearch } from '../discover';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -57,6 +58,10 @@ export interface VisSavedObject extends SavedObject {
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
+  savedSearchRefName?: string;
+  savedSearchId?: string;
+  savedSearch?: SavedSearch;
+  visState: any;
 }
 
 export interface VisualizeEmbeddableConfiguration {

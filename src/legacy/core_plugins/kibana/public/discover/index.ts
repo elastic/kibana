@@ -36,3 +36,6 @@ export const pluginInstance = plugin({} as PluginInitializerContext);
 SavedObjectRegistryProvider.register((savedSearches: any) => {
   return savedSearches;
 });
+
+export { createSavedSearchesService } from './saved_searches/saved_searches';
+export * from './np_ready/types';

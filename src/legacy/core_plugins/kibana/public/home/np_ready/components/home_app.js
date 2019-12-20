@@ -31,14 +31,13 @@ import { getServices } from '../../kibana_services';
 // TODO This is going to be refactored soon
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npSetup } from 'ui/new_platform';
-
 export function HomeApp({ directories }) {
   const {
     getInjected,
     savedObjectsClient,
     getBasePath,
     addBasePath,
-    telemetryOptInProvider: { setOptInNoticeSeen },
+    telemetryOptInProvider: { setOptInNoticeSeen, getOptIn },
   } = getServices();
   const { cloud } = npSetup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
@@ -89,6 +88,7 @@ export function HomeApp({ directories }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               onOptInSeen={setOptInNoticeSeen}
+              getOptInStatus={getOptIn}
             />
           </Route>
           <Route path="/home">
