@@ -44,8 +44,8 @@ If you have a license that includes the {ml} features, you can create
 image::user/ml/images/ml-job-management.jpg[Job Management]
 
 You can use the *Settings* pane to create and edit 
-{stack-ov}/ml-calendars.html[calendars] and the filters that are used in 
-{stack-ov}/ml-rules.html[custom rules]:
+{ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
+{ml-docs}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
 image::user/ml/images/ml-settings.jpg[Calendar Management]
@@ -66,8 +66,8 @@ image::user/ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotati
 
 In some circumstances, annotations are also added automatically. For example, if
 the {anomaly-job} detects that there is missing data, it annotates the affected
-time period. For more information, see 
-{stack-ov}/ml-delayed-data-detection.html[Handling delayed data].
+time period. For more information, see
+{ml-docs}/ml-delayed-data-detection.html[Handling delayed data].
 The *Job Management* pane shows the full list of annotations for each job.
 
 NOTE: The {kib} {ml-features} use pop-ups. You must configure your
@@ -76,5 +76,5 @@ your {kib} URL.
 
 For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning and
-{stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+{ml-docs}/xpack-ml.html[Machine learning in the {stack}].
 

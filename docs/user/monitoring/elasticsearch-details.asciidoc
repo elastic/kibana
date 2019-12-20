@@ -128,4 +128,4 @@ You can also see advanced information, which contains the results from the
  
 image::user/monitoring/images/monitoring-ccr-shard.png["Cross-cluster replication shard details",link="images/monitoring-ccr-shard.png"]
 
-For more information, see {stack-ov}/xpack-ccr.html[Cross-cluster replication].
+For more information, see {ref}/xpack-ccr.html[Cross-cluster replication].
