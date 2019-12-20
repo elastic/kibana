@@ -27,7 +27,7 @@ export interface ColumnTypes {
   ran: string;
   lookedBackTo: string;
   status: string;
-  response: string | undefined;
+  response?: string | undefined;
 }
 
 export interface PageTypes {
@@ -36,8 +36,8 @@ export interface PageTypes {
 }
 
 export interface SortTypes {
-  field: string;
-  direction: string;
+  field: keyof ColumnTypes;
+  direction: 'asc' | 'desc';
 }
 
 export const ActivityMonitor = React.memo(() => {
@@ -279,9 +279,9 @@ export const ActivityMonitor = React.memo(() => {
   const [sortState, setSortState] = useState<SortTypes>({ field: 'ran', direction: 'desc' });
 
   const handleChange = useCallback(
-    ({ page, sort }: { page: PageTypes; sort: SortTypes }) => {
-      setPageState(page);
-      setSortState(sort);
+    ({ page, sort }: { page?: PageTypes; sort?: SortTypes }) => {
+      setPageState(page!);
+      setSortState(sort!);
     },
     [setPageState, setSortState]
   );
@@ -326,7 +326,7 @@ export const ActivityMonitor = React.memo(() => {
           selection={{
             selectable: (item: ColumnTypes) => item.status !== 'Completed',
             selectableMessage: (selectable: boolean) =>
-              selectable ? undefined : 'Completed runs cannot be acted upon',
+              selectable ? '' : 'Completed runs cannot be acted upon',
             onSelectionChange: (selectedItems: ColumnTypes[]) => {
               // setSelectedState(selectedItems);
             },
