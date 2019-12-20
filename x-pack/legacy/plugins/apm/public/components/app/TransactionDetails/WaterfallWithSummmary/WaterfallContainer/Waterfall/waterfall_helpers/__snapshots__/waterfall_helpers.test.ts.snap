@@ -1469,6 +1469,39 @@ Array [
   },
   Object {
     "doc": Object {
+      "id": "b2",
+      "name": "GET [0:0:0:0:0:0:0:1]",
+      "parent": Object {
+        "doc": Object {
+          "errorsCount": 0,
+          "id": "a",
+          "name": "APIRestController#products",
+          "parent": undefined,
+          "serviceName": "opbeans-java",
+          "timestamp": 1536763736366000,
+          "transaction": Object {},
+        },
+        "docType": "transaction",
+        "duration": 9480,
+        "offset": 0,
+        "skew": 0,
+      },
+      "parentId": "a",
+      "serviceName": "opbeans-java",
+      "span": Object {
+        "transaction": Object {
+          "id": "a",
+        },
+      },
+      "timestamp": 1536763736367000,
+    },
+    "docType": "span",
+    "duration": 4694,
+    "offset": 1000,
+    "skew": 0,
+  },
+  Object {
+    "doc": Object {
       "id": "b",
       "name": "GET [0:0:0:0:0:0:0:1]",
       "parent": Object {
@@ -1612,39 +1645,6 @@ Array [
     "docType": "span",
     "duration": 210,
     "offset": 5000,
-    "skew": 0,
-  },
-  Object {
-    "doc": Object {
-      "id": "b2",
-      "name": "GET [0:0:0:0:0:0:0:1]",
-      "parent": Object {
-        "doc": Object {
-          "errorsCount": 0,
-          "id": "a",
-          "name": "APIRestController#products",
-          "parent": undefined,
-          "serviceName": "opbeans-java",
-          "timestamp": 1536763736366000,
-          "transaction": Object {},
-        },
-        "docType": "transaction",
-        "duration": 9480,
-        "offset": 0,
-        "skew": 0,
-      },
-      "parentId": "a",
-      "serviceName": "opbeans-java",
-      "span": Object {
-        "transaction": Object {
-          "id": "a",
-        },
-      },
-      "timestamp": 1536763736367000,
-    },
-    "docType": "span",
-    "duration": 4694,
-    "offset": 1000,
     "skew": 0,
   },
 ]

@@ -234,7 +234,10 @@ export function getOrderedWaterfallItems(
       return [item];
     }
 
-    const children = sortBy(childrenByParentId[item.doc.id] || [], 'timestamp');
+    const children = sortBy(
+      childrenByParentId[item.doc.id] || [],
+      'doc.timestamp'
+    );
 
     item.doc.parent = parentItem;
     // get offset from the beginning of trace
