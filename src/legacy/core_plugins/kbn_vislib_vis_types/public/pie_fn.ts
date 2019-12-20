@@ -18,9 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { vislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 
+import { vislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from './legacy_imports';
 import {
   ExpressionFunction,
   KibanaDatatable,

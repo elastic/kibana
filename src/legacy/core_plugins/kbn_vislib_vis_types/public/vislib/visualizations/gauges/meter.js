@@ -19,7 +19,8 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import { getHeatmapColors } from 'ui/color_maps';
+
+import { getHeatmapColors } from '../../../legacy_imports';
 
 const arcAngles = {
   angleFactor: 0.75,

@@ -21,9 +21,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { palettes } from '@elastic/eui/lib/services';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggGroupNames } from 'ui/vis/editors/default';
-
+import { Schemas, AggGroupNames } from './legacy_imports';
 import {
   Positions,
   ChartTypes,

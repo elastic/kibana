@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import { colorSchemas } from 'ui/color_maps';
+import { colorSchemas } from '../legacy_imports';
 
 export const Positions = Object.freeze({
   RIGHT: 'right' as 'right',

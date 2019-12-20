@@ -18,11 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { $Values } from '@kbn/utility-types';
 
-export enum AggGroupNames {
-  Buckets = 'buckets',
-  Metrics = 'metrics',
-}
+export const AggGroupNames = Object.freeze({
+  Buckets: 'buckets' as 'buckets',
+  Metrics: 'metrics' as 'metrics',
+  None: 'none' as 'none',
+});
+export type AggGroupNames = $Values<typeof AggGroupNames>;
 
 export const aggGroupNamesMap = () => ({
   [AggGroupNames.Metrics]: i18n.translate('common.ui.vis.editors.aggGroups.metricsText', {

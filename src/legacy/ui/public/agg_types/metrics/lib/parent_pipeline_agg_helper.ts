@@ -27,6 +27,7 @@ import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
 // @ts-ignore
 import { Schemas } from '../../../vis/editors/default/schemas';
+import { AggGroupNames } from '../../../vis/editors/default';
 
 const metricAggFilter = [
   '!top_hits',
@@ -51,7 +52,7 @@ const subtypeLabel = i18n.translate(
 
 const [metricAggSchema] = new Schemas([
   {
-    group: 'none',
+    group: AggGroupNames.None,
     name: 'metricAgg',
     title: metricAggTitle,
     hideCustomLabel: true,

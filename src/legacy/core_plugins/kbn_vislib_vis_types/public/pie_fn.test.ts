@@ -22,7 +22,7 @@ import { functionWrapper } from '../../../../plugins/expressions/public/function
 import { createPieVisFn } from './pie_fn';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/vis/response_handlers/vislib', () => ({
+jest.mock('./legacy_imports.ts', () => ({
   vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));
 

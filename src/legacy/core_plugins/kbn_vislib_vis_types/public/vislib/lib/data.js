@@ -19,11 +19,11 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
+
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
 import { labels } from '../components/labels/labels';
-import { vislibColor } from '../../../../../ui/public/vis/components/color/color';
-import { getFormat } from '../../../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+import { vislibColor, getFormat } from '../../legacy_imports';
 
 /**
  * Provides an API for pulling values off the data

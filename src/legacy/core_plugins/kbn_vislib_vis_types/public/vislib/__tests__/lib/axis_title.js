@@ -21,7 +21,9 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
+
 import expect from '@kbn/expect';
+
 import { AxisTitle } from '../../lib/axis/axis_title';
 import { AxisConfig } from '../../lib/axis/axis_config';
 import { VisConfig } from '../../lib/vis_config';

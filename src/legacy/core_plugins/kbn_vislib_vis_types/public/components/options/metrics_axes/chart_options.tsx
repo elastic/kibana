@@ -18,10 +18,11 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from '../../../legacy_imports';
 import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
 import { SelectOption } from '../../common';

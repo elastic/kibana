@@ -20,16 +20,16 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { Vis, VisParams } from 'ui/vis';
-
 import {
   CUSTOM_LEGEND_VIS_TYPES,
   VisLegend,
-} from '../../../ui/public/vis/vis_types/vislib_vis_legend';
+  Vis,
+  VisParams,
+  chrome,
+  mountReactNode,
+} from './legacy_imports';
 // @ts-ignore
 import { VislibVisProvider } from './vislib/vis';
-import chrome from '../../../ui/public/chrome';
-import { mountReactNode } from '../../../../core/public/utils';
 import { Positions } from './utils/collections';
 
 const legendClassName = {

@@ -18,10 +18,11 @@
  */
 
 import React, { useCallback } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { Vis } from 'ui/vis';
+import { Vis } from '../../../legacy_imports';
 import { SeriesParam } from '../../../types';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../common';
 import { SetChart } from './chart_options';

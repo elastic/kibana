@@ -19,17 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggGroupNames } from 'ui/vis/editors/default';
-import { ColorSchemas } from 'ui/color_maps';
-import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
-
+import { Schemas, AggGroupNames, ColorSchemas, RangeValues } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
 import { VislibVisController } from './vis_controller';
 import { ColorSchemaVislibParams, Labels, Style } from './types';
 
-interface Gauge extends ColorSchemaVislibParams {
+export interface Gauge extends ColorSchemaVislibParams {
   backStyle: 'Full';
   gaugeStyle: 'Full';
   orientation: 'vertical';

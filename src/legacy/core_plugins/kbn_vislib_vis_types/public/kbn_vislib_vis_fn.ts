@@ -18,9 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 
+import { vislibSeriesResponseHandlerProvider } from './legacy_imports';
 import {
   ExpressionFunction,
   KibanaDatatable,

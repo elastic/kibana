@@ -26,6 +26,7 @@ import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 // @ts-ignore
 import { Schemas } from '../../../vis/editors/default/schemas';
+import { AggGroupNames } from '../../../vis/editors/default';
 
 const metricAggFilter: string[] = [
   '!top_hits',
@@ -48,7 +49,7 @@ const bucketAggFilter: string[] = [];
 
 const [metricAggSchema] = new Schemas([
   {
-    group: 'none',
+    group: AggGroupNames.None,
     name: 'metricAgg',
     title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
       defaultMessage: 'Metric agg',
@@ -59,7 +60,7 @@ const [metricAggSchema] = new Schemas([
 
 const [bucketAggSchema] = new Schemas([
   {
-    group: 'none',
+    group: AggGroupNames.None,
     title: i18n.translate('common.ui.aggTypes.metrics.bucketAggTitle', {
       defaultMessage: 'Bucket agg',
     }),

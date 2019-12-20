@@ -40,6 +40,7 @@ export interface Schema {
   defaults: unknown;
   hideCustomLabel?: boolean;
   mustBeFirst?: boolean;
+  aggSettings?: any;
   editorComponent?: React.ComponentType<AggControlProps>;
 }
 

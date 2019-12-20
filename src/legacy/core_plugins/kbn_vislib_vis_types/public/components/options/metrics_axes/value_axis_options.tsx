@@ -100,7 +100,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       if (isCategoryAxisHorizontal) {
         return isAxisHorizontal(position);
       }
-      return [Positions.LEFT, Positions.RIGHT].includes(position);
+      return [Positions.LEFT, Positions.RIGHT].includes(position as any);
     },
     [isCategoryAxisHorizontal]
   );

@@ -18,8 +18,9 @@
  */
 
 import React from 'react';
-import { VisOptionsProps } from 'ui/vis/editors/default';
 import { i18n } from '@kbn/i18n';
+
+import { VisOptionsProps } from '../legacy_imports';
 import { PointSeriesOptions, MetricsAxisOptions } from '../components/options';
 import { ValidationWrapper } from '../components/common';
 import { BasicVislibParams } from '../types';

@@ -19,7 +19,8 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { getHeatmapColors } from 'ui/color_maps';
+
+import { getHeatmapColors } from '../../../legacy_imports';
 
 describe('Vislib Heatmap Color Module Test Suite', function() {
   const emptyObject = {};

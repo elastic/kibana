@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import mockDispatchDataD3 from './fixtures/dispatch_heatmap_d3.json';
+import { Dispatch } from '../../lib/dispatch';
+import mockdataPoint from './fixtures/dispatch_heatmap_data_point.json';
+import mockConfigPercentage from './fixtures/dispatch_heatmap_config.json';
+
 jest.mock('d3', () => ({
   event: {
     target: {
@@ -26,16 +31,13 @@ jest.mock('d3', () => ({
     },
   },
 }));
-
-import { Dispatch } from '../../lib/dispatch';
-import mockdataPoint from './fixtures/dispatch_heatmap_data_point.json';
-import mockConfigPercentage from './fixtures/dispatch_heatmap_config.json';
-
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: () => ({
-    get: () => '',
-  }),
-  addBasePath: () => {},
+jest.mock('../../../legacy_imports.ts', () => ({
+  chrome: {
+    getUiSettingsClient: () => ({
+      get: () => '',
+    }),
+    addBasePath: () => {},
+  },
 }));
 
 function getHandlerMock(config = {}, data = {}) {

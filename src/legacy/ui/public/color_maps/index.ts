@@ -19,6 +19,6 @@
 
 export * from './color_maps';
 // @ts-ignore
-export * from './heatmap_color';
+export { getHeatmapColors } from './heatmap_color';
 // @ts-ignore
 export * from './truncated_color_maps';

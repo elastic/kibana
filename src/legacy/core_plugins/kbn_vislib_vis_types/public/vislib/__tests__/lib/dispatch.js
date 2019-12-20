@@ -20,13 +20,14 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import ngMock from 'ng_mock';
+
 import expect from '@kbn/expect';
+import 'ui/persisted_state';
 
 // Data
 import data from './fixtures/mock_data/date_histogram/_series';
 import FixturesVislibVisFixtureProvider from './fixtures/_vis_fixture';
-import 'ui/persisted_state';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { SimpleEmitter } from '../../../legacy_imports';
 
 describe('Vislib Dispatch Class Test Suite', function() {
   function destroyVis(vis) {

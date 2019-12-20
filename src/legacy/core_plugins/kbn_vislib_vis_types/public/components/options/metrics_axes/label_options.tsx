@@ -18,11 +18,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from '../../../legacy_imports';
 import { BasicVislibParams, Axis } from '../../../types';
 import { SelectOption, SwitchOption, TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../utils/collections';

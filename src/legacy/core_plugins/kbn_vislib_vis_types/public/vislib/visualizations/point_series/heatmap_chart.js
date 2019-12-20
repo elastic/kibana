@@ -19,9 +19,11 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { PointSeries } from './_point_series';
-import { getHeatmapColors } from 'ui/color_maps';
+
 import { isColorDark } from '@elastic/eui';
+
+import { PointSeries } from './_point_series';
+import { getHeatmapColors } from '../../../legacy_imports';
 
 const defaults = {
   color: undefined, // todo

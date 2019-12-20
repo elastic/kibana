@@ -44,7 +44,7 @@ const makeSerie = (
 };
 
 const isAxisHorizontal = (position: Positions) =>
-  [Positions.TOP, Positions.BOTTOM].includes(position);
+  [Positions.TOP, Positions.BOTTOM].includes(position as any);
 
 const RADIX = 10;
 

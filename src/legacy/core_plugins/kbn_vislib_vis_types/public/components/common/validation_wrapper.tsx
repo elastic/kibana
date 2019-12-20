@@ -18,7 +18,8 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { VisOptionsProps } from 'ui/vis/editors/default';
+
+import { VisOptionsProps } from '../../legacy_imports';
 
 export interface ValidationVisOptionsProps<T> extends VisOptionsProps<T> {
   setMultipleValidity(paramName: string, isValid: boolean): void;

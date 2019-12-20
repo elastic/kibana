@@ -66,7 +66,7 @@ function DefaultEditorAggGroup({
   setTouched,
   setValidity,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = aggGroupNamesMap()[groupName];
+  const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
   const group: AggConfig[] =
     state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [];

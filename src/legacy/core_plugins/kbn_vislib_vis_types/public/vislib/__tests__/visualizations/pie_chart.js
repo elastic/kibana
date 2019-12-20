@@ -21,14 +21,18 @@ import d3 from 'd3';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
-import fixtures from 'fixtures/fake_hierarchical_data';
 import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import { Vis } from 'ui/vis';
+
 import 'ui/persisted_state';
+import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { vislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import { tabifyAggResponse } from 'ui/agg_response/tabify';
+
+import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import {
+  Vis,
+  tabifyAggResponse,
+  vislibSlicesResponseHandlerProvider,
+} from '../../../legacy_imports';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },

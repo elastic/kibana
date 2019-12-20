@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/color_maps';
+import { ColorSchemas } from './legacy_imports';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import {
   Positions,

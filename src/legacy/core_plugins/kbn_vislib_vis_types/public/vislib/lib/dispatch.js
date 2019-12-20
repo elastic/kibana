@@ -20,8 +20,8 @@
 import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
-import { SimpleEmitter } from 'ui/utils/simple_emitter';
-import chrome from 'ui/chrome';
+
+import { SimpleEmitter, chrome } from '../../legacy_imports';
 
 const config = chrome.getUiSettingsClient();
 

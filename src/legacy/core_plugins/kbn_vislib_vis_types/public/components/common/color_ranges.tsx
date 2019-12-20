@@ -19,9 +19,10 @@
 
 import React, { useCallback } from 'react';
 import { last } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
+import { RangeValues, RangesParamEditor } from '../../legacy_imports';
 
 interface ColorRangesProps {
   'data-test-subj'?: string;

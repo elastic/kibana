@@ -18,11 +18,12 @@
  */
 
 import React from 'react';
+
 import { EuiPanel, EuiTitle, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from '../../../legacy_imports';
 import { BasicVislibParams } from '../../../types';
 import { ChartOptions } from './chart_options';
 import { SetParamByIndex, ChangeValueAxis } from './';
