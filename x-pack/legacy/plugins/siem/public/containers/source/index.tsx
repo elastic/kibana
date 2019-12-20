@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 import React, { useEffect, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
-import chrome from 'ui/chrome';
+import { useUiSetting$ } from '../../lib/kibana';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IndexField, SourceQuery } from '../../graphql/types';
@@ -82,6 +82,7 @@ export const getBrowserFields = memoizeOne(
 );
 
 export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) => {
+  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   return (
     <Query<SourceQuery.Query, SourceQuery.Variables>
       query={sourceQuery}
@@ -89,20 +90,14 @@ export const WithSource = React.memo<WithSourceProps>(({ children, sourceId }) =
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+        defaultIndex,
       }}
     >
       {({ data }) =>
         children({
           indicesExist: get('source.status.indicesExist', data),
           browserFields: getBrowserFields(get('source.status.indexFields', data)),
-          indexPattern: getIndexFields(
-            chrome
-              .getUiSettingsClient()
-              .get(DEFAULT_INDEX_KEY)
-              .join(),
-            get('source.status.indexFields', data)
-          ),
+          indexPattern: getIndexFields(defaultIndex.join(), get('source.status.indexFields', data)),
         })
       }
     </Query>
