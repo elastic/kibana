@@ -39,7 +39,6 @@ import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugin
 
 // @ts-ignore
 import { Schemas } from '../../vis/editors/default/schemas';
-import { AggGroupNames } from '../../vis/editors/default';
 
 import {
   buildOtherBucketAgg,
@@ -50,7 +49,7 @@ import {
 
 const [orderAggSchema] = new Schemas([
   {
-    group: AggGroupNames.None,
+    group: 'none',
     name: 'orderAgg',
     // This string is never visible to the user so it doesn't need to be translated
     title: 'Order Agg',
