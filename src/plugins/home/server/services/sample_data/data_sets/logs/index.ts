@@ -21,30 +21,37 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
+import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
 
-export function flightsSpecProvider() {
+const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
+  defaultMessage: 'Sample web logs',
+});
+const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
+  defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
+});
+const initialAppLinks = [] as AppLinkSchema[];
+
+export const logsSpecProvider = function(): SampleDatasetSchema {
   return {
-    id: 'flights',
-    name: i18n.translate('server.sampleData.flightsSpecTitle', {
-      defaultMessage: 'Sample flight data',
-    }),
-    description: i18n.translate('server.sampleData.flightsSpecDescription', {
-      defaultMessage: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
-    }),
-    previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
-    darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard_dark.png',
-    overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-    defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+    id: 'logs',
+    name: logsName,
+    description: logsDescription,
+    previewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard.png',
+    darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard_dark.png',
+    overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
+    appLinks: initialAppLinks,
+    defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
     savedObjects: getSavedObjects(),
     dataIndices: [
       {
-        id: 'flights',
-        dataPath: path.join(__dirname, './flights.json.gz'),
+        id: 'logs',
+        dataPath: path.join(__dirname, './logs.json.gz'),
         fields: fieldMappings,
-        timeFields: ['timestamp'],
-        currentTimeMarker: '2018-01-09T00:00:00',
+        timeFields: ['timestamp', 'utc_time'],
+        currentTimeMarker: '2018-08-01T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
       },
     ],
+    status: 'not_installed',
   };
-}
+};
