@@ -59,6 +59,8 @@ import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
 
+import { PulseNotificationsTrigger } from './pulse_notifications/pulse_notifications_trigger';
+
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
 const TRUNCATE_LIMIT: number = 64;
@@ -275,6 +277,9 @@ class HeaderUI extends Component<Props, State> {
       </EuiHeaderSectionItemButton>
     );
   }
+  public renderPulseNotificationsTrigger() {
+    return <PulseNotificationsTrigger />;
+  }
 
   public render() {
     const {
@@ -397,7 +402,9 @@ class HeaderUI extends Component<Props, State> {
                 }}
               />
             </EuiHeaderSectionItem>
-
+            <EuiHeaderSectionItem>
+              <React.Fragment>{this.renderPulseNotificationsTrigger()}</React.Fragment>
+            </EuiHeaderSectionItem>
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
         </EuiHeader>
