@@ -5,6 +5,7 @@
  */
 import {
   EuiBasicTable,
+  EuiBasicTableProps,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -17,7 +18,7 @@ import {
   Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useState, useEffect, useCallback, ComponentType } from 'react';
 import styled from 'styled-components';
 
 import { AuthTableColumns } from '../page/hosts/authentications_table';
@@ -253,6 +254,9 @@ export const PaginatedTable = memo<SiemTables>(
           <EuiLoadingContent data-test-subj="initialLoadingPanelPaginatedTable" lines={10} />
         ) : (
           <>
+            {
+              // @ts-ignore avoid some type mismatches
+            }
             <BasicTable
               // @ts-ignore `Columns` interface differs from EUI's `column` type and is used all over this plugin, so ignore the differences instead of refactoring a lot of code
               columns={columns}
@@ -264,7 +268,7 @@ export const PaginatedTable = memo<SiemTables>(
                 sorting
                   ? {
                       sort: {
-                        field: sorting.field,
+                        field: sorting.field as any, // eslint-disable-line @typescript-eslint/no-explicit-any
                         direction: sorting.direction,
                       },
                     }
@@ -308,18 +312,20 @@ export const PaginatedTable = memo<SiemTables>(
 
 PaginatedTable.displayName = 'PaginatedTable';
 
-const BasicTable = styled(EuiBasicTable)`
+type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+const BasicTable: typeof EuiBasicTable & { displayName: string } = styled(
+  EuiBasicTable as BasicTableType
+)`
   tbody {
     th,
     td {
       vertical-align: top;
     }
-
     .euiTableCellContent {
       display: block;
     }
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 BasicTable.displayName = 'BasicTable';
 

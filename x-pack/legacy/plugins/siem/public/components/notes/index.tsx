@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiInMemoryTable, EuiModalBody, EuiModalHeader, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -34,7 +41,9 @@ const NotesPanel = styled(EuiPanel)`
 
 NotesPanel.displayName = 'NotesPanel';
 
-const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(EuiInMemoryTable)`
+const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(
+  EuiInMemoryTable as React.ComponentType<EuiInMemoryTableProps<Note>>
+)`
   overflow-x: hidden;
   overflow-y: auto;
   height: 220px;
