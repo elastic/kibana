@@ -56,7 +56,7 @@ const createPlugin = async () => {
   };
 };
 
-export const uiActionsPluginMock = {
+export const bfetchPluginMock = {
   createSetupContract,
   createStartContract,
   createPlugin,

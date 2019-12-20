@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import { BfetchServerSetup, BfetchServerStart } from '.';
+import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/server/mocks';
 
-export type Setup = jest.Mocked<BfetchServerSetup>;
-export type Start = jest.Mocked<BfetchServerStart>;
+export type Setup = jest.Mocked<ExpressionsServerSetup>;
+export type Start = jest.Mocked<ExpressionsServerStart>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    addStreamingResponseRoute: jest.fn(),
-  };
+  const setupContract: Setup = {};
   return setupContract;
 };
 
@@ -54,7 +52,7 @@ const createPlugin = async () => {
   };
 };
 
-export const bfetchPluginMock = {
+export const expressionsPluginMock = {
   createSetupContract,
   createStartContract,
   createPlugin,
