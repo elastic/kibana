@@ -10,10 +10,10 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'src/core/server';
-import { PLUGIN_ID } from './plugin';
+import { PLUGIN_ID, MlXpackMainPlugin } from './plugin';
 
 export const licensePreRoutingFactory = (
-  xpackMainPlugin: any,
+  xpackMainPlugin: MlXpackMainPlugin,
   handler: RequestHandler<any, any, any>
 ): RequestHandler<any, any, any> => {
   // License checking and enable/disable logic

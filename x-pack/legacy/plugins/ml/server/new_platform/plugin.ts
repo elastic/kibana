@@ -108,6 +108,12 @@ export interface UsageInitialization {
   savedObjects: SavedObjectsLegacyService;
 }
 
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    ml?: any;
+  }
+}
+
 export const PLUGIN_ID = 'ml';
 
 export class Plugin {
