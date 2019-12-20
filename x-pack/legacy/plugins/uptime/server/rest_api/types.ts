@@ -17,6 +17,7 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { UMServerLibs } from '../lib/lib';
+import { UMDynamicSettingsType } from '../lib/sources/saved_object_mappings';
 
 /**
  * Defines the basic properties employed by Uptime routes.
@@ -66,6 +67,7 @@ export interface UMRouteParams {
     clientParams?: Record<string, any>,
     options?: CallAPIOptions | undefined
   ) => Promise<any>;
+  sourceSettings: UMDynamicSettingsType;
   savedObjectsClient: Pick<
     SavedObjectsClient,
     | 'errors'

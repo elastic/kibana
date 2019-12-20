@@ -13,9 +13,9 @@ import { getApiPath } from '../../helper';
  * @param basePath - the base path, if any
  * @param setter - a callback for use with non-async functions like `useEffect`
  */
-export const getSourceSettings = async (basePath?: string, setter?: (data: unknown) => void) => {
+export const getDynamicSettings = async (basePath?: string, setter?: (data: unknown) => void) => {
   try {
-    const { data } = await axios.get(getApiPath('/api/uptime/source_settings', basePath));
+    const { data } = await axios.get(getApiPath('/api/uptime/dynamic_settings', basePath));
     if (setter) {
       setter(data);
     }

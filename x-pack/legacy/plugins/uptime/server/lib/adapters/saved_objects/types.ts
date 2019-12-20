@@ -5,8 +5,10 @@
  */
 
 import { UMSavedObjectsQueryFn } from '../framework';
+import { UMDynamicSettingsType } from '../../sources';
 
 export interface UMSavedObjectsAdapter {
   getUptimeIndexPattern: UMSavedObjectsQueryFn;
-  getUptimeSourceSettings: UMSavedObjectsQueryFn;
+  getUptimeSourceSettings: UMSavedObjectsQueryFn<UMDynamicSettingsType>;
+  setUptimeSourceSettings: UMSavedObjectsQueryFn<void, UMDynamicSettingsType>;
 }

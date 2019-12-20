@@ -11,7 +11,7 @@ import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
-import { uptimeSourceConfigurationSavedObjectType } from './lib/sources';
+import { umDynamicSettings } from './lib/sources';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -45,7 +45,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
       all: {
         api: ['uptime'],
         savedObject: {
-          all: [uptimeSourceConfigurationSavedObjectType],
+          all: [umDynamicSettings.type],
           read: ['index-pattern'],
         },
         ui: ['save', 'configureSource', 'show'],
@@ -54,7 +54,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         api: ['uptime'],
         savedObject: {
           all: [],
-          read: ['index-pattern', uptimeSourceConfigurationSavedObjectType],
+          read: ['index-pattern', umDynamicSettings.type],
         },
         ui: ['show'],
       },

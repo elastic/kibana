@@ -25,7 +25,6 @@ import { useTrackPageview } from '../../../infra/public';
 import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
 import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
-import { getSourceSettings } from '../lib/adapters/source_settings';
 
 interface OverviewPageProps {
   basePath: string;
@@ -76,7 +75,6 @@ export const OverviewPage = ({
 
   useEffect(() => {
     getIndexPattern(basePath, setIndexPattern);
-    getSourceSettings(basePath, getSourceSettings);
     setBreadcrumbs(getOverviewPageBreadcrumbs());
     logOverviewPageLoad();
     if (setHeadingText) {

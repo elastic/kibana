@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uptimeSourceSettingsSavedObjectMappings } from './lib/sources';
+import { umDynamicSettings } from './lib/sources';
 
-export const savedObjectMappings = uptimeSourceSettingsSavedObjectMappings;
+export const savedObjectMappings = umDynamicSettings.mapping;

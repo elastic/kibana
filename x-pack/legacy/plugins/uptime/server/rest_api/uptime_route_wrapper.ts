@@ -5,6 +5,7 @@
  */
 
 import { UMKibanaRouteWrapper } from './types';
+import { savedObjectsAdapter } from '../lib/adapters/saved_objects';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = uptimeRoute => {
   return {
@@ -12,7 +13,16 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = uptimeRoute => {
     handler: async (context, request, response) => {
       const { callAsCurrentUser: callES } = context.core.elasticsearch.dataClient;
       const { client: savedObjectsClient } = context.core.savedObjects;
-      return await uptimeRoute.handler({ callES, savedObjectsClient }, context, request, response);
+      const sourceSettings = await savedObjectsAdapter.getUptimeSourceSettings(
+        savedObjectsClient,
+        undefined
+      );
+      return await uptimeRoute.handler(
+        { callES, savedObjectsClient, sourceSettings },
+        context,
+        request,
+        response
+      );
     },
   };
 };

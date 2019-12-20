@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createGetSourceSettingsRoute } from './get_source_settings';
+export { getDynamicSettings } from './get_dynamic_settings';
