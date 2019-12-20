@@ -12,24 +12,33 @@ import { alertTypeRegistryMock } from './alert_type_registry.mock';
 import { TaskStatus } from '../../task_manager';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
+import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 
 const taskManager = taskManagerMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
+const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
 
 const alertsClientParams = {
   taskManager,
   alertTypeRegistry,
   savedObjectsClient,
   spaceId: 'default',
+  namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
+  encryptedSavedObjectsPlugin: encryptedSavedObjects,
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   alertsClientParams.createAPIKey.mockResolvedValue({ created: false });
+  alertsClientParams.invalidateAPIKey.mockResolvedValue({
+    invalidated: true,
+    result: { error_count: 0 },
+  });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runNow.mockResolvedValue({ id: '' });
 });
@@ -830,7 +839,7 @@ describe('create()', () => {
 describe('enable()', () => {
   test('enables an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -889,7 +898,7 @@ describe('enable()', () => {
 
   test(`doesn't enable already enabled alerts`, async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -907,7 +916,7 @@ describe('enable()', () => {
 
   test('calls the API key function', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1375,7 +1384,7 @@ describe('find()', () => {
 describe('delete()', () => {
   test('successfully removes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1433,7 +1442,7 @@ describe('update()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1584,7 +1593,7 @@ describe('update()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1763,7 +1772,7 @@ describe('update()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1925,7 +1934,7 @@ describe('update()', () => {
       },
       async executor() {},
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1985,7 +1994,7 @@ describe('update()', () => {
           },
         ],
       });
-      savedObjectsClient.get.mockResolvedValueOnce({
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: alertId,
         type: 'alert',
         attributes: {
@@ -2185,7 +2194,7 @@ describe('update()', () => {
 describe('updateApiKey()', () => {
   test('updates the API key for the alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {

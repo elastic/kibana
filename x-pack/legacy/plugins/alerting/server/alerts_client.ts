@@ -23,7 +23,12 @@ import {
 } from './types';
 import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
-import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
+import {
+  InvalidateAPIKeyParams,
+  CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
+  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
+} from '../../../../plugins/security/server';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
 
 interface FailedCreateAPIKeyResult {
   created: false;
@@ -35,14 +40,26 @@ interface SuccessCreateAPIKeyResult {
 export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 
+interface IInvalidateAPIKeyFailedResult {
+  invalidated: false;
+}
+interface IInvalidateAPIKeySuccessResult {
+  invalidated: true;
+  result: SecurityPluginInvalidateAPIKeyResult;
+}
+export type InvalidateAPIKeyResult = IInvalidateAPIKeyFailedResult | IInvalidateAPIKeySuccessResult;
+
 interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceId?: string;
+  namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
+  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
 }
 
 export interface FindOptions {
@@ -104,10 +121,15 @@ export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
+  private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
+  private readonly invalidateAPIKey: (
+    params: InvalidateAPIKeyParams
+  ) => Promise<InvalidateAPIKeyResult>;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
 
   constructor({
     alertTypeRegistry,
@@ -115,16 +137,22 @@ export class AlertsClient {
     taskManager,
     logger,
     spaceId,
+    namespace,
     getUserName,
     createAPIKey,
+    invalidateAPIKey,
+    encryptedSavedObjectsPlugin,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
     this.spaceId = spaceId;
+    this.namespace = namespace;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.createAPIKey = createAPIKey;
+    this.invalidateAPIKey = invalidateAPIKey;
+    this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
   }
 
   public async create({ data, options }: CreateOptions) {
@@ -198,21 +226,26 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    const alertSavedObject = await this.savedObjectsClient.get('alert', id);
+    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      RawAlert
+    >('alert', id, { namespace: this.namespace });
     const removeResult = await this.savedObjectsClient.delete('alert', id);
-    if (alertSavedObject.attributes.scheduledTaskId) {
-      await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
+    if (decryptedAlertSavedObject.attributes.scheduledTaskId) {
+      await this.taskManager.remove(decryptedAlertSavedObject.attributes.scheduledTaskId);
     }
+    await this.invalidateApiKey({ apiKey: decryptedAlertSavedObject.attributes.apiKey });
     return removeResult;
   }
 
   public async update({ id, data }: UpdateOptions) {
-    const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
-    const updateResult = await this.updateAlert({ id, data }, alert);
+    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+      RawAlert
+    >('alert', id, { namespace: this.namespace });
+    const updateResult = await this.updateAlert({ id, data }, decryptedAlertSavedObject);
 
     if (
       updateResult.scheduledTaskId &&
-      !isEqual(alert.attributes.schedule, updateResult.schedule)
+      !isEqual(decryptedAlertSavedObject.attributes.schedule, updateResult.schedule)
     ) {
       this.taskManager.runNow(updateResult.scheduledTaskId).catch(err => {
         this.logger.error(
@@ -254,6 +287,9 @@ export class AlertsClient {
         references,
       }
     );
+
+    await this.invalidateApiKey({ apiKey: attributes.apiKey });
+
     return this.getAlertFromRaw(id, updatedObject.attributes, updatedObject.references);
   }
 
@@ -273,7 +309,12 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const { version, attributes } = await this.savedObjectsClient.get('alert', id);
+    const {
+      version,
+      attributes,
+    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      namespace: this.namespace,
+    });
 
     const username = await this.getUserName();
     await this.savedObjectsClient.update(
@@ -286,10 +327,32 @@ export class AlertsClient {
       },
       { version }
     );
+
+    await this.invalidateApiKey({ apiKey: attributes.apiKey });
+  }
+
+  private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
+    if (!apiKey) {
+      return;
+    }
+
+    const apiKeyId = Buffer.from(apiKey, 'base64')
+      .toString()
+      .split(':')[0];
+    const response = await this.invalidateAPIKey({ id: apiKeyId });
+    if (response.invalidated === true && response.result.error_count > 0) {
+      this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
+    }
   }
 
   public async enable({ id }: { id: string }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const {
+      version,
+      attributes,
+    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      namespace: this.namespace,
+    });
+
     if (attributes.enabled === false) {
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
@@ -305,6 +368,7 @@ export class AlertsClient {
         },
         { version }
       );
+      await this.invalidateApiKey({ apiKey: attributes.apiKey });
     }
   }
 

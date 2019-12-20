@@ -10,6 +10,7 @@ import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 
 jest.mock('../alerts_client');
 
@@ -25,6 +26,8 @@ const alertsClientFactoryParams: jest.Mocked<ConstructorOpts> = {
   taskManager: taskManagerMock.create(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
+  spaceIdToNamespace: jest.fn(),
+  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.createStart()
 };
 const fakeRequest: Request = {
   headers: {},
@@ -45,6 +48,7 @@ const fakeRequest: Request = {
 beforeEach(() => {
   jest.resetAllMocks();
   alertsClientFactoryParams.getSpaceId.mockReturnValue('default');
+  alertsClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
 });
 
 test('creates an alerts client with proper constructor arguments', async () => {
@@ -57,8 +61,11 @@ test('creates an alerts client with proper constructor arguments', async () => {
     taskManager: alertsClientFactoryParams.taskManager,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     spaceId: 'default',
+    namespace: 'default',
     getUserName: expect.any(Function),
     createAPIKey: expect.any(Function),
+    invalidateAPIKey: expect.any(Function),
+    encryptedSavedObjectsPlugin: alertsClientFactoryParams.encryptedSavedObjectsPlugin,
   });
 });
 
