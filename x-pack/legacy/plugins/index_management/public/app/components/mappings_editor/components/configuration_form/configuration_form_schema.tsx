@@ -7,7 +7,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
@@ -27,6 +27,45 @@ const fieldPathComboBoxConfig = {
 };
 
 export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
+  metaField: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorLabel', {
+      defaultMessage: '_meta field data',
+    }),
+    helpText: () => (
+      <FormattedMessage
+        id="xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorHelpText"
+        defaultMessage="Use JSON format: {code}"
+        values={{
+          code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+        }}
+      />
+    ),
+    validations: [
+      {
+        validator: (...args) => {
+          const [{ value }] = args;
+
+          try {
+            if (JSON.parse(value)) {
+              return;
+            }
+          } catch (e) {
+            return {
+              message: i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorJsonError',
+                {
+                  defaultMessage: 'Invalid JSON: {error}',
+                  values: {
+                    error: e.message,
+                  },
+                }
+              ),
+            };
+          }
+        },
+      },
+    ],
+  },
   sourceField: {
     enabled: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldLabel', {

@@ -30,6 +30,7 @@ export const MappingsEditor = React.memo(
 
     const {
       _source = {},
+      _meta = {},
       dynamic,
       numeric_detection,
       date_detection,
@@ -41,6 +42,7 @@ export const MappingsEditor = React.memo(
       () => ({
         configurationDefaultValue: {
           _source,
+          _meta,
           dynamic,
           numeric_detection,
           date_detection,

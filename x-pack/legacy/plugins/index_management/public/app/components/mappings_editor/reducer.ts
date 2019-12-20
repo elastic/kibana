@@ -28,6 +28,7 @@ export interface MappingsConfiguration {
     includes?: string[];
     excludes?: string[];
   };
+  _meta?: string;
 }
 
 export interface MappingsFields {

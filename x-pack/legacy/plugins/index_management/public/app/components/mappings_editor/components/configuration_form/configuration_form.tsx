@@ -10,6 +10,7 @@ import { useForm, Form, SerializerFunc } from '../../shared_imports';
 import { Types, useDispatch } from '../../mappings_state';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
+import { MetaFieldSection } from './meta_field_section';
 import { configurationFormSchema } from './configuration_form_schema';
 
 type MappingsConfiguration = Types['MappingsConfiguration'];
@@ -28,6 +29,7 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
       dynamic_date_formats,
     },
     sourceField,
+    metaField,
   } = formData;
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
@@ -38,6 +40,7 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
     date_detection,
     dynamic_date_formats,
     _source: { ...sourceField },
+    _meta: JSON.parse(metaField),
   };
 };
 
@@ -48,6 +51,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
     date_detection,
     dynamic_date_formats,
     _source: { enabled, includes, excludes },
+    _meta,
   } = formData;
 
   return {
@@ -63,6 +67,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
       includes,
       excludes,
     },
+    metaField: JSON.stringify(_meta),
   };
 };
 
@@ -85,6 +90,8 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   return (
     <Form form={form}>
       <DynamicMappingSection />
+      <EuiSpacer size="xl" />
+      <MetaFieldSection />
       <EuiSpacer size="xl" />
       <SourceFieldSection />
     </Form>
