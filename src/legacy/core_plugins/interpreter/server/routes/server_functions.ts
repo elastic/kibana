@@ -125,6 +125,7 @@ function runServerFunctions(server: any) {
 function batchError(id: any, message: any, statusCode = 500) {
   return {
     id,
+    error: { message },
     statusCode,
     result: { statusCode, message },
   };
