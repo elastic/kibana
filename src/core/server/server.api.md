@@ -792,6 +792,14 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
+// @internal @deprecated (undocumented)
+export interface ILegacyInternals {
+    getInjectedUiAppVars(id: string): Promise<LegacyVars>;
+    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<LegacyVars>;
+    // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
+    injectUiAppVars(id: string, injector: VarsInjector): void;
+}
+
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -913,6 +921,15 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
+// Warning: (ae-forgotten-export) The symbol "ChromeNavLink" needs to be exported by the entry point index.d.ts
+// 
+// @internal @deprecated (undocumented)
+export type LegacyAppSpec = Pick<ChromeNavLink, 'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden'> & {
+    pluginId?: string;
+    id?: string;
+    listed?: boolean;
+};
+
 // @internal @deprecated
 export interface LegacyConfig {
     // (undocumented)
@@ -926,6 +943,21 @@ export interface LegacyConfig {
 }
 
 // @internal @deprecated (undocumented)
+export class LegacyInternals implements ILegacyInternals {
+    constructor(uiExports: LegacyUiExports, config: LegacyConfig, server: Server);
+    // (undocumented)
+    getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
+    // (undocumented)
+    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
+    private get defaultVars();
+    // (undocumented)
+    injectUiAppVars(id: string, injector: VarsInjector): void;
+    }
+
+// @internal @deprecated (undocumented)
+export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
+
+// @internal @deprecated (undocumented)
 export interface LegacyPlugins {
     // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
     // 
@@ -937,8 +969,6 @@ export interface LegacyPlugins {
     navLinks: LegacyNavLink[];
     // (undocumented)
     pluginSpecs: LegacyPluginSpec[];
-    // Warning: (ae-forgotten-export) The symbol "LegacyUiExports" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     uiExports: LegacyUiExports;
 }
@@ -974,6 +1004,22 @@ export interface LegacyServiceStartDeps {
     // (undocumented)
     plugins: Record<string, unknown>;
 }
+
+// Warning: (ae-forgotten-export) The symbol "SavedObjectsLegacyUiExports" needs to be exported by the entry point index.d.ts
+// 
+// @internal @deprecated (undocumented)
+export type LegacyUiExports = SavedObjectsLegacyUiExports & {
+    defaultInjectedVarProviders?: VarsProvider[];
+    injectedVarsReplacers?: VarsReplacer[];
+    navLinkSpecs?: LegacyNavLinkSpec[] | null;
+    uiAppSpecs?: Array<LegacyAppSpec | undefined>;
+    unknown?: [{
+        pluginSpec: {
+            getId: () => unknown;
+        };
+        type: unknown;
+    }];
+};
 
 // @internal @deprecated (undocumented)
 export type LegacyVars = Record<string, any>;
@@ -1946,6 +1992,19 @@ export interface UuidServiceSetup {
 
 // @public
 export const validBodyOutput: readonly ["data", "stream"];
+
+// @internal @deprecated (undocumented)
+export interface VarsProvider {
+    // (undocumented)
+    fn: (server: Server, configValue: any) => LegacyVars;
+    // (undocumented)
+    pluginSpec: {
+        readConfigValue(config: any, key: string | string[]): any;
+    };
+}
+
+// @internal @deprecated (undocumented)
+export type VarsReplacer = (vars: LegacyVars, request: LegacyRequest, server: Server) => LegacyVars | Promise<LegacyVars>;
 
 
 // Warnings were encountered during analysis:

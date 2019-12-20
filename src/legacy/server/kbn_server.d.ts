@@ -109,52 +109,51 @@ export interface PluginsSetup {
   [key: string]: object;
 }
 
-export interface KibanaPlatform {
+export interface KibanaCore {
   __internals: {
-    hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
-    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
-    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+    hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
-    savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
-    rendering: LegacyServiceSetupDeps['core']['rendering'];
     legacy: ILegacyInternals;
-  };
-  coreContext: {
-    logger: LoggerFactory;
+    rendering: LegacyServiceSetupDeps['core']['rendering'];
+    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
+    savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };
   env: {
     mode: Readonly<EnvironmentMode>;
     packageInfo: Readonly<PackageInfo>;
   };
-  setup: {
+  setupDeps: {
     core: CoreSetup;
     plugins: PluginsSetup;
   };
-  start: {
+  startDeps: {
     core: CoreSetup;
     plugins: Record<string, object>;
   };
+  logger: LoggerFactory;
+}
+
+export interface NewPlatform {
+  __internals: KibanaCore['__internals'];
+  env: KibanaCore['env'];
+  coreContext: {
+    logger: KibanaCore['logger'];
+  };
+  setup: KibanaCore['setupDeps'];
+  start: KibanaCore['startDeps'];
   stop: null;
 }
 
-export interface LegacyPlatform {
-  __internals: KibanaPlatform['__internals'];
-  env: KibanaPlatform['env'];
-  logger: KibanaPlatform['coreContext']['logger'];
-  setupDeps: KibanaPlatform['setup'];
-  startDeps: KibanaPlatform['start'];
-}
-
-export interface LegacyPlugins {
-  pluginSpecs: LegacyServiceDiscoverPlugins['pluginSpecs'];
-  disabledPluginSpecs: LegacyServiceDiscoverPlugins['pluginSpecs'];
-  uiExports: LegacyServiceDiscoverPlugins['uiExports'];
-}
+export type LegacyPlugins = Pick<
+  LegacyServiceDiscoverPlugins,
+  'pluginSpecs' | 'disabledPluginSpecs' | 'uiExports'
+>;
 
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
-  public readonly newPlatform: KibanaPlatform;
+  public readonly newPlatform: NewPlatform;
   public server: Server;
   public inject: Server['inject'];
   public pluginSpecs: any[];
@@ -162,7 +161,7 @@ export default class KbnServer {
   constructor(
     settings: Record<string, any>,
     config: KibanaConfig,
-    core: LegacyPlatform,
+    core: KibanaCore,
     legacyPlugins: LegacyPlugins
   );
 

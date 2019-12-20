@@ -24,7 +24,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
 import { LegacyInternals } from './legacy_internals';
-import { LegacyPlugins, LegacyConfig, LegacyVars } from './types';
+import { LegacyConfig, LegacyVars, LegacyUiExports } from './types';
 
 function varsProvider(vars: LegacyVars, configValue?: any) {
   return {
@@ -37,16 +37,16 @@ function varsProvider(vars: LegacyVars, configValue?: any) {
 
 describe('LegacyInternals', () => {
   describe('getInjectedUiAppVars()', () => {
-    let legacyPlugins: LegacyPlugins;
+    let uiExports: LegacyUiExports;
     let config: LegacyConfig;
     let server: Server;
     let legacyInternals: LegacyInternals;
 
     beforeEach(async () => {
-      legacyPlugins = findLegacyPluginSpecsMock();
+      uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
       server = httpServiceMock.createSetupContract().server;
-      legacyInternals = new LegacyInternals(legacyPlugins, config, server);
+      legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
     it('gets with no injectors', async () => {
@@ -100,16 +100,16 @@ describe('LegacyInternals', () => {
   });
 
   describe('getVars()', () => {
-    let legacyPlugins: LegacyPlugins;
+    let uiExports: LegacyUiExports;
     let config: LegacyConfig;
     let server: Server;
     let legacyInternals: LegacyInternals;
 
     beforeEach(async () => {
-      legacyPlugins = findLegacyPluginSpecsMock();
+      uiExports = findLegacyPluginSpecsMock().uiExports;
       config = configMock.create() as any;
       server = httpServiceMock.createSetupContract().server;
-      legacyInternals = new LegacyInternals(legacyPlugins, config, server);
+      legacyInternals = new LegacyInternals(uiExports, config, server);
     });
 
     it('gets: no default injectors, no injected vars replacers, no ui app injectors, no inject arg', async () => {
@@ -119,7 +119,7 @@ describe('LegacyInternals', () => {
     });
 
     it('gets: with default injectors, no injected vars replacers, no ui app injectors, no inject arg', async () => {
-      legacyPlugins.uiExports.defaultInjectedVarProviders = [
+      uiExports.defaultInjectedVarProviders = [
         varsProvider({ alpha: 'alpha' }),
         varsProvider({ gamma: 'gamma' }),
         varsProvider({ alpha: 'beta' }),
@@ -136,7 +136,7 @@ describe('LegacyInternals', () => {
     });
 
     it('gets: no default injectors, with injected vars replacers, with ui app injectors, no inject arg', async () => {
-      legacyPlugins.uiExports.injectedVarsReplacers = [
+      uiExports.injectedVarsReplacers = [
         jest.fn(async vars => ({ ...vars, added: 'key' })),
         jest.fn(vars => vars),
         jest.fn(vars => ({ replaced: 'all' })),
@@ -182,14 +182,12 @@ describe('LegacyInternals', () => {
     });
 
     it('gets: with default injectors, with injected vars replacers, with ui app injectors, with inject arg', async () => {
-      legacyPlugins.uiExports.defaultInjectedVarProviders = [
+      uiExports.defaultInjectedVarProviders = [
         varsProvider({ alpha: 'alpha' }),
         varsProvider({ gamma: 'gamma' }),
         varsProvider({ alpha: 'beta' }),
       ];
-      legacyPlugins.uiExports.injectedVarsReplacers = [
-        jest.fn(async vars => ({ ...vars, gamma: 'delta' })),
-      ];
+      uiExports.injectedVarsReplacers = [jest.fn(async vars => ({ ...vars, gamma: 'delta' }))];
 
       legacyInternals.injectUiAppVars('core', async () => ({ is: 'core' }));
       legacyInternals.injectUiAppVars('core', () => ({ sync: 'injector' }));

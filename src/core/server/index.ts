@@ -232,12 +232,20 @@ export {
 } from './types';
 
 export {
+  ILegacyInternals,
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
   LegacyConfig,
   LegacyPlugins,
   LegacyVars,
+  LegacyInternals,
+  LegacyUiExports,
+  VarsProvider,
+  VarsReplacer,
+  VarsInjector,
+  LegacyNavLinkSpec,
+  LegacyAppSpec,
 } from './legacy';
 
 /**

@@ -44,7 +44,7 @@ import { i18nMixin } from './i18n';
 
 /**
  * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
- * @typedef {import('./kbn_server').Platform} Platform
+ * @typedef {import('./kbn_server').KibanaCore} KibanaCore
  * @typedef {import('./kbn_server').LegacyPlugins} LegacyPlugins
  */
 
@@ -54,7 +54,7 @@ export default class KbnServer {
   /**
    * @param {Record<string, any>} settings
    * @param {KibanaConfig} config
-   * @param {Platform} core
+   * @param {KibanaCore} core
    * @param {LegacyPlugins} legacyPlugins
    */
   constructor(settings, config, core, legacyPlugins) {

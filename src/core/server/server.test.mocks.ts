@@ -70,7 +70,9 @@ jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
-export { mockRenderingService } from './rendering/__mocks__/rendering_service';
+import { RenderingService, mockRenderingService } from './rendering/__mocks__/rendering_service';
+export { mockRenderingService };
+jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
 
 import { uuidServiceMock } from './uuid/uuid_service.mock';
 export const mockUuidService = uuidServiceMock.create();

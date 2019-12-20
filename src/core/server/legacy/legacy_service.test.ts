@@ -25,7 +25,7 @@ jest.mock('./config/legacy_deprecation_adapters', () => ({
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
 
 import { BehaviorSubject, throwError } from 'rxjs';
-import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
+
 // @ts-ignore: implicit any for JS file
 import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
@@ -44,7 +44,8 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
-import { LegacyVars } from './types';
+import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
+import { LegacyService } from './legacy_service';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 

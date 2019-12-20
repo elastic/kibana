@@ -66,7 +66,7 @@ function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
 }
 
 /** @internal */
-export type ILegacyService = Pick<LegacyService, keyof LegacyService>;
+export type ILegacyService = PublicMethodsOf<LegacyService>;
 
 /** @internal */
 export class LegacyService implements CoreService {
@@ -316,7 +316,7 @@ export class LegacyService implements CoreService {
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
-          legacy: new LegacyInternals(legacyPlugins, config, setupDeps.core.http.server),
+          legacy: new LegacyInternals(legacyPlugins.uiExports, config, setupDeps.core.http.server),
         },
         logger: this.coreContext.logger,
       },
