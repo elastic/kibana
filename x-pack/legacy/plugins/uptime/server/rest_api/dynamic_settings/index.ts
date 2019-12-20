@@ -17,10 +17,10 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
   options: {
     tags: ['access:uptime'],
   },
-  handler: async ({ sourceSettings }, _context, _request, response): Promise<any> => {
+  handler: async ({ dynamicSettings }, _context, _request, response): Promise<any> => {
     return response.ok({
       body: {
-        dynamic_settings: sourceSettings,
+        dynamic_settings: dynamicSettings,
       },
     });
   },
@@ -36,7 +36,7 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
   handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
     // @ts-ignore
     const newSettings: UMDynamicSettingsType = request.body;
-    await savedObjectsAdapter.setUptimeSourceSettings(savedObjectsClient, newSettings);
+    await savedObjectsAdapter.setUptimeDynamicSettings(savedObjectsClient, newSettings);
 
     return response.ok({
       body: {

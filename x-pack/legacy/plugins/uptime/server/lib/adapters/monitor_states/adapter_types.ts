@@ -22,6 +22,7 @@ export interface MonitorStatesParams {
 }
 
 export interface GetSnapshotCountParams {
+  indexName: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string | null;

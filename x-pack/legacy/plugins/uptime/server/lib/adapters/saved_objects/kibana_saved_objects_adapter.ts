@@ -23,7 +23,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       );
     }
   },
-  getUptimeSourceSettings: async (client): Promise<UMDynamicSettingsType> => {
+  getUptimeDynamicSettings: async (client): Promise<UMDynamicSettingsType> => {
     try {
       return (await client.get(umDynamicSettings.type, umDynamicSettings.id)).attributes;
     } catch (e) {
@@ -34,12 +34,12 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
             overwrite: false,
           })
         ).attributes;
-      } catch (e) {
-        return e;
+      } catch (otherE) {
+        return otherE;
       }
     }
   },
-  setUptimeSourceSettings: async (client, settings) => {
+  setUptimeDynamicSettings: async (client, settings) => {
     // @ts-ignore
     client.update(umDynamicSettings.type, umDynamicSettings.id, settings);
   },

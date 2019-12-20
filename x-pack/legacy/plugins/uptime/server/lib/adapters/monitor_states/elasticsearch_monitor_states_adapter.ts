@@ -55,10 +55,18 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     };
   },
 
-  getSnapshotCount: async ({ callES, dateRangeStart, dateRangeEnd, filters, statusFilter }) => {
+  getSnapshotCount: async ({
+    callES,
+    indexPattern,
+    dateRangeStart,
+    dateRangeEnd,
+    filters,
+    statusFilter,
+  }) => {
     const context: QueryContext = {
       count: query => callES('count', query),
       search: query => callES('search', query),
+      indexPattern,
       dateRangeStart,
       dateRangeEnd,
       pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,

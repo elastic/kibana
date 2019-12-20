@@ -67,7 +67,7 @@ export interface UMRouteParams {
     clientParams?: Record<string, any>,
     options?: CallAPIOptions | undefined
   ) => Promise<any>;
-  sourceSettings: UMDynamicSettingsType;
+  dynamicSettings: UMDynamicSettingsType;
   savedObjectsClient: Pick<
     SavedObjectsClient,
     | 'errors'
