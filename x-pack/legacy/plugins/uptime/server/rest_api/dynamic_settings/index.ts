@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMRestApiRouteFactory } from '..';
+import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { savedObjectsAdapter } from '../../lib/adapters';
+import { UMDynamicSettingsType } from '../../lib/sources';
+import { UMRestApiRouteFactory } from '..';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -24,16 +26,17 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
   },
 });
 
-export const createSetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
-  method: 'PUT',
+export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+  method: 'POST',
   path: '/api/uptime/dynamic_settings',
-  validate: false,
+  validate: schema.object({}, { allowUnknowns: true }),
   options: {
     tags: ['access:uptime'],
   },
   handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
-    console.log("BODY IS", request.body);
-    await savedObjectsAdapter.setUptimeSourceSettings(savedObjectsClient, JSON.parse(request.body));
+    // @ts-ignore
+    const newSettings: UMDynamicSettingsType = request.body;
+    await savedObjectsAdapter.setUptimeSourceSettings(savedObjectsClient, newSettings);
 
     return response.ok({
       body: {
