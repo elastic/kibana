@@ -17,11 +17,19 @@
  * under the License.
  */
 
-export * from './query';
-export * from './field_formats';
-export * from './kbn_field_types';
-export * from './index_patterns';
-export * from './es_query';
-export * from './utils';
-export * from './types';
-export * from './constants';
+import { fetchProvider } from './fetch';
+import { UsageCollectionSetup } from '../../../../usage_collection/server';
+
+export async function makeKQLUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  kibanaIndex: string
+) {
+  const fetch = fetchProvider(kibanaIndex);
+  const kqlUsageCollector = usageCollection.makeUsageCollector({
+    type: 'kql',
+    fetch,
+    isReady: () => true,
+  });
+
+  usageCollection.registerCollector(kqlUsageCollector);
+}

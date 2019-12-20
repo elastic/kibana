@@ -17,30 +17,28 @@
  * under the License.
  */
 
-import Joi from 'joi';
-import Boom from 'boom';
+import { CoreSetup, IRouter, Logger } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
-export function registerKqlTelemetryApi(server) {
-  server.route({
-    path: '/api/kibana/kql_opt_in_telemetry',
-    method: 'POST',
-    config: {
+export function registerKqlTelemetryRoute(
+  router: IRouter,
+  savedObjects: CoreSetup['savedObjects'],
+  logger: Logger
+) {
+  router.post(
+    {
+      path: '/api/kibana/kql_opt_in_telemetry',
       validate: {
-        payload: Joi.object({
-          opt_in: Joi.bool().required(),
+        body: schema.object({
+          opt_in: schema.boolean(),
         }),
       },
-      tags: ['api'],
     },
-    handler: async function(request) {
-      const {
-        savedObjects: { getSavedObjectsRepository },
-      } = server;
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+    async (context, request, response) => {
+      const internalRepository = savedObjects.createScopedRepository(request);
 
       const {
-        payload: { opt_in: optIn },
+        body: { opt_in: optIn },
       } = request;
 
       const counterName = optIn ? 'optInCount' : 'optOutCount';
@@ -48,13 +46,19 @@ export function registerKqlTelemetryApi(server) {
       try {
         await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', counterName);
       } catch (error) {
-        return new Boom('Something went wrong', {
+        logger.warn(`Unable to increment counter: ${error}`);
+        return response.customError({
           statusCode: error.status,
-          data: { success: false },
+          body: {
+            message: 'Something went wrong',
+            attributes: {
+              success: false,
+            },
+          },
         });
       }
 
-      return { success: true };
-    },
-  });
+      return response.ok({ body: { success: true } });
+    }
+  );
 }
