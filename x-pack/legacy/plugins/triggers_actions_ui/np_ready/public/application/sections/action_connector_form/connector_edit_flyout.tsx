@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
-import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnectorForm } from './action_connector_form';
 import { useAppDependencies } from '../../app_context';
 import { ActionConnectorTableItem } from '../../../types';
@@ -24,7 +24,7 @@ export interface ConnectorEditProps {
 
 export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { editFlyoutVisible, setEditFlyoutVisibility } = useContext(ActionsConnectorsContext);
+  const { editFlyoutVisible, setEditFlyoutVisibility } = useActionsConnectorsContext();
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
 
   if (!editFlyoutVisible) {

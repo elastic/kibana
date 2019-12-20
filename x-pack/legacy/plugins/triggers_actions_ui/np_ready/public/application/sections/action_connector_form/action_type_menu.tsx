@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionType } from '../../../types';
-import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { useAppDependencies } from '../../app_context';
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 
 export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { actionTypesIndex, setAddFlyoutVisibility } = useContext(ActionsConnectorsContext);
+  const { actionTypesIndex, setAddFlyoutVisibility } = useActionsConnectorsContext();
   if (!actionTypesIndex) {
     return null;
   }

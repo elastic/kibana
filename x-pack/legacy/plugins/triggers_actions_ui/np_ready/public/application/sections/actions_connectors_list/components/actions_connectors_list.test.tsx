@@ -11,7 +11,6 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
-jest.mock('../../../context/actions_connectors_context');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),

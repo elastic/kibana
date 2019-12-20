@@ -10,7 +10,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore: EuiSearchBar not exported in TypeScript
 import { EuiBasicTable, EuiButton, EuiFilterButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 
-import { AlertsContext } from '../../../context/alerts_context';
+import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
@@ -225,7 +225,7 @@ export const AlertsList: React.FunctionComponent = () => {
     <section data-test-subj="alertsList">
       <Fragment>
         <EuiSpacer size="m" />
-        <AlertsContext.Provider value={{ alertFlyoutVisible, setAlertFlyoutVisibility }}>
+        <AlertsContextProvider value={{ alertFlyoutVisible, setAlertFlyoutVisibility }}>
           <EuiSearchBar
             onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
             toolsLeft={
@@ -279,7 +279,7 @@ export const AlertsList: React.FunctionComponent = () => {
             }}
           />
           <AlertAdd refreshList={loadAlertsData} />
-        </AlertsContext.Provider>
+        </AlertsContextProvider>
       </Fragment>
     </section>
   );

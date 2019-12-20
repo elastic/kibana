@@ -4,11 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext, createContext } from 'react';
 
-export interface IAlertsContext {
+export interface AlertsContextValue {
   alertFlyoutVisible: boolean;
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertsContext = React.createContext({} as IAlertsContext);
+const AlertsContext = createContext<AlertsContextValue>(null as any);
+
+export const AlertsContextProvider = ({
+  children,
+  value,
+}: {
+  value: AlertsContextValue;
+  children: React.ReactNode;
+}) => {
+  return <AlertsContext.Provider value={value}>{children}</AlertsContext.Provider>;
+};
+
+export const useAlertsContext = () => {
+  const ctx = useContext(AlertsContext);
+  if (!ctx) {
+    throw new Error('ActionsConnectorsContext has not been set.');
+  }
+  return ctx;
+};

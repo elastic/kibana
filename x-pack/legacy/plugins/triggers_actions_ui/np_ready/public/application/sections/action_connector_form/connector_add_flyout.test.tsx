@@ -9,11 +9,10 @@ import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ConnectorAddFlyout } from './connector_add_flyout';
-import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AppContextProvider } from '../../app_context';
-jest.mock('../../context/actions_connectors_context');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
@@ -50,7 +49,7 @@ describe('connector_add_flyout', () => {
     await act(async () => {
       wrapper = mountWithIntl(
         <AppContextProvider value={deps}>
-          <ActionsConnectorsContext.Provider
+          <ActionsConnectorsContextProvider
             value={{
               addFlyoutVisible: true,
               setAddFlyoutVisibility: state => {},
@@ -63,7 +62,7 @@ describe('connector_add_flyout', () => {
             }}
           >
             <ConnectorAddFlyout />
-          </ActionsConnectorsContext.Provider>
+          </ActionsConnectorsContextProvider>
         </AppContextProvider>
       );
     });

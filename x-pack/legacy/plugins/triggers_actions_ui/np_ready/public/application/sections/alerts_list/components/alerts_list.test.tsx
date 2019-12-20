@@ -13,7 +13,6 @@ import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
 import { AppContextProvider } from '../../../app_context';
-jest.mock('../../../context/alerts_context');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),

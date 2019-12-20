@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useContext, useState, useReducer, useEffect } from 'react';
+import React, { Fragment, useState, useReducer, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -24,7 +24,7 @@ import { createActionConnector, updateActionConnector } from '../../lib/action_c
 import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../../app_context';
 import { connectorReducer } from './connector_reducer';
-import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnector, IErrorObject } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 
@@ -46,7 +46,7 @@ export const ActionConnectorForm = ({
     actionTypeRegistry,
   } = useAppDependencies();
 
-  const { reloadConnectors } = useContext(ActionsConnectorsContext);
+  const { reloadConnectors } = useActionsConnectorsContext();
   const canSave = hasSaveActionsCapability(capabilities.get());
 
   // hooks
@@ -202,9 +202,9 @@ export const ActionConnectorForm = ({
                 <Fragment>
                   <EuiCallOut
                     title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningTitleText',
+                      'xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionTypeConfigurationWarningTitleText',
                       {
-                        defaultMessage: 'Account may not be configured',
+                        defaultMessage: 'Action type may not be configured',
                       }
                     )}
                     color="warning"
@@ -214,9 +214,9 @@ export const ActionConnectorForm = ({
                       <p>
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningDescriptionText"
-                          defaultMessage="To create this action, you must configure at least one {accountType} account. {docLink}"
+                          defaultMessage="To create this connector, you must configure at least one {actionType} account. {docLink}"
                           values={{
-                            accountType: actionTypeName,
+                            actionType: actionTypeName,
                             docLink: (
                               <EuiLink target="_blank">
                                 <FormattedMessage

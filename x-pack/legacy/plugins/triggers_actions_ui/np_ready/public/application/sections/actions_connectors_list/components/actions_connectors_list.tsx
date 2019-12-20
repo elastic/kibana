@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionsConnectorsContext } from '../../../context/actions_connectors_context';
+import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { useAppDependencies } from '../../../app_context';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
@@ -233,7 +233,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     <section data-test-subj="actionsList">
       <Fragment>
         <EuiSpacer size="m" />
-        <ActionsConnectorsContext.Provider
+        <ActionsConnectorsContextProvider
           value={{
             addFlyoutVisible,
             setAddFlyoutVisibility,
@@ -377,7 +377,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           )}
           <ConnectorAddFlyout />
           {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}
-        </ActionsConnectorsContext.Provider>
+        </ActionsConnectorsContextProvider>
       </Fragment>
     </section>
   );

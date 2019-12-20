@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext, useCallback, useState, useEffect, Fragment } from 'react';
+import React, { useCallback, useState, useEffect, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm } from './action_connector_form';
 import { ActionType, ActionConnector } from '../../../types';
@@ -22,7 +22,7 @@ import { useAppDependencies } from '../../app_context';
 
 export const ConnectorAddFlyout = () => {
   const { actionTypeRegistry } = useAppDependencies();
-  const { addFlyoutVisible, setAddFlyoutVisibility } = useContext(ActionsConnectorsContext);
+  const { addFlyoutVisible, setAddFlyoutVisibility } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const closeFlyout = useCallback(() => setAddFlyoutVisibility(false), [setAddFlyoutVisibility]);
 
