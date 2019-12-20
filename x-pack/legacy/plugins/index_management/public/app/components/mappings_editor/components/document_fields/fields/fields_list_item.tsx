@@ -5,14 +5,7 @@
  */
 import React, { forwardRef } from 'react';
 import classNames from 'classnames';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiBadge,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, NormalizedFields } from '../../../types';
@@ -68,9 +61,6 @@ function FieldListItemComponent(
     hasMultiFields,
     isExpanded,
   } = field;
-  const isAddFieldBtnDisabled = false; // For now, we never disable the Add Child button.
-  // const isAddFieldBtnDisabled = field.nestedDepth === MAX_DEPTH_DEFAULT_EDITOR - 1;
-
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
@@ -104,41 +94,86 @@ function FieldListItemComponent(
     );
   };
 
-  const renderActionButtons = () => (
-    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-      {canHaveChildFields && (
+  const renderActionButtons = () => {
+    const addMultiFieldButtonLabel = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.addMultiFieldTooltipLabel',
+      {
+        defaultMessage: 'Add a multi-field to index the same field in different ways.',
+      }
+    );
+
+    const addChildButtonLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
+      defaultMessage: 'Add child',
+    });
+
+    const editButtonLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
+      defaultMessage: 'Edit',
+    });
+
+    const deleteButtonLabel = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel',
+      {
+        defaultMessage: 'Remove',
+      }
+    );
+
+    return (
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+        {canHaveMultiFields && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={addMultiFieldButtonLabel}>
+              <EuiButtonIcon
+                iconType="submodule"
+                onClick={addField}
+                data-test-subj="addMultiFieldButton"
+                aria-label={addMultiFieldButtonLabel}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+
+        {canHaveChildFields && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={addChildButtonLabel}>
+              <EuiButtonIcon
+                iconType="plusInCircle"
+                onClick={addField}
+                data-test-subj="addMultiFieldButton"
+                aria-label={addChildButtonLabel}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={addField}
-            disabled={isAddFieldBtnDisabled}
-            data-test-subj="addChildButton"
-          >
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
-              defaultMessage: 'Add child',
-            })}
-          </EuiButtonEmpty>
+          <EuiToolTip content={editButtonLabel}>
+            <EuiButtonIcon
+              iconType="pencil"
+              onClick={editField}
+              data-test-subj="editFieldButton"
+              aria-label={editButtonLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
-            defaultMessage: 'Edit',
-          })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DeleteFieldProvider>
-          {deleteField => (
-            <EuiButtonEmpty onClick={() => deleteField(field)} data-test-subj="removeFieldButton">
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel', {
-                defaultMessage: 'Remove',
-              })}
-            </EuiButtonEmpty>
-          )}
-        </DeleteFieldProvider>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+
+        <EuiFlexItem grow={false}>
+          <DeleteFieldProvider>
+            {deleteField => (
+              <EuiToolTip content={deleteButtonLabel}>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={editField}
+                  data-test-subj="editFieldButton"
+                  aria-label={deleteButtonLabel}
+                />
+              </EuiToolTip>
+            )}
+          </DeleteFieldProvider>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
     <li
@@ -182,9 +217,11 @@ function FieldListItemComponent(
                 />
               </EuiFlexItem>
             )}
+
             <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
               {source.name}
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
                 {isMultiField
@@ -197,36 +234,7 @@ function FieldListItemComponent(
                   : TYPE_DEFINITION[source.type].label}
               </EuiBadge>
             </EuiFlexItem>
-            {canHaveMultiFields && (
-              <>
-                <EuiFlexItem
-                  grow={false}
-                  className="mappingsEditor__fieldsListItem__multiFieldButton"
-                >
-                  <EuiToolTip
-                    position="top"
-                    content={
-                      <p>
-                        {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldTooltipLabel', {
-                          defaultMessage:
-                            'Multi-fields are useful to index the same field in different ways.',
-                        })}
-                      </p>
-                    }
-                  >
-                    <EuiButtonEmpty
-                      onClick={addField}
-                      iconType="plusInCircleFilled"
-                      data-test-subj="addMultiFieldButton"
-                    >
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldButtonLabel', {
-                        defaultMessage: 'Add multi-field',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </>
-            )}
+
             <EuiFlexItem className="mappingsEditor__fieldsListItem__actions">
               {renderActionButtons()}
             </EuiFlexItem>
