@@ -44,65 +44,6 @@ localhost and port 5601 (the defaults) and not be using the basepath proxy:
 yarn start --no-base-path
 ```
 
-<<<<<<< HEAD
-### Add the index patterns
-You'll need to add the index patterns for each channel. To make this easy, use the dev tools in Kibana once it's started up.
-The default channel uses 'pulse-poc-raw':
-```kibana dev tools
-# create the pulse-poc-raw index pattern
-
-PUT pulse-poc-raw
-{
-  "settings": {
-    "number_of_shards": 1
-  },
-  "mappings": {
-    "properties": {
-      "deployment_id": {"type": "keyword"}
-    }
-  }
-}
-
-# create a test document
-POST /pulse-poc-raw/_doc
-{
-  "deployment_id": "123"
-}
-
-GET pulse-poc-raw/_mapping
-# create the pulse-poc-raw-errors index pattern
-```
-The errors channel uses the pulse-poc-raw-errors index pattern:
-Note: the mapping isn't fully defined yet :-)
-```
-# create the pulse-poc-raw-errors index pattern
-
-
-PUT pulse-poc-raw-errors
-{
-  "settings": {
-    "number_of_shards": 1
-  },
-  "mappings": {
-    "properties": {
-      "deployment_id": {"type": "keyword"},
-      "error": { "type": "text"}
-    }
-  }
-}
-
-POST /pulse-poc-raw-errors/_doc
-{
-  "deployment_id": "123",
-  "error": "Houston, we have a problem!"
-}
-
-GET pulse-poc-raw-errors
-```
-
-
-=======
->>>>>>> pulse_poc
 ## Adding a channel
 
 To add a channel to the service, create a directory for that channel in
