@@ -25,6 +25,7 @@ import { addPrepackedRulesRoute } from './lib/detection_engine/routes/rules/add_
 import { createRulesBulkRoute } from './lib/detection_engine/routes/rules/create_rules_bulk_route';
 import { updateRulesBulkRoute } from './lib/detection_engine/routes/rules/update_rules_bulk_route';
 import { deleteRulesBulkRoute } from './lib/detection_engine/routes/rules/delete_rules_bulk_route';
+import { importRulesBulkRoute } from './lib/detection_engine/routes/rules/import_rules_route';
 
 const APP_ID = 'siem';
 
@@ -50,6 +51,7 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   createRulesBulkRoute(__legacy);
   updateRulesBulkRoute(__legacy);
   deleteRulesBulkRoute(__legacy);
+  importRulesBulkRoute(__legacy);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
