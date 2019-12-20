@@ -276,7 +276,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'join',
     documentation: {
-      main: '/join.html',
+      main: '/parent-join.html',
     },
   },
   alias: {
