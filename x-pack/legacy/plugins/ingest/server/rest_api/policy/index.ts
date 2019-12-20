@@ -67,6 +67,7 @@ export const createGETPoliciesRoute = (libs: ServerLibs) => ({
       page: parseInt(query.page, 10),
       perPage: parseInt(query.perPage, 10),
       kuery: query.kuery,
+      withDatasources: true,
     });
 
     return { list: items, success: true, total, page, perPage };

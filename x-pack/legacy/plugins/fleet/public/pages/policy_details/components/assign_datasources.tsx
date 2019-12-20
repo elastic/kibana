@@ -176,6 +176,7 @@ export const AssignDatasourcesFlyout: React.FC<Props> = ({
     <EuiFlyoutBody>
       <DatasourcesTable
         datasources={datasources}
+        withPoliciesCount={true}
         loading={isDatasourcesLoading}
         message={getTableMessage()}
         search={{
@@ -184,6 +185,19 @@ export const AssignDatasourcesFlyout: React.FC<Props> = ({
             incremental: true,
             schema: true,
           },
+          filters: [
+            {
+              type: 'field_value_toggle',
+              field: 'policies',
+              value: 0,
+              name: (
+                <FormattedMessage
+                  id="xpack.fleet.assignDatasources.unassignedFilterButtonLabel"
+                  defaultMessage="Unassigned"
+                />
+              ),
+            },
+          ],
         }}
         selection={{
           onSelectionChange: (selection: Datasource[]) =>

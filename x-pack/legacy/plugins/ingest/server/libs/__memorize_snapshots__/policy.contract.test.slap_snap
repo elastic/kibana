@@ -7,7 +7,7 @@ exports['Policies Lib create should create a new policy - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -23,26 +23,26 @@ exports['Policies Lib create should create a new policy - get info (1)'] = {
 
 exports['Policies Lib create should create a new policy - create - {"name":"test","description":"test description"} (2)'] = {
   "results": {
-    "id": "23c08d20-1bdf-11ea-aa72-271a734b43b0",
+    "id": "25f8fbf0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:17.967Z",
+    "updated_on": "2019-12-19T23:41:58.955Z",
     "updated_by": "system (Fleet)"
   }
 }
 
-exports['Policies Lib create should create a new policy - get - "23c08d20-1bdf-11ea-aa72-271a734b43b0" (3)'] = {
+exports['Policies Lib create should create a new policy - get - "25f8fbf0-22b9-11ea-b637-7765ebe7310c" (3)'] = {
   "results": {
-    "id": "23c08d20-1bdf-11ea-aa72-271a734b43b0",
+    "id": "25f8fbf0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:17.967Z",
+    "updated_on": "2019-12-19T23:41:58.955Z",
     "updated_by": "system (Fleet)"
   }
 }
@@ -63,7 +63,7 @@ exports['Policies Lib ensureDefaultPolicy should create a new default policy if 
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -84,12 +84,12 @@ exports['Policies Lib ensureDefaultPolicy should create a new default policy if 
     "description": "Default policy created by Kibana",
     "status": "active",
     "datasources": [],
-    "updated_on": "2019-12-11T06:26:19.740Z",
+    "updated_on": "2019-12-19T23:42:00.952Z",
     "updated_by": "Fleet (system action)"
   }
 }
 
-exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - list - {"username":"internal","options":{"page":1,"perPage":20}} (4)'] = {
+exports['Policies Lib ensureDefaultPolicy should create a new default policy if none exists - list - {"username":"internal","options":{"page":1,"perPage":20,"withDatasources":true}} (4)'] = {
   "results": {
     "items": [
       {
@@ -98,7 +98,7 @@ exports['Policies Lib ensureDefaultPolicy should create a new default policy if 
         "description": "Default policy created by Kibana",
         "status": "active",
         "datasources": [],
-        "updated_on": "2019-12-11T06:26:19.740Z",
+        "updated_on": "2019-12-19T23:42:00.952Z",
         "updated_by": "Fleet (system action)"
       }
     ],
@@ -124,7 +124,7 @@ exports['Policies Lib ensureDefaultPolicy should not create the new default poli
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -145,7 +145,7 @@ exports['Policies Lib ensureDefaultPolicy should not create the new default poli
     "description": "Default policy created by Kibana",
     "status": "active",
     "datasources": [],
-    "updated_on": "2019-12-11T06:26:20.769Z",
+    "updated_on": "2019-12-19T23:42:02.011Z",
     "updated_by": "Fleet (system action)"
   }
 }
@@ -157,12 +157,12 @@ exports['Policies Lib ensureDefaultPolicy should not create the new default poli
     "description": "Default policy created by Kibana",
     "status": "active",
     "datasources": [],
-    "updated_on": "2019-12-11T06:26:20.769Z",
+    "updated_on": "2019-12-19T23:42:02.011Z",
     "updated_by": "Fleet (system action)"
   }
 }
 
-exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - list - {"username":"internal","options":{"page":1,"perPage":20}} (5)'] = {
+exports['Policies Lib ensureDefaultPolicy should not create the new default policy more than once - list - {"username":"internal","options":{"page":1,"perPage":20,"withDatasources":true}} (5)'] = {
   "results": {
     "items": [
       {
@@ -171,7 +171,7 @@ exports['Policies Lib ensureDefaultPolicy should not create the new default poli
         "description": "Default policy created by Kibana",
         "status": "active",
         "datasources": [],
-        "updated_on": "2019-12-11T06:26:20.769Z",
+        "updated_on": "2019-12-19T23:42:02.011Z",
         "updated_by": "Fleet (system action)"
       }
     ],
@@ -193,7 +193,7 @@ exports['Policies Lib list should list all active policies - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -209,13 +209,13 @@ exports['Policies Lib list should list all active policies - get info (1)'] = {
 
 exports['Policies Lib list should list all active policies - create - {"name":"test","description":"test description"} (2)'] = {
   "results": {
-    "id": "260c2ad0-1bdf-11ea-aa72-271a734b43b0",
+    "id": "28660450-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:21.819Z",
+    "updated_on": "2019-12-19T23:42:03.027Z",
     "updated_by": "system (Fleet)"
   }
 }
@@ -228,7 +228,7 @@ exports['Policies Lib list should list all active policies - get info (3)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -244,13 +244,13 @@ exports['Policies Lib list should list all active policies - get info (3)'] = {
 
 exports['Policies Lib list should list all active policies - create - {"name":"test2","description":"test description"} (4)'] = {
   "results": {
-    "id": "26a07b90-1bdf-11ea-aa72-271a734b43b0",
+    "id": "28fc50e0-22b9-11ea-b637-7765ebe7310c",
     "name": "test2",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test2",
-    "updated_on": "2019-12-11T06:26:22.791Z",
+    "updated_on": "2019-12-19T23:42:04.013Z",
     "updated_by": "system (Fleet)"
   }
 }
@@ -263,7 +263,7 @@ exports['Policies Lib list should list all active policies - get info (5)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -279,48 +279,48 @@ exports['Policies Lib list should list all active policies - get info (5)'] = {
 
 exports['Policies Lib list should list all active policies - create - {"name":"test3","description":"test description"} (6)'] = {
   "results": {
-    "id": "273ce2a0-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2997a680-22b9-11ea-b637-7765ebe7310c",
     "name": "test3",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test3",
-    "updated_on": "2019-12-11T06:26:23.816Z",
+    "updated_on": "2019-12-19T23:42:05.031Z",
     "updated_by": "system (Fleet)"
   }
 }
 
-exports['Policies Lib list should list all active policies - list - {"username":"internal","options":{"page":1,"perPage":20}} (7)'] = {
+exports['Policies Lib list should list all active policies - list - {"username":"internal","options":{"page":1,"perPage":20,"withDatasources":true}} (7)'] = {
   "results": {
     "items": [
       {
-        "id": "260c2ad0-1bdf-11ea-aa72-271a734b43b0",
+        "id": "28660450-22b9-11ea-b637-7765ebe7310c",
         "name": "test",
         "description": "test description",
         "status": "active",
         "datasources": [],
         "label": "test",
-        "updated_on": "2019-12-11T06:26:21.819Z",
+        "updated_on": "2019-12-19T23:42:03.027Z",
         "updated_by": "system (Fleet)"
       },
       {
-        "id": "26a07b90-1bdf-11ea-aa72-271a734b43b0",
+        "id": "28fc50e0-22b9-11ea-b637-7765ebe7310c",
         "name": "test2",
         "description": "test description",
         "status": "active",
         "datasources": [],
         "label": "test2",
-        "updated_on": "2019-12-11T06:26:22.791Z",
+        "updated_on": "2019-12-19T23:42:04.013Z",
         "updated_by": "system (Fleet)"
       },
       {
-        "id": "273ce2a0-1bdf-11ea-aa72-271a734b43b0",
+        "id": "2997a680-22b9-11ea-b637-7765ebe7310c",
         "name": "test3",
         "description": "test description",
         "status": "active",
         "datasources": [],
         "label": "test3",
-        "updated_on": "2019-12-11T06:26:23.816Z",
+        "updated_on": "2019-12-19T23:42:05.031Z",
         "updated_by": "system (Fleet)"
       }
     ],
@@ -342,7 +342,7 @@ exports['Policies Lib update should update a policy and invalidate the original 
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -358,52 +358,52 @@ exports['Policies Lib update should update a policy and invalidate the original 
 
 exports['Policies Lib update should update a policy and invalidate the original - create - {"name":"test","description":"test description"} (2)'] = {
   "results": {
-    "id": "27de52c0-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2a38a170-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:24.875Z",
+    "updated_on": "2019-12-19T23:42:06.084Z",
     "updated_by": "system (Fleet)"
   }
 }
 
-exports['Policies Lib update should update a policy and invalidate the original - get - "27de52c0-1bdf-11ea-aa72-271a734b43b0" (3)'] = {
+exports['Policies Lib update should update a policy and invalidate the original - get - "2a38a170-22b9-11ea-b637-7765ebe7310c" (3)'] = {
   "results": {
-    "id": "27de52c0-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2a38a170-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:24.875Z",
+    "updated_on": "2019-12-19T23:42:06.084Z",
     "updated_by": "system (Fleet)"
   }
 }
 
 exports['Policies Lib update should update a policy and invalidate the original - update - {"name":"foo","description":"test description","datasources":[]} (4)'] = {
   "results": {
-    "id": "27de52c0-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2a38a170-22b9-11ea-b637-7765ebe7310c",
     "name": "foo",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:25 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:07 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
 
-exports['Policies Lib update should update a policy and invalidate the original - get - "27de52c0-1bdf-11ea-aa72-271a734b43b0" (5)'] = {
+exports['Policies Lib update should update a policy and invalidate the original - get - "2a38a170-22b9-11ea-b637-7765ebe7310c" (5)'] = {
   "results": {
-    "id": "27de52c0-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2a38a170-22b9-11ea-b637-7765ebe7310c",
     "name": "foo",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:25 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:07 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
@@ -420,7 +420,7 @@ exports['Policies Lib update should assign and unassign data sources to policy -
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -436,33 +436,33 @@ exports['Policies Lib update should assign and unassign data sources to policy -
 
 exports['Policies Lib update should assign and unassign data sources to policy - create - {"name":"test","description":"test description"} (2)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:27.008Z",
+    "updated_on": "2019-12-19T23:42:08.156Z",
     "updated_by": "system (Fleet)"
   }
 }
 
-exports['Policies Lib update should assign and unassign data sources to policy - get - "2923f220-1bdf-11ea-aa72-271a734b43b0" (3)'] = {
+exports['Policies Lib update should assign and unassign data sources to policy - get - "2b747cd0-22b9-11ea-b637-7765ebe7310c" (3)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:27.008Z",
+    "updated_on": "2019-12-19T23:42:08.156Z",
     "updated_by": "system (Fleet)"
   }
 }
 
 exports['Policies Lib update should assign and unassign data sources to policy - update - {"name":"test","description":"test description","datasources":["foo","bar"]} (4)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
@@ -471,14 +471,14 @@ exports['Policies Lib update should assign and unassign data sources to policy -
       "bar"
     ],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:28 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:09 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
 
-exports['Policies Lib update should assign and unassign data sources to policy - get - "2923f220-1bdf-11ea-aa72-271a734b43b0" (5)'] = {
+exports['Policies Lib update should assign and unassign data sources to policy - get - "2b747cd0-22b9-11ea-b637-7765ebe7310c" (5)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
@@ -487,14 +487,14 @@ exports['Policies Lib update should assign and unassign data sources to policy -
       "bar"
     ],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:28 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:09 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
 
 exports['Policies Lib update should assign and unassign data sources to policy - update - {"name":"test","description":"test description","datasources":["foo","bar","test"]} (6)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
@@ -504,14 +504,14 @@ exports['Policies Lib update should assign and unassign data sources to policy -
       "test"
     ],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:29 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:10 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
 
-exports['Policies Lib update should assign and unassign data sources to policy - get - "2923f220-1bdf-11ea-aa72-271a734b43b0" (7)'] = {
+exports['Policies Lib update should assign and unassign data sources to policy - get - "2b747cd0-22b9-11ea-b637-7765ebe7310c" (7)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
@@ -521,14 +521,14 @@ exports['Policies Lib update should assign and unassign data sources to policy -
       "test"
     ],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:29 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:10 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
 
 exports['Policies Lib update should assign and unassign data sources to policy - update - {"name":"test","description":"test description","datasources":["bar"]} (8)'] = {
   "results": {
-    "id": "2923f220-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2b747cd0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
@@ -536,7 +536,7 @@ exports['Policies Lib update should assign and unassign data sources to policy -
       "bar"
     ],
     "label": "test",
-    "updated_on": "Tue Dec 10 2019 22:26:30 GMT-0800 (Pacific Standard Time)",
+    "updated_on": "Thu Dec 19 2019 15:42:11 GMT-0800 (Pacific Standard Time)",
     "updated_by": "Fleet (system action)"
   }
 }
@@ -549,7 +549,7 @@ exports['Policies Lib delete Should delete the by the ID - get info (1)'] = {
     "license": {
       "type": "trial",
       "expired": false,
-      "expiry_date_in_millis": 1578637547310
+      "expiry_date_in_millis": 1579390787514
     },
     "security": {
       "enabled": true,
@@ -565,20 +565,20 @@ exports['Policies Lib delete Should delete the by the ID - get info (1)'] = {
 
 exports['Policies Lib delete Should delete the by the ID - create - {"name":"test","description":"test description"} (2)'] = {
   "results": {
-    "id": "2b9ae590-1bdf-11ea-aa72-271a734b43b0",
+    "id": "2dea5ed0-22b9-11ea-b637-7765ebe7310c",
     "name": "test",
     "description": "test description",
     "status": "active",
     "datasources": [],
     "label": "test",
-    "updated_on": "2019-12-11T06:26:31.142Z",
+    "updated_on": "2019-12-19T23:42:12.282Z",
     "updated_by": "system (Fleet)"
   }
 }
 
-exports['Policies Lib delete Should delete the by the ID - delete - 2b9ae590-1bdf-11ea-aa72-271a734b43b0'] = {}
+exports['Policies Lib delete Should delete the by the ID - delete - 2dea5ed0-22b9-11ea-b637-7765ebe7310c'] = {}
 
-exports['Policies Lib delete Should delete the by the ID - list - {"username":"internal","options":{"page":1,"perPage":20}} (3)'] = {
+exports['Policies Lib delete Should delete the by the ID - list - {"username":"internal","options":{"page":1,"perPage":20,"withDatasources":true}} (3)'] = {
   "results": {
     "items": [],
     "total": 0,
