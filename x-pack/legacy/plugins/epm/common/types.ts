@@ -9,6 +9,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../src/core/server';
+import { AssetType as IngestAssetType } from '../../ingest/server/libs/types';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -164,7 +165,9 @@ export type NotInstalled<T = {}> = T & {
   status: InstallationStatus.notInstalled;
 };
 
-export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+export type AssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: AssetType | IngestAssetType;
+};
 
 export interface DatasourcePayload {
   pkgkey: string;
