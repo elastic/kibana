@@ -35,26 +35,26 @@ const insertDataIntoIndex = (
   context: RequestHandlerContext,
   logger: Logger
 ) => {
-  const bulkInsert = async (docs: any) => {
-    function updateTimestamps(doc: any) {
-      dataIndexConfig.timeFields.forEach((timeFieldName: string) => {
-        if (doc[timeFieldName]) {
-          doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
-            ? translateTimeRelativeToWeek(
-                doc[timeFieldName],
-                dataIndexConfig.currentTimeMarker,
-                nowReference
-              )
-            : translateTimeRelativeToDifference(
-                doc[timeFieldName],
-                dataIndexConfig.currentTimeMarker,
-                nowReference
-              );
-        }
+  function updateTimestamps(doc: any) {
+    dataIndexConfig.timeFields
+      .filter((timeFieldName: string) => doc[timeFieldName])
+      .forEach((timeFieldName: string) => {
+        doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
+          ? translateTimeRelativeToWeek(
+              doc[timeFieldName],
+              dataIndexConfig.currentTimeMarker,
+              nowReference
+            )
+          : translateTimeRelativeToDifference(
+              doc[timeFieldName],
+              dataIndexConfig.currentTimeMarker,
+              nowReference
+            );
       });
-      return doc;
-    }
+    return doc;
+  }
 
+  const bulkInsert = async (docs: any) => {
     const insertCmd = { index: { _index: index } };
     const bulk: any[] = [];
     docs.forEach((doc: any) => {
