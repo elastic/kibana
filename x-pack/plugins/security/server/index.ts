@@ -4,15 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import {
+  PluginConfigDescriptor,
+  PluginInitializer,
+  PluginInitializerContext,
+  RecursiveReadonly,
+} from '../../../../src/core/server';
 import { ConfigSchema } from './config';
-import { Plugin } from './plugin';
+import { Plugin, PluginSetupContract, PluginSetupDependencies } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
 export { AuthenticationResult, DeauthenticationResult, CreateAPIKeyResult } from './authentication';
-export { PluginSetupContract } from './plugin';
+export { PluginSetupContract };
 
-export const config = { schema: ConfigSchema };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
+  schema: ConfigSchema,
+  deprecations: ({ rename, unused }) => [
+    rename('sessionTimeout', 'session.idleTimeout'),
+    unused('authorization.legacyFallback.enabled'),
+  ],
+};
+export const plugin: PluginInitializer<
+  RecursiveReadonly<PluginSetupContract>,
+  void,
+  PluginSetupDependencies
+> = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);
