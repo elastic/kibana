@@ -56,7 +56,7 @@ export class PulseService {
   private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
   private readonly instructions: Map<string, Subject<any>> = new Map();
-  private readonly subscriptions: Set<Subscription> = new Set();
+  private readonly subscriptions: Set<NodeJS.Timer> = new Set();
   private elasticsearch?: IClusterClient;
 
   constructor(coreContext: CoreContext) {
@@ -95,19 +95,21 @@ export class PulseService {
     const elasticsearch = this.elasticsearch;
 
     // poll for instructions every second for this deployment
-    setInterval(() => {
+    const loadInstructionSubcription = setInterval(() => {
       this.loadInstructions().catch(err => this.log.error(err.stack));
     }, 1000);
+    this.subscriptions.add(loadInstructionSubcription);
 
     this.log.debug('Will attempt first telemetry collection in 5 seconds...');
-    setInterval(() => {
+    const sendTelemetrySubcription = setInterval(() => {
       this.sendTelemetry(elasticsearch).catch(err => this.log.error(err.stack));
     }, 5000);
+    this.subscriptions.add(sendTelemetrySubcription);
   }
 
   public async stop() {
     this.subscriptions.forEach(subscription => {
-      subscription.unsubscribe();
+      clearInterval(subscription);
       this.subscriptions.delete(subscription);
     });
   }
