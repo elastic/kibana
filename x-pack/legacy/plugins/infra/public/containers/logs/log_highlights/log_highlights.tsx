@@ -28,7 +28,7 @@ export const useLogHighlightsState = ({
   filterQuery: string | null;
 }) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
-  const [{ visibleMidpoint }, { jumpToTargetPosition }] = useContext(LogPositionState.Context);
+  const { visibleMidpoint, jumpToTargetPosition } = useContext(LogPositionState.Context);
   const { intervalSize: summaryIntervalSize } = useContext(LogViewConfiguration.Context);
   const {
     start: summaryStart,

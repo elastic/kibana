@@ -20,10 +20,14 @@ interface LogPositionUrlState {
 }
 
 export const WithLogPositionUrlState = () => {
-  const [
-    { visibleMidpoint, isAutoReloading },
-    { jumpToTargetPosition, jumpToTargetPositionTime, startLiveStreaming, stopLiveStreaming },
-  ] = useContext(LogPositionState.Context);
+  const {
+    visibleMidpoint,
+    isAutoReloading,
+    jumpToTargetPosition,
+    jumpToTargetPositionTime,
+    startLiveStreaming,
+    stopLiveStreaming,
+  } = useContext(LogPositionState.Context);
   const urlState = useMemo(
     () => ({
       position: visibleMidpoint ? pickTimeKey(visibleMidpoint) : null,

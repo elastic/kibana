@@ -25,10 +25,13 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
-  const [
-    { targetPosition, pagesBeforeStart, pagesAfterEnd, isAutoReloading },
-    { jumpToTargetPosition },
-  ] = useContext(LogPositionState.Context);
+  const {
+    targetPosition,
+    pagesBeforeStart,
+    pagesAfterEnd,
+    isAutoReloading,
+    jumpToTargetPosition,
+  } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
 
   const entriesProps = {

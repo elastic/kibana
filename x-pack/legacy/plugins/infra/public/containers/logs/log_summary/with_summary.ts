@@ -25,7 +25,7 @@ export const WithSummary = ({
   const { intervalSize } = useContext(LogViewConfiguration.Context);
   const { sourceId } = useContext(Source.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
-  const [{ visibleMidpointTime }] = useContext(LogPositionState.Context);
+  const { visibleMidpointTime } = useContext(LogPositionState.Context);
 
   const { buckets, start, end } = useLogSummary(
     sourceId,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
 import { TimeKey } from '../../../../common/time';
 
@@ -59,7 +59,7 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
   return store.currentValue;
 };
 
-export const useLogPositionState: () => [LogPositionStateParams, LogPositionCallbacks] = () => {
+export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
   const [isAutoReloading, setIsAutoReloading] = useState(false);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
@@ -92,13 +92,16 @@ export const useLogPositionState: () => [LogPositionStateParams, LogPositionCall
 
   const callbacks = {
     jumpToTargetPosition,
-    jumpToTargetPositionTime: (time: number) => jumpToTargetPosition({ tiebreaker: 0, time }),
+    jumpToTargetPositionTime: useCallback(
+      (time: number) => jumpToTargetPosition({ tiebreaker: 0, time }),
+      [jumpToTargetPosition]
+    ),
     reportVisiblePositions,
-    startLiveStreaming: () => setIsAutoReloading(true),
-    stopLiveStreaming: () => setIsAutoReloading(false),
+    startLiveStreaming: useCallback(() => setIsAutoReloading(true), [setIsAutoReloading]),
+    stopLiveStreaming: useCallback(() => setIsAutoReloading(false), [setIsAutoReloading]),
   };
 
-  return [state, callbacks];
+  return { ...state, ...callbacks };
 };
 
 export const LogPositionState = createContainer(useLogPositionState);

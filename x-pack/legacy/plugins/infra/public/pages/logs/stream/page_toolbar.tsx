@@ -54,10 +54,13 @@ export const LogsToolbar = () => {
     goToPreviousHighlight,
     goToNextHighlight,
   } = useContext(LogHighlightsState.Context);
-  const [
-    { visibleMidpointTime, isAutoReloading },
-    { jumpToTargetPositionTime, startLiveStreaming, stopLiveStreaming },
-  ] = useContext(LogPositionState.Context);
+  const {
+    visibleMidpointTime,
+    isAutoReloading,
+    jumpToTargetPositionTime,
+    startLiveStreaming,
+    stopLiveStreaming,
+  } = useContext(LogPositionState.Context);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">

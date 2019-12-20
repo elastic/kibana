@@ -46,10 +46,15 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
-  const [
-    { isAutoReloading, targetPosition, visibleMidpointTime, visibleTimeInterval },
-    { reportVisiblePositions, jumpToTargetPosition, stopLiveStreaming },
-  ] = useContext(LogPositionState.Context);
+  const {
+    isAutoReloading,
+    targetPosition,
+    visibleMidpointTime,
+    visibleTimeInterval,
+    reportVisiblePositions,
+    jumpToTargetPosition,
+    stopLiveStreaming,
+  } = useContext(LogPositionState.Context);
   return (
     <>
       <WithLogMinimapUrlState />

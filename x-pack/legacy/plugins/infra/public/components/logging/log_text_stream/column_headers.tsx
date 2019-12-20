@@ -28,7 +28,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
 }> = ({ columnConfigurations, columnWidths }) => {
-  const [{ firstVisiblePosition }] = useContext(LogPositionState.Context);
+  const { firstVisiblePosition } = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map(columnConfiguration => {
