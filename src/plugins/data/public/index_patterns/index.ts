@@ -26,7 +26,7 @@ import {
   validateIndexPattern,
   getFromSavedObject,
 } from './lib';
-import { getRoutes } from './utils';
+import { getRoutes, findByTitle } from './utils';
 import { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export const indexPatterns = {
@@ -40,6 +40,7 @@ export const indexPatterns = {
   getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
+  findByTitle,
 };
 
 export { Field, FieldList, IFieldList } from './fields';

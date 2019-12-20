@@ -24,7 +24,7 @@ import { VegaMapView } from './vega_view/vega_map_view';
 import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 
-import { findIndexPatternByTitle } from '../../data/public/index_patterns';
+import { indexPatterns } from '../../../../plugins/data/public';
 
 export const createVegaVisualization = ({ serviceSettings }) =>
   class VegaVisualization {
@@ -42,7 +42,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
     async findIndex(index) {
       let idxObj;
       if (index) {
-        idxObj = await findIndexPatternByTitle(this.savedObjectsClient, index);
+        idxObj = await indexPatterns.findByTitle(this.savedObjectsClient, index);
         if (!idxObj) {
           throw new Error(
             i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
