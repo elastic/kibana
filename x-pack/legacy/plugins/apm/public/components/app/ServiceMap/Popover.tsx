@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiTitle
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { useContext, useEffect, useState } from 'react';
 import { CytoscapeContext } from './Cytoscape';
@@ -24,47 +31,52 @@ export function Popover() {
         setSelectedNode(undefined);
       });
     }
-
-    window.onclick = event => {
-      console.log(event);
-      console.log(event.target.x, event.target.y);
-    };
   }, [cy]);
 
-  if (!cy || !selectedNode) {
-    return null;
-  }
-
-  const container = (cy.container() as HTMLElement) || undefined;
-
-  if (!container) {
-    return null;
-  }
+  const container = (cy?.container() as HTMLElement) ?? undefined;
+  const renderedHeight = selectedNode?.renderedHeight() ?? 0;
+  const renderedWidth = selectedNode?.renderedWidth() ?? 0;
+  const { x, y } = selectedNode?.position() ?? { x: 0, y: 0 };
+  const pan = cy?.pan() ?? { x: 0, y: 0 };
+  //  const isOpen = !!selectedNode;
+  const isOpen = true;
+  const serviceName = selectedNode?.data('id');
 
   const triggerStyle = {
     background: 'transparent',
-    height: selectedNode.renderedHeight(),
-    width: selectedNode.renderedWidth()
+    height: renderedHeight,
+    width: renderedWidth
   };
   const trigger = <div className="trigger" style={triggerStyle} />;
-
-  const { x, y } = selectedNode.position();
-  const pan = cy.pan();
 
   const popoverStyle = {
     transform: `translate(${x - pan.x}px, ${y + pan.y}px)`
   };
-  console.log({ x, y, panx: cy.pan().x, pany: cy.pan().y });
+
   return (
     <EuiPopover
-      className="poopover"
       container={container}
       style={popoverStyle}
       closePopover={() => {}}
-      isOpen={true}
+      isOpen={isOpen}
       button={trigger}
     >
-      {JSON.stringify(selectedNode.data())}
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiTitle size="xxs">
+          <>{serviceName}</>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        <EuiButton fill={true}>
+          {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {
+            defaultMessage: 'Service Details'
+          })}
+        </EuiButton>
+        <EuiButton color="secondary">
+          {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
+            defaultMessage: 'Focus map'
+          })}
+        </EuiButton>
+      </EuiFlexGroup>
     </EuiPopover>
   );
 }

@@ -93,10 +93,10 @@ const style: cytoscape.Stylesheet[] = [
     }
   },
   {
-    selector: 'edge:hover',
+    selector: 'edge.hover',
     style: {
       color: theme.euiColorPrimary,
-      width: 4
+      width: 3
     }
   }
 ];
