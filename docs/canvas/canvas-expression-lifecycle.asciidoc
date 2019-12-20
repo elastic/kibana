@@ -191,7 +191,7 @@ The expression does the following:
 * Compares the value to `100`
 * Returns `true` if the value is 100 or greater, and `false` if the value is 100 or less
 
-That boolean value becomes the value for the `condition` argument. The output from the `then` expression is used as the output when `condition` is `true`. The output from the "else" expression is used when `condition` is false. In both cases, a base64-encoded image will be returned, and one of the two images will be displayed.
+That boolean value becomes the value for the `condition` argument. The output from the `then` expression is used as the output when `condition` is `true`. The output from the `else` expression is used when `condition` is false. In both cases, a base64-encoded image will be returned, and one of the two images will be displayed.
 
 You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly inserted into <<getCell_fn, getCell>>. The answer is simple, but important to understand. When nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function that its parent function receives. In this specific expression, demodata’s data table is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
 
