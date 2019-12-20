@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export async function getRecords() {
-  return [{}];
+import { IClusterClient } from '../../elasticsearch';
+
+export async function getRecords(elasticsearch: IClusterClient) {
+  const pingResult = await elasticsearch.callAsInternalUser('ping');
+
+  return [{ ping_received: pingResult }];
 }
