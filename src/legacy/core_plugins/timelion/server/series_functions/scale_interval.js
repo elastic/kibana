@@ -27,7 +27,7 @@ export default new Chainable('scale_interval', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'interval',
@@ -36,7 +36,7 @@ export default new Chainable('scale_interval', {
         defaultMessage:
           'The new interval in date math notation, e.g., 1s for 1 second. 1m, 5m, 1M, 1w, 1y, etc.',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.scaleIntervalHelpText', {
     defaultMessage:
@@ -46,12 +46,12 @@ export default new Chainable('scale_interval', {
     const currentInterval = toMS(tlConfig.time.interval);
     const scaleInterval = toMS(args.byName.interval);
 
-    return alter(args, function (eachSeries) {
-      const data = _.map(eachSeries.data, function (point) {
+    return alter(args, function(eachSeries) {
+      const data = _.map(eachSeries.data, function(point) {
         return [point[0], (point[1] / currentInterval) * scaleInterval];
       });
       eachSeries.data = data;
       return eachSeries;
     });
-  }
+  },
 });

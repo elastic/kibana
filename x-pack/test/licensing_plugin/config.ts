@@ -43,7 +43,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.licensing.pollingFrequency=300',
+        '--xpack.licensing.api_polling_frequency=300',
       ],
     },
 

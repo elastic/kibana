@@ -15,6 +15,7 @@ import { HostsTableType } from '../../store/hosts/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
+jest.mock('ui/new_platform');
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));

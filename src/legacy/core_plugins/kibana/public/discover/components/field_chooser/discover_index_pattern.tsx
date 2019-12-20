@@ -17,10 +17,11 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiComboBox } from '@elastic/eui';
 import { SavedObject } from 'kibana/server';
-import { DiscoverIndexPatternTitle } from './discover_index_pattern_title';
+import { I18nProvider } from '@kbn/i18n/react';
 
+import { IndexPatternRef } from './types';
+import { ChangeIndexPattern } from './change_indexpattern';
 export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link
@@ -48,60 +49,37 @@ export function DiscoverIndexPattern({
     // just in case, shouldn't happen
     return null;
   }
-  const [selected, setSelected] = useState(selectedIndexPattern);
-  const [showCombo, setShowCombo] = useState(false);
-  const options = indexPatternList.map(entity => ({
-    value: entity.id,
-    label: entity.attributes!.title,
+  const options: IndexPatternRef[] = indexPatternList.map(entity => ({
+    id: entity.id,
+    title: entity.attributes!.title,
   }));
-  const selectedOptions = selected
-    ? [{ value: selected.id, label: selected.attributes.title }]
-    : [];
 
-  const findIndexPattern = (id?: string) => indexPatternList.find(entity => entity.id === id);
-
-  if (!showCombo) {
-    return (
-      <DiscoverIndexPatternTitle
-        isChangeable={indexPatternList.length > 1}
-        onChange={() => setShowCombo(true)}
-        title={selected.attributes ? selected.attributes.title : ''}
-      />
-    );
-  }
-
-  /**
-   * catches a EuiComboBox related 'Can't perform a React state update on an unmounted component'
-   * warning in console by delaying the hiding/removal of the EuiComboBox a bit
-   */
-  function hideCombo() {
-    setTimeout(() => setShowCombo(false), 50);
-  }
+  const [selected, setSelected] = useState({
+    id: selectedIndexPattern.id,
+    title: selectedIndexPattern.attributes!.title,
+  });
 
   return (
-    <EuiComboBox
-      className="index-pattern-selection"
-      data-test-subj="index-pattern-selection"
-      fullWidth={true}
-      isClearable={false}
-      onBlur={() => hideCombo()}
-      onChange={choices => {
-        const newSelected = choices[0] && findIndexPattern(choices[0].value);
-        if (newSelected) {
-          setSelected(newSelected);
-          setIndexPattern(newSelected.id);
-        }
-        hideCombo();
-      }}
-      inputRef={el => {
-        // auto focus input element when combo box is displayed
-        if (el) {
-          el.focus();
-        }
-      }}
-      options={options}
-      selectedOptions={selectedOptions}
-      singleSelection={{ asPlainText: true }}
-    />
+    <div className="indexPattern__container">
+      <I18nProvider>
+        <ChangeIndexPattern
+          trigger={{
+            label: selected.title,
+            title: selected.title,
+            'data-test-subj': 'indexPattern-switch-link',
+            className: 'indexPattern__triggerButton',
+          }}
+          indexPatternId={selected.id}
+          indexPatternRefs={options}
+          onChangeIndexPattern={id => {
+            const indexPattern = options.find(pattern => pattern.id === id);
+            if (indexPattern) {
+              setIndexPattern(id);
+              setSelected(indexPattern);
+            }
+          }}
+        />
+      </I18nProvider>
+    </div>
   );
 }

@@ -112,10 +112,11 @@
   "dependencies": {
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
+    "@elastic/apm-rum": "^4.6.0",
     "@elastic/charts": "^14.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
-    "@elastic/eui": "17.0.0",
+    "@elastic/eui": "17.1.2",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
@@ -154,7 +155,7 @@
     "check-disk-space": "^2.1.0",
     "chokidar": "3.2.1",
     "color": "1.0.3",
-    "commander": "3.0.0",
+    "commander": "3.0.2",
     "compare-versions": "3.5.1",
     "core-js": "^3.2.1",
     "css-loader": "2.1.1",
@@ -182,7 +183,7 @@
     "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
     "history": "^4.9.0",
-    "hjson": "3.2.0",
+    "hjson": "3.2.1",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",
     "https-proxy-agent": "^2.2.2",
@@ -219,7 +220,7 @@
     "postcss-loader": "3.0.0",
     "prop-types": "15.6.0",
     "proxy-from-env": "1.0.0",
-    "pug": "^2.0.3",
+    "pug": "^2.0.4",
     "querystring-browser": "1.0.4",
     "raw-loader": "3.1.0",
     "react": "^16.12.0",
@@ -364,8 +365,8 @@
     "@types/uuid": "^3.4.4",
     "@types/vinyl-fs": "^2.4.11",
     "@types/zen-observable": "^0.8.0",
-    "@typescript-eslint/eslint-plugin": "^2.10.0",
-    "@typescript-eslint/parser": "^2.10.0",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
     "angular-mocks": "^1.7.8",
     "archiver": "^3.1.1",
     "axe-core": "^3.3.2",
@@ -467,7 +468,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.15.2",
+    "node": "10.18.0",
     "yarn": "^1.21.1"
   }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function (api) {
+export default function(api) {
   api.addEndpointDescription('search', {
     priority: 10, // collides with get doc by id
     data_autocomplete_rules: {
@@ -129,19 +129,17 @@ export default function (api) {
       docvalue_fields: ['{field}'],
       collapse: {
         __template: {
-          'field': 'FIELD'
-        }
+          field: 'FIELD',
+        },
       },
       indices_boost: {
-        __template: [
-          { 'INDEX': 1.0 }
-        ]
+        __template: [{ INDEX: 1.0 }],
       },
       rescore: {
         __template: {
-          'query': {},
-          'window_size': 50
-        }
+          query: {},
+          window_size: 50,
+        },
       },
       script_fields: {
         __template: {
@@ -196,10 +194,7 @@ export default function (api) {
   api.addEndpointDescription('search_template', {
     data_autocomplete_rules: {
       template: {
-        __one_of: [
-          { __scope_link: 'search' },
-          { __scope_link: 'GLOBAL.script' },
-        ],
+        __one_of: [{ __scope_link: 'search' }, { __scope_link: 'GLOBAL.script' }],
       },
       params: {},
     },
@@ -207,10 +202,7 @@ export default function (api) {
 
   api.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
-      __one_of: [
-        { source: { __scope_link: 'search' } },
-        { __scope_link: 'GLOBAL.script' },
-      ],
+      __one_of: [{ source: { __scope_link: 'search' } }, { __scope_link: 'GLOBAL.script' }],
       params: {},
     },
   });

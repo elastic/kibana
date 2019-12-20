@@ -11,7 +11,8 @@ import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
 import {
-  editCluster as sendEditClusterRequest, extractQueryParams,
+  editCluster as sendEditClusterRequest,
+  extractQueryParams,
   getRouter,
   redirect,
 } from '../../services';
@@ -25,7 +26,7 @@ import {
   CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const editCluster = (cluster) => async (dispatch) => {
+export const editCluster = cluster => async dispatch => {
   dispatch({
     type: EDIT_CLUSTER_SAVE,
   });
@@ -59,24 +60,34 @@ export const editCluster = (cluster) => async (dispatch) => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(error, i18n.translate('xpack.remoteClusters.editAction.errorTitle', {
-      defaultMessage: 'Error editing cluster',
-    }));
+    return fatalError(
+      error,
+      i18n.translate('xpack.remoteClusters.editAction.errorTitle', {
+        defaultMessage: 'Error editing cluster',
+      })
+    );
   }
 
   dispatch({
     type: EDIT_CLUSTER_SUCCESS,
   });
 
-  const { history, route: { location: { search } }  } = getRouter();
+  const {
+    history,
+    route: {
+      location: { search },
+    },
+  } = getRouter();
   const { redirect: redirectUrl } = extractQueryParams(search);
 
   if (redirectUrl) {
     // A toast is only needed if we're leaving the app.
-    toasts.addSuccess(i18n.translate('xpack.remoteClusters.editAction.successTitle', {
-      defaultMessage: `Edited remote cluster '{name}'`,
-      values: { name: cluster.name },
-    }));
+    toasts.addSuccess(
+      i18n.translate('xpack.remoteClusters.editAction.successTitle', {
+        defaultMessage: `Edited remote cluster '{name}'`,
+        values: { name: cluster.name },
+      })
+    );
 
     const decodedRedirect = decodeURIComponent(redirectUrl);
     redirect(`${decodedRedirect}?cluster=${cluster.name}`);
@@ -90,7 +101,7 @@ export const editCluster = (cluster) => async (dispatch) => {
   }
 };
 
-export const startEditingCluster = ({ clusterName }) => (dispatch) => {
+export const startEditingCluster = ({ clusterName }) => dispatch => {
   dispatch(loadClusters());
 
   dispatch({
@@ -99,7 +110,7 @@ export const startEditingCluster = ({ clusterName }) => (dispatch) => {
   });
 };
 
-export const stopEditingCluster = () => (dispatch) => {
+export const stopEditingCluster = () => dispatch => {
   // Load the clusters to refresh the one we just edited.
   dispatch(loadClusters());
 
@@ -108,7 +119,7 @@ export const stopEditingCluster = () => (dispatch) => {
   });
 };
 
-export const clearEditClusterErrors = () => (dispatch) => {
+export const clearEditClusterErrors = () => dispatch => {
   dispatch({
     type: CLEAR_EDIT_CLUSTER_ERRORS,
   });

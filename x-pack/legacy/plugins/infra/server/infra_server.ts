@@ -19,6 +19,12 @@ import { initMetricExplorerRoute } from './routes/metrics_explorer';
 import { initMetadataRoute } from './routes/metadata';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initNodeDetailsRoute } from './routes/node_details';
+import {
+  initLogEntriesSummaryRoute,
+  initLogEntriesSummaryHighlightsRoute,
+  initLogEntriesItemRoute,
+} from './routes/log_entries';
+import { initInventoryMetaRoute } from './routes/inventory_metadata';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -37,6 +43,10 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
+  initLogEntriesSummaryRoute(libs);
+  initLogEntriesSummaryHighlightsRoute(libs);
+  initLogEntriesItemRoute(libs);
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
+  initInventoryMetaRoute(libs);
 };

@@ -14,7 +14,10 @@ import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { InfraSetup } from '../../../plugins/infra/server';
-import { APMPluginContract } from '../../../plugins/apm/server/plugin';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
+import { APMPluginContract } from '../../../plugins/apm/server';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -90,19 +93,9 @@ export function infra(kibana: any) {
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
-        metrics: legacyServer.plugins.metrics,
-        spaces: plugins.spaces,
-        features: plugins.features,
-        // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
-        // originate from the New Platform router (and are very different to the old request object).
-        // Once TSVB has migrated over to NP, and can work with the new raw requests, or ideally just
-        // the requestContext, this can be removed.
-        ___legacy: {
-          tsvb: {
-            elasticsearch: legacyServer.plugins.elasticsearch,
-            __internals: legacyServer.newPlatform.__internals,
-          },
-        },
+        metrics: plugins.metrics as VisTypeTimeseriesSetup,
+        spaces: plugins.spaces as SpacesPluginSetup,
+        features: plugins.features as FeaturesPluginSetup,
         apm: plugins.apm as APMPluginContract,
       };
 
@@ -113,7 +106,7 @@ export function infra(kibana: any) {
 
       const libs = infraPluginInstance.getLibs();
 
-      // NP_TODO how do we replace this? Answer: return from setup function.
+      // NP_NOTE: Left here for now for legacy plugins to consume
       legacyServer.expose(
         'defineInternalSourceConfiguration',
         libs.sources.defineInternalSourceConfiguration.bind(libs.sources)
