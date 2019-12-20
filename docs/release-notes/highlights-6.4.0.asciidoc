@@ -95,7 +95,7 @@ If you want to fine tune your machine learning results
 you can now create custom rules in {kib}. Custom rules instruct 
 anomaly detectors to change their behavior based on domain-specific 
 knowledge that you provide. See 
-https://www.elastic.co/guide/en/elastic-stack-overview/6.4/ml-rules.html[machine learning custom rules].
+https://www.elastic.co/guide/en/machine-learning/6.4/ml-rules.html[machine learning custom rules].
 
 [role="screenshot"]
 image::images/highlights_6_4_ml_create_rule.jpg[Machine learning create rule]

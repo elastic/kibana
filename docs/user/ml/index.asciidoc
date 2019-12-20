@@ -66,7 +66,8 @@ image::user/ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotati
 
 In some circumstances, annotations are also added automatically. For example, if
 the {anomaly-job} detects that there is missing data, it annotates the affected
-time period. For more information, see <<ml-delayed-data-detection>>.
+time period. For more information, see
+{ml-docs}/ml-delayed-data-detection.html[Handling delayed data].
 The *Job Management* pane shows the full list of annotations for each job.
 
 NOTE: The {kib} {ml-features} use pop-ups. You must configure your
@@ -75,5 +76,5 @@ your {kib} URL.
 
 For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning and
-<<xpack-ml>>.
+{ml-docs}/xpack-ml.html[Machine learning in the {stack}].
 

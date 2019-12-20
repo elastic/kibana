@@ -2713,7 +2713,7 @@ Elastic Stack. For more information about the APM functionality in {kib}, see
 
 Machine Learning::
 * Added the ability to create
-{stack-ov}/ml-calendars.html[calendars and scheduled events].
+{ml-docs}/ml-calendars.html[calendars and scheduled events].
 
 Monitoring::
 * Added monitoring information for Beats in {kib}. See <<beats-page>>.
@@ -3044,7 +3044,7 @@ checkbox. The choice is saved in the URL, so it persists if you re-open the
 view from a bookmarked URL.
 * Added a new job creation wizard for population jobs, which detect activity
 that is unusual compared to the behavior of the population. For more information,
-see {stack-ov}/ml-configuring-pop.html[Performing Population Analysis].
+see {ml-docs}/ml-configuring-pop.html[Performing population analysis].
 * Added the ability to control the maximum number of rows in the Anomaly
 Explorer view by swimlane, with options of `5`, `10`, `25`, or `50`. Previously,
 it was fixed to a maximum of 10 rows.
