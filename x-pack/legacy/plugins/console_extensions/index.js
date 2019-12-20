@@ -33,9 +33,7 @@ export function consoleExtensions(kibana) {
       ) {
         const { addExtensionSpecFilePath, addProcessorDefinition } = server.plugins.console;
 
-        addExtensionSpecFilePath(
-          join(__dirname, 'spec/')
-        );
+        addExtensionSpecFilePath(join(__dirname, 'spec/'));
 
         processors.forEach(processor => addProcessorDefinition(processor));
       } else {
@@ -44,6 +42,6 @@ export function consoleExtensions(kibana) {
           'Cannot add xpack APIs to autocomplete.'
         );
       }
-    }
+    },
   });
 }

@@ -18,10 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../kibana_services';
-const { docLinks } = getServices();
 
-export function addHelpMenuToAppChrome(chrome) {
+export function addHelpMenuToAppChrome(chrome, docLinks) {
   chrome.setHelpExtension({
     appName: i18n.translate('kbn.visualize.helpMenu.appName', {
       defaultMessage: 'Visualize',

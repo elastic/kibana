@@ -9,32 +9,32 @@ import { Lifecycle } from 'hapi';
 import { ObjectType } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
-import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
+import { APMPluginContract } from '../../../../../../../plugins/apm/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
+  spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  spaces: any;
-  metrics: {
-    getVisData: any;
-  };
+  metrics: VisTypeTimeseriesSetup;
   indexPatterns: {
     indexPatternsServiceFactory: any;
   };
-  features: any;
+  features: FeaturesPluginSetup;
   apm: APMPluginContract;
-  ___legacy: any;
 }
 
 export interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
   name?: string;
-  index?: string;
+  index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: string;
+  fields?: string | string[];
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;

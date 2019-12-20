@@ -4,34 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatabaseAdapter } from '../database';
-import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from './adapter_types';
-import { StatesIndexStatus } from '../../../../common/graphql/types';
+import { APICaller } from 'kibana/server';
+import { UMMonitorStatesAdapter, CursorPagination } from './adapter_types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { Snapshot } from '../../../../common/runtime_types';
 import { QueryContext } from './search/query_context';
 
-export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
-  constructor(private readonly database: DatabaseAdapter) {
-    this.database = database;
-  }
-
+export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
   // Gets a page of monitor states.
-  public async getMonitorStates(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    pagination: CursorPagination = CONTEXT_DEFAULTS.CURSOR_PAGINATION,
-    filters?: string | null,
-    statusFilter?: string
-  ): Promise<GetMonitorStatesResult> {
+  getMonitorStates: async ({
+    callES,
+    dateRangeStart,
+    dateRangeEnd,
+    pagination,
+    filters,
+    statusFilter,
+  }) => {
+    pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
+    statusFilter = statusFilter === null ? undefined : statusFilter;
     const size = 10;
 
     const queryContext = new QueryContext(
-      this.database,
-      request,
+      callES,
       dateRangeStart,
       dateRangeEnd,
       pagination,
@@ -47,18 +43,17 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       nextPagePagination: jsonifyPagination(page.nextPagePagination),
       prevPagePagination: jsonifyPagination(page.prevPagePagination),
     };
-  }
+  },
 
-  public async getSnapshotCount(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string,
-    statusFilter?: string
-  ): Promise<Snapshot> {
+  getSnapshotCount: async ({
+    callES,
+    dateRangeStart,
+    dateRangeEnd,
+    filters,
+    statusFilter,
+  }): Promise<Snapshot> => {
     const context = new QueryContext(
-      this.database,
-      request,
+      callES,
       dateRangeStart,
       dateRangeEnd,
       CONTEXT_DEFAULTS.CURSOR_PAGINATION,
@@ -83,22 +78,22 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     }
 
     return counts;
-  }
+  },
 
-  public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
+  statesIndexExists: async ({ callES }) => {
     // TODO: adapt this to the states index in future release
     const {
       _shards: { total },
       count,
-    } = await this.database.count(request, { index: INDEX_NAMES.HEARTBEAT });
+    } = await callES('count', { index: INDEX_NAMES.HEARTBEAT });
     return {
       indexExists: total > 0,
       docCount: {
         count,
       },
     };
-  }
-}
+  },
+};
 
 // To simplify the handling of the group of pagination vars they're passed back to the client as a string
 const jsonifyPagination = (p: any): string | null => {
@@ -129,7 +124,7 @@ const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
     },
   };
 
-  const statistics = await context.database.search(context.request, params);
+  const statistics = await context.search(params);
   const total = statistics.aggregations.unique.value;
   const down = statistics.aggregations.down.unique.value;
 

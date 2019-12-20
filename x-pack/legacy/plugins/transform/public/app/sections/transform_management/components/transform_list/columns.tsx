@@ -87,7 +87,7 @@ export const getColumns = (
   }
 
   const columns: [
-    ExpanderColumnType,
+    ExpanderColumnType<TransformListRow>,
     FieldDataColumnType<TransformListRow>,
     FieldDataColumnType<TransformListRow>,
     FieldDataColumnType<TransformListRow>,

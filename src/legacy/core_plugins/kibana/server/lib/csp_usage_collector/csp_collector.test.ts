@@ -17,79 +17,74 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import { Server } from 'hapi';
-import { DEFAULT_CSP_RULES } from '../../../../../server/csp';
+import { CspConfig, ICspConfig } from '../../../../../../core/server';
 import { createCspCollector } from './csp_collector';
 
-interface MockConfig {
-  get: (x: string) => any;
-}
-
-const getMockKbnServer = (mockConfig: MockConfig) => ({
-  config: () => mockConfig,
+const createMockKbnServer = () => ({
+  newPlatform: {
+    setup: {
+      core: {
+        http: {
+          csp: new CspConfig(),
+        },
+      },
+    },
+  },
 });
 
-test('fetches whether strict mode is enabled', async () => {
-  const { collector, mockConfig } = setupCollector();
+describe('csp collector', () => {
+  let kbnServer: ReturnType<typeof createMockKbnServer>;
 
-  expect((await collector.fetch()).strict).toEqual(true);
+  function updateCsp(config: Partial<ICspConfig>) {
+    kbnServer.newPlatform.setup.core.http.csp = new CspConfig(config);
+  }
 
-  mockConfig.get.withArgs('csp.strict').returns(false);
-  expect((await collector.fetch()).strict).toEqual(false);
+  beforeEach(() => {
+    kbnServer = createMockKbnServer();
+  });
+
+  test('fetches whether strict mode is enabled', async () => {
+    const collector = createCspCollector(kbnServer as any);
+
+    expect((await collector.fetch()).strict).toEqual(true);
+
+    updateCsp({ strict: false });
+    expect((await collector.fetch()).strict).toEqual(false);
+  });
+
+  test('fetches whether the legacy browser warning is enabled', async () => {
+    const collector = createCspCollector(kbnServer as any);
+
+    expect((await collector.fetch()).warnLegacyBrowsers).toEqual(true);
+
+    updateCsp({ warnLegacyBrowsers: false });
+    expect((await collector.fetch()).warnLegacyBrowsers).toEqual(false);
+  });
+
+  test('fetches whether the csp rules have been changed or not', async () => {
+    const collector = createCspCollector(kbnServer as any);
+
+    expect((await collector.fetch()).rulesChangedFromDefault).toEqual(false);
+
+    updateCsp({ rules: ['not', 'default'] });
+    expect((await collector.fetch()).rulesChangedFromDefault).toEqual(true);
+  });
+
+  test('does not include raw csp rules under any property names', async () => {
+    const collector = createCspCollector(kbnServer as any);
+
+    // It's important that we do not send the value of csp.rules here as it
+    // can be customized with values that can be identifiable to given
+    // installs, such as URLs
+    //
+    // We use a snapshot here to ensure csp.rules isn't finding its way into the
+    // payload under some new and unexpected variable name (e.g. cspRules).
+    expect(await collector.fetch()).toMatchInlineSnapshot(`
+      Object {
+        "rulesChangedFromDefault": false,
+        "strict": true,
+        "warnLegacyBrowsers": true,
+      }
+    `);
+  });
 });
-
-test('fetches whether the legacy browser warning is enabled', async () => {
-  const { collector, mockConfig } = setupCollector();
-
-  expect((await collector.fetch()).warnLegacyBrowsers).toEqual(true);
-
-  mockConfig.get.withArgs('csp.warnLegacyBrowsers').returns(false);
-  expect((await collector.fetch()).warnLegacyBrowsers).toEqual(false);
-});
-
-test('fetches whether the csp rules have been changed or not', async () => {
-  const { collector, mockConfig } = setupCollector();
-
-  expect((await collector.fetch()).rulesChangedFromDefault).toEqual(false);
-
-  mockConfig.get.withArgs('csp.rules').returns(['not', 'default']);
-  expect((await collector.fetch()).rulesChangedFromDefault).toEqual(true);
-});
-
-test('does not include raw csp.rules under any property names', async () => {
-  const { collector } = setupCollector();
-
-  // It's important that we do not send the value of csp.rules here as it
-  // can be customized with values that can be identifiable to given
-  // installs, such as URLs
-  //
-  // We use a snapshot here to ensure csp.rules isn't finding its way into the
-  // payload under some new and unexpected variable name (e.g. cspRules).
-  expect(await collector.fetch()).toMatchInlineSnapshot(`
-    Object {
-      "rulesChangedFromDefault": false,
-      "strict": true,
-      "warnLegacyBrowsers": true,
-    }
-  `);
-});
-
-test('does not arbitrarily fetch other csp configurations (e.g. whitelist only)', async () => {
-  const { collector, mockConfig } = setupCollector();
-
-  mockConfig.get.withArgs('csp.foo').returns('bar');
-
-  expect(await collector.fetch()).not.toHaveProperty('foo');
-});
-
-function setupCollector() {
-  const mockConfig = { get: sinon.stub() };
-  mockConfig.get.withArgs('csp.rules').returns(DEFAULT_CSP_RULES);
-  mockConfig.get.withArgs('csp.strict').returns(true);
-  mockConfig.get.withArgs('csp.warnLegacyBrowsers').returns(true);
-
-  const mockKbnServer = getMockKbnServer(mockConfig);
-
-  return { mockConfig, collector: createCspCollector(mockKbnServer as Server) };
-}

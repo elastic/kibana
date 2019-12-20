@@ -26,7 +26,7 @@ const getRootCause = err => _.get(err, 'resp.error.root_cause');
  * @param  {Error|String} err
  * @returns {string}
  */
-export const formatESMsg = (err) => {
+export const formatESMsg = err => {
   const rootCause = getRootCause(err);
 
   if (!rootCause) {

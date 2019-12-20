@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -14,6 +14,7 @@ import { Direction } from '../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../public/containers/source/mock';
 import { Sort } from '../sort';
 import { TestProviders } from '../../../../mock/test_providers';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ColumnHeadersComponent } from '.';
 
@@ -26,6 +27,8 @@ jest.mock('../../../resize_handle/is_resizing', () => ({
 }));
 
 describe('ColumnHeaders', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     const sort: Sort = {
       columnId: 'fooColumn',
@@ -38,11 +41,14 @@ describe('ColumnHeaders', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
+          isSelectAllChecked={false}
           onColumnSorted={jest.fn()}
           onColumnRemoved={jest.fn()}
           onColumnResized={jest.fn()}
+          onSelectAll={jest.fn}
           onUpdateColumns={jest.fn()}
           showEventsSelect={false}
+          showSelectAllCheckbox={false}
           sort={sort}
           timelineId={'test'}
           toggleColumn={jest.fn()}
@@ -58,11 +64,14 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
+            isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
+            onSelectAll={jest.fn}
             onUpdateColumns={jest.fn()}
             showEventsSelect={false}
+            showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
@@ -85,11 +94,14 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
+            isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
+            onSelectAll={jest.fn}
             onUpdateColumns={jest.fn()}
             showEventsSelect={false}
+            showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
@@ -114,11 +126,14 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
+            isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
+            onSelectAll={jest.fn}
             onUpdateColumns={jest.fn()}
             showEventsSelect={false}
+            showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}

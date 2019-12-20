@@ -11,6 +11,7 @@ describe('state selectors', () => {
   const state: AppState = {
     monitor: {
       monitorDetailsList: [],
+      monitorLocationsList: new Map(),
       loading: false,
       errors: [],
     },

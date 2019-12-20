@@ -5,12 +5,12 @@
  */
 
 import DateMath from '@elastic/datemath';
+import { APICaller } from 'kibana/server';
 import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
 
 export class QueryContext {
-  database: any;
-  request: any;
+  callES: APICaller;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -21,7 +21,6 @@ export class QueryContext {
 
   constructor(
     database: any,
-    request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
@@ -29,8 +28,7 @@ export class QueryContext {
     size: number,
     statusFilter?: string
   ) {
-    this.database = database;
-    this.request = request;
+    this.callES = database;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.pagination = pagination;
@@ -41,12 +39,12 @@ export class QueryContext {
 
   async search(params: any): Promise<any> {
     params.index = INDEX_NAMES.HEARTBEAT;
-    return this.database.search(this.request, params);
+    return this.callES('search', params);
   }
 
   async count(params: any): Promise<any> {
     params.index = INDEX_NAMES.HEARTBEAT;
-    return this.database.count(this.request, params);
+    return this.callES('count', params);
   }
 
   async dateAndCustomFilters(): Promise<any[]> {
@@ -125,8 +123,7 @@ export class QueryContext {
 
   clone(): QueryContext {
     return new QueryContext(
-      this.database,
-      this.request,
+      this.callES,
       this.dateRangeStart,
       this.dateRangeEnd,
       this.pagination,

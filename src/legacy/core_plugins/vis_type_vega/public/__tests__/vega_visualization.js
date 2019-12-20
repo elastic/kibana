@@ -65,11 +65,12 @@ describe('VegaVisualizations', () => {
         uiSettings: $injector.get('config'),
       };
 
-      if(!visRegComplete) {
+      if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(createVegaTypeDefinition(vegaVisualizationDependencies));
+        visualizationsSetup.types.createBaseVisualization(
+          createVegaTypeDefinition(vegaVisualizationDependencies)
+        );
       }
-
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
@@ -77,19 +78,19 @@ describe('VegaVisualizations', () => {
   );
 
   describe('VegaVisualization - basics', () => {
-    beforeEach(async function () {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
       vis = new Vis(indexPattern, { type: 'vega' });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -112,7 +113,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph (may fail in dev env)', async function () {
+    it('should show vega graph (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);

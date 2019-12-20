@@ -10,44 +10,44 @@ import { Listing } from './listing';
 
 const expectedData = [
   {
-    'jvm': {
-      'mem': {
-        'heap_used_percent': 27
-      }
-    },
-    'logstash': {
-      'pipeline': {
-        'batch_size': 125,
-        'workers': 4
+    jvm: {
+      mem: {
+        heap_used_percent: 27,
       },
-      'http_address': '127.0.0.1:9600',
-      'name': 'Elastic-MBP.local',
-      'host': 'Elastic-MBP.local',
-      'version': '8.0.0',
-      'uuid': '4134a00e-89e4-4896-a3d4-c3a9aa03a594',
-      'status': 'green'
     },
-    'process': {
-      'cpu': {
-        'percent': 0
-      }
+    logstash: {
+      pipeline: {
+        batch_size: 125,
+        workers: 4,
+      },
+      http_address: '127.0.0.1:9600',
+      name: 'Elastic-MBP.local',
+      host: 'Elastic-MBP.local',
+      version: '8.0.0',
+      uuid: '4134a00e-89e4-4896-a3d4-c3a9aa03a594',
+      status: 'green',
     },
-    'os': {
-      'cpu': {
-        'load_average': {
-          '1m': 2.54248046875
-        }
-      }
+    process: {
+      cpu: {
+        percent: 0,
+      },
     },
-    'events': {
-      'out': 3505
+    os: {
+      cpu: {
+        load_average: {
+          '1m': 2.54248046875,
+        },
+      },
     },
-    'reloads': {
-      'failures': 0,
-      'successes': 0
+    events: {
+      out: 3505,
     },
-    'availability': true
-  }
+    reloads: {
+      failures: 0,
+      successes: 0,
+    },
+    availability: true,
+  },
 ];
 
 describe('Listing', () => {
@@ -56,12 +56,12 @@ describe('Listing', () => {
       data: expectedData,
       angular: {
         scope: null,
-        kbnUrl: null
+        kbnUrl: null,
       },
       sorting: {
-        sort: 'asc'
+        sort: 'asc',
       },
-      setupMode: {}
+      setupMode: {},
     };
 
     const component = shallow(<Listing {...props} />);
@@ -76,12 +76,12 @@ describe('Listing', () => {
       }),
       angular: {
         scope: null,
-        kbnUrl: null
+        kbnUrl: null,
       },
       sorting: {
-        sort: 'asc'
+        sort: 'asc',
       },
-      setupMode: {}
+      setupMode: {},
     };
 
     const component = shallow(<Listing {...props} />);
