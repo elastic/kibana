@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Logger } from '../../../../../../src/core/server';
+import { pick, mapValues, omit } from 'lodash';
+import { Logger, SavedObject } from '../../../../../../src/core/server';
 import { RunContext } from '../../../task_manager';
 import { createExecutionHandler } from './create_execution_handler';
 import { createAlertInstanceFactory } from './create_alert_instance_factory';
@@ -15,7 +15,6 @@ import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../..
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
 import {
   AlertType,
-  AlertServices,
   GetBasePathFunction,
   GetServicesFunction,
   RawAlert,
@@ -31,6 +30,8 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
 }
+
+type AlertInstances = Record<string, AlertInstance>;
 
 export class TaskRunnerFactory {
   private isInitialized = false;
@@ -59,9 +60,7 @@ export class TaskRunnerFactory {
     } = this.taskRunnerContext!;
 
     return {
-      async run() {
-        const { alertId, spaceId } = taskInstance.params;
-        const requestHeaders: Record<string, string> = {};
+      async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
         const namespace = spaceIdToNamespace(spaceId);
         // Only fetch encrypted attributes here, we'll create a saved objects client
         // scoped with the API key to fetch the remaining data.
@@ -72,6 +71,12 @@ export class TaskRunnerFactory {
           alertId,
           { namespace }
         );
+
+        return apiKey;
+      },
+
+      async getServicesWithSpaceLevelPermissions(spaceId: string, apiKey: string | null) {
+        const requestHeaders: Record<string, string> = {};
 
         if (apiKey) {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -92,16 +97,16 @@ export class TaskRunnerFactory {
           },
         };
 
-        const services = getServices(fakeRequest);
-        // Ensure API key is still valid and user has access
-        const {
-          attributes: { params, actions, schedule, throttle, muteAll, mutedInstanceIds },
-          references,
-        } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
+        return getServices(fakeRequest);
+      },
 
-        // Validate
-        const validatedAlertTypeParams = validateAlertTypeParams(alertType, params);
-
+      getExecutionHandler(
+        alertId: string,
+        spaceId: string,
+        apiKey: string | null,
+        actions: RawAlert['actions'],
+        references: SavedObject['references']
+      ) {
         // Inject ids into actions
         const actionsWithIds = actions.map(action => {
           const actionReference = references.find(obj => obj.name === action.actionRef);
@@ -116,7 +121,7 @@ export class TaskRunnerFactory {
           };
         });
 
-        const executionHandler = createExecutionHandler({
+        return createExecutionHandler({
           alertId,
           logger,
           executeAction,
@@ -125,48 +130,78 @@ export class TaskRunnerFactory {
           spaceId,
           alertType,
         });
-        const alertInstances: Record<string, AlertInstance> = {};
-        const alertInstancesData = taskInstance.state.alertInstances || {};
-        for (const id of Object.keys(alertInstancesData)) {
-          alertInstances[id] = new AlertInstance(alertInstancesData[id]);
-        }
-        const alertInstanceFactory = createAlertInstanceFactory(alertInstances);
+      },
 
-        const alertTypeServices: AlertServices = {
-          ...services,
-          alertInstanceFactory,
-        };
+      async executeAlertInstance(
+        alertInstanceId: string,
+        alertInstance: AlertInstance,
+        executionHandler: ReturnType<typeof createExecutionHandler>
+      ) {
+        const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
+        alertInstance.updateLastScheduledActions(actionGroup);
+        alertInstance.unscheduleActions();
+        return executionHandler({ actionGroup, context, state, alertInstanceId });
+      },
+
+      async run() {
+        const {
+          params: { alertId, spaceId },
+          state: { alertInstances: alertRawInstances = {} },
+        } = taskInstance;
+        const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+        const services = await this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+
+        // Ensure API key is still valid and user has access
+        const {
+          attributes: { params, actions, schedule, throttle, muteAll, mutedInstanceIds },
+          references,
+        } = await services.savedObjectsClient.get<RawAlert>('alert', alertId);
+
+        // Validate
+        const validatedAlertTypeParams = validateAlertTypeParams(alertType, params);
+
+        const alertInstances = mapValues(alertRawInstances, alert => new AlertInstance(alert));
 
         const alertTypeState = await alertType.executor({
           alertId,
-          services: alertTypeServices,
+          services: {
+            ...services,
+            alertInstanceFactory: createAlertInstanceFactory(alertInstances),
+          },
           params: validatedAlertTypeParams,
           state: taskInstance.state.alertTypeState || {},
           startedAt: taskInstance.startedAt!,
           previousStartedAt: taskInstance.state.previousStartedAt,
         });
 
-        await Promise.all(
-          Object.keys(alertInstances).map(alertInstanceId => {
-            const alertInstance = alertInstances[alertInstanceId];
-            if (alertInstance.hasScheduledActions()) {
-              if (
-                alertInstance.isThrottled(throttle) ||
-                muteAll ||
-                mutedInstanceIds.includes(alertInstanceId)
-              ) {
-                return;
-              }
-              const { actionGroup, context, state } = alertInstance.getScheduledActionOptions()!;
-              alertInstance.updateLastScheduledActions(actionGroup);
-              alertInstance.unscheduleActions();
-              return executionHandler({ actionGroup, context, state, alertInstanceId });
-            } else {
-              // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-              delete alertInstances[alertInstanceId];
-            }
-          })
+        const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
+          alertInstances,
+          alertInstance => alertInstance.hasScheduledActions()
         );
+
+        if (!muteAll) {
+          const executionHandler = this.getExecutionHandler(
+            alertId,
+            spaceId,
+            apiKey,
+            actions,
+            references
+          );
+          const enabledAlertInstances = omit<AlertInstances, AlertInstances>(
+            instancesWithScheduledActions,
+            ...mutedInstanceIds
+          );
+
+          await Promise.all(
+            Object.entries(enabledAlertInstances)
+              .filter(
+                ([, alertInstance]: [string, AlertInstance]) => !alertInstance.isThrottled(throttle)
+              )
+              .map(([id, alertInstance]: [string, AlertInstance]) =>
+                this.executeAlertInstance(id, alertInstance, executionHandler)
+              )
+          );
+        }
 
         const nextRunAt = getNextRunAt(
           new Date(taskInstance.startedAt!),
@@ -179,7 +214,8 @@ export class TaskRunnerFactory {
         return {
           state: {
             alertTypeState,
-            alertInstances,
+            // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
+            alertInstances: instancesWithScheduledActions,
             previousStartedAt: taskInstance.startedAt!,
           },
           runAt: nextRunAt,
