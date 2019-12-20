@@ -50,14 +50,18 @@ describe('Doc Table', function() {
       // Stub `getConverterFor` for a field in the indexPattern to return mock data.
       // Returns `val` if provided, otherwise generates fake data for the field.
       fakeRowVals = getFakeRowVals('formatted', 0, mapping);
-      stubFieldFormatConverter = function($root, field, val = null) {
-        $root.indexPattern.fields.getByName(field).format.getConverterFor = () => (...args) => {
+      stubFieldFormatConverter = function($root, field, val) {
+        const convertFn = (value, type, options) => {
           if (val) {
             return val;
           }
-          const fieldName = _.get(args, '[1].name', null);
+          const fieldName = _.get(options, 'field.name', null);
+
           return fakeRowVals[fieldName] || '';
         };
+
+        $root.indexPattern.fields.getByName(field).format.convert = convertFn;
+        $root.indexPattern.fields.getByName(field).format.getConverterFor = () => convertFn;
       };
     })
   );

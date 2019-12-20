@@ -26,7 +26,7 @@ import { createSavedObjectClass } from '../saved_object';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { npStart } from 'ui/new_platform';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
-import { mockUiSettings } from '../../new_platform/new_platform.karma_mock';
+import { npSetup } from '../../new_platform/new_platform.karma_mock';
 
 const getConfig = cfg => cfg;
 
@@ -310,7 +310,7 @@ describe('Saved Object', function() {
               getConfig,
               null,
               [],
-              mockUiSettings
+              npSetup.core
             );
             indexPattern.title = indexPattern.id;
             savedObject.searchSource.setField('index', indexPattern);
@@ -700,7 +700,7 @@ describe('Saved Object', function() {
             getConfig,
             null,
             [],
-            mockUiSettings
+            npSetup.core
           );
           indexPattern.title = indexPattern.id;
           savedObject.searchSource.setField('index', indexPattern);
