@@ -1,0 +1,17 @@
+{
+  "rule_id": "00503a3c-304c-421c-bfea-e5d8fdfd9726",
+  "risk_score": 50,
+  "description": "Suricata Category - Client Using Unusual Port",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Client Using Unusual Port",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"A client was using an unusual port\" or rule.category: \"A client was using an unusual port\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

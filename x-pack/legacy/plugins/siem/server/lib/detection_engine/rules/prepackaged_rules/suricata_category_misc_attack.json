@@ -1,0 +1,17 @@
+{
+  "rule_id": "83277123-749f-49da-ad3d-d59f35490db1",
+  "risk_score": 50,
+  "description": "Suricata Category - Misc Attack",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Misc Attack",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Misc Attack\" or rule.category: \"Misc Attack\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

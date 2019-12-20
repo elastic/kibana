@@ -76,8 +76,8 @@ export interface Alert {
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
-  apiKey?: string;
-  apiKeyOwner?: string;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
@@ -95,8 +95,8 @@ export interface RawAlert extends SavedObjectAttributes {
   scheduledTaskId?: string;
   createdBy: string | null;
   updatedBy: string | null;
-  apiKey?: string;
-  apiKeyOwner?: string;
+  apiKey: string | null;
+  apiKeyOwner: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
