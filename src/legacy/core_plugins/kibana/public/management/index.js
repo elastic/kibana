@@ -110,15 +110,9 @@ export function updateSidebar(items, id) {
     return;
   }
 
-  const npSections = npStart.plugins.management.sections.getAvailable();
+  const npSections = npStart.plugins.management.sections.getAllSections();
 
-  //todo merge
   //todo iterate over new platform, then iterate over old interface
-  // verify highlighting item
-  // verify sidebar working within app sections
-  //verify rendering
-  // code cleanup
-  // typescript
   // tests
 
   render(

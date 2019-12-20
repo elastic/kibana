@@ -21,6 +21,7 @@ import { IconType } from '@elastic/eui';
 import { AppMountContext } from 'kibana/public';
 import { ManagementApp } from './management_app';
 import { ManagementSection } from './management_section';
+import { ChromeBreadcrumb } from '../../../core/public/';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -68,6 +69,7 @@ export type Unmount = () => Promise<void> | void;
 interface ManagementAppMountParams {
   sectionBasePath: string; // base path for setting up your router
   element: HTMLElement; // element the section should render into
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
 export type ManagementSectionMount = (
