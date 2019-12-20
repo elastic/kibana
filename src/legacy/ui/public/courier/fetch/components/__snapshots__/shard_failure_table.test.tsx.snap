@@ -36,7 +36,6 @@ exports[`ShardFailureTable renders matching snapshot given valid properties 1`] 
       },
     ]
   }
-  executeQueryOptions={Object {}}
   itemId="id"
   itemIdToExpandedRowMap={Object {}}
   items={

@@ -211,7 +211,7 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
       const application = await this.application.start({ http, injectedMetadata });
