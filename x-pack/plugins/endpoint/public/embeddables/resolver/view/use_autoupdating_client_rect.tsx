@@ -7,22 +7,18 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 
-/** Built in typescript DOM libs and the ResizeObserver polyfill have incompatible definitions of DOMRectReadOnly so we use this basic one
- */
-interface BasicDOMRect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 /**
- * Returns a DOMRect sometimes, and a `ref` callback. Put the `ref` as the `ref` property of an element, and
- * DOMRect will be the result of getBoundingClientRect on it.
- * Updates automatically when the window resizes. TODO: better Englishe here
+ * Returns a nullable DOMRect and a ref callback. Pass the refCallback to the
+ * `ref` property of a native element and this hook will return a DOMRect for
+ * it by calling `getBoundingClientRect`. This hook will observe the element
+ * with a resize observer and call getBoundingClientRect again after resizes.
+ *
+ * Note that the changes to the position of the element aren't automatically
+ * tracked. So if the element's position moves for some reason, be sure to
+ * handle that.
  */
-export function useAutoUpdatingClientRect(): [BasicDOMRect | null, (node: Element | null) => void] {
-  const [rect, setRect] = useState<BasicDOMRect | null>(null);
+export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+  const [rect, setRect] = useState<DOMRect | null>(null);
   const nodeRef = useRef<Element | null>(null);
   const ref = useCallback((node: Element | null) => {
     nodeRef.current = node;
