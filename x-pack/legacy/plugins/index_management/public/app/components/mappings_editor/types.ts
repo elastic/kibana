@@ -82,7 +82,6 @@ export type ParameterName =
   | 'doc_values'
   | 'doc_values_binary'
   | 'coerce'
-  | 'coerce_geo_shape'
   | 'coerce_shape'
   | 'ignore_malformed'
   | 'null_value'

@@ -11,7 +11,7 @@ import {
   StoreParameter,
   IndexParameter,
   BoostParameter,
-  CoerceParameter,
+  CoerceNumberParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
@@ -31,7 +31,7 @@ export const RangeType = ({ field }: Props) => {
       </BasicParametersSection>
 
       <AdvancedParametersSection>
-        <CoerceParameter />
+        <CoerceNumberParameter />
 
         <StoreParameter />
 

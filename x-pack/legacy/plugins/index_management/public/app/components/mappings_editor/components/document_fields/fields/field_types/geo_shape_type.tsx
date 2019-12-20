@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 import {
-  CoerceParameter,
+  CoerceShapeParameter,
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
   OrientationParameter,
@@ -46,7 +46,8 @@ export const GeoShapeType = ({ field }: Props) => {
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.ignoreMalformedFieldDescription',
             {
-              defaultMessage: 'Whether to ignore malformed GeoJSON or WKT shapes.',
+              defaultMessage:
+                'By default, documents that contain malformed GeoJSON or WKT shapes are not indexed. If enabled, these documents are indexed, but fields with malformed shapes are filtered out. Be careful: if too many documents are indexed this way, queries on the field become meaningless.',
             }
           )}
         />
@@ -65,7 +66,8 @@ export const GeoShapeType = ({ field }: Props) => {
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
             {
-              defaultMessage: 'Configures the geo_shape field type for point shapes only.',
+              defaultMessage:
+                'Optimizes geo-shape queries if this field contains only geo-points. Shapes, including multi-point shapes, will be rejected.',
             }
           )}
           formFieldPath="points_only"
@@ -73,7 +75,7 @@ export const GeoShapeType = ({ field }: Props) => {
 
         <IgnoreZValueParameter />
 
-        <CoerceParameter configPath="coerce_geo_shape" />
+        <CoerceShapeParameter />
       </AdvancedParametersSection>
     </>
   );
