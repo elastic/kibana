@@ -22,6 +22,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { CreateSection } from './types';
+import { CoreStart } from '../../../core/public';
 
 export class ManagementService {
   private sections: ManagementSection[] = [];
@@ -29,7 +30,6 @@ export class ManagementService {
     this.sections = [];
   }
 
-  // todo verify input,
   private register(
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagement: () => LegacyManagementSection
@@ -79,12 +79,11 @@ export class ManagementService {
     };
   };
 
-  public start = {
+  public start = (navigateToApp: CoreStart['application']['navigateToApp']) => ({
     getSection: this.getSection.bind(this),
     getAllSections: this.getAllSections.bind(this),
     navigateToApp: (appId: string, options?: { path?: string; state?: any }) => {
-      // @ts-ignore
-      // console.log('navigateToApp', appId, options);
+      navigateToApp(appId, options);
     },
-  };
+  });
 }
