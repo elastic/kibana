@@ -56,7 +56,7 @@ export interface State {
 }
 
 export type Action =
-  | { type: 'configuration.update'; value: State['configuration'] }
+  | { type: 'configuration.update'; value: Partial<State['configuration']> }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
