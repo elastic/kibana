@@ -14,7 +14,7 @@ export const getMessages = () => {
     return messages;
   }
 
-  const createJobsDocsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/create-jobs.html`;
+  const createJobsDocsUrl = `https://www.elastic.co/guide/en/machine-learning/{{version}}/create-jobs.html`;
 
   return (messages = {
     field_not_aggregatable: {
