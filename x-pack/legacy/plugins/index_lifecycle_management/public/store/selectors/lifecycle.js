@@ -84,10 +84,12 @@ export const positiveNumbersAboveZeroErrorMessage = i18n.translate(
   }
 );
 
-export const positiveNumbersEqualAboveZeroErrorMessage =
-  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
-    defaultMessage: 'Only numbers equal to or above 0 are allowed.'
-  });
+export const positiveNumbersEqualAboveZeroErrorMessage = i18n.translate(
+  'xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError',
+  {
+    defaultMessage: 'Only numbers equal to or above 0 are allowed.',
+  }
+);
 
 export const validatePhase = (type, phase, errors) => {
   const phaseErrors = {};
@@ -128,12 +130,11 @@ export const validatePhase = (type, phase, errors) => {
       } else if (
         (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE ||
           numberedAttribute === PHASE_PRIMARY_SHARD_COUNT) &&
-        phase[numberedAttribute] < 0
+        phase[numberedAttribute] <= 0
       ) {
         phaseErrors[numberedAttribute] = [positiveNumbersEqualAboveZeroErrorMessage];
       }
     }
-
   }
   if (phase[PHASE_ROLLOVER_ENABLED]) {
     if (
@@ -167,7 +168,6 @@ export const validatePhase = (type, phase, errors) => {
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
-
     if (!isNumber(phase[PHASE_FORCE_MERGE_SEGMENTS])) {
       phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [numberRequiredMessage];
     } else if (phase[PHASE_FORCE_MERGE_SEGMENTS] < 1) {
