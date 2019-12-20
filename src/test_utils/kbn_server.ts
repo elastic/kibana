@@ -37,7 +37,7 @@ import { Root } from '../core/server/root';
 import KbnServer from '../legacy/server/kbn_server';
 import { CallCluster } from '../legacy/core_plugins/elasticsearch';
 
-type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
+export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -96,7 +96,7 @@ export function createRootWithSettings(
  * @param method
  * @param path
  */
-function getSupertest(root: Root, method: HttpMethod, path: string) {
+export function getSupertest(root: Root, method: HttpMethod, path: string) {
   const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
   return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
