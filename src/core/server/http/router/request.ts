@@ -22,7 +22,7 @@ import { Request } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { deepFreeze, KbnHeaders, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
@@ -127,6 +127,11 @@ export class KibanaRequest<
    * This property will contain a `filtered` copy of request headers.
    */
   public readonly headers: Headers;
+  /**
+   * Whether or not the request is a "system API" call rather than an application-level call.
+   * Can be set on the client using the `asSystemApi` option.
+   */
+  public readonly isSystemApi: boolean;
 
   /** {@link IKibanaSocket} */
   public readonly socket: IKibanaSocket;
@@ -147,6 +152,7 @@ export class KibanaRequest<
   ) {
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
+    this.isSystemApi = request.headers[KbnHeaders.SYSTEM_API] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {

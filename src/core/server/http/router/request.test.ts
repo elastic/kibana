@@ -66,6 +66,24 @@ describe('KibanaRequest', () => {
     });
   });
 
+  describe('isSytemApi property', () => {
+    it('is false when no kbn-system-api header is set', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemApi).toBe(false);
+    });
+
+    it('is true when kbn-system-api header is set', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-api': 'true' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemApi).toBe(true);
+    });
+  });
+
   describe('RouteSchema type inferring', () => {
     it('should work with config-schema', () => {
       const body = Buffer.from('body!');
