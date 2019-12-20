@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { getUiSettingDefaults } from '../../../ui_setting_defaults';
 import { get } from 'lodash';
+import { APICaller } from 'kibana/server';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../common';
 
-const uiSettingDefaults = getUiSettingDefaults();
-const defaultSearchQueryLanguageSetting = uiSettingDefaults['search:queryLanguage'].value;
+const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
-export function fetchProvider(index) {
-  return async callCluster => {
+export function fetchProvider(index: string) {
+  return async (callCluster: APICaller) => {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
