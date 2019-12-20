@@ -287,29 +287,6 @@
             "deprecationReason": null
           },
           {
-            "name": "logItem",
-            "description": "",
-            "args": [
-              {
-                "name": "id",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "InfraLogItem", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "snapshot",
             "description": "A snapshot of nodes",
             "args": [
@@ -1538,108 +1515,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "InfraLogItem",
-        "description": "",
-        "fields": [
-          {
-            "name": "id",
-            "description": "The ID of the document",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "index",
-            "description": "The index where the document was found",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "key",
-            "description": "Time key for the document - derived from the source configuration timestamp and tiebreaker settings",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "InfraTimeKey", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "fields",
-            "description": "An array of flattened fields and values",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "InfraLogItemField", "ofType": null }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "InfraLogItemField",
-        "description": "",
-        "fields": [
-          {
-            "name": "field",
-            "description": "The flattened field name",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "value",
-            "description": "The value for the Field as a string",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "INPUT_OBJECT",
         "name": "InfraTimerangeInput",
         "description": "",
@@ -1836,9 +1711,24 @@
           { "name": "memory", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "tx", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "rx", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "logRate", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "diskIOReadBytes", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "diskIOWriteBytes", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "logRate",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "diskIOReadBytes",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "diskIOWriteBytes",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },
