@@ -21,7 +21,6 @@ import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { SavedObjectLoader } from 'ui/saved_objects';
 import {
   AppMountContext,
   ChromeStart,
@@ -44,6 +43,7 @@ import {
   RedirectWhenMissingProvider,
   confirmModalFactory,
   configureAppAngularModule,
+  SavedObjectLoader,
 } from './legacy_imports';
 
 // @ts-ignore

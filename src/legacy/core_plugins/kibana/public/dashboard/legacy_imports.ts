@@ -64,3 +64,4 @@ export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_mon
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { IInjector } from 'ui/chrome';
+export { SavedObjectLoader } from 'ui/saved_objects';
