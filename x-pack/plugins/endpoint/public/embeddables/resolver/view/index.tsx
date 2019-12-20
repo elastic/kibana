@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
+import { useAutoUpdatingClientRect } from './use_autoupdating_client_rect';
 import { DiagnosticDot } from './diagnostic_dot';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
@@ -33,7 +34,7 @@ const Diagnostic = styled(
 
     const relativeCoordinatesFromMouseEvent = useCallback(
       (event: { clientX: number; clientY: number }): null | [number, number] => {
-        if (elementBoundingClientRect === undefined) {
+        if (elementBoundingClientRect === null) {
           return null;
         }
         return [
@@ -45,7 +46,7 @@ const Diagnostic = styled(
     );
 
     useEffect(() => {
-      if (elementBoundingClientRect !== undefined) {
+      if (elementBoundingClientRect !== null) {
         dispatch({
           type: 'userSetRasterSize',
           payload: [elementBoundingClientRect.width, elementBoundingClientRect.height],
@@ -91,7 +92,7 @@ const Diagnostic = styled(
       (event: WheelEvent) => {
         // we use elementBoundingClientRect to interpret pixel deltas as a fraction of the element's height
         if (
-          elementBoundingClientRect !== undefined &&
+          elementBoundingClientRect !== null &&
           event.ctrlKey &&
           event.deltaY !== 0 &&
           event.deltaMode === 0
@@ -159,39 +160,6 @@ const Diagnostic = styled(
   flex-grow: 1;
   position: relative;
 `;
-/**
- * Returns a DOMRect sometimes, and a `ref` callback. Put the `ref` as the `ref` property of an element, and
- * DOMRect will be the result of getBoundingClientRect on it.
- * Updates automatically when the window resizes. TODO: better Englishe here
- */
-function useAutoUpdatingClientRect(): [DOMRect | undefined, (node: Element | null) => void] {
-  const [rect, setRect] = useState<DOMRect>();
-  const nodeRef = useRef<Element>();
-
-  const ref = useCallback((node: Element | null) => {
-    // why do we have to deal /w both null and undefined? TODO
-    nodeRef.current = node === null ? undefined : node;
-    if (node !== null) {
-      setRect(node.getBoundingClientRect());
-    }
-  }, []);
-
-  // TODO, this isn't really a concern of Resolver.
-  // The parent should inform resolver that it needs to rerender
-  useEffect(() => {
-    window.addEventListener('resize', handler, { passive: true });
-    return () => {
-      window.removeEventListener('resize', handler);
-    };
-    function handler() {
-      if (nodeRef.current !== undefined) {
-        setRect(nodeRef.current.getBoundingClientRect());
-      }
-    }
-  }, []);
-  return [rect, ref];
-}
-
 /**
  * Register an event handler directly on `elementRef` for the `wheel` event, with no options
  * React sets native event listeners on the `window` and calls provided handlers via event propagation.
