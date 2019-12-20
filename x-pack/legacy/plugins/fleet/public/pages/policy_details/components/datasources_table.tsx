@@ -6,18 +6,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiInMemoryTableProps, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiInMemoryTableProps, EuiLink, EuiBadge } from '@elastic/eui';
 import { Datasource } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks';
 
 interface Props extends EuiInMemoryTableProps {
-  datasources?: Datasource[];
+  datasources?: Array<Datasource & { policies?: string[] }>;
+  withPoliciesCount?: boolean;
 }
 
-export const DatasourcesTable: React.FC<Props> = ({
-  datasources: originalDatasources,
-  ...rest
-}) => {
+export const DatasourcesTable: React.FC<Props> = (
+  { datasources: originalDatasources, withPoliciesCount, ...rest } = {
+    datasources: [],
+    withPoliciesCount: false,
+  }
+) => {
   const { framework } = useLibs();
 
   // Flatten some values so that they can be searched via in-memory table search
@@ -32,6 +35,7 @@ export const DatasourcesTable: React.FC<Props> = ({
         version: packageVersion,
         description: packageDescription,
       },
+      policies,
     }) => ({
       id,
       name,
@@ -40,73 +44,88 @@ export const DatasourcesTable: React.FC<Props> = ({
       packageTitle,
       packageVersion,
       packageDescription,
+      policies: policies?.length || 0,
     })
   );
+
+  const columns: EuiInMemoryTableProps['columns'] = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.nameColumnTitle', {
+        defaultMessage: 'Name',
+      }),
+    },
+    {
+      field: 'packageTitle',
+      name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.packageNameColumnTitle', {
+        defaultMessage: 'Package',
+      }),
+    },
+    {
+      field: 'packageVersion',
+      name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.packageVersionColumnTitle', {
+        defaultMessage: 'Version',
+      }),
+    },
+    {
+      field: 'streams',
+      name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.streamsCountColumnTitle', {
+        defaultMessage: 'Streams',
+      }),
+    },
+    {
+      name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          render: ({ packageName, packageVersion }: any) => {
+            return (
+              <EuiLink
+                color="primary"
+                external
+                target="_blank"
+                href={`${window.location.origin}${framework.info.basePath}/app/epm#/detail/${packageName}-${packageVersion}`}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.datasourcesTable.viewActionLinkText"
+                  defaultMessage="view"
+                />
+              </EuiLink>
+            );
+          },
+        },
+      ],
+      width: '100px',
+    },
+  ];
+
+  if (withPoliciesCount) {
+    columns.splice(columns.length - 1, 0, {
+      field: 'policies',
+      name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.policiesColumnTitle', {
+        defaultMessage: 'Policies',
+      }),
+      render: (policies: number) => {
+        return policies === 0 ? (
+          <EuiBadge>
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.datasourcesTable.unassignedLabelText"
+              defaultMessage="Unassigned"
+            />
+          </EuiBadge>
+        ) : (
+          policies
+        );
+      },
+    });
+  }
 
   return (
     <EuiInMemoryTable
       itemId="id"
       items={datasources}
-      columns={[
-        {
-          field: 'name',
-          name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.ameColumnTitle', {
-            defaultMessage: 'Name',
-          }),
-        },
-        {
-          field: 'packageTitle',
-          name: i18n.translate(
-            'xpack.fleet.policyDetails.datasourcesTable.packageNameColumnTitle',
-            {
-              defaultMessage: 'Package',
-            }
-          ),
-        },
-        {
-          field: 'packageVersion',
-          name: i18n.translate(
-            'xpack.fleet.policyDetails.datasourcesTable.packageVersionColumnTitle',
-            {
-              defaultMessage: 'Version',
-            }
-          ),
-        },
-        {
-          field: 'streams',
-          name: i18n.translate(
-            'xpack.fleet.policyDetails.datasourcesTable.streamsCountColumnTitle',
-            {
-              defaultMessage: 'Streams',
-            }
-          ),
-        },
-        {
-          name: i18n.translate('xpack.fleet.policyDetails.datasourcesTable.actionsColumnTitle', {
-            defaultMessage: 'Actions',
-          }),
-          actions: [
-            {
-              render: ({ packageName, packageVersion }: any) => {
-                return (
-                  <EuiLink
-                    color="primary"
-                    external
-                    target="_blank"
-                    href={`${window.location.origin}${framework.info.basePath}/app/epm#/detail/${packageName}-${packageVersion}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.policyDetails.datasourcesTable.viewActionLinkText"
-                      defaultMessage="view"
-                    />
-                  </EuiLink>
-                );
-              },
-            },
-          ],
-          width: '100px',
-        },
-      ]}
+      columns={columns}
       sorting={{
         field: 'name',
         direction: 'asc',
