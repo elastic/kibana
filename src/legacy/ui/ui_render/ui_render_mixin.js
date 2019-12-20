@@ -28,6 +28,7 @@ import { getApmConfig } from '../apm';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
+ * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
  */
 
 /**
@@ -175,22 +176,28 @@ export function uiRenderMixin(kbnServer, server, config) {
     },
   });
 
-  async function renderApp({
-    app = { getId: () => 'core' },
+  async function renderApp(
     h,
-    includeUserProvidedConfig = true,
-    injectedVarsOverrides = {},
-  }) {
-    const appId = app.getId();
+    app = { getId: () => 'core' },
+    includeUserSettings = true,
+    overrides = {}
+  ) {
     const { http } = kbnServer.newPlatform.setup.core;
-    const { rendering, legacy } = kbnServer.newPlatform.__internals;
-    const content = await rendering.render(h.request, h.request.getUiSettingsService(), {
-      appId,
-      includeUserSettings: includeUserProvidedConfig,
-      injectedVarsOverrides: await legacy.getVars(appId, h.request, {
-        apmConfig: getApmConfig(app),
-        ...injectedVarsOverrides,
-      }),
+    const {
+      rendering,
+      legacy,
+      savedObjectsClientProvider: savedObjects,
+      uiSettings: { asScopedToClient },
+    } = kbnServer.newPlatform.__internals;
+    const uiSettings = asScopedToClient(savedObjects.getClient(h.request));
+    const vars = await legacy.getVars(app.getId(), h.request, {
+      apmConfig: getApmConfig(app),
+      ...overrides,
+    });
+    const content = await rendering.render(h.request, uiSettings, {
+      app,
+      includeUserSettings,
+      vars,
     });
 
     return h
@@ -199,20 +206,11 @@ export function uiRenderMixin(kbnServer, server, config) {
       .header('content-security-policy', http.csp.header);
   }
 
-  server.decorate('toolkit', 'renderApp', function(app, injectedVarsOverrides) {
-    return renderApp({
-      app,
-      h: this,
-      includeUserProvidedConfig: true,
-      injectedVarsOverrides,
-    });
+  server.decorate('toolkit', 'renderApp', function(app, overrides) {
+    return renderApp(this, app, true, overrides);
   });
 
   server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
-    return renderApp({
-      app,
-      h: this,
-      includeUserProvidedConfig: false,
-    });
+    return renderApp(this, app);
   });
 }

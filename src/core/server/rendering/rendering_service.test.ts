@@ -51,6 +51,7 @@ const INJECTED_METADATA = {
   },
 };
 const { createKibanaRequest, createRawRequest } = httpServerMock;
+const legacyApp = { getId: () => 'legacy' };
 
 describe('RenderingService', () => {
   let service: RenderingService;
@@ -125,7 +126,7 @@ describe('RenderingService', () => {
       });
 
       it('renders "legacy" page', async () => {
-        const content = await render(createRawRequest(), uiSettings, { appId: 'legacy' });
+        const content = await render(createRawRequest(), uiSettings, { app: legacyApp });
         const dom = load(content);
         const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
@@ -135,17 +136,17 @@ describe('RenderingService', () => {
       it('renders "legacy" page for blank basepath', async () => {
         mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
 
-        const content = await render(createRawRequest(), uiSettings, { appId: 'legacy' });
+        const content = await render(createRawRequest(), uiSettings, { app: legacyApp });
         const dom = load(content);
         const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
-      it('renders "legacy" with custom injectedVarsOverrides', async () => {
+      it('renders "legacy" with custom vars', async () => {
         const content = await render(createRawRequest(), uiSettings, {
-          appId: 'legacy',
-          injectedVarsOverrides: {
+          app: legacyApp,
+          vars: {
             fake: '__TEST_TOKEN__',
           },
         });
@@ -157,7 +158,7 @@ describe('RenderingService', () => {
 
       it('renders "legacy" with excluded user settings', async () => {
         const content = await render(createRawRequest(), uiSettings, {
-          appId: 'legacy',
+          app: legacyApp,
           includeUserSettings: false,
         });
         const dom = load(content);
@@ -166,11 +167,11 @@ describe('RenderingService', () => {
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
-      it('renders "legacy" with excluded user settings and custom injectedVarsOverrides', async () => {
+      it('renders "legacy" with excluded user settings and custom vars', async () => {
         const content = await render(createRawRequest(), uiSettings, {
-          appId: 'legacy',
+          app: legacyApp,
           includeUserSettings: false,
-          injectedVarsOverrides: {
+          vars: {
             fake: '__TEST_TOKEN__',
           },
         });

@@ -87,7 +87,6 @@ class Plugin {
         },
       },
       async (context, req, res) => {
-        console.log(req.params); // eslint-disable-line
         const body = await context.core.rendering.render({ appId: req.params.id } as any);
         return res.ok({
           body,

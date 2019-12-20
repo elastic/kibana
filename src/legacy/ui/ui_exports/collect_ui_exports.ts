@@ -17,8 +17,8 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyUiExports } from 'src/core/server/types';
+import { LegacyUiExports } from '../../../core/server';
+
 // @ts-ignore
 import { UI_EXPORT_DEFAULTS } from './ui_export_defaults';
 // @ts-ignore

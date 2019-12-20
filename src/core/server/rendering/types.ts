@@ -91,15 +91,15 @@ export interface IRenderOptions {
  */
 export interface LegacyRenderOptions extends IRenderOptions {
   /**
-   * Render the bootstrapped HTML content for an optional legacy bundle.
+   * Render the bootstrapped HTML content for an optional legacy application.
    * Defaults to `core`.
    */
-  appId?: string;
+  app?: { getId(): string };
 
   /**
    * Inject custom vars into the page metadata.
    */
-  injectedVarsOverrides?: Record<string, any>;
+  vars?: Record<string, any>;
 }
 
 /** @public */

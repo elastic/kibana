@@ -24,7 +24,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
 import { LegacyInternals } from './legacy_internals';
-import { LegacyConfig, LegacyVars, LegacyUiExports } from './types';
+import { ILegacyInternals, LegacyConfig, LegacyVars, LegacyUiExports } from './types';
 
 function varsProvider(vars: LegacyVars, configValue?: any) {
   return {
@@ -40,7 +40,7 @@ describe('LegacyInternals', () => {
     let uiExports: LegacyUiExports;
     let config: LegacyConfig;
     let server: Server;
-    let legacyInternals: LegacyInternals;
+    let legacyInternals: ILegacyInternals;
 
     beforeEach(async () => {
       uiExports = findLegacyPluginSpecsMock().uiExports;

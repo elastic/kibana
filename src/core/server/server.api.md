@@ -792,13 +792,6 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
-// @internal @deprecated (undocumented)
-export interface ILegacyInternals {
-    getInjectedUiAppVars(id: string): Promise<LegacyVars>;
-    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<LegacyVars>;
-    injectUiAppVars(id: string, injector: VarsInjector): void;
-}
-
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -914,15 +907,6 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
-// Warning: (ae-forgotten-export) The symbol "ChromeNavLink" needs to be exported by the entry point index.d.ts
-// 
-// @internal @deprecated (undocumented)
-export type LegacyAppSpec = Pick<ChromeNavLink, 'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden'> & {
-    pluginId?: string;
-    id?: string;
-    listed?: boolean;
-};
-
 // @internal @deprecated
 export interface LegacyConfig {
     // (undocumented)
@@ -931,24 +915,14 @@ export interface LegacyConfig {
     has(key: string): boolean;
     // (undocumented)
     set(key: string, value: any): void;
+    // Warning: (ae-forgotten-export) The symbol "LegacyVars" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     set(config: LegacyVars): void;
 }
 
-// @internal @deprecated
-export type LegacyConfigDeprecation = (settings: LegacyVars, log: (msg: string) => void) => void;
-
-// @internal @deprecated
-export interface LegacyConfigDeprecationFactory {
-    // (undocumented)
-    rename(oldKey: string, newKey: string): LegacyConfigDeprecation;
-    // (undocumented)
-    unused(unusedKey: string): LegacyConfigDeprecation;
-}
-
-// @internal @deprecated
-export type LegacyConfigDeprecationProvider = (factory: LegacyConfigDeprecationFactory) => LegacyConfigDeprecation[] | Promise<LegacyConfigDeprecation[]>;
-
+// Warning: (ae-forgotten-export) The symbol "ILegacyInternals" needs to be exported by the entry point index.d.ts
+// 
 // @internal @deprecated (undocumented)
 export class LegacyInternals implements ILegacyInternals {
     constructor(uiExports: LegacyUiExports, config: LegacyConfig, server: Server);
@@ -957,52 +931,26 @@ export class LegacyInternals implements ILegacyInternals {
     // (undocumented)
     getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
     private get defaultVars();
+    // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     injectUiAppVars(id: string, injector: VarsInjector): void;
     }
 
 // @internal @deprecated (undocumented)
-export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order'> & {
-    order: number;
-};
-
-// @internal @deprecated (undocumented)
-export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
-
-// @internal @deprecated (undocumented)
-export interface LegacyPlugins {
-    // (undocumented)
-    disabledPluginSpecs: LegacyPluginSpec[];
-    // (undocumented)
-    navLinks: LegacyNavLink[];
-    // (undocumented)
-    pluginSpecs: LegacyPluginSpec[];
-    // (undocumented)
-    uiExports: LegacyUiExports;
-}
-
-// @internal @deprecated (undocumented)
-export interface LegacyPluginSpec {
-    // (undocumented)
-    getConfigPrefix: () => string;
-    // (undocumented)
-    getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
-    // (undocumented)
-    getExpectedKibanaVersion: () => string;
-    // (undocumented)
-    getId: () => unknown;
-}
-
-// @internal @deprecated (undocumented)
 export interface LegacyRenderOptions extends IRenderOptions {
-    appId?: string;
-    injectedVarsOverrides?: Record<string, any>;
+    app?: {
+        getId(): string;
+    };
+    vars?: Record<string, any>;
 }
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
 
+// Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
+// 
 // @internal @deprecated (undocumented)
 export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
     // (undocumented)
@@ -1046,9 +994,6 @@ export type LegacyUiExports = SavedObjectsLegacyUiExports & {
         type: unknown;
     }];
 };
-
-// @internal @deprecated (undocumented)
-export type LegacyVars = Record<string, any>;
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 // 
@@ -2019,26 +1964,14 @@ export interface UuidServiceSetup {
 // @public
 export const validBodyOutput: readonly ["data", "stream"];
 
-// @internal @deprecated (undocumented)
-export type VarsInjector = (server: Server) => LegacyVars | Promise<LegacyVars>;
-
-// @internal @deprecated (undocumented)
-export interface VarsProvider {
-    // (undocumented)
-    fn: (server: Server, configValue: any) => LegacyVars;
-    // (undocumented)
-    pluginSpec: {
-        readConfigValue(config: any, key: string | string[]): any;
-    };
-}
-
-// @internal @deprecated (undocumented)
-export type VarsReplacer = (vars: LegacyVars, request: LegacyRequest, server: Server) => LegacyVars | Promise<LegacyVars>;
-
 
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:158:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:159:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:160:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:161:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts

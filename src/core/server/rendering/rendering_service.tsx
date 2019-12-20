@@ -53,9 +53,9 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
         request,
         uiSettings,
         {
-          appId = 'core',
+          app = { getId: () => 'core' },
           includeUserSettings = true,
-          injectedVarsOverrides = {},
+          vars = {},
         }: LegacyRenderOptions = {}
       ) => {
         const { env } = this.coreContext;
@@ -64,6 +64,7 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
+        const appId = app.getId();
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl: `${basePath}/ui`,
@@ -84,7 +85,7 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
-            vars: injectedVarsOverrides,
+            vars,
             uiPlugins: await Promise.all(
               [...plugins.uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
@@ -93,7 +94,7 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
               }))
             ),
             legacyMetadata: {
-              app: { getId: () => appId },
+              app,
               bundleId: `app:${appId}`,
               nav: legacyPlugins.navLinks,
               version: env.packageInfo.version,
