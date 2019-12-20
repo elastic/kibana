@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-import { UMMonitorStatesAdapter, CursorPagination } from './adapter_types';
+import { UMMonitorStatesAdapter } from './adapter_types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
