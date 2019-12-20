@@ -233,10 +233,17 @@ export {
 
 export {
   ILegacyInternals,
+  LegacyAppSpec,
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
   LegacyConfig,
+  LegacyConfigDeprecationProvider,
+  LegacyConfigDeprecationFactory,
+  LegacyConfigDeprecation,
+  LegacyNavLink,
+  LegacyNavLinkSpec,
+  LegacyPluginSpec,
   LegacyPlugins,
   LegacyVars,
   LegacyInternals,
@@ -244,8 +251,6 @@ export {
   VarsProvider,
   VarsReplacer,
   VarsInjector,
-  LegacyNavLinkSpec,
-  LegacyAppSpec,
 } from './legacy';
 
 /**

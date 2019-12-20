@@ -796,7 +796,6 @@ export interface IKibanaSocket {
 export interface ILegacyInternals {
     getInjectedUiAppVars(id: string): Promise<LegacyVars>;
     getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<LegacyVars>;
-    // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
     injectUiAppVars(id: string, injector: VarsInjector): void;
 }
 
@@ -942,6 +941,20 @@ export interface LegacyConfig {
     set(config: LegacyVars): void;
 }
 
+// @internal @deprecated
+export type LegacyConfigDeprecation = (settings: LegacyVars, log: (msg: string) => void) => void;
+
+// @internal @deprecated
+export interface LegacyConfigDeprecationFactory {
+    // (undocumented)
+    rename(oldKey: string, newKey: string): LegacyConfigDeprecation;
+    // (undocumented)
+    unused(unusedKey: string): LegacyConfigDeprecation;
+}
+
+// @internal @deprecated
+export type LegacyConfigDeprecationProvider = (factory: LegacyConfigDeprecationFactory) => LegacyConfigDeprecation[] | Promise<LegacyConfigDeprecation[]>;
+
 // @internal @deprecated (undocumented)
 export class LegacyInternals implements ILegacyInternals {
     constructor(uiExports: LegacyUiExports, config: LegacyConfig, server: Server);
@@ -955,22 +968,35 @@ export class LegacyInternals implements ILegacyInternals {
     }
 
 // @internal @deprecated (undocumented)
+export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order'> & {
+    order: number;
+};
+
+// @internal @deprecated (undocumented)
 export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
 
 // @internal @deprecated (undocumented)
 export interface LegacyPlugins {
-    // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     disabledPluginSpecs: LegacyPluginSpec[];
-    // Warning: (ae-forgotten-export) The symbol "LegacyNavLink" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     navLinks: LegacyNavLink[];
     // (undocumented)
     pluginSpecs: LegacyPluginSpec[];
     // (undocumented)
     uiExports: LegacyUiExports;
+}
+
+// @internal @deprecated (undocumented)
+export interface LegacyPluginSpec {
+    // (undocumented)
+    getConfigPrefix: () => string;
+    // (undocumented)
+    getDeprecationsProvider: () => LegacyConfigDeprecationProvider | undefined;
+    // (undocumented)
+    getExpectedKibanaVersion: () => string;
+    // (undocumented)
+    getId: () => unknown;
 }
 
 // @public @deprecated (undocumented)
@@ -1992,6 +2018,9 @@ export interface UuidServiceSetup {
 
 // @public
 export const validBodyOutput: readonly ["data", "stream"];
+
+// @internal @deprecated (undocumented)
+export type VarsInjector = (server: Server) => LegacyVars | Promise<LegacyVars>;
 
 // @internal @deprecated (undocumented)
 export interface VarsProvider {
