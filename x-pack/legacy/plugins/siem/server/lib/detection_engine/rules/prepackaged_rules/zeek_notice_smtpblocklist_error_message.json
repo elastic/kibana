@@ -1,0 +1,17 @@
+{
+  "rule_id": "b9bb4a93-8c5c-4942-9193-e2dc97230034",
+  "risk_score": 50,
+  "description": "An SMTP server sent a reply mentioning an SMTP block list.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SMTP::Blocklist_Error_Message",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SMTP::Blocklist_Error_Message\" or rule.name: \"SMTP::Blocklist_Error_Message\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
