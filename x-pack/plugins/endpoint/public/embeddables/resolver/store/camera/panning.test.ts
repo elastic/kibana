@@ -40,7 +40,7 @@ describe('panning interaction', () => {
       });
       describe('when the user continues to pan 50px up and to the right', () => {
         beforeEach(() => {
-          const action: CameraAction = { type: 'userContinuedPanning', payload: [150, 50] };
+          const action: CameraAction = { type: 'userMovedPointer', payload: [150, 50] };
           store.dispatch(action);
         });
         it('should have a translation of 50,50', () => {

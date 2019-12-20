@@ -38,7 +38,7 @@ export class ResolverEmbeddable extends Embeddable {
     }
     this.lastRenderTarget = node;
     // TODO, figure out how to destroy middleware
-    const { store } = storeFactory({ httpServiceBase: this.httpService });
+    const { store } = storeFactory({ httpService: this.httpService });
     ReactDOM.render(<AppRoot store={store} />, node);
   }
 

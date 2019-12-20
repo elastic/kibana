@@ -44,17 +44,9 @@ interface UserSetPanningOffset {
 interface UserStartedPanning {
   readonly type: 'userStartedPanning';
   /**
-   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen.)
+   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen)
+   * relative to the Resolver component.
    * Represents a starting position during panning for a pointing device.
-   */
-  readonly payload: Vector2;
-}
-
-interface UserContinuedPanning {
-  readonly type: 'userContinuedPanning';
-  /**
-   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen.)
-   * Represents the current position during panning for a pointing device.
    */
   readonly payload: Vector2;
 }
@@ -67,12 +59,11 @@ interface UserCanceledPanning {
   readonly type: 'userCanceledPanning';
 }
 
-// This action is blacklisted in redux dev tools
-interface UserFocusedOnWorldCoordinates {
-  readonly type: 'userFocusedOnWorldCoordinates';
+interface UserMovedPointer {
+  readonly type: 'userMovedPointer';
   /**
-   * World coordinates indicating a point that the user's pointing device is hoving over.
-   * When the camera's scale is changed, we make sure to adjust its tranform so that the these world coordinates are in the same place on the screen
+   * A vector in screen coordinates relative to the Resolver component.
+   * The payload should be contain clientX and clientY minus the client position of the Resolver component.
    */
   readonly payload: Vector2;
 }
@@ -82,8 +73,7 @@ export type CameraAction =
   | UserSetRasterSize
   | UserSetPanningOffset
   | UserStartedPanning
-  | UserContinuedPanning
   | UserStoppedPanning
   | UserCanceledPanning
-  | UserFocusedOnWorldCoordinates
-  | UserZoomed;
+  | UserZoomed
+  | UserMovedPointer;

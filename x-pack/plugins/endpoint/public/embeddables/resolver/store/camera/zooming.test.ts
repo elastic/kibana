@@ -75,9 +75,10 @@ describe('zooming', () => {
     });
     describe('when the user has moved their mouse to the raster position 200, 50', () => {
       beforeEach(() => {
+        // TODO update action
         const action: CameraAction = {
-          type: 'userFocusedOnWorldCoordinates',
-          payload: applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())),
+          type: 'userMovedPointer',
+          payload: [200, 50],
         };
         store.dispatch(action);
       });

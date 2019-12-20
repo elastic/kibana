@@ -30,22 +30,17 @@ const Diagnostic = styled(
 
     const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
-    const inverseProjectionMatrix = useSelector(selectors.inverseProjectionMatrix);
-
-    const worldPositionFromClientPosition = useCallback(
-      (clientPosition: Vector2): Vector2 | null => {
+    const relativeCoordinatesFromMouseEvent = useCallback(
+      (event: { clientX: number; clientY: number }): null | [number, number] => {
         if (elementBoundingClientRect === undefined) {
           return null;
         }
-        return applyMatrix3(
-          [
-            clientPosition[0] - elementBoundingClientRect.x,
-            clientPosition[1] - elementBoundingClientRect.y,
-          ],
-          inverseProjectionMatrix
-        );
+        return [
+          event.clientX - elementBoundingClientRect.x,
+          event.clientY - elementBoundingClientRect.y,
+        ];
       },
-      [inverseProjectionMatrix, elementBoundingClientRect]
+      [elementBoundingClientRect]
     );
 
     useEffect(() => {
@@ -59,35 +54,28 @@ const Diagnostic = styled(
 
     const handleMouseDown = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
-        dispatch({
-          type: 'userStartedPanning',
-          payload: [event.clientX, event.clientY],
-        });
+        const maybeCoordinates = relativeCoordinatesFromMouseEvent(event);
+        if (maybeCoordinates !== null) {
+          dispatch({
+            type: 'userStartedPanning',
+            payload: maybeCoordinates,
+          });
+        }
       },
-      [dispatch]
+      [dispatch, relativeCoordinatesFromMouseEvent]
     );
 
     const handleMouseMove = useCallback(
       (event: MouseEvent) => {
-        if (event.buttons === 1 && userIsPanning) {
+        const maybeCoordinates = relativeCoordinatesFromMouseEvent(event);
+        if (maybeCoordinates) {
           dispatch({
-            type: 'userContinuedPanning',
-            payload: [event.clientX, event.clientY],
-          });
-        }
-        // TODO, don't fire two actions here. make userContinuedPanning also pass world position
-        const maybeClientWorldPosition = worldPositionFromClientPosition([
-          event.clientX,
-          event.clientY,
-        ]);
-        if (maybeClientWorldPosition !== null) {
-          dispatch({
-            type: 'userFocusedOnWorldCoordinates',
-            payload: maybeClientWorldPosition,
+            type: 'userMovedPointer',
+            payload: maybeCoordinates,
           });
         }
       },
-      [dispatch, userIsPanning, worldPositionFromClientPosition]
+      [dispatch, relativeCoordinatesFromMouseEvent]
     );
 
     const handleMouseUp = useCallback(() => {
@@ -131,8 +119,6 @@ const Diagnostic = styled(
       };
     }, [handleMouseMove]);
 
-    // TODO, handle mouse up when no longer on element or event window. ty
-
     const dotPositions = useMemo(
       (): ReadonlyArray<readonly [number, number]> => [
         [0, 0],
@@ -156,16 +142,7 @@ const Diagnostic = styled(
       [clientRectCallback]
     );
 
-    useEffect(() => {
-      // Set the 'wheel' event listener directly on the element
-      // React sets event listeners on the window and routes them back via event propagation. As of Chrome 73 or something, 'wheel' events on the 'window' are automatically treated as 'passive'. Seems weird, but whatever
-      if (ref !== null) {
-        ref.addEventListener('wheel', handleWheel);
-        return () => {
-          ref.removeEventListener('wheel', handleWheel);
-        };
-      }
-    }, [handleWheel, ref]);
+    useNonPassiveWheelHandler(handleWheel, ref);
 
     return (
       <div className={className} ref={refCallback} onMouseDown={handleMouseDown}>
@@ -180,6 +157,36 @@ const Diagnostic = styled(
   display: flex;
   flex-grow: 1;
   position: relative;
+`;
+
+const DiagnosticDot = styled(
+  React.memo(({ className, worldPosition }: { className?: string; worldPosition: Vector2 }) => {
+    const projectionMatrix = useSelector(selectors.projectionMatrix);
+    const [left, top] = applyMatrix3(worldPosition, projectionMatrix);
+    const style = {
+      left: (left - 20).toString() + 'px',
+      top: (top - 20).toString() + 'px',
+    };
+    return (
+      <span className={className} style={style}>
+        x: {worldPosition[0]}
+        <br />
+        y: {worldPosition[1]}
+      </span>
+    );
+  })
+)`
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  text-align: left;
+  font-size: 10px;
+  user-select: none;
+  border: 1px solid black;
+  box-sizing: border-box;
+  border-radius: 10%;
+  padding: 4px;
+  white-space: nowrap;
 `;
 
 /**
@@ -215,32 +222,22 @@ function useAutoUpdatingClientRect(): [DOMRect | undefined, (node: Element | nul
   return [rect, ref];
 }
 
-const DiagnosticDot = styled(
-  React.memo(({ className, worldPosition }: { className?: string; worldPosition: Vector2 }) => {
-    const projectionMatrix = useSelector(selectors.projectionMatrix);
-    const [left, top] = applyMatrix3(worldPosition, projectionMatrix);
-    const style = {
-      left: (left - 20).toString() + 'px',
-      top: (top - 20).toString() + 'px',
-    };
-    return (
-      <span className={className} style={style}>
-        x: {worldPosition[0]}
-        <br />
-        y: {worldPosition[1]}
-      </span>
-    );
-  })
-)`
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  text-align: left;
-  font-size: 10px;
-  user-select: none;
-  border: 1px solid black;
-  box-sizing: border-box;
-  border-radius: 10%;
-  padding: 4px;
-  white-space: nowrap;
-`;
+/**
+ * Register an event handler directly on `elementRef` for the `wheel` event, with no options
+ * React sets native event listeners on the `window` and calls provided handlers via event propagation.
+ * As of Chrome 73, `'wheel'` events on `window` are automatically treated as 'passive'.
+ * If you don't need to call `event.preventDefault` then you should use regular React event handling instead.
+ */
+function useNonPassiveWheelHandler(
+  handler: (event: WheelEvent) => void,
+  elementRef: HTMLElement | null
+) {
+  useEffect(() => {
+    if (elementRef !== null) {
+      elementRef.addEventListener('wheel', handler);
+      return () => {
+        elementRef.removeEventListener('wheel', handler);
+      };
+    }
+  }, [elementRef, handler]);
+}

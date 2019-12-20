@@ -5,9 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactory, EmbeddableInput, IContainer } from 'src/plugins/embeddable/public';
 import { HttpSetup } from 'kibana/public';
-import { ResolverEmbeddable } from './';
+import {
+  EmbeddableFactory,
+  IContainer,
+  EmbeddableInput,
+} from '../../../../../../src/plugins/embeddable/public';
+import { ResolverEmbeddable } from './embeddable';
 
 export class ResolverEmbeddableFactory extends EmbeddableFactory {
   public readonly type = 'resolver';

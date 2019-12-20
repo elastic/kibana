@@ -5,10 +5,11 @@
  */
 
 import { createStore, StoreEnhancer } from 'redux';
+import { ResolverAction } from '../types';
+import { HttpSetup } from '../../../../../../../src/core/public';
 import { resolverReducer } from './reducer';
-import { HttpServiceBase } from '../../../../../../../src/core/public';
 
-export const storeFactory = ({ httpServiceBase }: { httpServiceBase: HttpServiceBase }) => {
+export const storeFactory = (_dependencies: { httpService: HttpSetup }) => {
   interface SomethingThatMightHaveReduxDevTools {
     __REDUX_DEVTOOLS_EXTENSION__?: (options?: {
       name?: string;
@@ -16,12 +17,14 @@ export const storeFactory = ({ httpServiceBase }: { httpServiceBase: HttpService
     }) => StoreEnhancer;
   }
   const windowWhichMightHaveReduxDevTools = window as SomethingThatMightHaveReduxDevTools;
+  // Make sure blacklisted action types are valid
+  const actionsBlacklist: ReadonlyArray<ResolverAction['type']> = ['userMovedPointer'];
   const store = createStore(
     resolverReducer,
     windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__ &&
       windowWhichMightHaveReduxDevTools.__REDUX_DEVTOOLS_EXTENSION__({
         name: 'Resolver',
-        actionsBlacklist: ['userFocusedOnWorldCoordinates'],
+        actionsBlacklist,
       })
   );
   return {

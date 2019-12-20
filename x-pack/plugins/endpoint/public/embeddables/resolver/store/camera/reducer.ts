@@ -73,19 +73,6 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
         currentOffset: action.payload,
       },
     };
-  } else if (action.type === 'userContinuedPanning') {
-    if (userIsPanning(state)) {
-      return {
-        // This logic means, if the user calls `userContinuedPanning` without starting panning first, we start automatically basically?
-        ...state,
-        panning: {
-          origin: state.panning ? state.panning.origin : action.payload,
-          currentOffset: action.payload,
-        },
-      };
-    } else {
-      return state;
-    }
   } else if (action.type === 'userStoppedPanning') {
     if (userIsPanning(state)) {
       return {
@@ -106,10 +93,25 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       ...state,
       rasterSize: action.payload,
     };
-  } else if (action.type === 'userFocusedOnWorldCoordinates') {
+  } else if (action.type === 'userMovedPointer') {
     return {
       ...state,
-      latestFocusedWorldCoordinates: action.payload,
+      /**
+       * keep track of the last world coordinates the user moved over.
+       * When the scale of the projection matrix changes, we adjust the camera's world transform in order
+       * to keep the same point under the pointer.
+       * In order to do this, we need to know the position of the mouse when changing the scale.
+       */
+      latestFocusedWorldCoordinates: applyMatrix3(action.payload, inverseProjectionMatrix(state)),
+      /**
+       * If the user is panning, adjust the panning offset
+       */
+      panning: userIsPanning(state)
+        ? {
+            origin: state.panning ? state.panning.origin : action.payload,
+            currentOffset: action.payload,
+          }
+        : state.panning,
     };
   } else {
     return state;
