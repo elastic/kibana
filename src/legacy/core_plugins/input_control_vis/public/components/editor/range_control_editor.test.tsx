@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { SinonSpy, spy, assert, match } from 'sinon';
+import { SinonSpy, spy, assert } from 'sinon';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
@@ -46,12 +46,12 @@ const controlParams: ControlParams = {
 const deps = getDepsMock();
 let handleFieldNameChange: SinonSpy;
 let handleIndexPatternChange: SinonSpy;
-let handleNumberOptionChange: SinonSpy;
+let handleOptionsChange: SinonSpy;
 
 beforeEach(() => {
   handleFieldNameChange = spy();
   handleIndexPatternChange = spy();
-  handleNumberOptionChange = spy();
+  handleOptionsChange = spy();
 });
 
 test('renders RangeControlEditor', async () => {
@@ -72,7 +72,7 @@ test('renders RangeControlEditor', async () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('handleNumberOptionChange - step', async () => {
+test('handleOptionsChange - step', async () => {
   const component = mountWithIntl(
     <RangeControlEditor
       deps={deps}
@@ -94,20 +94,10 @@ test('handleNumberOptionChange - step', async () => {
   assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'step';
-  assert.calledWith(
-    handleNumberOptionChange,
-    expectedControlIndex,
-    expectedOptionName,
-    match(event => {
-      if (event.target.value === 0.5) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event')
-  );
+  assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 0.5);
 });
 
-test('handleNumberOptionChange - decimalPlaces', async () => {
+test('handleOptionsChange - decimalPlaces', async () => {
   const component = mountWithIntl(
     <RangeControlEditor
       deps={deps}
@@ -129,15 +119,5 @@ test('handleNumberOptionChange - decimalPlaces', async () => {
   assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'decimalPlaces';
-  assert.calledWith(
-    handleNumberOptionChange,
-    expectedControlIndex,
-    expectedOptionName,
-    match(event => {
-      if (event.target.value === 2) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event')
-  );
+  assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 2);
 });

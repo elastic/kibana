@@ -29,7 +29,6 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { RangeControlEditor } from './range_control_editor';
@@ -41,33 +40,28 @@ import { InputControlVisDependencies } from '../../plugin';
 interface ControlEditorUiProps {
   controlIndex: number;
   controlParams: ControlParams;
-  handleLabelChange: (controlIndex: number, event: ChangeEvent<HTMLInputElement>) => void;
+  handleLabelChange: (controlIndex: number, value: string) => void;
   moveControl: (controlIndex: number, direction: number) => void;
   handleRemoveControl: (controlIndex: number) => void;
   handleIndexPatternChange: (controlIndex: number, indexPatternId: string) => void;
   handleFieldNameChange: (controlIndex: number, fieldName: string) => void;
   getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
-  handleCheckboxOptionChange: (
+  handleOptionsChange: <T extends keyof ControlParamsOptions>(
     controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: EuiSwitchEvent
-  ) => void;
-  handleNumberOptionChange: (
-    controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: ChangeEvent<HTMLInputElement>
+    optionName: T,
+    value: ControlParamsOptions[T]
   ) => void;
   parentCandidates: Array<{
     value: string;
     text: string;
   }>;
-  handleParentChange: (controlIndex: number, event: ChangeEvent<HTMLSelectElement>) => void;
+  handleParentChange: (controlIndex: number, parent: string) => void;
   deps: InputControlVisDependencies;
 }
 
 class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlProps> {
   changeLabel = (event: ChangeEvent<HTMLInputElement>) => {
-    this.props.handleLabelChange(this.props.controlIndex, event);
+    this.props.handleLabelChange(this.props.controlIndex, event.target.value);
   };
 
   removeControl = () => {
@@ -116,7 +110,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
             getIndexPattern={this.props.getIndexPattern}
-            handleNumberOptionChange={this.props.handleNumberOptionChange}
+            handleOptionsChange={this.props.handleOptionsChange}
             deps={this.props.deps}
           />
         );

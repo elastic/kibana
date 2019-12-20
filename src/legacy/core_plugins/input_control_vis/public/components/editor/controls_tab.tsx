@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { PureComponent, ChangeEvent } from 'react';
+import React, { PureComponent } from 'react';
 import { InjectedIntlProps } from 'react-intl';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
@@ -28,7 +28,6 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSelect,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { ControlEditor } from './control_editor';
@@ -73,44 +72,44 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
 
   onChange = (value: ControlParams[]) => this.props.setValue('controls', value);
 
-  handleLabelChange = (controlIndex: number, event: ChangeEvent<HTMLInputElement>) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.label = event.target.value;
+  handleLabelChange = (controlIndex: number, label: string) => {
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      label,
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   };
 
-  handleIndexPatternChange = (controlIndex: number, indexPatternId: string) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.indexPattern = indexPatternId;
-    updatedControl.fieldName = '';
+  handleIndexPatternChange = (controlIndex: number, indexPattern: string) => {
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      indexPattern,
+      fieldName: '',
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   };
 
   handleFieldNameChange = (controlIndex: number, fieldName: string) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.fieldName = fieldName;
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      fieldName,
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   };
 
-  handleCheckboxOptionChange = (
+  handleOptionsChange = <T extends keyof ControlParamsOptions>(
     controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: EuiSwitchEvent
+    optionName: T,
+    value: ControlParamsOptions[T]
   ) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    // @ts-ignore
-    updatedControl.options[optionName] = event.target.checked;
-    this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
-  };
-
-  handleNumberOptionChange = (
-    controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    // @ts-ignore
-    updatedControl.options[optionName] = parseFloat(event.target.value);
+    const control = this.props.stateParams.controls[controlIndex];
+    const updatedControl = {
+      ...control,
+      options: {
+        ...control.options,
+        [optionName]: value,
+      },
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   };
 
@@ -126,9 +125,11 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
     this.onChange(addControl(this.props.stateParams.controls, newControl(this.state.type)));
   };
 
-  handleParentChange = (controlIndex: number, event: ChangeEvent<HTMLSelectElement>) => {
-    const updatedControl = this.props.stateParams.controls[controlIndex];
-    updatedControl.parent = event.target.value;
+  handleParentChange = (controlIndex: number, parent: string) => {
+    const updatedControl = {
+      ...this.props.stateParams.controls[controlIndex],
+      parent,
+    };
     this.onChange(setControl(this.props.stateParams.controls, controlIndex, updatedControl));
   };
 

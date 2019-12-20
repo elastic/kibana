@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import React, { PureComponent, ChangeEvent, ComponentType } from 'react';
+import React, { PureComponent, ComponentType } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiSwitch,
-  EuiSelect,
-  EuiSelectProps,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect, EuiSelectProps } from '@elastic/eui';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -52,17 +45,12 @@ interface ListControlEditorProps {
   controlParams: ControlParams;
   handleFieldNameChange: (fieldName: string) => void;
   handleIndexPatternChange: (indexPatternId: string) => void;
-  handleCheckboxOptionChange: (
+  handleOptionsChange: <T extends keyof ControlParamsOptions>(
     controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: EuiSwitchEvent
+    optionName: T,
+    value: ControlParamsOptions[T]
   ) => void;
-  handleNumberOptionChange: (
-    controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: ChangeEvent<HTMLInputElement>
-  ) => void;
-  handleParentChange: (controlIndex: number, event: ChangeEvent<HTMLSelectElement>) => void;
+  handleParentChange: (controlIndex: number, parent: string) => void;
   parentCandidates: EuiSelectProps['options'];
   deps: InputControlVisDependencies;
 }
@@ -184,7 +172,7 @@ export class ListControlEditor extends PureComponent<
             options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
             onChange={event => {
-              this.props.handleParentChange(this.props.controlIndex, event);
+              this.props.handleParentChange(this.props.controlIndex, event.target.value);
             }}
           />
         </EuiFormRow>
@@ -211,7 +199,11 @@ export class ListControlEditor extends PureComponent<
           }
           checked={this.props.controlParams.options.multiselect ?? true}
           onChange={event => {
-            this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', event);
+            this.props.handleOptionsChange(
+              this.props.controlIndex,
+              'multiselect',
+              event.target.checked
+            );
           }}
           data-test-subj="listControlMultiselectInput"
         />
@@ -244,7 +236,11 @@ export class ListControlEditor extends PureComponent<
           }
           checked={this.props.controlParams.options.dynamicOptions ?? false}
           onChange={event => {
-            this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', event);
+            this.props.handleOptionsChange(
+              this.props.controlIndex,
+              'dynamicOptions',
+              event.target.checked
+            );
           }}
           disabled={this.state.isStringField ? false : true}
           data-test-subj="listControlDynamicOptionsSwitch"
@@ -275,7 +271,11 @@ export class ListControlEditor extends PureComponent<
             min={1}
             value={this.props.controlParams.options.size}
             onChange={event => {
-              this.props.handleNumberOptionChange(this.props.controlIndex, 'size', event);
+              this.props.handleOptionsChange(
+                this.props.controlIndex,
+                'size',
+                event.target.valueAsNumber
+              );
             }}
             data-test-subj="listControlSizeInput"
           />

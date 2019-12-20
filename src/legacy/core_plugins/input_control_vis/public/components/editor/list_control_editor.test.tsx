@@ -48,8 +48,7 @@ const controlParamsBase: ControlParams = {
 const deps = getDepsMock();
 let handleFieldNameChange: sinon.SinonSpy;
 let handleIndexPatternChange: sinon.SinonSpy;
-let handleCheckboxOptionChange: sinon.SinonSpy;
-let handleNumberOptionChange: sinon.SinonSpy;
+let handleOptionsChange: sinon.SinonSpy;
 
 beforeEach(() => {
   handleFieldNameChange = sinon.spy();
@@ -221,7 +220,7 @@ describe('renders', () => {
   });
 });
 
-test('handleCheckboxOptionChange - multiselect', async () => {
+test('handleOptionsChange - multiselect', async () => {
   const component = mountWithIntl(
     <ListControlEditor
       deps={deps}
@@ -244,22 +243,10 @@ test('handleCheckboxOptionChange - multiselect', async () => {
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'multiselect';
-  sinon.assert.calledWith(
-    handleCheckboxOptionChange,
-    expectedControlIndex,
-    expectedOptionName,
-    sinon.match(event => {
-      // Synthetic `event.target.checked` does not get altered by EuiSwitch,
-      // but its aria attribute is correctly updated
-      if (event.target.getAttribute('aria-checked') === 'true') {
-        return true;
-      }
-      return false;
-    }, 'unexpected checkbox input event')
-  );
+  sinon.assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName);
 });
 
-test('handleNumberOptionChange - size', async () => {
+test('handleOptionsChange - size', async () => {
   const component = mountWithIntl(
     <ListControlEditor
       deps={deps}
@@ -277,22 +264,12 @@ test('handleNumberOptionChange - size', async () => {
   await updateComponent(component);
 
   const input = findTestSubject(component, 'listControlSizeInput');
-  input.simulate('change', { target: { value: 7 } });
+  input.simulate('change', { target: { valueAsNumber: 7 } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   const expectedControlIndex = 0;
   const expectedOptionName = 'size';
-  sinon.assert.calledWith(
-    handleNumberOptionChange,
-    expectedControlIndex,
-    expectedOptionName,
-    sinon.match(event => {
-      if (event.target.value === 7) {
-        return true;
-      }
-      return false;
-    }, 'unexpected input event')
-  );
+  sinon.assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 7);
 });
 
 test('field name change', async () => {
