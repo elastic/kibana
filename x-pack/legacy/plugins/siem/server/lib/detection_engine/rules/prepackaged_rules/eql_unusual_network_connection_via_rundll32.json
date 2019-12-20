@@ -1,0 +1,17 @@
+{
+  "rule_id": "52aaab7b-b51c-441a-89ce-4387b3aea886",
+  "risk_score": 50,
+  "description": "EQL -  Unusual Network Connection via RunDLL32",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL -  Unusual Network Connection via RunDLL32",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:rundll32.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

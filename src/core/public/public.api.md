@@ -544,8 +544,8 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpServiceBase {
-    addLoadingCount(countSource$: Observable<number>): void;
+export interface HttpSetup {
+    addLoadingCountSource(countSource$: Observable<number>): void;
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
@@ -558,16 +558,10 @@ export interface HttpServiceBase {
     patch: HttpHandler;
     post: HttpHandler;
     put: HttpHandler;
-    removeAllInterceptors(): void;
-    // @internal (undocumented)
-    stop(): void;
 }
 
 // @public
-export type HttpSetup = HttpServiceBase;
-
-// @public
-export type HttpStart = HttpServiceBase;
+export type HttpStart = HttpSetup;
 
 // @public
 export interface I18nStart {
@@ -877,7 +871,7 @@ export interface SavedObjectsBulkUpdateOptions {
 // @public
 export class SavedObjectsClient {
     // @internal
-    constructor(http: HttpServiceBase);
+    constructor(http: HttpSetup);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     bulkGet: (objects?: {
         id: string;
