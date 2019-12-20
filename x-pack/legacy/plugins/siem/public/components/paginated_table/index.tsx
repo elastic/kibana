@@ -206,6 +206,7 @@ export const PaginatedTable = memo<SiemTables>(
         iconType="arrowDown"
         iconSide="right"
         onClick={onButtonClick}
+        data-test-subj="rowsPerPage"
       >
         {`${i18n.ROWS}: ${limit}`}
       </EuiButtonEmpty>
