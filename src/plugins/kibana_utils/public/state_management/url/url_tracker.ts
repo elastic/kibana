@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { createBrowserHistory, Location, History, createLocation } from 'history';
+import { createBrowserHistory, History } from 'history';
 import { useLayoutEffect } from 'react';
+import { getRelativeToHistoryPath } from './url_storage';
 
 /**
  * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
@@ -26,30 +27,32 @@ import { useLayoutEffect } from 'react';
  */
 export function createUrlTracker(key: string, history: History = createBrowserHistory()) {
   return {
-    restoreUrl() {
-      const preservedLocation = JSON.parse(sessionStorage.getItem(key)!) as Location<any>;
-      if (preservedLocation) {
-        history.replace(preservedLocation);
-      }
-    },
     startTrackingUrl() {
       return history.listen(location => {
-        sessionStorage.setItem(key, JSON.stringify(location));
+        const url = getRelativeToHistoryPath(history.createHref(location), history);
+        sessionStorage.setItem(key, url);
       });
     },
-    trackUrl(url: string | Location<any>) {
-      if (typeof url === 'string') {
-        url = createLocation(url);
-      }
-      sessionStorage.setItem(key, JSON.stringify(location));
+    getTrackedUrl() {
+      return sessionStorage.getItem(key);
+    },
+    trackUrl(url: string) {
+      sessionStorage.setItem(key, url);
     },
   };
 }
 
-export function useUrlTracker(appInstanceId: string, history: History) {
+export function useUrlTracker(
+  appInstanceId: string,
+  history: History,
+  shouldRestoreUrl: (urlToRestore: string) => boolean = () => true
+) {
   useLayoutEffect(() => {
     const urlTracker = createUrlTracker(`lastUrlTracker:${appInstanceId}`, history);
-    urlTracker.restoreUrl();
+    const urlToRestore = urlTracker.getTrackedUrl();
+    if (urlToRestore && shouldRestoreUrl(urlToRestore)) {
+      history.replace(urlToRestore);
+    }
     const stopTrackingUrl = urlTracker.startTrackingUrl();
     return () => {
       stopTrackingUrl();

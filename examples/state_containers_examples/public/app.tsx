@@ -41,7 +41,10 @@ export const renderApp = (
     historyType === History.Browser
       ? createBrowserHistory({ basename: appBasePath })
       : createHashHistory();
-  ReactDOM.render(<TodoAppPage history={history} appInstanceId={appInstanceId} />, element);
+  ReactDOM.render(
+    <TodoAppPage history={history} appInstanceId={appInstanceId} appBasePath={appBasePath} />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

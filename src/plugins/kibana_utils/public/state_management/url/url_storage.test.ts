@@ -33,20 +33,28 @@ describe('url_storage', () => {
     });
 
     it('should extract path relative to browser history with basename', () => {
-      const history1 = createBrowserHistory({ basename: '/oxf/app/' });
-      const url1 =
+      const url =
         "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
-      const relativePath1 = getRelativeToHistoryPath(url1, history1);
+      const history1 = createBrowserHistory({ basename: '/oxf/app/' });
+      const relativePath1 = getRelativeToHistoryPath(url, history1);
       expect(relativePath1).toEqual(
         "/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
       );
 
       const history2 = createBrowserHistory({ basename: '/oxf/app/kibana/' });
-      const url2 =
-        "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
-      const relativePath2 = getRelativeToHistoryPath(url2, history2);
+      const relativePath2 = getRelativeToHistoryPath(url, history2);
       expect(relativePath2).toEqual(
         "#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+      );
+    });
+
+    it('should extract path relative to browser history with basename from relative url', () => {
+      const history = createBrowserHistory({ basename: '/oxf/app/' });
+      const url =
+        "/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual(
+        "/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
       );
     });
 
@@ -64,6 +72,16 @@ describe('url_storage', () => {
       const history = createHashHistory({ basename: 'management' });
       const url =
         "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const relativePath = getRelativeToHistoryPath(url, history);
+      expect(relativePath).toEqual(
+        "/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+      );
+    });
+
+    it('should extract path relative to hash history with basename from relative url', () => {
+      const history = createHashHistory({ basename: 'management' });
+      const url =
+        "/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
       expect(relativePath).toEqual(
         "/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"

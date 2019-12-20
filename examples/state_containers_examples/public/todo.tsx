@@ -126,14 +126,29 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
 
 const TodoAppConnected = connect<TodoAppProps, never>(() => ({}))(TodoApp);
 
-export const TodoAppPage: React.FC<{ history: History; appInstanceId: string }> = props => {
+export const TodoAppPage: React.FC<{
+  history: History;
+  appInstanceId: string;
+  appBasePath: string;
+}> = props => {
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
 
   /**
    * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
    * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
    */
-  useUrlTracker(props.appInstanceId, props.history);
+  useUrlTracker(props.appInstanceId, props.history, urlToRestore => {
+    // shouldRestoreUrl:
+    // Allow to restore url only if navigated to app's basePath
+    const currentAppUrl = stripTrailingSlash(props.history.createHref(props.history.location));
+    if (currentAppUrl === stripTrailingSlash(props.appBasePath)) {
+      // navigated to the base path, so should restore the url
+      return true;
+    } else {
+      // navigated to specific route, so should not restore the url
+      return false;
+    }
+  });
 
   useEffect(() => {
     const destroySyncState = syncState([
@@ -194,3 +209,7 @@ export const TodoAppPage: React.FC<{ history: History; appInstanceId: string }> 
     </Router>
   );
 };
+
+function stripTrailingSlash(path: string) {
+  return path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
+}
