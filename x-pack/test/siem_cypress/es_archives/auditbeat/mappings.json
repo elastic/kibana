@@ -6,7 +6,7 @@
         "is_write_index": true
       }
     },
-    "index": "auditbeat-7.5.1-2019.12.19-000001",
+    "index": "auditbeat-7.5.1-2019.12.20-000001",
     "mappings": {
       "_meta": {
         "beat": "auditbeat",
