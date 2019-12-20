@@ -8,17 +8,13 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 import {
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
   CoerceParameter,
   OrientationParameter,
 } from '../../field_parameters';
-import {
-  FieldDescriptionSection,
-  BasicParametersSection,
-  AdvancedParametersSection,
-} from '../edit_field';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
@@ -41,14 +37,11 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean 
 
 interface Props {
   field: NormalizedField;
-  isMultiField: boolean;
 }
 
-export const ShapeType = ({ field, isMultiField }: Props) => {
+export const ShapeType = ({ field }: Props) => {
   return (
     <>
-      <FieldDescriptionSection isMultiField={isMultiField} />
-
       <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(

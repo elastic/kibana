@@ -7,22 +7,17 @@ import React from 'react';
 
 import { PathParameter } from '../../field_parameters';
 import { NormalizedField, NormalizedFields } from '../../../../types';
-import { FieldDescriptionSection, BasicParametersSection } from '../edit_field';
+import { BasicParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
   allFields: NormalizedFields['byId'];
-  isMultiField: boolean;
 }
 
-export const AliasType = ({ field, allFields, isMultiField }: Props) => {
+export const AliasType = ({ field, allFields }: Props) => {
   return (
-    <>
-      <FieldDescriptionSection isMultiField={isMultiField} />
-
-      <BasicParametersSection>
-        <PathParameter field={field} allFields={allFields} />
-      </BasicParametersSection>
-    </>
+    <BasicParametersSection>
+      <PathParameter field={field} allFields={allFields} />
+    </BasicParametersSection>
   );
 };

@@ -5,22 +5,14 @@
  */
 import React from 'react';
 
+import { BasicParametersSection } from '../edit_field';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import { FieldDescriptionSection, BasicParametersSection } from '../edit_field';
 
-interface Props {
-  isMultiField: boolean;
-}
-
-export const DenseVectorType = ({ isMultiField }: Props) => {
+export const DenseVectorType = () => {
   return (
-    <>
-      <FieldDescriptionSection isMultiField={isMultiField} />
-
-      <BasicParametersSection>
-        <UseField path="dims" config={getFieldConfig('dims')} component={Field} />
-      </BasicParametersSection>
-    </>
+    <BasicParametersSection>
+      <UseField path="dims" config={getFieldConfig('dims')} component={Field} />
+    </BasicParametersSection>
   );
 };

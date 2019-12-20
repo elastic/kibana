@@ -15,11 +15,7 @@ import {
   BoostParameter,
   NullValueParameter,
 } from '../../field_parameters';
-import {
-  FieldDescriptionSection,
-  BasicParametersSection,
-  AdvancedParametersSection,
-} from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -36,14 +32,11 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
-  isMultiField: boolean;
 }
 
-export const IpType = ({ field, isMultiField }: Props) => {
+export const IpType = ({ field }: Props) => {
   return (
     <>
-      <FieldDescriptionSection isMultiField={isMultiField} />
-
       <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
       </BasicParametersSection>
