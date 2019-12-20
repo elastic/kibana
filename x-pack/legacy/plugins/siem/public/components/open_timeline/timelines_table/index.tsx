@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -21,6 +21,9 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
+
+// there are a number of type mismatches across this file
+const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
@@ -124,7 +127,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
 
     const sorting = {
       sort: {
-        field: sortField,
+        field: sortField as keyof OpenTimelineResult,
         direction: sortDirection,
       },
     };

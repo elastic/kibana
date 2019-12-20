@@ -16,6 +16,7 @@ import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { InfraSetup } from '../../../plugins/infra/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
+import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../plugins/apm/server';
 
 export const APP_ID = 'infra';
@@ -90,19 +91,9 @@ export function infra(kibana: any) {
         indexPatterns: {
           indexPatternsServiceFactory: legacyServer.indexPatternsServiceFactory,
         },
-        metrics: legacyServer.plugins.metrics,
+        metrics: plugins.metrics as VisTypeTimeseriesSetup,
         spaces: plugins.spaces as SpacesPluginSetup,
         features: plugins.features as FeaturesPluginSetup,
-        // NP_NOTE: [TSVB_GROUP] Huge hack to make TSVB (getVisData()) work with raw requests that
-        // originate from the New Platform router (and are very different to the old request object).
-        // Once TSVB has migrated over to NP, and can work with the new raw requests, or ideally just
-        // the requestContext, this can be removed.
-        ___legacy: {
-          tsvb: {
-            elasticsearch: legacyServer.plugins.elasticsearch,
-            __internals: legacyServer.newPlatform.__internals,
-          },
-        },
         apm: plugins.apm as APMPluginContract,
       };
 

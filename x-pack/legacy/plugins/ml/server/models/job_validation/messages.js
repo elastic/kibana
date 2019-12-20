@@ -14,6 +14,8 @@ export const getMessages = () => {
     return messages;
   }
 
+  const createJobsDocsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/{{version}}/create-jobs.html`;
+
   return (messages = {
     field_not_aggregatable: {
       status: 'ERROR',
@@ -43,7 +45,7 @@ export const getMessages = () => {
           fieldName: 'by_field "{{fieldName}}"',
         },
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality',
+      url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_over_field_low: {
       status: 'WARNING',
@@ -57,7 +59,7 @@ export const getMessages = () => {
           },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality',
+      url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_over_field_high: {
       status: 'WARNING',
@@ -71,7 +73,7 @@ export const getMessages = () => {
           },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality',
+      url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_partition_field: {
       status: 'WARNING',
@@ -85,7 +87,7 @@ export const getMessages = () => {
           },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality',
+      url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_model_plot_high: {
       status: 'WARNING',
@@ -155,7 +157,7 @@ export const getMessages = () => {
           },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span',
+      url: `${createJobsDocsUrl}#bucket-span`,
     },
     bucket_span_high: {
       status: 'INFO',
@@ -166,7 +168,7 @@ export const getMessages = () => {
         defaultMessage:
           'Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span',
+      url: `${createJobsDocsUrl}#bucket-span`,
     },
     bucket_span_valid: {
       status: 'SUCCESS',
@@ -209,21 +211,21 @@ export const getMessages = () => {
           partitionFieldNameParam: `'partition_field_name'`,
         },
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors',
+      url: `${createJobsDocsUrl}#detectors`,
     },
     detectors_empty: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsEmptyMessage', {
         defaultMessage: 'No detectors were found. At least one detector must be specified.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors',
+      url: `${createJobsDocsUrl}#detectors`,
     },
     detectors_function_empty: {
       status: 'ERROR',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsFunctionEmptyMessage', {
         defaultMessage: 'One of the detector functions is empty.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors',
+      url: `${createJobsDocsUrl}#detectors`,
     },
     detectors_function_not_empty: {
       status: 'SUCCESS',
@@ -239,7 +241,7 @@ export const getMessages = () => {
           defaultMessage: 'Presence of detector functions validated in all detectors.',
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#detectors',
+      url: `${createJobsDocsUrl}#detectors`,
     },
     index_fields_invalid: {
       status: 'ERROR',
@@ -260,7 +262,7 @@ export const getMessages = () => {
           'The job configuration includes more than 3 influencers. ' +
           'Consider using fewer influencers or creating multiple jobs.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers',
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low: {
       status: 'WARNING',
@@ -268,7 +270,7 @@ export const getMessages = () => {
         defaultMessage:
           'No influencers have been configured. Picking an influencer is strongly recommended.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers',
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low_suggestion: {
       status: 'WARNING',
@@ -280,7 +282,7 @@ export const getMessages = () => {
           values: { influencerSuggestion: '{{influencerSuggestion}}' },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers',
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low_suggestions: {
       status: 'WARNING',
@@ -292,7 +294,7 @@ export const getMessages = () => {
           values: { influencerSuggestion: '{{influencerSuggestion}}' },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers',
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     job_id_empty: {
       status: 'ERROR',
@@ -401,7 +403,7 @@ export const getMessages = () => {
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successCardinalityMessage', {
         defaultMessage: 'Cardinality of detector fields is within recommended bounds.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#cardinality',
+      url: `${createJobsDocsUrl}#cardinality`,
     },
     success_bucket_span: {
       status: 'SUCCESS',
@@ -412,14 +414,14 @@ export const getMessages = () => {
         defaultMessage: 'Format of {bucketSpan} is valid and passed validation checks.',
         values: { bucketSpan: '"{{bucketSpan}}"' },
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#bucket-span',
+      url: `${createJobsDocsUrl}#bucket-span`,
     },
     success_influencers: {
       status: 'SUCCESS',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successInfluencersMessage', {
         defaultMessage: 'Influencer configuration passed the validation checks.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#influencers',
+      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     estimated_mml_greater_than_max_mml: {
       status: 'WARNING',
@@ -446,7 +448,7 @@ export const getMessages = () => {
           '1MB and should be specified in bytes e.g. 10MB.',
         values: { mml: '{{mml}}' },
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits',
+      url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     half_estimated_mml_greater_than_mml: {
       status: 'WARNING',
@@ -458,7 +460,7 @@ export const getMessages = () => {
             'memory limit and will likely hit the hard limit.',
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits',
+      url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     estimated_mml_greater_than_mml: {
       status: 'INFO',
@@ -469,7 +471,7 @@ export const getMessages = () => {
             'The estimated model memory limit is greater than the model memory limit you have configured.',
         }
       ),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits',
+      url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     success_mml: {
       status: 'SUCCESS',
@@ -479,7 +481,7 @@ export const getMessages = () => {
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successMmlMessage', {
         defaultMessage: 'Valid and within the estimated model memory limit.',
       }),
-      url: 'https://www.elastic.co/guide/en/kibana/{{version}}/job-tips.html#model-memory-limits',
+      url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     success_time_range: {
       status: 'SUCCESS',

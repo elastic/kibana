@@ -21,7 +21,7 @@ const validLicense = {
       isEnabled: true,
     };
   },
-  isOneOf: (...candidates) => true,
+  hasAtLeast: (...candidates) => true,
 } as ILicense;
 
 describe('SecurityNavControlService', () => {
