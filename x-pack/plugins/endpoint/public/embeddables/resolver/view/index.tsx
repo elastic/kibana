@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
+import { DiagnosticDot } from './diagnostic_dot';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
@@ -158,37 +159,6 @@ const Diagnostic = styled(
   flex-grow: 1;
   position: relative;
 `;
-
-const DiagnosticDot = styled(
-  React.memo(({ className, worldPosition }: { className?: string; worldPosition: Vector2 }) => {
-    const projectionMatrix = useSelector(selectors.projectionMatrix);
-    const [left, top] = applyMatrix3(worldPosition, projectionMatrix);
-    const style = {
-      left: (left - 20).toString() + 'px',
-      top: (top - 20).toString() + 'px',
-    };
-    return (
-      <span className={className} style={style}>
-        x: {worldPosition[0]}
-        <br />
-        y: {worldPosition[1]}
-      </span>
-    );
-  })
-)`
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  text-align: left;
-  font-size: 10px;
-  user-select: none;
-  border: 1px solid black;
-  box-sizing: border-box;
-  border-radius: 10%;
-  padding: 4px;
-  white-space: nowrap;
-`;
-
 /**
  * Returns a DOMRect sometimes, and a `ref` callback. Put the `ref` as the `ref` property of an element, and
  * DOMRect will be the result of getBoundingClientRect on it.
