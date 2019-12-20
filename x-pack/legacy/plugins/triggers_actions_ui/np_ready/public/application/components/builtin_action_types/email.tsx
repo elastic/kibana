@@ -118,9 +118,9 @@ export function getActionType(): ActionTypeModel {
       };
       validationResult.errors = errors;
       if (
-        (!actionParams.to || !(actionParams.to instanceof Array) || actionParams.to.length === 0) &&
-        (!actionParams.cc || !(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&
-        (!actionParams.bcc || !(actionParams.bcc instanceof Array) || actionParams.bcc.length === 0)
+        (!(actionParams.to instanceof Array) || actionParams.to.length === 0) &&
+        (!(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&
+        (!(actionParams.bcc instanceof Array) || actionParams.bcc.length === 0)
       ) {
         const errorText = i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
