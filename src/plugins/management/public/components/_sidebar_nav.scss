@@ -1,5 +1,9 @@
 .mgtSidebarNav {
   width: 192px;
+  img.euiSideNavItemButton__content {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 @include euiBreakpoint('xs','s') {

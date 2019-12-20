@@ -54,11 +54,15 @@ const managementSectionOrAppToNav = (appOrSection: ManagementApp | ManagementSec
   'data-test-subj': appOrSection.id,
 });
 
-const managementSectionToNavSection = (section: ManagementSection) => ({
-  // todo support icon as url path
-  icon: section.euiIconType ? <EuiIcon type={section.euiIconType} /> : null,
-  ...managementSectionOrAppToNav(section),
-});
+const managementSectionToNavSection = (section: ManagementSection) => {
+  let icon = section.icon ? <img src={section.icon} alt={section.title} /> : null;
+  // euiIconType takes precedence
+  icon = section.euiIconType ? <EuiIcon type={section.euiIconType} /> : icon;
+  return {
+    icon,
+    ...managementSectionOrAppToNav(section),
+  };
+};
 
 const managementAppToNavItem = (selectedId?: string, parentId?: string) => (
   app: ManagementApp
