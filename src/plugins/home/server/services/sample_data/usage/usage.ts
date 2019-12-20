@@ -17,40 +17,39 @@
  * under the License.
  */
 
-import * as Hapi from 'hapi';
+import { Logger, SavedObjectsServiceSetup } from 'kibana/server';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 
-export function usage(request: Hapi.Request) {
-  const { server } = request;
+export interface SampleDataUsageTracker {
+  addInstall(dataSet: string): void;
+  addUninstall(dataSet: string): void;
+}
 
+export function usage(
+  savedObjects: SavedObjectsServiceSetup,
+  logger: Logger
+): SampleDataUsageTracker {
   const handleIncrementError = (err: Error) => {
-    if (err != null) {
-      server.log(['debug', 'sample_data', 'telemetry'], err.stack);
+    if (err && err.stack) {
+      logger.debug(err.stack);
     }
-    server.log(
-      ['warning', 'sample_data', 'telemetry'],
-      `saved objects repository incrementCounter encountered an error: ${err}`
-    );
+    logger.warn(`saved objects repository incrementCounter encountered an error: ${err}`);
   };
 
-  const {
-    savedObjects: { getSavedObjectsRepository },
-  } = server;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+  const internalRepository = savedObjects.createInternalRepository();
 
   return {
     addInstall: async (dataSet: string) => {
       try {
-        internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
+        await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
       } catch (err) {
         handleIncrementError(err);
       }
     },
     addUninstall: async (dataSet: string) => {
       try {
-        internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
+        await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
       } catch (err) {
         handleIncrementError(err);
       }

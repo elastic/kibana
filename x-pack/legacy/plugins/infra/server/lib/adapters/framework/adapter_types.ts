@@ -13,9 +13,11 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../..
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../../../../../plugins/apm/server';
+import { HomeServerPluginSetup } from '../../../../../../../../src/plugins/home/server';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
+  home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   metrics: VisTypeTimeseriesSetup;

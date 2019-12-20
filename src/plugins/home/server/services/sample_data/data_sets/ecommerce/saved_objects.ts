@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+/* eslint max-len: 0 */
+/* eslint-disable */
 
-export const getSavedObjects = () => [
+import { i18n } from '@kbn/i18n';
+import { SavedObject } from 'kibana/server';
+
+export const getSavedObjects = (): SavedObject[] => [
   {
     id: '37cc8650-b882-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.salesByCategoryTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.salesByCategoryTitle', {
         defaultMessage: '[eCommerce] Sales by Category',
       }),
       visState:
@@ -40,15 +44,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: 'ed8436b0-b88b-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.salesByGenderTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.salesByGenderTitle', {
         defaultMessage: '[eCommerce] Sales by Gender',
       }),
       visState:
@@ -61,15 +66,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '09ffee60-b88c-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.markdownTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.markdownTitle', {
         defaultMessage: '[eCommerce] Markdown',
       }),
       visState:
@@ -81,15 +87,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '1c389590-b88d-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.controlsTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.controlsTitle', {
         defaultMessage: '[eCommerce] Controls',
       }),
       visState:
@@ -101,15 +108,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '45e07720-b890-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:17:30.755Z',
-    version: 2,
+    version: '2',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.promotionTrackingTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.promotionTrackingTitle', {
         defaultMessage: '[eCommerce] Promotion Tracking',
       }),
       visState:
@@ -121,15 +129,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '10f1a240-b891-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.totalRevenueTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.totalRevenueTitle', {
         defaultMessage: '[eCommerce] Total Revenue',
       }),
       visState:
@@ -142,15 +151,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: 'b80e6540-b891-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.soldProductsPerDayTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.soldProductsPerDayTitle', {
         defaultMessage: '[eCommerce] Sold Products per Day',
       }),
       visState:
@@ -162,15 +172,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '4b3ec120-b892-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.averageSalesPriceTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.averageSalesPriceTitle', {
         defaultMessage: '[eCommerce] Average Sales Price',
       }),
       visState:
@@ -184,15 +195,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '9ca7aa90-b892-11e8-a6d9-e546fe2bba5f',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
         defaultMessage: '[eCommerce] Average Sold Quantity',
       }),
       visState:
@@ -206,15 +218,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '3ba638e0-b894-11e8-a6d9-e546fe2bba5f',
     type: 'search',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.ordersTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.ordersTitle', {
         defaultMessage: '[eCommerce] Orders',
       }),
       description: '',
@@ -227,15 +240,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","highlightAll":true,"version":true,"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
         defaultMessage: '[eCommerce] Average Sales Per Region',
       }),
       visState:
@@ -248,15 +262,16 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: 'b72dd430-bb4d-11e8-9c84-77068524bcab',
     type: 'visualization',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.topSellingProductsTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.topSellingProductsTitle', {
         defaultMessage: '[eCommerce] Top Selling Products',
       }),
       visState:
@@ -269,12 +284,13 @@ export const getSavedObjects = () => [
           '{"index":"ff959d40-b880-11e8-a6d9-e546fe2bba5f","query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
     type: 'index-pattern',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_ecommerce',
@@ -283,12 +299,13 @@ export const getSavedObjects = () => [
         '[{"name":"_id","type":"string","esTypes":["_id"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_index","type":"string","esTypes":["_index"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_score","type":"number","count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_source","type":"_source","esTypes":["_source"],"count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_type","type":"string","esTypes":["_type"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"category","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"category.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "category"}}},{"name":"currency","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"customer_birth_date","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"customer_first_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_first_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "customer_first_name"}}},{"name":"customer_full_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_full_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "customer_full_name"}}},{"name":"customer_gender","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"customer_id","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"customer_last_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_last_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "customer_last_name"}}},{"name":"customer_phone","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"day_of_week","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"day_of_week_i","type":"number","esTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"email","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geoip.city_name","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geoip.continent_name","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geoip.country_iso_code","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geoip.location","type":"geo_point","esTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geoip.region_name","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"manufacturer","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"manufacturer.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "manufacturer"}}},{"name":"order_date","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"order_id","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products._id","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"products._id.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "products._id"}}},{"name":"products.base_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.base_unit_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.category","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"products.category.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "products.category"}}},{"name":"products.created_on","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.discount_amount","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.discount_percentage","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.manufacturer","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"products.manufacturer.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "products.manufacturer"}}},{"name":"products.min_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.product_id","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.product_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"products.product_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "products.product_name"}}},{"name":"products.quantity","type":"number","esTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.sku","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.tax_amount","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.taxful_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.taxless_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"products.unit_discount_amount","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"sku","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"taxful_total_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"taxless_total_price","type":"number","esTypes":["half_float"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"total_quantity","type":"number","esTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"total_unique_products","type":"number","esTypes":["integer"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"type","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"user","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true}]',
       fieldFormatMap: '{"taxful_total_price":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
     },
+    references: [],
   },
   {
     id: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     type: 'dashboard',
     updated_at: '2018-10-01T15:13:03.270Z',
-    version: 1,
+    version: '1',
     references: [
       {
         name: 'panel_0',
@@ -355,11 +372,11 @@ export const getSavedObjects = () => [
       dashboard: '7.0.0',
     },
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardTitle', {
         defaultMessage: '[eCommerce] Revenue Dashboard',
       }),
       hits: 0,
-      description: i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardDescription', {
+      description: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardDescription', {
         defaultMessage: 'Analyze mock eCommerce orders and revenue',
       }),
       panelsJSON:
