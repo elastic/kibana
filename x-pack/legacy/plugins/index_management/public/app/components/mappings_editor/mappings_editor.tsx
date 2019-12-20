@@ -15,7 +15,7 @@ import {
   DocumentFieldsJsonEditor,
 } from './components';
 import { IndexSettings } from './types';
-import { State, Dispatch, MappingsConfiguration } from './reducer';
+import { State, Dispatch } from './reducer';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
 
@@ -55,41 +55,18 @@ export const MappingsEditor = React.memo(
       };
     }, [defaultValue]);
 
-    const validateConfigurationForm = async (
-      configuration: State['configuration']
-    ): Promise<{ isValid: boolean; data?: MappingsConfiguration }> => {
-      const isValid = await configuration.validate();
-
-      if (!isValid) {
-        return { isValid };
-      }
-
-      // We create a snapshot of the configuration form data.
-      const formData = configuration.data.format();
-
-      return { isValid, data: formData };
-    };
-
     const changeTab = async (tab: TabName, [state, dispatch]: [State, Dispatch]) => {
-      if (tab === 'fields') {
+      if (selectedTab === 'advanced') {
         // Navigating away from the configuration form === "sending" the form: we need to validate its data first.
-        const { isValid, data } = await validateConfigurationForm(state.configuration);
+        const isConfigurationFormValid = await state.configuration.validate();
 
-        if (!isValid) {
+        if (!isConfigurationFormValid) {
+          /**
+           * Don't navigate away from the tab if there are errors in the form.
+           * For now there is no need to display a CallOut as the form can never be invalid.
+           */
           return;
         }
-
-        // We need to update our state "configuration" with this snapshot.
-        // It will be used as "defaultValue" when navigating back to the form.
-        dispatch({
-          type: 'configuration.update',
-          value: {
-            defaultValue: data!,
-            isValid,
-            data: { raw: state.configuration.data.raw, format: () => data! },
-            validate: () => Promise.resolve(true),
-          },
-        });
       }
 
       selectTab(tab);
