@@ -47,7 +47,7 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
-import { SavedSearch } from '../discover';
+import { SavedSearch } from '../discover/np_ready/types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

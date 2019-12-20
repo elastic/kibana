@@ -38,4 +38,3 @@ SavedObjectRegistryProvider.register((savedSearches: any) => {
 });
 
 export { createSavedSearchesService } from './saved_searches/saved_searches';
-export * from './np_ready/types';
