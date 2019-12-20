@@ -17,17 +17,20 @@
  * under the License.
  */
 
+/* eslint max-len: 0 */
+/* eslint-disable */
 import { i18n } from '@kbn/i18n';
+import { SavedObject } from 'kibana/server';
 
-export const getSavedObjects = () => [
+export const getSavedObjects = (): SavedObject[] => [
   {
     id: 'e1d0f010-9ee7-11e7-8711-e7a007dcef99',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.uniqueVisitorsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.uniqueVisitorsTitle', {
         defaultMessage: '[Logs] Unique Visitors vs. Average Bytes',
       }),
       visState:
@@ -40,15 +43,16 @@ export const getSavedObjects = () => [
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.uniqueVisitorsByCountryTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.uniqueVisitorsByCountryTitle', {
         defaultMessage: '[Logs] Unique Visitors by Country',
       }),
       visState:
@@ -61,15 +65,16 @@ export const getSavedObjects = () => [
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '935afa20-e0cd-11e7-9d07-1398ccfcefa3',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.heatmapTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Heatmap',
       }),
       visState:
@@ -83,15 +88,16 @@ export const getSavedObjects = () => [
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '4eb6e500-e1c7-11e7-b6d5-4dc382ef7f5b',
     type: 'visualization',
     updated_at: '2018-08-29T13:23:20.897Z',
-    version: 2,
+    version: '2',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.hostVisitsBytesTableTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.hostVisitsBytesTableTitle', {
         defaultMessage: '[Logs] Host, Visits and Bytes Table',
       }),
       visState:
@@ -103,15 +109,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '69a34b00-9ee8-11e7-8711-e7a007dcef99',
     type: 'visualization',
     updated_at: '2018-08-29T13:24:46.136Z',
-    version: 2,
+    version: '2',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.goalsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.goalsTitle', {
         defaultMessage: '[Logs] Goals',
       }),
       visState:
@@ -125,15 +132,16 @@ export const getSavedObjects = () => [
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '42b997f0-0c26-11e8-b0ec-3bb475f6b6ff',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.fileTypeScatterPlotTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.fileTypeScatterPlotTitle', {
         defaultMessage: '[Logs] File Type Scatter Plot',
       }),
       visState:
@@ -145,15 +153,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '7cbd2350-2223-11e8-b802-5bcf64c2cfb4',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
         defaultMessage: '[Logs] Source and Destination Sankey Chart',
       }),
       visState:
@@ -165,15 +174,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '314c6f60-2224-11e8-b802-5bcf64c2cfb4',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.responseCodesOverTimeTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.responseCodesOverTimeTitle', {
         defaultMessage: '[Logs] Response Codes Over Time + Annotations',
       }),
       visState:
@@ -185,15 +195,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '24a3e970-4257-11e8-b3aa-73fdaf54bfc9',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.inputControlsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.inputControlsTitle', {
         defaultMessage: '[Logs] Input Controls',
       }),
       visState:
@@ -205,15 +216,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '14e2e710-4258-11e8-b3aa-73fdaf54bfc9',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.visitorOSTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.visitorOSTitle', {
         defaultMessage: '[Logs] Visitors by OS',
       }),
       visState:
@@ -226,15 +238,16 @@ export const getSavedObjects = () => [
           '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '47f2c680-a6e3-11e8-94b4-c30c0228351b',
     type: 'visualization',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.markdownInstructionsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Logs] Markdown Instructions',
       }),
       visState:
@@ -246,12 +259,13 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     type: 'index-pattern',
     updated_at: '2018-08-29T13:22:17.617Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_logs',
@@ -260,12 +274,13 @@ export const getSavedObjects = () => [
         '[{"name":"@timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"_id","type":"string","esTypes":["_id"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_index","type":"string","esTypes":["_index"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"_score","type":"number","count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_source","type":"_source","esTypes":["_source"],"count":0,"scripted":false,"searchable":false,"aggregatable":false,"readFromDocValues":false},{"name":"_type","type":"string","esTypes":["_type"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":false},{"name":"agent","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"agent.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "agent"}}},{"name":"bytes","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"clientip","type":"ip","esTypes":["ip"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"event.dataset","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"extension","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"extension.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "extension"}}},{"name":"geo.coordinates","type":"geo_point","esTypes":["geo_point"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geo.dest","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geo.src","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"geo.srcdest","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"host","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"host.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "host"}}},{"name":"index","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"index.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "index"}}},{"name":"ip","type":"ip","esTypes":["ip"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"machine.os","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"machine.os.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "machine.os"}}},{"name":"machine.ram","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"memory","type":"number","esTypes":["double"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"message","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"message.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "message"}}},{"name":"phpmemory","type":"number","esTypes":["long"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"referer","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"request","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"request.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "request"}}},{"name":"response","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"response.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "response"}}},{"name":"tags","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"tags.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "tags"}}},{"name":"timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"url","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"url.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent": "url"}}},{"name":"utc_time","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true},{"name":"hour_of_day","type":"number","count":0,"scripted":true,"script":"doc[\'timestamp\'].value.getHour()","lang":"painless","searchable":true,"aggregatable":true,"readFromDocValues":false}]',
       fieldFormatMap: '{"hour_of_day":{}}',
     },
+    references: [],
   },
   {
     id: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     type: 'dashboard',
     updated_at: '2018-08-29T13:26:13.463Z',
-    version: 3,
+    version: '3',
     references: [
       {
         name: 'panel_0',
@@ -327,11 +342,11 @@ export const getSavedObjects = () => [
       dashboard: '7.0.0',
     },
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.webTrafficTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.webTrafficTitle', {
         defaultMessage: '[Logs] Web Traffic',
       }),
       hits: 0,
-      description: i18n.translate('server.sampleData.logsSpec.webTrafficDescription', {
+      description: i18n.translate('home.sampleData.logsSpec.webTrafficDescription', {
         defaultMessage: "Analyze mock web traffic log data for Elastic's website",
       }),
       panelsJSON:

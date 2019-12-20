@@ -19,20 +19,20 @@
 
 import readline from 'readline';
 import fs from 'fs';
-import zlib from 'zlib';
+import { createUnzip } from 'zlib';
 
 const BULK_INSERT_SIZE = 500;
 
-export function loadData(path, bulkInsert) {
+export function loadData(path: any, bulkInsert: (docs: any[]) => Promise<void>) {
   return new Promise((resolve, reject) => {
-    let count = 0;
-    let docs = [];
-    let isPaused = false;
+    let count: number = 0;
+    let docs: any[] = [];
+    let isPaused: boolean = false;
 
     // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
     const readStream = fs.createReadStream(path, { highWaterMark: 1024 * 4 });
-    // eslint-disable-next-line new-cap
-    const lineStream = readline.createInterface({ input: readStream.pipe(zlib.Unzip()) });
+
+    const lineStream = readline.createInterface({ input: readStream.pipe(createUnzip()) });
     const onClose = async () => {
       if (docs.length > 0) {
         try {
@@ -46,7 +46,7 @@ export function loadData(path, bulkInsert) {
     };
     lineStream.on('close', onClose);
 
-    const closeWithError = err => {
+    const closeWithError = (err: any) => {
       lineStream.removeListener('close', onClose);
       lineStream.close();
       reject(err);

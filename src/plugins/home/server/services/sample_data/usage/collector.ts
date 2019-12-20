@@ -17,4 +17,27 @@
  * under the License.
  */
 
-export { sampleDataMixin } from './sample_data_mixin';
+import { PluginInitializerContext } from 'kibana/server';
+import { first } from 'rxjs/operators';
+import { fetchProvider } from './collector_fetch';
+import { UsageCollectionSetup } from '../../../../../usage_collection/server';
+
+export async function makeSampleDataUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  context: PluginInitializerContext
+) {
+  let index: string;
+  try {
+    const config = await context.config.legacy.globalConfig$.pipe(first()).toPromise();
+    index = config.kibana.index;
+  } catch (err) {
+    return; // kibana plugin is not enabled (test environment)
+  }
+  const collector = usageCollection.makeUsageCollector({
+    type: 'sample-data',
+    fetch: fetchProvider(index),
+    isReady: () => true,
+  });
+
+  usageCollection.registerCollector(collector);
+}

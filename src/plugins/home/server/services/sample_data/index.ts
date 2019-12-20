@@ -16,13 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export {
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './sample_data_registry';
 
-export function createIndexName(sampleDataSetId, dataIndexId) {
-  // Sample data schema was updated to support multiple indices in 6.5.
-  // This if statement ensures that sample data sets that used a single index prior to the schema change
-  // have the same index name to avoid orphaned indices when uninstalling.
-  if (sampleDataSetId === dataIndexId) {
-    return `kibana_sample_data_${sampleDataSetId}`;
-  }
-  return `kibana_sample_data_${sampleDataSetId}_${dataIndexId}`;
-}
+export { SampleDatasetSchema, SampleDatasetProvider } from './lib/sample_dataset_registry_types';

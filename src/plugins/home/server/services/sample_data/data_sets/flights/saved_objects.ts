@@ -17,17 +17,21 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+/* eslint max-len: 0 */
+/* eslint-disable */
 
-export const getSavedObjects = () => [
+import { i18n } from '@kbn/i18n';
+import { SavedObject } from 'kibana/server';
+
+export const getSavedObjects = (): SavedObject[] => [
   {
     id: 'aeb212e0-4c84-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.controlsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.controlsTitle', {
         defaultMessage: '[Flights] Controls',
       }),
       visState:
@@ -39,15 +43,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{}',
       },
     },
+    references: [],
   },
   {
     id: 'c8fc3d30-4c87-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightCountAndAverageTicketPriceTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightCountAndAverageTicketPriceTitle', {
         defaultMessage: '[Flights] Flight Count and Average Ticket Price',
       }),
       visState:
@@ -61,15 +66,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
     type: 'search',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightLogTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightLogTitle', {
         defaultMessage: '[Flights] Flight Log',
       }),
       description: '',
@@ -92,15 +98,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","highlightAll":true,"version":true,"query":{"language":"kuery","query":""},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: '8f4d0c00-4c86-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.airlineCarrierTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.airlineCarrierTitle', {
         defaultMessage: '[Flights] Airline Carrier',
       }),
       visState:
@@ -113,15 +120,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: 'f8290060-4c88-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.delayTypeTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.delayTypeTitle', {
         defaultMessage: '[Flights] Delay Type',
       }),
       visState:
@@ -134,15 +142,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: 'bcb63b50-4c89-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.delaysAndCancellationsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.delaysAndCancellationsTitle', {
         defaultMessage: '[Flights] Delays & Cancellations',
       }),
       visState:
@@ -154,15 +163,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{}',
       },
     },
+    references: [],
   },
   {
     id: '9886b410-4c8b-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.delayBucketsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.delayBucketsTitle', {
         defaultMessage: '[Flights] Delay Buckets',
       }),
       visState:
@@ -175,15 +185,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[{"meta":{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","negate":true,"disabled":false,"alias":null,"type":"phrase","key":"FlightDelayMin","value":"0","params":{"query":0,"type":"phrase"}},"query":{"match":{"FlightDelayMin":{"query":0,"type":"phrase"}}},"$state":{"store":"appState"}}],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '76e3c090-4c8c-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightDelaysTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightDelaysTitle', {
         defaultMessage: '[Flights] Flight Delays',
       }),
       visState:
@@ -196,15 +207,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '707665a0-4c8c-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightCancellationsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightCancellationsTitle', {
         defaultMessage: '[Flights] Flight Cancellations',
       }),
       visState:
@@ -217,15 +229,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '293b5a30-4c8f-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.destinationWeatherTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.destinationWeatherTitle', {
         defaultMessage: '[Flights] Destination Weather',
       }),
       visState:
@@ -238,15 +251,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '129be430-4c93-11e8-b3d7-01146121b73d',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.markdownInstructionsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Flights] Markdown Instructions',
       }),
       visState:
@@ -258,15 +272,16 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{}',
       },
     },
+    references: [],
   },
   {
     id: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.originCountryTicketPricesTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.originCountryTicketPricesTitle', {
         defaultMessage: '[Flights] Origin Country Ticket Prices',
       }),
       visState:
@@ -279,15 +294,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: 'f8283bf0-52fd-11e8-a160-89cc2ad9e8e2',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.totalFlightDelaysTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.totalFlightDelaysTitle', {
         defaultMessage: '[Flights] Total Flight Delays',
       }),
       visState:
@@ -301,15 +317,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[{"meta":{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"FlightDelay","value":"true","params":{"query":true,"type":"phrase"}},"query":{"match":{"FlightDelay":{"query":true,"type":"phrase"}}},"$state":{"store":"appState"}}],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '08884800-52fe-11e8-a160-89cc2ad9e8e2',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.totalFlightCancellationsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.totalFlightCancellationsTitle', {
         defaultMessage: '[Flights] Total Flight Cancellations',
       }),
       visState:
@@ -323,15 +340,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[{"meta":{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"Cancelled","value":"true","params":{"query":true,"type":"phrase"}},"query":{"match":{"Cancelled":{"query":true,"type":"phrase"}}},"$state":{"store":"appState"}}],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: 'e6944e50-52fe-11e8-a160-89cc2ad9e8e2',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.originCountryTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.originCountryTitle', {
         defaultMessage: '[Flights] Origin Country vs. Destination Country',
       }),
       visState:
@@ -345,15 +363,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '01c413e0-5395-11e8-99bf-1ba7b1bdaa61',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.totalFlightsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.totalFlightsTitle', {
         defaultMessage: '[Flights] Total Flights',
       }),
       visState:
@@ -366,15 +385,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: '2edf78b0-5395-11e8-99bf-1ba7b1bdaa61',
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.averageTicketPriceTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.averageTicketPriceTitle', {
         defaultMessage: '[Flights] Average Ticket Price',
       }),
       visState:
@@ -387,15 +407,16 @@ export const getSavedObjects = () => [
           '{"index":"d3d7af60-4c81-11e8-b3d7-01146121b73d","filter":[],"query":{"query":"","language":"kuery"}}',
       },
     },
+    references: [],
   },
   {
     id: 'ed78a660-53a0-11e8-acbd-0be0ad9d822b',
     type: 'visualization',
     updated_at: '2018-05-09T15:55:51.195Z',
-    version: 3,
+    version: '3',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.airportConnectionsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.airportConnectionsTitle', {
         defaultMessage: '[Flights] Airport Connections (Hover Over Airport)',
       }),
       visState:
@@ -407,12 +428,13 @@ export const getSavedObjects = () => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
+    references: [],
   },
   {
     id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
     type: 'index-pattern',
     updated_at: '2018-05-09T15:49:03.736Z',
-    version: 1,
+    version: '1',
     migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_flights',
@@ -422,12 +444,13 @@ export const getSavedObjects = () => [
       fieldFormatMap:
         '{"hour_of_day":{"id":"number","params":{"pattern":"00"}},"AvgTicketPrice":{"id":"number","params":{"pattern":"$0,0.[00]"}}}',
     },
+    references: [],
   },
   {
     id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     type: 'dashboard',
     updated_at: '2018-05-09T15:59:04.578Z',
-    version: 4,
+    version: '4',
     references: [
       {
         name: 'panel_0',
@@ -524,12 +547,12 @@ export const getSavedObjects = () => [
       dashboard: '7.0.0',
     },
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.globalFlightDashboardTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.globalFlightDashboardTitle', {
         defaultMessage: '[Flights] Global Flight Dashboard',
       }),
       hits: 0,
       description: i18n.translate(
-        'server.sampleData.flightsSpec.globalFlightDashboardDescription',
+        'home.sampleData.flightsSpec.globalFlightDashboardDescription',
         {
           defaultMessage:
             'Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats',

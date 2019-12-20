@@ -17,25 +17,12 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
-import { fetchProvider } from './collector_fetch';
-import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
-
-export function makeSampleDataUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  server: Server
-) {
-  let index: string;
-  try {
-    index = server.config().get('kibana.index');
-  } catch (err) {
-    return; // kibana plugin is not enabled (test environment)
+export const createIndexName = function(sampleDataSetId: string, dataIndexId: string): string {
+  // Sample data schema was updated to support multiple indices in 6.5.
+  // This if statement ensures that sample data sets that used a single index prior to the schema change
+  // have the same index name to avoid orphaned indices when uninstalling.
+  if (sampleDataSetId === dataIndexId) {
+    return `kibana_sample_data_${sampleDataSetId}`;
   }
-  const collector = usageCollection.makeUsageCollector({
-    type: 'sample-data',
-    fetch: fetchProvider(index),
-    isReady: () => true,
-  });
-
-  usageCollection.registerCollector(collector);
-}
+  return `kibana_sample_data_${sampleDataSetId}_${dataIndexId}`;
+};
