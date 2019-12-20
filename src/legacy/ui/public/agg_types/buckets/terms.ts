@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
@@ -80,14 +79,8 @@ export const termsBucketAgg = new BucketAggType({
           if (val === '__missing__') {
             return bucket.params.missingBucketLabel;
           }
-          const parsedUrl = {
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-            basePath: chrome.getBasePath(),
-          };
-          const converter = bucket.params.field.format.getConverterFor(type);
 
-          return converter(val, undefined, undefined, parsedUrl);
+          return bucket.params.field.format.convert(val, type);
         };
       },
     } as FieldFormat;
