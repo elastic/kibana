@@ -17,21 +17,77 @@
  * under the License.
  */
 
-import { ItemBufferParams, TimedItemBufferParams } from '../../common';
+import { defer, Defer } from 'src/plugins/kibana_utils/public';
+import {
+  ItemBufferParams,
+  TimedItemBufferParams,
+  createBatchedFunction,
+  BatchResponseItem,
+  ErrorLike,
+} from '../../common';
 import { fetchStreaming } from '../streaming';
 
 export interface StreamingBatchedFunctionParams<Payload, Result> {
   url: string;
-  fetchStreaming?: typeof fetchStreaming,
+  fetchStreaming?: typeof fetchStreaming;
   flushOnMaxItems?: ItemBufferParams<any>['flushOnMaxItems'];
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
 }
 
-export const createStreamingBatchedFunction = <Payload, Result>(
+export interface BatchItem<Payload, Result> {
+  payload: Payload;
+  future: Defer<Result>;
+}
+
+export type BatchedFunc<Payload, Result> = (payload: Payload) => Promise<Result>;
+
+export const createStreamingBatchedFunction = <
+  Payload,
+  Result extends object,
+  E extends ErrorLike = ErrorLike
+>(
   params: StreamingBatchedFunctionParams<Payload, Result>
-): ((payload: Payload) => Promise<Result>) => {
-  createBatchedFunction<(payload: Payload) => Promise<Result>, any>({
-    onBatch: 
+): BatchedFunc<Payload, Result> => {
+  const {
+    url,
+    fetchStreaming: fetchStreamingInjected = fetchStreaming,
+    flushOnMaxItems = 25,
+    maxItemAge = 10,
+  } = params;
+  const [fn] = createBatchedFunction<BatchedFunc<Payload, Result>, BatchItem<Payload, Result>>({
+    onCall: (payload: Payload) => {
+      const future = defer<Result>();
+      const entry: BatchItem<Payload, Result> = {
+        payload,
+        future,
+      };
+      return [future.promise, entry];
+    },
+    onBatch: async items => {
+      try {
+        const { promise, stream } = fetchStreamingInjected({
+          url,
+          body: JSON.stringify(items),
+          method: 'POST',
+        });
+        stream.subscribe(json => {
+          const response = JSON.parse(json) as BatchResponseItem<Result, E>;
+          if (response.error) {
+            const error = new Error(response.error.message);
+            for (const [key, value] of Object.entries(response.error)) (error as any)[key] = value;
+            items[response.id].future.reject(error);
+          } else if (response.data) {
+            items[response.id].future.resolve(response.data);
+          }
+        });
+        await promise;
+      } catch (error) {
+        for (const item of items) item.future.reject(error);
+      }
+    },
+    flushOnMaxItems,
+    maxItemAge,
   });
-  const fn: (payload: Payload) => Promise<Result> = payload => {};
+
+  return fn;
 };

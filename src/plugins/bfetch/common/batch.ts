@@ -17,7 +17,14 @@
  * under the License.
  */
 
-export * from './util';
-export * from './streaming';
-export * from './buffer';
-export * from './batch';
+export interface ErrorLike {
+  message: string;
+}
+
+export type BatchRequestData<Item> = Item[];
+
+export interface BatchResponseItem<Result extends object, Error extends ErrorLike> {
+  id: number;
+  data?: Result;
+  error?: Error;
+}
