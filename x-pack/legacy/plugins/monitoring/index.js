@@ -73,12 +73,13 @@ export const monitoring = kibana =>
         _hapi: server,
         _kbnServer: this.kbnServer,
       };
-      const { usageCollection } = server.newPlatform.setup.plugins;
+      const { usageCollection, licensing } = server.newPlatform.setup.plugins;
       const plugins = {
         xpack_main: server.plugins.xpack_main,
         elasticsearch: server.plugins.elasticsearch,
         infra: server.plugins.infra,
         usageCollection,
+        licensing,
       };
 
       const plugin = new Plugin();

@@ -140,7 +140,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         if (criteria.sort != null) {
           const sort: HostsSortField = {
             field: getSortField(criteria.sort.field),
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (sort.direction !== direction || sort.field !== sortField) {
             updateHostsSort({

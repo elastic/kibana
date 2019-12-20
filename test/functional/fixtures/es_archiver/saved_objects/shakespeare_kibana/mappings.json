@@ -1,0 +1,388 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".kibana": {
+      }
+    },
+    "index": ".kibana_1",
+    "mappings": {
+      "_meta": {
+        "migrationMappingPropertyHashes": {
+          "config": "87aca8fdb053154f11383fce3dbf3edf",
+          "dashboard": "d00f614b29a80360e1190193fd333bab",
+          "index-pattern": "66eccb05066c5a89924f48a9e9736499",
+          "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
+          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+          "namespace": "2f4316de49999235636386fe51dc06c1",
+          "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
+          "references": "7997cf5a56cc02bdc9c93361bde732b0",
+          "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
+          "search": "181661168bbadd1eff5902361e2a0d5c",
+          "server": "ec97f1c5da1a19609a60874e5af1100c",
+          "telemetry": "358ffaa88ba34a97d55af0933a117de4",
+          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
+          "type": "2f4316de49999235636386fe51dc06c1",
+          "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
+          "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+          "url": "c7f66a0df8b1b52f17c28c4adb111105",
+          "visualization": "52d7a13ad68a150c4525b292d23e12cc"
+        }
+      },
+      "dynamic": "strict",
+      "properties": {
+        "config": {
+          "dynamic": "true",
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            },
+            "defaultIndex": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "optionsJSON": {
+              "type": "text"
+            },
+            "panelsJSON": {
+              "type": "text"
+            },
+            "refreshInterval": {
+              "properties": {
+                "display": {
+                  "type": "keyword"
+                },
+                "pause": {
+                  "type": "boolean"
+                },
+                "section": {
+                  "type": "integer"
+                },
+                "value": {
+                  "type": "integer"
+                }
+              }
+            },
+            "timeFrom": {
+              "type": "keyword"
+            },
+            "timeRestore": {
+              "type": "boolean"
+            },
+            "timeTo": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "index-pattern": {
+          "properties": {
+            "fieldFormatMap": {
+              "type": "text"
+            },
+            "fields": {
+              "type": "text"
+            },
+            "intervalName": {
+              "type": "keyword"
+            },
+            "notExpandable": {
+              "type": "boolean"
+            },
+            "sourceFilters": {
+              "type": "text"
+            },
+            "timeFieldName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "typeMeta": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kql-telemetry": {
+          "properties": {
+            "optInCount": {
+              "type": "long"
+            },
+            "optOutCount": {
+              "type": "long"
+            }
+          }
+        },
+        "migrationVersion": {
+          "dynamic": "true",
+          "properties": {
+            "index-pattern": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "query": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "filters": {
+              "enabled": false,
+              "type": "object"
+            },
+            "query": {
+              "properties": {
+                "language": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              }
+            },
+            "timefilter": {
+              "enabled": false,
+              "type": "object"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
+        "sample-data-telemetry": {
+          "properties": {
+            "installCount": {
+              "type": "long"
+            },
+            "unInstallCount": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "columns": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "sort": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "server": {
+          "properties": {
+            "uuid": {
+              "type": "keyword"
+            }
+          }
+        },
+        "telemetry": {
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "lastReported": {
+              "type": "date"
+            },
+            "lastVersionChecked": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "sendUsageFrom": {
+              "ignore_above": 256,
+              "type": "keyword"
+            },
+            "userHasSeenNotice": {
+              "type": "boolean"
+            }
+          }
+        },
+        "timelion-sheet": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "timelion_chart_height": {
+              "type": "integer"
+            },
+            "timelion_columns": {
+              "type": "integer"
+            },
+            "timelion_interval": {
+              "type": "keyword"
+            },
+            "timelion_other_interval": {
+              "type": "keyword"
+            },
+            "timelion_rows": {
+              "type": "integer"
+            },
+            "timelion_sheet": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "ui-metric": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "url": {
+          "properties": {
+            "accessCount": {
+              "type": "long"
+            },
+            "accessDate": {
+              "type": "date"
+            },
+            "createDate": {
+              "type": "date"
+            },
+            "url": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchRefName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
