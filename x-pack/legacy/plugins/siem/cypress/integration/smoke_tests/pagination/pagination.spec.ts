@@ -16,7 +16,7 @@ import {
   NUMBERED_PAGINATION,
   ROWS_PER_PAGE,
   SUPER_DATE_PICKER_APPLY_BUTTON,
-  UNCOMMON_PROCCESSES_TABLE,
+  UNCOMMON_PROCESSES_TABLE,
 } from '../../lib/pagination/selectors';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../lib/util/helpers';
 
@@ -41,7 +41,7 @@ describe('Pagination', () => {
       .then(text1 => {
         cy.get(getPageButtonSelector(2)).click({ force: true });
         // wait for table to be done loading
-        waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
+        waitForTableLoad(UNCOMMON_PROCESSES_TABLE);
         cy.get(getDraggableField('process.name'))
           .first()
           .invoke('text')
