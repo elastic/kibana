@@ -138,7 +138,7 @@ function FieldListItemComponent(
               <EuiButtonIcon
                 iconType="plusInCircle"
                 onClick={addField}
-                data-test-subj="addMultiFieldButton"
+                data-test-subj="addChildButton"
                 aria-label={addChildButtonLabel}
               />
             </EuiToolTip>
@@ -163,8 +163,8 @@ function FieldListItemComponent(
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"
-                  onClick={editField}
-                  data-test-subj="editFieldButton"
+                  onClick={() => deleteField(field)}
+                  data-test-subj="removeFieldButton"
                   aria-label={deleteButtonLabel}
                 />
               </EuiToolTip>
