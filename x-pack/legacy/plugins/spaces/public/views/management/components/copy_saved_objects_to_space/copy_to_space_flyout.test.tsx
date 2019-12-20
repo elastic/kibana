@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import Boom from 'boom';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { mockManagementPlugin } from '../../../../../../../../../src/legacy/core_plugins/management/public/np_ready/mocks';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
@@ -93,9 +93,10 @@ const setup = async (opts: SetupOpts = {}) => {
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender
-    await Promise.resolve();
-    await Promise.resolve();
-    wrapper.update();
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
   }
 
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
@@ -113,8 +114,10 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
-    await Promise.resolve();
-    wrapper.update();
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -160,13 +163,12 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     const startButton = findTestSubject(wrapper, 'cts-initiate-button');
-    act(() => {
+
+    await act(async () => {
       startButton.simulate('click');
+      await nextTick();
+      wrapper.update();
     });
-
-    await Promise.resolve();
-
-    wrapper.update();
 
     expect(mockSpacesManager.copySavedObjects).toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
@@ -214,12 +216,12 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     const startButton = findTestSubject(wrapper, 'cts-initiate-button');
-    act(() => {
-      startButton.simulate('click');
-    });
 
-    await Promise.resolve();
-    wrapper.update();
+    await act(async () => {
+      startButton.simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(mockSpacesManager.copySavedObjects).toHaveBeenCalled();
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
@@ -231,12 +233,12 @@ describe('CopyToSpaceFlyout', () => {
     overwriteButton.simulate('click');
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
-    act(() => {
-      finishButton.simulate('click');
-    });
 
-    await Promise.resolve();
-    wrapper.update();
+    await act(async () => {
+      finishButton.simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
@@ -275,13 +277,12 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     const startButton = findTestSubject(wrapper, 'cts-initiate-button');
-    act(() => {
+
+    await act(async () => {
       startButton.simulate('click');
+      await nextTick();
+      wrapper.update();
     });
-
-    await Promise.resolve();
-
-    wrapper.update();
 
     expect(mockSpacesManager.copySavedObjects).toHaveBeenCalledWith(
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
@@ -350,13 +351,12 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     const startButton = findTestSubject(wrapper, 'cts-initiate-button');
-    act(() => {
+
+    await act(async () => {
       startButton.simulate('click');
+      await nextTick();
+      wrapper.update();
     });
-
-    await Promise.resolve();
-
-    wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(ProcessingCopyToSpace)).toHaveLength(1);
@@ -368,12 +368,12 @@ describe('CopyToSpaceFlyout', () => {
     overwriteButton.simulate('click');
 
     const finishButton = findTestSubject(wrapper, 'cts-finish-button');
-    act(() => {
-      finishButton.simulate('click');
-    });
 
-    await Promise.resolve();
-    wrapper.update();
+    await act(async () => {
+      finishButton.simulate('click');
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalledWith(
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
@@ -420,13 +420,12 @@ describe('CopyToSpaceFlyout', () => {
     });
 
     const startButton = findTestSubject(wrapper, 'cts-initiate-button');
-    act(() => {
+
+    await act(async () => {
       startButton.simulate('click');
+      await nextTick();
+      wrapper.update();
     });
-
-    await Promise.resolve();
-
-    wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(0);
     expect(wrapper.find(ProcessingCopyToSpace)).toHaveLength(1);
