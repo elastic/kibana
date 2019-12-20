@@ -65,4 +65,5 @@ export const alertsHeaders: ColumnHeader[] = [
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
   columns: alertsHeaders,
+  showRowRenderers: false,
 };
