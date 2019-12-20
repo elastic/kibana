@@ -8,7 +8,6 @@ import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
 import { Plugin } from './plugin';
 import 'uiExports/embeddableFactories';
-
 new Plugin(
   { opaqueId: Symbol('uptime'), env: {} as any, config: { get: () => ({} as any) } },
   chrome
