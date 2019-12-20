@@ -32,6 +32,10 @@ const MOCK_VERSION = 'test-version';
 const MOCK_URL = 'http://127.0.0.1:12345';
 const MOCK_FILENAME = 'test-filename';
 
+const DAILY_SNAPSHOT_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots';
+const PERMANENT_SNAPSHOT_BASE_URL =
+  'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
+
 const createArchive = (params = {}) => {
   const license = params.license || 'default';
 
@@ -58,10 +62,18 @@ beforeEach(() => {
   };
 });
 
-const artifactTest = (requestedLicense, expectedLicense) => {
+const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) => {
   return async () => {
     const artifact = await Artifact.getSnapshot(requestedLicense, MOCK_VERSION, log);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(fetchTimesCalled);
+    expect(fetch.mock.calls[0][0]).toEqual(
+      `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest-verified.json`
+    );
+    if (fetchTimesCalled === 2) {
+      expect(fetch.mock.calls[1][0]).toEqual(
+        `${PERMANENT_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest.json`
+      );
+    }
     expect(artifact.getUrl()).toEqual(MOCK_URL + `/${expectedLicense}`);
     expect(artifact.getChecksumUrl()).toEqual(MOCK_URL + `/${expectedLicense}.sha512`);
     expect(artifact.getChecksumType()).toEqual('sha512');
@@ -76,10 +88,10 @@ describe('Artifact', () => {
         mockFetch(MOCKS.valid);
       });
 
-      it('should return artifact metadata for an oss artifact', artifactTest('oss', 'oss'));
+      it('should return artifact metadata for a daily oss artifact', artifactTest('oss', 'oss'));
 
       it(
-        'should return artifact metadata for a default artifact',
+        'should return artifact metadata for a daily default artifact',
         artifactTest('default', 'default')
       );
 
@@ -92,6 +104,70 @@ describe('Artifact', () => {
         await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
           "couldn't find an artifact"
         );
+      });
+    });
+
+    describe('with missing default snapshot', () => {
+      beforeEach(() => {
+        fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 404 })));
+        mockFetch(MOCKS.valid);
+      });
+
+      it(
+        'should return artifact metadata for a permanent oss artifact',
+        artifactTest('oss', 'oss', 2)
+      );
+
+      it(
+        'should return artifact metadata for a permanent default artifact',
+        artifactTest('default', 'default', 2)
+      );
+
+      it(
+        'should default to default license with anything other than "oss"',
+        artifactTest('INVALID_LICENSE', 'default', 2)
+      );
+
+      it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
+        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+          "couldn't find an artifact"
+        );
+      });
+    });
+
+    describe('with custom snapshot manifest URL', () => {
+      const CUSTOM_URL = 'http://www.creedthoughts.gov.www/creedthoughts';
+
+      beforeEach(() => {
+        process.env.ES_SNAPSHOT_MANIFEST = CUSTOM_URL;
+        mockFetch(MOCKS.valid);
+      });
+
+      it('should use the custom URL when looking for a snapshot', async () => {
+        await Artifact.getSnapshot('oss', MOCK_VERSION, log);
+        expect(fetch.mock.calls[0][0]).toEqual(CUSTOM_URL);
+      });
+
+      afterEach(() => {
+        delete process.env.ES_SNAPSHOT_MANIFEST;
+      });
+    });
+
+    describe('with latest unverified snapshot', () => {
+      beforeEach(() => {
+        process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = 1;
+        mockFetch(MOCKS.valid);
+      });
+
+      it('should use the daily unverified URL when looking for a snapshot', async () => {
+        await Artifact.getSnapshot('oss', MOCK_VERSION, log);
+        expect(fetch.mock.calls[0][0]).toEqual(
+          `${DAILY_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest-latest.json`
+        );
+      });
+
+      afterEach(() => {
+        delete process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED;
       });
     });
   });

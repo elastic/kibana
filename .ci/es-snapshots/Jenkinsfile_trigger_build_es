@@ -1,10 +1,10 @@
 #!/bin/groovy
 
-// TODO is there a good place to grab a list of these?
-def branches = [
-  'master',
-  // '7.4',
-]
+if (!params.branches_yaml) {
+  error "'branches_yaml' parameter must be specified"
+}
+
+def branches = readYaml text: params.branches_yaml
 
 branches.each { branch ->
   build(

@@ -18,8 +18,8 @@ if (!ES_BRANCH) {
   error "Parameter 'ES_BRANCH' must be specified."
 }
 
-currentBuild.displayName += " ${params.ES_BRANCH}"
-currentBuild.description = "ES: ${params.ES_BRANCH}\nKibana: ${params.branch_specifier}"
+currentBuild.displayName += " - ${params.ES_BRANCH}"
+currentBuild.description = "ES: ${params.ES_BRANCH}<br />Kibana: ${params.branch_specifier}"
 
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {
@@ -56,7 +56,7 @@ timeout(time: 120, unit: 'MINUTES') {
                 checksum: filename + '.sha512',
                 url: "https://storage.googleapis.com/kibana-ci-es-snapshots/${DESTINATION}/${filename}".toString(),
                 version: parts[1],
-                platform: parts.size() >= 5 ? parts[3] : '',
+                platform: parts.size() >= 5 ? parts[3] : 'no-jdk',
                 architecture: parts.size() >= 5 ? parts[4].split('\\.')[0] : '',
                 license: parts[0] == 'oss' ? 'oss' : 'default',
               ]
@@ -131,14 +131,15 @@ def upload(destination, pattern) {
 def buildArchives(destination) {
   def props = readProperties file: '.ci/java-versions.properties'
   withEnv([
-      "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}",
+    // Select the correct JDK for this branch
+    "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}",
 
-      // these jenkins env vars trigger some automation in ES that we don't want
-      "BUILD_NUMBER=",
-      "JENKINS_URL=",
-      "BUILD_URL=",
-      "JOB_NAME=",
-      "NODE_NAME=",
+    // these jenkins env vars trigger some automation in ES that we don't want
+    "BUILD_NUMBER=",
+    "JENKINS_URL=",
+    "BUILD_URL=",
+    "JOB_NAME=",
+    "NODE_NAME=",
   ]) {
     sh """
       ./gradlew -p distribution/archives assemble --parallel
