@@ -30,7 +30,7 @@ import {
   RenderingSetupDeps,
   RenderingServiceSetup,
   RenderingMetadata,
-  InternalRenderOptions,
+  LegacyRenderOptions,
 } from './types';
 
 /** @internal */
@@ -56,7 +56,7 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
           appId = 'core',
           includeUserSettings = true,
           injectedVarsOverrides = {},
-        }: InternalRenderOptions = {}
+        }: LegacyRenderOptions = {}
       ) => {
         const { env } = this.coreContext;
         const basePath = http.basePath.get(request);

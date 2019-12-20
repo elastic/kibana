@@ -150,7 +150,7 @@ export {
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
-export { RenderingServiceSetup, IRenderOptions, InternalRenderOptions } from './rendering';
+export { RenderingServiceSetup, IRenderOptions, LegacyRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {

@@ -805,12 +805,6 @@ export interface IndexSettingsDeprecationInfo {
     [indexName: string]: DeprecationInfo[];
 }
 
-// @internal @deprecated (undocumented)
-export interface InternalRenderOptions extends IRenderOptions {
-    appId?: string;
-    injectedVarsOverrides?: Record<string, any>;
-}
-
 // @public (undocumented)
 export interface IRenderOptions {
     includeUserSettings?: boolean;
@@ -997,6 +991,12 @@ export interface LegacyPluginSpec {
     getExpectedKibanaVersion: () => string;
     // (undocumented)
     getId: () => unknown;
+}
+
+// @internal @deprecated (undocumented)
+export interface LegacyRenderOptions extends IRenderOptions {
+    appId?: string;
+    injectedVarsOverrides?: Record<string, any>;
 }
 
 // @public @deprecated (undocumented)
@@ -1288,7 +1288,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @internal (undocumented)
 export interface RenderingServiceSetup {
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? InternalRenderOptions : IRenderOptions): Promise<string>;
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
 }
 
 // @public
