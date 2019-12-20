@@ -25,16 +25,67 @@ import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { RenderingServiceSetup } from '../rendering';
 import { SavedObjectsLegacyUiExports } from '../types';
-import { LegacyConfig, LegacyConfigDeprecationProvider } from './config';
 
-type Spec = Record<string, unknown>;
+/**
+ * @internal
+ * @deprecated
+ */
+export type Vars = Record<string, any>;
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type Spec = Record<string, unknown>;
+
 type LegacyCoreSetup = InternalCoreSetup & {
   plugins: PluginsServiceSetup;
   rendering: RenderingServiceSetup;
 };
 type LegacyCoreStart = InternalCoreStart & { plugins: PluginsServiceStart };
 
-export type Vars = Record<string, any>;
+/**
+ * New platform representation of the legacy configuration (KibanaConfig)
+ *
+ * @internal
+ * @deprecated
+ */
+export interface LegacyConfig {
+  get<T>(key?: string): T;
+  has(key: string): boolean;
+  set(key: string, value: any): void;
+  set(config: Vars): void;
+}
+
+/**
+ * Representation of a legacy configuration deprecation factory used for
+ * legacy plugin deprecations.
+ *
+ * @internal
+ * @deprecated
+ */
+export interface LegacyConfigDeprecationFactory {
+  rename(oldKey: string, newKey: string): LegacyConfigDeprecation;
+  unused(unusedKey: string): LegacyConfigDeprecation;
+}
+
+/**
+ * Representation of a legacy configuration deprecation.
+ *
+ * @internal
+ * @deprecated
+ */
+export type LegacyConfigDeprecation = (settings: Vars, log: (msg: string) => void) => void;
+
+/**
+ * Representation of a legacy configuration deprecation provider.
+ *
+ * @internal
+ * @deprecated
+ */
+export type LegacyConfigDeprecationProvider = (
+  factory: LegacyConfigDeprecationFactory
+) => LegacyConfigDeprecation[] | Promise<LegacyConfigDeprecation[]>;
 
 /**
  * @internal
@@ -88,6 +139,10 @@ export type VarsReplacer = (
  */
 export type LegacyNavLinkSpec = Spec & ChromeNavLink;
 
+/**
+ * @internal
+ * @deprecated
+ */
 export type LegacyAppSpec = Pick<
   ChromeNavLink,
   'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden'
@@ -108,7 +163,7 @@ export type LegacyNavLink = Omit<ChromeNavLink, 'baseUrl' | 'legacy' | 'order'> 
 export type LegacyUiExports = SavedObjectsLegacyUiExports & {
   defaultInjectedVarProviders?: VarsProvider[];
   injectedVarsReplacers?: VarsReplacer[];
-  navLinkSpecs?: LegacyNavLinkSpec[];
+  navLinkSpecs?: LegacyNavLinkSpec[] | null;
   uiAppSpecs?: Array<LegacyAppSpec | undefined>;
   unknown?: [{ pluginSpec: { getId: () => unknown }; type: unknown }];
 };

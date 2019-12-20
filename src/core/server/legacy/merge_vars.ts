@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { Vars } from './types';
+
 const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
 
-export function mergeVars(...sources: Array<Record<string, any>>): Record<string, any> {
+export function mergeVars(...sources: Vars[]): Vars {
   return Object.assign(
     {},
     ...sources,

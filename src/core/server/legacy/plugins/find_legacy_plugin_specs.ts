@@ -19,20 +19,27 @@
 
 import { Observable, merge, forkJoin } from 'rxjs';
 import { toArray, tap, distinct, map } from 'rxjs/operators';
+
 import {
   findPluginSpecs,
   defaultConfig,
   // @ts-ignore
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
-import { LoggerFactory } from '../../logging';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
-import { LegacyConfig } from '../config';
-import { LegacyUiExports, LegacyNavLink, LegacyPluginSpec, LegacyPluginPack } from '../types';
 
-const REMOVE_FROM_ARRAY: any[] = [];
+import { LoggerFactory } from '../../logging';
+import {
+  LegacyUiExports,
+  LegacyNavLink,
+  LegacyPluginSpec,
+  LegacyPluginPack,
+  LegacyConfig,
+} from '../types';
 
-function getUiApps({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
+const REMOVE_FROM_ARRAY: LegacyNavLink[] = [];
+
+function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
   return uiAppSpecs.flatMap(spec => {
     if (!spec) {
       return REMOVE_FROM_ARRAY;
@@ -67,22 +74,22 @@ function getUiApps({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: LegacyPlug
 }
 
 function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
-  const navLinkSpecs = uiExports.navLinkSpecs || [];
-  const navLinks = navLinkSpecs.map<LegacyNavLink>(spec => ({
-    id: spec.id,
-    title: spec.title,
-    order: typeof spec.order === 'number' ? spec.order : 0,
-    url: spec.url,
-    subUrlBase: spec.subUrlBase || spec.url,
-    icon: spec.icon,
-    euiIconType: spec.euiIconType,
-    linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
-    hidden: 'hidden' in spec ? spec.hidden : false,
-    disabled: 'disabled' in spec ? spec.disabled : false,
-    tooltip: spec.tooltip || '',
-  }));
-
-  return [...navLinks, ...getUiApps(uiExports, pluginSpecs)].sort((a, b) => a.order - b.order);
+  return (uiExports.navLinkSpecs || [])
+    .map<LegacyNavLink>(spec => ({
+      id: spec.id,
+      title: spec.title,
+      order: typeof spec.order === 'number' ? spec.order : 0,
+      url: spec.url,
+      subUrlBase: spec.subUrlBase || spec.url,
+      icon: spec.icon,
+      euiIconType: spec.euiIconType,
+      linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
+      hidden: 'hidden' in spec ? spec.hidden : false,
+      disabled: 'disabled' in spec ? spec.disabled : false,
+      tooltip: spec.tooltip || '',
+    }))
+    .concat(getUiAppsNavLinks(uiExports, pluginSpecs))
+    .sort((a, b) => a.order - b.order);
 }
 
 export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {

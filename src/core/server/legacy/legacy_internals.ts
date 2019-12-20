@@ -20,9 +20,8 @@
 import { Server } from 'hapi';
 
 import { LegacyRequest } from '../http';
-import { LegacyConfig } from './config';
 import { mergeVars } from './merge_vars';
-import { ILegacyInternals, LegacyPlugins, Vars, VarsInjector } from './types';
+import { ILegacyInternals, LegacyPlugins, Vars, VarsInjector, LegacyConfig } from './types';
 
 export class LegacyInternals implements ILegacyInternals {
   private readonly injectors = new Map<string, Set<VarsInjector>>();

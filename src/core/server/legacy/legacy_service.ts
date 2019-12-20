@@ -29,17 +29,17 @@ import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig }
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
-import { LegacyConfig, convertLegacyDeprecationProvider } from './config';
+import { convertLegacyDeprecationProvider } from './config';
 import {
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyPlugins,
   LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  Vars,
 } from './types';
 import { LegacyInternals } from './legacy_internals';
 import { CoreSetup, CoreStart } from '..';
-
-type Vars = Record<string, any>;
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Vars>) => void;

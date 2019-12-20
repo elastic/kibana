@@ -44,6 +44,7 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
+import { Vars } from './types';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -140,7 +141,7 @@ describe('once LegacyService is set up with connection info', () => {
       { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
       expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {} }
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
     );
     expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
       path: { autoListen: true },
@@ -170,7 +171,7 @@ describe('once LegacyService is set up with connection info', () => {
       { path: { autoListen: false }, server: { autoListen: true } },
       expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {} }
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
     );
     expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
       path: { autoListen: false },
@@ -311,7 +312,7 @@ describe('once LegacyService is set up without connection info', () => {
       { path: {}, server: { autoListen: true } },
       expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object),
-      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {} }
+      { disabledPluginSpecs: [], pluginSpecs: [], uiExports: {}, navLinks: [] }
     );
     expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
       path: {},
@@ -443,6 +444,7 @@ describe('#discoverPlugins()', () => {
           pluginExtendedConfig: settings,
           disabledPluginSpecs: [],
           uiExports: {},
+          navLinks: [],
         }) as any
     );
 
@@ -473,15 +475,16 @@ test('Sets the server.uuid property on the legacy configuration', async () => {
 
   const configSetMock = jest.fn();
 
-  findLegacyPluginSpecsMock.mockImplementation((settings: Record<string, any>) => ({
+  findLegacyPluginSpecsMock.mockImplementation((settings: Vars) => ({
     pluginSpecs: [],
     pluginExtendedConfig: {
       has: jest.fn(),
-      get: jest.fn(() => settings),
+      get: jest.fn().mockReturnValue(settings),
       set: configSetMock,
     },
     disabledPluginSpecs: [],
-    uiExports: [],
+    uiExports: {},
+    navLinks: [],
   }));
 
   await legacyService.discoverPlugins();
