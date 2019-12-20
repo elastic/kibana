@@ -5,7 +5,6 @@
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
-
 import {
   EuiPage,
   EuiPageBody,
@@ -17,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
@@ -157,6 +157,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     };
   });
 
+  const jobCreatorTitle = getJobCreatorTitle(jobCreator);
+
   return (
     <Fragment>
       <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
@@ -165,7 +167,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
-                  <h2>Create job: {getJobCreatorTitle(jobCreator)} </h2>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.newJob.page.createJob"
+                      defaultMessage={`Create job`}
+                    />
+                    : {jobCreatorTitle}
+                  </h2>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
