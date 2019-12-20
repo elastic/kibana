@@ -1,0 +1,17 @@
+{
+  "rule_id": "73fbc44c-c3cd-48a8-a473-f4eb2065c716",
+  "risk_score": 50,
+  "description": "EQL - DLL Search Order Hijack",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - DLL Search Order Hijack",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": " event.action:\"File created (rule: FileCreate)\"  and    not winlog.user.identifier:(\"S-1-5-18\" or \"S-1-5-19\" or \"S-1-5-20\") and    file.path:(\"C\\Windows\\ehome\\cryptbase.dll\" or               \"C\\Windows\\System32\\Sysprep\\cryptbase.dll\" or               \"C\\Windows\\System32\\Sysprep\\cryptsp.dll\" or               \"C\\Windows\\System32\\Sysprep\\rpcrtremote.dll\" or               \"C\\Windows\\System32\\Sysprep\\uxtheme.dll\" or               \"C\\Windows\\System32\\Sysprep\\dwmapi.dll\" or               \"C\\Windows\\System32\\Sysprep\\shcore.dll\" or               \"C\\Windows\\System32\\Sysprep\\oleacc.dll\" or               \"C\\Windows\\System32\\ntwdblib.dll\") ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

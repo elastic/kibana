@@ -20,6 +20,9 @@
           }
         }
       },
+      "consumer": {
+        "type": "keyword"
+      },
       "actions": {
         "type": "nested",
         "properties": {

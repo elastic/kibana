@@ -61,8 +61,8 @@ export class Plugin {
     });
 
     loadSampleData(
-      plugins.sampleData.addSavedObjectsToSampleDataset,
-      plugins.sampleData.addAppLinksToSampleDataset
+      plugins.home.sampleData.addSavedObjectsToSampleDataset,
+      plugins.home.sampleData.addAppLinksToSampleDataset
     );
   }
 }
