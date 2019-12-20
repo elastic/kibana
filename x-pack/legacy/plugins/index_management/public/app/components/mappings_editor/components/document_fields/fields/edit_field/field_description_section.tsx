@@ -13,6 +13,10 @@ interface Props {
 }
 
 export const FieldDescriptionSection = ({ children, isMultiField }: Props) => {
+  if (!children && !isMultiField) {
+    return null;
+  }
+
   return (
     <section>
       <EuiSpacer size="l" />

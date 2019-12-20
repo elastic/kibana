@@ -14,6 +14,7 @@ import { getFieldConfig, filterTypesForMultiField } from '../../../../lib';
 import { TYPE_DEFINITION } from '../../../../constants';
 
 import { NameParameter, TypeParameter } from '../../field_parameters';
+import { FieldDescriptionSection } from './field_description_section';
 
 interface Props {
   type: MainType;
@@ -105,6 +106,10 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+
+      <FieldDescriptionSection isMultiField={isMultiField}>
+        {typeDefinition.description ? typeDefinition.description() : null}
+      </FieldDescriptionSection>
     </>
   );
 });

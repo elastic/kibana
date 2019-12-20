@@ -30,16 +30,10 @@ import {
   TermVectorParameter,
   FieldDataParameter,
 } from '../../field_parameters';
-import {
-  FieldDescriptionSection,
-  BasicParametersSection,
-  EditFieldFormRow,
-  AdvancedParametersSection,
-} from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
-  isMultiField: boolean;
 }
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -73,7 +67,7 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
   }
 };
 
-export const TextType = React.memo(({ field, isMultiField }: Props) => {
+export const TextType = React.memo(({ field }: Props) => {
   const onIndexPrefixesChanage = (minField: FieldHook, maxField: FieldHook) => ([
     min,
     max,
@@ -84,27 +78,6 @@ export const TextType = React.memo(({ field, isMultiField }: Props) => {
 
   return (
     <>
-      <FieldDescriptionSection isMultiField={isMultiField}>
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.mappingsEditor.textType.fieldDescription"
-            defaultMessage="Text fields support full text search by breaking a string into individual terms, each of which can be searched for. Text fields aren't used for sorting and aggregations. If you need to index structured content such as email addresses or status codes, you should use the {keyword}."
-            values={{
-              keyword: (
-                <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.textType.fieldDescription.keywordTypeLink',
-                    {
-                      defaultMessage: 'keyword data type',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </FieldDescriptionSection>
-
       <BasicParametersSection>
         <IndexParameter />
       </BasicParametersSection>

@@ -17,12 +17,7 @@ import {
   IgnoreZValueParameter,
   OrientationParameter,
 } from '../../field_parameters';
-import {
-  FieldDescriptionSection,
-  BasicParametersSection,
-  EditFieldFormRow,
-  AdvancedParametersSection,
-} from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
@@ -44,36 +39,11 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean 
 
 interface Props {
   field: NormalizedField;
-  isMultiField: boolean;
 }
 
-export const GeoShapeType = ({ field, isMultiField }: Props) => {
+export const GeoShapeType = ({ field }: Props) => {
   return (
     <>
-      <FieldDescriptionSection isMultiField={isMultiField}>
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.mappingsEditor.geoShapeType.fieldDescription"
-            defaultMessage="Geo-shapes are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7-dimensional point in a BKD tree. {docsLink}"
-            values={{
-              docsLink: (
-                <EuiLink
-                  href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
-                  target="_blank"
-                >
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.geoShapeType.fieldDescription.learnMoreLink',
-                    {
-                      defaultMessage: 'Learn more.',
-                    }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </FieldDescriptionSection>
-
       <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(

@@ -6,21 +6,13 @@
 import React from 'react';
 
 import { StoreParameter, DocValuesParameter } from '../../field_parameters';
-import { FieldDescriptionSection, AdvancedParametersSection } from '../edit_field';
+import { AdvancedParametersSection } from '../edit_field';
 
-interface Props {
-  isMultiField: boolean;
-}
-
-export const BinaryType = ({ isMultiField }: Props) => {
+export const BinaryType = () => {
   return (
-    <>
-      <FieldDescriptionSection isMultiField={isMultiField} />
-
-      <AdvancedParametersSection>
-        <DocValuesParameter configPath="doc_values_binary" />
-        <StoreParameter />
-      </AdvancedParametersSection>
-    </>
+    <AdvancedParametersSection>
+      <DocValuesParameter configPath="doc_values_binary" />
+      <StoreParameter />
+    </AdvancedParametersSection>
   );
 };
