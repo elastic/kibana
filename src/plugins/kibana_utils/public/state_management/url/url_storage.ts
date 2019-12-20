@@ -157,39 +157,57 @@ export const createUrlControls = (history: History = createBrowserHistory()): IU
   };
 
   function updateUrl(newUrl: string, replace = false): string {
-    if (newUrl === getCurrentUrl()) return getCurrentUrl();
+    const currentUrl = getCurrentUrl();
+    if (newUrl === currentUrl) return currentUrl; // skip update
 
-    const { pathname, search } = parseUrl(newUrl);
-    const getHash = () => {
-      const parsedHash = parseUrlHash(newUrl);
-      if (!parsedHash) return undefined;
-      const searchQueryString = stringifyQueryString(parsedHash.query);
-      return formatUrl({
-        pathname: parsedHash.pathname,
-        search: searchQueryString,
-      });
-    };
-    const baseName = getBaseName();
-    const location = {
-      pathname: stripBasename(pathname, baseName),
-      hash: getHash(),
-      search,
-    };
+    const historyPath = getRelativeToHistoryPath(newUrl, history);
     if (replace) {
-      history.replace(location);
+      history.replace(historyPath);
     } else {
-      history.push(location);
+      history.push(historyPath);
     }
+
     return getCurrentUrl();
   }
+};
 
-  function stripBasename(path: string = '', prefix: string = '') {
-    return path.startsWith(prefix) ? path.substr(prefix.length) : path;
+/**
+ * Depending on history configuration extracts relative path for history updates
+ * 4 possible cases (see tests):
+ * 1. Browser history with empty base path
+ * 2. Browser history with base path
+ * 3. Hash history with empty base path
+ * 4. Hash history with base path
+ */
+export function getRelativeToHistoryPath(absoluteUrl: string, history: History): History.Path {
+  const parsedUrl = isHashHistory() ? parseUrlHash(absoluteUrl)! : parseUrl(absoluteUrl);
+  const parsedHash = isHashHistory() ? null : parseUrlHash(absoluteUrl);
+
+  return formatUrl({
+    pathname: stripBasename(parsedUrl.pathname),
+    search: stringifyQueryString(parsedUrl.query),
+    hash: parsedHash
+      ? formatUrl({
+          pathname: parsedHash.pathname,
+          search: stringifyQueryString(parsedHash.query),
+        })
+      : parsedUrl.hash,
+  });
+
+  function isHashHistory() {
+    return history.createHref({}).includes('#');
   }
-  function stripTrailingSlash(path: string = '') {
+
+  function stripBasename(path: string = '') {
+    const getBaseName = () => stripLeadingHash(stripTrailingSlash(history.createHref({})));
+    const baseName = getBaseName();
+    return path.startsWith(baseName) ? path.substr(baseName.length) : path;
+  }
+
+  function stripLeadingHash(path: string) {
+    return path.charAt(0) === '#' ? path.substr(1) : path;
+  }
+  function stripTrailingSlash(path: string) {
     return path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
   }
-  function getBaseName() {
-    return stripTrailingSlash(history.createHref({}));
-  }
-};
+}

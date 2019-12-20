@@ -17,24 +17,30 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { AppMountParameters, CoreSetup, Plugin } from 'kibana/public';
 
 export class StateContainersExamplesPlugin implements Plugin {
   public setup(core: CoreSetup) {
     core.application.register({
-      id: 'stateContainersExamples1',
-      title: 'State containers examples 1',
+      id: 'state-containers-example-browser-history',
+      title: 'State containers example - browser history routing',
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
-        return renderApp(params, '1');
+        const { renderApp, History } = await import('./app');
+        return renderApp(params, {
+          appInstanceId: '1-with-browser-history',
+          historyType: History.Browser,
+        });
       },
     });
     core.application.register({
-      id: 'stateContainersExamples2',
-      title: 'State containers examples 2',
+      id: 'state-containers-example-hash-history',
+      title: 'State containers example - hash history routing',
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
-        return renderApp(params, '2');
+        const { renderApp, History } = await import('./app');
+        return renderApp(params, {
+          appInstanceId: '2-with-hash-history',
+          historyType: History.Hash,
+        });
       },
     });
   }

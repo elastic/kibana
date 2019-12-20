@@ -20,17 +20,28 @@
 import { AppMountParameters } from 'kibana/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { createBrowserHistory } from 'history';
+import { createHashHistory, createBrowserHistory } from 'history';
 import { TodoAppPage } from './todo';
 
-export const renderApp = ({ appBasePath, element }: AppMountParameters, appInstanceId: string) => {
-  ReactDOM.render(
-    <TodoAppPage
-      history={createBrowserHistory({ basename: appBasePath })}
-      appInstanceId={appInstanceId}
-    />,
-    element
-  );
+export interface AppOptions {
+  appInstanceId: string;
+  historyType: History;
+}
+
+export enum History {
+  Browser,
+  Hash,
+}
+
+export const renderApp = (
+  { appBasePath, element }: AppMountParameters,
+  { appInstanceId, historyType }: AppOptions
+) => {
+  const history =
+    historyType === History.Browser
+      ? createBrowserHistory({ basename: appBasePath })
+      : createHashHistory();
+  ReactDOM.render(<TodoAppPage history={history} appInstanceId={appInstanceId} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
