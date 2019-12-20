@@ -18,10 +18,6 @@
 .mappingsEditor__fieldsListItem__field--enabled {
   &:hover {
     background-color: $euiColorLightestShade;
-    .mappingsEditor__fieldsListItem__actions,
-    .mappingsEditor__fieldsListItem__multiFieldButton {
-      opacity: 1;
-    }
   }
 }
 
@@ -64,7 +60,5 @@
 
 .mappingsEditor__fieldsListItem__actions,
 .mappingsEditor__fieldsListItem__multiFieldButton {
-  opacity: 0;
   padding-right: $euiSizeS;
-  transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
 }
