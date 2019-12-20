@@ -19,7 +19,7 @@ import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 import { Request } from '../types';
 
-export async function createDatasource(options: {
+interface CreateDatasource {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
   request: Request;
@@ -27,17 +27,16 @@ export async function createDatasource(options: {
   datasourceName: string;
   datasets: Dataset[];
   policyIds: string[];
-}) {
-  const {
-    savedObjectsClient,
-    callCluster,
-    pkgkey,
-    datasets,
-    datasourceName,
-    request,
-    policyIds,
-  } = options;
-
+}
+export async function createDatasource({
+  savedObjectsClient,
+  callCluster,
+  pkgkey,
+  datasets,
+  datasourceName,
+  request,
+  policyIds,
+}: CreateDatasource) {
   const epmPackageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
   if (epmPackageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
