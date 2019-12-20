@@ -20,6 +20,7 @@
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -121,7 +122,7 @@ export function getUiSettingDefaults() {
     },
     'search:queryLanguage': {
       name: queryLanguageSettingName,
-      value: 'kuery',
+      value: DEFAULT_QUERY_LANGUAGE,
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
           'Query language used by the query bar. KQL is a new language built specifically for Kibana.',

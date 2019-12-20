@@ -18,33 +18,26 @@
  */
 
 import { makeKQLUsageCollector } from './make_kql_usage_collector';
+import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
 describe('makeKQLUsageCollector', () => {
-  let server;
-  let makeUsageCollectorStub;
-  let registerStub;
-  let usageCollection;
+  let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
-    makeUsageCollectorStub = jest.fn();
-    registerStub = jest.fn();
-    usageCollection = {
-      makeUsageCollector: makeUsageCollectorStub,
-      registerCollector: registerStub,
-    };
-    server = {
-      config: () => ({ get: () => '.kibana' }),
-    };
+    usageCollectionMock = ({
+      makeUsageCollector: jest.fn(),
+      registerCollector: jest.fn(),
+    } as unknown) as jest.Mocked<UsageCollectionSetup>;
   });
 
   it('should call registerCollector', () => {
-    makeKQLUsageCollector(usageCollection, server);
-    expect(registerStub).toHaveBeenCalledTimes(1);
+    makeKQLUsageCollector(usageCollectionMock, '.kibana');
+    expect(usageCollectionMock.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('should call makeUsageCollector with type = kql', () => {
-    makeKQLUsageCollector(usageCollection, server);
-    expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
-    expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('kql');
+    makeKQLUsageCollector(usageCollectionMock, '.kibana');
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalledTimes(1);
+    expect(usageCollectionMock.makeUsageCollector.mock.calls[0][0].type).toBe('kql');
   });
 });

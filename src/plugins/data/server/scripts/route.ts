@@ -17,12 +17,15 @@
  * under the License.
  */
 
-export function registerLanguages(server) {
-  server.route({
-    path: '/api/kibana/scripts/languages',
-    method: 'GET',
-    handler: function() {
-      return ['painless', 'expression'];
-    },
-  });
+import { IRouter } from 'kibana/server';
+
+export function registerScriptsRoute(router: IRouter) {
+  router.get(
+    { path: '/api/kibana/scripts/languages', validate: false },
+    async (context, request, response) => {
+      return response.ok({
+        body: ['painless', 'expression'],
+      });
+    }
+  );
 }
