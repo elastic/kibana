@@ -8,6 +8,10 @@ import { ReturnTypeCreate, ReturnTypeUpdate } from '../../ingest/common/types/st
 import { Datasource } from '../../ingest/server/libs/types';
 import { Request } from './types';
 
+// Temporary while we're iterating.
+// Not an abstraction for Ingest. Just a file which handles Ingest-related behavior
+// We'll delete it or clean it up eventually
+
 export async function addDatasourcesToPolicy({
   request,
   datasources,
@@ -54,9 +58,6 @@ export async function createDatasource({
   }
 }
 
-// Temporary while we're iterating.
-// If we end up keeping the "make another HTTP request" method,
-// we'll clean this up via proxy or something else
 async function ingestAPI({
   path,
   method,

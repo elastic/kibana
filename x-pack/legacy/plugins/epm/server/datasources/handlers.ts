@@ -44,10 +44,10 @@ export async function handleRequestInstallDatasource(
       datasets,
       datasourceName,
       callCluster,
+      policyIds,
       // long-term, I don't want to pass `request` through
       // but this was the fastest/least invasive change way to make the change
       request,
-      policyIds,
     });
 
     return result;
