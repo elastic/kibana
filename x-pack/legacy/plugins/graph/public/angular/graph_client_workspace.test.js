@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const gws = require('../graph_client_workspace.js');
-const expect = require('@kbn/expect');
+import gws from './graph_client_workspace';
+
 describe('graphui-workspace', function() {
   describe('createWorkspace()', function() {
     // var fooResource=null;
@@ -47,7 +47,7 @@ describe('graphui-workspace', function() {
     });
     it('initializeWorkspace', function() {
       const { workspace } = init();
-      expect(workspace.nodes).to.have.length(0);
+      expect(workspace.nodes.length).toEqual(0);
     });
     it('simpleSearch', function() {
       //Test that a graph is loaded from a free-text search
@@ -79,16 +79,16 @@ describe('graphui-workspace', function() {
       };
       workspace.simpleSearch('myquery', {}, 2);
 
-      expect(workspace.nodes).to.have.length(2);
-      expect(workspace.edges).to.have.length(1);
-      expect(workspace.selectedNodes).to.have.length(0);
-      expect(workspace.blacklistedNodes).to.have.length(0);
+      expect(workspace.nodes.length).toEqual(2);
+      expect(workspace.edges.length).toEqual(1);
+      expect(workspace.selectedNodes.length).toEqual(0);
+      expect(workspace.blacklistedNodes.length).toEqual(0);
 
       const nodeA = workspace.getNode(workspace.makeNodeId('field1', 'a'));
-      expect(nodeA).to.be.an(Object);
+      expect(typeof nodeA).toBe('object');
 
       const nodeD = workspace.getNode(workspace.makeNodeId('field1', 'd'));
-      expect(nodeD).to.be(undefined);
+      expect(nodeD).toBe(undefined);
     });
 
     it('expandTest', function() {
@@ -121,10 +121,10 @@ describe('graphui-workspace', function() {
       };
       workspace.simpleSearch('myquery', {}, 2);
 
-      expect(workspace.nodes).to.have.length(2);
-      expect(workspace.edges).to.have.length(1);
-      expect(workspace.selectedNodes).to.have.length(0);
-      expect(workspace.blacklistedNodes).to.have.length(0);
+      expect(workspace.nodes.length).toEqual(2);
+      expect(workspace.edges.length).toEqual(1);
+      expect(workspace.selectedNodes.length).toEqual(0);
+      expect(workspace.blacklistedNodes.length).toEqual(0);
 
       mockedResult = {
         vertices: [
@@ -151,8 +151,8 @@ describe('graphui-workspace', function() {
         ],
       };
       workspace.expandGraph();
-      expect(workspace.nodes).to.have.length(3); //we already had b from initial query
-      expect(workspace.edges).to.have.length(2);
+      expect(workspace.nodes.length).toEqual(3); //we already had b from initial query
+      expect(workspace.edges.length).toEqual(2);
     });
 
     it('selectionTest', function() {
@@ -203,38 +203,38 @@ describe('graphui-workspace', function() {
       };
       workspace.simpleSearch('myquery', {}, 2);
 
-      expect(workspace.selectedNodes).to.have.length(0);
+      expect(workspace.selectedNodes.length).toEqual(0);
 
       const nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
-      expect(nodeA1).to.be.an(Object);
+      expect(typeof nodeA1).toEqual('object');
       const nodeA2 = workspace.getNode(workspace.makeNodeId('field1', 'a2'));
-      expect(nodeA2).to.be.an(Object);
+      expect(typeof nodeA2).toEqual('object');
       const nodeB1 = workspace.getNode(workspace.makeNodeId('field1', 'b1'));
-      expect(nodeB1).to.be.an(Object);
+      expect(typeof nodeB1).toEqual('object');
       const nodeB2 = workspace.getNode(workspace.makeNodeId('field1', 'b2'));
-      expect(nodeB2).to.be.an(Object);
+      expect(typeof nodeB2).toEqual('object');
 
-      expect(workspace.selectedNodes).to.have.length(0);
+      expect(workspace.selectedNodes.length).toEqual(0);
       workspace.selectNode(nodeA1);
-      expect(workspace.selectedNodes).to.have.length(1);
+      expect(workspace.selectedNodes.length).toEqual(1);
       workspace.selectInvert();
-      expect(workspace.selectedNodes).to.have.length(3);
+      expect(workspace.selectedNodes.length).toEqual(3);
       workspace.selectInvert();
-      expect(workspace.selectedNodes).to.have.length(1);
+      expect(workspace.selectedNodes.length).toEqual(1);
       workspace.deselectNode(nodeA1);
-      expect(workspace.selectedNodes).to.have.length(0);
+      expect(workspace.selectedNodes.length).toEqual(0);
       workspace.selectAll();
-      expect(workspace.selectedNodes).to.have.length(4);
+      expect(workspace.selectedNodes.length).toEqual(4);
       workspace.selectInvert();
-      expect(workspace.selectedNodes).to.have.length(0);
+      expect(workspace.selectedNodes.length).toEqual(0);
 
       workspace.selectNode(nodeA1);
-      expect(workspace.selectedNodes).to.have.length(1);
+      expect(workspace.selectedNodes.length).toEqual(1);
       workspace.selectNeighbours();
-      expect(workspace.selectedNodes).to.have.length(2);
+      expect(workspace.selectedNodes.length).toEqual(2);
       workspace.selectNeighbours();
       //Should have reached full extent of a1-a2 island.
-      expect(workspace.selectedNodes).to.have.length(2);
+      expect(workspace.selectedNodes.length).toEqual(2);
     });
 
     it('undoRedoDeletes', function() {
@@ -266,31 +266,31 @@ describe('graphui-workspace', function() {
       };
       workspace.simpleSearch('myquery', {}, 2);
 
-      expect(workspace.nodes).to.have.length(2);
+      expect(workspace.nodes.length).toEqual(2);
 
       let nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
-      expect(nodeA1).to.be.an(Object);
+      expect(typeof nodeA1).toEqual('object');
       const nodeA2 = workspace.getNode(workspace.makeNodeId('field1', 'a2'));
-      expect(nodeA2).to.be.an(Object);
+      expect(typeof nodeA2).toEqual('object');
 
       workspace.selectNode(nodeA1);
       workspace.deleteSelection();
-      expect(workspace.nodes).to.have.length(1);
+      expect(workspace.nodes.length).toEqual(1);
       nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
-      expect(nodeA1).to.be(undefined);
+      expect(nodeA1).toBe(undefined);
 
       workspace.undo();
-      expect(workspace.nodes).to.have.length(2);
+      expect(workspace.nodes.length).toEqual(2);
       nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
-      expect(nodeA1).to.be.an(Object);
+      expect(typeof nodeA1).toEqual('object');
 
       workspace.redo();
-      expect(workspace.nodes).to.have.length(1);
+      expect(workspace.nodes.length).toEqual(1);
       nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
-      expect(nodeA1).to.be(undefined);
+      expect(nodeA1).toBe(undefined);
 
       workspace.undo();
-      expect(workspace.nodes).to.have.length(2);
+      expect(workspace.nodes.length).toEqual(2);
     });
 
     it('undoRedoGroupings', function() {
@@ -322,36 +322,36 @@ describe('graphui-workspace', function() {
       };
       workspace.simpleSearch('myquery', {}, 2);
 
-      expect(workspace.nodes).to.have.length(2);
+      expect(workspace.nodes.length).toEqual(2);
 
       const nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
-      expect(nodeA1).to.be.an(Object);
+      expect(typeof nodeA1).toEqual('object');
       const nodeA2 = workspace.getNode(workspace.makeNodeId('field1', 'a2'));
-      expect(nodeA2).to.be.an(Object);
+      expect(typeof nodeA2).toEqual('object');
 
       workspace.selectNode(nodeA2);
       workspace.mergeSelections(nodeA1);
 
       let groupedItems = workspace.returnUnpackedGroupeds([nodeA1]);
-      expect(groupedItems).to.have.length(2);
+      expect(groupedItems.length).toEqual(2);
       workspace.undo();
       groupedItems = workspace.returnUnpackedGroupeds([nodeA1]);
-      expect(groupedItems).to.have.length(1);
+      expect(groupedItems.length).toEqual(1);
       workspace.redo();
       groupedItems = workspace.returnUnpackedGroupeds([nodeA1]);
-      expect(groupedItems).to.have.length(2);
+      expect(groupedItems.length).toEqual(2);
 
       //Grouped deletes delete all grouped items
       workspace.selectNone();
       workspace.selectNode(nodeA1);
       workspace.deleteSelection();
-      expect(workspace.nodes).to.have.length(0);
-      expect(workspace.selectedNodes).to.have.length(0);
+      expect(workspace.nodes.length).toEqual(0);
+      expect(workspace.selectedNodes.length).toEqual(0);
 
       workspace.undo();
-      expect(workspace.nodes).to.have.length(2);
+      expect(workspace.nodes.length).toEqual(2);
       groupedItems = workspace.returnUnpackedGroupeds([nodeA1]);
-      expect(groupedItems).to.have.length(2);
+      expect(groupedItems.length).toEqual(2);
     });
   });
 });
