@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { render, unmountComponentAtNode } from 'react-dom';
+import { Provider } from 'react-redux';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { EditorConfigProviderRegistry } from 'ui/vis/editors/config/editor_config_providers';
@@ -29,7 +32,12 @@ import {
 } from '../../../../../src/plugins/home/public';
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
+// @ts-ignore
+import { App } from './crud_app/app';
 import { ManagementStart } from '../../../../../src/plugins/management/public';
+// @ts-ignore
+import { rollupJobsStore } from './crud_app/store';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -46,6 +54,11 @@ export interface RollupPluginSetupDependencies {
 
 export interface RollupPluginStartDependencies {
   management: ManagementStart;
+  __LEGACY: {
+    // TODO this becomes part of the management section register function as soon as
+    // the API is ready
+    registerRollupApp: (renderFunction: (element: HTMLElement) => void) => () => void;
+  };
 }
 
 export class RollupPlugin implements Plugin {
@@ -94,7 +107,10 @@ export class RollupPlugin implements Plugin {
     }
   }
 
-  start(core: CoreStart, { management }: RollupPluginStartDependencies) {
+  start(
+    core: CoreStart,
+    { management, __LEGACY: { registerRollupApp } }: RollupPluginStartDependencies
+  ) {
     const esSection = management.legacy.getSection('elasticsearch');
 
     esSection.register('rollup_jobs', {
@@ -102,6 +118,31 @@ export class RollupPlugin implements Plugin {
       display: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
       order: 3,
       url: `#${CRUD_APP_BASE_PATH}/job_list`,
+    });
+
+    const I18nContext = core.i18n.Context;
+
+    registerRollupApp(elem => {
+      render(
+        <I18nContext>
+          <KibanaContextProvider
+            services={{
+              http: core.http,
+              notifications: core.notifications,
+              chrome: core.chrome,
+            }}
+          >
+            <Provider store={rollupJobsStore}>
+              <App />
+            </Provider>
+          </KibanaContextProvider>
+        </I18nContext>,
+        elem
+      );
+
+      return () => {
+        unmountComponentAtNode(elem);
+      };
     });
   }
 }
