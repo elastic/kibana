@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { setAppDependencies } from '../../../app_dependencies';
 import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -13,6 +12,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
+import { AppContextProvider } from '../../../app_context';
 jest.mock('../../../context/alerts_context');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -69,18 +69,23 @@ describe('alerts_list component empty', () => {
       total: 0,
       data: [],
     });
+
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: {
-        ...coreMock.createStart(),
-        injectedMetadata: {
-          getInjectedVar(name: string) {
-            if (name === 'createAlertUiEnabled') {
-              return true;
-            }
-          },
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: {
+        getInjectedVar(name: string) {
+          if (name === 'createAlertUiEnabled') {
+            return true;
+          }
         },
-      },
-      plugins: {
+      } as any,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -91,17 +96,18 @@ describe('alerts_list component empty', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
+
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <AlertsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 
@@ -187,18 +193,22 @@ describe('alerts_list component with items', () => {
       total: 0,
       data: [],
     });
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: {
-        ...coreMock.createStart(),
-        injectedMetadata: {
-          getInjectedVar(name: string) {
-            if (name === 'createAlertUiEnabled') {
-              return true;
-            }
-          },
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: {
+        getInjectedVar(name: string) {
+          if (name === 'createAlertUiEnabled') {
+            return true;
+          }
         },
-      },
-      plugins: {
+      } as any,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -209,18 +219,18 @@ describe('alerts_list component with items', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <AlertsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 
@@ -267,18 +277,22 @@ describe('alerts_list component empty with show only capability', () => {
       total: 0,
       data: [],
     });
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: {
-        ...coreMock.createStart(),
-        injectedMetadata: {
-          getInjectedVar(name: string) {
-            if (name === 'createAlertUiEnabled') {
-              return true;
-            }
-          },
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: {
+        getInjectedVar(name: string) {
+          if (name === 'createAlertUiEnabled') {
+            return true;
+          }
         },
-      },
-      plugins: {
+      } as any,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -289,8 +303,9 @@ describe('alerts_list component empty with show only capability', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: {
         get() {
           return null;
@@ -298,13 +313,12 @@ describe('alerts_list component empty with show only capability', () => {
       } as any,
       alertTypeRegistry: {} as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <AlertsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 
@@ -382,18 +396,22 @@ describe('alerts_list with show only capability', () => {
       total: 0,
       data: [],
     });
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: {
-        ...coreMock.createStart(),
-        injectedMetadata: {
-          getInjectedVar(name: string) {
-            if (name === 'createAlertUiEnabled') {
-              return true;
-            }
-          },
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: {
+        getInjectedVar(name: string) {
+          if (name === 'createAlertUiEnabled') {
+            return true;
+          }
         },
-      },
-      plugins: {
+      } as any,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -404,18 +422,18 @@ describe('alerts_list with show only capability', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <AlertsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 

@@ -277,9 +277,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   errors,
   hasErrors,
 }) => {
-  const {
-    core: { http },
-  } = useAppDependencies();
+  const { http } = useAppDependencies();
 
   const {
     index,

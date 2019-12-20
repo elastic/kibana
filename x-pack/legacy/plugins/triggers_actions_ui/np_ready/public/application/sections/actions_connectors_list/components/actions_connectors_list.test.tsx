@@ -6,11 +6,11 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionsConnectorsList } from './actions_connectors_list';
-import { setAppDependencies } from '../../../app_dependencies';
 import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import { AppContextProvider } from '../../../app_context';
 jest.mock('../../../context/actions_connectors_context');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -42,9 +42,16 @@ describe('actions_connectors_list component empty', () => {
         name: 'Test2',
       },
     ]);
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: coreMock.createStart(),
-      plugins: {
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -55,19 +62,19 @@ describe('actions_connectors_list component empty', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
     actionTypeRegistry.has.mockReturnValue(true);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <ActionsConnectorsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 
@@ -128,9 +135,17 @@ describe('actions_connectors_list component with items', () => {
         name: 'Test2',
       },
     ]);
+
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: coreMock.createStart(),
-      plugins: {
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -141,8 +156,9 @@ describe('actions_connectors_list component with items', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: {
         get() {
           return null;
@@ -150,13 +166,12 @@ describe('actions_connectors_list component with items', () => {
       } as any,
       alertTypeRegistry: {} as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <ActionsConnectorsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 
@@ -202,9 +217,16 @@ describe('actions_connectors_list component empty with show only capability', ()
         name: 'Test2',
       },
     ]);
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: coreMock.createStart(),
-      plugins: {
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -215,8 +237,9 @@ describe('actions_connectors_list component empty with show only capability', ()
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: {
         get() {
           return null;
@@ -224,13 +247,12 @@ describe('actions_connectors_list component empty with show only capability', ()
       } as any,
       alertTypeRegistry: {} as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <ActionsConnectorsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 
@@ -281,9 +303,16 @@ describe('actions_connectors_list with show only capability', () => {
         name: 'Test2',
       },
     ]);
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: coreMock.createStart(),
-      plugins: {
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -294,8 +323,9 @@ describe('actions_connectors_list with show only capability', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: {
         get() {
           return null;
@@ -303,13 +333,12 @@ describe('actions_connectors_list with show only capability', () => {
       } as any,
       alertTypeRegistry: {} as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <ActionsConnectorsList />
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 

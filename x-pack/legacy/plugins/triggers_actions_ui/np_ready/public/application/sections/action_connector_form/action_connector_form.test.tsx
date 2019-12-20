@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { setAppDependencies } from '../../app_dependencies';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -13,6 +12,7 @@ import { ActionsConnectorsContext } from '../../context/actions_connectors_conte
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
+import { AppContextProvider } from '../../app_context';
 jest.mock('../../context/actions_connectors_context');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -20,9 +20,16 @@ describe('action_connector_form', () => {
   let wrapper: ReactWrapper<any>;
 
   beforeAll(async () => {
+    const mockes = coreMock.createSetup();
+    const [{ chrome, docLinks }] = await mockes.getStartServices();
     const deps = {
-      core: coreMock.createStart(),
-      plugins: {
+      chrome,
+      docLinks,
+      toastNotifications: mockes.notifications.toasts,
+      injectedMetadata: mockes.injectedMetadata,
+      http: mockes.http,
+      uiSettings: mockes.uiSettings,
+      legacy: {
         capabilities: {
           get() {
             return {
@@ -33,12 +40,12 @@ describe('action_connector_form', () => {
               },
             };
           },
-        },
-      } as any,
+        } as any,
+        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
+      },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
-    const AppDependenciesProvider = setAppDependencies(deps);
 
     const actionType = {
       id: 'my-action-type',
@@ -65,7 +72,7 @@ describe('action_connector_form', () => {
 
     await act(async () => {
       wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
+        <AppContextProvider value={deps}>
           <ActionsConnectorsContext.Provider
             value={{
               addFlyoutVisible: true,
@@ -86,7 +93,7 @@ describe('action_connector_form', () => {
               setFlyoutVisibility={() => {}}
             />
           </ActionsConnectorsContext.Provider>
-        </AppDependenciesProvider>
+        </AppContextProvider>
       );
     });
 

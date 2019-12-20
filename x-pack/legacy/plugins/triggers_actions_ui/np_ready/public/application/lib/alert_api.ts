@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { BASE_ALERT_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId } from '../../types';
 
-export async function loadAlertTypes({ http }: { http: HttpServiceBase }): Promise<AlertType[]> {
+export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
 }
 
@@ -19,7 +19,7 @@ export async function loadAlerts({
   typesFilter,
   actionTypesFilter,
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
   page: { index: number; size: number };
   searchText?: string;
   typesFilter?: string[];
@@ -60,7 +60,7 @@ export async function deleteAlerts({
   http,
 }: {
   ids: string[];
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`)));
 }
@@ -69,7 +69,7 @@ export async function createAlert({
   http,
   alert,
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
   alert: Omit<AlertWithoutId, 'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds'>;
 }): Promise<Alert> {
   return await http.post(`${BASE_ALERT_API_PATH}`, {
@@ -82,7 +82,7 @@ export async function updateAlert({
   alert,
   id,
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
   alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'interval' | 'params' | 'actions'>;
   id: string;
 }): Promise<Alert> {
@@ -96,7 +96,7 @@ export async function enableAlerts({
   http,
 }: {
   ids: string[];
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`)));
 }
@@ -106,18 +106,12 @@ export async function disableAlerts({
   http,
 }: {
   ids: string[];
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`)));
 }
 
-export async function muteAlerts({
-  ids,
-  http,
-}: {
-  ids: string[];
-  http: HttpServiceBase;
-}): Promise<void> {
+export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
   await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`)));
 }
 
@@ -126,7 +120,7 @@ export async function unmuteAlerts({
   http,
 }: {
   ids: string[];
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`)));
 }

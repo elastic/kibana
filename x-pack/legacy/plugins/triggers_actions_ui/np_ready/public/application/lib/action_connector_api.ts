@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { BASE_ACTION_API_PATH } from '../constants';
 import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
 
@@ -13,14 +13,14 @@ import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../typ
 // We'll set this max setting assuming it's never reached.
 const MAX_ACTIONS_RETURNED = 10000;
 
-export async function loadActionTypes({ http }: { http: HttpServiceBase }): Promise<ActionType[]> {
+export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
   return await http.get(`${BASE_ACTION_API_PATH}/types`);
 }
 
 export async function loadAllActions({
   http,
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<{
   page: number;
   perPage: number;
@@ -38,7 +38,7 @@ export async function createActionConnector({
   http,
   connector,
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
   connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
 }): Promise<ActionConnector> {
   return await http.post(`${BASE_ACTION_API_PATH}`, {
@@ -51,7 +51,7 @@ export async function updateActionConnector({
   connector,
   id,
 }: {
-  http: HttpServiceBase;
+  http: HttpSetup;
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
@@ -69,7 +69,7 @@ export async function deleteActions({
   http,
 }: {
   ids: string[];
-  http: HttpServiceBase;
+  http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`)));
 }
