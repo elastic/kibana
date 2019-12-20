@@ -34,6 +34,9 @@ export function initRoutes(server, taskTestingEvents) {
         payload: Joi.object({
           task: Joi.object({
             taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
             interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
@@ -60,6 +63,30 @@ export function initRoutes(server, taskTestingEvents) {
   });
 
   server.route({
+    path: '/api/sample_tasks/run_now',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      const {
+        task: { id },
+      } = request.payload;
+      try {
+        return await taskManager.runNow(id);
+      } catch (err) {
+        return { id, error: `${err}` };
+      }
+    },
+  });
+
+  server.route({
     path: '/api/sample_tasks/ensure_scheduled',
     method: 'POST',
     config: {
@@ -67,7 +94,6 @@ export function initRoutes(server, taskTestingEvents) {
         payload: Joi.object({
           task: Joi.object({
             taskType: Joi.string().required(),
-            interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
             id: Joi.string().optional(),
@@ -99,13 +125,16 @@ export function initRoutes(server, taskTestingEvents) {
       validate: {
         payload: Joi.object({
           event: Joi.string().required(),
+          data: Joi.object()
+            .optional()
+            .default({}),
         }),
       },
     },
     async handler(request) {
       try {
-        const { event } = request.payload;
-        taskTestingEvents.emit(event);
+        const { event, data } = request.payload;
+        taskTestingEvents.emit(event, data);
         return { event };
       } catch (err) {
         return err;

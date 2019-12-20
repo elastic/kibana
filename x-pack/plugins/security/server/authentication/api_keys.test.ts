@@ -5,7 +5,7 @@
  */
 
 import { IClusterClient, IScopedClusterClient } from '../../../../../src/core/server';
-import { SecurityLicense } from '../licensing';
+import { SecurityLicense } from '../../common/licensing';
 import { APIKeys } from './api_keys';
 
 import {
@@ -13,7 +13,7 @@ import {
   loggingServiceMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { licenseMock } from '../licensing/index.mock';
+import { licenseMock } from '../../common/licensing/index.mock';
 
 describe('API Keys', () => {
   let apiKeys: APIKeys;

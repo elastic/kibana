@@ -16,11 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
+import {
+  ChromeStart,
+  OverlayStart,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from 'kibana/public';
 import { SearchSource, SearchSourceContract } from 'ui/courier';
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
-import { IndexPatternsContract } from '../../../../plugins/data/public';
-import { IndexPattern } from '../../../core_plugins/data/public';
+import { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
@@ -30,11 +34,11 @@ export interface SavedObject {
   creationOpts: (opts: SavedObjectCreationOpts) => Record<string, unknown>;
   defaults: any;
   delete?: () => Promise<{}>;
-  destroy?: () => void;
+  destroy: () => void;
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | IIndexPattern>;
   id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
@@ -66,7 +70,8 @@ export interface SavedObjectKibanaServices {
 }
 
 export interface SavedObjectConfig {
-  afterESResp?: () => any;
+  // is only used by visualize
+  afterESResp?: (savedObject: SavedObject) => Promise<SavedObject>;
   clearSavedIndexPattern?: boolean;
   defaults?: any;
   extractReferences?: (opts: {
@@ -78,7 +83,7 @@ export interface SavedObjectConfig {
   };
   id?: string;
   init?: () => void;
-  indexPattern?: IndexPattern;
+  indexPattern?: IIndexPattern;
   injectReferences?: any;
   mapping?: any;
   migrationVersion?: Record<string, any>;

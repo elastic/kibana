@@ -449,11 +449,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string;
+    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -564,6 +564,8 @@ export interface CoreSetup {
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
+    // (undocumented)
+    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -572,6 +574,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+    // (undocumented)
+    uiSettings: UiSettingsServiceStart;
 }
 
 // @public
@@ -928,6 +932,7 @@ export interface Logger {
     debug(message: string, meta?: LogMeta): void;
     error(errorOrMessage: string | Error, meta?: LogMeta): void;
     fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
+    get(...childContextPaths: string[]): Logger;
     info(message: string, meta?: LogMeta): void;
     // @internal (undocumented)
     log(record: LogRecord): void;
@@ -1819,6 +1824,11 @@ export interface UiSettingsServiceSetup {
     register(settings: Record<string, UiSettingsParams>): void;
 }
 
+// @public (undocumented)
+export interface UiSettingsServiceStart {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
@@ -1828,6 +1838,11 @@ export interface UserProvidedValues<T = any> {
     isOverridden?: boolean;
     // (undocumented)
     userValue?: T;
+}
+
+// @public
+export interface UuidServiceSetup {
+    getInstanceUuid(): string;
 }
 
 // @public

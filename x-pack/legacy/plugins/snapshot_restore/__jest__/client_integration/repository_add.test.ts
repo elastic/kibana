@@ -11,6 +11,8 @@ import { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
