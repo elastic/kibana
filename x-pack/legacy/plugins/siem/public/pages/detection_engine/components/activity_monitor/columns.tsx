@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiIconTip, EuiLink, EuiTextColor } from '@elastic/eui';
+import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 import React from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { ColumnTypes } from './index';
 
-const actions = [
+const actions: Array<DefaultItemIconButtonAction<ColumnTypes>> = [
   {
     available: (item: ColumnTypes) => item.status === 'Running',
     description: 'Stop',
@@ -17,7 +18,7 @@ const actions = [
     isPrimary: true,
     name: 'Stop',
     onClick: () => {},
-    type: 'icon',
+    type: 'icon' as const,
   },
   {
     available: (item: ColumnTypes) => item.status === 'Stopped',
@@ -26,12 +27,12 @@ const actions = [
     isPrimary: true,
     name: 'Resume',
     onClick: () => {},
-    type: 'icon',
+    type: 'icon' as const,
   },
 ];
 
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
-export const columns = [
+export const columns: Array<EuiBasicTableColumn<ColumnTypes>> = [
   {
     field: 'rule',
     name: 'Rule',

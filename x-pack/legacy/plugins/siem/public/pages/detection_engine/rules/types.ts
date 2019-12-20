@@ -19,7 +19,7 @@ export interface EuiBasicTableOnChange {
     index: number;
     size: number;
   };
-  sort: EuiBasicTableSortTypes;
+  sort?: EuiBasicTableSortTypes;
 }
 
 export interface TableData {
