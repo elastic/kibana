@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
+import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../../../plugins/features/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -15,8 +16,11 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
+export type SiemPluginSecurity = Pick<SecurityPlugin, 'authc'>;
+
 export interface PluginsSetup {
   features: FeaturesSetupContract;
+  security: SiemPluginSecurity;
 }
 
 export class Plugin {
@@ -33,7 +37,6 @@ export class Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     this.logger.debug('Shim plugin setup');
-
     plugins.features.registerFeature({
       id: this.name,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
@@ -75,7 +78,7 @@ export class Plugin {
       },
     });
 
-    const libs = compose(core, this.context.env);
+    const libs = compose(core, plugins, this.context.env);
     initServer(libs);
   }
 }

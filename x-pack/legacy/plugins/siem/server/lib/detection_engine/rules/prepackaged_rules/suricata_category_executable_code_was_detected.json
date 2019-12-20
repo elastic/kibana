@@ -1,0 +1,17 @@
+{
+  "rule_id": "4699296b-5127-475a-9d83-8434fcd18136",
+  "risk_score": 50,
+  "description": "Suricata Category - Executable code was detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Executable code was detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Executable code was detected\" or rule.category: \"Executable code was detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

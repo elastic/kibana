@@ -312,6 +312,7 @@ export class LegacyService implements CoreService {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
       savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires

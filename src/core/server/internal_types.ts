@@ -19,7 +19,7 @@
 
 import { InternalElasticsearchServiceSetup } from './elasticsearch';
 import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup } from './ui_settings';
+import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { ContextSetup } from './context';
 import {
   InternalSavedObjectsServiceStart,
@@ -45,4 +45,5 @@ export interface InternalCoreSetup {
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
 }

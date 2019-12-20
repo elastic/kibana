@@ -191,22 +191,31 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
+  _getJoinFields() {
+    const joinFields = [];
+    this.getValidJoins().forEach(join => {
+      const fields = join.getJoinFields();
+      joinFields.push(...fields);
+    });
+    return joinFields;
+  }
+
   async getDateFields() {
     return await this._source.getDateFields();
   }
 
   async getNumberFields() {
     const numberFieldOptions = await this._source.getNumberFields();
-    const joinFields = [];
-    this.getValidJoins().forEach(join => {
-      const fields = join.getJoinFields();
-      joinFields.push(...fields);
-    });
-    return [...numberFieldOptions, ...joinFields];
+    return [...numberFieldOptions, ...this._getJoinFields()];
   }
 
   async getOrdinalFields() {
     return [...(await this.getDateFields()), ...(await this.getNumberFields())];
+  }
+
+  async getFields() {
+    const sourceFields = await this._source.getFields();
+    return [...sourceFields, ...this._getJoinFields()];
   }
 
   getIndexPatternIds() {
@@ -621,30 +630,40 @@ export class VectorLayer extends AbstractLayer {
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
-    let mbLayerId;
+    // Point layers symbolized as circles require 2 mapbox layers because
+    // "circle" layers do not support "text" style properties
+    // Point layers symbolized as icons only contain a single mapbox layer.
+    let markerLayerId;
+    let textLayerId;
     if (this._style.arePointsSymbolizedAsCircles()) {
-      mbLayerId = pointLayerId;
+      markerLayerId = pointLayerId;
+      textLayerId = this._getMbTextLayerId();
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
       this._setMbCircleProperties(mbMap);
     } else {
-      mbLayerId = symbolLayerId;
+      markerLayerId = symbolLayerId;
+      textLayerId = symbolLayerId;
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
+        mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
       this._setMbSymbolProperties(mbMap);
     }
 
-    this.syncVisibilityWithMb(mbMap, mbLayerId);
-    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this.syncVisibilityWithMb(mbMap, markerLayerId);
+    mbMap.setLayerZoomRange(markerLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    if (markerLayerId !== textLayerId) {
+      this.syncVisibilityWithMb(mbMap, textLayerId);
+      mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    }
   }
 
   _setMbCircleProperties(mbMap) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
-
     if (!pointLayer) {
       mbMap.addLayer({
         id: pointLayerId,
@@ -654,15 +673,32 @@ export class VectorLayer extends AbstractLayer {
       });
     }
 
+    const textLayerId = this._getMbTextLayerId();
+    const textLayer = mbMap.getLayer(textLayerId);
+    if (!textLayer) {
+      mbMap.addLayer({
+        id: textLayerId,
+        type: 'symbol',
+        source: sourceId,
+      });
+    }
+
     const filterExpr = getPointFilterExpression(this._hasJoins());
     if (filterExpr !== mbMap.getFilter(pointLayerId)) {
       mbMap.setFilter(pointLayerId, filterExpr);
+      mbMap.setFilter(textLayerId, filterExpr);
     }
 
     this._style.setMBPaintPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
-      pointLayerId: pointLayerId,
+      pointLayerId,
+    });
+
+    this._style.setMBPropertiesForLabelText({
+      alpha: this.getAlpha(),
+      mbMap,
+      textLayerId,
     });
   }
 
@@ -687,7 +723,13 @@ export class VectorLayer extends AbstractLayer {
     this._style.setMBSymbolPropertiesForPoints({
       alpha: this.getAlpha(),
       mbMap,
-      symbolLayerId: symbolLayerId,
+      symbolLayerId,
+    });
+
+    this._style.setMBPropertiesForLabelText({
+      alpha: this.getAlpha(),
+      mbMap,
+      textLayerId: symbolLayerId,
     });
   }
 
@@ -759,6 +801,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('circle');
   }
 
+  _getMbTextLayerId() {
+    return this.makeMbLayerId('text');
+  }
+
   _getMbSymbolLayerId() {
     return this.makeMbLayerId('symbol');
   }
@@ -774,6 +820,7 @@ export class VectorLayer extends AbstractLayer {
   getMbLayerIds() {
     return [
       this._getMbPointLayerId(),
+      this._getMbTextLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
@@ -781,12 +828,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   ownsMbLayerId(mbLayerId) {
-    return (
-      this._getMbPointLayerId() === mbLayerId ||
-      this._getMbLineLayerId() === mbLayerId ||
-      this._getMbPolygonLayerId() === mbLayerId ||
-      this._getMbSymbolLayerId() === mbLayerId
-    );
+    return this.getMbLayerIds().includes(mbLayerId);
   }
 
   ownsMbSourceId(mbSourceId) {
