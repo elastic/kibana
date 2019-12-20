@@ -32,12 +32,12 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../.
 
 import { findByTitle, getRoutes } from '../utils';
 import { indexPatterns } from '../';
-import { Field, FieldList, FieldListInterface } from '../fields';
+import { Field, FieldList, IFieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
-import { getNotifications, getFieldFormats } from '../services';
+import { getNotifications, getFieldFormats } from '../../services';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -50,7 +50,7 @@ export class IndexPattern implements IIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta: any;
-  public fields: FieldListInterface;
+  public fields: IFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -437,13 +437,10 @@ export class IndexPattern implements IIndexPattern {
             }
 
             if (unresolvedCollision) {
-              const message = i18n.translate(
-                'data.indexPatterns.unableWriteLabel',
-                {
-                  defaultMessage:
-                    'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-                } // eslint-disable-line max-len
-              );
+              const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
+                defaultMessage:
+                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+              });
               const { toasts } = getNotifications();
 
               toasts.addDanger(message);

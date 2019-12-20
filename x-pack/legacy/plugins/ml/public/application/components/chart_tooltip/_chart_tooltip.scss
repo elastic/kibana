@@ -1,6 +1,3 @@
-@import '@elastic/eui/src/components/tool_tip/variables';
-@import '@elastic/eui/src/components/tool_tip/mixins';
-
 .mlChartTooltip {
   @include euiToolTipStyle('s');
   @include euiFontSizeXS;
@@ -50,5 +47,4 @@
   &--hidden {
     opacity: 0;
   }
-
 }

@@ -5,17 +5,15 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { RequestAuth } from 'hapi';
-import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
-
-import { SavedObjectsFindOptions } from 'src/core/server';
-
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { Pick3 } from '../../../common/utility_types';
-import { FrameworkRequest, internalFrameworkRequest } from '../framework';
+
+import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
+import { FrameworkRequest } from '../framework';
 import {
   PinnedEventSavedObject,
   PinnedEventSavedObjectRuntimeType,
@@ -27,24 +25,18 @@ import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 
 export class PinnedEvent {
-  constructor(
-    private readonly libs: {
-      savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-        Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isConflictError'>;
-    }
-  ) {}
-
   public async deletePinnedEventOnTimeline(request: FrameworkRequest, pinnedEventIds: string[]) {
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
     await Promise.all(
       pinnedEventIds.map(pinnedEventId =>
-        this.libs.savedObjects
-          .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-          .delete(pinnedEventSavedObjectType, pinnedEventId)
+        savedObjectsClient.delete(pinnedEventSavedObjectType, pinnedEventId)
       )
     );
   }
 
   public async deleteAllPinnedEventsOnTimeline(request: FrameworkRequest, timelineId: string) {
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const options: SavedObjectsFindOptions = {
       type: pinnedEventSavedObjectType,
       search: timelineId,
@@ -53,9 +45,7 @@ export class PinnedEvent {
     const pinnedEventToBeDeleted = await this.getAllSavedPinnedEvents(request, options);
     await Promise.all(
       pinnedEventToBeDeleted.map(pinnedEvent =>
-        this.libs.savedObjects
-          .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-          .delete(pinnedEventSavedObjectType, pinnedEvent.pinnedEventId)
+        savedObjectsClient.delete(pinnedEventSavedObjectType, pinnedEvent.pinnedEventId)
       )
     );
   }
@@ -103,18 +93,18 @@ export class PinnedEvent {
     eventId: string,
     timelineId: string | null
   ): Promise<PinnedEventResponse | null> {
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
     try {
       if (pinnedEventId == null) {
         const timelineVersionSavedObject =
           timelineId == null
             ? await (async () => {
                 const timelineResult = convertSavedObjectToSavedTimeline(
-                  await this.libs.savedObjects
-                    .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-                    .create(
-                      timelineSavedObjectType,
-                      pickSavedTimeline(null, {}, request[internalFrameworkRequest].auth || null)
-                    )
+                  await savedObjectsClient.create(
+                    timelineSavedObjectType,
+                    pickSavedTimeline(null, {}, request.user || null)
+                  )
                 );
                 timelineId = timelineResult.savedObjectId; // eslint-disable-line no-param-reassign
                 return timelineResult.version;
@@ -133,16 +123,10 @@ export class PinnedEvent {
             };
             // create Pinned Event on Timeline
             return convertSavedObjectToSavedPinnedEvent(
-              await this.libs.savedObjects
-                .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-                .create(
-                  pinnedEventSavedObjectType,
-                  pickSavedPinnedEvent(
-                    pinnedEventId,
-                    savedPinnedEvent,
-                    request[internalFrameworkRequest].auth || null
-                  )
-                ),
+              await savedObjectsClient.create(
+                pinnedEventSavedObjectType,
+                pickSavedPinnedEvent(pinnedEventId, savedPinnedEvent, request.user || null)
+              ),
               timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
             );
           }
@@ -177,10 +161,7 @@ export class PinnedEvent {
   }
 
   private async getSavedPinnedEvent(request: FrameworkRequest, pinnedEventId: string) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
-
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(pinnedEventSavedObjectType, pinnedEventId);
 
     return convertSavedObjectToSavedPinnedEvent(savedObject);
@@ -190,10 +171,7 @@ export class PinnedEvent {
     request: FrameworkRequest,
     options: SavedObjectsFindOptions
   ) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
-
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObjects = await savedObjectsClient.find(options);
 
     return savedObjects.saved_objects.map(savedObject =>
@@ -229,17 +207,18 @@ const convertSavedObjectToSavedPinnedEvent = (
 const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
   savedPinnedEvent: SavedPinnedEvent,
-  userInfo: RequestAuth
+  userInfo: AuthenticatedUser | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
+  const dateNow = new Date().valueOf();
   if (pinnedEventId == null) {
-    savedPinnedEvent.created = new Date().valueOf();
-    savedPinnedEvent.createdBy = getOr(null, 'credentials.username', userInfo);
-    savedPinnedEvent.updated = new Date().valueOf();
-    savedPinnedEvent.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedPinnedEvent.created = dateNow;
+    savedPinnedEvent.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedPinnedEvent.updated = dateNow;
+    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   } else if (pinnedEventId != null) {
-    savedPinnedEvent.updated = new Date().valueOf();
-    savedPinnedEvent.updatedBy = getOr(null, 'credentials.username', userInfo);
+    savedPinnedEvent.updated = dateNow;
+    savedPinnedEvent.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
   return savedPinnedEvent;
 };

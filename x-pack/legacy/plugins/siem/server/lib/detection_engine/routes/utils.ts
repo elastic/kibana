@@ -5,77 +5,8 @@
  */
 
 import Boom from 'boom';
-import { pickBy } from 'lodash/fp';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { RuleAlertType, isAlertType, OutputRuleAlertRest, isAlertTypes } from '../alerts/types';
 import { ServerFacade, RequestFacade } from '../../../types';
-
-export const getIdError = ({
-  id,
-  ruleId,
-}: {
-  id: string | undefined | null;
-  ruleId: string | undefined | null;
-}) => {
-  if (id != null) {
-    return new Boom(`id of ${id} not found`, { statusCode: 404 });
-  } else if (ruleId != null) {
-    return new Boom(`rule_id of ${ruleId} not found`, { statusCode: 404 });
-  } else {
-    return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
-  }
-};
-
-// Transforms the data but will remove any null or undefined it encounters and not include
-// those on the export
-export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAlertRest> => {
-  return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
-    created_by: alert.createdBy,
-    description: alert.params.description,
-    enabled: alert.enabled,
-    false_positives: alert.params.falsePositives,
-    filter: alert.params.filter,
-    filters: alert.params.filters,
-    from: alert.params.from,
-    id: alert.id,
-    immutable: alert.params.immutable,
-    index: alert.params.index,
-    interval: alert.interval,
-    rule_id: alert.params.ruleId,
-    language: alert.params.language,
-    output_index: alert.params.outputIndex,
-    max_signals: alert.params.maxSignals,
-    risk_score: alert.params.riskScore,
-    name: alert.name,
-    query: alert.params.query,
-    references: alert.params.references,
-    saved_id: alert.params.savedId,
-    meta: alert.params.meta,
-    severity: alert.params.severity,
-    updated_by: alert.updatedBy,
-    tags: alert.params.tags,
-    to: alert.params.to,
-    type: alert.params.type,
-    threats: alert.params.threats,
-  });
-};
-
-export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
-  if (isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
-    return findResults;
-  } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
-  }
-};
-
-export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> | Boom => {
-  if (isAlertType(alert)) {
-    return transformAlertToRule(alert);
-  } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
-  }
-};
 
 export const transformError = (err: Error & { statusCode?: number }) => {
   if (Boom.isBoom(err)) {
@@ -83,11 +14,65 @@ export const transformError = (err: Error & { statusCode?: number }) => {
   } else {
     if (err.statusCode != null) {
       return new Boom(err.message, { statusCode: err.statusCode });
+    } else if (err instanceof TypeError) {
+      // allows us to throw type errors instead of booms in some conditions
+      // where we don't want to mingle Boom with the rest of the code
+      return new Boom(err.message, { statusCode: 400 });
     } else {
       // natively return the err and allow the regular framework
       // to deal with the error when it is a non Boom
       return err;
     }
+  }
+};
+
+export interface BulkError {
+  id: string;
+  error: {
+    statusCode: number;
+    message: string;
+  };
+}
+export const createBulkErrorObject = ({
+  ruleId,
+  statusCode,
+  message,
+}: {
+  ruleId: string;
+  statusCode: number;
+  message: string;
+}): BulkError => {
+  return {
+    id: ruleId,
+    error: {
+      statusCode,
+      message,
+    },
+  };
+};
+
+export const transformBulkError = (
+  ruleId: string,
+  err: Error & { statusCode?: number }
+): BulkError => {
+  if (Boom.isBoom(err)) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: err.output.statusCode,
+      message: err.message,
+    });
+  } else if (err instanceof TypeError) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 400,
+      message: err.message,
+    });
+  } else {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: err.statusCode ?? 500,
+      message: err.message,
+    });
   }
 };
 
@@ -97,8 +82,8 @@ export const getIndex = (request: RequestFacade, server: ServerFacade): string =
   return `${signalsIndex}-${spaceId}`;
 };
 
-export const callWithRequestFactory = (request: RequestFacade) => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+export const callWithRequestFactory = (request: RequestFacade, server: ServerFacade) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   return <T, U>(endpoint: string, params: T, options?: U) => {
     return callWithRequest(request, endpoint, params, options);
   };

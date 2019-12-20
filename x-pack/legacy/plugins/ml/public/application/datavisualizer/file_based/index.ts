@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './file_datavisualizer_directive';
+export { FileDataVisualizerPage } from './file_datavisualizer';

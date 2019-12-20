@@ -13,7 +13,14 @@
       "alertTypeId": {
         "type": "keyword"
       },
-      "interval": {
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
+      },
+      "consumer": {
         "type": "keyword"
       },
       "actions": {
@@ -23,6 +30,9 @@
             "type": "keyword"
           },
           "actionRef": {
+            "type": "keyword"
+          },
+          "actionTypeId": {
             "type": "keyword"
           },
           "params": {

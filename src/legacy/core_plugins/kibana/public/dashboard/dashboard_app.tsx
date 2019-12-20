@@ -118,6 +118,7 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           AppStateClass: AppState,
           config,
           confirmModal,
+          indexPatterns: deps.npDataStart.indexPatterns,
           ...deps,
         }),
     };

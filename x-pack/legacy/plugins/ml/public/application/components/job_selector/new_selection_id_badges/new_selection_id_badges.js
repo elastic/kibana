@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import { PropTypes } from 'prop-types';
-import {
-  EuiFlexItem,
-  EuiLink,
-  EuiText
-} from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +16,7 @@ export function NewSelectionIdBadges({
   newSelection,
   onDeleteClick,
   onLinkClick,
-  showAllBadges
+  showAllBadges,
 }) {
   const badges = [];
 
@@ -36,7 +30,7 @@ export function NewSelectionIdBadges({
         <JobSelectorBadge
           id={newSelection[i]}
           icon={true}
-          isGroup={(maps.groupsMap[newSelection[i]] !== undefined)}
+          isGroup={maps.groupsMap[newSelection[i]] !== undefined}
           removeId={onDeleteClick}
         />
       </EuiFlexItem>
@@ -45,29 +39,25 @@ export function NewSelectionIdBadges({
 
   if (showAllBadges === false && newSelection.length > limit) {
     badges.push(
-      <EuiLink
-        key="more-badges-link"
-        onClick={onLinkClick}
-      >
+      <EuiLink key="more-badges-link" onClick={onLinkClick}>
         <EuiText grow={false} size="xs">
           {i18n.translate('xpack.ml.jobSelector.showFlyoutBadges', {
             defaultMessage: `And {overFlow} more`,
             values: { overFlow: newSelection.length - limit },
           })}
         </EuiText>
-      </EuiLink>);
+      </EuiLink>
+    );
   } else if (showAllBadges === true && newSelection.length > limit) {
     badges.push(
-      <EuiLink
-        key="hide-badges-link"
-        onClick={onLinkClick}
-      >
+      <EuiLink key="hide-badges-link" onClick={onLinkClick}>
         <EuiText grow={false} size="xs">
           {i18n.translate('xpack.ml.jobSelector.hideFlyoutBadges', {
-            defaultMessage: 'Hide'
+            defaultMessage: 'Hide',
           })}
         </EuiText>
-      </EuiLink>);
+      </EuiLink>
+    );
   }
 
   return badges;
@@ -76,10 +66,10 @@ NewSelectionIdBadges.propTypes = {
   limit: PropTypes.number,
   maps: PropTypes.shape({
     jobsMap: PropTypes.object,
-    groupsMap: PropTypes.object
+    groupsMap: PropTypes.object,
   }),
   newSelection: PropTypes.array,
   onDeleteClick: PropTypes.func,
   onLinkClick: PropTypes.func,
-  showAllBadges: PropTypes.bool
+  showAllBadges: PropTypes.bool,
 };

@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractField } from './field';
 import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 export class ESAggMetricField extends AbstractField {
-
   static type = 'ES_AGG';
 
   constructor({ label, source, aggType, esDocField, origin }) {
@@ -25,7 +24,9 @@ export class ESAggMetricField extends AbstractField {
   }
 
   async getLabel() {
-    return this._label ? await this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
+    return this._label
+      ? await this._label
+      : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
   }
 
   getAggType() {
@@ -33,7 +34,12 @@ export class ESAggMetricField extends AbstractField {
   }
 
   isValid() {
-    return (this.getAggType() === COUNT_AGG_TYPE) ? true : !!this._esDocField;
+    return this.getAggType() === COUNT_AGG_TYPE ? true : !!this._esDocField;
+  }
+
+  async getDataType() {
+    // aggregations only provide numerical data
+    return 'number';
   }
 
   getESDocFieldName() {
@@ -41,7 +47,9 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getRequestDescription() {
-    return this.getAggType() !== COUNT_AGG_TYPE ? `${this.getAggType()} ${this.getESDocFieldName()}` : COUNT_AGG_TYPE;
+    return this.getAggType() !== COUNT_AGG_TYPE
+      ? `${this.getAggType()} ${this.getESDocFieldName()}`
+      : COUNT_AGG_TYPE;
   }
 
   async createTooltipProperty(value) {
@@ -55,18 +63,26 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-
   makeMetricAggConfig() {
     const metricAggConfig = {
       id: this.getName(),
       enabled: true,
       type: this.getAggType(),
       schema: 'metric',
-      params: {}
+      params: {},
     };
     if (this.getAggType() !== COUNT_AGG_TYPE) {
       metricAggConfig.params = { field: this.getESDocFieldName() };
     }
     return metricAggConfig;
+  }
+
+  supportsFieldMeta() {
+    // count and sum aggregations are not within field bounds so they do not support field meta.
+    return !isMetricCountable(this.getAggType());
+  }
+
+  async getFieldMetaRequest(config) {
+    return this._esDocField.getFieldMetaRequest(config);
   }
 }

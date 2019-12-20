@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { debounce, indexBy, sortBy, uniq } from 'lodash';
 import {
   EuiTitle,
-  // @ts-ignore
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -36,6 +35,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { ToastsStart, IUiSettingsClient } from 'kibana/public';
 import { toMountPoint } from '../util';
@@ -366,7 +366,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             });
           },
         }
-      : null;
+      : undefined;
 
     const actions = [
       {
@@ -416,7 +416,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={columns}
+        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}

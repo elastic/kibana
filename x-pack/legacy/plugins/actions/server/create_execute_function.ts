@@ -18,7 +18,7 @@ export interface ExecuteOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
-  apiKey?: string;
+  apiKey: string | null;
 }
 
 export function createExecuteFunction({

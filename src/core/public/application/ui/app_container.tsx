@@ -21,12 +21,12 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Subject } from 'rxjs';
 
-import { LegacyApp, AppMounter, AppUnmount } from '../types';
+import { LegacyApp, AppMount, AppUnmount } from '../types';
 import { HttpStart } from '../../http';
 import { AppNotFound } from './app_not_found_screen';
 
 interface Props extends RouteComponentProps<{ appId: string }> {
-  apps: ReadonlyMap<string, AppMounter>;
+  apps: ReadonlyMap<string, AppMount>;
   legacyApps: ReadonlyMap<string, LegacyApp>;
   basePath: HttpStart['basePath'];
   currentAppId$: Subject<string | undefined>;

@@ -21,7 +21,7 @@ import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { parseRange, Range } from '../../../../../../utils/range';
+import { parseRange, NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
 
 const EMPTY_STRING = '';
@@ -34,7 +34,7 @@ function parse(value: string) {
   return isNaN(parsedValue) ? EMPTY_STRING : parsedValue;
 }
 
-function getRange(range?: string): Range {
+function getRange(range?: string): NumberListRange {
   try {
     return range ? parseRange(range) : defaultRange;
   } catch (e) {
@@ -42,7 +42,7 @@ function getRange(range?: string): Range {
   }
 }
 
-function validateValue(value: number | '', numberRange: Range) {
+function validateValue(value: number | '', numberRange: NumberListRange) {
   const result: { isInvalid: boolean; error?: string } = {
     isInvalid: false,
   };
@@ -76,7 +76,7 @@ function validateOrder(list: Array<number | undefined>) {
   return result;
 }
 
-function getNextModel(list: NumberRowModel[], range: Range): NumberRowModel {
+function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRowModel {
   const lastValue = last(list).value;
   let next = Number(lastValue) ? Number(lastValue) + 1 : 1;
 
@@ -104,7 +104,7 @@ function getInitModelList(list: Array<number | undefined>): NumberRowModel[] {
 function getUpdatedModels(
   numberList: Array<number | undefined>,
   modelList: NumberRowModel[],
-  numberRange: Range,
+  numberRange: NumberListRange,
   invalidOrderModelIndex?: number
 ): NumberRowModel[] {
   if (!numberList.length) {

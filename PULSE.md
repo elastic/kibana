@@ -44,6 +44,7 @@ localhost and port 5601 (the defaults) and not be using the basepath proxy:
 yarn start --no-base-path
 ```
 
+<<<<<<< HEAD
 ### Add the index patterns
 You'll need to add the index patterns for each channel. To make this easy, use the dev tools in Kibana once it's started up.
 The default channel uses 'pulse-poc-raw':
@@ -100,6 +101,8 @@ GET pulse-poc-raw-errors
 ```
 
 
+=======
+>>>>>>> pulse_poc
 ## Adding a channel
 
 To add a channel to the service, create a directory for that channel in

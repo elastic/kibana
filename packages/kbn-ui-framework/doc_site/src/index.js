@@ -34,9 +34,7 @@ import AppContainer from './views/app_container';
 import { HomeView } from './views/home/home_view';
 import { NotFoundView } from './views/not_found/not_found_view';
 
-import {
-  Routes,
-} from './services';
+import { Routes } from './services';
 
 const store = configureStore();
 
@@ -47,22 +45,24 @@ childRoutes.push({
   name: 'Page Not Found',
 });
 
-const routes = [{
-  path: '/',
-  component: AppContainer,
-  indexRoute: {
-    component: HomeView,
-    source: 'views/home/HomeView',
+const routes = [
+  {
+    path: '/',
+    component: AppContainer,
+    indexRoute: {
+      component: HomeView,
+      source: 'views/home/HomeView',
+    },
+    childRoutes,
   },
-  childRoutes,
-}];
+];
 
 // Update document title with route name.
 const onRouteEnter = route => {
   const leafRoute = route.routes[route.routes.length - 1];
-  document.title = leafRoute.name ?
-    `Kibana UI Framework - ${leafRoute.name}` :
-    'Kibana UI Framework';
+  document.title = leafRoute.name
+    ? `Kibana UI Framework - ${leafRoute.name}`
+    : 'Kibana UI Framework';
 };
 
 const syncTitleWithRoutes = routesList => {
@@ -82,10 +82,7 @@ syncTitleWithRoutes(routes);
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router
-      history={hashHistory}
-      routes={routes}
-    />
+    <Router history={hashHistory} routes={routes} />
   </Provider>,
   document.getElementById('guide')
 );

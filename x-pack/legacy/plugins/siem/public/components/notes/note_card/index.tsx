@@ -6,7 +6,6 @@
 
 import { EuiPanel } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { NoteCardBody } from './note_card_body';
@@ -18,7 +17,7 @@ const NoteCardContainer = styled(EuiPanel)`
 
 NoteCardContainer.displayName = 'NoteCardContainer';
 
-export const NoteCard = pure<{ created: Date; rawNote: string; user: string }>(
+export const NoteCard = React.memo<{ created: Date; rawNote: string; user: string }>(
   ({ created, rawNote, user }) => (
     <NoteCardContainer data-test-subj="note-card" hasShadow={false} paddingSize="none">
       <NoteCardHeader created={created} user={user} />
