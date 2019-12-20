@@ -88,6 +88,13 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
     form.reset({ resetValues: true });
   }, [defaultValue]);
 
+  useEffect(() => {
+    return () => {
+      // On unmount, we save in the state a snapshot of the current form data.
+      dispatch({ type: 'configuration.save' });
+    };
+  }, []);
+
   return (
     <Form form={form}>
       <DynamicMappingSection />

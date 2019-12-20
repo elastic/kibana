@@ -58,6 +58,7 @@ export interface State {
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
   | { type: 'configuration.update'; value: Partial<State['configuration']> }
+  | { type: 'configuration.save' }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -249,6 +250,25 @@ export const reducer = (state: State, action: Action): State => {
       const isValid = isStateValid(nextState);
       nextState.isValid = isValid;
       return nextState;
+    }
+    case 'configuration.save': {
+      const {
+        data: { raw, format },
+      } = state.configuration;
+      const configurationData = format();
+
+      return {
+        ...state,
+        configuration: {
+          isValid: true,
+          defaultValue: configurationData,
+          data: {
+            raw,
+            format: () => configurationData,
+          },
+          validate: async () => true,
+        },
+      };
     }
     case 'fieldForm.update': {
       const nextState = {
