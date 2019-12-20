@@ -13,7 +13,7 @@ import { StaticOrientationSelection } from './static_orientation_selection';
 export function OrientationEditor(props) {
   return (
     <StaticDynamicStyleRow
-      ordinalFields={props.ordinalFields}
+      fields={props.fields}
       styleProperty={props.styleProperty}
       handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicOrientationSelection}

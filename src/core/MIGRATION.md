@@ -46,6 +46,8 @@
   - [How to](#how-to)
     - [Configure plugin](#configure-plugin)
       - [Handle plugin configuration deprecations](#handle-plugin-config-deprecations)
+    - [Use scoped services](#use-scoped-services)
+      - [Declare a custom scoped service](#declare-a-custom-scoped-service)
     - [Mock new platform services in tests](#mock-new-platform-services-in-tests)
       - [Writing mocks for your plugin](#writing-mocks-for-your-plugin)
       - [Using mocks in your tests](#using-mocks-in-your-tests)
@@ -1190,22 +1192,23 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | `server.config()`                                                             | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-server.plugininitializercontext.config.md)                                                                                                                                                                               | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
 | `server.route`                                                                | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                                                                                                                                                                                             | [Examples](./MIGRATION_EXAMPLES.md#route-registration)                      |
 | `request.getBasePath()`                                                       | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                                                                                                                                                                                                 |                                                                             |
-| `server.plugins.elasticsearch.getCluster('data')`                             | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)                                                                                                                                                                             | Handlers will also include a pre-configured client                          |
-| `server.plugins.elasticsearch.getCluster('admin')`                            | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md)                                                                                                                                                                           | Handlers will also include a pre-configured client                          |
-| `xpackMainPlugin.info.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)                                                                                                                                                                                                                                            |                                                                             |
+| `server.plugins.elasticsearch.getCluster('data')`                             | [`context.elasticsearch.dataClient`](/docs/development/core/server/kibana-plugin-server.iscopedclusterclient.md)                                                                                                                                                                                            |                                                                             |
+| `server.plugins.elasticsearch.getCluster('admin')`                            | [`context.elasticsearch.adminClient`](/docs/development/core/server/kibana-plugin-server.iscopedclusterclient.md)                                                                                                                                                                                           |                                                                             |
 | `server.savedObjects.setScopedSavedObjectsClientFactory`                      | [`core.savedObjects.setClientFactory`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.setclientfactory.md)                                                                                                                                                                     |                                                                             |
 | `server.savedObjects.addScopedSavedObjectsClientWrapperFactory`               | [`core.savedObjects.addClientWrapper`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md)                                                                                                                                                                     |                                                                             |
 | `server.savedObjects.getSavedObjectsRepository`                               | [`core.savedObjects.createInternalRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createinternalrepository.md) [`core.savedObjects.createScopedRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createscopedrepository.md) |                                                                             |
 | `server.savedObjects.getScopedSavedObjectsClient`                             | [`core.savedObjects.getScopedClient`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicestart.getscopedclient.md)                                                                                                                                                                       |                                                                             |
 | `request.getSavedObjectsClient`                                               | [`context.core.savedObjects.client`](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.core.md)                                                                                                                                                                                      |                                                                             |
+| `request.getUiSettingsService`                                                | [`context.uiSettings.client`](/docs/development/core/server/kibana-plugin-server.iuisettingsclient.md)                                                                                                                                                                                                      |                                                                             |
 | `kibana.Plugin.deprecations`                                                  | [Handle plugin configuration deprecations](#handle-plugin-config-deprecations) and [`PluginConfigDescriptor.deprecations`](docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.md)                                                                                                     | Deprecations from New Platform are not applied to legacy configuration      |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
 ##### Plugin services
-| Legacy Platform                             | New Platform                                                                   | Notes |
-| ------------------------------------------- | ------------------------------------------------------------------------------ | ----- |
-| `server.plugins.xpack_main.registerFeature` | [`plugins.features.registerFeature`](x-pack/plugins/features/server/plugin.ts) |       |
+| Legacy Platform                                                                    | New Platform                                                                   | Notes |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----- |
+| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerFeature`](x-pack/plugins/features/server/plugin.ts) |       |
+| `server.plugins.xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)               |       |
 
 #### UI Exports
 
@@ -1399,7 +1402,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   deprecations: ({ rename, unused }) => [
     rename('oldProperty', 'newProperty'),
     unused('someUnusedProperty'),
-  ]   
+  ]
 };
 ```
 
@@ -1413,13 +1416,75 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   deprecations: ({ renameFromRoot, unusedFromRoot }) => [
     renameFromRoot('oldplugin.property', 'myplugin.property'),
     unusedFromRoot('oldplugin.deprecated'),
-  ]   
+  ]
 };
 ```
 
 Note that deprecations registered in new platform's plugins are not applied to the legacy configuration.
 During migration, if you still need the deprecations to be effective in the legacy plugin, you need to declare them in
 both plugin definitions.
+
+### Use scoped services
+Whenever Kibana needs to get access to data saved in elasticsearch, it should perform a check whether an end-user has access to the data.
+In the legacy platform, Kibana requires to bind elasticsearch related API with an incoming request to access elasticsearch service on behalf of a user.
+```js
+  async function handler(req, res) {
+    const dataCluster = server.plugins.elasticsearch.getCluster('data');
+    const data = await dataCluster.callWithRequest(req, 'ping');
+  }
+```
+
+The new platform introduced [a handler interface](/rfcs/text/0003_handler_interface.md) on the server-side to perform that association internally. Core services, that require impersonation with an incoming request, are
+exposed via `context` argument of [the request handler interface.](/docs/development/core/server/kibana-plugin-server.requesthandler.md)
+The above example looks in the new platform as
+```js
+  async function handler(context, req, res) {
+    const data = await context.core.elasticsearch.adminClient.callAsInternalUser('ping')
+  }
+```
+
+The [request handler context](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.md) exposed the next scoped **core** services:
+| Legacy Platform                                     | New Platform                                                                                                       |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------|
+| `request.getSavedObjectsClient`                     | [`context.savedObjects.client`](/docs/development/core/server/kibana-plugin-server.savedobjectsclient.md)          |
+| `server.plugins.elasticsearch.getCluster('admin')`  | [`context.elasticsearch.adminClient`](/docs/development/core/server/kibana-plugin-server.iscopedclusterclient.md)  |
+| `server.plugins.elasticsearch.getCluster('data')`   | [`context.elasticsearch.dataClient`](/docs/development/core/server/kibana-plugin-server.iscopedclusterclient.md)   |
+| `request.getUiSettingsService`                      | [`context.uiSettings.client`](/docs/development/core/server/kibana-plugin-server.iuisettingsclient.md)             |
+
+#### Declare a custom scoped service
+Plugins can extend the handler context with custom API that will be available to the plugin itself and all dependent plugins.
+For example, the plugin creates a custom elasticsearch client and want to use it via the request handler context:
+
+```ts
+import { CoreSetup, IScopedClusterClient } from 'kibana/server';
+
+export interface MyPluginContext {
+  client: IScopedClusterClient;
+}
+
+// extend RequestHandlerContext when a dependent plugin imports MyPluginContext from the file
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    myPlugin?: MyPluginContext;
+  }
+}
+
+class Plugin {
+  setup(core: CoreSetup) {
+    const client = core.elasticsearch.createClient('myClient');
+    core.http.registerRouteHandlerContext('myPlugin', (context, req, res) => {
+      return { client: client.asScoped(req) };
+    });
+
+    router.get(
+      { path: '/api/my-plugin/', validate },
+      async (context, req, res) => {
+        const data = await context.myPlugin.client.callAsCurrentUser('endpoint');
+        ...
+      }
+    );
+  }
+```
 
 ### Mock new platform services in tests
 

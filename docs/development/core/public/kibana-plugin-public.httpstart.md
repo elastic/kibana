@@ -4,10 +4,10 @@
 
 ## HttpStart type
 
-See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md)
+See [HttpSetup](./kibana-plugin-public.httpsetup.md)
 
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpStart = HttpServiceBase;
+export declare type HttpStart = HttpSetup;
 ```
