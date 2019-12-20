@@ -11,16 +11,6 @@ import { EuiConfirmModal } from '@elastic/eui';
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import 'ui/angular-bootstrap';
-import 'ace';
-import 'ui/kbn_top_nav';
-import { configureAppAngularModule } from 'ui/legacy_compat';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-import { confirmModalFactory } from 'ui/modals/confirm_modal';
-// @ts-ignore
-import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 // type imports
 import {
@@ -31,6 +21,13 @@ import {
   ToastsStart,
   IUiSettingsClient,
 } from 'kibana/public';
+import {
+  configureAppAngularModule,
+  createTopNavDirective,
+  createTopNavHelper,
+  confirmModalFactory,
+  addAppRedirectMessageToUrl,
+} from './legacy_imports';
 // @ts-ignore
 import { initGraphApp } from './app';
 import {
@@ -40,6 +37,8 @@ import {
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { checkLicense } from '../../../../plugins/graph/common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
+import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -47,7 +46,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../s
  * plugins in LP-world, but if they are migrated only the import path in the plugin
  * itself changes
  */
-export interface GraphDependencies extends LegacyAngularInjectedDependencies {
+export interface GraphDependencies {
   element: HTMLElement;
   appBasePath: string;
   capabilities: Record<string, boolean | Record<string, boolean>>;
@@ -62,25 +61,9 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   addBasePath: (url: string) => string;
   getBasePath: () => string;
-  Storage: any;
+  storage: Storage;
   canEditDrillDownUrls: boolean;
   graphSavePolicy: string;
-}
-
-/**
- * Dependencies of the Graph app which rely on the global angular instance.
- * These dependencies have to be migrated to their NP counterparts.
- */
-export interface LegacyAngularInjectedDependencies {
-  /**
-   * Instance of SavedObjectRegistryProvider
-   */
-  savedObjectRegistry: any;
-  kbnBaseUrl: any;
-  /**
-   * Instance of SavedWorkspacesProvider
-   */
-  savedGraphWorkspaces: any;
 }
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
@@ -92,12 +75,20 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath(deps.kbnBaseUrl), info.message);
+      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath('/app/kibana'), info.message);
       window.location.href = newUrl;
     }
   });
 
-  initGraphApp(graphAngularModule, deps);
+  const savedWorkspaceLoader = createSavedWorkspacesLoader({
+    chrome: deps.coreStart.chrome,
+    indexPatterns: deps.npData.indexPatterns,
+    overlays: deps.coreStart.overlays,
+    savedObjectsClient: deps.coreStart.savedObjects.client,
+    basePath: deps.coreStart.http.basePath,
+  });
+
+  initGraphApp(graphAngularModule, { ...deps, savedWorkspaceLoader });
   const $injector = mountGraphApp(appBasePath, element);
   return () => {
     licenseSubscription.unsubscribe();
