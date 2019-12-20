@@ -2,59 +2,20 @@
 
 source test/scripts/jenkins_test_setup.sh
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  echo " -> Ensuring all functional tests are in a ciGroup"
-  cd "$XPACK_DIR"
-  node scripts/functional_tests --assert-none-excluded \
-    --include-tag ciGroup1 \
-    --include-tag ciGroup2 \
-    --include-tag ciGroup3 \
-    --include-tag ciGroup4 \
-    --include-tag ciGroup5 \
-    --include-tag ciGroup6 \
-    --include-tag ciGroup7 \
-    --include-tag ciGroup8 \
-    --include-tag ciGroup9 \
-    --include-tag ciGroup10
-fi
+installDir="$PARENT_DIR/install/kibana"
+destDir="${installDir}-${CI_WORKER_NUMBER}"
+cp -R "$installDir" "$destDir"
 
-cd "$KIBANA_DIR"
+export KIBANA_INSTALL_DIR="$destDir"
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  echo " -> building and extracting default Kibana distributable for use in functional tests"
-  node scripts/build --debug --no-oss
-
-  linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
-  installDir="$PARENT_DIR/install/kibana"
-
-  mkdir -p "$installDir"
-  tar -xzf "$linuxBuild" -C "$installDir" --strip=1
-
-  export KIBANA_INSTALL_DIR="$installDir"
-else
-  installDir="$PARENT_DIR/install/kibana"
-  destDir="${installDir}-${CI_WORKER_NUMBER}"
-  cp -R "$installDir" "$destDir"
-
-  export KIBANA_INSTALL_DIR="$destDir"
-fi
-
-echo " -> Running functional and api tests"
+echo " -> Running SIEM cypress tests"
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
+checks-reporter-with-killswitch "SIEM Cypress Tests" \
   node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --include-tag "ciGroup$CI_GROUP"
+    --config test/siem_cypress/config.ts
 
 echo ""
 echo ""
-
-# checks-reporter-with-killswitch "X-Pack Firefox Functional tests / Group ${CI_GROUP}" \
-#   node scripts/functional_tests --debug --bail \
-#   --kibana-install-dir "$installDir" \
-#   --include-tag "ciGroup$CI_GROUP" \
-#   --config "test/functional/config.firefox.js"
-# echo ""
-# echo ""
