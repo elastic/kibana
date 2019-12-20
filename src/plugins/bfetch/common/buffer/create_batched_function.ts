@@ -23,7 +23,7 @@ import { TimedItemBufferParams, TimedItemBuffer } from './timed_item_buffer';
 type Fn = (...args: any) => any;
 
 export interface BatchedFunctionParams<Func extends Fn, BatchEntry> {
-  onCall: (...args: Parameters<Func>) => [Func, BatchEntry];
+  onCall: (...args: Parameters<Func>) => [ReturnType<Func>, BatchEntry];
   onBatch: (items: BatchEntry[]) => void;
   flushOnMaxItems?: ItemBufferParams<any>['flushOnMaxItems'];
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
