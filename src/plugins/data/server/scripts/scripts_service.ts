@@ -17,11 +17,13 @@
  * under the License.
  */
 
-export * from './query';
-export * from './field_formats';
-export * from './kbn_field_types';
-export * from './index_patterns';
-export * from './es_query';
-export * from './utils';
-export * from './types';
-export * from './constants';
+import { CoreSetup, Plugin } from 'kibana/server';
+import { registerScriptsRoute } from './route';
+
+export class ScriptsService implements Plugin<void> {
+  public setup({ http }: CoreSetup) {
+    registerScriptsRoute(http.createRouter());
+  }
+
+  public start() {}
+}

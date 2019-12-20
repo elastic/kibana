@@ -17,18 +17,22 @@
  * under the License.
  */
 
-jest.mock('../../../ui_setting_defaults', () => ({
-  getUiSettingDefaults: () => ({ 'search:queryLanguage': { value: 'lucene' } }),
+import { fetchProvider } from './fetch';
+import { APICaller } from 'kibana/server';
+
+jest.mock('../../../common', () => ({
+  DEFAULT_QUERY_LANGUAGE: 'lucene',
 }));
 
-import { fetchProvider } from './fetch';
+let fetch: ReturnType<typeof fetchProvider>;
+let callCluster: APICaller;
 
-let fetch;
-let callCluster;
-
-function setupMockCallCluster(optCount, language) {
-  callCluster = jest.fn((method, params) => {
-    if ('id' in params && params.id === 'kql-telemetry:kql-telemetry') {
+function setupMockCallCluster(
+  optCount: { optInCount?: number; optOutCount?: number } | null,
+  language: string | undefined | null
+) {
+  callCluster = (jest.fn((method, params) => {
+    if (params && 'id' in params && params.id === 'kql-telemetry:kql-telemetry') {
       if (optCount === null) {
         return Promise.resolve({
           _index: '.kibana_1',
@@ -46,9 +50,9 @@ function setupMockCallCluster(optCount, language) {
           },
         });
       }
-    } else if ('body' in params && params.body.query.term.type === 'config') {
+    } else if (params && 'body' in params && params.body.query.term.type === 'config') {
       if (language === 'missingConfigDoc') {
-        Promise.resolve({
+        return Promise.resolve({
           hits: {
             hits: [],
           },
@@ -69,7 +73,9 @@ function setupMockCallCluster(optCount, language) {
         });
       }
     }
-  });
+
+    throw new Error('invalid call');
+  }) as unknown) as APICaller;
 }
 
 describe('makeKQLUsageCollector', () => {
