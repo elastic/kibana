@@ -71,7 +71,7 @@ export const BooleanType = ({ field }: Props) => {
             'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
             {
               defaultMessage:
-                'Replace explicit null values with the selected boolean value so that it can be indexed and searched.',
+                'Replace explicit null values with a specific boolean value so that it can be indexed and searched.',
             }
           )}
         >

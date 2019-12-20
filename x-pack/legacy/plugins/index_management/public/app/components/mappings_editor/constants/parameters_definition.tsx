@@ -257,7 +257,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.nullValueHelpText', {
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.nullValueIpHelpText', {
         defaultMessage: 'Accepts an IP address.',
       }),
     },

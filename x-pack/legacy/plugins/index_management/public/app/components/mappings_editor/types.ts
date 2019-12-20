@@ -69,6 +69,7 @@ export type RangeType =
   | 'integer_range'
   | 'float_range'
   | 'long_range'
+  | 'ip_range'
   | 'double_range'
   | 'date_range';
 
