@@ -33,7 +33,6 @@ import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../ui/public/timefilter/setup_router';
 import { syncOnMount } from './global_state_sync';
-import { savedObjectLoaderDashboard } from './saved_dashboard/saved_dashboards';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -87,7 +86,7 @@ export function initDashboardApp(app, deps) {
         ...defaults,
         template: dashboardListingTemplate,
         controller($injector, $location, $scope) {
-          const service = savedObjectLoaderDashboard;
+          const service = deps.savedDashboards;
 
           const kbnUrl = $injector.get('kbnUrl');
           const dashboardConfig = deps.dashboardConfig;

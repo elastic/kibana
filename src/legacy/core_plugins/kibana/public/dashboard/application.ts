@@ -21,6 +21,7 @@ import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { IPrivate } from 'ui/private';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
+import { SavedObjectLoader } from 'ui/saved_objects';
 import {
   AppMountContext,
   ChromeStart,
@@ -57,8 +58,8 @@ export interface RenderDeps {
   npDataStart: NpDataStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
+  savedDashboards: SavedObjectLoader;
   dashboardConfig: any;
-  savedDashboards: any;
   dashboardCapabilities: any;
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;

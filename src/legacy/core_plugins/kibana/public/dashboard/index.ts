@@ -21,7 +21,7 @@ import { npSetup, npStart, legacyChrome } from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import './saved_dashboard/saved_dashboards';
+import './saved_dashboard/saved_dashboard_register';
 import './dashboard_config';
 
 /**
@@ -33,7 +33,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 
   return {
     dashboardConfig: injector.get('dashboardConfig'),
-    savedDashboards: injector.get('savedDashboards'),
   };
 }
 

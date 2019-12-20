@@ -39,10 +39,10 @@ import {
 } from '../../../../../plugins/home/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
-  savedDashboards: any;
 }
 
 export interface DashboardPluginStartDependencies {
@@ -89,6 +89,13 @@ export class DashboardPlugin implements Plugin {
           npDataStart,
         } = this.startDependencies;
         const angularDependencies = await getAngularDependencies();
+        const savedDashboards = createSavedDashboardLoader({
+          savedObjectsClient,
+          indexPatterns: npDataStart.indexPatterns,
+          chrome: contextCore.chrome,
+          overlays: contextCore.overlays,
+        });
+
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
           ...angularDependencies,
@@ -96,6 +103,7 @@ export class DashboardPlugin implements Plugin {
           share,
           npDataStart,
           savedObjectsClient,
+          savedDashboards,
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
