@@ -10,7 +10,13 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
-import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  FlowTarget,
+  UsersEdges,
+  UsersFields,
+  UsersSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 
@@ -104,7 +110,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
           const splitField = criteria.sort.field.split('.');
           const newUsersSort: UsersSortField = {
             field: getSortFromString(splitField[splitField.length - 1]),
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (!isEqual(newUsersSort, sort)) {
             updateNetworkTable({

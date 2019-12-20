@@ -1,0 +1,17 @@
+{
+  "rule_id": "85471d30-78c9-48f6-b2db-ab5b2547e450",
+  "risk_score": 50,
+  "description": "Suricata Category - Unsuccessful User Privilege Gain",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Unsuccessful User Privilege Gain",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Unsuccessful User Privilege Gain\" or rule.category: \"Unsuccessful User Privilege Gain\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
