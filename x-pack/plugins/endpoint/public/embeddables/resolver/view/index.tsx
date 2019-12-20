@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Store } from 'redux';
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -12,6 +12,7 @@ import { applyMatrix3 } from '../lib/vector2';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 import { useAutoUpdatingClientRect } from './use_autoupdating_client_rect';
+import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
 import { DiagnosticDot } from './diagnostic_dot';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
@@ -160,22 +161,3 @@ const Diagnostic = styled(
   flex-grow: 1;
   position: relative;
 `;
-/**
- * Register an event handler directly on `elementRef` for the `wheel` event, with no options
- * React sets native event listeners on the `window` and calls provided handlers via event propagation.
- * As of Chrome 73, `'wheel'` events on `window` are automatically treated as 'passive'.
- * If you don't need to call `event.preventDefault` then you should use regular React event handling instead.
- */
-function useNonPassiveWheelHandler(
-  handler: (event: WheelEvent) => void,
-  elementRef: HTMLElement | null
-) {
-  useEffect(() => {
-    if (elementRef !== null) {
-      elementRef.addEventListener('wheel', handler);
-      return () => {
-        elementRef.removeEventListener('wheel', handler);
-      };
-    }
-  }, [elementRef, handler]);
-}
