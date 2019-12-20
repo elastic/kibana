@@ -127,9 +127,11 @@ Array [
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#000",
@@ -156,9 +158,11 @@ Array [
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#fff",
@@ -185,9 +189,11 @@ Array [
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#fff",
@@ -214,9 +220,11 @@ Array [
       }
     >
       <svg
+        aria-hidden={true}
         className="euiIcon euiIcon--medium euiIcon-isLoading"
         focusable="false"
         height={16}
+        role="img"
         style={
           Object {
             "fill": "#fff",

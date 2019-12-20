@@ -9,4 +9,7 @@ import Joi from 'joi';
 export const querySignalsSchema = Joi.object({
   query: Joi.object(),
   aggs: Joi.object(),
+  size: Joi.number(),
+  track_total_hits: Joi.boolean(),
+  _source: Joi.array().items(Joi.string()),
 }).min(1);
