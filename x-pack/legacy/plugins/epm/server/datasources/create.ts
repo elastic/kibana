@@ -44,46 +44,12 @@ export async function createDatasource(options: {
   }
 
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  // Pick the full dataset definition for each dataset name that has been requested
-  // from the package information from the registry.
-  // Requested dataset names that don't exist in the package will be silently ignored.
-  const datasetsRequestedNames = datasets.map(d => d.name);
-  const datasetsRequested = registryPackageInfo.datasets?.filter(packageDataset => {
-    return datasetsRequestedNames.includes(packageDataset.name);
+  const toSave = await installAssets({
+    pkg: registryPackageInfo,
+    datasets,
+    callCluster,
+    datasourceName,
   });
-
-  const templateRefs: Array<Promise<AssetReference>> = [];
-  const pipelineRefs: Array<Promise<AssetReference[]>> = [];
-
-  if (datasetsRequested) {
-    datasetsRequested.forEach(dataset => {
-      const templateRef = installTemplateForDataset(
-        registryPackageInfo,
-        callCluster,
-        dataset,
-        datasourceName
-      );
-      if (templateRef) {
-        templateRefs.push(templateRef as Promise<AssetReference>); // Typescript thinks this may still be undefined here
-      }
-      if (dataset.ingest_pipeline) {
-        const pipelineRefArray = installPipelinesForDataset({
-          pkgkey,
-          dataset,
-          callCluster,
-          datasourceName,
-          packageName: registryPackageInfo.name,
-        });
-        pipelineRefs.push(pipelineRefArray);
-      }
-    });
-  }
-  // the promises from template installation resolve to template references
-  const templatesToSave = await Promise.all(templateRefs);
-  // the promises from pipeline installation resolve to arrays of pipeline references
-  const pipelinesToSave = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
-
-  const toSave = templatesToSave.concat(pipelinesToSave);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
@@ -223,6 +189,59 @@ async function getConfig(pkgkey: string, dataset: Dataset): Promise<string> {
     return createInput(vars, buffer.toString());
   }
   return '';
+}
+
+async function installAssets({
+  pkg: registryPackageInfo,
+  datasets,
+  callCluster,
+  datasourceName,
+}: {
+  pkg: RegistryPackage;
+  datasets: Dataset[];
+  callCluster: CallESAsCurrentUser;
+  datasourceName: string;
+}) {
+  // Pick the full dataset definition for each dataset name that has been requested
+  // from the package information from the registry.
+  // Requested dataset names that don't exist in the package will be silently ignored.
+  const datasetsRequestedNames = datasets.map(d => d.name);
+  const datasetsRequested = registryPackageInfo.datasets?.filter(packageDataset => {
+    return datasetsRequestedNames.includes(packageDataset.name);
+  });
+
+  const templateRefs: Array<Promise<AssetReference>> = [];
+  const pipelineRefs: Array<Promise<AssetReference[]>> = [];
+
+  if (datasetsRequested) {
+    datasetsRequested.forEach(dataset => {
+      const templateRef = installTemplateForDataset(
+        registryPackageInfo,
+        callCluster,
+        dataset,
+        datasourceName
+      );
+      if (templateRef) {
+        templateRefs.push(templateRef as Promise<AssetReference>); // Typescript thinks this may still be undefined here
+      }
+      if (dataset.ingest_pipeline) {
+        const pipelineRefArray = installPipelinesForDataset({
+          pkgkey: Registry.pkgToPkgKey(registryPackageInfo),
+          dataset,
+          callCluster,
+          datasourceName,
+          packageName: registryPackageInfo.name,
+        });
+        pipelineRefs.push(pipelineRefArray);
+      }
+    });
+  }
+  // the promises from template installation resolve to template references
+  const templatesToSave = await Promise.all(templateRefs);
+  // the promises from pipeline installation resolve to arrays of pipeline references
+  const pipelinesToSave = (await Promise.all(pipelineRefs)).reduce((a, b) => a.concat(b));
+
+  return templatesToSave.concat(pipelinesToSave);
 }
 
 const isDatasetInput = ({ path }: Registry.ArchiveEntry, datasetName: string) => {
