@@ -449,11 +449,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
+    get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
