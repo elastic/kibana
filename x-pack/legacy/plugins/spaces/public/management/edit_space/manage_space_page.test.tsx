@@ -65,21 +65,28 @@ describe('ManageSpacePage', () => {
   });
 
   it('allows a space to be updated', async () => {
-    const spacesManager = spacesManagerMock.create();
-    spacesManager.getSpace = jest.fn().mockResolvedValue({
+    const spaceToUpdate = {
       id: 'existing-space',
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
       initials: 'AB',
       disabledFeatures: [],
+    };
+
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      ...spaceToUpdate,
     });
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const onLoadSpace = jest.fn();
 
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
+        onLoadSpace={onLoadSpace}
         intl={null as any}
         capabilities={{
           navLinks: {},
@@ -93,6 +100,9 @@ describe('ManageSpacePage', () => {
     await waitForDataLoad(wrapper);
 
     expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
+    expect(onLoadSpace).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+    });
 
     await Promise.resolve();
 

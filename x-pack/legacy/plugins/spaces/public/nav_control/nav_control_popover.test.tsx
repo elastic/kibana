@@ -42,6 +42,7 @@ describe('NavControlPopover', () => {
         disabledFeatures: [],
       },
     ]);
+    // @ts-ignore readonly check
     spacesManager.onActiveSpaceChange$ = Rx.of({
       id: 'foo-space',
       name: 'foo',

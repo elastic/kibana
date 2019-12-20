@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { registerSettingsComponent } from 'ui/management';
 import { npSetup, npStart } from 'ui/new_platform';
 import { setup as managementSetup } from '../../../../../src/legacy/core_plugins/management/public/legacy';
 import { plugin } from '.';
@@ -15,6 +16,9 @@ const spacesPlugin: SpacesPlugin = plugin();
 const pluginsSetup: PluginsSetup = {
   home: npSetup.plugins.home,
   management: managementSetup,
+  __managementLegacyCompat: {
+    registerSettingsComponent,
+  },
 };
 
 const pluginsStart: PluginsStart = {

@@ -141,6 +141,8 @@ export const npStart = {
       legacy: {
         getSection: () => ({
           register: sinon.fake(),
+          deregister: sinon.fake(),
+          hasItem: sinon.fake(),
         }),
       },
     },

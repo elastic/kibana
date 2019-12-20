@@ -10,14 +10,43 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import routes from 'ui/routes';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management/breadcrumbs';
 import { npStart } from 'ui/new_platform';
 import { ManageSpacePage } from './edit_space';
-import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
 import { SpacesGridPage } from './spaces_grid';
 
 import { start as spacesNPStart } from '../legacy';
+import { Space } from '../../common/model/space';
 
 const reactRootNodeId = 'manageSpacesReactRoot';
+
+function getListBreadcrumbs() {
+  return [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: 'Spaces',
+      href: '#/management/spaces/list',
+    },
+  ];
+}
+
+function getCreateBreadcrumbs() {
+  return [
+    ...getListBreadcrumbs(),
+    {
+      text: 'Create',
+    },
+  ];
+}
+
+function getEditBreadcrumbs(space?: Space) {
+  return [
+    ...getListBreadcrumbs(),
+    {
+      text: space ? space.name : '...',
+    },
+  ];
+}
 
 routes.when('/management/spaces/list', {
   template,
@@ -100,7 +129,9 @@ routes.when('/management/spaces/edit/:spaceId', {
           <ManageSpacePage
             spaceId={spaceId}
             spacesManager={spacesManager!}
-            setBreadcrumbs={npStart.core.chrome.setBreadcrumbs}
+            onLoadSpace={space => {
+              npStart.core.chrome.setBreadcrumbs(getEditBreadcrumbs(space));
+            }}
             capabilities={npStart.core.application.capabilities}
           />
         </I18nContext>,

@@ -17,7 +17,6 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { Breadcrumb } from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import { Capabilities } from 'src/core/public';
@@ -26,7 +25,7 @@ import { isReservedSpace } from '../../../common';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { SecureSpaceMessage, UnauthorizedPrompt } from '../components';
-import { getEditBreadcrumbs, toSpaceIdentifier } from '../lib';
+import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { CustomizeSpace } from './customize_space';
@@ -38,7 +37,7 @@ interface Props {
   spacesManager: SpacesManager;
   spaceId?: string;
   intl: InjectedIntl;
-  setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
+  onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
 }
 
@@ -75,7 +74,7 @@ class ManageSpacePageUI extends Component<Props, State> {
       return;
     }
 
-    const { spaceId, spacesManager, intl, setBreadcrumbs } = this.props;
+    const { spaceId, spacesManager, intl, onLoadSpace } = this.props;
 
     const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
 
@@ -83,8 +82,8 @@ class ManageSpacePageUI extends Component<Props, State> {
       try {
         const [space, features] = await Promise.all([spacesManager.getSpace(spaceId), getFeatures]);
         if (space) {
-          if (setBreadcrumbs) {
-            setBreadcrumbs(getEditBreadcrumbs(space));
+          if (onLoadSpace) {
+            onLoadSpace(space);
           }
 
           this.setState({

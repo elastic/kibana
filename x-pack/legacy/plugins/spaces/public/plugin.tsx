@@ -22,6 +22,13 @@ export interface SpacesPluginStart {
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
+  __managementLegacyCompat: {
+    registerSettingsComponent: (
+      id: string,
+      component: string | React.FC<any>,
+      allowOverride: boolean
+    ) => void;
+  };
 }
 
 export interface PluginsStart {
@@ -31,16 +38,7 @@ export interface PluginsStart {
 export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetup> {
   private spacesManager!: SpacesManager;
 
-  public start(core: CoreStart, plugins: PluginsStart) {
-    initSpacesNavControl(this.spacesManager, core);
-
-    const managementService = new ManagementService();
-    managementService.start({ managementStart: plugins.management });
-
-    return {
-      spacesManager: this.spacesManager,
-    };
-  }
+  private managementService?: ManagementService;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
@@ -55,10 +53,29 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
     const advancedSettingsService = new AdvancedSettingsService();
     advancedSettingsService.setup({
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
+      registerSettingsComponent: plugins.__managementLegacyCompat.registerSettingsComponent,
     });
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register(createSpacesFeatureCatalogueEntry());
+    }
+  }
+
+  public start(core: CoreStart, plugins: PluginsStart) {
+    initSpacesNavControl(this.spacesManager, core);
+
+    this.managementService = new ManagementService();
+    this.managementService.start({ managementStart: plugins.management });
+
+    return {
+      spacesManager: this.spacesManager,
+    };
+  }
+
+  public stop() {
+    if (this.managementService) {
+      this.managementService.stop();
+      this.managementService = undefined;
     }
   }
 }
