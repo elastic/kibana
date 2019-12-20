@@ -51,7 +51,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  addToDashMode,
+  addToDashboardMode,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -59,8 +59,8 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (id?: string, addToDashMode?: boolean) => void;
-  addToDashMode?: boolean;
+  redirectTo: (id?: string) => void;
+  addToDashboardMode?: boolean;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -169,7 +169,7 @@ export function App({
 
   const { TopNavMenu } = npStart.plugins.navigation.ui;
 
-  const confirmButton = addToDashMode ? (
+  const confirmButton = addToDashboardMode ? (
     <FormattedMessage
       id="xpack.lens.app.saveAddToDashboard"
       defaultMessage="Save and add to dashboard"
@@ -331,11 +331,7 @@ export function App({
                     lastKnownDoc: newDoc,
                   }));
                   if (docId !== id) {
-                    if (!!addToDashMode) {
-                      redirectTo(id, addToDashMode);
-                    } else {
-                      redirectTo(id);
-                    }
+                    redirectTo(id);
                   }
                 })
                 .catch(() => {
@@ -350,7 +346,7 @@ export function App({
             }}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             title={lastKnownDoc.title || ''}
-            showCopyOnSave={!addToDashMode}
+            showCopyOnSave={!addToDashboardMode}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}

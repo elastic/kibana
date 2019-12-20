@@ -97,14 +97,14 @@ export class AppPlugin {
 
         const redirectTo = (
           routeProps: RouteComponentProps<{ id?: string }>,
-          addToDashMode: boolean,
+          addToDashboardMode: boolean,
           id?: string
         ) => {
           if (!id) {
             routeProps.history.push('/lens');
-          } else if (!addToDashMode) {
+          } else if (!addToDashboardMode) {
             routeProps.history.push(`/lens/edit/${id}`);
-          } else if (addToDashMode && id) {
+          } else if (addToDashboardMode && id) {
             routeProps.history.push(`/lens/edit/${id}`);
             const url = context.core.chrome.navLinks.get('kibana:dashboard');
             if (!url) {
@@ -130,7 +130,7 @@ export class AppPlugin {
 
         const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
           trackUiEvent('loaded');
-          const addToDashMode =
+          const addToDashboardMode =
             !!routeProps.location.search && routeProps.location.search.includes('addToDashboard');
           return (
             <App
@@ -140,8 +140,8 @@ export class AppPlugin {
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}
               docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-              redirectTo={id => redirectTo(routeProps, addToDashMode, id)}
-              addToDashMode={addToDashMode}
+              redirectTo={id => redirectTo(routeProps, addToDashboardMode, id)}
+              addToDashboardMode={addToDashboardMode}
             />
           );
         };

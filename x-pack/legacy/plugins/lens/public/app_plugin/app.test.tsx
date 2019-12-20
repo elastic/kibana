@@ -79,8 +79,8 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (id?: string, addToDashMode?: boolean) => void;
-    addToDashMode?: boolean;
+    redirectTo: (id?: string) => void;
+    addToDashboardMode?: boolean;
   }> {
     return ({
       editorFrame: createMockFrame(),
@@ -126,8 +126,8 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, addToDashMode?: boolean) => void;
-      addToDashMode?: boolean;
+      redirectTo: (id?: string) => void;
+      addToDashboardMode?: boolean;
     }>;
   }
 
@@ -346,18 +346,18 @@ describe('Lens App', () => {
 
       async function save({
         initialDocId,
-        addToDashMode,
+        addToDashboardMode,
         ...saveProps
       }: SaveProps & {
         initialDocId?: string;
-        addToDashMode?: boolean;
+        addToDashboardMode?: boolean;
       }) {
         const args = {
           ...defaultArgs,
           docId: initialDocId,
         };
-        if (!!addToDashMode) {
-          args.addToDashMode = addToDashMode;
+        if (addToDashboardMode) {
+          args.addToDashboardMode = addToDashboardMode;
         }
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
@@ -554,7 +554,7 @@ describe('Lens App', () => {
       it('saves new doc and redirects to dashboard', async () => {
         const { args } = await save({
           initialDocId: undefined,
-          addToDashMode: true,
+          addToDashboardMode: true,
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
@@ -564,7 +564,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
       });
     });
   });
