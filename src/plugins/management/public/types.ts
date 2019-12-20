@@ -20,6 +20,7 @@
 import { IconType } from '@elastic/eui';
 import { AppMountContext } from 'kibana/public';
 import { ManagementApp } from './management_app';
+import { ManagementSection } from './management_section';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -74,27 +75,12 @@ export type ManagementSectionMount = (
   params: ManagementAppMountParams
 ) => Unmount | Promise<Unmount>;
 
-export interface IManagementApp extends CreateManagementApp {
-  enable: () => void;
-  disable: () => void;
-}
-
 export interface CreateManagementApp {
   id: string;
   title: string;
   basePath: string;
   order?: number;
   mount: ManagementSectionMount;
-}
-
-export interface ManagementSection {
-  id: string;
-  title: string;
-  apps: ManagementApp[];
-  registerApp: RegisterManagementApp;
-  order?: number;
-  euiIconType?: string;
-  icon?: string;
 }
 
 export interface LegacySection extends LegacyApp {

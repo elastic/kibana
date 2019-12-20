@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { Section } from './section';
+import { ManagementSection } from './management_section';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { CreateSection } from './types';
 
 export class ManagementService {
-  private sections: Section[] = [];
+  private sections: ManagementSection[] = [];
   constructor() {
     this.sections = [];
   }
@@ -39,7 +39,7 @@ export class ManagementService {
         throw Error(`ManagementSection '${section.id}' already registered`);
       }
 
-      const newSection = new Section(
+      const newSection = new ManagementSection(
         section,
         this.sections,
         registerLegacyApp,
@@ -49,7 +49,7 @@ export class ManagementService {
       return newSection;
     };
   }
-  private getSection(sectionId: Section['id']) {
+  private getSection(sectionId: ManagementSection['id']) {
     return this.sections.find(section => section.id === sectionId);
   }
 

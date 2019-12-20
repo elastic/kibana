@@ -26,8 +26,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ManagementSection, LegacySection, LegacyApp } from '../types';
+import { LegacySection, LegacyApp } from '../types';
 import { ManagementApp } from '../management_app';
+import { ManagementSection } from '../management_section';
 
 interface NavApp {
   [key: string]: unknown;

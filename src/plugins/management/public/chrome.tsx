@@ -21,7 +21,8 @@ import * as React from 'react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { SidebarNav } from './components';
-import { ManagementSection, LegacySection } from './types';
+import { LegacySection } from './types';
+import { ManagementSection } from './management_section';
 
 interface Props {
   sections: ManagementSection[];

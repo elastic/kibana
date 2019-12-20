@@ -19,35 +19,29 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  IManagementApp,
-  CreateManagementApp,
-  ManagementSectionMount,
-  ManagementSection,
-  Unmount,
-} from './types';
+import { CreateManagementApp, ManagementSectionMount, Unmount } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { Chrome } from './chrome';
-import { Section } from './section';
+import { ManagementSection } from './management_section';
 
-export class ManagementApp implements IManagementApp {
+export class ManagementApp {
   readonly id: string;
   readonly title: string;
   readonly basePath: string;
   readonly order?: number;
   readonly mount: ManagementSectionMount;
-  readonly sections: Section[];
+  readonly sections: ManagementSection[];
   protected enabledStatus: boolean = true;
-  private readonly sectionId: Section['id'];
+  private readonly sectionId: ManagementSection['id'];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
   private readonly getLegacyManagementSection: () => LegacyManagementSection;
 
   constructor(
     { id, title, basePath, order, mount }: CreateManagementApp,
-    sectionId: Section['id'],
-    sections: Section[],
+    sectionId: ManagementSection['id'],
+    sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSection: () => ManagementSection
   ) {

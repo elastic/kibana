@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { CreateSection, ManagementSection, RegisterManagementAppArgs } from './types';
+import { CreateSection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { ManagementApp } from './management_app';
 
-export class Section implements ManagementSection {
+export class ManagementSection {
   public readonly id: string = '';
   public readonly title: string = '';
   public readonly apps: ManagementApp[] = [];
   public readonly order?: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
-  private readonly sections: Section[];
+  private readonly sections: ManagementSection[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
   private readonly getLegacyManagementSection: () => LegacyManagementSection;
 
   constructor(
     section: CreateSection,
-    sections: Section[],
+    sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSection: () => ManagementSection
   ) {
