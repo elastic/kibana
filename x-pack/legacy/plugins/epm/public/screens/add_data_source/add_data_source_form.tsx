@@ -17,7 +17,7 @@ import styled from 'styled-components';
 import { installDatasource } from '../../data';
 import { useCore, useLinks } from '../../hooks';
 import { StepOne } from './step_one';
-import { Dataset } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 
 const StyledSteps = styled.div`
   .euiStep__titleWrapper {
@@ -29,10 +29,7 @@ const StyledSteps = styled.div`
   }
 `;
 interface AddDataSourceStepsProps {
-  pkgName: string;
-  pkgTitle: string;
-  pkgVersion: string;
-  datasets: Dataset[];
+  package: PackageInfo;
 }
 export interface FormState {
   datasourceName: string;
@@ -44,7 +41,7 @@ const FormNav = styled.div`
   text-align: right;
 `;
 
-export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
+export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => {
   const defaultPolicyOption = { label: 'Default policy', value: 'default' };
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
   const [datasourceName, setDatasourceName] = useState<FormState['datasourceName']>('');
@@ -61,12 +58,11 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
 
   const { notifications } = useCore();
   const { toDetailView } = useLinks();
-  const { pkgName, pkgTitle, pkgVersion, datasets } = props;
-
+  const datasets = pkg?.datasets || [];
   const handleRequestInstallDatasource = async () => {
     try {
       await installDatasource({
-        pkgkey: `${pkgName}-${pkgVersion}`,
+        pkgkey: `${pkg.name}-${pkg.version}`,
         datasets: datasets.filter(d => formState.datasets[d.name] === true),
         datasourceName: formState.datasourceName,
         // @ts-ignore not sure where/how to enforce a `value` key
@@ -74,12 +70,12 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
       });
       setAddDataSourceSuccess(true);
       notifications.toasts.addSuccess({
-        title: `Added ${pkgTitle} data source`,
+        title: `Added ${pkg.title} data source`,
       });
       return;
     } catch (err) {
       notifications.toasts.addWarning({
-        title: `Failed to add data source to ${pkgTitle}`,
+        title: `Failed to add data source to ${pkg.title}`,
         iconType: 'alert',
       });
     }
@@ -124,8 +120,8 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
       {addDataSourceSuccess ? (
         <Redirect
           to={toDetailView({
-            name: pkgName,
-            version: pkgVersion,
+            name: pkg.name,
+            version: pkg.version,
             panel: 'data-sources',
             withAppRoot: false,
           })}

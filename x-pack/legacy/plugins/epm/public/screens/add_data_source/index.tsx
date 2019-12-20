@@ -76,14 +76,7 @@ export function AddDataSource({ pkgkey }: AddDataSourceProps) {
               <h1>Add {title} data source</h1>
             </EuiTitle>
           </EuiPageHeader>
-          {datasets && (
-            <AddDataSourceForm
-              pkgName={name}
-              pkgVersion={version}
-              pkgTitle={title}
-              datasets={datasets}
-            />
-          )}
+          {datasets && <AddDataSourceForm package={info} />}
         </PageBody>
       </EuiFlexGroup>
     </PageContainer>
