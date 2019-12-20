@@ -57,7 +57,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it(`doesn't show dashboard navlink`, async () => {
+      it(`doesn't show endpoint navlink`, async () => {
         await pageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
