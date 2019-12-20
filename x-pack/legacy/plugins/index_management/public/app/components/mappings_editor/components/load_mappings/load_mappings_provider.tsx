@@ -23,7 +23,7 @@ interface State {
 
 const i18nTexts = {
   modalTitle: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.title', {
-    defaultMessage: 'Load mappings from JSON object',
+    defaultMessage: 'Load mappings from JSON',
   }),
   buttons: {
     confirm: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.loadButtonLabel', {
@@ -31,6 +31,15 @@ const i18nTexts = {
     }),
     cancel: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
+    }),
+  },
+  editor: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.jsonEditorLabel', {
+      defaultMessage: 'JSON mappings to load',
+    }),
+    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.jsonEditorHelpText', {
+      defaultMessage:
+        "All unknown parameters or parameters whose values don't have the correct format will be removed.",
     }),
   },
 };
@@ -74,13 +83,17 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
             buttonColor="danger"
             confirmButtonText={i18nTexts.buttons.confirm}
           >
-            <>
+            {/* The override for the EuiCodeEditor is around the .application css class */}
+            <div className="application">
               <JsonEditor
-                label="JSON mappings to load"
-                helpText="use JSON format"
+                label={i18nTexts.editor.label}
+                helpText={i18nTexts.editor.helpText}
                 onUpdate={onJsonUpdate}
+                euiCodeEditorProps={{
+                  height: '450px',
+                }}
               />
-            </>
+            </div>
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
