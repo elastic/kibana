@@ -82,7 +82,7 @@ routes.when(`${BASE_PATH}:section?/:subsection?/:view?/:id?`, {
 
 management.getSection('kibana').register('triggersActions', {
   display: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-    defaultMessage: 'Alerts and actions',
+    defaultMessage: 'Alerts and Actions',
   }),
   order: 7,
   url: `#${BASE_PATH}`,

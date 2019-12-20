@@ -13,7 +13,7 @@ import {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'triggersActions',
-    title: 'Alerts and actions', // This is a product name so we don't translate it.
+    title: 'Alerts and Actions', // This is a product name so we don't translate it.
     description: i18n.translate('xpack.triggersActionsUI.triggersActionsDescription', {
       defaultMessage: 'Data by creating, managing, and monitoring triggers and actions.',
     }),

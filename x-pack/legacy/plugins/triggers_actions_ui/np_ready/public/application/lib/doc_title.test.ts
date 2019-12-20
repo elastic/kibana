@@ -22,7 +22,7 @@ describe('doc_title', () => {
       "change": [MockFunction] {
         "calls": Array [
           Array [
-            "Alerts and actions",
+            "Alerts and Actions",
           ],
           Array [
             "Alerts",

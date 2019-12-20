@@ -13,7 +13,7 @@ export const getCurrentBreadcrumb = (type: string): any => {
     case 'home':
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerts and actions',
+          defaultMessage: 'Alerts and Actions',
         }),
         href: `#${routeToHome}`,
       };

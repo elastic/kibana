@@ -8,7 +8,7 @@ export const PLUGIN = {
   ID: 'triggers_actions_ui',
   getI18nName: (i18n: any): string => {
     return i18n.translate('xpack.triggers_actions_ui.appName', {
-      defaultMessage: 'Alerts and actions',
+      defaultMessage: 'Alerts and Actions',
     });
   },
 };
