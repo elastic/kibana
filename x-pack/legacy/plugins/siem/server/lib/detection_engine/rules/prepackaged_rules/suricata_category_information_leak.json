@@ -1,0 +1,17 @@
+{
+  "rule_id": "95df8ff4-7169-4c84-ae50-3561b1d1bc91",
+  "risk_score": 50,
+  "description": "Suricata Category - Information Leak",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Information Leak",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Information Leak\" or rule.category: \"Information Leak\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
