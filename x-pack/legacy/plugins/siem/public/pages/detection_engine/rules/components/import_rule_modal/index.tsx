@@ -28,7 +28,7 @@ import { fold } from 'fp-ts/lib/Either';
 import uuid from 'uuid';
 import * as i18n from './translations';
 import { duplicateRules } from '../../../../../containers/detection_engine/rules/api';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
 import { ndjsonToJSON } from '../json_downloader';
 import { RulesSchema } from '../../../../../containers/detection_engine/rules/types';
@@ -54,7 +54,7 @@ export const ImportRuleModalComponent = ({
 }: ImportRuleModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   const cleanupAndCloseModal = () => {
