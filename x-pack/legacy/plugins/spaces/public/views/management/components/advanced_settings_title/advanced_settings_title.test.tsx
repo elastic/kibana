@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { AdvancedSettingsTitle } from './advanced_settings_title';
 import { SpaceAvatar } from '../../../../components';
+import { act } from '@testing-library/react';
 
 describe('AdvancedSettingsTitle', () => {
   it('renders without crashing', async () => {
@@ -20,9 +21,11 @@ describe('AdvancedSettingsTitle', () => {
       <AdvancedSettingsTitle getActiveSpace={() => Promise.resolve(space)} />
     );
 
-    await Promise.resolve();
-    await Promise.resolve();
-    wrapper.update();
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find(SpaceAvatar)).toHaveLength(1);
   });
 });

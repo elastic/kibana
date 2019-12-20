@@ -77,7 +77,7 @@ export class CanvasPlugin
     initLocationProvider(core, plugins);
     initStore(core, plugins);
     initClipboard(plugins.__LEGACY.storage);
-    initLoadingIndicator(core.http.addLoadingCount);
+    initLoadingIndicator(core.http.addLoadingCountSource);
 
     const CanvasRootController = CanvasRootControllerFactory(core, plugins);
     plugins.__LEGACY.setRootController('canvas', CanvasRootController);

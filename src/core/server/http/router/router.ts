@@ -313,6 +313,7 @@ type RequestHandlerEnhanced<
 /**
  * A function executed when route path matched requested resource path.
  * Request handler is expected to return a result of one of {@link KibanaResponseFactory} functions.
+ * @param context {@link RequestHandlerContext} - the core context exposed for this request.
  * @param request {@link KibanaRequest} - object containing information about requested resource,
  * such as path, method, headers, parameters, query, body, etc.
  * @param response {@link KibanaResponseFactory} - a set of helper functions used to respond to a request.

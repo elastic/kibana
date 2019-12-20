@@ -31,7 +31,16 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const { filterQuery, nodeType, groupBy, sourceId, metric, timerange } = pipe(
+        const {
+          filterQuery,
+          nodeType,
+          groupBy,
+          sourceId,
+          metric,
+          timerange,
+          accountId,
+          region,
+        } = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
@@ -39,6 +48,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         UsageCollector.countNode(nodeType);
         const options: InfraSnapshotRequestOptions = {
           filterQuery: parseFilterQuery(filterQuery),
+          accountId,
+          region,
           // TODO: Use common infra metric and replace graphql type
           nodeType: nodeType as InfraNodeType,
           groupBy,
