@@ -31,6 +31,7 @@ export { DataStart };
 
 export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
 export { EsQuerySortValue, FetchOptions, ISearchSource, SortDirection } from './search/types';
+export { SearchSourceFields } from './search/types';
 export {
   SavedQueryAttributes,
   SavedQuery,
