@@ -11,7 +11,7 @@ import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 
 declare const DataRecognizer: FC<{
   indexPattern: IndexPattern;
-  savedSearch?: SavedSearchSavedObject | null;
+  savedSearch: SavedSearchSavedObject | null;
   results: {
     count: number;
     onChange?: Function;
