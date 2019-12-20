@@ -24,9 +24,9 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
 import { LegacyInternals } from './legacy_internals';
-import { LegacyPlugins, LegacyConfig, Vars } from './types';
+import { LegacyPlugins, LegacyConfig, LegacyVars } from './types';
 
-function varsProvider(vars: Vars, configValue?: any) {
+function varsProvider(vars: LegacyVars, configValue?: any) {
   return {
     fn: jest.fn().mockReturnValue(vars),
     pluginSpec: {

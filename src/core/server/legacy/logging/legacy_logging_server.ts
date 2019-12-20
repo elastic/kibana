@@ -25,10 +25,10 @@ import { Config } from '../../../../legacy/server/config';
 import { setupLogging } from '../../../../legacy/server/logging';
 import { LogLevel } from '../../logging/log_level';
 import { LogRecord } from '../../logging/log_record';
-import { Vars } from '../../types';
+import { LegacyVars } from '../../types';
 
 export const metadataSymbol = Symbol('log message with metadata');
-export function attachMetaData(message: string, metadata: Vars = {}) {
+export function attachMetaData(message: string, metadata: LegacyVars = {}) {
   return {
     [metadataSymbol]: {
       message,
@@ -51,7 +51,7 @@ interface PluginRegisterParams {
       options: PluginRegisterParams['options']
     ) => Promise<void>;
   };
-  options: Vars;
+  options: LegacyVars;
 }
 
 /**
@@ -85,7 +85,7 @@ export class LegacyLoggingServer {
 
   private onPostStopCallback?: () => void;
 
-  constructor(legacyLoggingConfig: Readonly<Vars>) {
+  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.

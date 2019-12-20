@@ -29,4 +29,6 @@ export {
   LegacyServiceDiscoverPlugins,
   LegacyNavLink,
   LegacyConfig,
+  LegacyPlugins,
+  LegacyVars,
 } from './types';

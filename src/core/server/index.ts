@@ -235,6 +235,9 @@ export {
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyPlugins,
+  LegacyVars,
 } from './legacy';
 
 /**

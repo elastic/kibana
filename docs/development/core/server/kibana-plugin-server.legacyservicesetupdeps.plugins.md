@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-plugins: Spec;
+plugins: Record<string, unknown>;
 ```

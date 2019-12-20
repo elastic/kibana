@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Vars } from './types';
+import { LegacyVars } from './types';
 
-export const findLegacyPluginSpecsMock = jest.fn().mockImplementation((settings: Vars) => ({
+export const findLegacyPluginSpecsMock = jest.fn().mockImplementation((settings: LegacyVars) => ({
   pluginSpecs: [],
   pluginExtendedConfig: {
     has: jest.fn(),

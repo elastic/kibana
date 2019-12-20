@@ -19,7 +19,7 @@
 
 import { ConfigPath } from '../../config';
 import { ObjectToConfigAdapter } from '../../config/object_to_config_adapter';
-import { Vars } from '../types';
+import { LegacyVars } from '../types';
 
 /**
  * Represents logging config supported by the legacy platform.
@@ -78,7 +78,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     };
   }
 
-  private static transformPlugins(configValue: Vars) {
+  private static transformPlugins(configValue: LegacyVars) {
     // These properties are the only ones we use from the existing `plugins` config node
     // since `scanDirs` isn't respected by new platform plugin discovery.
     return {
@@ -95,7 +95,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       case 'server':
         return LegacyObjectToConfigAdapter.transformServer(configValue);
       case 'plugins':
-        return LegacyObjectToConfigAdapter.transformPlugins(configValue as Vars);
+        return LegacyObjectToConfigAdapter.transformPlugins(configValue as LegacyVars);
       default:
         return configValue;
     }

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Vars } from './types';
+import { LegacyVars } from './types';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
 
-export function mergeVars(...sources: Vars[]): Vars {
+export function mergeVars(...sources: LegacyVars[]): LegacyVars {
   return Object.assign(
     {},
     ...sources,

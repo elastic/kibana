@@ -28,7 +28,7 @@ export async function replaceTelemetryInjectedVars(request: any, server: any) {
   const configTelemetrySendUsageFrom = config.get('telemetry.sendUsageFrom');
   const configTelemetryOptIn = config.get('telemetry.optIn');
   const configTelemetryAllowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
-  const isRequestingApplication = request.route.path.startsWith('/app');
+  const isRequestingApplication = request.path.startsWith('/app');
 
   // Prevent interstitial screens (such as the space selector) from prompting for telemetry
   if (!isRequestingApplication) {

@@ -21,11 +21,11 @@ import { Server } from 'hapi';
 
 import { LegacyRequest } from '../http';
 import { mergeVars } from './merge_vars';
-import { ILegacyInternals, LegacyPlugins, Vars, VarsInjector, LegacyConfig } from './types';
+import { ILegacyInternals, LegacyPlugins, LegacyVars, VarsInjector, LegacyConfig } from './types';
 
 export class LegacyInternals implements ILegacyInternals {
   private readonly injectors = new Map<string, Set<VarsInjector>>();
-  private cachedDefaultVars?: Vars;
+  private cachedDefaultVars?: LegacyVars;
 
   constructor(
     private readonly legacyPlugins: LegacyPlugins,
@@ -33,7 +33,7 @@ export class LegacyInternals implements ILegacyInternals {
     private readonly server: Server
   ) {}
 
-  private get defaultVars(): Vars {
+  private get defaultVars(): LegacyVars {
     if (this.cachedDefaultVars) {
       return this.cachedDefaultVars;
     }
@@ -47,7 +47,7 @@ export class LegacyInternals implements ILegacyInternals {
     ));
   }
 
-  private replaceVars(vars: Vars, request: LegacyRequest) {
+  private replaceVars(vars: LegacyVars, request: LegacyRequest) {
     const { injectedVarsReplacers = [] } = this.legacyPlugins.uiExports;
 
     return injectedVarsReplacers.reduce(
@@ -70,11 +70,11 @@ export class LegacyInternals implements ILegacyInternals {
         ...(await promise),
         ...(await injector(this.server)),
       }),
-      Promise.resolve<Vars>({})
+      Promise.resolve<LegacyVars>({})
     );
   }
 
-  public async getVars(id: string, request: LegacyRequest, injected: Vars = {}) {
+  public async getVars(id: string, request: LegacyRequest, injected: LegacyVars = {}) {
     return this.replaceVars(
       mergeVars(this.defaultVars, await this.getInjectedUiAppVars(id), injected),
       request

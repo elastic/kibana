@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer } from 'kibana/public';
 import { StatusPagePlugin, StatusPagePluginSetup, StatusPagePluginStart } from './plugin';
 
-export const plugin: PluginInitializer<StatusPagePluginSetup, StatusPagePluginStart> = (
-  initializerContext: PluginInitializerContext
-) => new StatusPagePlugin(initializerContext);
+export const plugin: PluginInitializer<StatusPagePluginSetup, StatusPagePluginStart> = () =>
+  new StatusPagePlugin();

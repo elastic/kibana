@@ -913,22 +913,46 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
+// @internal @deprecated
+export interface LegacyConfig {
+    // (undocumented)
+    get<T>(key?: string): T;
+    // (undocumented)
+    has(key: string): boolean;
+    // (undocumented)
+    set(key: string, value: any): void;
+    // (undocumented)
+    set(config: LegacyVars): void;
+}
+
+// @internal @deprecated (undocumented)
+export interface LegacyPlugins {
+    // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    disabledPluginSpecs: LegacyPluginSpec[];
+    // Warning: (ae-forgotten-export) The symbol "LegacyNavLink" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    navLinks: LegacyNavLink[];
+    // (undocumented)
+    pluginSpecs: LegacyPluginSpec[];
+    // Warning: (ae-forgotten-export) The symbol "LegacyUiExports" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    uiExports: LegacyUiExports;
+}
+
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
 
-// Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
-// 
 // @internal @deprecated (undocumented)
 export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
-    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     pluginExtendedConfig: LegacyConfig;
-    // Warning: (ae-forgotten-export) The symbol "Vars" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    settings: Vars;
+    settings: LegacyVars;
 }
 
 // @public @deprecated (undocumented)
@@ -937,10 +961,8 @@ export interface LegacyServiceSetupDeps {
     // 
     // (undocumented)
     core: LegacyCoreSetup;
-    // Warning: (ae-forgotten-export) The symbol "Spec" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
-    plugins: Spec;
+    plugins: Record<string, unknown>;
 }
 
 // @public @deprecated (undocumented)
@@ -950,8 +972,11 @@ export interface LegacyServiceStartDeps {
     // (undocumented)
     core: LegacyCoreStart;
     // (undocumented)
-    plugins: Spec;
+    plugins: Record<string, unknown>;
 }
+
+// @internal @deprecated (undocumented)
+export type LegacyVars = Record<string, any>;
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 // 

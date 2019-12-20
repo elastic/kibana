@@ -18,7 +18,7 @@
  */
 import {
   CoreSetup,
-  LegacyCoreStart,
+  CoreStart,
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
@@ -85,7 +85,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
   }
 
-  public start(core: LegacyCoreStart) {
+  public start(core: CoreStart) {
     const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
 
     if (timelionUiEnabled === false) {

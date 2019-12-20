@@ -36,13 +36,13 @@ import {
   LegacyPlugins,
   LegacyServiceDiscoverPlugins,
   LegacyConfig,
-  Vars,
+  LegacyVars,
 } from './types';
 import { LegacyInternals } from './legacy_internals';
 import { CoreSetup, CoreStart } from '..';
 
 interface LegacyKbnServer {
-  applyLoggingConfiguration: (settings: Readonly<Vars>) => void;
+  applyLoggingConfiguration: (settings: Readonly<LegacyVars>) => void;
   listen: () => Promise<void>;
   ready: () => Promise<void>;
   close: () => Promise<void>;
@@ -82,7 +82,7 @@ export class LegacyService implements CoreService {
   private update$?: ConnectableObservable<[Config, PathConfigType]>;
   private legacyRawConfig?: LegacyConfig;
   private legacyPlugins?: LegacyPlugins;
-  private settings?: Vars;
+  private settings?: LegacyVars;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -242,7 +242,7 @@ export class LegacyService implements CoreService {
   }
 
   private async createKbnServer(
-    settings: Vars,
+    settings: LegacyVars,
     config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
     startDeps: LegacyServiceStartDeps,

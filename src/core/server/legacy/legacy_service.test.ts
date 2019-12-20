@@ -44,7 +44,7 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
-import { Vars } from './types';
+import { LegacyVars } from './types';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -475,7 +475,7 @@ test('Sets the server.uuid property on the legacy configuration', async () => {
 
   const configSetMock = jest.fn();
 
-  findLegacyPluginSpecsMock.mockImplementation((settings: Vars) => ({
+  findLegacyPluginSpecsMock.mockImplementation((settings: LegacyVars) => ({
     pluginSpecs: [],
     pluginExtendedConfig: {
       has: jest.fn(),

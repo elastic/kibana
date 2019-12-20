@@ -30,13 +30,7 @@ import { SavedObjectsLegacyUiExports } from '../types';
  * @internal
  * @deprecated
  */
-export type Vars = Record<string, any>;
-
-/**
- * @internal
- * @deprecated
- */
-export type Spec = Record<string, unknown>;
+export type LegacyVars = Record<string, any>;
 
 type LegacyCoreSetup = InternalCoreSetup & {
   plugins: PluginsServiceSetup;
@@ -54,7 +48,7 @@ export interface LegacyConfig {
   get<T>(key?: string): T;
   has(key: string): boolean;
   set(key: string, value: any): void;
-  set(config: Vars): void;
+  set(config: LegacyVars): void;
 }
 
 /**
@@ -75,7 +69,7 @@ export interface LegacyConfigDeprecationFactory {
  * @internal
  * @deprecated
  */
-export type LegacyConfigDeprecation = (settings: Vars, log: (msg: string) => void) => void;
+export type LegacyConfigDeprecation = (settings: LegacyVars, log: (msg: string) => void) => void;
 
 /**
  * Representation of a legacy configuration deprecation provider.
@@ -111,7 +105,7 @@ export interface LegacyPluginSpec {
  * @deprecated
  */
 export interface VarsProvider {
-  fn: (server: Server, configValue: any) => Vars;
+  fn: (server: Server, configValue: any) => LegacyVars;
   pluginSpec: {
     readConfigValue(config: any, key: string | string[]): any;
   };
@@ -121,23 +115,23 @@ export interface VarsProvider {
  * @internal
  * @deprecated
  */
-export type VarsInjector = (server: Server) => Vars | Promise<Vars>;
+export type VarsInjector = (server: Server) => LegacyVars | Promise<LegacyVars>;
 
 /**
  * @internal
  * @deprecated
  */
 export type VarsReplacer = (
-  vars: Vars,
+  vars: LegacyVars,
   request: LegacyRequest,
   server: Server
-) => Vars | Promise<Vars>;
+) => LegacyVars | Promise<LegacyVars>;
 
 /**
  * @internal
  * @deprecated
  */
-export type LegacyNavLinkSpec = Spec & ChromeNavLink;
+export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
 
 /**
  * @internal
@@ -174,7 +168,7 @@ export type LegacyUiExports = SavedObjectsLegacyUiExports & {
  */
 export interface LegacyServiceSetupDeps {
   core: LegacyCoreSetup;
-  plugins: Spec;
+  plugins: Record<string, unknown>;
 }
 
 /**
@@ -183,7 +177,7 @@ export interface LegacyServiceSetupDeps {
  */
 export interface LegacyServiceStartDeps {
   core: LegacyCoreStart;
-  plugins: Spec;
+  plugins: Record<string, unknown>;
 }
 
 /**
@@ -199,12 +193,12 @@ export interface ILegacyInternals {
   /**
    * Get all the merged injected UI app vars for a particular plugin
    */
-  getInjectedUiAppVars(id: string): Promise<Vars>;
+  getInjectedUiAppVars(id: string): Promise<LegacyVars>;
 
   /**
    * Get the metadata vars for a particular plugin
    */
-  getVars(id: string, request: LegacyRequest, injected?: Vars): Promise<Vars>;
+  getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<LegacyVars>;
 }
 
 /**
@@ -224,5 +218,5 @@ export interface LegacyPlugins {
  */
 export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
   pluginExtendedConfig: LegacyConfig;
-  settings: Vars;
+  settings: LegacyVars;
 }
