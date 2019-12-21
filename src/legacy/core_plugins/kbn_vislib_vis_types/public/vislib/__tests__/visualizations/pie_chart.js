@@ -23,7 +23,6 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import $ from 'jquery';
 
-import 'ui/persisted_state';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

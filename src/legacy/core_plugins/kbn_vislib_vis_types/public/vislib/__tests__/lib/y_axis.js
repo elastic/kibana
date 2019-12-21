@@ -22,7 +22,6 @@ import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import 'ui/persisted_state';
 import { Axis } from '../../lib/axis';
 import { VisConfig } from '../../lib/vis_config';
 

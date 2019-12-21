@@ -31,7 +31,6 @@ import rangeRows from '../lib/fixtures/mock_data/range/_rows';
 import termSeries from '../lib/fixtures/mock_data/terms/_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import 'ui/persisted_state';
 
 const dataTypes = [
   ['series pos', seriesPos],

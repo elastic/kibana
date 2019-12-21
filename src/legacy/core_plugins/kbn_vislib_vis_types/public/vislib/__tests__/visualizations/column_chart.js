@@ -34,7 +34,6 @@ import { rowsSeriesWithHoles } from '../lib/fixtures/mock_data/date_histogram/_r
 import rowsWithZeros from '../lib/fixtures/mock_data/date_histogram/_rows';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [

@@ -21,7 +21,6 @@ import d3 from 'd3';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VislibVisProvider } from '../../vis';
-import 'ui/persisted_state';
 import { Chart } from '../../visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function() {

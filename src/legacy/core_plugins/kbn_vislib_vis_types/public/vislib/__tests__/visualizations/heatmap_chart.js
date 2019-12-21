@@ -30,7 +30,6 @@ import termsColumns from '../lib/fixtures/mock_data/terms/_columns';
 import stackedSeries from '../lib/fixtures/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [

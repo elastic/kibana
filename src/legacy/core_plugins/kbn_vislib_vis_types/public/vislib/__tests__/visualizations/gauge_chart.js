@@ -23,7 +23,6 @@ import $ from 'jquery';
 import _ from 'lodash';
 import data from '../lib/fixtures/mock_data/terms/_seriesMultiple';
 import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import 'ui/persisted_state';
 
 describe('Vislib Gauge Chart Test Suite', function() {
   let PersistedState;

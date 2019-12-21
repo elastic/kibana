@@ -24,7 +24,7 @@ import _ from 'lodash';
 
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import 'ui/persisted_state';
+
 const dataTypesArray = {
   'series pos': require('../lib/fixtures/mock_data/date_histogram/_series'),
   'series pos neg': require('../lib/fixtures/mock_data/date_histogram/_series_pos_neg'),

@@ -22,7 +22,6 @@ import d3 from 'd3';
 import ngMock from 'ng_mock';
 
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 // Data
 import data from './fixtures/mock_data/date_histogram/_series';

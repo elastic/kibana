@@ -27,7 +27,6 @@ import rows from '../fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
 import $ from 'jquery';
 import FixturesVislibVisFixtureProvider from '../fixtures/_vis_fixture';
-import 'ui/persisted_state';
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
