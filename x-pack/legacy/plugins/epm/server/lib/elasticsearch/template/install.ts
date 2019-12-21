@@ -28,18 +28,17 @@ export const loadDatasetFieldsFromYaml = async (pkg: RegistryPackage, datasetNam
   // Fetch all field definition files for this dataset
   const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
   // Merge all the fields of a dataset together and create an Elasticsearch index template
-  let fields: Field[] = [];
-  for (const file of fieldDefinitionFiles) {
+  return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {
       const tmpFields = safeLoad(file.buffer.toString());
       // safeLoad() returns undefined for empty files, we don't want that
       if (tmpFields) {
-        fields = fields.concat(tmpFields);
+        acc = acc.concat(tmpFields);
       }
     }
-  }
-  return fields;
+    return acc;
+  }, []);
 };
 
 /**
@@ -86,7 +85,6 @@ export async function installTemplate({
     });
   }
   const template = getTemplate(templateName + '-*', mappings, pipelineName);
-
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
     name: templateName,
