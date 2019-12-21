@@ -14,5 +14,5 @@ const DEFAULT_LABEL = 'default';
  * {type}-{label}-{package}-{datasetName}
  */
 export function getDatasetAssetBaseName(dataset: Dataset): string {
-  return `${dataset.type}-${DEFAULT_LABEL}-${dataset.package}-${dataset.name}`;
+  return `${dataset.type}-${DEFAULT_LABEL}-${dataset.packageName}-${dataset.name}`;
 }

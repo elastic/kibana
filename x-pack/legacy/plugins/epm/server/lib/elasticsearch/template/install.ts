@@ -16,21 +16,17 @@ const isFields = (path: string) => {
   return path.includes('/fields/');
 };
 
-/**
- * installTemplates installs one template for each dataset
+
+ /**
+ * loadDatasetFieldsFromYaml loads all related dataset fields from yaml
  *
  * For each dataset, the fields.yml files are extracted. If there are multiple
- * in one datasets, they are merged together into 1 and then converted to a template
- * The template is currently loaded with the pkgey-package-dataset
+ * in one datasets, they are merged together into 1
  */
-export async function installTemplateForDataset(
-  pkg: RegistryPackage,
-  callCluster: CallESAsCurrentUser,
-  dataset: Dataset,
-  datasourceName: string
-) {
+
+ export const loadDatasetFieldsFromYaml = async (pkg: RegistryPackage, datasetName: string) => {
   // Fetch all field definition files for this dataset
-  const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
+  const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
   // Merge all the fields of a dataset together and create an Elasticsearch index template
   let fields: Field[] = [];
   for (const file of fieldDefinitionFiles) {
@@ -42,12 +38,27 @@ export async function installTemplateForDataset(
         fields = fields.concat(tmpFields);
       }
     }
-    dataset.package = pkg.name;
-    return installTemplate({ callCluster, fields, dataset, datasourceName });
   }
+  return fields;
+ }
+
+ /**
+ * installTemplatesForDataset installs one template for each dataset
+ *
+ * The template is currently loaded with the pkgey-package-dataset
+ */
+
+ export async function installTemplateForDataset(
+  pkg: RegistryPackage,
+  callCluster: CallESAsCurrentUser,
+  dataset: Dataset,
+  datasourceName: string
+) {
+  const fields = await loadDatasetFieldsFromYaml(pkg, dataset.name);
+  return installTemplate({ callCluster, fields, dataset, datasourceName });
 }
 
-async function installTemplate({
+export async function installTemplate({
   callCluster,
   fields,
   dataset,
@@ -58,6 +69,7 @@ async function installTemplate({
   dataset: Dataset;
   datasourceName: string;
 }): Promise<AssetReference> {
+  console.log('fields', JSON.stringify(fields))
   const mappings = generateMappings(fields);
   const templateName = generateTemplateName(dataset);
   let pipelineName;
@@ -65,7 +77,7 @@ async function installTemplate({
     pipelineName = getPipelineNameForInstallation(
       dataset.ingest_pipeline,
       dataset,
-      dataset.package,
+      dataset.packageName,
       datasourceName
     );
   }
