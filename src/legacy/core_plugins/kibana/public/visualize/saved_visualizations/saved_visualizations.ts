@@ -16,26 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npStart } from 'ui/new_platform';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
 import { createVisualizeEditUrl } from '..';
-const app = uiModules.get('app/visualize');
 
-app.service('savedVisualizations', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
+export function createSavedVisLoader(services: SavedObjectKibanaServices) {
+  const { savedObjectsClient } = services;
+
   class SavedObjectLoaderVisualize extends SavedObjectLoader {
     mapHitSource = (source: Record<string, any>, id: string) => {
       const visTypes = visualizations.types;
@@ -81,6 +73,5 @@ app.service('savedVisualizations', function() {
     }
   }
   const SavedVis = createSavedVisClass(services);
-
-  return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient, npStart.core.chrome);
-});
+  return new SavedObjectLoaderVisualize(SavedVis, savedObjectsClient, services.chrome);
+}
