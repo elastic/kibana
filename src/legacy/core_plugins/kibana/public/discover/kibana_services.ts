@@ -65,8 +65,8 @@ export {
   SearchSource,
   EsQuerySortValue,
   SortDirection,
-  SearchSourceContract,
-} from '../../../../ui/public/courier';
+  ISearchSource,
+} from 'ui/courier';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
