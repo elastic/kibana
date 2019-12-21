@@ -24,11 +24,11 @@ import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
 
 // @ts-ignore
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../common/lib';
-import { tickFormatters } from '../services/tick_formatters';
-import { xaxisFormatterProvider } from './timechart/xaxis_formatter';
-import { generateTicksProvider } from './timechart/tick_generator';
-import { Series } from '../helpers/timelion_request_handler';
+import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
+import { tickFormatters } from './tick_formatters';
+import { xaxisFormatterProvider } from './xaxis_formatter';
+import { generateTicksProvider } from './tick_generator';
+import { Series } from './timelion_request_handler';
 
 function buildSeriesData(chart: Series[], options: object) {
   return chart.map((series: Series, seriesIndex: number) => {

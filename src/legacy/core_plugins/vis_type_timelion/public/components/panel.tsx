@@ -22,13 +22,13 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
-import './timechart/flot';
+import '../flot';
 
 // @ts-ignore
-import { DEFAULT_TIME_FORMAT } from '../../common/lib';
+import { DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
 
 import { getServices } from '../kibana_services';
-import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from './utils';
+import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from '../helpers/panel_utils';
 import { Series, Sheet } from '../helpers/timelion_request_handler';
 
 interface PanelProps {

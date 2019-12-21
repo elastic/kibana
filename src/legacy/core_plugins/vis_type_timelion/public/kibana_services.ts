@@ -19,7 +19,7 @@
 
 import { IUiSettingsClient, HttpSetup } from 'kibana/public';
 import { TimefilterContract } from 'src/plugins/data/public';
-import { IPanelWrapper } from './panels/timechart/timechart';
+import { IPanelWrapper } from './timechart';
 
 export interface TimelionKibanaServices {
   http: HttpSetup;

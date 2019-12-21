@@ -28,7 +28,7 @@ import {
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
-import { getTimeChart, IPanelWrapper } from './panels/timechart/timechart';
+import { getTimeChart, IPanelWrapper } from './timechart';
 import { setServices } from './kibana_services';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
