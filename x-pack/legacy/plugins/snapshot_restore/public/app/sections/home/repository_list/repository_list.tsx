@@ -135,7 +135,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     content = (
       <RepositoryTable
         repositories={repositories || []}
-        managedRepository={managedRepository.name}
+        managedRepository={managedRepository && managedRepository.name}
         reload={reload}
         openRepositoryDetailsUrl={openRepositoryDetailsUrl}
         onRepositoryDeleted={onRepositoryDeleted}
