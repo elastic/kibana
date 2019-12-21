@@ -15,10 +15,19 @@ import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config
 
 export class Plugin {
   setup(_coreSetup, pluginsSetup, __LEGACY) {
-    const { plugins, _kbnServer: kbnServer, log, getOSInfo, _hapi: hapiServer, events, expose, config: monitoringConfig } = __LEGACY;
+    const {
+      plugins,
+      _kbnServer: kbnServer,
+      log,
+      getOSInfo,
+      _hapi: hapiServer,
+      events,
+      expose,
+      config: monitoringConfig,
+    } = __LEGACY;
     const config = monitoringConfig();
 
-    const { usageCollection } = pluginsSetup;
+    const { usageCollection, licensing } = pluginsSetup;
     registerMonitoringCollection();
     /*
      * Register collector objects for stats to show up in the APIs
@@ -61,7 +70,7 @@ export class Plugin {
           config,
           log,
           xpackMainPlugin: plugins.xpack_main,
-          expose
+          expose,
         }); // Route handlers depend on this for xpackInfo
         await requireUIRoutes(__LEGACY);
       }
