@@ -17,16 +17,15 @@ const isFields = (path: string) => {
 };
 
 /**
- * loadDatasetFieldsFromYaml loads all related dataset fields from yaml
+ * loadFieldsFromYaml
  *
- * For each dataset, the fields.yml files are extracted. If there are multiple
- * in one datasets, they are merged together into 1
+ * Gets all field files, optionally filtered by dataset, extracts .yml files, merges them together
  */
 
-export const loadDatasetFieldsFromYaml = async (pkg: RegistryPackage, datasetName: string) => {
-  // Fetch all field definition files for this dataset
+export const loadFieldsFromYaml = async (pkg: RegistryPackage, datasetName?: string) => {
+  // Fetch all field definition files
   const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
-  // Merge all the fields of a dataset together and create an Elasticsearch index template
+
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {
@@ -52,7 +51,7 @@ export async function installTemplateForDataset(
   dataset: Dataset,
   datasourceName: string
 ) {
-  const fields = await loadDatasetFieldsFromYaml(pkg, dataset.name);
+  const fields = await loadFieldsFromYaml(pkg, dataset.name);
   return installTemplate({ callCluster, fields, dataset, datasourceName });
 }
 

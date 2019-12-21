@@ -16,7 +16,7 @@ const EPR_PATH_PREFIX = '/package/';
 export function getAssets(
   packageInfo: RegistryPackage,
   filter = (path: string): boolean => true,
-  dataSet: string = ''
+  datasetName?: string
 ): string[] {
   const assets: string[] = [];
   if (!packageInfo?.assets) return assets;
@@ -27,37 +27,35 @@ export function getAssets(
       continue;
     }
 
-    // Check if a dataSet is set, and if yes, filter for all assets in it
-    if (dataSet !== '') {
+    // if dataset, filter for them
+    if (datasetName) {
       // TODO: Filter for dataset path
       const comparePath =
-        EPR_PATH_PREFIX + packageInfo.name + '-' + packageInfo.version + '/dataset/' + dataSet;
+        EPR_PATH_PREFIX + packageInfo.name + '-' + packageInfo.version + '/dataset/' + datasetName;
       if (!path.includes(comparePath)) {
         continue;
       }
     }
-
     if (!filter(path)) {
       continue;
     }
 
     assets.push(path);
   }
-
   return assets;
 }
 
 export async function getAssetsData(
   packageInfo: RegistryPackage,
   filter = (path: string): boolean => true,
-  dataSet: string = ''
+  datasetName?: string
 ): Promise<Registry.ArchiveEntry[]> {
   // TODO: Needs to be called to fill the cache but should not be required
   const pkgkey = packageInfo.name + '-' + packageInfo.version;
   if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(pkgkey);
 
   // Gather all asset data
-  const assets = getAssets(packageInfo, filter, dataSet);
+  const assets = getAssets(packageInfo, filter, datasetName);
   const entries: Registry.ArchiveEntry[] = assets.map(path => {
     const archivePath = path.replace(EPR_PATH_PREFIX, '');
     const buffer = Registry.getAsset(archivePath);
