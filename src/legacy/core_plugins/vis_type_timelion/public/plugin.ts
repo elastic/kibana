@@ -28,15 +28,16 @@ import {
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
-import { getTimeChart } from './panels/timechart/timechart';
-import { Panel } from './panels/panel';
+import { getTimeChart, IPanelWrapper } from './panels/timechart/timechart';
 import { setServices } from './kibana_services';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
 
+type TimelionVisCoreSetup = CoreSetup<TimelionVisSetupDependencies>;
+
 /** @internal */
-export interface TimelionVisualizationDependencies {
+export interface TimelionVisDependencies {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timelionPanels: Map<string, any>;
@@ -44,7 +45,7 @@ export interface TimelionVisualizationDependencies {
 }
 
 /** @internal */
-export interface TimelionPluginSetupDependencies {
+export interface TimelionVisSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
@@ -52,19 +53,15 @@ export interface TimelionPluginSetupDependencies {
 
 /** @internal */
 export class TimelionVisPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
-  }
+  constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
-    core: CoreSetup,
-    { expressions, visualizations, data }: TimelionPluginSetupDependencies
+    core: TimelionVisCoreSetup,
+    { expressions, visualizations, data }: TimelionVisSetupDependencies
   ) {
-    const timelionPanels: Map<string, any> = new Map();
+    const timelionPanels: Map<string, IPanelWrapper> = new Map();
 
-    const dependencies: TimelionVisualizationDependencies = {
+    const dependencies: TimelionVisDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
       timelionPanels,
@@ -72,23 +69,19 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     };
     setServices(dependencies);
 
-    this.registerPanels(dependencies);
+    this.registerPanels(timelionPanels);
 
-    expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.types.createReactVisualization(getTimelionVisDefinition(dependencies));
+    expressions.registerFunction(getTimelionVisualizationConfig);
+    visualizations.types.createReactVisualization(getTimelionVisDefinition());
   }
 
-  private registerPanels(dependencies: TimelionVisualizationDependencies) {
-    const [name, timeChartPanel] = getTimeChart(dependencies);
+  private registerPanels(timelionPanels: Map<string, IPanelWrapper>) {
+    const [name, timeChartPanel] = getTimeChart();
 
-    dependencies.timelionPanels.set(name as string, timeChartPanel);
+    timelionPanels.set(name, timeChartPanel);
   }
 
   public start(core: CoreStart) {
-    const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-
-    if (timelionUiEnabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
+    // nothing to do here
   }
 }

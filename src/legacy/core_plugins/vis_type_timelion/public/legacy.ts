@@ -21,10 +21,10 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
-import { TimelionPluginSetupDependencies } from './plugin';
+import { TimelionVisSetupDependencies } from './plugin';
 import { plugin } from '.';
 
-const plugins: Readonly<TimelionPluginSetupDependencies> = {
+const setupPlugins: Readonly<TimelionVisSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   data: npSetup.plugins.data,
   visualizations: visualizationsSetup,
@@ -32,5 +32,5 @@ const plugins: Readonly<TimelionPluginSetupDependencies> = {
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, plugins);
+export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
 export const start = pluginInstance.start(npStart.core);

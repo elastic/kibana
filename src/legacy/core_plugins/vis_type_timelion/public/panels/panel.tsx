@@ -29,33 +29,12 @@ import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import { getServices } from '../kibana_services';
 import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from './utils';
+import { Series, Sheet } from '../helpers/timelion_request_handler';
 
-export interface Series {
-  _global?: boolean;
-  _hide?: boolean;
-  _id?: number;
-  _title?: string;
-  color?: string;
-  data: any[];
-  fit: string;
-  label: string;
-  split: string;
-  stack?: boolean;
-  type: string;
-}
-
-interface SeriesList {
-  list: Series[];
-  render: {
-    type: string;
-    grid?: boolean;
-  };
-  type: string;
-}
 interface PanelProps {
   name: string;
   interval: string;
-  seriesList: SeriesList;
+  seriesList: Sheet;
   renderComplete(): void;
 }
 
@@ -64,7 +43,6 @@ const DEBOUNCE_DELAY = 50;
 const emptyCaption = '<br>';
 
 function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProps) {
-  console.log('Panel');
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState();
   const [chartElem, setChartElem] = useState();
@@ -196,6 +174,8 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
     if (canvasElem) {
       // @ts-ignore
       setPlot($.plot(canvasElem, compact(updatedSeries), options));
+      renderComplete();
+
       const legend = $(canvasElem).find('.legendValue');
       if (legend) {
         legend.click(toggleSeries);
@@ -203,7 +183,15 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
         legend.mouseover(highlightSeries);
       }
     }
-  }, [canvasElem, options, updatedSeries, toggleSeries, focusSeries, highlightSeries]);
+  }, [
+    canvasElem,
+    options,
+    updatedSeries,
+    toggleSeries,
+    focusSeries,
+    highlightSeries,
+    renderComplete,
+  ]);
 
   moment.tz.setDefault(getServices().uiSettings.get('dateFormat:tz'));
 

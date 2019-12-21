@@ -19,14 +19,27 @@
 
 import React from 'react';
 
+import { IUiSettingsClient } from 'kibana/public';
+import { Vis } from 'ui/vis';
 import { ChartComponent } from './chart';
+import { VisParams } from '../timelion_vis_fn';
+import { TimelionSuccessResponse } from '../helpers/timelion_request_handler';
 
-function TimelionVisComponent(props: any) {
+interface TimelionVisComponentProp {
+  config: IUiSettingsClient;
+  renderComplete: () => void;
+  updateStatus: object;
+  vis: Vis;
+  visData: TimelionSuccessResponse;
+  visParams: VisParams;
+}
+
+function TimelionVisComponent(props: TimelionVisComponentProp) {
   return (
     <div className="timVis">
       <ChartComponent
         seriesList={props.visData.sheet[0]}
-        rerenderTrigger={props.renderComplete}
+        renderComplete={props.renderComplete}
         className="timChart"
         interval={props.vis.getState().params.interval}
       />

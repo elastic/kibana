@@ -22,13 +22,14 @@ import { EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getServices } from '../kibana_services';
+import { Sheet } from '../helpers/timelion_request_handler';
 
 interface ChartComponentProp {
   className?: string;
-  seriesList: any;
+  interval: string;
+  renderComplete(): void;
+  seriesList: Sheet;
   search?(): void;
-  interval: any;
-  renderComplete: boolean;
 }
 
 function ChartComponent({ seriesList, interval, search, renderComplete }: ChartComponentProp) {

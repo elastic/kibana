@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { Panel } from '../panel';
-import { TimelionVisualizationDependencies } from '../../plugin';
 
-function getTimeChart(dependencies: TimelionVisualizationDependencies) {
-  // Schema is broken out so that it may be extended for use in other plugins
-  // Its also easier to test.
+export type IPanelWrapper = (props: any) => ReactElement;
+
+function getTimeChart(): [string, IPanelWrapper] {
   return ['timechart', (props: any) => <Panel name="timechart" {...props} />];
 }
 

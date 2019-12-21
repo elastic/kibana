@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
 function baseTickFormatter(value: any, axis: any) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
@@ -68,7 +68,7 @@ export function tickFormatters() {
     },
     percent(val: any, axis: any) {
       let precision =
-        _.get(axis, 'tickDecimals', 0) - _.get(axis, 'options.units.tickDecimalsShift', 0);
+        get(axis, 'tickDecimals', 0) - get(axis, 'options.units.tickDecimalsShift', 0);
       // toFixed only accepts values between 0 and 20
       if (precision < 0) {
         precision = 0;

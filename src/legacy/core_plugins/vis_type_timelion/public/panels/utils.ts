@@ -28,7 +28,7 @@ import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../common/lib';
 import { tickFormatters } from '../services/tick_formatters';
 import { xaxisFormatterProvider } from './timechart/xaxis_formatter';
 import { generateTicksProvider } from './timechart/tick_generator';
-import { Series } from './panel';
+import { Series } from '../helpers/timelion_request_handler';
 
 function buildSeriesData(chart: Series[], options: object) {
   return chart.map((series: Series, seriesIndex: number) => {

@@ -19,17 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
 import { DefaultEditorSize } from './legacy_imports';
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TimelionVisComponent } from './components/timelion_vis';
 import editorConfigTemplate from './timelion_vis_params.html';
-import { TimelionVisualizationDependencies } from './plugin';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
-export function getTimelionVisDefinition(dependencies: TimelionVisualizationDependencies) {
-  const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+export function getTimelionVisDefinition() {
+  const timelionRequestHandler = getTimelionRequestHandler();
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
