@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../services/documentation';
 import { MainType, DataType, DataTypeDefinition } from '../types';
@@ -140,6 +140,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/binary.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.binaryLongDescription"
+          defaultMessage="Binary fields accept a binary value as a Base64-encoded string. By default, binary fields are not stored or searchable."
+        />
+      </p>
+    ),
   },
   ip: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.ipDescription', {
@@ -149,6 +157,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/ip.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.ipLongDescription"
+          defaultMessage="IP fields accept IPv4 or IPv6 addresses. If you need to store IP ranges in a single field, use the {ipRange}."
+          values={{
+            ipRange: (
+              <EuiLink href={documentationService.getTypeDocLink('range')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.ipLongDescription.ipRangeTypeLink',
+                  {
+                    defaultMessage: 'IP range data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   boolean: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.booleanDescription', {
@@ -158,6 +186,18 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/boolean.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.booleanLongDescription"
+          defaultMessage="Boolean fields accept JSON {true} and {false} values, as well as strings which are interpreted as true or false."
+          values={{
+            true: <EuiCode>true</EuiCode>,
+            false: <EuiCode>false</EuiCode>,
+          }}
+        />
+      </p>
+    ),
   },
   range: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeDescription', {
@@ -171,7 +211,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeSubtypeDescription', {
         defaultMessage: 'Range type',
       }),
-      types: ['date_range', 'double_range', 'float_range', 'integer_range', 'long_range'],
+      types: [
+        'date_range',
+        'double_range',
+        'float_range',
+        'integer_range',
+        'ip_range',
+        'long_range',
+      ],
     },
   },
   object: {
@@ -248,6 +295,12 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Long range',
     }),
     value: 'long_range',
+  },
+  ip_range: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.ipRangeDescription', {
+      defaultMessage: 'IP range',
+    }),
+    value: 'ip_range',
   },
   geo_point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoPointDescription', {
