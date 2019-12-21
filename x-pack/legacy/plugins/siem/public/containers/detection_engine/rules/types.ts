@@ -10,11 +10,13 @@ export const NewRuleSchema = t.intersection([
   t.type({
     description: t.string,
     enabled: t.boolean,
+    filters: t.array(t.unknown),
     index: t.array(t.string),
     interval: t.string,
     language: t.string,
     name: t.string,
     query: t.string,
+    risk_score: t.number,
     severity: t.string,
     type: t.union([t.literal('query'), t.literal('saved_query')]),
   }),
@@ -26,7 +28,9 @@ export const NewRuleSchema = t.intersection([
     max_signals: t.number,
     references: t.array(t.string),
     rule_id: t.string,
+    saved_id: t.string,
     tags: t.array(t.string),
+    threats: t.array(t.unknown),
     to: t.string,
     updated_by: t.string,
   }),
@@ -41,29 +45,41 @@ export interface AddRulesProps {
   signal: AbortSignal;
 }
 
+const MetaRule = t.type({
+  from: t.string,
+});
+
 export const RuleSchema = t.intersection([
   t.type({
+    created_at: t.string,
     created_by: t.string,
     description: t.string,
     enabled: t.boolean,
+    false_positives: t.array(t.string),
+    filters: t.array(t.unknown),
+    from: t.string,
     id: t.string,
     index: t.array(t.string),
     interval: t.string,
+    immutable: t.boolean,
     language: t.string,
     name: t.string,
+    max_signals: t.number,
+    meta: MetaRule,
     query: t.string,
+    references: t.array(t.string),
+    risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
     type: t.string,
+    tags: t.array(t.string),
+    to: t.string,
+    threats: t.array(t.unknown),
+    updated_at: t.string,
     updated_by: t.string,
   }),
   t.partial({
-    false_positives: t.array(t.string),
-    from: t.string,
-    max_signals: t.number,
-    references: t.array(t.string),
-    tags: t.array(t.string),
-    to: t.string,
+    saved_id: t.string,
   }),
 ]);
 
@@ -97,6 +113,12 @@ export interface FetchRulesResponse {
   perPage: number;
   total: number;
   data: Rule[];
+}
+
+export interface FetchRuleProps {
+  id: string;
+  kbnVersion: string;
+  signal: AbortSignal;
 }
 
 export interface EnableRulesProps {
