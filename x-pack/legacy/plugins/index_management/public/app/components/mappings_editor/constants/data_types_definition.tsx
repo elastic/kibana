@@ -25,7 +25,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.textLongDescription"
-          defaultMessage="Text fields support full-text search by breaking a string into individual, searchable terms. To index structured content, such as an email address, use the {keyword}."
+          defaultMessage="Text fields support full-text search by breaking strings into individual, searchable terms. To index structured content, such as an email address, use the {keyword}."
           values={{
             keyword: (
               <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
