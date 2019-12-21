@@ -34,11 +34,7 @@ import { generateTicksProvider } from './tick_generator';
 const DEBOUNCE_DELAY = 50;
 
 export function timechartFn(dependencies: TimelionVisualizationDependencies) {
-  const {
-    $rootScope,
-    $compile,
-    core: { uiSettings },
-  } = dependencies;
+  const { $rootScope, $compile, uiSettings } = dependencies;
 
   return function() {
     return {

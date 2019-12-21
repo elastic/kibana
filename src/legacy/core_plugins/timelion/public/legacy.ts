@@ -37,4 +37,4 @@ const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

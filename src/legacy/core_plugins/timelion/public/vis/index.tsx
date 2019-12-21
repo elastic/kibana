@@ -30,21 +30,12 @@ import { TimelionVisualizationDependencies } from '../plugin';
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 import { TimelionOptions } from './timelion_options';
 import { VisParams } from '../timelion_vis_fn';
-import { getArgValueSuggestions } from '../services/arg_value_suggestions';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
-export async function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
-  const { core } = dependencies;
-  const { http, uiSettings } = core;
+export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
+  const { http, uiSettings } = dependencies;
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
-
-  const [coreStart, pluginsStart] = await core.getStartServices();
-
-  const argValueSuggestions = getArgValueSuggestions(
-    pluginsStart.data.indexPatterns,
-    coreStart.savedObjects.client
-  );
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
@@ -65,13 +56,7 @@ export async function getTimelionVisualization(dependencies: TimelionVisualizati
     },
     editorConfig: {
       optionsTemplate: (props: VisOptionsProps<VisParams>) => (
-        <KibanaContextProvider
-          services={{
-            uiSettings,
-            http,
-            argValueSuggestions,
-          }}
-        >
+        <KibanaContextProvider services={{ uiSettings, http }}>
           <TimelionOptions {...props} />
         </KibanaContextProvider>
       ),

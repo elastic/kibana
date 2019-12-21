@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
@@ -25,7 +25,7 @@ import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
-import { TimelionServices } from '../services/types';
+import { getArgValueSuggestions } from '../services/arg_value_suggestions';
 
 const LANGUAGE_ID = 'timelion_expression';
 monacoEditor.languages.register({ id: LANGUAGE_ID });
@@ -37,7 +37,8 @@ interface TimelionExpressionInputProps {
 
 function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
   const functionList = useRef([]);
-  const kibana = useKibana<TimelionServices>();
+  const kibana = useKibana();
+  const argValueSuggestions = useMemo(getArgValueSuggestions, []);
 
   const provideCompletionItems = useCallback(
     async (model: monacoEditor.editor.ITextModel, position: monacoEditor.Position) => {
@@ -56,7 +57,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
         // it's important to offset the cursor position on 1 point left
         // because of PEG parser starts the line with 0, but monaco with 1
         position.column - 1,
-        kibana.services.argValueSuggestions
+        argValueSuggestions
       );
 
       return {
@@ -67,7 +68,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
           : [],
       };
     },
-    [kibana.services.argValueSuggestions]
+    [argValueSuggestions]
   );
 
   const provideHover = useCallback(
@@ -78,7 +79,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
         // it's important to offset the cursor position on 1 point left
         // because of PEG parser starts the line with 0, but monaco with 1
         position.column - 1,
-        kibana.services.argValueSuggestions
+        argValueSuggestions
       );
 
       return {
@@ -89,7 +90,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
           : [],
       };
     },
-    [kibana.services.argValueSuggestions]
+    [argValueSuggestions]
   );
 
   useEffect(() => {

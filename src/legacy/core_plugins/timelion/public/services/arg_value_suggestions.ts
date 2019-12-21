@@ -18,9 +18,8 @@
  */
 
 import { get } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { IndexPatternsContract } from 'src/plugins/data/public';
 import { TimelionFunctionArgs } from '../../common/types';
+import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 
 export interface Location {
   min: number;
@@ -41,10 +40,10 @@ export interface FunctionArg {
   };
 }
 
-export function getArgValueSuggestions(
-  indexPatterns: IndexPatternsContract,
-  savedObjectsClient: SavedObjectsClientContract
-) {
+export function getArgValueSuggestions() {
+  const indexPatterns = getIndexPatterns();
+  const savedObjectsClient = getSavedObjectsClient();
+
   async function getIndexPattern(functionArgs: FunctionArg[]) {
     const indexPatternArg = functionArgs.find(({ name }) => name === 'index');
     if (!indexPatternArg) {

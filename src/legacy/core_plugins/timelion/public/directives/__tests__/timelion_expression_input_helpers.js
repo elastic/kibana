@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import PEG from 'pegjs';
 import grammar from 'raw-loader!../../chain.peg';
 import { SUGGESTION_TYPE, suggest } from '../timelion_expression_input_helpers';
-import { ArgValueSuggestionsProvider } from '../timelion_expression_suggestions/arg_value_suggestions';
+import { getArgValueSuggestions } from '../../services/arg_value_suggestions';
 
 describe('Timelion expression suggestions', () => {
   describe('getSuggestions', () => {
@@ -44,11 +44,7 @@ describe('Timelion expression suggestions', () => {
     };
     const functionList = [func1, myFunc2];
     let Parser;
-    const privateStub = () => {
-      return {};
-    };
-    const indexPatternsStub = {};
-    const argValueSuggestions = ArgValueSuggestionsProvider(privateStub, indexPatternsStub); // eslint-disable-line new-cap
+    const argValueSuggestions = getArgValueSuggestions();
     beforeEach(function() {
       Parser = PEG.generate(grammar);
     });

@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { ArgValueSuggestions } from './arg_value_suggestions';
+import { IndexPatternsContract } from 'src/plugins/data/public';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
 
-export interface TimelionServices {
-  argValueSuggestions: ArgValueSuggestions;
-}
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
+
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
+  SavedObjectsClientContract
+>('SavedObjectsClient');
