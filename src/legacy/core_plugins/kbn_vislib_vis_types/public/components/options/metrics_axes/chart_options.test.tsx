@@ -31,6 +31,8 @@ import {
 } from '../../../utils/collections';
 import { valueAxis, seriesParam } from './mocks';
 
+jest.mock('ui/new_platform');
+
 const interpolationModes = getInterpolationModes();
 const chartTypes = getChartTypes();
 const chartModes = getChartModes();

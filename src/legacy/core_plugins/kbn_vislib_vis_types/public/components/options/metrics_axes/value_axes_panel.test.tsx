@@ -25,6 +25,8 @@ import { Positions, getScaleTypes, getAxisModes, getPositions } from '../../../u
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { valueAxis, seriesParam } from './mocks';
 
+jest.mock('ui/new_platform');
+
 const positions = getPositions();
 const axisModes = getAxisModes();
 const scaleTypes = getScaleTypes();

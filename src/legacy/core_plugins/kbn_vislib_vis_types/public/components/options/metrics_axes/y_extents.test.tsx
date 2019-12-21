@@ -23,6 +23,8 @@ import { YExtents, YExtentsProps } from './y_extents';
 import { ScaleTypes } from '../../../utils/collections';
 import { NumberInputOption } from '../../common';
 
+jest.mock('ui/new_platform');
+
 describe('YExtents component', () => {
   let setMultipleValidity: jest.Mock;
   let setScale: jest.Mock;

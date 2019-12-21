@@ -23,6 +23,8 @@ import { LabelOptions, LabelOptionsProps } from './label_options';
 import { TruncateLabelsOption } from '../../common';
 import { valueAxis, categoryAxis } from './mocks';
 
+jest.mock('ui/new_platform');
+
 const FILTER = 'filter';
 const ROTATE = 'rotate';
 const DISABLED = 'disabled';

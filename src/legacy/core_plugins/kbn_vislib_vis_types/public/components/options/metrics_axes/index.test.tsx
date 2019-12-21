@@ -30,6 +30,7 @@ import { ChartTypes } from '../../../utils/collections';
 import { AggConfig, AggType } from '../../../legacy_imports';
 import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mocks';
 
+jest.mock('ui/new_platform');
 jest.mock('./series_panel', () => ({
   SeriesPanel: () => 'SeriesPanel',
 }));

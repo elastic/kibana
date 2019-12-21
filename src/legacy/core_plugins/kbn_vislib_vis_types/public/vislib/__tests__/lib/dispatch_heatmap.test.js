@@ -22,6 +22,7 @@ import { Dispatch } from '../../lib/dispatch';
 import mockdataPoint from './fixtures/dispatch_heatmap_data_point.json';
 import mockConfigPercentage from './fixtures/dispatch_heatmap_config.json';
 
+jest.mock('ui/new_platform');
 jest.mock('d3', () => ({
   event: {
     target: {
@@ -32,6 +33,7 @@ jest.mock('d3', () => ({
   },
 }));
 jest.mock('../../../legacy_imports.ts', () => ({
+  ...jest.requireActual('../../../legacy_imports.ts'),
   chrome: {
     getUiSettingsClient: () => ({
       get: () => '',

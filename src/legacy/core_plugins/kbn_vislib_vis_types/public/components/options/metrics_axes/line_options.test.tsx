@@ -24,6 +24,8 @@ import { NumberInputOption } from '../../common';
 import { getInterpolationModes } from '../../../utils/collections';
 import { seriesParam } from './mocks';
 
+jest.mock('ui/new_platform');
+
 const LINE_WIDTH = 'lineWidth';
 const DRAW_LINES = 'drawLinesBetweenPoints';
 const interpolationModes = getInterpolationModes();

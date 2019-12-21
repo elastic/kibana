@@ -25,6 +25,8 @@ import { Positions, getPositions } from '../../../utils/collections';
 import { LabelOptions } from './label_options';
 import { categoryAxis } from './mocks';
 
+jest.mock('ui/new_platform');
+
 const positions = getPositions();
 
 describe('CategoryAxisPanel component', () => {

@@ -23,6 +23,7 @@ import mockdataPoint from './fixtures/dispatch_bar_chart_data_point.json';
 import mockConfigPercentage from './fixtures/dispatch_bar_chart_config_percentage.json';
 import mockConfigNormal from './fixtures/dispatch_bar_chart_config_normal.json';
 
+jest.mock('ui/new_platform');
 jest.mock('d3', () => ({
   event: {
     target: {
@@ -33,6 +34,7 @@ jest.mock('d3', () => ({
   },
 }));
 jest.mock('../../../legacy_imports.ts', () => ({
+  ...jest.requireActual('../../../legacy_imports.ts'),
   chrome: {
     getUiSettingsClient: () => ({
       get: () => '',

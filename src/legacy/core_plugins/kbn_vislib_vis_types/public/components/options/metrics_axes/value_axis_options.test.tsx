@@ -32,6 +32,8 @@ import {
 } from '../../../utils/collections';
 import { valueAxis, categoryAxis } from './mocks';
 
+jest.mock('ui/new_platform');
+
 const POSITION = 'position';
 const positions = getPositions();
 const axisModes = getAxisModes();

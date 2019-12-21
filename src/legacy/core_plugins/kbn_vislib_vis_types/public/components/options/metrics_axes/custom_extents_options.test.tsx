@@ -28,6 +28,8 @@ const DEFAULT_Y_EXTENTS = 'defaultYExtents';
 const SCALE = 'scale';
 const SET_Y_EXTENTS = 'setYExtents';
 
+jest.mock('ui/new_platform');
+
 describe('CustomExtentsOptions component', () => {
   let setValueAxis: jest.Mock;
   let setValueAxisScale: jest.Mock;
