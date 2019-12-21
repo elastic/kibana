@@ -28,7 +28,6 @@ import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
-import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
@@ -78,7 +77,6 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     this.registerPanels(dependencies);
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    // visualizations.types.createBaseVisualization(getTimelionVisualization(dependencies));
   }
 
   private registerPanels(dependencies: TimelionVisualizationDependencies) {

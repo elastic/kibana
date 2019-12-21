@@ -59,8 +59,6 @@ document.title = 'Timelion - Kibana';
 
 const app = require('ui/modules').get('apps/timelion', []);
 
-require('./vis');
-
 require('ui/routes').enable();
 
 require('ui/routes').when('/:id?', {

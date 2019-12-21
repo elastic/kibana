@@ -27,7 +27,7 @@ const timelionVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: Legac
     require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      // styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
     },
