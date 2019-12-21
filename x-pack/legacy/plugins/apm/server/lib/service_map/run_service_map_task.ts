@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import { uniq } from 'lodash';
-import { APMPluginContract } from '../../../../../../plugins/apm/server';
-import { getESClient, ESClient } from '../helpers/es_client';
+import { ESClient } from '../helpers/es_client';
 import { getNextTransactionSamples } from './get_next_transaction_samples';
 import { getServiceConnections } from './get_service_connections';
 import { mapTraceToBulkServiceConnection } from './map_trace_to_bulk_service_connection';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import {
   SPAN_TYPE,
@@ -25,6 +22,7 @@ import {
   SERVICE_ENVIRONMENT,
   DESTINATION_ADDRESS
 } from '../../../common/elasticsearch_fieldnames';
+import { Setup } from '../helpers/setup_request';
 
 interface MappedDocument {
   [TIMESTAMP]: string;
@@ -47,6 +45,7 @@ export interface TraceConnection {
 async function indexLatestConnections(
   apmIndices: ApmIndicesConfig,
   esClient: ESClient,
+  internalEsClient: ESClient,
   startTimeInterval?: string | number,
   latestTransactionTime = 0,
   afterKey?: object
@@ -92,7 +91,7 @@ async function indexLatestConnections(
     );
   });
   if (bulkIndexConnectionDocs.length > 0) {
-    await esClient.bulk({
+    await internalEsClient.bulk({
       body: bulkIndexConnectionDocs
         .map(bulkObject => JSON.stringify(bulkObject))
         .join('\n')
@@ -101,6 +100,7 @@ async function indexLatestConnections(
   return await indexLatestConnections(
     apmIndices,
     esClient,
+    internalEsClient,
     startTimeInterval,
     nextLatestTransactionTime,
     nextAfterKey
@@ -108,19 +108,13 @@ async function indexLatestConnections(
 }
 
 export async function runServiceMapTask(
-  server: Server,
+  setup: Setup,
   startTimeInterval?: string | number
 ) {
-  const callCluster = server.plugins.elasticsearch.getCluster('data')
-    .callWithInternalUser;
-  const apmPlugin = server.newPlatform.setup.plugins.apm as APMPluginContract;
-  const savedObjectsClient = getInternalSavedObjectsClient(server);
-  const apmIndices = await apmPlugin.getApmIndices(savedObjectsClient);
-  const esClient: ESClient = getESClient(
-    apmIndices,
-    server.uiSettingsServiceFactory({ savedObjectsClient }),
-    callCluster
+  return await indexLatestConnections(
+    setup.indices,
+    setup.client,
+    setup.internalClient,
+    startTimeInterval
   );
-
-  return await indexLatestConnections(apmIndices, esClient, startTimeInterval);
 }

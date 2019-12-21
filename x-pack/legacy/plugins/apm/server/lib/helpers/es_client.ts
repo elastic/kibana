@@ -9,7 +9,8 @@ import {
   IndexDocumentParams,
   IndicesDeleteParams,
   IndicesCreateParams,
-  BulkIndexDocumentsParams
+  BulkIndexDocumentsParams,
+  IndicesExistsParams
 } from 'elasticsearch';
 import { merge } from 'lodash';
 import { cloneDeep, isString } from 'lodash';
@@ -142,6 +143,10 @@ export function getESClient(
     indicesCreate: (params: IndicesCreateParams) => {
       onRequest('indices.create', params);
       return esClient('indices.create', params);
+    },
+    indexExists: (params: IndicesExistsParams) => {
+      onRequest('indices.exists', params);
+      return esClient('indices.exists', params);
     },
     bulk: (params: BulkIndexDocumentsParams) => {
       onRequest('bulk', params);

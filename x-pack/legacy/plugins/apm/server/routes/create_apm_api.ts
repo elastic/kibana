@@ -58,7 +58,7 @@ import {
   uiFiltersEnvironmentsRoute
 } from './ui_filters';
 import { createApi } from './create_api';
-import { serviceMapRoute } from './services';
+import { serviceMapRoute } from './service_map';
 
 const createApmApi = () => {
   const api = createApi()
@@ -76,8 +76,10 @@ const createApmApi = () => {
     .add(serviceTransactionTypesRoute)
     .add(servicesRoute)
     .add(serviceNodeMetadataRoute)
-    .add(serviceMapRoute)
     .add(serviceAnnotationsRoute)
+
+    // Service Map
+    .add(serviceMapRoute)
 
     // Agent configuration
     .add(agentConfigurationAgentNameRoute)

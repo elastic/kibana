@@ -12,6 +12,8 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { callApi } from '../../../services/rest/callApi';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -51,9 +53,21 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
     [uiFilters]
   );
 
+  const { http } = useApmPluginContext().core;
+  const { data: serviceMapStartResponse } = useFetcher(async () => {
+    const response = await callApi<{
+      taskStatus: 'initialized' | 'active';
+    }>(http, {
+      method: 'GET',
+      pathname: `/api/apm/service-map-start-task`
+    });
+    return response;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [http]);
+
   const { data } = useFetcher(
     callApmApi => {
-      if (start && end) {
+      if (start && end && serviceMapStartResponse) {
         return callApmApi({
           pathname: '/api/apm/service-map',
           params: {
@@ -68,23 +82,36 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         });
       }
     },
-    [start, end, uiFiltersOmitEnv, environment, serviceName]
+    [
+      start,
+      end,
+      uiFiltersOmitEnv,
+      environment,
+      serviceName,
+      serviceMapStartResponse
+    ]
   );
 
   const elements = Array.isArray(data) ? data : [];
   const license = useLicense();
   const isValidPlatinumLicense =
-    license?.isActive && license?.type === 'platinum';
+    true ||
+    (license?.isActive &&
+      (license?.type === 'platinum' || license?.type === 'trial'));
 
-  return isValidPlatinumLicense ? (
-    <Cytoscape
-      elements={elements}
-      serviceName={serviceName}
-      style={cytoscapeDivStyle}
-    >
-      <Controls />
-    </Cytoscape>
-  ) : (
-    <PlatinumLicensePrompt />
+  return (
+    <>
+      {isValidPlatinumLicense ? (
+        <Cytoscape
+          elements={elements}
+          serviceName={serviceName}
+          style={cytoscapeDivStyle}
+        >
+          <Controls />
+        </Cytoscape>
+      ) : (
+        <PlatinumLicensePrompt />
+      )}
+    </>
   );
 }

@@ -4,45 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
-import { APMPluginContract } from '../../../../../../plugins/apm/server';
-import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
-import { CallCluster } from '../../../../../../../src/legacy/core_plugins/elasticsearch';
 import { TIMESTAMP } from '../../../common/elasticsearch_fieldnames';
+import { Setup } from '../helpers/setup_request';
 
-export async function createServiceConnectionsIndex(server: Server) {
-  const callCluster = server.plugins.elasticsearch.getCluster('data')
-    .callWithInternalUser;
-  const apmPlugin = server.newPlatform.setup.plugins.apm as APMPluginContract;
+export async function createServiceConnectionsIndex(setup: Setup) {
+  const { internalClient, indices } = setup;
+  const index = indices.apmServiceConnectionsIndex;
 
-  try {
-    const apmIndices = await apmPlugin.getApmIndices(
-      getInternalSavedObjectsClient(server)
-    );
-    const index = apmIndices.apmServiceConnectionsIndex;
-    const indexExists = await callCluster('indices.exists', { index });
-    if (!indexExists) {
-      const result = await createNewIndex(index, callCluster);
+  const indexExists = await internalClient.indexExists({ index });
 
-      if (!result.acknowledged) {
-        const resultError =
-          result && result.error && JSON.stringify(result.error);
-        throw new Error(
-          `Unable to create APM Service Connections index '${index}': ${resultError}`
-        );
-      }
+  if (!indexExists) {
+    const result = await createNewIndex(index, internalClient);
+
+    if (!result.acknowledged) {
+      const resultError =
+        result && result.error && JSON.stringify(result.error);
+      throw new Error(
+        `Unable to create APM Service Connections index '${index}': ${resultError}`
+      );
     }
-  } catch (error) {
-    server.log(
-      ['apm', 'error'],
-      `Could not create APM Service Connections: ${error.message}`
-    );
-    throw error;
   }
 }
 
-function createNewIndex(index: string, callWithInternalUser: CallCluster) {
-  return callWithInternalUser('indices.create', {
+function createNewIndex(index: string, client: Setup['client']) {
+  return client.indicesCreate({
     index,
     body: {
       settings: { 'index.auto_expand_replicas': '0-1' },

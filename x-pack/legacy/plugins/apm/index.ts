@@ -11,7 +11,6 @@ import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
-import { initializeServiceMaps } from './server/lib/service_map/initialize_service_maps';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -78,15 +77,12 @@ export const apm: LegacyPluginInitializer = kibana => {
         autocreateApmIndexPattern: Joi.boolean().default(true),
 
         // service map
-
         serviceMapEnabled: Joi.boolean().default(false)
       }).default();
     },
 
     // TODO: get proper types
     init(server: Server) {
-      const config = server.config();
-
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
@@ -123,10 +119,6 @@ export const apm: LegacyPluginInitializer = kibana => {
         .apm as APMPluginContract;
 
       apmPlugin.registerLegacyAPI({ server });
-
-      if (config.get('xpack.apm.serviceMapEnabled')) {
-        initializeServiceMaps(server);
-      }
     }
   });
 };

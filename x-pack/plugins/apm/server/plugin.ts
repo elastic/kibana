@@ -18,6 +18,7 @@ import { createApmAgentConfigurationIndex } from '../../../legacy/plugins/apm/se
 import { createApmApi } from '../../../legacy/plugins/apm/server/routes/create_apm_api';
 import { getApmIndices } from '../../../legacy/plugins/apm/server/lib/settings/apm_indices/get_apm_indices';
 import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
+import { initializeServiceMaps } from '../../../legacy/plugins/apm/server/lib/service_map/initialize_service_maps';
 
 export interface LegacySetup {
   server: Server;
@@ -55,6 +56,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
 
     this.legacySetup$.subscribe(__LEGACY => {
       createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
+      initializeServiceMaps(core, { config$: mergedConfig$, logger, __LEGACY });
     });
 
     await new Promise(resolve => {
