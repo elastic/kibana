@@ -19,6 +19,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
+import { readFileSync } from 'fs';
 import { Logger } from '../logging';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -202,15 +203,48 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.customHeaders = rawConfig.customHeaders;
 
-    const certificateAuthorities = Array.isArray(rawConfig.ssl.certificateAuthorities)
-      ? rawConfig.ssl.certificateAuthorities
-      : typeof rawConfig.ssl.certificateAuthorities === 'string'
-      ? [rawConfig.ssl.certificateAuthorities]
-      : undefined;
+    const { alwaysPresentCertificate, keyPassphrase, verificationMode } = rawConfig.ssl;
+
+    let key: string | undefined;
+    let certificate: string | undefined;
+    let certificateAuthorities: string[] | undefined;
+
+    if (rawConfig.ssl.key) {
+      key = readFile(rawConfig.ssl.key);
+    }
+    if (rawConfig.ssl.certificate) {
+      certificate = readFile(rawConfig.ssl.certificate);
+    }
+
+    const ca = rawConfig.ssl.certificateAuthorities;
+    if (ca) {
+      const parsed = [];
+      const paths = Array.isArray(ca) ? ca : [ca];
+      if (paths.length > 0) {
+        for (const path of paths) {
+          parsed.push(readFile(path));
+        }
+        certificateAuthorities = parsed;
+      }
+    }
+
+    if (key && !certificate) {
+      log.warn(`Detected a key without a certificate; mutual TLS authentication is disabled.`);
+    } else if (certificate && !key) {
+      log.warn(`Detected a certificate without a key; mutual TLS authentication is disabled.`);
+    }
 
     this.ssl = {
-      ...rawConfig.ssl,
+      alwaysPresentCertificate,
+      key,
+      keyPassphrase,
+      certificate,
       certificateAuthorities,
+      verificationMode,
     };
   }
 }
+
+const readFile = (file: string) => {
+  return readFileSync(file, 'utf8');
+};

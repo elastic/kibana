@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { mockReadFileSync } from './elasticsearch_client_config.test.mocks';
-
 import { duration } from 'moment';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import {
@@ -43,31 +41,29 @@ test('parses minimally specified config', () => {
       logger.get()
     )
   ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "master",
-  "hosts": Array [
     Object {
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "localhost",
-      "path": "/elasticsearch",
-      "port": "80",
-      "protocol": "http:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": false,
-  "sniffOnStart": false,
-}
-`);
+      "apiVersion": "master",
+      "hosts": Array [
+        Object {
+          "headers": Object {
+            "xsrf": "something",
+          },
+          "host": "localhost",
+          "path": "/elasticsearch",
+          "port": "80",
+          "protocol": "http:",
+          "query": null,
+        },
+      ],
+      "keepAlive": true,
+      "log": [Function],
+      "sniffOnConnectionFault": false,
+      "sniffOnStart": false,
+    }
+  `);
 });
 
 test('parses fully specified config', () => {
-  mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-
   const elasticsearchConfig: ElasticsearchClientConfig = {
     apiVersion: 'v7.0.0',
     customHeaders: { xsrf: 'something' },
@@ -87,9 +83,9 @@ test('parses fully specified config', () => {
     sniffInterval: 11223344,
     ssl: {
       verificationMode: 'certificate',
-      certificateAuthorities: ['ca-path-1', 'ca-path-2'],
-      certificate: 'certificate-path',
-      key: 'key-path',
+      certificateAuthorities: ['content-of-ca-path-1', 'content-of-ca-path-2'],
+      certificate: 'content-of-certificate-path',
+      key: 'content-of-key-path',
       keyPassphrase: 'key-pass',
       alwaysPresentCertificate: true,
     },
@@ -108,63 +104,63 @@ test('parses fully specified config', () => {
   expect(elasticsearchConfig.ssl).not.toBe(elasticsearchClientConfig.ssl);
 
   expect(elasticsearchClientConfig).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
     Object {
-      "auth": "elastic:changeme",
-      "headers": Object {
-        "xsrf": "something",
+      "apiVersion": "v7.0.0",
+      "hosts": Array [
+        Object {
+          "auth": "elastic:changeme",
+          "headers": Object {
+            "xsrf": "something",
+          },
+          "host": "localhost",
+          "path": "/elasticsearch",
+          "port": "80",
+          "protocol": "http:",
+          "query": null,
+        },
+        Object {
+          "auth": "elastic:changeme",
+          "headers": Object {
+            "xsrf": "something",
+          },
+          "host": "domain.com",
+          "path": "/elasticsearch",
+          "port": "1234",
+          "protocol": "http:",
+          "query": null,
+        },
+        Object {
+          "auth": "elastic:changeme",
+          "headers": Object {
+            "xsrf": "something",
+          },
+          "host": "es.local",
+          "path": "/",
+          "port": "443",
+          "protocol": "https:",
+          "query": null,
+        },
+      ],
+      "keepAlive": true,
+      "log": [Function],
+      "pingTimeout": 12345,
+      "requestTimeout": 54321,
+      "sniffInterval": 11223344,
+      "sniffOnConnectionFault": true,
+      "sniffOnStart": true,
+      "ssl": Object {
+        "ca": Array [
+          "content-of-ca-path-1",
+          "content-of-ca-path-2",
+        ],
+        "cert": "content-of-certificate-path",
+        "checkServerIdentity": [Function],
+        "key": "content-of-key-path",
+        "passphrase": "key-pass",
+        "rejectUnauthorized": true,
       },
-      "host": "localhost",
-      "path": "/elasticsearch",
-      "port": "80",
-      "protocol": "http:",
-      "query": null,
-    },
-    Object {
-      "auth": "elastic:changeme",
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "domain.com",
-      "path": "/elasticsearch",
-      "port": "1234",
-      "protocol": "http:",
-      "query": null,
-    },
-    Object {
-      "auth": "elastic:changeme",
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "pingTimeout": 12345,
-  "requestTimeout": 54321,
-  "sniffInterval": 11223344,
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-  "ssl": Object {
-    "ca": Array [
-      "content-of-ca-path-1",
-      "content-of-ca-path-2",
-    ],
-    "cert": "content-of-certificate-path",
-    "checkServerIdentity": [Function],
-    "key": "content-of-key-path",
-    "passphrase": "key-pass",
-    "rejectUnauthorized": true,
-  },
-}
-`);
+    }
+  `);
 });
 
 test('parses config timeouts of moment.Duration type', () => {
@@ -185,29 +181,29 @@ test('parses config timeouts of moment.Duration type', () => {
       logger.get()
     )
   ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "master",
-  "hosts": Array [
     Object {
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "localhost",
-      "path": "/elasticsearch",
-      "port": "9200",
-      "protocol": "http:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "pingTimeout": 100,
-  "requestTimeout": 30000,
-  "sniffInterval": 60000,
-  "sniffOnConnectionFault": false,
-  "sniffOnStart": false,
-}
-`);
+      "apiVersion": "master",
+      "hosts": Array [
+        Object {
+          "headers": Object {
+            "xsrf": "something",
+          },
+          "host": "localhost",
+          "path": "/elasticsearch",
+          "port": "9200",
+          "protocol": "http:",
+          "query": null,
+        },
+      ],
+      "keepAlive": true,
+      "log": [Function],
+      "pingTimeout": 100,
+      "requestTimeout": 30000,
+      "sniffInterval": 60000,
+      "sniffOnConnectionFault": false,
+      "sniffOnStart": false,
+    }
+  `);
 });
 
 describe('#auth', () => {
@@ -229,36 +225,36 @@ describe('#auth', () => {
         { auth: false }
       )
     ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "localhost",
-      "path": "/elasticsearch",
-      "port": "80",
-      "protocol": "http:",
-      "query": null,
-    },
-    Object {
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {
+              "xsrf": "something",
+            },
+            "host": "localhost",
+            "path": "/elasticsearch",
+            "port": "80",
+            "protocol": "http:",
+            "query": null,
+          },
+          Object {
+            "headers": Object {
+              "xsrf": "something",
+            },
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+      }
+    `);
   });
 
   test('is not set if username is not specified', () => {
@@ -278,26 +274,26 @@ Object {
         { auth: true }
       )
     ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {
+              "xsrf": "something",
+            },
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+      }
+    `);
   });
 
   test('is not set if password is not specified', () => {
@@ -317,26 +313,26 @@ Object {
         { auth: true }
       )
     ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {
-        "xsrf": "something",
-      },
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {
+              "xsrf": "something",
+            },
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+      }
+    `);
   });
 });
 
@@ -365,24 +361,24 @@ describe('#log', () => {
     expect(typeof esLogger.close).toBe('function');
 
     expect(loggingServiceMock.collect(logger)).toMatchInlineSnapshot(`
-Object {
-  "debug": Array [],
-  "error": Array [
-    Array [
-      "some-error",
-    ],
-  ],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [
-    Array [
-      "some-warning",
-    ],
-  ],
-}
-`);
+      Object {
+        "debug": Array [],
+        "error": Array [
+          Array [
+            "some-error",
+          ],
+        ],
+        "fatal": Array [],
+        "info": Array [],
+        "log": Array [],
+        "trace": Array [],
+        "warn": Array [
+          Array [
+            "some-warning",
+          ],
+        ],
+      }
+    `);
   });
 
   test('default logger with #logQueries = true', () => {
@@ -411,35 +407,35 @@ Object {
     expect(typeof esLogger.close).toBe('function');
 
     expect(loggingServiceMock.collect(logger)).toMatchInlineSnapshot(`
-Object {
-  "debug": Array [
-    Array [
-      "304
-METHOD /some-path
-?query=2",
       Object {
-        "tags": Array [
-          "query",
+        "debug": Array [
+          Array [
+            "304
+      METHOD /some-path
+      ?query=2",
+            Object {
+              "tags": Array [
+                "query",
+              ],
+            },
+          ],
         ],
-      },
-    ],
-  ],
-  "error": Array [
-    Array [
-      "some-error",
-    ],
-  ],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [
-    Array [
-      "some-warning",
-    ],
-  ],
-}
-`);
+        "error": Array [
+          Array [
+            "some-error",
+          ],
+        ],
+        "fatal": Array [],
+        "info": Array [],
+        "log": Array [],
+        "trace": Array [],
+        "warn": Array [
+          Array [
+            "some-warning",
+          ],
+        ],
+      }
+    `);
   });
 
   test('custom logger', () => {
@@ -480,27 +476,28 @@ describe('#ssl', () => {
         logger.get()
       )
     ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {},
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-  "ssl": Object {
-    "rejectUnauthorized": false,
-  },
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {},
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+        "ssl": Object {
+          "ca": undefined,
+          "rejectUnauthorized": false,
+        },
+      }
+    `);
   });
 
   test('#verificationMode = certificate', () => {
@@ -524,28 +521,29 @@ Object {
     ).toBeUndefined();
 
     expect(clientConfig).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {},
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-  "ssl": Object {
-    "checkServerIdentity": [Function],
-    "rejectUnauthorized": true,
-  },
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {},
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+        "ssl": Object {
+          "ca": undefined,
+          "checkServerIdentity": [Function],
+          "rejectUnauthorized": true,
+        },
+      }
+    `);
   });
 
   test('#verificationMode = full', () => {
@@ -564,27 +562,28 @@ Object {
         logger.get()
       )
     ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {},
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-  "ssl": Object {
-    "rejectUnauthorized": true,
-  },
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {},
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+        "ssl": Object {
+          "ca": undefined,
+          "rejectUnauthorized": true,
+        },
+      }
+    `);
   });
 
   test('#verificationMode is unknown', () => {
@@ -606,8 +605,6 @@ Object {
   });
 
   test('#ignoreCertAndKey = true', () => {
-    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
-
     expect(
       parseElasticsearchClientConfig(
         {
@@ -620,9 +617,9 @@ Object {
           requestHeadersWhitelist: [],
           ssl: {
             verificationMode: 'certificate',
-            certificateAuthorities: ['ca-path'],
-            certificate: 'certificate-path',
-            key: 'key-path',
+            certificateAuthorities: ['content-of-ca-path'],
+            certificate: 'content-of-certificate-path',
+            key: 'content-of-key-path',
             keyPassphrase: 'key-pass',
             alwaysPresentCertificate: true,
           },
@@ -631,30 +628,30 @@ Object {
         { ignoreCertAndKey: true }
       )
     ).toMatchInlineSnapshot(`
-Object {
-  "apiVersion": "v7.0.0",
-  "hosts": Array [
-    Object {
-      "headers": Object {},
-      "host": "es.local",
-      "path": "/",
-      "port": "443",
-      "protocol": "https:",
-      "query": null,
-    },
-  ],
-  "keepAlive": true,
-  "log": [Function],
-  "sniffOnConnectionFault": true,
-  "sniffOnStart": true,
-  "ssl": Object {
-    "ca": Array [
-      "content-of-ca-path",
-    ],
-    "checkServerIdentity": [Function],
-    "rejectUnauthorized": true,
-  },
-}
-`);
+      Object {
+        "apiVersion": "v7.0.0",
+        "hosts": Array [
+          Object {
+            "headers": Object {},
+            "host": "es.local",
+            "path": "/",
+            "port": "443",
+            "protocol": "https:",
+            "query": null,
+          },
+        ],
+        "keepAlive": true,
+        "log": [Function],
+        "sniffOnConnectionFault": true,
+        "sniffOnStart": true,
+        "ssl": Object {
+          "ca": Array [
+            "content-of-ca-path",
+          ],
+          "checkServerIdentity": [Function],
+          "rejectUnauthorized": true,
+        },
+      }
+    `);
   });
 });

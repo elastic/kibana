@@ -49,23 +49,23 @@ const createAgent = (legacyConfig: any) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (
-    legacyConfig.ssl &&
-    Array.isArray(legacyConfig.ssl.certificateAuthorities) &&
-    legacyConfig.ssl.certificateAuthorities.length > 0
-  ) {
-    agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
-  }
-
-  if (
-    legacyConfig.ssl &&
-    legacyConfig.ssl.alwaysPresentCertificate &&
-    legacyConfig.ssl.certificate &&
-    legacyConfig.ssl.key
-  ) {
+  const ignoreCertAndKey = !legacyConfig.ssl?.alwaysPresentCertificate;
+  if (!ignoreCertAndKey && legacyConfig.ssl?.certificate && legacyConfig.ssl?.key) {
     agentOptions.cert = readFile(legacyConfig.ssl.certificate);
     agentOptions.key = readFile(legacyConfig.ssl.key);
     agentOptions.passphrase = legacyConfig.ssl.keyPassphrase;
+  }
+
+  const ca = legacyConfig.ssl?.certificateAuthorities;
+  if (ca) {
+    const parsed = [];
+    const paths = Array.isArray(ca) ? ca : [ca];
+    if (paths.length > 0) {
+      for (const path of paths) {
+        parsed.push(readFile(path));
+      }
+      agentOptions.ca = parsed;
+    }
   }
 
   return new https.Agent(agentOptions);

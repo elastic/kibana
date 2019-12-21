@@ -140,21 +140,21 @@ describe('#setup', () => {
 
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
-Object {
-  "healthCheckDelay": 2000,
-  "hosts": Array [
-    "http://8.8.8.8",
-  ],
-  "logQueries": true,
-  "requestHeadersWhitelist": Array [
-    undefined,
-  ],
-  "ssl": Object {
-    "certificate": "certificate-value",
-    "verificationMode": "none",
-  },
-}
-`);
+        Object {
+          "healthCheckDelay": 2000,
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
     it('falls back to elasticsearch config if custom config not passed', async () => {
       const setupContract = await elasticsearchService.setup(deps);
@@ -165,20 +165,24 @@ Object {
 
       const config = MockClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
-Object {
-  "healthCheckDelay": 2000,
-  "hosts": Array [
-    "http://1.2.3.4",
-  ],
-  "requestHeadersWhitelist": Array [
-    undefined,
-  ],
-  "ssl": Object {
-    "certificateAuthorities": undefined,
-    "verificationMode": "none",
-  },
-}
-`);
+        Object {
+          "healthCheckDelay": 2000,
+          "hosts": Array [
+            "http://1.2.3.4",
+          ],
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "alwaysPresentCertificate": undefined,
+            "certificate": undefined,
+            "certificateAuthorities": undefined,
+            "key": undefined,
+            "keyPassphrase": undefined,
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
 
     it('does not merge elasticsearch hosts if custom config overrides', async () => {
