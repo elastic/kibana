@@ -20,10 +20,10 @@ import { SavedObjectLoader } from 'ui/saved_objects';
 import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
-import { createVisualizeEditUrl } from '../visualize_constants';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
+import { createVisualizeEditUrl } from '..';
 
 export function createSavedVisLoader(services: SavedObjectKibanaServices) {
   const { savedObjectsClient } = services;

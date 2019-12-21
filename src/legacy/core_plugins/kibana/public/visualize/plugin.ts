@@ -34,15 +34,19 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../p
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
-import { VisualizeConstants } from './visualize_constants';
+import { VisualizeConstants } from './np_ready/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
+import {
+  defaultEditor,
+  VisEditorTypesRegistryProvider,
+  VisualizeEmbeddableFactory,
+  VISUALIZE_EMBEDDABLE_TYPE,
+} from './legacy_imports';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 
 export interface LegacyAngularInjectedDependencies {
@@ -64,6 +68,7 @@ export interface VisualizePluginSetupDependencies {
   };
   home: HomePublicPluginSetup;
   kibana_legacy: KibanaLegacySetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class VisualizePlugin implements Plugin {
@@ -78,7 +83,12 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    { home, kibana_legacy, __LEGACY: { getAngularDependencies } }: VisualizePluginSetupDependencies
+    {
+      home,
+      kibana_legacy,
+      __LEGACY: { getAngularDependencies },
+      usageCollection,
+    }: VisualizePluginSetupDependencies
   ) {
     kibana_legacy.registerLegacyApp({
       id: 'visualize',
@@ -123,10 +133,11 @@ export class VisualizePlugin implements Plugin {
           uiSettings: contextCore.uiSettings,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
+          usageCollection,
         };
         setServices(deps);
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./np_ready/application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     });

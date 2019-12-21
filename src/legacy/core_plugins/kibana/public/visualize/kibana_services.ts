@@ -31,7 +31,8 @@ import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { SavedVisualizations } from './types';
+import { SavedVisualizations } from './np_ready/types';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
@@ -53,6 +54,7 @@ export interface VisualizeKibanaServices {
   uiSettings: IUiSettingsClient;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 let services: VisualizeKibanaServices | null = null;

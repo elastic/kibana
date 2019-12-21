@@ -24,6 +24,8 @@ import { start as embeddables } from '../../../embeddable_api/public/np_ready/pu
 import './saved_dashboard/saved_dashboard_register';
 import './dashboard_config';
 
+export * from './np_ready/dashboard_constants';
+
 /**
  * Get dependencies relying on the global angular context.
  * They also have to get resolved together with the legacy imports above
