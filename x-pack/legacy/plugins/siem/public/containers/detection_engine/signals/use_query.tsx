@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../../components/toasters';
@@ -26,7 +26,7 @@ type Return<Hit, Aggs> = [boolean, SignalSearchResponse<Hit, Aggs> | null];
 export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => {
   const [signals, setSignals] = useState<SignalSearchResponse<Hit, Aggs> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {

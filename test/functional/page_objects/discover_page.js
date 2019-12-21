@@ -30,7 +30,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
-  const comboBox = getService('comboBox');
   const elasticChart = getService('elasticChart');
 
   class DiscoverPage {
@@ -279,7 +278,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async selectIndexPattern(indexPattern) {
       await testSubjects.click('indexPattern-switch-link');
-      await comboBox.set('index-pattern-selection', indexPattern);
+      await find.clickByCssSelector(
+        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}*"]`
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

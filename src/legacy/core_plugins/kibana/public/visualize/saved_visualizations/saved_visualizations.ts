@@ -22,10 +22,10 @@ import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/saved_objects';
 
 import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
-import { createVisualizeEditUrl } from '../visualize_constants';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
+import { createVisualizeEditUrl } from '..';
 const app = uiModules.get('app/visualize');
 
 app.service('savedVisualizations', function() {

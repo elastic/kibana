@@ -88,7 +88,7 @@ export class HomePlugin implements Plugin {
           indexPatternService: this.dataStart!.indexPatterns,
           ...angularDependencies,
         });
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
       },
     });
