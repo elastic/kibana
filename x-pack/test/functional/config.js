@@ -68,7 +68,7 @@ export default async function({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['path.repo=/tmp/'],
     },
 
     kbnTestServer: {

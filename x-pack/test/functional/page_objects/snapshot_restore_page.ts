@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  // const wait = getService('waitFor');
 
   return {
     async appTitleText() {
@@ -15,6 +16,9 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     },
     async registerRepositoryButton() {
       return await testSubjects.find('registerRepositoryButton');
+    },
+    async navToRepositories() {
+      await testSubjects.click('repositories_tab');
     },
   };
 }

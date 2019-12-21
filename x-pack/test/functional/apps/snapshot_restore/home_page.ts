@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'snapshotRestore']);
   const log = getService('log');
+  const es = getService('legacyEs');
+  // const testSubjects = getService('testSubjects');
 
   describe('Home page', function() {
     this.tags('smoke');
@@ -25,6 +27,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const repositoriesButton = await pageObjects.snapshotRestore.registerRepositoryButton();
       expect(await repositoriesButton.isDisplayed()).to.be(true);
+    });
+
+    it('Reposiories Tab', async () => {
+      before(async () => {
+        await es.snapshot.createRepository({
+          repository: 'my-repository',
+          body: {
+            type: 'fs',
+          },
+          verify: true,
+        });
+
+        it('cleanup repository', async () => {
+          await pageObjects.snapshotRestore.navToRepositories();
+        });
+      });
     });
   });
 };

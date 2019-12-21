@@ -95,6 +95,16 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setCleanupRepositoryResponse = (response?: HttpResponse, error?: any) => {
+    const status = error ? error.status || 503 : 200;
+
+    server.respondWith('POST', `${API_BASE_PATH}repositories/:name/cleanup`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   const setGetPolicyResponse = (response?: HttpResponse) => {
     server.respondWith('GET', `${API_BASE_PATH}policy/:name`, [
       200,
@@ -113,6 +123,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadIndicesResponse,
     setAddPolicyResponse,
     setGetPolicyResponse,
+    setCleanupRepositoryResponse,
   };
 };
 
