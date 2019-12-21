@@ -13,7 +13,7 @@ import { initRoutes } from './routes';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, licensing } = plugins;
+    const { featuresPlugin, home, licensing } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -54,66 +54,68 @@ export class MapPlugin {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
     });
-    __LEGACY.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+    if (home) {
+      home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
-    __LEGACY.addAppLinksToSampleDataset('ecommerce', [
-      {
-        path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
-        label: sampleDataLinkLabel,
-        icon: APP_ICON,
-      },
-    ]);
+      home.sampleData.addAppLinksToSampleDataset('ecommerce', [
+        {
+          path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: APP_ICON,
+        },
+      ]);
 
-    __LEGACY.replacePanelInSampleDatasetDashboard({
-      sampleDataId: 'ecommerce',
-      dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
-      oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
-      embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-      embeddableType: 'map',
-      embeddableConfig: {
-        isLayerTOCOpen: false,
-      },
-    });
+      home.sampleData.replacePanelInSampleDatasetDashboard({
+        sampleDataId: 'ecommerce',
+        dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+        oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
+        embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+        embeddableType: 'map',
+        embeddableConfig: {
+          isLayerTOCOpen: false,
+        },
+      });
 
-    __LEGACY.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
+      home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
-    __LEGACY.addAppLinksToSampleDataset('flights', [
-      {
-        path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
-        label: sampleDataLinkLabel,
-        icon: APP_ICON,
-      },
-    ]);
+      home.sampleData.addAppLinksToSampleDataset('flights', [
+        {
+          path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: APP_ICON,
+        },
+      ]);
 
-    __LEGACY.replacePanelInSampleDatasetDashboard({
-      sampleDataId: 'flights',
-      dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-      oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
-      embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
-      embeddableType: MAP_SAVED_OBJECT_TYPE,
-      embeddableConfig: {
-        isLayerTOCOpen: true,
-      },
-    });
+      home.sampleData.replacePanelInSampleDatasetDashboard({
+        sampleDataId: 'flights',
+        dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+        oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
+        embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
+        embeddableConfig: {
+          isLayerTOCOpen: true,
+        },
+      });
 
-    __LEGACY.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
-    __LEGACY.addAppLinksToSampleDataset('logs', [
-      {
-        path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
-        label: sampleDataLinkLabel,
-        icon: APP_ICON,
-      },
-    ]);
-    __LEGACY.replacePanelInSampleDatasetDashboard({
-      sampleDataId: 'logs',
-      dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
-      oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
-      embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-      embeddableType: MAP_SAVED_OBJECT_TYPE,
-      embeddableConfig: {
-        isLayerTOCOpen: false,
-      },
-    });
+      home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
+      home.sampleData.addAppLinksToSampleDataset('logs', [
+        {
+          path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: APP_ICON,
+        },
+      ]);
+      home.sampleData.replacePanelInSampleDatasetDashboard({
+        sampleDataId: 'logs',
+        dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
+        oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
+        embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+        embeddableType: MAP_SAVED_OBJECT_TYPE,
+        embeddableConfig: {
+          isLayerTOCOpen: false,
+        },
+      });
+    }
 
     __LEGACY.injectUiAppVars(APP_ID, async () => {
       return await __LEGACY.getInjectedUiAppVars('kibana');
