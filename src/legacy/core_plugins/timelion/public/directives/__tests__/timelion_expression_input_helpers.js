@@ -22,8 +22,14 @@ import PEG from 'pegjs';
 import grammar from 'raw-loader!../../chain.peg';
 import { SUGGESTION_TYPE, suggest } from '../timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../../services/arg_value_suggestions';
+import { setIndexPatterns, setSavedObjectsClient } from '../../services/plugin_services';
 
 describe('Timelion expression suggestions', () => {
+  setIndexPatterns({});
+  setSavedObjectsClient({});
+
+  const argValueSuggestions = getArgValueSuggestions();
+
   describe('getSuggestions', () => {
     const func1 = {
       name: 'func1',
@@ -44,7 +50,6 @@ describe('Timelion expression suggestions', () => {
     };
     const functionList = [func1, myFunc2];
     let Parser;
-    const argValueSuggestions = getArgValueSuggestions();
     beforeEach(function() {
       Parser = PEG.generate(grammar);
     });
