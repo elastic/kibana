@@ -15,7 +15,7 @@ export const defaultDeletePhase = {
   [PHASE_ENABLED]: false,
   [PHASE_ROLLOVER_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
-  [PHASE_ROLLOVER_MINIMUM_AGE]: '',
+  [PHASE_ROLLOVER_MINIMUM_AGE]: 0,
   [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: 'd',
 };
 export const defaultEmptyDeletePhase = defaultDeletePhase;

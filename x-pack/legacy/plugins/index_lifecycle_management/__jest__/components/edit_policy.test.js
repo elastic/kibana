@@ -20,7 +20,7 @@ import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   positiveNumbersAboveZeroErrorMessage,
-  numberRequiredMessage,
+  positiveNumbersEqualAboveZeroErrorMessage,
   positiveNumberRequiredMessage,
   maximumAgeRequiredMessage,
   maximumSizeRequiredMessage,
@@ -238,22 +238,14 @@ describe('edit policy', () => {
     });
   });
   describe('warm phase', () => {
-    test('should show number required error when trying to save empty warm phase', () => {
-      const rendered = mountWithIntl(component);
-      noRollover(rendered);
-      setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
-      save(rendered);
-      expectedErrorMessages(rendered, [numberRequiredMessage]);
-    });
-    test('should show positive number required above zero error when trying to save warm phase with 0 for after', () => {
+    test('should show positive number required equal to or above zero error when trying to save warm phase with 0 for after', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, [positiveNumbersEqualAboveZeroErrorMessage]);
     });
     test('should show positive number required error when trying to save warm phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
@@ -383,14 +375,14 @@ describe('edit policy', () => {
     });
   });
   describe('cold phase', () => {
-    test('should show positive number required error when trying to save cold phase with 0 for after', () => {
+    test('should show positive number required error when trying to save cold phase with less than 0 for after', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, [positiveNumbersEqualAboveZeroErrorMessage]);
     });
     test('should show positive number required error when trying to save cold phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
@@ -464,14 +456,14 @@ describe('edit policy', () => {
     });
   });
   describe('delete phase', () => {
-    test('should show positive number required error when trying to save delete phase with 0 for after', () => {
+    test('should show positive number required error when trying to save delete phase with less than 0 for after', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', 0);
       save(rendered);
-      expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+      expectedErrorMessages(rendered, [positiveNumbersEqualAboveZeroErrorMessage]);
     });
     test('should show positive number required error when trying to save delete phase with -1 for after', () => {
       const rendered = mountWithIntl(component);
