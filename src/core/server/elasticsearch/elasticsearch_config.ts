@@ -20,6 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
 import { Logger } from '../logging';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -68,19 +69,39 @@ export const config = {
     pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
     startupTimeout: schema.duration({ defaultValue: '5s' }),
     logQueries: schema.boolean({ defaultValue: false }),
-    ssl: schema.object({
-      verificationMode: schema.oneOf(
-        [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-        { defaultValue: 'full' }
-      ),
-      certificateAuthorities: schema.maybe(
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-      ),
-      certificate: schema.maybe(schema.string()),
-      key: schema.maybe(schema.string()),
-      keyPassphrase: schema.maybe(schema.string()),
-      alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
-    }),
+    ssl: schema.object(
+      {
+        verificationMode: schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        ),
+        certificateAuthorities: schema.maybe(
+          schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        ),
+        certificate: schema.maybe(schema.string()),
+        key: schema.maybe(schema.string()),
+        keyPassphrase: schema.maybe(schema.string()),
+        keystore: schema.object({
+          path: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        }),
+        truststore: schema.object({
+          path: schema.maybe(schema.string()),
+          password: schema.maybe(schema.string()),
+        }),
+        alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
+      },
+      {
+        validate: rawConfig => {
+          if (rawConfig.key && rawConfig.keystore.path) {
+            return 'cannot use [key] when [keystore.path] is specified';
+          }
+          if (rawConfig.certificate && rawConfig.keystore.path) {
+            return 'cannot use [certificate] when [keystore.path] is specified';
+          }
+        },
+      }
+    ),
     apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
     healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
     ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
@@ -174,7 +195,7 @@ export class ElasticsearchConfig {
    */
   public readonly ssl: Pick<
     SslConfigSchema,
-    Exclude<keyof SslConfigSchema, 'certificateAuthorities'>
+    Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>
   > & { certificateAuthorities?: string[] };
 
   /**
@@ -208,23 +229,51 @@ export class ElasticsearchConfig {
     let key: string | undefined;
     let certificate: string | undefined;
     let certificateAuthorities: string[] | undefined;
+    const addCAs = (ca: string[] | undefined) => {
+      if (ca && ca.length) {
+        certificateAuthorities = certificateAuthorities ? certificateAuthorities.concat(ca) : ca;
+      }
+    };
 
-    if (rawConfig.ssl.key) {
-      key = readFile(rawConfig.ssl.key);
+    if (rawConfig.ssl.keystore?.path) {
+      const { key: k, cert, ca } = readPkcs12Keystore(
+        rawConfig.ssl.keystore.path,
+        rawConfig.ssl.keystore.password
+      );
+      if (!k && !cert) {
+        log.warn(
+          `Did not find key or certificate in keystore; mutual TLS authentication is disabled.`
+        );
+      }
+      key = k;
+      certificate = cert;
+      addCAs(ca);
+    } else {
+      if (rawConfig.ssl.key) {
+        key = readFile(rawConfig.ssl.key);
+      }
+      if (rawConfig.ssl.certificate) {
+        certificate = readFile(rawConfig.ssl.certificate);
+      }
     }
-    if (rawConfig.ssl.certificate) {
-      certificate = readFile(rawConfig.ssl.certificate);
+
+    if (rawConfig.ssl.truststore?.path) {
+      const ca = readPkcs12Truststore(
+        rawConfig.ssl.truststore.path,
+        rawConfig.ssl.truststore.password
+      );
+      addCAs(ca);
     }
 
     const ca = rawConfig.ssl.certificateAuthorities;
     if (ca) {
-      const parsed = [];
+      const parsed: string[] = [];
       const paths = Array.isArray(ca) ? ca : [ca];
       if (paths.length > 0) {
         for (const path of paths) {
           parsed.push(readFile(path));
         }
-        certificateAuthorities = parsed;
+        addCAs(parsed);
       }
     }
 

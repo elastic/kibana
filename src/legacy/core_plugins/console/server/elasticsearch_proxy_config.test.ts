@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { mockReadFileSync } from './elasticsearch_proxy_config.test.mocks';
+import {
+  mockReadFileSync,
+  mockReadPkcs12Keystore,
+  mockReadPkcs12Truststore,
+} from './elasticsearch_proxy_config.test.mocks';
 
 import _ from 'lodash';
 import moment from 'moment';
@@ -67,6 +71,14 @@ describe('plugins/console', () => {
 
         mockReadFileSync.mockReset();
         mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+        mockReadPkcs12Keystore.mockReset();
+        mockReadPkcs12Keystore.mockImplementation((path: string) => ({
+          key: `content-of-${path}.key`,
+          cert: `content-of-${path}.cert`,
+          ca: [`content-of-${path}.ca`],
+        }));
+        mockReadPkcs12Truststore.mockReset();
+        mockReadPkcs12Truststore.mockImplementation((path: string) => [`content-of-${path}`]);
       });
 
       const _getElasticsearchProxyConfig = (args: any) => {
@@ -124,6 +136,36 @@ describe('plugins/console', () => {
         expect(agent.options.checkServerIdentity).toBeUndefined();
       });
 
+      it(`sets ca when keystore path is specified`, () => {
+        const { agent } = _getElasticsearchProxyConfig({
+          ...config,
+          ssl: {
+            ...config.ssl,
+            keystore: {
+              path: 'some-path',
+            },
+          },
+        });
+
+        expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
+        expect(agent.options.ca).toEqual(['content-of-some-path.ca']);
+      });
+
+      it(`sets ca when truststore path is specified`, () => {
+        const { agent } = _getElasticsearchProxyConfig({
+          ...config,
+          ssl: {
+            ...config.ssl,
+            truststore: {
+              path: 'some-path',
+            },
+          },
+        });
+
+        expect(mockReadPkcs12Truststore).toHaveBeenCalledTimes(1);
+        expect(agent.options.ca).toEqual(['content-of-some-path']);
+      });
+
       it(`sets ca when certificateAuthorities are specified`, () => {
         let _config = _getElasticsearchProxyConfig({
           ...config,
@@ -155,7 +197,51 @@ describe('plugins/console', () => {
         ]);
       });
 
+      it(`sets ca when keystore path, truststore path, and certificateAuthorities are specified`, () => {
+        const { agent } = _getElasticsearchProxyConfig({
+          ...config,
+          ssl: {
+            ...config.ssl,
+            keystore: {
+              path: 'some-path',
+            },
+            truststore: {
+              path: 'another-path',
+            },
+            certificateAuthorities: 'yet-another-path',
+          },
+        });
+
+        expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
+        expect(mockReadPkcs12Truststore).toHaveBeenCalledTimes(1);
+        expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+        expect(agent.options.ca).toEqual([
+          'content-of-some-path.ca',
+          'content-of-another-path',
+          'content-of-yet-another-path',
+        ]);
+      });
+
       describe('when alwaysPresentCertificate is false', () => {
+        it(`doesn't set cert and key when keystore path is specified`, () => {
+          const { agent } = _getElasticsearchProxyConfig({
+            ...config,
+            ssl: {
+              ...config.ssl,
+              alwaysPresentCertificate: false,
+              keystore: {
+                path: 'some-path',
+                password: 'another-path',
+              },
+            },
+          });
+
+          expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
+          expect(mockReadPkcs12Keystore).toHaveBeenCalledWith('some-path', 'another-path');
+          expect(agent.options.cert).toBeUndefined();
+          expect(agent.options.key).toBeUndefined();
+        });
+
         it(`doesn't set cert and key when certificate and key paths are specified`, () => {
           const { agent } = _getElasticsearchProxyConfig({
             ...config,
@@ -189,6 +275,23 @@ describe('plugins/console', () => {
       });
 
       describe('when alwaysPresentCertificate is true', () => {
+        it(`sets cert and key when keystore path is specified`, () => {
+          const { agent } = _getElasticsearchProxyConfig({
+            ...config,
+            ssl: {
+              ...config.ssl,
+              alwaysPresentCertificate: true,
+              keystore: {
+                path: 'some-path',
+              },
+            },
+          });
+
+          expect(mockReadPkcs12Keystore).toHaveBeenCalledTimes(1);
+          expect(agent.options.cert).toBe('content-of-some-path.cert');
+          expect(agent.options.key).toBe('content-of-some-path.key');
+        });
+
         it(`sets cert and key when certificate and key paths are specified`, () => {
           const { agent } = _getElasticsearchProxyConfig({
             ...config,

@@ -22,6 +22,7 @@ import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
 import url from 'url';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../../../../core/utils';
 
 const readFile = (file: string) => readFileSync(file, 'utf8');
 
@@ -50,10 +51,36 @@ const createAgent = (legacyConfig: any): http.Agent | https.Agent => {
   }
 
   const ignoreCertAndKey = !legacyConfig.ssl?.alwaysPresentCertificate;
-  if (!ignoreCertAndKey && legacyConfig.ssl?.certificate && legacyConfig.ssl?.key) {
+
+  let certificateAuthorities: string[] | undefined;
+  const addCAs = (ca: string[] | undefined) => {
+    if (ca && ca.length) {
+      certificateAuthorities = certificateAuthorities ? certificateAuthorities.concat(ca) : ca;
+    }
+  };
+
+  if (legacyConfig.ssl.keystore?.path) {
+    const { key, cert, ca } = readPkcs12Keystore(
+      legacyConfig.ssl.keystore.path,
+      legacyConfig.ssl.keystore.password
+    );
+    if (!ignoreCertAndKey) {
+      agentOptions.key = key;
+      agentOptions.cert = cert;
+    }
+    addCAs(ca);
+  } else if (!ignoreCertAndKey && legacyConfig.ssl?.certificate && legacyConfig.ssl?.key) {
     agentOptions.cert = readFile(legacyConfig.ssl.certificate);
     agentOptions.key = readFile(legacyConfig.ssl.key);
     agentOptions.passphrase = legacyConfig.ssl.keyPassphrase;
+  }
+
+  if (legacyConfig.ssl.truststore?.path) {
+    const ca = readPkcs12Truststore(
+      legacyConfig.ssl.truststore.path,
+      legacyConfig.ssl.truststore.password
+    );
+    addCAs(ca);
   }
 
   const ca = legacyConfig.ssl?.certificateAuthorities;
@@ -64,9 +91,11 @@ const createAgent = (legacyConfig: any): http.Agent | https.Agent => {
       for (const path of paths) {
         parsed.push(readFile(path));
       }
-      agentOptions.ca = parsed;
+      addCAs(parsed);
     }
   }
+
+  agentOptions.ca = certificateAuthorities;
 
   return new https.Agent(agentOptions);
 };
