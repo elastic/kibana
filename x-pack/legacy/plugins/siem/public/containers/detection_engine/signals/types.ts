@@ -15,7 +15,8 @@ export interface SignalsResponse {
   timeout: boolean;
 }
 
-export interface SignalSearchResponse<Hit = {}, Aggregations = undefined> extends SignalsResponse {
+export interface SignalSearchResponse<Hit = {}, Aggregations = {} | undefined>
+  extends SignalsResponse {
   _shards: {
     total: number;
     successful: number;

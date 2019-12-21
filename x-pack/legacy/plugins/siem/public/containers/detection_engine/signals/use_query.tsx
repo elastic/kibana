@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import React, { SetStateAction, useEffect, useState } from 'react';
 
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
@@ -15,7 +15,11 @@ import { fetchQuerySignals } from './api';
 import * as i18n from './translations';
 import { SignalSearchResponse } from './types';
 
-type Return<Hit, Aggs> = [boolean, SignalSearchResponse<Hit, Aggs> | null];
+type Return<Hit, Aggs> = [
+  boolean,
+  SignalSearchResponse<Hit, Aggs> | null,
+  React.Dispatch<SetStateAction<string>>
+];
 
 /**
  * Hook for using to get a Signals from the Detection Engine API
@@ -24,6 +28,7 @@ type Return<Hit, Aggs> = [boolean, SignalSearchResponse<Hit, Aggs> | null];
  *
  */
 export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => {
+  const [queryString, setQueryString] = useState(query);
   const [signals, setSignals] = useState<SignalSearchResponse<Hit, Aggs> | null>(null);
   const [loading, setLoading] = useState(true);
   const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
@@ -37,7 +42,7 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
     async function fetchData() {
       try {
         const signalResponse = await fetchQuerySignals<Hit, Aggs>({
-          query,
+          query: queryString,
           kbnVersion,
           signal: abortCtrl.signal,
         });
@@ -61,7 +66,7 @@ export const useQuerySignals = <Hit, Aggs>(query: string): Return<Hit, Aggs> => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query]);
+  }, [queryString]);
 
-  return [loading, signals];
+  return [loading, signals, setQueryString];
 };

@@ -8,7 +8,7 @@ import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { CreateRuleComponent } from './rules/create';
-import { DetectionEngineComponent } from './detection_engine';
+import { DetectionEngine } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
 import { RuleDetailsComponent } from './rules/details';
 import { RulesComponent } from './rules';
@@ -20,7 +20,7 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 export const DetectionEngineContainer = React.memo<Props>(() => (
   <Switch>
     <Route exact path={detectionEnginePath} strict>
-      <DetectionEngineComponent />
+      <DetectionEngine />
     </Route>
     <Route exact path={`${detectionEnginePath}/rules`}>
       <RulesComponent />

@@ -24,7 +24,7 @@ import {
 } from '../../../../containers/source';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 
-import { SignalsCharts } from '../../components/signals_chart';
+import { SignalsHistogramPanel } from '../../components/signals_histogram_panel';
 import { SignalsTable } from '../../components/signals';
 import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
 import { useSignalInfo } from '../../components/signals_info';
@@ -39,6 +39,7 @@ import { getStepsData } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
+import { signalsHistogramOptions } from '../../components/signals_histogram_panel/config';
 
 export const RuleDetailsComponent = memo(() => {
   const { ruleId } = useParams();
@@ -195,7 +196,12 @@ export const RuleDetailsComponent = memo(() => {
 
                     <EuiSpacer />
 
-                    <SignalsCharts />
+                    <SignalsHistogramPanel
+                      filters={signalDefaultFilters}
+                      from={from}
+                      stackByOptions={signalsHistogramOptions}
+                      to={to}
+                    />
 
                     <EuiSpacer />
 
