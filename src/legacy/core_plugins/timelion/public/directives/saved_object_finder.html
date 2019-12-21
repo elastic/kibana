@@ -23,7 +23,7 @@
 
     <div class="kuiBarSection">
       <p class="kuiText kuiSubduedText"
-        i18n-id="common.ui.savedObjectFinder.pageItemsFromHitCountDescription"
+        i18n-id="timelion.savedObjectFinder.pageItemsFromHitCountDescription"
         i18n-default-message="{pageFirstItem}-{pageLastItem} of {hitCount}"
         i18n-values="{pageFirstItem, pageLastItem, hitCount: finder.hitCount}"
       ></p>
@@ -33,7 +33,7 @@
           ng-if="onAddNew"
           ng-click="onAddNew()"
           data-test-subj="addNewSavedObjectLink"
-          i18n-id="common.ui.savedObjectFinder.addNewItemButtonLabel"
+          i18n-id="timelion.savedObjectFinder.addNewItemButtonLabel"
           i18n-default-message="Add new {item}"
           i18n-values="{item: finder.properties.noun}"
           i18n-description="{item} can be a type of object in Kibana, like 'visualization', 'dashboard', etc"
@@ -43,7 +43,7 @@
           class="kuiButton kuiButton--secondary"
           ng-if="!useLocalManagement"
           ng-click="finder.manageObjects(finder.properties.name)"
-          i18n-id="common.ui.savedObjectFinder.manageItemsButtonLabel"
+          i18n-id="timelion.savedObjectFinder.manageItemsButtonLabel"
           i18n-default-message="Manage {items}"
           i18n-values="{items: finder.properties.nouns}"
           i18n-description="{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
@@ -64,11 +64,11 @@
     aria-live="assertive"
   >
     <span class="euiScreenReaderOnly"
-      i18n-id="common.ui.savedObjectFinder.sortByButtonLabelScreenReaderOnly"
+      i18n-id="timelion.savedObjectFinder.sortByButtonLabelScreenReaderOnly"
       i18n-default-message="Sort by"
     ></span>
     <span
-      i18n-id="common.ui.savedObjectFinder.sortByButtonLabel"
+      i18n-id="timelion.savedObjectFinder.sortByButtonLabel"
       i18n-default-message="Name"
     ></span>
     <span
@@ -77,12 +77,12 @@
     >
       <span class="euiScreenReaderOnly"
         ng-if="finder.isAscending"
-        i18n-id="common.ui.savedObjectFinder.sortByButtonLabeAscendingScreenReaderOnly"
+        i18n-id="timelion.savedObjectFinder.sortByButtonLabeAscendingScreenReaderOnly"
         i18n-default-message="ascending"
       ></span>
       <span class="euiScreenReaderOnly"
         ng-if="!finder.isAscending"
-        i18n-id="common.ui.savedObjectFinder.sortByButtonLabeDescendingScreenReaderOnly"
+        i18n-id="timelion.savedObjectFinder.sortByButtonLabeDescendingScreenReaderOnly"
         i18n-default-message="descending"
       ></span>
     </span>
@@ -108,7 +108,7 @@
       class="list-group-item list-group-no-results"
       ng-if="finder.hits.length === 0"
     >
-      <p i18n-id="common.ui.savedObjectFinder.noMatchesFoundDescription"
+      <p i18n-id="timelion.savedObjectFinder.noMatchesFoundDescription"
         i18n-default-message="No matching {items} found."
         i18n-values="{items: finder.properties.nouns}"
         i18n-description="{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
