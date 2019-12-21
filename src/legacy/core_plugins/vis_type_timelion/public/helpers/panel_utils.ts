@@ -176,11 +176,11 @@ function buildOptions(
         const labelSpan = document.createElement('span');
         const numberSpan = document.createElement('span');
 
-        wrapperSpan.setAttribute('class', 'legendValue');
+        wrapperSpan.setAttribute('class', 'ngLegendValue');
         wrapperSpan.setAttribute(SERIES_ID_ATTR, series._id);
 
         labelSpan.appendChild(document.createTextNode(label));
-        numberSpan.setAttribute('class', 'legendValueNumber');
+        numberSpan.setAttribute('class', 'ngLegendValueNumber');
 
         wrapperSpan.appendChild(labelSpan);
         wrapperSpan.appendChild(numberSpan);

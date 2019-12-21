@@ -104,7 +104,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
 
       canvasNode.find('div.legend table').append(caption);
 
-      setLegendValueNumbers(canvasNode.find('.legendValueNumber'));
+      setLegendValueNumbers(canvasNode.find('.ngLegendValueNumber'));
       // legend has been re-created. Apply focus on legend element when previously set
       if (focusedSeries || focusedSeries === 0) {
         const $legendLabels = canvasNode.find('div.legend table .legendLabel>span');
@@ -176,7 +176,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
       setPlot($.plot(canvasElem, compact(updatedSeries), options));
       renderComplete();
 
-      const legend = $(canvasElem).find('.legendValue');
+      const legend = $(canvasElem).find('.ngLegendValue');
       if (legend) {
         legend.click(toggleSeries);
         legend.focus(focusSeries);
@@ -309,6 +309,7 @@ function Panel({ interval: intervalProp, seriesList, renderComplete }: PanelProp
         .off('plotselected')
         .off('plothover')
         .off('mouseleave');
+
       $chart
         .on('plotselected', plotSelectedHandler)
         .on('plothover', plotHoverHandler)
