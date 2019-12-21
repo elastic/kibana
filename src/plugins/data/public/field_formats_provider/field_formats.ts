@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { forOwn, isFunction, memoize } from 'lodash';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 import {
@@ -78,10 +79,14 @@ export class FieldFormatRegisty {
    * @return {FieldFormat | void}
    */
   getType = (formatId: IFieldFormatId): IFieldFormatType | void => {
-    const decoratedFieldFormat: any = this.fieldFormatMetaParamsDecorator(formatId);
+    const fieldFormat = this.fieldFormats.get(formatId);
 
-    if (decoratedFieldFormat) {
-      return decoratedFieldFormat as IFieldFormatType;
+    if (fieldFormat) {
+      const decoratedFieldFormat: any = this.fieldFormatMetaParamsDecorator(fieldFormat);
+
+      if (decoratedFieldFormat) {
+        return decoratedFieldFormat as IFieldFormatType;
+      }
     }
   };
 
@@ -196,9 +201,12 @@ export class FieldFormatRegisty {
    * @return {FieldFormat[]}
    */
   getByFieldType(fieldType: KBN_FIELD_TYPES): IFieldFormatType[] {
-    return [...this.fieldFormats.values()].filter(
-      (format: IFieldFormatType) => format.fieldType.indexOf(fieldType) !== -1
-    );
+    return [...this.fieldFormats.values()]
+      .filter((format: IFieldFormatType) => format && format.fieldType.indexOf(fieldType) !== -1)
+      .map(
+        (format: IFieldFormatType) =>
+          this.fieldFormatMetaParamsDecorator(format) as IFieldFormatType
+      );
   }
 
   /**
@@ -232,24 +240,39 @@ export class FieldFormatRegisty {
    * FieldFormat decorator - provide a one way to add meta-params for all field formatters
    *
    * @private
-   * @param  {IFieldFormatId} formatId - the format id
+   * @param  {IFieldFormatType} fieldFormat - field format type
    * @return {FieldFormat | void}
    */
-  private fieldFormatMetaParamsDecorator = (formatId: IFieldFormatId): Function | void => {
-    const concreteFieldFormat = this.fieldFormats.get(formatId);
-    const decorateMetaParams = (customOptions: Record<string, any> = {}) => ({
-      parsedUrl: {
-        origin: window.location.origin,
-        pathname: window.location.pathname,
-        basePath: this.basePath,
-      },
-      ...customOptions,
-    });
+  private fieldFormatMetaParamsDecorator = (
+    fieldFormat: IFieldFormatType
+  ): IFieldFormatType | void => {
+    const getMetaParams = (customParams: Record<string, any>) => this.buildMetaParams(customParams);
 
-    if (concreteFieldFormat) {
-      return function(params: Record<string, any> = {}, getConfig?: Function) {
-        return new concreteFieldFormat(decorateMetaParams(params), getConfig);
+    if (fieldFormat) {
+      return class DecoratedFieldFormat extends fieldFormat {
+        static id = fieldFormat.id;
+        static fieldType = fieldFormat.fieldType;
+
+        constructor(params: Record<string, any> = {}, getConfig?: Function) {
+          super(getMetaParams(params), getConfig);
+        }
       };
     }
   };
+
+  /**
+   * Build Meta Params
+   *
+   * @static
+   * @param  {Record<string, any>} custom params
+   * @return {Record<string, any>}
+   */
+  private buildMetaParams = (customParams: Record<string, any> = {}): Record<string, any> => ({
+    parsedUrl: {
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+      basePath: this.basePath,
+    },
+    ...customParams,
+  });
 }
