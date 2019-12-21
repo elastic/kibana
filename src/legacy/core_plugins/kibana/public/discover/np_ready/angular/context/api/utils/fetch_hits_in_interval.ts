@@ -16,16 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  EsQuerySortValue,
-  SortDirection,
-<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/api/utils/fetch_hits_in_interval.ts
-  SearchSourceContract,
-} from '../../../../../kibana_services';
-=======
-  ISearchSource,
-} from '../../../../../../../../ui/public/courier';
->>>>>>> Rename SearchSourceContract -> ISearchSource.:src/legacy/core_plugins/kibana/public/discover/angular/context/api/utils/fetch_hits_in_interval.ts
+import { EsQuerySortValue, SortDirection, ISearchSource } from '../../../../../kibana_services';
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';

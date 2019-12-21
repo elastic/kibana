@@ -24,7 +24,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from 'kibana/public';
-import { SearchSource, ISearchSource } from 'ui/courier';
+import { ISearchSource } from 'ui/courier';
 import { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
 
 export interface SavedObject {
