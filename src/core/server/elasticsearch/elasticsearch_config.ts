@@ -183,7 +183,7 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: ElasticsearchConfigType, log?: Logger) {
+  constructor(rawConfig: ElasticsearchConfigType, log: Logger) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
