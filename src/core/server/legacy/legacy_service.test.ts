@@ -98,6 +98,7 @@ beforeEach(() => {
     core: {
       capabilities: capabilitiesServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},

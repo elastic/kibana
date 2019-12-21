@@ -116,7 +116,7 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
           const newSortDirection = field !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
           const newTopNFlowSort: NetworkTopTablesSortField = {
             field: field as NetworkTopTablesFields,
-            direction: newSortDirection,
+            direction: newSortDirection as Direction,
           };
           if (!isEqual(newTopNFlowSort, sort)) {
             updateNetworkTable({
