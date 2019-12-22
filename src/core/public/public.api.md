@@ -593,6 +593,7 @@ export interface HttpErrorResponse extends IHttpResponse {
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
+    asSystemApi?: boolean;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;

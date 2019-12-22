@@ -22,7 +22,7 @@ import { Request } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
-import { deepFreeze, KbnHeaders, RecursiveReadonly } from '../../../utils';
+import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
@@ -152,7 +152,7 @@ export class KibanaRequest<
   ) {
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
-    this.isSystemApi = request.headers[KbnHeaders.SYSTEM_API] === 'true';
+    this.isSystemApi = request.headers['kbn-system-api'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
