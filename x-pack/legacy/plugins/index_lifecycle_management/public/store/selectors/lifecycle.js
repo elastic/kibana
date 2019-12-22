@@ -85,7 +85,7 @@ export const positiveNumbersAboveZeroErrorMessage = i18n.translate(
 );
 
 export const positiveNumbersEqualAboveZeroErrorMessage = i18n.translate(
-  'xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError',
+  'xpack.indexLifecycleMgmt.editPolicy.positiveNumberEqualAboveZeroRequiredError',
   {
     defaultMessage: 'Only numbers equal to or above 0 are allowed.',
   }
