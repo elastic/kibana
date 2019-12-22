@@ -6,7 +6,7 @@
 
 import { get } from 'lodash/fp';
 
-import { InputsModel, TimeRange, Refetch, InspectQuery } from './model';
+import { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
 import { InputsModelId } from './constants';
 
 export const updateInputTimerange = (
@@ -59,7 +59,7 @@ export interface UpdateQueryParams {
   inputId: InputsModelId;
   inspect: InspectQuery | null;
   loading: boolean;
-  refetch: Refetch;
+  refetch: Refetch | RefetchKql;
   state: InputsModel;
 }
 
