@@ -8,10 +8,11 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, State, inputsSelectors, hostsModel } from '../../../store';
+import { withKibana, WithKibanaProps } from '../../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../query_template';
 
@@ -40,7 +41,7 @@ export interface AlertsOverTimeComponentReduxProps {
   isInspected: boolean;
 }
 
-type AlertsOverTimeProps = OwnProps & AlertsOverTimeComponentReduxProps;
+type AlertsOverTimeProps = OwnProps & AlertsOverTimeComponentReduxProps & WithKibanaProps;
 
 class AlertsOverTimeComponentQuery extends QueryTemplate<
   AlertsOverTimeProps,
@@ -54,6 +55,7 @@ class AlertsOverTimeComponentQuery extends QueryTemplate<
       filterQuery,
       id = ID,
       isInspected,
+      kibana,
       sourceId,
       startDate,
     } = this.props;
@@ -70,7 +72,7 @@ class AlertsOverTimeComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
           inspect: isInspected,
         }}
       >
@@ -105,4 +107,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const AlertsOverTimeQuery = connect(makeMapStateToProps)(AlertsOverTimeComponentQuery);
+export const AlertsOverTimeQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(AlertsOverTimeComponentQuery);
