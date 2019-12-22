@@ -31,7 +31,7 @@ interface OwnProps {
   timelineId: string;
 }
 
-type Props = OwnProps & PropsFromRedux;
+type Props = OwnProps & StatefulSearchOrFilterReduxProps;
 
 const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
@@ -211,6 +211,6 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 
 export const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+type StatefulSearchOrFilterReduxProps = ConnectedProps<typeof connector>;
 
 export const StatefulSearchOrFilter = connector(StatefulSearchOrFilterComponent);

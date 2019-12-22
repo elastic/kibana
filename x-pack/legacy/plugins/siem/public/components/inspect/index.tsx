@@ -7,11 +7,10 @@
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
 
-import { inputsModel, inputsSelectors, State } from '../../store';
+import { inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
 
@@ -38,24 +37,7 @@ interface OwnProps {
   title: string | React.ReactElement | React.ReactNode;
 }
 
-interface InspectButtonReducer {
-  id: string;
-  isInspected: boolean;
-  loading: boolean;
-  inspect: inputsModel.InspectQuery | null;
-  selectedInspectIndex: number;
-}
-
-interface InspectButtonDispatch {
-  setIsInspected: ActionCreator<{
-    id: string;
-    inputId: InputsModelId;
-    isInspected: boolean;
-    selectedInspectIndex: number;
-  }>;
-}
-
-type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
+type InspectButtonProps = OwnProps & PropsFromRedux;
 
 const InspectButtonComponent = React.memo<InspectButtonProps>(
   ({
@@ -150,6 +132,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const InspectButton = connect(makeMapStateToProps, {
+const connector = connect(makeMapStateToProps, {
   setIsInspected: inputsActions.setInspectionParameter,
-})(InspectButtonComponent);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const InspectButton = connector(InspectButtonComponent);

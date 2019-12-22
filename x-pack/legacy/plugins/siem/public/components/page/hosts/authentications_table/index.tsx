@@ -6,8 +6,7 @@
 
 import { has } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { hostsActions } from '../../../../store/hosts';
 import { AuthenticationsEdges } from '../../../../graphql/types';
@@ -38,24 +37,6 @@ interface OwnProps {
   type: hostsModel.HostsType;
 }
 
-interface AuthenticationTableReduxProps {
-  activePage: number;
-  limit: number;
-}
-
-interface AuthenticationTableDispatchProps {
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    limit: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-}
-
 export type AuthTableColumns = [
   Columns<AuthenticationsEdges>,
   Columns<AuthenticationsEdges>,
@@ -68,9 +49,7 @@ export type AuthTableColumns = [
   Columns<AuthenticationsEdges>
 ];
 
-type AuthenticationTableProps = OwnProps &
-  AuthenticationTableReduxProps &
-  AuthenticationTableDispatchProps;
+type AuthenticationTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -152,10 +131,14 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const AuthenticationTable = connect(makeMapStateToProps, {
+const connector = connect(makeMapStateToProps, {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(AuthenticationTableComponent);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const AuthenticationTable = connector(AuthenticationTableComponent);
 
 const getAuthenticationColumns = (): AuthTableColumns => [
   {

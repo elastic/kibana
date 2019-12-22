@@ -41,6 +41,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={jest.fn()}
+          upsertColumn={jest.fn()}
         />
       </TestProviders>
     );
@@ -65,6 +67,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={jest.fn()}
+            upsertColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -83,6 +87,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={jest.fn()}
+            upsertColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -111,6 +117,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={jest.fn()}
+            upsertColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -142,6 +150,8 @@ describe('StatefulFieldsBrowser', () => {
             timelineId={timelineId}
             toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
+            removeColumn={jest.fn()}
+            upsertColumn={jest.fn()}
           />
         </TestProviders>
       );
@@ -180,6 +190,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={jest.fn()}
+          upsertColumn={jest.fn()}
         />
       </TestProviders>
     );
@@ -206,6 +218,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={jest.fn()}
+          upsertColumn={jest.fn()}
         />
       </TestProviders>
     );
@@ -232,6 +246,8 @@ describe('StatefulFieldsBrowser', () => {
           timelineId={timelineId}
           toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
+          removeColumn={jest.fn()}
+          upsertColumn={jest.fn()}
         />
       </TestProviders>
     );

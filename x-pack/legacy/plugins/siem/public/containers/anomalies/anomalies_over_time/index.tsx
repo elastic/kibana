@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { State, inputsSelectors } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
@@ -15,12 +15,12 @@ import { QueryTemplate } from '../../query_template';
 
 import { AnomaliesOverTimeGqlQuery } from './anomalies_over_time.gql_query';
 import { GetAnomaliesOverTimeQuery } from '../../../graphql/types';
-import { AnomaliesOverTimeProps, OwnProps } from './types';
+import { AnomaliesOverTimeProps } from './types';
 
 const ID = 'anomaliesOverTimeQuery';
 
 class AnomaliesOverTimeComponentQuery extends QueryTemplate<
-  AnomaliesOverTimeProps,
+  AnomaliesOverTimeProps & AnomaliesOverTimeQueryReduxProps,
   GetAnomaliesOverTimeQuery.Query,
   GetAnomaliesOverTimeQuery.Variables
 > {
@@ -74,7 +74,7 @@ class AnomaliesOverTimeComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+  const mapStateToProps = (state: State, { id = ID }: AnomaliesOverTimeProps) => {
     const { isInspected } = getQuery(state, id);
     return {
       isInspected,
@@ -83,4 +83,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const AnomaliesOverTimeQuery = connect(makeMapStateToProps)(AnomaliesOverTimeComponentQuery);
+export const connector = connect(makeMapStateToProps);
+
+type AnomaliesOverTimeQueryReduxProps = ConnectedProps<typeof connector>;
+
+export const AnomaliesOverTimeQuery = connector(AnomaliesOverTimeComponentQuery);

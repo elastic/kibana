@@ -5,8 +5,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { hostsActions } from '../../../../store/actions';
 import {
@@ -46,30 +45,6 @@ interface OwnProps {
   type: hostsModel.HostsType;
 }
 
-interface HostsTableReduxProps {
-  activePage: number;
-  direction: Direction;
-  limit: number;
-  sortField: HostsFields;
-}
-
-interface HostsTableDispatchProps {
-  updateHostsSort: ActionCreator<{
-    hostsType: hostsModel.HostsType;
-    sort: HostsSortField;
-  }>;
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    hostsType: hostsModel.HostsType;
-    tableType: hostsModel.HostsTableType;
-  }>;
-  updateTableLimit: ActionCreator<{
-    hostsType: hostsModel.HostsType;
-    limit: number;
-    tableType: hostsModel.HostsTableType;
-  }>;
-}
-
 export type HostsTableColumns = [
   Columns<HostFields['name']>,
   Columns<HostItem['lastSeen']>,
@@ -77,7 +52,7 @@ export type HostsTableColumns = [
   Columns<OsFields['version']>
 ];
 
-type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
+type HostsTableProps = OwnProps & HostsTableReduxProps;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -217,10 +192,14 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const HostsTable = connect(makeMapStateToProps, {
+const connector = connect(makeMapStateToProps, {
   updateHostsSort: hostsActions.updateHostsSort,
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
-})(HostsTableComponent);
+});
+
+type HostsTableReduxProps = ConnectedProps<typeof connector>;
+
+export const HostsTable = HostsTableComponent;
 
 HostsTable.displayName = 'HostsTable';

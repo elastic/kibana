@@ -29,7 +29,7 @@ interface OwnProps {
   children: (args: GlobalTimeArgs) => React.ReactNode;
 }
 
-type GlobalTimeProps = OwnProps & PropsFromRedux;
+type GlobalTimeProps = OwnProps & GlobalTimeReduxProps;
 
 export const GlobalTimeComponent = React.memo(
   ({ children, deleteAllQuery, deleteOneQuery, from, to, setGlobalQuery }: GlobalTimeProps) => {
@@ -73,6 +73,6 @@ export const connector = connect(mapStateToProps, {
   setGlobalQuery: inputsActions.setQuery,
 });
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+type GlobalTimeReduxProps = ConnectedProps<typeof connector>;
 
 export const GlobalTime = connector(GlobalTimeComponent);

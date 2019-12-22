@@ -7,13 +7,12 @@
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { BrowserFields } from '../../../containers/source';
-import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
-import { appModel, appSelectors, State, timelineSelectors } from '../../../store';
+import { appSelectors, State, timelineSelectors } from '../../../store';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -46,59 +45,7 @@ interface OwnProps {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-interface ReduxProps {
-  columnHeaders: ColumnHeader[];
-  eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  isSelectAllChecked: boolean;
-  loadingEventIds: Readonly<string[]>;
-  notesById: appModel.NotesById;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
-  range?: string;
-  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-  showCheckboxes: boolean;
-  showRowRenderers: boolean;
-}
-
-interface DispatchProps {
-  addNoteToEvent?: ActionCreator<{ id: string; noteId: string; eventId: string }>;
-  applyDeltaToColumnWidth?: ActionCreator<{
-    id: string;
-    columnId: string;
-    delta: number;
-  }>;
-  clearSelected?: ActionCreator<{
-    id: string;
-  }>;
-  pinEvent?: ActionCreator<{
-    id: string;
-    eventId: string;
-  }>;
-  removeColumn?: ActionCreator<{
-    id: string;
-    columnId: string;
-  }>;
-  setSelected?: ActionCreator<{
-    id: string;
-    eventIds: Record<string, TimelineNonEcsData[]>;
-    isSelected: boolean;
-    isSelectAllChecked: boolean;
-  }>;
-  unPinEvent?: ActionCreator<{
-    id: string;
-    eventId: string;
-  }>;
-  updateColumns?: ActionCreator<{
-    id: string;
-    columns: ColumnHeader[];
-  }>;
-  updateSort?: ActionCreator<{
-    id: string;
-    sort: Sort;
-  }>;
-  updateNote?: ActionCreator<{ note: Note }>;
-}
-
-type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
+type StatefulBodyComponentProps = OwnProps & StatefulBodyReduxProps;
 
 export const emptyColumnHeaders: ColumnHeader[] = [];
 
@@ -118,7 +65,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     notesById,
     pinEvent,
     pinnedEventIds,
-    range,
     removeColumn,
     selectedEventIds,
     setSelected,
@@ -234,7 +180,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onUnPinEvent={onUnPinEvent}
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
-        range={range!}
         rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
@@ -260,7 +205,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       prevProps.selectedEventIds === nextProps.selectedEventIds &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showRowRenderers === nextProps.showRowRenderers &&
-      prevProps.range === nextProps.range &&
       prevProps.sort === nextProps.sort
     );
   }
@@ -305,7 +249,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulBody = connect(makeMapStateToProps, {
+const connector = connect(makeMapStateToProps, {
   addNoteToEvent: timelineActions.addNoteToEvent,
   applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
   clearSelected: timelineActions.clearSelected,
@@ -317,4 +261,8 @@ export const StatefulBody = connect(makeMapStateToProps, {
   updateColumns: timelineActions.updateColumns,
   updateNote: appActions.updateNote,
   updateSort: timelineActions.updateSort,
-})(StatefulBodyComponent);
+});
+
+type StatefulBodyReduxProps = ConnectedProps<typeof connector>;
+
+export const StatefulBody = connector(StatefulBodyComponent);

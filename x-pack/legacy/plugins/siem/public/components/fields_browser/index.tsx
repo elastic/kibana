@@ -7,9 +7,8 @@
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserFields } from '../../containers/source';
 import { timelineActions } from '../../store/actions';
@@ -31,22 +30,10 @@ const FieldsBrowserButtonContainer = styled.div`
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';
 
-interface DispatchProps {
-  removeColumn?: ActionCreator<{
-    id: string;
-    columnId: string;
-  }>;
-  upsertColumn?: ActionCreator<{
-    column: ColumnHeader;
-    id: string;
-    index: number;
-  }>;
-}
-
 /**
  * Manages the state of the field browser
  */
-export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & DispatchProps>(
+export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & PropsFromRedux>(
   ({
     columnHeaders,
     browserFields,
@@ -214,7 +201,11 @@ export const StatefulFieldsBrowserComponent = React.memo<FieldBrowserProps & Dis
 
 StatefulFieldsBrowserComponent.displayName = 'StatefulFieldsBrowserComponent';
 
-export const StatefulFieldsBrowser = connect(null, {
+const connector = connect(null, {
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
-})(StatefulFieldsBrowserComponent);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulFieldsBrowser = connector(StatefulFieldsBrowserComponent);

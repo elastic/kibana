@@ -6,11 +6,10 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
-import { FlowDirection, FlowTarget } from '../../../../graphql/types';
+import { FlowDirection } from '../../../../graphql/types';
 import { State } from '../../../../store';
 import { networkActions, networkSelectors } from '../../../../store/network';
 import * as i18nIp from '../ip_overview/translations';
@@ -24,17 +23,7 @@ const SelectTypeItem = styled(EuiFlexItem)`
 
 SelectTypeItem.displayName = 'SelectTypeItem';
 
-interface FlowTargetSelectReduxProps {
-  flowTarget: FlowTarget;
-}
-
-export interface FlowTargetSelectDispatchProps {
-  updateIpDetailsFlowTarget: ActionCreator<{
-    flowTarget: FlowTarget;
-  }>;
-}
-
-type FlowTargetSelectProps = FlowTargetSelectReduxProps & FlowTargetSelectDispatchProps;
+type FlowTargetSelectProps = FlowTargetSelectReduxProps;
 
 const FlowTargetSelectComponent = React.memo<FlowTargetSelectProps>(
   ({ flowTarget, updateIpDetailsFlowTarget }) => (
@@ -62,6 +51,10 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const FlowTargetSelectConnected = connect(makeMapStateToProps, {
+const connector = connect(makeMapStateToProps, {
   updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
-})(FlowTargetSelectComponent);
+});
+
+type FlowTargetSelectReduxProps = ConnectedProps<typeof connector>;
+
+export const FlowTargetSelectConnected = connector(FlowTargetSelectComponent);

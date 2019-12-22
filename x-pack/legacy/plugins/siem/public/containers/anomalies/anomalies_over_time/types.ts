@@ -19,14 +19,8 @@ export interface AnomaliesArgs {
   totalCount: number;
 }
 
-export interface OwnProps extends Omit<QueryTemplateProps, 'filterQuery'> {
+export interface AnomaliesOverTimeProps extends Omit<QueryTemplateProps, 'filterQuery'> {
   filterQuery?: string;
   children?: (args: AnomaliesArgs) => React.ReactNode;
   type: hostsModel.HostsType | networkModel.NetworkType;
 }
-
-export interface AnomaliesOverTimeComponentReduxProps {
-  isInspected: boolean;
-}
-
-export type AnomaliesOverTimeProps = OwnProps & AnomaliesOverTimeComponentReduxProps;

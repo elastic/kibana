@@ -51,7 +51,7 @@ interface OwnProps {
   to: number;
 }
 
-type SignalsTableComponentProps = OwnProps & PropsFromRedux;
+type SignalsTableComponentProps = OwnProps & SignalsTableReduxProps;
 
 export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
   ({
@@ -300,6 +300,6 @@ export const connector = connect(makeMapStateToProps, {
   createTimeline: timelineActions.createTimeline,
 });
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+type SignalsTableReduxProps = ConnectedProps<typeof connector>;
 
 export const SignalsTable = connector(SignalsTableComponent);

@@ -6,9 +6,8 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-import { compose } from 'redux';
 
 import { useParams } from 'react-router-dom';
 import { FiltersGlobal } from '../../components/filters_global';
@@ -21,7 +20,6 @@ import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
-import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
@@ -41,7 +39,7 @@ import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-const HostsComponent = React.memo<HostsComponentProps>(
+const HostsComponent = React.memo<HostsComponentProps & HostsReduxProps>(
   ({
     deleteQuery,
     isInitializing,
@@ -163,13 +161,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-interface HostsProps extends GlobalTimeArgs {
-  hostsPagePath: string;
-}
+const connector = connect(makeMapStateToProps, {
+  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+});
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Hosts = compose<React.ComponentClass<HostsProps>>(
-  connect(makeMapStateToProps, {
-    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-  })
-)(HostsComponent);
+type HostsReduxProps = ConnectedProps<typeof connector>;
+
+export const Hosts = connector(HostsComponent);

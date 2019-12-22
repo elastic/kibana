@@ -12,9 +12,8 @@ import {
   DraggableStateSnapshot,
   Droppable,
 } from 'react-beautiful-dnd';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import styled, { css } from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { EuiPortal } from '@elastic/eui';
 import { dragAndDropActions } from '../../store/drag_and_drop';
@@ -190,16 +189,7 @@ interface OwnProps {
   truncate?: boolean;
 }
 
-interface DispatchProps {
-  registerProvider?: ActionCreator<{
-    provider: DataProvider;
-  }>;
-  unRegisterProvider?: ActionCreator<{
-    id: string;
-  }>;
-}
-
-type Props = OwnProps & DispatchProps;
+type Props = OwnProps & PropsFromRedxux;
 
 /**
  * Wraps a draggable component to handle registration / unregistration of the
@@ -270,10 +260,14 @@ const DraggableWrapperComponent = React.memo<Props>(
 
 DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
 
-export const DraggableWrapper = connect(null, {
+const connector = connect(null, {
   registerProvider: dragAndDropActions.registerProvider,
   unRegisterProvider: dragAndDropActions.unRegisterProvider,
-})(DraggableWrapperComponent);
+});
+
+type PropsFromRedxux = ConnectedProps<typeof connector>;
+
+export const DraggableWrapper = connector(DraggableWrapperComponent);
 
 DraggableWrapper.displayName = 'DraggableWrapper';
 

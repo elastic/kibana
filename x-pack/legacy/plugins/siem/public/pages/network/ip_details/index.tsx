@@ -57,7 +57,7 @@ export const IPDetailsComponent = ({
   setIpDetailsTablesActivePageToZero,
   setQuery,
   to,
-}: IPDetailsComponentProps & PropsFromRedux) => {
+}: IPDetailsComponentProps & IPDetailsReduxProps) => {
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -292,6 +292,6 @@ export const connector = connect(makeMapStateToProps, {
   setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
 });
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+type IPDetailsReduxProps = ConnectedProps<typeof connector>;
 
 export const IPDetails = connector(React.memo(IPDetailsComponent));
