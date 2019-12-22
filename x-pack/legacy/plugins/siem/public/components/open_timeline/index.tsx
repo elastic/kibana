@@ -6,7 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
@@ -37,8 +37,6 @@ import {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
-  OpenTimelineDispatchProps,
-  OpenTimelineReduxProps,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
@@ -53,8 +51,7 @@ interface OwnProps<TCache = object> {
 
 export type OpenTimelineOwnProps = OwnProps &
   Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> &
-  OpenTimelineDispatchProps &
-  OpenTimelineReduxProps;
+  PropsFromRedux;
 
 /** Returns a collection of selected timeline ids */
 export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): string[] =>
@@ -340,7 +337,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const StatefulOpenTimeline = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(StatefulOpenTimelineComponent);
+export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulOpenTimeline = connector(StatefulOpenTimelineComponent);

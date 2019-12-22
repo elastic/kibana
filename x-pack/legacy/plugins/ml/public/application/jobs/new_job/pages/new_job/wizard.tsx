@@ -41,13 +41,15 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
-  const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number) => number>(s => s + 1, 0);
-  const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
-
-  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<(s: number) => number>(
+  const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
     s => s + 1,
     0
   );
+  const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
+
+  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<
+    (s: number, action: any) => number
+  >(s => s + 1, 0);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings';
@@ -33,7 +32,3 @@ const renderIfElement: React.FunctionComponent<StateProps> = props => {
 export const ElementSettings = connect<StateProps, {}, Props, State>(mapStateToProps)(
   renderIfElement
 );
-
-ElementSettings.propTypes = {
-  selectedElementId: PropTypes.string.isRequired,
-};

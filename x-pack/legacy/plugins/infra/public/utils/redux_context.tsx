@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import React, { createContext } from 'react';
 import { State, initialState } from '../store';
 
 export const ReduxStateContext = createContext(initialState);
 
-const withRedux = connect((state: State) => state);
-export const ReduxStateContextProvider = withRedux(({ children, ...state }) => {
-  return <ReduxStateContext.Provider value={state as State}>{children}</ReduxStateContext.Provider>;
-});
+export const ReduxStateContextProvider = ({ children }: { children: JSX.Element }) => {
+  const state = useSelector((store: State) => store);
+  return <ReduxStateContext.Provider value={state}>{children}</ReduxStateContext.Provider>;
+};

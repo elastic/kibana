@@ -95,7 +95,7 @@ const getMockProps = (ip: string) => ({
     from: number;
     to: number;
   }>,
-  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<null>,
+  setIpDetailsTablesActivePageToZero: (jest.fn() as unknown) as ActionCreator<void>,
 });
 
 describe('Ip Details', () => {

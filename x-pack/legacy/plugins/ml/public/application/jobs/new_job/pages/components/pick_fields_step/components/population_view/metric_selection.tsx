@@ -48,7 +48,10 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   const [chartSettings, setChartSettings] = useState(defaultChartSettings);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
   const [fieldValuesPerDetector, setFieldValuesPerDetector] = useState<DetectorFieldValues>({});
-  const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number) => number>(s => s + 1, 0);
+  const [byFieldsUpdated, setByFieldsUpdated] = useReducer<(s: number, action: any) => number>(
+    s => s + 1,
+    0
+  );
   const [pageReady, setPageReady] = useState(false);
   const updateByFields = () => setByFieldsUpdated(0);
 

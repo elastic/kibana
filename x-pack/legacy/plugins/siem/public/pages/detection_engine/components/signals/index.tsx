@@ -5,8 +5,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect } from 'react-redux';
-import { ActionCreator } from 'typescript-fsa';
+import { connect, ConnectedProps } from 'react-redux';
 import { SignalsUtilityBar } from './signals_utility_bar';
 import { StatefulEventsViewer } from '../../../../components/events_viewer';
 import * as i18n from './translations';
@@ -28,10 +27,8 @@ import {
 import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
 import { DEFAULT_KBN_VERSION, DEFAULT_SIGNALS_INDEX } from '../../../../../common/constants';
 import { defaultHeaders } from '../../../../components/timeline/body/column_headers/default_headers';
-import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { inputsSelectors, SerializedFilterQuery, State } from '../../../../store';
+import { inputsSelectors, State } from '../../../../store';
 import { sendSignalsToTimelineAction, updateSignalStatusAction } from './actions';
 import {
   CreateTimelineProps,
@@ -45,48 +42,8 @@ import { inputsActions } from '../../../../store/inputs';
 import { combineQueries } from '../../../../components/timeline/helpers';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { InputsRange } from '../../../../store/inputs/model';
-import { Query } from '../../../../../../../../../src/plugins/data/common/query';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
-
-interface ReduxProps {
-  globalQuery: Query;
-  globalFilters: esFilters.Filter[];
-  deletedEventIds: string[];
-  isSelectAllChecked: boolean;
-  loadingEventIds: string[];
-  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-}
-
-interface DispatchProps {
-  createTimeline: ActionCreator<{
-    dateRange?: {
-      start: number;
-      end: number;
-    };
-    filters?: esFilters.Filter[];
-    id: string;
-    kqlQuery?: {
-      filterQuery: SerializedFilterQuery | null;
-    };
-    columns: ColumnHeader[];
-    show?: boolean;
-  }>;
-  clearEventsDeleted?: ActionCreator<{ id: string }>;
-  clearEventsLoading?: ActionCreator<{ id: string }>;
-  clearSelected?: ActionCreator<{ id: string }>;
-  removeTimelineLinkTo: ActionCreator<{}>;
-  setEventsDeleted?: ActionCreator<{
-    id: string;
-    eventIds: string[];
-    isDeleted: boolean;
-  }>;
-  setEventsLoading?: ActionCreator<{
-    id: string;
-    eventIds: string[];
-    isLoading: boolean;
-  }>;
-}
 
 interface OwnProps {
   defaultFilters?: esFilters.Filter[];
@@ -94,7 +51,7 @@ interface OwnProps {
   to: number;
 }
 
-type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
+type SignalsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
   ({
@@ -145,7 +102,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     // Callback for creating a new timeline -- utilized by row/batch actions
     const createTimelineCallback = useCallback(
       ({ id, kqlQuery, filters, dateRange }: CreateTimelineProps) => {
-        removeTimelineLinkTo({});
+        removeTimelineLinkTo();
         createTimeline({ id, columns: defaultHeaders, show: true, filters, dateRange, kqlQuery });
       },
       [createTimeline, removeTimelineLinkTo]
@@ -333,7 +290,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const SignalsTable = connect(makeMapStateToProps, {
+export const connector = connect(makeMapStateToProps, {
   removeTimelineLinkTo: inputsActions.removeTimelineLinkTo,
   clearSelected: timelineActions.clearSelected,
   setEventsLoading: timelineActions.setEventsLoading,
@@ -341,4 +298,8 @@ export const SignalsTable = connect(makeMapStateToProps, {
   setEventsDeleted: timelineActions.setEventsDeleted,
   clearEventsDeleted: timelineActions.clearEventsDeleted,
   createTimeline: timelineActions.createTimeline,
-})(SignalsTableComponent);
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const SignalsTable = connector(SignalsTableComponent);

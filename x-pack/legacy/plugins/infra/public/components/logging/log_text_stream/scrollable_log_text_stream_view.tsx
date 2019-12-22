@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useMemo } from 'react';
 import moment from 'moment';
+import { Action } from 'typescript-fsa';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
@@ -56,8 +57,8 @@ interface ScrollableLogTextStreamViewProps {
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
   scrollLock: {
-    enable: () => void;
-    disable: () => void;
+    enable: (payload: void) => Action<void>;
+    disable: (payload: void) => Action<void>;
     isEnabled: boolean;
   };
 }

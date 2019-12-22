@@ -7,7 +7,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-import { InspectQuery, Refetch } from './model';
+import { InspectQuery, Refetch, RefetchKql } from './model';
 import { InputsModelId } from './constants';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
@@ -42,7 +42,7 @@ export const setQuery = actionCreator<{
   inputId: InputsModelId;
   id: string;
   loading: boolean;
-  refetch: Refetch;
+  refetch: Refetch | RefetchKql;
   inspect: InspectQuery | null;
 }>('SET_QUERY');
 

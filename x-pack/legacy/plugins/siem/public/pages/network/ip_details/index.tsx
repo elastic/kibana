@@ -6,7 +6,7 @@
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../../components/filters_global';
@@ -57,7 +57,7 @@ export const IPDetailsComponent = ({
   setIpDetailsTablesActivePageToZero,
   setQuery,
   to,
-}: IPDetailsComponentProps) => {
+}: IPDetailsComponentProps & PropsFromRedux) => {
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -73,7 +73,7 @@ export const IPDetailsComponent = ({
   const kibana = useKibana();
 
   useEffect(() => {
-    setIpDetailsTablesActivePageToZero(null);
+    setIpDetailsTablesActivePageToZero();
   }, [detailName, setIpDetailsTablesActivePageToZero]);
 
   return (
@@ -287,7 +287,11 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const IPDetails = connect(makeMapStateToProps, {
+export const connector = connect(makeMapStateToProps, {
   setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
   setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-})(React.memo(IPDetailsComponent));
+});
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const IPDetails = connector(React.memo(IPDetailsComponent));

@@ -4,38 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { NetworkType } from '../../../store/network/model';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
-import { InputsModelId } from '../../../store/inputs/constants';
 import { GlobalTimeArgs } from '../../../containers/global_time';
 
 export const type = NetworkType.details;
 
-type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: number;
-  to: number;
-}>;
-
-interface IPDetailsComponentReduxProps {
-  filters: esFilters.Filter[];
-  flowTarget: FlowTarget;
-  query: Query;
-}
-
-interface IPDetailsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
-  setIpDetailsTablesActivePageToZero: ActionCreator<null>;
-}
-
-export type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  IPDetailsComponentDispatchProps &
-  GlobalTimeArgs & { detailName: string };
+export type IPDetailsComponentProps = GlobalTimeArgs & { detailName: string };
 
 export interface OwnProps {
   type: NetworkType;
