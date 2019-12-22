@@ -13,7 +13,7 @@ import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
-import { QueryRequest } from './types';
+import { QueryRequest } from '../../rules/types';
 
 export const createDeleteRulesRoute: Hapi.ServerRoute = {
   method: 'DELETE',

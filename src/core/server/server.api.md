@@ -115,6 +115,7 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse } from 'elasticsearch';
@@ -502,15 +503,34 @@ export class ClusterClient implements IClusterClient {
     close(): void;
     }
 
+// @public
+export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, logger: ConfigDeprecationLogger) => Record<string, any>;
+
+// @public
+export interface ConfigDeprecationFactory {
+    rename(oldKey: string, newKey: string): ConfigDeprecation;
+    renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+    unused(unusedKey: string): ConfigDeprecation;
+    unusedFromRoot(unusedKey: string): ConfigDeprecation;
+}
+
+// @public
+export type ConfigDeprecationLogger = (message: string) => void;
+
+// @public
+export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
+
 // @public (undocumented)
 export type ConfigPath = string | string[];
 
 // @internal (undocumented)
 export class ConfigService {
-    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "RawConfigurationProvider" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
-    constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
+    constructor(rawConfigProvider: RawConfigurationProvider, env: Env, logger: LoggerFactory);
+    addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider): void;
     atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
+    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     getConfig$(): Observable<Config>;
     // (undocumented)
     getUnusedPaths(): Promise<string[]>;
@@ -520,6 +540,7 @@ export class ConfigService {
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
     optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    validate(): Promise<void>;
     }
 
 // @public
@@ -544,6 +565,8 @@ export interface CoreSetup {
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
+    // (undocumented)
+    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -552,6 +575,24 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+    // (undocumented)
+    uiSettings: UiSettingsServiceStart;
+}
+
+// @public
+export class CspConfig implements ICspConfig {
+    // @internal
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    // (undocumented)
+    static readonly DEFAULT: CspConfig;
+    // (undocumented)
+    readonly header: string;
+    // (undocumented)
+    readonly rules: string[];
+    // (undocumented)
+    readonly strict: boolean;
+    // (undocumented)
+    readonly warnLegacyBrowsers: boolean;
 }
 
 // @public
@@ -693,6 +734,7 @@ export interface HttpServiceSetup {
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
+    csp: ICspConfig;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
@@ -720,6 +762,14 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// @public
+export interface ICspConfig {
+    readonly header: string;
+    readonly rules: string[];
+    readonly strict: boolean;
+    readonly warnLegacyBrowsers: boolean;
+}
 
 // @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
@@ -756,7 +806,7 @@ export interface IRouter {
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -792,8 +842,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"], any>;
+    static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -883,6 +935,7 @@ export interface Logger {
     debug(message: string, meta?: LogMeta): void;
     error(errorOrMessage: string | Error, meta?: LogMeta): void;
     fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
+    get(...childContextPaths: string[]): Logger;
     info(message: string, meta?: LogMeta): void;
     // @internal (undocumented)
     log(record: LogRecord): void;
@@ -1024,6 +1077,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 
 // @public
 export interface PluginConfigDescriptor<T = any> {
+    deprecations?: ConfigDeprecationProvider;
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
     };
@@ -1108,7 +1162,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 };
 
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
@@ -1150,10 +1204,10 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
-    validate: RouteSchemas<P, Q, B> | false;
+    validate: RouteValidatorFullConfig<P, Q, B> | false;
 }
 
 // @public
@@ -1178,16 +1232,54 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> {
+export class RouteValidationError extends SchemaTypeError {
+    constructor(error: Error | string, path?: string[]);
+}
+
+// @public
+export type RouteValidationFunction<T> = (data: any, validationResult: RouteValidationResultFactory) => {
+    value: T;
+    error?: never;
+} | {
+    value?: never;
+    error: RouteValidationError;
+};
+
+// @public
+export interface RouteValidationResultFactory {
     // (undocumented)
-    body?: B;
+    badRequest: (error: Error | string, path?: string[]) => {
+        error: RouteValidationError;
+    };
     // (undocumented)
-    params?: P;
-    // (undocumented)
-    query?: Q;
+    ok: <T>(value: T) => {
+        value: T;
+    };
+}
+
+// @public
+export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
+
+// @public
+export interface RouteValidatorConfig<P, Q, B> {
+    body?: RouteValidationSpec<B>;
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+}
+
+// @public
+export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> & RouteValidatorOptions;
+
+// @public
+export interface RouteValidatorOptions {
+    unsafe?: {
+        params?: boolean;
+        query?: boolean;
+        body?: boolean;
+    };
 }
 
 // @public (undocumented)
@@ -1773,6 +1865,11 @@ export interface UiSettingsServiceSetup {
     register(settings: Record<string, UiSettingsParams>): void;
 }
 
+// @public (undocumented)
+export interface UiSettingsServiceStart {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
@@ -1785,6 +1882,11 @@ export interface UserProvidedValues<T = any> {
 }
 
 // @public
+export interface UuidServiceSetup {
+    getInstanceUuid(): string;
+}
+
+// @public
 export const validBodyOutput: readonly ["data", "stream"];
 
 
@@ -1792,9 +1894,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:213:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:213:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:214:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:215:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:222:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:223:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

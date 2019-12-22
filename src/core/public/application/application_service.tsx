@@ -29,7 +29,8 @@ import { ContextSetup, IContextContainer } from '../context';
 import {
   App,
   LegacyApp,
-  AppMounter,
+  AppMount,
+  AppMountDeprecated,
   InternalApplicationSetup,
   InternalApplicationStart,
 } from './types';
@@ -50,7 +51,7 @@ interface StartDeps {
 
 interface AppBox {
   app: App;
-  mount: AppMounter;
+  mount: AppMount;
 }
 
 /**
@@ -61,7 +62,7 @@ export class ApplicationService {
   private readonly apps$ = new BehaviorSubject<ReadonlyMap<string, AppBox>>(new Map());
   private readonly legacyApps$ = new BehaviorSubject<ReadonlyMap<string, LegacyApp>>(new Map());
   private readonly capabilities = new CapabilitiesService();
-  private mountContext?: IContextContainer<App['mount']>;
+  private mountContext?: IContextContainer<AppMountDeprecated>;
 
   public setup({ context }: SetupDeps): InternalApplicationSetup {
     this.mountContext = context.createContextContainer();
@@ -75,10 +76,21 @@ export class ApplicationService {
           throw new Error(`Applications cannot be registered after "setup"`);
         }
 
-        const appBox: AppBox = {
-          app,
-          mount: this.mountContext!.createHandler(plugin, app.mount),
-        };
+        let appBox: AppBox;
+        if (isAppMountDeprecated(app.mount)) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
+          );
+
+          appBox = {
+            app,
+            mount: this.mountContext!.createHandler(plugin, app.mount),
+          };
+        } else {
+          appBox = { app, mount: app.mount };
+        }
+
         this.apps$.next(new Map([...this.apps$.value.entries(), [app.id, appBox]]));
       },
       registerLegacyApp: (app: LegacyApp) => {
@@ -146,7 +158,7 @@ export class ApplicationService {
         }
 
         // Filter only available apps and map to just the mount function.
-        const appMounters = new Map<string, AppMounter>(
+        const appMounts = new Map<string, AppMount>(
           [...this.apps$.value]
             .filter(([id]) => availableApps.has(id))
             .map(([id, { mount }]) => [id, mount])
@@ -154,7 +166,7 @@ export class ApplicationService {
 
         return (
           <AppRouter
-            apps={appMounters}
+            apps={appMounts}
             legacyApps={availableLegacyApps}
             basePath={http.basePath}
             currentAppId$={currentAppId$}
@@ -173,3 +185,8 @@ const appPath = (appId: string, { path }: { path?: string } = {}): string =>
   path
     ? `/app/${appId}/${path.replace(/^\//, '')}` // Remove preceding slash from path if present
     : `/app/${appId}`;
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
+}

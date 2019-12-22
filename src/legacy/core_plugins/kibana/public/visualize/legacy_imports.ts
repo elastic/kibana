@@ -43,7 +43,6 @@ export { IPrivate } from 'ui/private';
 // @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
 
-export { SavedObjectRegistryProvider } from 'ui/saved_objects';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
@@ -72,4 +71,7 @@ export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
 export { wrapInI18nContext } from 'ui/i18n';
 
-export { VisSavedObject } from './embeddable/visualize_embeddable';
+export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
+export { VisSavedObject } from '../visualize_embeddable/visualize_embeddable';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize_embeddable';
+export { VisualizeEmbeddableFactory } from '../visualize_embeddable/visualize_embeddable_factory';

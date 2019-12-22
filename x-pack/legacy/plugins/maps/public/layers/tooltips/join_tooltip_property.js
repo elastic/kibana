@@ -7,7 +7,6 @@
 import { TooltipProperty } from './tooltip_property';
 
 export class JoinTooltipProperty extends TooltipProperty {
-
   constructor(tooltipProperty, leftInnerJoins) {
     super();
     this._tooltipProperty = tooltipProperty;
@@ -37,14 +36,16 @@ export class JoinTooltipProperty extends TooltipProperty {
     }
 
     for (let i = 0; i < this._leftInnerJoins.length; i++) {
-      const rightSource =  this._leftInnerJoins[i].getRightJoinSource();
+      const rightSource = this._leftInnerJoins[i].getRightJoinSource();
       const termField = rightSource.getTermField();
       try {
-        const esTooltipProperty = await termField.createTooltipProperty(this._tooltipProperty.getRawValue());
+        const esTooltipProperty = await termField.createTooltipProperty(
+          this._tooltipProperty.getRawValue()
+        );
         if (esTooltipProperty) {
           esFilters.push(...(await esTooltipProperty.getESFilters()));
         }
-      } catch(e) {
+      } catch (e) {
         console.error('Cannot create joined filter', e);
       }
     }

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * React component for rendering a select element with threshold levels.
  */
@@ -15,20 +13,23 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  EuiHealth,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 
-const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });
-const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' });
-const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' });
-const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' });
+const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
+  defaultMessage: 'warning',
+});
+const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
+  defaultMessage: 'minor',
+});
+const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
+  defaultMessage: 'major',
+});
+const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
+  defaultMessage: 'critical',
+});
 
 const optionsMap = {
   [warningLabel]: 0,
@@ -41,28 +42,28 @@ export const SEVERITY_OPTIONS = [
   {
     val: 0,
     display: warningLabel,
-    color: getSeverityColor(0)
+    color: getSeverityColor(0),
   },
   {
     val: 25,
     display: minorLabel,
-    color: getSeverityColor(25)
+    color: getSeverityColor(25),
   },
   {
     val: 50,
     display: majorLabel,
-    color: getSeverityColor(50)
+    color: getSeverityColor(50),
   },
   {
     val: 75,
     display: criticalLabel,
-    color: getSeverityColor(75)
+    color: getSeverityColor(75),
   },
 ];
 
 function optionValueToThreshold(value) {
   // Get corresponding threshold object with required display and val properties from the specified value.
-  let threshold = SEVERITY_OPTIONS.find(opt => (opt.val === value));
+  let threshold = SEVERITY_OPTIONS.find(opt => opt.val === value);
 
   // Default to warning if supplied value doesn't map to one of the options.
   if (threshold === undefined) {
@@ -75,10 +76,10 @@ function optionValueToThreshold(value) {
 export const severity$ = new BehaviorSubject(SEVERITY_OPTIONS[0]);
 
 class SelectSeverityUnwrapped extends Component {
-  onChange = (valueDisplay) => {
+  onChange = valueDisplay => {
     const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
     severity$.next(threshold);
-  }
+  };
 
   getOptions = () =>
     SEVERITY_OPTIONS.map(({ color, display, val }) => ({
@@ -126,16 +127,13 @@ class SelectSeverityUnwrapped extends Component {
 }
 
 SelectSeverityUnwrapped.propTypes = {
-  classNames: PropTypes.string
+  classNames: PropTypes.string,
 };
 
 SelectSeverityUnwrapped.defaultProps = {
-  classNames: ''
+  classNames: '',
 };
 
-const SelectSeverity = injectObservablesAsProps(
-  { severity: severity$ },
-  SelectSeverityUnwrapped
-);
+const SelectSeverity = injectObservablesAsProps({ severity: severity$ }, SelectSeverityUnwrapped);
 
 export { SelectSeverity };

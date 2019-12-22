@@ -62,7 +62,7 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
     body,
   };
 
-  return await queryContext.database.search(queryContext.request, params);
+  return await queryContext.search(params);
 };
 
 const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {

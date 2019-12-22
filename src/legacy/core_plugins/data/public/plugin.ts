@@ -18,10 +18,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { createSearchBar, StatetfulSearchBarProps } from './search';
-import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import { SearchService, SearchStart } from './search';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { initLegacyModule } from './shim/legacy_module';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setFieldFormats } from '../../../../plugins/data/public/services';
@@ -36,9 +34,7 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataStart {
-  ui: {
-    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
-  };
+  search: SearchStart;
 }
 
 /**
@@ -54,29 +50,20 @@ export interface DataStart {
  */
 
 export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
-  private storage!: IStorageWrapper;
+  private readonly search = new SearchService();
 
-  public setup(core: CoreSetup) {
-    this.storage = new Storage(window.localStorage);
-  }
+  public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
-    initLegacyModule(data.indexPatterns);
-
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-    });
 
     return {
-      ui: {
-        SearchBar,
-      },
+      search: this.search.start(core),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.search.stop();
+  }
 }

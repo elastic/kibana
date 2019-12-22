@@ -29,7 +29,7 @@ export async function getOSInfo() {
     platform: os.platform(),
     // Include the platform name in the release to avoid grouping unrelated platforms together.
     // release 1.0 across windows, linux, and darwin don't mean anything useful.
-    platformRelease: `${os.platform()}-${os.release()}`
+    platformRelease: `${os.platform()}-${os.release()}`,
   };
 
   // Get distribution information for linux

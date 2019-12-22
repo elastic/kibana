@@ -33,7 +33,7 @@ export class ShowJson extends React.PureComponent {
         setOptions={{ maxLines: Infinity }}
         value={json}
         editorProps={{
-          $blockScrolling: Infinity
+          $blockScrolling: Infinity,
         }}
       />
     );
