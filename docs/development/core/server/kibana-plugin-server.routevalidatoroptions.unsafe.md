@@ -13,5 +13,6 @@ unsafe?: {
         params?: boolean;
         query?: boolean;
         body?: boolean;
-    };
+    }
+
 ```
