@@ -20,10 +20,6 @@
 export {
   addSearchStrategy,
   hasSearchStategyForIndexPattern,
-  getSearchStrategyById,
-  getSearchStrategyForSearchRequest,
-} from './search_strategy_registry';
-
-export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-
-export { SearchError, getSearchErrorType } from './search_error';
+  isDefaultTypeIndexPattern,
+  SearchError,
+} from '../index';
