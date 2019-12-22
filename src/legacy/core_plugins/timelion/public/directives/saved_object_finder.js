@@ -19,19 +19,16 @@
 
 import _ from 'lodash';
 import rison from 'rison-node';
-import { keyMap } from '../utils/key_map';
-import { SavedObjectRegistryProvider } from '../saved_objects/saved_object_registry';
-import { uiModules } from '../modules';
-
-import savedObjectFinderTemplate from './partials/saved_object_finder.html';
-import './input_focus';
-import './paginate';
+import { keyMap } from 'ui/utils/key_map';
+import { uiModules } from 'ui/modules';
+import 'ui/directives/input_focus';
+import 'ui/directives/paginate';
+import savedObjectFinderTemplate from './saved_object_finder.html';
+import { savedSheetLoader } from '../services/saved_sheets';
 
 const module = uiModules.get('kibana');
 
 module.directive('savedObjectFinder', function($location, kbnUrl, Private, config) {
-  const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
-
   return {
     restrict: 'E',
     scope: {
@@ -76,7 +73,7 @@ module.directive('savedObjectFinder', function($location, kbnUrl, Private, confi
       // the list of hits, used to render display
       self.hits = [];
 
-      self.service = services[$scope.type];
+      self.service = savedSheetLoader;
       self.properties = self.service.loaderProperties;
 
       filterResults();
