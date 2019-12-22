@@ -32,7 +32,7 @@ import {
 import { npStart } from 'ui/new_platform';
 import {
   SearchSource,
-  SearchSourceContract,
+  ISearchSource,
   getRequestInspectorStats,
   getResponseInspectorStats,
 } from '../../../../../ui/public/courier';
@@ -51,7 +51,7 @@ import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 
 export interface RequestHandlerParams {
-  searchSource: SearchSourceContract;
+  searchSource: ISearchSource;
   aggs: AggConfigs;
   timeRange?: TimeRange;
   query?: Query;
