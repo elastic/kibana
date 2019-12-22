@@ -18,7 +18,8 @@
  */
 
 import uuid from 'uuid';
-import { promises } from 'fs';
+import Fs from 'fs';
+import { promisify } from 'util';
 import { join } from 'path';
 import { take } from 'rxjs/operators';
 import { IConfigService } from '../config';
@@ -26,7 +27,8 @@ import { PathConfigType, config as pathConfigDef } from '../path';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { Logger } from '../logging';
 
-const { readFile, writeFile } = promises;
+const readFile = promisify(Fs.readFile);
+const writeFile = promisify(Fs.writeFile);
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
