@@ -61,7 +61,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   isScaled() {
-    return this.isOrdinal();
+    return !this.isCustomColorRamp();
   }
 
   isRanged() {
