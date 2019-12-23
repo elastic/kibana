@@ -8,10 +8,7 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
-import first from 'lodash/fp/first';
-import get from 'lodash/fp/get';
-import has from 'lodash/fp/has';
-import zip from 'lodash/fp/zip';
+import _ from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
@@ -205,7 +202,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     };
 
     const response = await search(params);
-    const document = first(response.hits.hits);
+    const document = _.first(response.hits.hits);
     if (!document) {
       throw new Error('Document not found');
     }
@@ -313,7 +310,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 function getLookupIntervals(start: number, direction: 'asc' | 'desc'): Array<[number, number]> {
   const offsetSign = direction === 'asc' ? 1 : -1;
   const translatedOffsets = LOOKUP_OFFSETS.map(offset => start + offset * offsetSign);
-  const intervals = zip(translatedOffsets.slice(0, -1), translatedOffsets.slice(1)) as Array<
+  const intervals = _.zip(translatedOffsets.slice(0, -1), translatedOffsets.slice(1)) as Array<
     [number, number]
   >;
   return intervals;
@@ -325,13 +322,13 @@ const convertHitToLogEntryDocument = (fields: string[]) => (
   gid: hit._id,
   fields: fields.reduce(
     (flattenedFields, fieldName) =>
-      has(fieldName, hit._source)
+      _.has(hit._source, fieldName)
         ? {
             ...flattenedFields,
-            [fieldName]: get(fieldName, hit._source),
+            [fieldName]: _.get(hit._source, fieldName),
           }
         : flattenedFields,
-    {} as { [fieldName: string]: string | number | boolean | null }
+    {} as { [fieldName: string]: string | number | object | boolean | null }
   ),
   highlights: hit.highlight || {},
   key: {
