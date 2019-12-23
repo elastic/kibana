@@ -28,7 +28,6 @@ export const createVegaVisualization = ({ serviceSettings }) =>
       this._vis = vis;
 
       this.savedObjectsClient = getSavedObjects();
-      this.notifications = getNotifications();
       this.dataPlugin = getData();
     }
 
@@ -71,8 +70,10 @@ export const createVegaVisualization = ({ serviceSettings }) =>
      * @returns {Promise<void>}
      */
     async render(visData, visParams, status) {
+      const { toasts } = getNotifications();
+
       if (!visData && !this._vegaView) {
-        this.notifications.toasts.addWarning(
+        toasts.addWarning(
           i18n.translate('visTypeVega.visualization.unableToRenderWithoutDataWarningMessage', {
             defaultMessage: 'Unable to render without data',
           })
@@ -86,7 +87,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
         if (this._vegaView) {
           this._vegaView.onError(error);
         } else {
-          this.notifications.toasts.addError(error, {
+          toasts.addError(error, {
             title: i18n.translate('visTypeVega.visualization.renderErrorTitle', {
               defaultMessage: 'Vega error',
             }),
@@ -103,13 +104,13 @@ export const createVegaVisualization = ({ serviceSettings }) =>
           this._vegaView = null;
         }
 
-        const { filterManager: queryfilter } = this.dataPlugin.query;
+        const { filterManager } = this.dataPlugin.query;
         const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
           parentEl: this._el,
           vegaParser,
           serviceSettings,
-          queryfilter,
+          filterManager,
           timefilter,
           findIndex: this.findIndex.bind(this),
         };
