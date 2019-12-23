@@ -37,8 +37,6 @@ import {
   KbnUrl,
   SavedObjectSaveOpts,
   unhashUrl,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  LENS_EMBEDDABLE_TYPE,
 } from '../legacy_imports';
 import { FilterStateManager } from '../../../../data/public';
 import {
