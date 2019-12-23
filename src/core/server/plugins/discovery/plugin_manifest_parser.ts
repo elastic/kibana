@@ -22,8 +22,10 @@ import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
 import { isConfigPath, PackageInfo } from '../../config';
+import { Logger } from '../../logging';
 import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
+import { isCamelCase } from './is_camel_case';
 
 const fsReadFileAsync = promisify(readFile);
 const fsStatAsync = promisify(stat);
@@ -67,7 +69,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
+export async function parseManifest(pluginPath: string, packageInfo: PackageInfo, log: Logger) {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -105,6 +107,10 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
       manifestPath,
       new Error('Plugin "id" must not include `.` characters.')
     );
+  }
+
+  if (!isCamelCase(manifest.id)) {
+    log.warn(`Expect plugin "id" in camelCase, but found: ${manifest.id}`);
   }
 
   if (!manifest.version || typeof manifest.version !== 'string') {
