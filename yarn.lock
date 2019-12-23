@@ -1945,10 +1945,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@17.1.2":
-  version "17.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.1.2.tgz#2167ec61ce14c6896844b5ebf890a0b88e0b8c51"
-  integrity sha512-B0zhJ449fLdjFXED9ibbnx7/ez4M0842O3ZaxbohP7IEIC/oHWhJhWBW0UEtRHlk7tD6uDp4RPjO5GmRKXSLBQ==
+"@elastic/eui@17.3.1":
+  version "17.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.3.1.tgz#67d883207b2efdb9a48f2d949b95de1e4bbc1064"
+  integrity sha512-fYoPbRXr9mZlTcfSqOCE65yb2Zpsptq4Y1Lg8+aeMw8G5JpMnUx1RaBRe1OJrCRHWpuF0f8Yxg+i1DDqxxLnlA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"

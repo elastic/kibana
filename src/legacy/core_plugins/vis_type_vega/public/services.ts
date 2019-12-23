@@ -17,13 +17,17 @@
  * under the License.
  */
 
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export {
-  FieldFormat,
-  IFieldFormatType,
-  IFieldFormatId,
-  IFieldFormatMetaParams,
-} from './field_format';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
-export * from './converters';
-export * from './constants';
+import { SavedObjectsStart } from 'kibana/public';
+import { NotificationsStart } from 'src/core/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
+
+export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
+
+export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjects'
+);
