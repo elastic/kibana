@@ -48,7 +48,7 @@ export class DynamicLegendRow extends React.Component {
     return this.props.style.formatField(value);
   }
 
-  render() {
+  _renderRangeLegend() {
     const fieldMeta = this.props.style.getFieldMeta();
 
     let minLabel = EMPTY_VALUE;
@@ -77,5 +77,13 @@ export class DynamicLegendRow extends React.Component {
         fieldLabel={this.state.label}
       />
     );
+  }
+
+  render() {
+    if (this.props.style.isOrdinal()) {
+      return this._renderRangeLegend();
+    } else {
+      return null;
+    }
   }
 }

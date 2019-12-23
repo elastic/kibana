@@ -56,12 +56,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return this._options.useCustomColorRamp;
   }
 
+  isOrdinal() {
+    return !this.isCustomColorRamp();
+  }
+
   supportsFeatureState() {
     return true;
   }
 
   isScaled() {
-    return !this.isCustomColorRamp();
+    return this.isOrdinal();
   }
 
   _getMbColor() {
