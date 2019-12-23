@@ -24,7 +24,6 @@ module.exports = {
   entry: [
     '@elastic/eui/dist/eui_theme_light.css',
     '@kbn/ui-framework/dist/kui_light.css',
-    '@storybook/addon-actions',
     '@storybook/addon-actions/register',
     '@storybook/addon-knobs',
     '@storybook/addon-knobs/react',
