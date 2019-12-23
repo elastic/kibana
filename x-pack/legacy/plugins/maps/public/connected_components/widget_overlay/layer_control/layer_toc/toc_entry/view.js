@@ -46,7 +46,8 @@ export class TOCEntry extends React.Component {
   };
 
   async _loadHasLegendDetails() {
-    const hasLegendDetails = await this.props.layer.hasLegendDetails();
+    const hasLegendDetails =
+      (await this.props.layer.hasLegendDetails()) && this.props.layer.isVisible();
     if (this._isMounted && hasLegendDetails !== this.state.hasLegendDetails) {
       this.setState({ hasLegendDetails });
     }
