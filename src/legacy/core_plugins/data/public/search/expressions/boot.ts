@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { npSetup } from 'ui/new_platform';
 import { esaggs } from './esaggs';
 
-export function loadEsaggs(expressions: ExpressionsSetup) {
-  expressions.registerFunction(esaggs);
-}
+npSetup.plugins.expressions.registerFunction(esaggs);

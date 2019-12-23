@@ -31,7 +31,6 @@ import {
   setUiSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
-import { loadEsaggs } from './search/expressions/boot';
 
 export interface DataPluginSetupDependencies {
   expressions: ExpressionsSetup;
@@ -66,9 +65,7 @@ export class DataPlugin
   implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   private readonly search = new SearchService();
 
-  public setup(core: CoreSetup, { expressions }: DataPluginSetupDependencies) {
-    loadEsaggs(expressions);
-  }
+  public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.

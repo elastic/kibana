@@ -35,7 +35,7 @@ import {
   FilterManager,
 } from '../../../../../../plugins/data/public';
 
-import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
+import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
