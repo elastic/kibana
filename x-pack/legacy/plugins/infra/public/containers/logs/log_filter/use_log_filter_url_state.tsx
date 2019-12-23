@@ -32,11 +32,7 @@ export const useLogFilterUrlState = () => {
   });
 
   /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    if (logFilterUrlState && filterQueryAsKuery?.expression !== logFilterUrlState.expression) {
-      applyLogFilterQuery(logFilterUrlState.expression);
-    }
-  }, [logFilterUrlState]);
+  useEffect(() => applyLogFilterQuery(logFilterUrlState.expression), [logFilterUrlState]);
   useEffect(() => setLogFilterUrlState(filterQueryAsKuery), [filterQueryAsKuery]);
   /* eslint-enable react-hooks/exhaustive-deps */
 };
