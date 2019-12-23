@@ -52,6 +52,8 @@ addParameters({
   options: {
     theme: create({
       base: 'light',
+      brandTitle: 'Kibana Storybook',
+      brandUrl: 'https://github.com/elastic/kibana/tree/master/packages/kbn-storybook',
     }),
     showPanel: true,
     isFullscreen: false,
