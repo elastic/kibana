@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-console */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -142,7 +144,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
   ];
 
-  const elasticsearchRole = {
+  const elasticsearchPrivileges = {
     indices: [
       { names: ['apm-*'], privileges: ['read', 'view_index_metadata'] },
       { names: ['.apm-agent-configuration'], privileges: ['read', 'write', 'view_index_metadata'] },
@@ -205,8 +207,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      log.debug(`hitting ${endpoint.req.url}`);
+      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
+      console.log(`Requesting: ${endpoint.req.url}`);
+      log.info(`Requesting: ${endpoint.req.url}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
+      console.log(`Responded: ${endpoint.req.url}`);
+      log.info(`Responded: ${endpoint.req.url}`);
+
       try {
         if (expectation === 'forbidden') {
           endpoint.expectForbidden(result);
@@ -214,6 +221,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           endpoint.expectResponse(result);
         }
       } catch (e) {
+        // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
+        console.log(`${endpoint.req.url} failed`);
+        log.warning(`${endpoint.req.url} failed`);
+
         const { statusCode, body, req } = result.response;
         throw new Error(
           `Endpoint: ${req.method} ${req.path}
@@ -229,7 +240,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   describe('apm feature controls', () => {
     let res: any;
     before(async () => {
-      log.debug('creating agent configuration');
+      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
+      console.log(`Creating agent configuration`);
+      log.info('Creating agent configuration');
       res = await executeAsAdmin({
         method: 'post',
         url: '/api/apm/settings/agent-configuration/new',
@@ -238,10 +251,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           settings: { transaction_sample_rate: 0.5 },
         },
       });
+      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
+      console.log(`Agent configuration created`);
+      log.info('Agent configuration created');
     });
 
     after(async () => {
-      log.debug('deleting agent configuration');
+      log.info('deleting agent configuration');
       const configurationId = res.body._id;
       await executeAsAdmin({
         method: 'delete',
@@ -255,7 +271,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
         });
 
         await security.user.create(username, {
@@ -277,7 +293,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [{ base: ['all'], spaces: ['*'] }],
         });
 
@@ -301,7 +317,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       const password = `${username}-password`;
       try {
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [{ feature: { dashboard: ['all'] }, spaces: ['*'] }],
         });
 
@@ -339,7 +355,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           disabledFeatures: [],
         });
         await security.role.create(roleName, {
-          elasticsearch: elasticsearchRole,
+          elasticsearch: elasticsearchPrivileges,
           kibana: [
             { feature: { apm: ['read'] }, spaces: [space1Id] },
             { feature: { dashboard: ['all'] }, spaces: [space2Id] },
