@@ -25,7 +25,6 @@ import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eu
 
 // @ts-ignore
 import { Data } from '../../../vislib/lib/data';
-// @ts-ignore
 import { createFiltersFromEvent } from '../../../../../core_plugins/visualizations/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './vislib_vis_legend_item';
