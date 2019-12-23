@@ -10,7 +10,7 @@ import { DEFAULT_KBN_VERSION } from '../../common/constants';
 import { useStateToaster } from '../components/toasters';
 import { errorToToaster } from '../components/ml/api/error_to_toaster';
 import { IndexPatternSavedObject } from '../components/ml_popover/types';
-import { useKibanaUiSetting } from '../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../lib/kibana';
 
 import { getIndexPatterns } from './api/api';
 import * as i18n from './translations';
@@ -21,7 +21,7 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   useEffect(() => {
     let isSubscribed = true;

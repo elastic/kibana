@@ -1,0 +1,17 @@
+{
+  "rule_id": "7581fd81-25e8-489e-bcf3-69db068b7a6c",
+  "risk_score": 50,
+  "description": "Zeek notice reporting a count of how often a notice occurred.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Notice::Tally",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Notice::Tally\" or rule.name: \"Notice::Tally\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
