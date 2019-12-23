@@ -124,6 +124,7 @@ export class InfraLogEntriesDomain {
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
     );
+
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
 
     const documents = await this.adapter.getLogEntries(
@@ -133,23 +134,29 @@ export class InfraLogEntriesDomain {
       params
     );
 
-    const entries = documents.map((doc: any) => {
+    const entries = documents.map(doc => {
       return {
-        id: doc._id,
-        cursor: {
-          time: doc.sort[0],
-          tiebreaker: doc.sort[1],
-        },
+        id: doc.gid,
+        cursor: doc.key,
         columns: configuration.logColumns.map(column => {
           if ('timestampColumn' in column) {
-            return doc._source[configuration.fields.timestamp];
+            return {
+              columnId: column.timestampColumn.id,
+              timestamp: doc.key.time,
+            };
           }
           if ('messageColumn' in column) {
-            // FIXME
-            return doc._source.message;
+            return {
+              columnId: column.messageColumn.id,
+              message: messageFormattingRules.format(doc.fields, doc.highlights),
+            };
           }
           if ('fieldColumn' in column) {
-            return get(doc._source, column.fieldColumn.field);
+            return {
+              columnId: column.fieldColumn.id,
+              field: column.fieldColumn.field,
+              value: doc.fields[column.fieldColumn.field],
+            };
           }
         }),
       };
@@ -386,7 +393,7 @@ export interface LogEntriesAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<any>;
+  ): Promise<LogEntryDocument[]>;
 
   getContainedLogEntryDocuments(
     requestContext: RequestHandlerContext,
@@ -430,6 +437,7 @@ export interface LogSummaryBucket {
   topEntryKeys: TimeKey[];
 }
 
+/** @deprecated */
 const convertLogDocumentToEntry = (
   sourceId: string,
   logColumns: InfraSourceConfiguration['logColumns'],

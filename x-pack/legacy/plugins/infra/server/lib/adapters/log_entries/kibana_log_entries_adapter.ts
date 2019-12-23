@@ -17,7 +17,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonObject, JsonValue } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
   LogEntriesParams,
@@ -88,7 +88,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<any> {
+  ): Promise<LogEntryDocument[]> {
     const { startTimestamp, endTimestamp, query, cursor } = params;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
@@ -126,9 +126,13 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       },
     };
 
-    const documents = await this.framework.callWithRequest(requestContext, 'search', esQuery);
-
-    return sortDirection === 'asc' ? documents.hits.hits : documents.hits.hits.reverse();
+    const esResult = await this.framework.callWithRequest<LogItemHit>(
+      requestContext,
+      'search',
+      esQuery
+    );
+    const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
+    return mapHitsToLogEntryDocuments(hits, sourceConfiguration.fields.timestamp, fields);
   }
 
   /** @deprecated */
@@ -369,6 +373,34 @@ function getLookupIntervals(start: number, direction: 'asc' | 'desc'): Array<[nu
   return intervals;
 }
 
+function mapHitsToLogEntryDocuments(
+  hits: LogItemHit[],
+  timestampField: string,
+  fields: string[]
+): LogEntryDocument[] {
+  return hits.map(hit => {
+    const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
+      (flattenedFields, field) => {
+        if (has(field, hit._source)) {
+          flattenedFields[field] = get(field, hit._source);
+        }
+        return flattenedFields;
+      },
+      {}
+    );
+
+    return {
+      gid: hit._id,
+      // timestamp: hit._source[timestampField],
+      // FIXME s/key/cursor/g
+      key: { time: hit.sort[0], tiebreaker: hit.sort[1] },
+      fields: logFields,
+      highlights: {},
+    };
+  });
+}
+
+/** @deprecated */
 const convertHitToLogEntryDocument = (fields: string[]) => (
   hit: SortedSearchHit
 ): LogEntryDocument => ({
