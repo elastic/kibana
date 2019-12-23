@@ -29,13 +29,16 @@ interface Props {
 
 const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
 
+const SCHEME_VERBS = ['','http','https'];
+
+
 export const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,
   editAction,
   errors,
   hasErrors,
 }) => {
-  const { method, host, port, path, body, username, password } = action;
+  const { method, host, port, scheme, path, body, username, password } = action;
 
   useEffect(() => {
     editAction({ key: 'contentType', value: 'application/json' }); // set content-type for threshold watch to json by default
@@ -126,6 +129,27 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               }}
             />
           </ErrableFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.SchemeFieldLabel',
+              {
+                defaultMessage: 'Scheme',
+              }
+            )}
+          >
+            <EuiSelect
+              name="scheme"
+              value={scheme}
+              data-test-subj="webhookSchemeSelect"
+              options={SCHEME_VERBS.map(verb => ({ text: verb, value: verb }))}
+              onChange={e => {
+                editAction({ key: 'scheme', value: e.target.value });
+              }}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>

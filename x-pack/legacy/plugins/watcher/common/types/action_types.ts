@@ -56,6 +56,7 @@ export interface WebhookAction extends BaseAction {
   method?: 'head' | 'get' | 'post' | 'put' | 'delete';
   host: string;
   port: number;
+  scheme?: 'http' | 'https';
   path?: string;
   body?: string;
   username?: string;

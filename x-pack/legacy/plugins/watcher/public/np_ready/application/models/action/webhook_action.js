@@ -11,17 +11,17 @@ import { i18n } from '@kbn/i18n';
 export class WebhookAction extends BaseAction {
   constructor(props = {}) {
     super(props);
-
+    debugger
     const defaultJson = JSON.stringify(
-      { message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold' },
+      { message: '22Watch [{{ctx.metadata.name}}] has exceeded the threshold' },
       null,
       2
     );
     this.body = get(props, 'body', props.ignoreDefaults ? null : defaultJson);
-
     this.method = get(props, 'method');
     this.host = get(props, 'host');
     this.port = get(props, 'port');
+    this.scheme = get(props, 'scheme');
     this.path = get(props, 'path');
     this.username = get(props, 'username');
     this.password = get(props, 'password');
@@ -112,6 +112,7 @@ export class WebhookAction extends BaseAction {
       method: this.method,
       host: this.host,
       port: this.port,
+      scheme: this.scheme,
       path: this.path,
       body: this.body,
       username: this.username,
