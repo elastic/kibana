@@ -4,23 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', () => ({
+  DashboardConstants: {
+    ADD_EMBEDDABLE_ID: 'addEmbeddableId',
+    ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
+  },
+}));
+
 import { addEmbeddableToDashboardUrl, getKibanaBasePathFromDashboardUrl } from './url_helper';
 
 describe('Lens URL Helper', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.doMock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', () => ({
-      ADD_EMBEDDABLE_ID: 'addEmbeddableId',
-    }));
-    jest.doMock('../../../../../../src/legacy/core_plugins/kibana/public/dashboard', () => ({
-      ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
-    }));
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('getKibanaBasePathFromDashboardUrl', () => {
     let url =
       "http://localhost:5601/lib/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(description:'',filters:!()";
