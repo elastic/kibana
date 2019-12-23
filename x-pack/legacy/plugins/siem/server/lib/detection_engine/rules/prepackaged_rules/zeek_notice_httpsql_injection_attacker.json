@@ -1,0 +1,17 @@
+{
+  "rule_id": "4ca9ef93-7e7e-40a4-8d71-9130204d86e6",
+  "risk_score": 50,
+  "description": "Indicates that a host performing SQL injection attacks was detected.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice HTTP::SQL_Injection_Attacker",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"HTTP::SQL_Injection_Attacker\" or rule.name: \"HTTP::SQL_Injection_Attacker\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

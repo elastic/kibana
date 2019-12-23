@@ -42,6 +42,7 @@ import {
   RedirectWhenMissingProvider,
   confirmModalFactory,
   configureAppAngularModule,
+  SavedObjectLoader,
   IPrivate,
 } from '../legacy_imports';
 
@@ -57,9 +58,8 @@ export interface RenderDeps {
   npDataStart: NpDataStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectRegistry: any;
+  savedDashboards: SavedObjectLoader;
   dashboardConfig: any;
-  savedDashboards: any;
   dashboardCapabilities: any;
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
