@@ -4,15 +4,10 @@ exports[`it renders without crashing 1`] = `
 <EuiPage
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
-  restrictWidth={false}
 >
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageHeader
       className="spcSpaceSelector__heading"
-      responsive={true}
     >
       <EuiSpacer
         size="xxl"
@@ -53,7 +48,6 @@ exports[`it renders without crashing 1`] = `
     </EuiPageHeader>
     <EuiPageContent
       className="spcSpaceSelector__pageContent"
-      panelPaddingSize="l"
     >
       <EuiFlexGroup
         alignItems="center"
