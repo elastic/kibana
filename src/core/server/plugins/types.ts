@@ -105,7 +105,8 @@ export type PluginOpaqueId = symbol;
  */
 export interface PluginManifest {
   /**
-   * Identifier of the plugin.
+   * Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.
+   * Other plugins leverage it to access plugin API, navigate to the plugin, etc.
    */
   readonly id: PluginName;
 
