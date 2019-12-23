@@ -35,9 +35,8 @@ import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../embeddable/constants';
-
 import {
+  VISUALIZE_EMBEDDABLE_TYPE,
   subscribeWithScope,
   absoluteToParsedUrl,
   KibanaParsedUrl,
