@@ -17,7 +17,6 @@
  * under the License.
  */
 import { resolve } from 'path';
-import { Legacy } from 'kibana';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
@@ -31,7 +30,6 @@ const timelionVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: Legac
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
     },
-    init: (server: Legacy.Server) => ({}),
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),

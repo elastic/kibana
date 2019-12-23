@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext, Render } from 'src/plugins/expressions/public';
-import { getTimelionRequestHandler } from './vis/timelion_request_handler';
+import { getTimelionRequestHandler } from './timelion_request_handler';
 import { TimelionVisualizationDependencies } from './plugin';
 
 const name = 'timelion_vis';

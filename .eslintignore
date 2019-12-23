@@ -16,7 +16,7 @@ bower_components
 /src/legacy/core_plugins/console/public/webpackShims
 /src/legacy/core_plugins/console/public/tests/webpackShims
 /src/legacy/ui/public/utils/decode_geo_hash.js
-/src/legacy/core_plugins/timelion/public/webpackShims/jquery.flot.*
+/src/legacy/core_plugins/vis_type_timelion/public/webpackShims/jquery.flot.*
 /src/core/lib/kbn_internal_native_observable
 /packages/*/target
 /packages/eslint-config-kibana

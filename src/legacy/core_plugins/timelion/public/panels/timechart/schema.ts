@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './flot';
+import '../../../../vis_type_timelion/public/flot';
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
@@ -27,9 +27,9 @@ import observeResize from '../../lib/observe_resize';
 // @ts-ignore
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
 import { TimelionVisualizationDependencies } from '../../plugin';
-import { tickFormatters } from '../../services/tick_formatters';
-import { xaxisFormatterProvider } from './xaxis_formatter';
-import { generateTicksProvider } from './tick_generator';
+import { tickFormatters } from '../../../../vis_type_timelion/public/helpers/tick_formatters';
+import { xaxisFormatterProvider } from '../../../../vis_type_timelion/public/helpers/xaxis_formatter';
+import { generateTicksProvider } from '../../../../vis_type_timelion/public/helpers/tick_generator';
 
 const DEBOUNCE_DELAY = 50;
 

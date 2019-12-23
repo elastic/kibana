@@ -22,8 +22,8 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
 import { VisParams } from 'ui/vis';
 import { i18n } from '@kbn/i18n';
-import { TimelionVisualizationDependencies } from '../plugin';
-import { TimeRange, esFilters, esQuery, Query } from '../../../../../plugins/data/public';
+import { TimelionVisualizationDependencies } from './plugin';
+import { TimeRange, esFilters, esQuery, Query } from '../../../../plugins/data/public';
 
 interface Stats {
   cacheCount: number;

@@ -20,12 +20,10 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
-import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 import { TimelionPluginSetupDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
-  visualizations,
   data: npSetup.plugins.data,
   expressions: npSetup.plugins.expressions,
 

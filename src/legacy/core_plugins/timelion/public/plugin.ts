@@ -26,7 +26,6 @@ import {
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
-import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
@@ -44,7 +43,6 @@ export interface TimelionVisualizationDependencies extends LegacyDependenciesPlu
 /** @internal */
 export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
 
   // Temporary solution
@@ -61,7 +59,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { __LEGACY, expressions, visualizations, data }: TimelionPluginSetupDependencies
+    { __LEGACY, expressions, data }: TimelionPluginSetupDependencies
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
