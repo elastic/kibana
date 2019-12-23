@@ -104,9 +104,7 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  * ]);
  */
 export type DestroySyncStateFnType = () => void;
-export function syncState<State>(
-  config: Array<IStateSyncConfig<State>> | IStateSyncConfig<State>
-): DestroySyncStateFnType {
+export function syncState(config: IStateSyncConfig[] | IStateSyncConfig): DestroySyncStateFnType {
   const stateSyncConfigs = Array.isArray(config) ? config : [config];
   const subscriptions: Subscription[] = [];
 
@@ -117,7 +115,7 @@ export function syncState<State>(
 
     // returned boolean indicates if update happen
     const updateState = async (): Promise<boolean> => {
-      const storageState = await fromStorage<State>(stateSyncConfig.syncKey);
+      const storageState = await fromStorage(stateSyncConfig.syncKey);
       if (!storageState) {
         return false;
       }
@@ -133,7 +131,7 @@ export function syncState<State>(
     // returned boolean indicates if update happen
     const updateStorage = async ({ replace = false } = {}): Promise<boolean> => {
       const newStorageState = stateSyncConfig.stateContainer.get();
-      const oldStorageState = await fromStorage<State>(stateSyncConfig.syncKey);
+      const oldStorageState = await fromStorage(stateSyncConfig.syncKey);
       if (!defaultComparator(newStorageState, oldStorageState)) {
         await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
       }
@@ -155,10 +153,10 @@ export function syncState<State>(
     );
     if (storageChange$) {
       subscriptions.push(
-        storageChange$<State>(stateSyncConfig.syncKey)
+        storageChange$(stateSyncConfig.syncKey)
           .pipe(
-            distinctUntilChangedWithInitialValue<State | null>(
-              fromStorage<State>(stateSyncConfig.syncKey),
+            distinctUntilChangedWithInitialValue(
+              fromStorage(stateSyncConfig.syncKey),
               defaultComparator
             ),
             concatMap(() =>

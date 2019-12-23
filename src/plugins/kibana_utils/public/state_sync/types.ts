@@ -20,7 +20,7 @@
 import { BaseStateContainer } from '../state_containers/types';
 import { SyncStrategy, ISyncStrategy } from './state_sync_strategies';
 
-export interface IStateSyncConfig<State> {
+export interface IStateSyncConfig<State = any> {
   /**
    * Storage key to use for syncing,
    * e.g. syncKey '_a' should sync state to ?_a query param

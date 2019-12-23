@@ -27,7 +27,8 @@ export class StateContainersExamplesPlugin implements Plugin {
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./app');
         return renderApp(params, {
-          appInstanceId: '1-with-browser-history',
+          appInstanceId: '1',
+          appTitle: 'Routing with browser history',
           historyType: History.Browser,
         });
       },
@@ -38,7 +39,8 @@ export class StateContainersExamplesPlugin implements Plugin {
       async mount(params: AppMountParameters) {
         const { renderApp, History } = await import('./app');
         return renderApp(params, {
-          appInstanceId: '2-with-hash-history',
+          appInstanceId: '2',
+          appTitle: 'Routing with hash history',
           historyType: History.Hash,
         });
       },

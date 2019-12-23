@@ -25,6 +25,7 @@ import { TodoAppPage } from './todo';
 
 export interface AppOptions {
   appInstanceId: string;
+  appTitle: string;
   historyType: History;
 }
 
@@ -35,14 +36,32 @@ export enum History {
 
 export const renderApp = (
   { appBasePath, element }: AppMountParameters,
-  { appInstanceId, historyType }: AppOptions
+  { appInstanceId, appTitle, historyType }: AppOptions
 ) => {
   const history =
     historyType === History.Browser
       ? createBrowserHistory({ basename: appBasePath })
       : createHashHistory();
   ReactDOM.render(
-    <TodoAppPage history={history} appInstanceId={appInstanceId} appBasePath={appBasePath} />,
+    <TodoAppPage
+      history={history}
+      appInstanceId={appInstanceId}
+      appTitle={appTitle}
+      appBasePath={appBasePath}
+      isBasePathRoute={() => {
+        const stripTrailingSlash = (path: string) =>
+          path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
+        const currentAppUrl = stripTrailingSlash(history.createHref(history.location));
+        if (historyType === History.Browser) {
+          // browser history
+          const basePath = stripTrailingSlash(appBasePath);
+          return currentAppUrl === basePath;
+        } else {
+          // hashed history
+          return currentAppUrl === '#';
+        }
+      }}
+    />,
     element
   );
 

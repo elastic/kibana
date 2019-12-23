@@ -35,7 +35,9 @@ import {
   createStateContainer,
   createStateContainerReactHelpers,
   createUrlSyncStrategy,
+  PureTransition,
   syncState,
+  SyncStrategy,
   useUrlTracker,
 } from '../../../src/plugins/kibana_utils/public';
 import {
@@ -44,6 +46,21 @@ import {
   TodoActions,
   TodoState,
 } from '../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+
+interface GlobalState {
+  text: string;
+}
+interface GlobalStateAction {
+  setText: PureTransition<GlobalState, [string]>;
+}
+const globalStateContainer = createStateContainer<GlobalState, GlobalStateAction>(
+  { text: '' },
+  {
+    setText: state => text => ({ ...state, text }),
+  }
+);
+
+const GlobalStateHelpers = createStateContainerReactHelpers<typeof globalStateContainer>();
 
 const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
 const { Provider, connect, useTransitions, useState } = createStateContainerReactHelpers<
@@ -55,6 +72,8 @@ interface TodoAppProps {
 }
 
 const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
+  const { setText } = GlobalStateHelpers.useTransitions();
+  const { text } = GlobalStateHelpers.useState();
   const { edit: editTodo, delete: deleteTodo, add: addTodo } = useTransitions();
   const todos = useState();
   const filteredTodos = todos.filter(todo => {
@@ -67,13 +86,19 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
     <>
       <div>
         <Link to={'/'}>
-          <EuiButton size={'s'}>All</EuiButton>
+          <EuiButton size={'s'} color={!filter ? 'primary' : 'secondary'}>
+            All
+          </EuiButton>
         </Link>
         <Link to={'/completed'}>
-          <EuiButton size={'s'}>Completed</EuiButton>
+          <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'secondary'}>
+            Completed
+          </EuiButton>
         </Link>
         <Link to={'/not-completed'}>
-          <EuiButton size={'s'}>Not Completed</EuiButton>
+          <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'secondary'}>
+            Not Completed
+          </EuiButton>
         </Link>
       </div>
       <ul>
@@ -120,16 +145,24 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
       >
         <EuiFieldText placeholder="Type your todo and press enter to submit" name="newTodo" />
       </form>
+      <div style={{ margin: '16px 0px' }}>
+        <label htmlFor="globalInput">Global state piece: </label>
+        <input name="globalInput" value={text} onChange={e => setText(e.target.value)} />
+      </div>
     </>
   );
 };
 
-const TodoAppConnected = connect<TodoAppProps, never>(() => ({}))(TodoApp);
+const TodoAppConnected = GlobalStateHelpers.connect<TodoAppProps, never>(() => ({}))(
+  connect<TodoAppProps, never>(() => ({}))(TodoApp)
+);
 
 export const TodoAppPage: React.FC<{
   history: History;
   appInstanceId: string;
+  appTitle: string;
   appBasePath: string;
+  isBasePathRoute: () => boolean;
 }> = props => {
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
 
@@ -139,9 +172,9 @@ export const TodoAppPage: React.FC<{
    */
   useUrlTracker(props.appInstanceId, props.history, urlToRestore => {
     // shouldRestoreUrl:
-    // Allow to restore url only if navigated to app's basePath
-    const currentAppUrl = stripTrailingSlash(props.history.createHref(props.history.location));
-    if (currentAppUrl === stripTrailingSlash(props.appBasePath)) {
+    // App decides if it should restore url or not
+    // In this specific case, restore only if navigated to app base path
+    if (props.isBasePathRoute()) {
       // navigated to the base path, so should restore the url
       return true;
     } else {
@@ -151,65 +184,73 @@ export const TodoAppPage: React.FC<{
   });
 
   useEffect(() => {
+    // have to sync with history passed to react-router
+    // history v5 will be singleton and this will not be needed
+    const urlSyncStrategy = createUrlSyncStrategy({
+      useHash: useHashedUrl,
+      history: props.history,
+    });
     const destroySyncState = syncState([
       {
         stateContainer: container,
-        syncKey: '_todo',
-
-        // have to sync with history passed to react-router
-        // history v5 will be singleton and this will not be needed
-        syncStrategy: createUrlSyncStrategy({ useHash: useHashedUrl, history: props.history }),
+        syncKey: `_todo-${props.appInstanceId}`,
+        syncStrategy: urlSyncStrategy,
       },
-
-      // This could be used instead of useUrlTracker
-      // if all the state we want to sync
-      // is inside state containers:
-      // {
-      //   stateContainer: container,
-      //   syncKey: 'preserve-todo-between-navigations',
-      //   syncStrategy: SyncStrategy.SessionStorage,
-      // },
+      {
+        stateContainer: globalStateContainer,
+        syncKey: '_g',
+        syncStrategy: urlSyncStrategy,
+      },
+      {
+        stateContainer: globalStateContainer,
+        syncKey: '_g',
+        syncStrategy: SyncStrategy.SessionStorage,
+      },
     ]);
     return () => {
       destroySyncState();
+
+      // reset state containers
+      container.set(defaultState);
+      globalStateContainer.set({ text: '' });
     };
-  }, [props.history, useHashedUrl]);
+  }, [props.appInstanceId, props.history, useHashedUrl]);
 
   return (
     <Router history={props.history}>
-      <Provider value={container}>
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="l">
-                <h1>State sync example. Instance: ${props.appInstanceId}</h1>
-              </EuiTitle>
-              <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
-                {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
-              </EuiButton>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <Switch>
-                <Route path={'/completed'}>
-                  <TodoAppConnected filter={'completed'} />
-                </Route>
-                <Route path={'/not-completed'}>
-                  <TodoAppConnected filter={'not-completed'} />
-                </Route>
-                <Route path={'/'}>
-                  <TodoAppConnected filter={null} />
-                </Route>
-              </Switch>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </Provider>
+      <GlobalStateHelpers.Provider value={globalStateContainer}>
+        <Provider value={container}>
+          <EuiPageBody>
+            <EuiPageHeader>
+              <EuiPageHeaderSection>
+                <EuiTitle size="l">
+                  <h1>
+                    State sync example. Instance: ${props.appInstanceId}. {props.appTitle}
+                  </h1>
+                </EuiTitle>
+                <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
+                  {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
+                </EuiButton>
+              </EuiPageHeaderSection>
+            </EuiPageHeader>
+            <EuiPageContent>
+              <EuiPageContentBody>
+                <Switch>
+                  <Route path={'/completed'}>
+                    <TodoAppConnected filter={'completed'} />
+                  </Route>
+                  <Route path={'/not-completed'}>
+                    <TodoAppConnected filter={'not-completed'} />
+                  </Route>
+                  <Route path={'/'}>
+                    <TodoAppConnected filter={null} />
+                  </Route>
+                </Switch>
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </Provider>
+      </GlobalStateHelpers.Provider>
     </Router>
   );
 };
-
-function stripTrailingSlash(path: string) {
-  return path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
-}
