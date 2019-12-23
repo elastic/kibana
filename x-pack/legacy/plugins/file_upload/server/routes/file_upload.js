@@ -10,6 +10,7 @@ import { importDataProvider } from '../models/import_data';
 import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
 import Joi from 'joi';
+import { IMPORT_ROUTE } from '../plugin';
 
 function importData({ callWithRequest, id, index, settings, mappings, ingestPipeline, data }) {
   const { importData: importDataFunc } = importDataProvider(callWithRequest);
@@ -37,7 +38,7 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
     const requestContentWithDefaults = {
       id,
       callWithRequest: callWithRequestFactory(elasticsearchPlugin, requestObj),
-      ...requestObj.payload
+      ...requestObj.payload,
     };
     return importData(requestContentWithDefaults).catch(wrapError);
   };
@@ -45,7 +46,7 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
 
 export const importRouteConfig = {
   payload: {
-    maxBytes: MAX_BYTES
+    maxBytes: MAX_BYTES,
   },
   validate: {
     query: Joi.object().keys({
@@ -53,24 +54,38 @@ export const importRouteConfig = {
     }),
     payload: Joi.object({
       app: Joi.string(),
-      index: Joi.string().min(1).required(),
-      data: Joi.array().when(
-        Joi.ref('$query.id'), {
+      index: Joi.string()
+        .min(1)
+        .required(),
+      data: Joi.array()
+        .when(Joi.ref('$query.id'), {
           is: Joi.exist(),
-          then: Joi.array().min(1).required()
-        }).default([]),
+          then: Joi.array()
+            .min(1)
+            .required(),
+        })
+        .default([]),
       fileType: Joi.string().required(),
       ingestPipeline: Joi.object().default({}),
-      settings: Joi.object().when(
-        Joi.ref('$query.id'), {
+      settings: Joi.object()
+        .when(Joi.ref('$query.id'), {
           is: null,
-          then: Joi.required()
-        }).default({}),
-      mappings: Joi.object().when(
-        Joi.ref('$query.id'), {
-          is: null,
-          then: Joi.required()
-        }),
+          then: Joi.required(),
+        })
+        .default({}),
+      mappings: Joi.object().when(Joi.ref('$query.id'), {
+        is: null,
+        then: Joi.required(),
+      }),
     }).required(),
-  }
+  },
+};
+
+export const initRoutes = (route, esPlugin, getSavedObjectsRepository) => {
+  route({
+    method: 'POST',
+    path: IMPORT_ROUTE,
+    handler: getImportRouteHandler(esPlugin, getSavedObjectsRepository),
+    config: importRouteConfig,
+  });
 };

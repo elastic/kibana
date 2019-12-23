@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getImportRouteHandler, importRouteConfig } from './routes/file_upload';
+import { initRoutes } from './routes/file_upload';
 import { registerFileUploadUsageCollector } from './telemetry';
+
+export const IMPORT_ROUTE = '/api/fileupload/import';
 
 export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
     const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;
     const getSavedObjectsRepository = __LEGACY.savedObjects.getSavedObjectsRepository;
 
-    // Set up route
-    __LEGACY.route({
-      method: 'POST',
-      path: '/api/fileupload/import',
-      handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
-      config: importRouteConfig
-    });
+    initRoutes(__LEGACY.route, elasticsearchPlugin, getSavedObjectsRepository);
 
     registerFileUploadUsageCollector(plugins.usageCollection, {
       elasticsearchPlugin,
