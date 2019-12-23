@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AssetType } from '../../../../../ingest/server/libs/types';
 import { AssetReference, Dataset, ElasticsearchAssetType } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { CallESAsCurrentUser } from '../../cluster_access';
@@ -119,7 +120,7 @@ async function installPipeline({
   // which we could otherwise use.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
   await callCluster('transport.request', callClusterParams);
-  return { id: pipeline.name, type: 'ingest-pipeline' };
+  return { id: pipeline.name, type: AssetType.IngestPipeline };
 }
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');

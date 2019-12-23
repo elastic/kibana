@@ -5,10 +5,11 @@
  */
 
 import { SavedObject, SavedObjectsBulkCreateObject } from 'src/core/server/';
+import { AssetType } from '../../common/types';
 import * as Registry from '../registry';
 
 type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references'>;
-type SavedObjectToBe = Required<SavedObjectsBulkCreateObject>;
+type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
 
 export async function getObjects(
   pkgkey: string,

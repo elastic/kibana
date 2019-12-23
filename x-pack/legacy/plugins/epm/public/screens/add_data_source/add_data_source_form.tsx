@@ -5,18 +5,19 @@
  */
 import {
   EuiButton,
+  EuiComboBoxOptionProps,
   EuiHorizontalRule,
   EuiPanel,
   EuiSteps,
   EuiCheckboxGroupIdToSelectedMap,
 } from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
-import { installDatasource } from '../../data';
+import { installDatasource, getPolicies } from '../../data';
 import { useCore, useLinks } from '../../hooks';
 import { StepOne } from './step_one';
-import { Dataset } from '../../../common/types';
+import { PackageInfo } from '../../../common/types';
 
 const StyledSteps = styled.div`
   .euiStep__titleWrapper {
@@ -28,60 +29,78 @@ const StyledSteps = styled.div`
   }
 `;
 interface AddDataSourceStepsProps {
-  pkgName: string;
-  pkgTitle: string;
-  pkgVersion: string;
-  datasets: Dataset[];
+  package: PackageInfo;
+}
+interface PolicyOption {
+  label: string;
+  value: string;
 }
 export interface FormState {
   datasourceName: string;
   datasets: EuiCheckboxGroupIdToSelectedMap;
+  policies: Array<EuiComboBoxOptionProps<string>>;
 }
+
 const FormNav = styled.div`
   text-align: right;
 `;
 
-export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
+export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => {
+  const defaultPolicyOption: PolicyOption = { label: 'Default policy', value: 'default' };
+  const [policyOptions, setPolicyOptions] = useState<PolicyOption[]>([defaultPolicyOption]);
+  useEffect(() => {
+    getPolicies()
+      .then(response => response.list)
+      .then(policies => policies.map(policy => ({ label: policy.name, value: policy.id })))
+      .then(setPolicyOptions);
+  }, []);
+
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
-  const [formState, setFormState] = useState<FormState>({ datasourceName: '', datasets: {} });
+  const [datasourceName, setDatasourceName] = useState<FormState['datasourceName']>('');
+  const [selectedDatasets, setSelectedDatasets] = useState<FormState['datasets']>({});
+  const [selectedPolicies, setSelectedPolicies] = useState<FormState['policies']>([
+    defaultPolicyOption,
+  ]);
+
+  const formState: FormState = {
+    datasourceName,
+    datasets: selectedDatasets,
+    policies: selectedPolicies,
+  };
+
   const { notifications } = useCore();
   const { toDetailView } = useLinks();
-  const { pkgName, pkgTitle, pkgVersion, datasets } = props;
-
+  const datasets = pkg?.datasets || [];
   const handleRequestInstallDatasource = async () => {
     try {
       await installDatasource({
-        pkgkey: `${pkgName}-${pkgVersion}`,
+        pkgkey: `${pkg.name}-${pkg.version}`,
         datasets: datasets.filter(d => formState.datasets[d.name] === true),
         datasourceName: formState.datasourceName,
+        // @ts-ignore not sure where/how to enforce a `value` key on options
+        policyIds: formState.policies.map(({ value }) => value),
       });
       setAddDataSourceSuccess(true);
       notifications.toasts.addSuccess({
-        title: `Added ${pkgTitle} data source`,
+        title: `Added ${pkg.title} data source`,
       });
       return;
     } catch (err) {
       notifications.toasts.addWarning({
-        title: `Failed to add data source to ${pkgTitle}`,
+        title: `Failed to add data source to ${pkg.title}`,
         iconType: 'alert',
       });
     }
   };
 
-  const onCheckboxChange = (name: string) => {
-    const newCheckboxStateMap = {
-      ...formState,
-      datasets: {
-        ...formState.datasets,
-        [name]: !formState.datasets[name],
-      },
-    };
-    setFormState(newCheckboxStateMap);
-  };
+  const onDatasetChange = (id: string) =>
+    setSelectedDatasets({
+      ...selectedDatasets,
+      [id]: !selectedDatasets[id],
+    });
 
-  const onTextChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState({ ...formState, [evt.target.name]: evt.target.value });
-  };
+  const onNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+    setDatasourceName(evt.target.value);
 
   // create checkbox items from datasets for EuiCheckboxGroup
   const checkboxes = datasets.map(dataset => ({
@@ -95,8 +114,10 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
       children: (
         <StepOne
           datasetCheckboxes={checkboxes}
-          onCheckboxChange={onCheckboxChange}
-          onTextChange={onTextChange}
+          onDatasetChange={onDatasetChange}
+          onNameChange={onNameChange}
+          policyOptions={policyOptions}
+          onPolicyChange={setSelectedPolicies}
           formState={formState}
         />
       ),
@@ -108,8 +129,8 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
       {addDataSourceSuccess ? (
         <Redirect
           to={toDetailView({
-            name: pkgName,
-            version: pkgVersion,
+            name: pkg.name,
+            version: pkg.version,
             panel: 'data-sources',
             withAppRoot: false,
           })}

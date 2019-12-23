@@ -18,4 +18,6 @@ export const PLUGIN = {
 };
 
 export const SAVED_OBJECT_TYPE_PACKAGES = 'epm-package';
-export const SAVED_OBJECT_TYPE_DATASOURCES = 'epm-datasource';
+// This is actually controled by Ingest
+// TODO: Ultimately, EPM should a) import this or b) not know about it at all
+export const SAVED_OBJECT_TYPE_DATASOURCES = 'datasources';

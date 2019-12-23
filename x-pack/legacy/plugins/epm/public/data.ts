@@ -12,6 +12,7 @@ import {
   getInstallDatasourcePath,
   getInstallPath,
   getListPath,
+  getListPoliciesPath,
   getRemovePath,
   ListParams,
 } from '../common/routes';
@@ -23,6 +24,7 @@ import {
   PackagesGroupedByStatus,
   DatasourcePayload,
 } from '../common/types';
+import { ReturnTypeList } from '../../ingest/common/types/std_return_format';
 
 const defaultClient: HttpHandler = (path: string, options?: HttpFetchOptions) =>
   fetch(path, options).then(res => res.json());
@@ -88,4 +90,17 @@ export async function installDatasource(datasource: DatasourcePayload): Promise<
   const path = getInstallDatasourcePath();
   const body = JSON.stringify(datasource);
   return _fetch(path, { body, method: 'POST' });
+}
+
+// TODO: This should come from the shared Ingest types
+// However, they are in a /server directory so /public/* cannot access them
+// Using this partial/placeholder type until we can figure out how to share
+interface PlaceholderPolicy {
+  name: string;
+  id: string;
+}
+
+export async function getPolicies(): Promise<ReturnTypeList<PlaceholderPolicy>> {
+  const path = getListPoliciesPath();
+  return _fetch(path);
 }

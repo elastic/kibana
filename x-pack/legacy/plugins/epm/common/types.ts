@@ -9,6 +9,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../src/core/server';
+import { AssetType as IngestAssetType } from '../../ingest/server/libs/types';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -124,7 +125,7 @@ export interface Dataset {
   name: string;
   release: string;
   ingest_pipeline: string;
-  vars: VarsEntry[];
+  vars?: VarsEntry[];
   type: string;
   // This is for convenience and not in the output from the registry. When creating a dataset, this info should be added.
   package: string;
@@ -164,10 +165,13 @@ export type NotInstalled<T = {}> = T & {
   status: InstallationStatus.notInstalled;
 };
 
-export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+export type AssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: AssetType | IngestAssetType;
+};
 
 export interface DatasourcePayload {
   pkgkey: string;
   datasourceName: string;
   datasets: Dataset[];
+  policyIds: string[];
 }

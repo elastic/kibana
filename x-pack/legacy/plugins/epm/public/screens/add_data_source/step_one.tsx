@@ -5,6 +5,7 @@
  */
 import React, { Fragment } from 'react';
 import {
+  EuiComboBox,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiForm,
@@ -17,16 +18,20 @@ import { FormState } from './add_data_source_form';
 
 interface AddDataSourceFormProps {
   formState: FormState;
-  onCheckboxChange: (name: string) => void;
-  onTextChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
+  onDatasetChange: (name: string) => void;
+  onNameChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
   datasetCheckboxes: EuiCheckboxGroupOption[];
+  policyOptions: FormState['policies'];
+  onPolicyChange: (selectedOptions: AddDataSourceFormProps['policyOptions']) => unknown;
 }
 
 export const StepOne = ({
   formState,
-  onCheckboxChange,
-  onTextChange,
+  onDatasetChange,
+  onNameChange,
   datasetCheckboxes,
+  onPolicyChange,
+  policyOptions,
 }: AddDataSourceFormProps) => {
   return (
     <Fragment>
@@ -45,7 +50,7 @@ export const StepOne = ({
             <EuiFieldText
               name="datasourceName"
               value={formState.datasourceName}
-              onChange={onTextChange}
+              onChange={onNameChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -61,7 +66,26 @@ export const StepOne = ({
             <EuiCheckboxGroup
               options={datasetCheckboxes}
               idToSelectedMap={formState.datasets}
-              onChange={onCheckboxChange}
+              onChange={onDatasetChange}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+        <EuiHorizontalRule />
+        <EuiDescribedFormGroup
+          idAria="data-source-policy"
+          title={<h3>Assign data source to policy</h3>}
+          description={
+            <Fragment>
+              Policies can help you maintain a group of data sources across a fleet of agents.
+            </Fragment>
+          }
+        >
+          <EuiFormRow label="Policy name" describedByIds={['policy-name']}>
+            <EuiComboBox
+              placeholder="Select a policy"
+              options={policyOptions}
+              selectedOptions={formState.policies}
+              onChange={onPolicyChange}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
