@@ -7,7 +7,7 @@ import React from 'react';
 
 import { PathParameter } from '../../field_parameters';
 import { NormalizedField, NormalizedFields } from '../../../../types';
-import { EditFieldSection } from '../edit_field';
+import { BasicParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -16,8 +16,8 @@ interface Props {
 
 export const AliasType = ({ field, allFields }: Props) => {
   return (
-    <EditFieldSection>
+    <BasicParametersSection>
       <PathParameter field={field} allFields={allFields} />
-    </EditFieldSection>
+    </BasicParametersSection>
   );
 };

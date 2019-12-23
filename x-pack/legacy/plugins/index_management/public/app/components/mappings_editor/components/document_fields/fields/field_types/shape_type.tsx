@@ -8,12 +8,13 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+
 import {
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
-  CoerceParameter,
   OrientationParameter,
+  CoerceShapeParameter,
 } from '../../field_parameters';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
@@ -42,27 +43,27 @@ interface Props {
 export const ShapeType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.shapeType.ignoredMalformedFieldDescription',
             {
-              defaultMessage: 'If true, malformed GeoJSON or WKT shapes are ignored.',
+              defaultMessage:
+                'By default, documents that contain malformed GeoJSON or WKT shapes are not indexed. If enabled, these documents are indexed, but fields with malformed shapes are filtered out. Be careful: if too many documents are indexed this way, queries on the field become meaningless.',
             }
           )}
         />
-      </EditFieldSection>
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <OrientationParameter
-            defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
-          />
+      </BasicParametersSection>
 
-          <IgnoreZValueParameter />
+      <AdvancedParametersSection>
+        <OrientationParameter
+          defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
+        />
 
-          <CoerceParameter configPath="coerce_shape" />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <IgnoreZValueParameter />
+
+        <CoerceShapeParameter />
+      </AdvancedParametersSection>
     </>
   );
 };

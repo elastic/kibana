@@ -92,7 +92,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.indexOptions.docNumberDescription',
       {
         defaultMessage:
-          'Index only the document ID. Used to verify the existence of a term in a field.',
+          'Index the doc number only. Used to verify the existence of a term in a field.',
       }
     ),
   },
@@ -107,7 +107,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.indexOptions.termFrequencyDescription',
       {
         defaultMessage:
-          'Doc number and term frequencies are indexed. Term frequencies are used to score repeated terms higher than single terms.',
+          'Index the doc number and term frequencies. Repeated terms score higher than single terms.',
       }
     ),
   },
@@ -119,7 +119,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.indexOptions.positionsDescription',
       {
         defaultMessage:
-          'Doc number, term frequencies, and term positions (or order) are indexed. Positions can be used for proximity or phrase queries.',
+          'Index the doc number, term frequencies, positions, and start and end character offsets. Offsets map the term back to the original string.',
       }
     ),
   },
@@ -249,8 +249,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.similarity.bm25Description',
       {
-        defaultMessage:
-          'The Okapi BM25 algorithm. The algorithm used by default in Elasticsearch and Lucene.',
+        defaultMessage: 'The default algorithm used in Elasticsearch and Lucene.',
       }
     ),
   },
@@ -262,7 +261,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.similarity.booleanDescription',
       {
         defaultMessage:
-          'A simple boolean similarity, which is used when full-text ranking is not needed and the score should only be based on whether the query terms match or not.',
+          'A boolean similarity to use when full text-ranking is not needed. The score is based on whether the query terms match.',
       }
     ),
   },
@@ -363,7 +362,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
       'xpack.idxMgmt.mappingsEditor.formSelect.orientation.counterclockwiseDescription',
       {
         defaultMessage:
-          'Defines outer ring vertices in counterclockwise order with inner ring(s) vertices (holes) in clockwise order.',
+          'Defines outer polygon vertices in counterclockwise order and interior shape vertices in clockwise order. This is the Open Geospatial Consortium (OGC) and GeoJSON standard.',
       }
     ),
   },
@@ -374,7 +373,8 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.orientation.clockwiseDescription',
       {
-        defaultMessage: 'TODO: Get description for this option.',
+        defaultMessage:
+          'Defines outer polygon vertices in clockwise order and interior shape vertices in counterclockwise order.',
       }
     ),
   },

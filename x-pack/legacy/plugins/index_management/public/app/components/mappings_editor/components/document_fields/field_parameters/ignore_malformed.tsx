@@ -20,7 +20,8 @@ export const IgnoreMalformedParameter = ({ description }: { description?: string
       description
         ? description
         : i18n.translate('xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription', {
-            defaultMessage: 'Whether to ignore malformed data.',
+            defaultMessage:
+              'By default, documents that contain the wrong data type for a field are not indexed. If enabled, these documents are indexed, but fields with the wrong data type are filtered out. Be careful: if too many documents are indexed this way, queries on the field become meaningless.',
           })
     }
     docLink={{

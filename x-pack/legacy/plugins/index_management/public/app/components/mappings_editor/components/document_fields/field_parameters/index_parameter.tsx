@@ -30,7 +30,7 @@ export const IndexParameter = ({
       defaultMessage: 'Searchable',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldDescription', {
-      defaultMessage: 'Allow the field to be searchable.',
+      defaultMessage: 'Allow the field to be searched.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexDocLinkText', {

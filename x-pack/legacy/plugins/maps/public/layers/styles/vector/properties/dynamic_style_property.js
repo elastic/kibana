@@ -33,6 +33,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return true;
   }
 
+  isOrdinal() {
+    return true;
+  }
+
   isComplete() {
     return !!this._field;
   }

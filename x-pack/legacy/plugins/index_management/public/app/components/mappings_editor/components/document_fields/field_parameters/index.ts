@@ -28,7 +28,9 @@ export * from './similarity_parameter';
 
 export * from './path_parameter';
 
-export * from './coerce_parameter';
+export * from './coerce_number_parameter';
+
+export * from './coerce_shape_parameter';
 
 export * from './format_parameter';
 
@@ -45,3 +47,5 @@ export * from './ignore_z_value_parameter';
 export * from './orientation_parameter';
 
 export * from './fielddata_parameter';
+
+export * from './split_queries_on_whitespace_parameter';

@@ -22,8 +22,9 @@ import {
   NormsParameter,
   SimilarityParameter,
   CopyToParameter,
+  SplitQueriesOnWhitespaceParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -32,12 +33,10 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
     case 'ignore_above': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
+    case 'normalizer':
     case 'copy_to':
     case 'null_value': {
-      return field.null_value !== undefined;
-    }
-    case 'normalizer': {
-      return field.normalizer === undefined;
+      return field[param] !== undefined;
     }
     default:
       return false;
@@ -51,7 +50,7 @@ interface Props {
 export const KeywordType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter
           config={{ ...getFieldConfig('index_options_keyword') }}
           indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
@@ -60,10 +59,10 @@ export const KeywordType = ({ field }: Props) => {
         {/* normalizer */}
         <EditFieldFormRow
           title={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
-            defaultMessage: 'Use index default normalizer',
+            defaultMessage: 'Use normalizer',
           })}
           description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
-            defaultMessage: 'How to pre-process the keyword prior to indexing.',
+            defaultMessage: 'Process the keyword prior to indexing.',
           })}
           docLink={{
             text: i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerDocLinkText', {
@@ -73,83 +72,53 @@ export const KeywordType = ({ field }: Props) => {
           }}
           defaultToggleValue={getDefaultToggleValue('normalizer', field.source)}
         >
-          {isOn =>
-            isOn === false && (
-              <UseField path="normalizer" config={getFieldConfig('normalizer')} component={Field} />
-            )
-          }
+          <UseField path="normalizer" config={getFieldConfig('normalizer')} component={Field} />
         </EditFieldFormRow>
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <EagerGlobalOrdinalsParameter />
+      <AdvancedParametersSection>
+        <EagerGlobalOrdinalsParameter />
 
-          {/* ignore_above */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldTitle', {
-              defaultMessage: 'Set length limit',
-            })}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription',
-              {
-                defaultMessage: 'Do not index any string longer than this value.',
-              }
-            )}
-            docLink={{
-              text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveDocLinkText', {
-                defaultMessage: 'Ignore above documentation',
-              }),
-              href: documentationService.getIgnoreAboveLink(),
-            }}
-            defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
-          >
-            <UseField
-              path="ignore_above"
-              config={getFieldConfig('ignore_above')}
-              component={Field}
-            />
-          </EditFieldFormRow>
+        {/* ignore_above */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldTitle', {
+            defaultMessage: 'Set length limit',
+          })}
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription', {
+            defaultMessage:
+              'Strings longer than this value will not be indexed. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
+          })}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveDocLinkText', {
+              defaultMessage: 'Ignore above documentation',
+            }),
+            href: documentationService.getIgnoreAboveLink(),
+          }}
+          defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
+        >
+          <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
+        </EditFieldFormRow>
 
-          <NormsParameter configPath="norms_keyword" />
-        </EditFieldSection>
+        <NormsParameter configPath="norms_keyword" />
 
-        <EditFieldSection>
-          <SimilarityParameter
-            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
-          />
+        <SimilarityParameter
+          defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
+        />
 
-          {/* split_queries_on_whitespace */}
-          <EditFieldFormRow
-            title={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle',
-              {
-                defaultMessage: 'Split queries on whitespace',
-              }
-            )}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldDescription',
-              {
-                defaultMessage:
-                  'Whether full text queries should split the input on whitespace when building a query for this field.',
-              }
-            )}
-            formFieldPath="split_queries_on_whitespace"
-          />
+        <SplitQueriesOnWhitespaceParameter />
 
-          <DocValuesParameter />
+        <DocValuesParameter />
 
-          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
+        <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-          />
+        <NullValueParameter
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+        />
 
-          <StoreParameter />
+        <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 };

@@ -22,7 +22,8 @@ export const BoostParameter = ({ defaultToggleValue }: Props) => (
       defaultMessage: 'Set boost level',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldDescription', {
-      defaultMessage: 'Mapping field-level query time boosting.',
+      defaultMessage:
+        'Boost this field at query time so it counts more toward the relevance score.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.boostDocLinkText', {

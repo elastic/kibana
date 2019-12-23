@@ -14,11 +14,11 @@ import { EditFieldFormRow } from '../fields/edit_field';
 export const StoreParameter = () => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.storeFieldValueFieldTitle', {
-      defaultMessage: 'Store field value',
+      defaultMessage: 'Store field value outside of _source',
     })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.storeFieldValueFieldDescription', {
       defaultMessage:
-        'Whether the field value should be stored and retrieved separately from the _source field.',
+        'This can be useful when the _source field is very large and you want to retrieve a few select fields without extracting them from _source.',
     })}
     docLink={{
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.storeDocLinkText', {
