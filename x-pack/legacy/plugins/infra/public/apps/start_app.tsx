@@ -26,7 +26,7 @@ import {
   useUiSetting$,
   KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { ROOT_ELEMENT_ID } from '../app';
+import { ROOT_ELEMENT_ID } from '../legacy_shim';
 // NP_TODO: Type plugins
 export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: any) {
   const history = createHashHistory();
