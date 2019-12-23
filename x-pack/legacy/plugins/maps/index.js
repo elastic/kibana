@@ -102,6 +102,7 @@ export function maps(kibana) {
       const pluginsSetup = {
         featuresPlugin: newPlatformPlugins.features,
         licensing: newPlatformPlugins.licensing,
+        home: newPlatformPlugins.home,
       };
 
       // legacy dependencies
@@ -117,9 +118,6 @@ export function maps(kibana) {
         savedObjects: {
           getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
-        addSavedObjectsToSampleDataset: server.addSavedObjectsToSampleDataset,
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
-        replacePanelInSampleDatasetDashboard: server.replacePanelInSampleDatasetDashboard,
         injectUiAppVars: server.injectUiAppVars,
         getInjectedUiAppVars: server.getInjectedUiAppVars,
       };

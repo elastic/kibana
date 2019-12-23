@@ -1,0 +1,17 @@
+{
+  "rule_id": "7e069475-817e-4e89-9245-1dfaa3083b11",
+  "risk_score": 50,
+  "description": "Indicates a host bruteforcing FTP logins by watching for too many rejected usernames or failed passwords.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice FTP::Bruteforcing",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"FTP::Bruteforcing\" or rule.name: \"FTP::Bruteforcing\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

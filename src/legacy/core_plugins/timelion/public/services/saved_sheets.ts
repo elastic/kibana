@@ -33,29 +33,28 @@ savedObjectManagementRegistry.register({
   title: 'sheets',
 });
 
+const savedObjectsClient = npStart.core.savedObjects.client;
+const services = {
+  savedObjectsClient,
+  indexPatterns: npStart.plugins.data.indexPatterns,
+  chrome: npStart.core.chrome,
+  overlays: npStart.core.overlays,
+};
+
+const SavedSheet = createSavedSheetClass(services, npStart.core.uiSettings);
+
+export const savedSheetLoader = new SavedObjectLoader(
+  SavedSheet,
+  savedObjectsClient,
+  npStart.core.chrome
+);
+savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
+// Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
+savedSheetLoader.loaderProperties = {
+  name: 'timelion-sheet',
+  noun: 'Saved Sheets',
+  nouns: 'saved sheets',
+};
+
 // This is the only thing that gets injected into controllers
-module.service('savedSheets', function() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const services = {
-    savedObjectsClient,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-
-  const SavedSheet = createSavedSheetClass(services, npStart.core.uiSettings);
-
-  const savedSheetLoader = new SavedObjectLoader(
-    SavedSheet,
-    savedObjectsClient,
-    npStart.core.chrome
-  );
-  savedSheetLoader.urlFor = id => `#/${encodeURIComponent(id)}`;
-  // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.
-  savedSheetLoader.loaderProperties = {
-    name: 'timelion-sheet',
-    noun: 'Saved Sheets',
-    nouns: 'saved sheets',
-  };
-  return savedSheetLoader;
-});
+module.service('savedSheets', () => savedSheetLoader);
