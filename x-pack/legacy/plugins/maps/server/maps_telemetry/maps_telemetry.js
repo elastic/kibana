@@ -82,7 +82,7 @@ export function buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, 
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
-    timeCaptured: new Date(),
+    timeCaptured: new Date().toISOString(),
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
