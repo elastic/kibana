@@ -6,6 +6,7 @@
 
 import { KibanaRequest, RequestHandlerContext } from '../../../../../../../src/core/server';
 import { getJobId, logEntryCategoriesJobTypes } from '../../../common/log_analysis';
+import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { NoLogAnalysisResultsIndexError } from './errors';
@@ -32,10 +33,16 @@ export class LogEntryCategoriesAnalysis {
     categoryCount: number
     // bucketDuration: number
   ) {
+    const topLogEntryCategoriesSpan = startTracingSpan('get top categories');
+
     const logEntryCategoriesCountJobId = getJobId(
       this.libs.framework.getSpaceId(request),
       sourceId,
       logEntryCategoriesJobTypes[0]
+    );
+
+    const fetchTopLogEntryCategoriesAggSpan = topLogEntryCategoriesSpan.startChild(
+      'fetch top categories from ES'
     );
 
     const topLogEntryCategoriesResponse = decodeOrThrow(topLogEntryCategoriesResponseRT)(
@@ -51,17 +58,13 @@ export class LogEntryCategoriesAnalysis {
       )
     );
 
+    fetchTopLogEntryCategoriesAggSpan.stop();
+
     if (topLogEntryCategoriesResponse._shards.total === 0) {
       throw new NoLogAnalysisResultsIndexError(
         `Failed to find ml result index for job ${logEntryCategoriesCountJobId}.`
       );
     }
-
-    // const topCategoryBuckets = pipe(
-    //   topLogEntryCategoriesResponseRT.decode(topLogEntryCategoriesResponse),
-    //   mapEither(response => response.aggregations.terms_category_id.buckets),
-    //   fold(throwErrors(createPlainError), identity)
-    // );
 
     const topCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
       topCategoryBucket => ({
@@ -73,6 +76,10 @@ export class LogEntryCategoriesAnalysis {
 
     const categoryIds = topCategories.map(({ categoryId }) => categoryId);
 
+    const fetchTopLogEntryCategoryPatternsSpan = topLogEntryCategoriesSpan.startChild(
+      'fetch category patterns from ES'
+    );
+
     const logEntryCategoriesResponse = decodeOrThrow(logEntryCategoriesResponseRT)(
       await this.libs.framework.callWithRequest(
         requestContext,
@@ -80,6 +87,8 @@ export class LogEntryCategoriesAnalysis {
         createLogEntryCategoriesQuery(logEntryCategoriesCountJobId, categoryIds)
       )
     );
+
+    fetchTopLogEntryCategoryPatternsSpan.stop();
 
     const logEntryCategoriesById = logEntryCategoriesResponse.hits.hits.reduce<
       Record<number, LogEntryCategoryHit>
@@ -91,10 +100,21 @@ export class LogEntryCategoriesAnalysis {
       {}
     );
 
-    return topCategories.map(topCategory => ({
-      ...topCategory,
-      regularExpression: logEntryCategoriesById[topCategory.categoryId]._source.regex,
-    }));
+    topLogEntryCategoriesSpan.stop();
+
+    return {
+      data: topCategories.map(topCategory => ({
+        ...topCategory,
+        regularExpression: logEntryCategoriesById[topCategory.categoryId]._source.regex,
+      })),
+      timing: {
+        spans: [
+          topLogEntryCategoriesSpan.state,
+          fetchTopLogEntryCategoriesAggSpan.state,
+          fetchTopLogEntryCategoryPatternsSpan.state,
+        ],
+      },
+    };
   }
 }
 

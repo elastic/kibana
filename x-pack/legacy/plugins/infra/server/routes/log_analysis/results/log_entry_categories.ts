@@ -49,7 +49,10 @@ export const initGetLogEntryCategoriesRoute = ({
       );
 
       try {
-        const topLogEntryCategories = await logEntryCategoriesAnalysis.getTopLogEntryCategories(
+        const {
+          data: topLogEntryCategories,
+          timing,
+        } = await logEntryCategoriesAnalysis.getTopLogEntryCategories(
           requestContext,
           request,
           sourceId,
@@ -64,6 +67,7 @@ export const initGetLogEntryCategoriesRoute = ({
               // bucketDuration,
               categories: topLogEntryCategories,
             },
+            timing,
           }),
         });
       } catch (e) {
@@ -81,14 +85,3 @@ export const initGetLogEntryCategoriesRoute = ({
     }
   );
 };
-
-// const getTotalNumberOfLogEntries = (
-//   logEntryRateBuckets: GetLogEntryRateSuccessResponsePayload['data']['histogramBuckets']
-// ) => {
-//   return logEntryRateBuckets.reduce((sumNumberOfLogEntries, bucket) => {
-//     const sumPartitions = bucket.partitions.reduce((partitionsTotal, partition) => {
-//       return (partitionsTotal += partition.numberOfLogEntries);
-//     }, 0);
-//     return (sumNumberOfLogEntries += sumPartitions);
-//   }, 0);
-// };

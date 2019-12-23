@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './errors';
-export * from './metric_statistics';
-export * from './time_range';
-export * from './timing';
+import * as rt from 'io-ts';
+
+import { tracingSpanRT } from '../../performance_tracing';
+
+export const routeTimingMetadataRT = rt.type({
+  spans: rt.array(tracingSpanRT),
+});

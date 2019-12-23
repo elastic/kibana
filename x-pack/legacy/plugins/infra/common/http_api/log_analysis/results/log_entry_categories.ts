@@ -6,7 +6,12 @@
 
 import * as rt from 'io-ts';
 
-import { badRequestErrorRT, forbiddenErrorRT, timeRangeRT } from '../../shared';
+import {
+  badRequestErrorRT,
+  forbiddenErrorRT,
+  timeRangeRT,
+  routeTimingMetadataRT,
+} from '../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH =
   '/api/infra/log_analysis/results/log_entry_categories';
@@ -46,12 +51,17 @@ export const logEntryCategoryRT = rt.type({
 
 export type LogEntryCategory = rt.TypeOf<typeof logEntryCategoryRT>;
 
-export const getLogEntryCategoriesSuccessReponsePayloadRT = rt.type({
-  data: rt.type({
-    // bucketDuration: rt.number,
-    categories: rt.array(logEntryCategoryRT),
+export const getLogEntryCategoriesSuccessReponsePayloadRT = rt.intersection([
+  rt.type({
+    data: rt.type({
+      // bucketDuration: rt.number,
+      categories: rt.array(logEntryCategoryRT),
+    }),
   }),
-});
+  rt.partial({
+    timing: routeTimingMetadataRT,
+  }),
+]);
 
 export type GetLogEntryCategoriesSuccessResponsePayload = rt.TypeOf<
   typeof getLogEntryCategoriesSuccessReponsePayloadRT
