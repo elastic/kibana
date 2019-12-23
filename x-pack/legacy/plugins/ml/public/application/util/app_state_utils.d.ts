@@ -6,11 +6,17 @@
 
 import { Observable } from 'rxjs';
 
-export const initializeAppState: (appState: any, stateName: any, defaultState: any) => any;
+export const initializeAppState: (
+  appState: any,
+  setAppState: any,
+  stateName: any,
+  defaultState: any
+) => any;
 
 export const subscribeAppStateToObservable: (
   appState: any,
+  setAppState: any,
   appStateName: string,
   o$: Observable<any>,
-  callback: (payload: any) => void
+  callback?: (payload: any) => void
 ) => any;

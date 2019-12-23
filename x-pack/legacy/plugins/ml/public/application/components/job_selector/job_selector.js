@@ -10,6 +10,7 @@ import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
 import { ml } from '../../services/ml_api_service';
+import { useUrlState } from '../../util/url_state';
 import { JobSelectorTable } from './job_selector_table';
 import { IdBadges } from './id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
@@ -17,7 +18,7 @@ import { timefilter } from 'ui/timefilter';
 import {
   getGroupsFromJobs,
   normalizeTimes,
-  setGlobalState,
+  setGlobalStateSelection,
   setGlobalStateSkipRefresh,
 } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
@@ -75,13 +76,14 @@ const DEFAULT_GANTT_BAR_WIDTH = 299; // pixels
 
 export function JobSelector({
   dateFormatTz,
-  globalState,
   jobSelectService$,
   selectedJobIds,
   selectedGroups,
   singleSelection,
   timeseriesOnly,
 }) {
+  const [globalState, setGlobalState] = useUrlState('_g');
+
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
   const [maps, setMaps] = useState({ groupsMap: getInitialGroupsMap(selectedGroups), jobsMap: {} });
@@ -151,14 +153,14 @@ export function JobSelector({
   function closeFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(false);
     if (setSkipRefresh) {
-      setGlobalStateSkipRefresh(globalState, false);
+      setGlobalStateSkipRefresh(globalState, setGlobalState, false);
     }
   }
 
   function showFlyout(setSkipRefresh = true) {
     setIsFlyoutVisible(true);
     if (setSkipRefresh) {
-      setGlobalStateSkipRefresh(globalState, true);
+      setGlobalStateSkipRefresh(globalState, setGlobalState, true);
     }
   }
 
@@ -218,7 +220,7 @@ export function JobSelector({
     // disable skipping the timefilter listener flag in globalState.
     // If the job selection changed, this will not
     // update skipRefresh yet to avoid firing multiple events via
-    // applyTimeRangeFromSelection() and setGlobalState().
+    // applyTimeRangeFromSelection() and setGlobalStateSelection().
     closeFlyout(isPrevousSelection);
 
     // If the job selection changed, then when
@@ -232,7 +234,7 @@ export function JobSelector({
     // Set `skipRefresh` again to `false` here so after
     // both the time range and jobs have been updated
     // Single Metric Viewer should again update itself.
-    setGlobalState(globalState, {
+    setGlobalStateSelection(globalState, setGlobalState, {
       selectedIds: allNewSelectionUnique,
       selectedGroups: groupSelection,
       skipRefresh: false,

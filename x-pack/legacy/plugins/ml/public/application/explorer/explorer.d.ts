@@ -8,11 +8,16 @@ import { FC } from 'react';
 
 import { UrlState } from '../util/url_state';
 
-import { JobSelectService$ } from '../components/job_selector/job_select_service_utils';
+import { JobSelection } from '../components/job_selector/use_job_selection';
+
+import { ExplorerState } from '../explorer/reducers';
 
 declare interface ExplorerProps {
-  globalState: UrlState;
-  jobSelectService$: JobSelectService$;
+  annotationsRefresh: boolean;
+  explorerState: ExplorerState;
+  jobSelection: JobSelection;
+  jobSelectService$: any;
+  showCharts: boolean;
 }
 
 export const Explorer: FC<ExplorerProps>;

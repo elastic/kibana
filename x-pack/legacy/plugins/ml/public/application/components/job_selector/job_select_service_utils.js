@@ -55,7 +55,11 @@ function loadJobIdsFromGlobalState(globalState) {
   const jobIds = [];
   let groups = [];
 
-  const ml = globalState.get('ml');
+  if (globalState === undefined) {
+    return { jobIds, selectedGroups: groups };
+  }
+
+  const ml = globalState.ml;
   if (ml && ml.jobIds) {
     let tempJobIds = [];
     groups = ml.groups || [];
@@ -102,24 +106,22 @@ function loadJobIdsFromGlobalState(globalState) {
 // the internals of the involved timefilter event triggering, we use
 // a global `skipRefresh` to control when Single Metric Viewer should
 // skip updates triggered by timefilter.
-export function setGlobalStateSkipRefresh(globalState, skipRefresh) {
-  let ml = globalState.get('ml');
-  if (ml === undefined) {
-    ml = {};
-  }
+export function setGlobalStateSkipRefresh(globalState, setGlobalState, skipRefresh) {
+  const ml = globalState?.ml || {};
   ml.skipRefresh = skipRefresh;
-  globalState.set('ml', ml);
+  setGlobalState('ml', ml);
 }
 
-export function setGlobalState(globalState, { selectedIds, selectedGroups, skipRefresh }) {
-  let ml = globalState.get('ml');
-  if (ml === undefined) {
-    ml = {};
-  }
+export function setGlobalStateSelection(
+  globalState,
+  setGlobalState,
+  { selectedIds, selectedGroups, skipRefresh }
+) {
+  const ml = globalState?.ml || {};
   ml.jobIds = selectedIds;
   ml.groups = selectedGroups || [];
   ml.skipRefresh = !!skipRefresh;
-  globalState.set('ml', ml);
+  setGlobalState('ml', ml);
 }
 
 // called externally to retrieve the selected jobs ids

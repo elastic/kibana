@@ -6,10 +6,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import { Dictionary } from '../../../../common/types/common';
+
 import { UrlState } from '../../util/url_state';
 
 export const getSelectedJobIds: (
-  globalState: UrlState
+  globalState: Dictionary<any>
 ) => { jobIds: string[]; selectedGroups: string[] };
 
 export declare type JobSelectService$ = BehaviorSubject<{
@@ -18,4 +20,4 @@ export declare type JobSelectService$ = BehaviorSubject<{
   resetSelection: boolean;
 }>;
 
-export const getJobSelectService$: (globalState: UrlState) => JobSelectService$;
+export const getJobSelectService$: (globalState: Dictionary<any>) => JobSelectService$;

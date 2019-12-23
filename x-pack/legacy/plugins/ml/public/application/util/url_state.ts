@@ -4,31 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useEffect } from 'react';
 import { isEqual } from 'lodash';
 // @ts-ignore
 import queryString from 'query-string';
 import { decode, encode } from 'rison-node';
-import { useHistory } from 'react-router-dom';
+import { LocationState } from 'history';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
 
-export interface UrlState {
-  get: (attribute: string) => any;
-  set: (attribute: string | Dictionary<any>, value?: any) => void;
-}
-
-// Note on the use of `useHistory()`:
-// Generally, it's recommended to use `useLocation()` instead of
-// accessing `history.location.search`, because the latter is mutable.
-// However, because the original appState/globalState were mutable
-// themselves this code makes use of `history.location.search`.
-// Using `useLocation()` as is here would fail because it would miss
-// updates triggered by get/set outside react lifecycles.
-// The aim of `useUrlState` is to restore the original behavior we had
-// using appState/globalState without changing to much of the consuming code.
-// In a future update we might consider using `useLocation()`.
+export type UrlState = [
+  Dictionary<any>,
+  (attribute: string | Dictionary<any>, value?: any) => void
+];
 
 // Compared to the original appState/globalState,
 // this no longer makes use of fetch/save methods.
@@ -39,10 +30,11 @@ export interface UrlState {
 
 export const useUrlState = (accessor: string): UrlState => {
   const history = useHistory();
+  const location = useLocation();
 
-  const getStateFromUrl = () => {
+  const getStateFromUrl = (l: LocationState) => {
     try {
-      const parsedQueryString = queryString.parse(history.location.search);
+      const parsedQueryString = queryString.parse(l.search);
       const newUrlState: Dictionary<any> = {};
       Object.keys(parsedQueryString).forEach(a => {
         newUrlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
@@ -55,9 +47,9 @@ export const useUrlState = (accessor: string): UrlState => {
     }
   };
 
-  const persistStateToUrl = (newUrlState: Dictionary<any>) => {
+  const persistStateToUrl = (l: LocationState, newUrlState: Dictionary<any>) => {
     try {
-      const parsedQueryString = queryString.parse(history.location.search);
+      const parsedQueryString = queryString.parse(l.search);
       const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
 
       Object.keys(newUrlState).forEach(a => {
@@ -77,18 +69,16 @@ export const useUrlState = (accessor: string): UrlState => {
   };
 
   // check if the accessor is present, if not, initialize it with an empty object.
-  const urlState = getStateFromUrl();
-  if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-    urlState[accessor] = {};
-    persistStateToUrl(urlState);
-  }
+  useEffect(() => {
+    const urlState = getStateFromUrl(location);
+    if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+      urlState[accessor] = {};
+      persistStateToUrl(location, urlState);
+    }
+  }, [location]);
 
-  const get = (attribute: string) => {
-    return getNestedProperty(getStateFromUrl(), `${accessor}.${attribute}`);
-  };
-
-  const set = (attribute: string | Dictionary<any>, value?: any) => {
-    const newUrlState = getStateFromUrl();
+  const setFactory = (l: LocationState) => (attribute: string | Dictionary<any>, value?: any) => {
+    const newUrlState = getStateFromUrl(location);
 
     if (!Object.prototype.hasOwnProperty.call(newUrlState, accessor)) {
       throw new Error(`useUrlState: set() failed, accessor '${accessor}' is not present.`);
@@ -107,11 +97,8 @@ export const useUrlState = (accessor: string): UrlState => {
       });
     }
 
-    persistStateToUrl(newUrlState);
+    persistStateToUrl(l, newUrlState);
   };
 
-  return {
-    get,
-    set,
-  };
+  return [getStateFromUrl(location)[accessor], setFactory(location)];
 };

@@ -53,14 +53,14 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
 };
 
 const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
-  const appState = useUrlState('_a');
-  const globalState = useUrlState('_g');
+  const [appState, setAppState] = useUrlState('_a');
+  const [globalState] = useUrlState('_g');
 
-  if (appState.get('mlTimeSeriesExplorer') === undefined) {
-    appState.set('mlTimeSeriesExplorer', {});
+  if (appState.mlTimeSeriesExplorer === undefined) {
+    setAppState('mlTimeSeriesExplorer', {});
   }
 
-  const globalStateTime = globalState.get('time');
+  const globalStateTime = globalState.time;
   if (globalStateTime) {
     timefilter.setTime({
       from: globalStateTime.from,
@@ -69,7 +69,7 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
   }
 
   const appStateHandler = (action: string, payload: any) => {
-    const mlTimeSeriesExplorer = appState.get('mlTimeSeriesExplorer');
+    const mlTimeSeriesExplorer = appState.mlTimeSeriesExplorer;
     switch (action) {
       case APP_STATE_ACTION.CLEAR:
         delete mlTimeSeriesExplorer.detectorIndex;
@@ -105,16 +105,16 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
         break;
     }
 
-    appState.set('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
+    setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
   };
 
   useEffect(() => {
     const subscriptions = new Subscription();
     subscriptions.add(
-      subscribeAppStateToObservable(appState, 'mlSelectInterval', interval$, () => {})
+      subscribeAppStateToObservable(appState, setAppState, 'mlSelectInterval', interval$)
     );
     subscriptions.add(
-      subscribeAppStateToObservable(appState, 'mlSelectSeverity', severity$, () => {})
+      subscribeAppStateToObservable(appState, setAppState, 'mlSelectSeverity', severity$)
     );
 
     return () => {
@@ -125,7 +125,7 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
-  if (appState.get('mlTimeSeriesExplorer') === undefined) {
+  if (appState.mlTimeSeriesExplorer === undefined) {
     return null;
   }
 

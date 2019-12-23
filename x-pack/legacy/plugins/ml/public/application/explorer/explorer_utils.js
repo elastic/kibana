@@ -886,7 +886,11 @@ export function restoreAppState(appState) {
   let filterData = {};
 
   // keep swimlane selection, restore selectedCells from AppState
-  if (appState.mlExplorerSwimlane.selectedType !== undefined) {
+  if (
+    appState &&
+    appState.mlExplorerSwimlane &&
+    appState.mlExplorerSwimlane.selectedType !== undefined
+  ) {
     selectedCells = {
       type: appState.mlExplorerSwimlane.selectedType,
       lanes: appState.mlExplorerSwimlane.selectedLanes,
@@ -897,7 +901,11 @@ export function restoreAppState(appState) {
   }
 
   // keep influencers filter selection, restore from AppState
-  if (appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
+  if (
+    appState &&
+    appState.mlExplorerFilter &&
+    appState.mlExplorerFilter.influencersFilterQuery !== undefined
+  ) {
     filterData = {
       influencersFilterQuery: appState.mlExplorerFilter.influencersFilterQuery,
       filterActive: appState.mlExplorerFilter.filterActive,
@@ -909,6 +917,7 @@ export function restoreAppState(appState) {
   return {
     filterData,
     selectedCells,
-    viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+    viewBySwimlaneFieldName:
+      appState && appState.mlExplorerSwimlane && appState.mlExplorerSwimlane.viewByFieldName,
   };
 }
