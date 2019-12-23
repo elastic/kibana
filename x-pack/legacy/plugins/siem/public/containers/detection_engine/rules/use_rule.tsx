@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { useStateToaster } from '../../../components/toasters';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
@@ -25,7 +25,7 @@ type Return = [boolean, Rule | null];
 export const useRule = (id: string | undefined): Return => {
   const [rule, setRule] = useState<Rule | null>(null);
   const [loading, setLoading] = useState(true);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {

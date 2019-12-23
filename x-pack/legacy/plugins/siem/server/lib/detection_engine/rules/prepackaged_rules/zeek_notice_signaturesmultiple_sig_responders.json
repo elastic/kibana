@@ -1,0 +1,17 @@
+{
+  "rule_id": "4f313ae8-cbc6-4082-9599-526f8ccb7303",
+  "risk_score": 50,
+  "description": "Host has triggered the same signature on multiple hosts.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Signatures::Multiple_Sig_Responders",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Signatures::Multiple_Sig_Responders\" or rule.name: \"Signatures::Multiple_Sig_Responders\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
