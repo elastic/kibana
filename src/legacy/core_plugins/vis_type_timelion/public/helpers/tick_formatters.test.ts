@@ -17,124 +17,123 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { tickFormatters } from '../../services/tick_formatters';
+import { tickFormatters } from './tick_formatters';
 
 describe('Tick Formatters', function() {
-  let formatters;
+  let formatters: any;
 
   beforeEach(function() {
     formatters = tickFormatters();
   });
 
   describe('Bits mode', function() {
-    let bitFormatter;
+    let bitFormatter: any;
     beforeEach(function() {
       bitFormatter = formatters.bits;
     });
 
     it('is a function', function() {
-      expect(bitFormatter).to.be.a('function');
+      expect(bitFormatter).toEqual(expect.any(Function));
     });
 
     it('formats with b/kb/mb/gb', function() {
-      expect(bitFormatter(7)).to.equal('7b');
-      expect(bitFormatter(4 * 1000)).to.equal('4kb');
-      expect(bitFormatter(4.1 * 1000 * 1000)).to.equal('4.1mb');
-      expect(bitFormatter(3 * 1000 * 1000 * 1000)).to.equal('3gb');
+      expect(bitFormatter(7)).toEqual('7b');
+      expect(bitFormatter(4 * 1000)).toEqual('4kb');
+      expect(bitFormatter(4.1 * 1000 * 1000)).toEqual('4.1mb');
+      expect(bitFormatter(3 * 1000 * 1000 * 1000)).toEqual('3gb');
     });
 
     it('formats negative values with b/kb/mb/gb', () => {
-      expect(bitFormatter(-7)).to.equal('-7b');
-      expect(bitFormatter(-4 * 1000)).to.equal('-4kb');
-      expect(bitFormatter(-4.1 * 1000 * 1000)).to.equal('-4.1mb');
-      expect(bitFormatter(-3 * 1000 * 1000 * 1000)).to.equal('-3gb');
+      expect(bitFormatter(-7)).toEqual('-7b');
+      expect(bitFormatter(-4 * 1000)).toEqual('-4kb');
+      expect(bitFormatter(-4.1 * 1000 * 1000)).toEqual('-4.1mb');
+      expect(bitFormatter(-3 * 1000 * 1000 * 1000)).toEqual('-3gb');
     });
   });
 
   describe('Bits/s mode', function() {
-    let bitsFormatter;
+    let bitsFormatter: any;
     beforeEach(function() {
       bitsFormatter = formatters['bits/s'];
     });
 
     it('is a function', function() {
-      expect(bitsFormatter).to.be.a('function');
+      expect(bitsFormatter).toEqual(expect.any(Function));
     });
 
     it('formats with b/kb/mb/gb', function() {
-      expect(bitsFormatter(7)).to.equal('7b/s');
-      expect(bitsFormatter(4 * 1000)).to.equal('4kb/s');
-      expect(bitsFormatter(4.1 * 1000 * 1000)).to.equal('4.1mb/s');
-      expect(bitsFormatter(3 * 1000 * 1000 * 1000)).to.equal('3gb/s');
+      expect(bitsFormatter(7)).toEqual('7b/s');
+      expect(bitsFormatter(4 * 1000)).toEqual('4kb/s');
+      expect(bitsFormatter(4.1 * 1000 * 1000)).toEqual('4.1mb/s');
+      expect(bitsFormatter(3 * 1000 * 1000 * 1000)).toEqual('3gb/s');
     });
 
     it('formats negative values with b/kb/mb/gb', function() {
-      expect(bitsFormatter(-7)).to.equal('-7b/s');
-      expect(bitsFormatter(-4 * 1000)).to.equal('-4kb/s');
-      expect(bitsFormatter(-4.1 * 1000 * 1000)).to.equal('-4.1mb/s');
-      expect(bitsFormatter(-3 * 1000 * 1000 * 1000)).to.equal('-3gb/s');
+      expect(bitsFormatter(-7)).toEqual('-7b/s');
+      expect(bitsFormatter(-4 * 1000)).toEqual('-4kb/s');
+      expect(bitsFormatter(-4.1 * 1000 * 1000)).toEqual('-4.1mb/s');
+      expect(bitsFormatter(-3 * 1000 * 1000 * 1000)).toEqual('-3gb/s');
     });
   });
 
   describe('Bytes mode', function() {
-    let byteFormatter;
+    let byteFormatter: any;
     beforeEach(function() {
       byteFormatter = formatters.bytes;
     });
 
     it('is a function', function() {
-      expect(byteFormatter).to.be.a('function');
+      expect(byteFormatter).toEqual(expect.any(Function));
     });
 
     it('formats with B/KB/MB/GB', function() {
-      expect(byteFormatter(10)).to.equal('10B');
-      expect(byteFormatter(10 * 1024)).to.equal('10KB');
-      expect(byteFormatter(10.2 * 1024 * 1024)).to.equal('10.2MB');
-      expect(byteFormatter(3 * 1024 * 1024 * 1024)).to.equal('3GB');
+      expect(byteFormatter(10)).toEqual('10B');
+      expect(byteFormatter(10 * 1024)).toEqual('10KB');
+      expect(byteFormatter(10.2 * 1024 * 1024)).toEqual('10.2MB');
+      expect(byteFormatter(3 * 1024 * 1024 * 1024)).toEqual('3GB');
     });
 
     it('formats negative values with B/KB/MB/GB', function() {
-      expect(byteFormatter(-10)).to.equal('-10B');
-      expect(byteFormatter(-10 * 1024)).to.equal('-10KB');
-      expect(byteFormatter(-10.2 * 1024 * 1024)).to.equal('-10.2MB');
-      expect(byteFormatter(-3 * 1024 * 1024 * 1024)).to.equal('-3GB');
+      expect(byteFormatter(-10)).toEqual('-10B');
+      expect(byteFormatter(-10 * 1024)).toEqual('-10KB');
+      expect(byteFormatter(-10.2 * 1024 * 1024)).toEqual('-10.2MB');
+      expect(byteFormatter(-3 * 1024 * 1024 * 1024)).toEqual('-3GB');
     });
   });
 
   describe('Bytes/s mode', function() {
-    let bytesFormatter;
+    let bytesFormatter: any;
     beforeEach(function() {
       bytesFormatter = formatters['bytes/s'];
     });
 
     it('is a function', function() {
-      expect(bytesFormatter).to.be.a('function');
+      expect(bytesFormatter).toEqual(expect.any(Function));
     });
 
     it('formats with B/KB/MB/GB', function() {
-      expect(bytesFormatter(10)).to.equal('10B/s');
-      expect(bytesFormatter(10 * 1024)).to.equal('10KB/s');
-      expect(bytesFormatter(10.2 * 1024 * 1024)).to.equal('10.2MB/s');
-      expect(bytesFormatter(3 * 1024 * 1024 * 1024)).to.equal('3GB/s');
+      expect(bytesFormatter(10)).toEqual('10B/s');
+      expect(bytesFormatter(10 * 1024)).toEqual('10KB/s');
+      expect(bytesFormatter(10.2 * 1024 * 1024)).toEqual('10.2MB/s');
+      expect(bytesFormatter(3 * 1024 * 1024 * 1024)).toEqual('3GB/s');
     });
 
     it('formats negative values with B/KB/MB/GB', function() {
-      expect(bytesFormatter(-10)).to.equal('-10B/s');
-      expect(bytesFormatter(-10 * 1024)).to.equal('-10KB/s');
-      expect(bytesFormatter(-10.2 * 1024 * 1024)).to.equal('-10.2MB/s');
-      expect(bytesFormatter(-3 * 1024 * 1024 * 1024)).to.equal('-3GB/s');
+      expect(bytesFormatter(-10)).toEqual('-10B/s');
+      expect(bytesFormatter(-10 * 1024)).toEqual('-10KB/s');
+      expect(bytesFormatter(-10.2 * 1024 * 1024)).toEqual('-10.2MB/s');
+      expect(bytesFormatter(-3 * 1024 * 1024 * 1024)).toEqual('-3GB/s');
     });
   });
 
   describe('Currency mode', function() {
-    let currencyFormatter;
+    let currencyFormatter: any;
     beforeEach(function() {
       currencyFormatter = formatters.currency;
     });
 
     it('is a function', function() {
-      expect(currencyFormatter).to.be.a('function');
+      expect(currencyFormatter).toEqual(expect.any(Function));
     });
 
     it('formats with $ by default', function() {
@@ -143,7 +142,7 @@ describe('Tick Formatters', function() {
           units: {},
         },
       };
-      expect(currencyFormatter(10.2, axis)).to.equal('$10.20');
+      expect(currencyFormatter(10.2, axis)).toEqual('$10.20');
     });
 
     it('accepts currency in ISO 4217', function() {
@@ -155,18 +154,18 @@ describe('Tick Formatters', function() {
         },
       };
 
-      expect(currencyFormatter(10.2, axis)).to.equal('CN¥10.20');
+      expect(currencyFormatter(10.2, axis)).toEqual('CN¥10.20');
     });
   });
 
   describe('Percent mode', function() {
-    let percentFormatter;
+    let percentFormatter: any;
     beforeEach(function() {
       percentFormatter = formatters.percent;
     });
 
     it('is a function', function() {
-      expect(percentFormatter).to.be.a('function');
+      expect(percentFormatter).toEqual(expect.any(Function));
     });
 
     it('formats with %', function() {
@@ -175,7 +174,7 @@ describe('Tick Formatters', function() {
           units: {},
         },
       };
-      expect(percentFormatter(0.1234, axis)).to.equal('12%');
+      expect(percentFormatter(0.1234, axis)).toEqual('12%');
     });
 
     it('formats with % with decimal precision', function() {
@@ -189,18 +188,18 @@ describe('Tick Formatters', function() {
           },
         },
       };
-      expect(percentFormatter(0.12345, axis)).to.equal('12.345%');
+      expect(percentFormatter(0.12345, axis)).toEqual('12.345%');
     });
   });
 
   describe('Custom mode', function() {
-    let customFormatter;
+    let customFormatter: any;
     beforeEach(function() {
       customFormatter = formatters.custom;
     });
 
     it('is a function', function() {
-      expect(customFormatter).to.be.a('function');
+      expect(customFormatter).toEqual(expect.any(Function));
     });
 
     it('accepts prefix and suffix', function() {
@@ -214,7 +213,7 @@ describe('Tick Formatters', function() {
         tickDecimals: 1,
       };
 
-      expect(customFormatter(10.2, axis)).to.equal('prefix10.2suffix');
+      expect(customFormatter(10.2, axis)).toEqual('prefix10.2suffix');
     });
 
     it('correctly renders small values', function() {
@@ -228,7 +227,7 @@ describe('Tick Formatters', function() {
         tickDecimals: 3,
       };
 
-      expect(customFormatter(0.00499999999999999, axis)).to.equal('prefix0.005suffix');
+      expect(customFormatter(0.00499999999999999, axis)).toEqual('prefix0.005suffix');
     });
   });
 });
