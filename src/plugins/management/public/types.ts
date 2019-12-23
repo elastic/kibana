@@ -67,7 +67,7 @@ export type RegisterManagementApp = (managementApp: RegisterManagementAppArgs) =
 export type Unmount = () => Promise<void> | void;
 
 interface ManagementAppMountParams {
-  sectionBasePath: string; // base path for setting up your router
+  basePath: string; // base path for setting up your router
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }

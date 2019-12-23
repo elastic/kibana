@@ -24,7 +24,7 @@ import { CreateManagementApp, ManagementSectionMount, Unmount } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
-import { Chrome } from './chrome';
+import { ManagementChrome } from './management_chrome';
 import { ManagementSection } from './management_section';
 import { ChromeBreadcrumb } from '../../../core/public/';
 
@@ -36,13 +36,11 @@ export class ManagementApp {
   readonly mount: ManagementSectionMount;
   readonly sections: ManagementSection[];
   protected enabledStatus: boolean = true;
-  private readonly sectionId: ManagementSection['id'];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
   private readonly getLegacyManagementSections: () => LegacyManagementSection;
 
   constructor(
     { id, title, basePath, order, mount }: CreateManagementApp,
-    sectionId: ManagementSection['id'],
     sections: ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSections: () => ManagementSection
@@ -52,16 +50,13 @@ export class ManagementApp {
     this.basePath = basePath;
     this.order = order;
     this.mount = mount;
-    this.sectionId = sectionId;
     this.sections = sections;
     this.registerLegacyApp = registerLegacyApp;
     this.getLegacyManagementSections = getLegacyManagementSections;
 
-    const legacyAppId = `management/${this.sectionId}/${this.id}`;
-
-    // todo - appid might be the same as basePath
     this.registerLegacyApp({
-      id: legacyAppId,
+      // basePath and legacy app id are the same
+      id: basePath,
       title,
       mount: async (appMountContext, params) => {
         let appUnmount: Unmount;
@@ -78,13 +73,13 @@ export class ManagementApp {
         }
 
         ReactDOM.render(
-          <Chrome
+          <ManagementChrome
             sections={this.sections}
             selectedId={id}
             legacySections={this.getLegacyManagementSections().items}
             mountedCallback={async element => {
               appUnmount = await mount(appMountContext, {
-                sectionBasePath: legacyAppId,
+                basePath,
                 element,
                 setBreadcrumbs,
               });
