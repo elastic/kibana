@@ -23,6 +23,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   CoreSetup,
   CoreStart,
+  LegacyRenderOptions,
   Logger,
   PluginInitializerContext,
   PluginConfigDescriptor,
@@ -87,7 +88,10 @@ class Plugin {
         },
       },
       async (context, req, res) => {
-        const body = await context.core.rendering.render({ appId: req.params.id } as any);
+        const id = req.params.id;
+        const options: Partial<LegacyRenderOptions> = id ? { app: { getId: () => id } } : {};
+        const body = await context.core.rendering.render(options);
+
         return res.ok({
           body,
           headers: {
