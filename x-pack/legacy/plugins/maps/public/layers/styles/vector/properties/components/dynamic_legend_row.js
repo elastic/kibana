@@ -7,8 +7,6 @@
 import React from 'react';
 import _ from 'lodash';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
-import { getVectorStyleLabel } from '../../components/get_vector_style_label';
-
 const EMPTY_VALUE = '';
 
 export class DynamicLegendRow extends React.Component {
@@ -17,12 +15,16 @@ export class DynamicLegendRow extends React.Component {
     this._isMounted = false;
     this.state = {
       label: EMPTY_VALUE,
+      isPointsOnly: null,
+      isLinesOnly: null,
     };
   }
 
   async _loadParams() {
     const label = await this.props.style.getField().getLabel();
-    const newState = { label };
+    const isLinesOnly = await this.props.loadIsLinesOnly();
+    const isPointsOnly = await this.props.loadIsPointsOnly();
+    const newState = { label, isLinesOnly, isPointsOnly };
     if (this._isMounted && !_.isEqual(this.state, newState)) {
       this.setState(newState);
     }
@@ -73,14 +75,19 @@ export class DynamicLegendRow extends React.Component {
         header={this.props.style.renderRangeLegendHeader()}
         minLabel={minLabel}
         maxLabel={maxLabel}
-        propertyLabel={getVectorStyleLabel(this.props.style.getStyleName())}
+        propertyLabel={this.props.style.getDisplayStyleName()}
         fieldLabel={this.state.label}
       />
     );
   }
 
   _renderBreakedLegend() {
-    return <span>render breaked legend</span>;
+    return this.props.style.renderBreakedLegend({
+      fieldLabel: this.state.label,
+      isLinesOnly: this.state.isLinesOnly,
+      isPointsOnly: this.state.isPointsOnly,
+      symbolId: this.props.symbolId,
+    });
   }
 
   render() {

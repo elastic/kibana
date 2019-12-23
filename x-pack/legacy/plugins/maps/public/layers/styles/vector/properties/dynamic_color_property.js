@@ -10,6 +10,12 @@ import { getComputedFieldName } from '../style_util';
 import { getColorRampStops } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import { LineIcon } from '../components/legend/line_icon';
+import { PolygonIcon } from '../components/legend/polygon_icon';
+import { CircleIcon } from '../components/legend/circle_icon';
+import { SymbolIcon } from '../components/legend/symbol_icon';
+import { VECTOR_STYLES } from '../vector_style_defaults';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -131,5 +137,90 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     } else {
       return null;
     }
+  }
+
+  _renderStopIcon(color, isLinesOnly, isPointsOnly, symbolId) {
+    if (isLinesOnly && this.getStyleName() === VECTOR_STYLES.LINE_COLOR) {
+      const style = {
+        stroke: color,
+        strokeWidth: '4px',
+      };
+      return <LineIcon style={style} />;
+    }
+
+    const style = {};
+
+    if (this.getStyleName() === VECTOR_STYLES.FILL_COLOR) {
+      style.fill = color;
+      style.strokeWidth = '0px';
+    } else if (this.getStyleName() === VECTOR_STYLES.LINE_COLOR) {
+      style.fill = 'rgba(255,255,255,0)';
+      style.stroke = color;
+      style.strokeWidth = '1px';
+    }
+
+    if (!isPointsOnly) {
+      return <PolygonIcon style={style} />;
+    }
+
+    if (!symbolId) {
+      return <CircleIcon style={style} />;
+    }
+
+    const fillColor =
+      this.getStyleName() === VECTOR_STYLES.FILL_COLOR ? color : 'rgba(255,255,255,0)';
+    const strokeColor =
+      this.getStyleName() === VECTOR_STYLES.LINE_COLOR ? color : 'rgba(255,255,255,0)';
+    return (
+      <SymbolIcon symbolId={symbolId} fill={fillColor} stroke={strokeColor} strokeWidth={'1px'} />
+    );
+  }
+
+  _renderColorbreaks({ isLinesOnly, isPointsOnly, symbolId }) {
+    if (!this._options.customColorRamp) {
+      return null;
+    }
+
+    return this._options.customColorRamp.map((config, index) => {
+      const value = this.formatField(config.stop);
+      return (
+        <EuiFlexItem key={index}>
+          <EuiFlexGroup direction={'row'}>
+            <EuiFlexItem>
+              <EuiText size={'xs'}>{value}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {this._renderStopIcon(config.color, isLinesOnly, isPointsOnly, symbolId)}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      );
+    });
+  }
+
+  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
+    return (
+      <div>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
+              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+                <small>
+                  <strong>{fieldLabel}</strong>
+                </small>
+              </EuiText>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup direction={'column'}>
+          {this._renderColorbreaks({
+            isPointsOnly,
+            isLinesOnly,
+            symbolId,
+          })}
+        </EuiFlexGroup>
+      </div>
+    );
   }
 }

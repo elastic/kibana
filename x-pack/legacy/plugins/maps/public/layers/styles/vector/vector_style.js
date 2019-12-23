@@ -385,11 +385,15 @@ export class VectorStyle extends AbstractStyle {
     return _.get(this._descriptor, '__styleMeta', {});
   };
 
-  getIcon = () => {
-    const styles = this.getRawProperties();
-    const symbolId = this.arePointsSymbolizedAsCircles()
+  _getSymbolId() {
+    return this.arePointsSymbolizedAsCircles()
       ? undefined
       : this._descriptor.properties.symbol.options.symbolId;
+  }
+
+  getIcon = () => {
+    const styles = this.getRawProperties();
+    const symbolId = this._getSymbolId();
     return (
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
@@ -430,7 +434,12 @@ export class VectorStyle extends AbstractStyle {
 
   renderLegendDetails() {
     return (
-      <VectorStyleLegend getLegendDetailStyleProperties={this._getLegendDetailStyleProperties} />
+      <VectorStyleLegend
+        getLegendDetailStyleProperties={this._getLegendDetailStyleProperties}
+        loadIsPointsOnly={this._getIsPointsOnly}
+        loadIsLinesOnly={this._getIsLinesOnly}
+        symbolId={this._getSymbolId()}
+      />
     );
   }
 

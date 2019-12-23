@@ -144,7 +144,14 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  renderLegendDetailRow() {
-    return <DynamicLegendRow style={this} />;
+  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+    return (
+      <DynamicLegendRow
+        style={this}
+        loadIsPointsOnly={loadIsPointsOnly}
+        loadIsLinesOnly={loadIsLinesOnly}
+        symbolId={symbolId}
+      />
+    );
   }
 }
