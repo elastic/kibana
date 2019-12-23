@@ -43,10 +43,11 @@ import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch
 import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
+import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -68,6 +69,7 @@ export {
   HandlerParameters,
 } from './context';
 export { CoreId } from './core_context';
+export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
@@ -132,10 +134,16 @@ export {
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
@@ -202,6 +210,7 @@ export {
   UiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
+  UiSettingsServiceStart,
   UserProvidedValues,
 } from './ui_settings';
 
@@ -232,6 +241,8 @@ export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
  *      admin client which uses the credentials of the incoming request
+ *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
+ *      which uses the credentials of the incoming request
  *
  * @public
  */
@@ -268,6 +279,8 @@ export interface CoreSetup {
   savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UuidServiceSetup} */
+  uuid: UuidServiceSetup;
 }
 
 /**
@@ -280,6 +293,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
+  /** {@link UiSettingsServiceStart} */
+  uiSettings: UiSettingsServiceStart;
 }
 
 export {
@@ -289,4 +304,5 @@ export {
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
+  UuidServiceSetup,
 };

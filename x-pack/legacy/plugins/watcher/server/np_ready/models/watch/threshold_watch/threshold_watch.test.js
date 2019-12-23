@@ -24,7 +24,7 @@ describe('ThresholdWatch', () => {
         thresholdComparator: 'thresholdComparator',
         timeWindowSize: 'timeWindowSize',
         timeWindowUnit: 'timeWindowUnit',
-        threshold: 'threshold'
+        threshold: 'threshold',
       };
     });
 
@@ -49,7 +49,7 @@ describe('ThresholdWatch', () => {
         thresholdComparator: 'thresholdComparator',
         timeWindowSize: 'timeWindowSize',
         timeWindowUnit: 'timeWindowUnit',
-        threshold: 'threshold'
+        threshold: 'threshold',
       };
 
       expect(actual).toEqual(expected);
@@ -57,7 +57,6 @@ describe('ThresholdWatch', () => {
   });
 
   describe('hasTermAgg getter method', () => {
-
     it('should return true if termField is defined', () => {
       const downstreamJson = { termField: 'foobar' };
       const thresholdWatch = ThresholdWatch.fromDownstreamJson(downstreamJson);
@@ -71,11 +70,9 @@ describe('ThresholdWatch', () => {
 
       expect(thresholdWatch.hasTermsAgg).toBe(false);
     });
-
   });
 
   describe('termOrder getter method', () => {
-
     it('should return SORT_ORDERS.DESCENDING if thresholdComparator is COMPARATORS.GREATER_THAN', () => {
       const downstreamJson = { thresholdComparator: COMPARATORS.GREATER_THAN };
       const thresholdWatch = ThresholdWatch.fromDownstreamJson(downstreamJson);
@@ -106,7 +103,7 @@ describe('ThresholdWatch', () => {
         thresholdComparator: 'thresholdComparator',
         timeWindowSize: 'timeWindowSize',
         timeWindowUnit: 'timeWindowUnit',
-        threshold: 'threshold'
+        threshold: 'threshold',
       };
     });
 
@@ -127,7 +124,7 @@ describe('ThresholdWatch', () => {
         thresholdComparator: 'thresholdComparator',
         timeWindowSize: 'timeWindowSize',
         timeWindowUnit: 'timeWindowUnit',
-        threshold: 'threshold'
+        threshold: 'threshold',
       };
 
       expect(actual).toEqual(expected);
@@ -156,10 +153,10 @@ describe('ThresholdWatch', () => {
               threshold_comparator: 'thresholdComparator',
               time_window_size: 'timeWindowSize',
               time_window_unit: 'timeWindowUnit',
-              threshold: 'threshold'
-            }
-          }
-        }
+              threshold: 'threshold',
+            },
+          },
+        },
       };
     });
 

@@ -46,7 +46,7 @@ export class AddFilter extends Component {
     const { filter } = this.state;
     const placeholder = i18n.translate('kbn.management.editIndexPattern.sourcePlaceholder', {
       defaultMessage:
-        'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')',
+        "source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')",
     });
 
     return (

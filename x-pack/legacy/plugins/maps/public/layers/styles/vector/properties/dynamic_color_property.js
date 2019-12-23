@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
 import { getComputedFieldName } from '../style_util';
@@ -12,9 +11,7 @@ import { getColorRampStops } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
 
-
 export class DynamicColorProperty extends DynamicStyleProperty {
-
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
@@ -49,6 +46,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
+  syncLabelColorWithMb(mbLayerId, mbMap, alpha) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'text-color', color);
+    mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
+  }
+
   isCustomColorRamp() {
     return this._options.useCustomColorRamp;
   }
@@ -62,12 +65,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getMbColor() {
-    const isDynamicConfigComplete = _.has(this._options, 'field.name') && _.has(this._options, 'color');
+    const isDynamicConfigComplete =
+      _.has(this._options, 'field.name') && _.has(this._options, 'color');
     if (!isDynamicConfigComplete) {
       return null;
     }
 
-    if (this._options.useCustomColorRamp && (!this._options.customColorRamp || !this._options.customColorRamp.length)) {
+    if (
+      this._options.useCustomColorRamp &&
+      (!this._options.customColorRamp || !this._options.customColorRamp.length)
+    ) {
       return null;
     }
 
@@ -86,7 +93,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         'step',
         ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
         'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
-        ...colorStops
+        ...colorStops,
       ];
     }
 
@@ -94,14 +101,13 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       'interpolate',
       ['linear'],
       ['coalesce', ['feature-state', targetName], -1],
-      -1, 'rgba(0,0,0,0)',
-      ...colorStops
+      -1,
+      'rgba(0,0,0,0)',
+      ...colorStops,
     ];
   }
 
-
   _getMBColorStops() {
-
     if (this._options.useCustomColorRamp) {
       return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
@@ -111,16 +117,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return getColorRampStops(this._options.color);
   }
 
-  renderHeader() {
+  renderLegendHeader() {
     if (this._options.color) {
-      return (<ColorGradient colorRampName={this._options.color}/>);
+      return <ColorGradient colorRampName={this._options.color} />;
     } else {
       return null;
     }
   }
-
 }
-
-
-
-

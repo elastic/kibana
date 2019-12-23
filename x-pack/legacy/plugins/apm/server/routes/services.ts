@@ -19,6 +19,7 @@ import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadat
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceMap } from '../lib/services/map';
+import { getServiceAnnotations } from '../lib/services/annotations';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -96,5 +97,31 @@ export const serviceMapRoute = createRoute(() => ({
       return getServiceMap();
     }
     return new Boom('Not found', { statusCode: 404 });
+  }
+}));
+
+export const serviceAnnotationsRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/annotations',
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string
+      })
+    ])
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { environment } = context.params.query;
+
+    return getServiceAnnotations({
+      setup,
+      serviceName,
+      environment
+    });
   }
 }));

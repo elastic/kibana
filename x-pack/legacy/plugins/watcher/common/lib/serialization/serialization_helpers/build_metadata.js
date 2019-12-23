@@ -36,6 +36,6 @@ export function buildMetadata({
       time_window_size: timeWindowSize,
       time_window_unit: timeWindowUnit,
       threshold,
-    }
+    },
   };
 }

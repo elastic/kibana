@@ -15,7 +15,7 @@ import {
   DeleteDocumentByQueryResponse,
 } from 'elasticsearch';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { RunContext } from '../../../task_manager';
 import { getVisualizationCounts } from './visualization_counts';
 
