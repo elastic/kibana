@@ -9,11 +9,12 @@ import { CoreStart } from 'src/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { SecurityLicense } from '../../common/licensing';
-import { AuthenticatedUser } from '../../common/model';
 import { SecurityNavControl } from './nav_control_component';
+import { AuthenticationServiceSetup } from '../authentication';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
+  getCurrentUser: AuthenticationServiceSetup['getCurrentUser'];
 }
 
 interface StartDeps {
@@ -22,13 +23,15 @@ interface StartDeps {
 
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
+  private getCurrentUser!: AuthenticationServiceSetup['getCurrentUser'];
 
   private navControlRegistered!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense }: SetupDeps) {
+  public setup({ securityLicense, getCurrentUser }: SetupDeps) {
     this.securityLicense = securityLicense;
+    this.getCurrentUser = getCurrentUser;
   }
 
   public start({ core }: StartDeps) {
@@ -38,14 +41,8 @@ export class SecurityNavControlService {
 
         const shouldRegisterNavControl =
           !isAnonymousPath && showLinks && !this.navControlRegistered;
-
         if (shouldRegisterNavControl) {
-          const user = core.http.get('/internal/security/me', {
-            headers: {
-              'kbn-system-api': true,
-            },
-          }) as Promise<AuthenticatedUser>;
-          this.registerSecurityNavControl(core, user);
+          this.registerSecurityNavControl(core);
         }
       }
     );
@@ -60,16 +57,16 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(
-    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'application'>,
-    user: Promise<AuthenticatedUser>
+    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'application'>
   ) {
+    const currentUserPromise = this.getCurrentUser();
     core.chrome.navControls.registerRight({
       order: 2000,
       mount: (el: HTMLElement) => {
         const I18nContext = core.i18n.Context;
 
         const props = {
-          user,
+          user: currentUserPromise,
           editProfileUrl: core.http.basePath.prepend('/app/kibana#/account'),
           logoutUrl: core.http.basePath.prepend(`/logout`),
         };

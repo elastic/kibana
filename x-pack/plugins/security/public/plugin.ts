@@ -9,18 +9,20 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import {
   SessionExpired,
   SessionTimeout,
+  ISessionTimeout,
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
 import { SecurityLicenseService } from '../common/licensing';
 import { SecurityNavControlService } from './nav_control';
+import { AuthenticationService } from './authentication';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
 }
 
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
-  private sessionTimeout!: SessionTimeout;
+  private sessionTimeout!: ISessionTimeout;
 
   private navControlService!: SecurityNavControlService;
 
@@ -43,12 +45,15 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     this.securityLicenseService = new SecurityLicenseService();
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
+    const authc = new AuthenticationService().setup({ http: core.http });
+
     this.navControlService.setup({
       securityLicense: license,
+      getCurrentUser: authc.getCurrentUser,
     });
 
     return {
-      anonymousPaths,
+      authc,
       sessionTimeout: this.sessionTimeout,
     };
   }
