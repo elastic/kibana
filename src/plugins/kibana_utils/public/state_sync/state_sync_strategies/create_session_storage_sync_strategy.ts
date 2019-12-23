@@ -19,10 +19,12 @@
 
 import { ISyncStrategy } from './types';
 
-export const createSessionStorageSyncStrategy = (): ISyncStrategy => {
+export const createSessionStorageSyncStrategy = (
+  storage: Storage = window.sessionStorage
+): ISyncStrategy => {
   return {
     toStorage: async <State>(syncKey: string, state: State) =>
-      sessionStorage.setItem(syncKey, JSON.stringify(state)),
-    fromStorage: async syncKey => JSON.parse(sessionStorage.getItem(syncKey)!),
+      storage.setItem(syncKey, JSON.stringify(state)),
+    fromStorage: async syncKey => JSON.parse(storage.getItem(syncKey)!),
   };
 };

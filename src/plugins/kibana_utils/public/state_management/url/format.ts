@@ -30,6 +30,7 @@ export function replaceUrlHashQuery(
   const hash = parseUrlHash(rawUrl);
   const newQuery = queryReplacer(hash?.query || {});
   const searchQueryString = stringifyQueryString(newQuery);
+  if ((!hash || !hash.search) && !searchQueryString) return rawUrl; // nothing to change. return original url
   return formatUrl({
     ...url,
     hash: formatUrl({
