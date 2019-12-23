@@ -23,14 +23,7 @@ import {
 import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import {
-  Field,
-  NormalizedField,
-  NormalizedFields,
-  DataType,
-  MainType,
-  SubType,
-} from '../../../../types';
+import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
@@ -44,7 +37,6 @@ const limitStringLength = (text: string, limit = 18): string => {
 };
 
 interface Props {
-  type: DataType;
   form: FormHook<Field>;
   field: NormalizedField;
   allFields: NormalizedFields['byId'];
@@ -161,7 +153,9 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                       isMultiField={isMultiField}
                     />
 
-                    {ParametersForm && <ParametersForm field={field} allFields={allFields} />}
+                    {ParametersForm && (
+                      <ParametersForm key={subType ?? type} field={field} allFields={allFields} />
+                    )}
                   </EuiFlyoutBody>
 
                   <EuiFlyoutFooter>
