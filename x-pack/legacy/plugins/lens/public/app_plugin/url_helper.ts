@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DashboardConstants } from 'src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
+import { DashboardConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard';
 
 const EMPTY_DASHBOARD_PATTERN = /(.*#\/dashboard\?)(.*)/;
 const DASHBOARD_WITH_ID_PATTERN = /(.*#\/dashboard\/.*\?)(.*)/;
