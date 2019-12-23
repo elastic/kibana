@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, get } from 'lodash/fp';
+import { isEmpty, isEqual, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
@@ -39,6 +39,12 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
   const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
+
+  useEffect(() => {
+    if (!isEqual(defaultIndices, indices)) {
+      setIndices(defaultIndices);
+    }
+  }, [defaultIndices, indices]);
 
   useEffect(() => {
     let isSubscribed = true;

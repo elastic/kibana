@@ -75,6 +75,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         schedule: { interval: '1m' },
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
+        apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
