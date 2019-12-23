@@ -12,7 +12,7 @@ export class WebhookAction extends BaseAction {
   constructor(props = {}) {
     super(props);
     const defaultJson = JSON.stringify(
-      { message: '22Watch [{{ctx.metadata.name}}] has exceeded the threshold' },
+      { message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold' },
       null,
       2
     );
