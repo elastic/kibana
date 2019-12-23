@@ -1,0 +1,17 @@
+{
+  "rule_id": "e108c0c6-5ee8-47a0-8c23-ec47ba3a9b00",
+  "risk_score": 50,
+  "description": "Splunk - Detect Large Outbound ICMP Packets",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Detect Large Outbound ICMP Packets",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "network.transport:icmp and network.bytes>1000 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
