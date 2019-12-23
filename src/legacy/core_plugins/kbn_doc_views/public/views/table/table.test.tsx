@@ -24,6 +24,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { flattenHitWrapper } from 'ui/index_patterns';
 import { DocViewTable } from './table';
 
+jest.mock('ui/new_platform');
+
 // @ts-ignore
 const indexPattern = {
   fields: {

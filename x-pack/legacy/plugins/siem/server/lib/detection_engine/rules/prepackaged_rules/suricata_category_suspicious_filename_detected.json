@@ -1,0 +1,17 @@
+{
+  "rule_id": "d0489b07-8140-4e3d-a2b7-52f2c06fdc7c",
+  "risk_score": 50,
+  "description": "Suricata Category - Suspicious Filename Detected",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Suspicious Filename Detected",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"A suspicious filename was detected\" or rule.category: \"A suspicious filename was detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

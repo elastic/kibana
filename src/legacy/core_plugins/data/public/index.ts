@@ -29,8 +29,15 @@ export function plugin() {
 /** @public types */
 export { DataStart };
 
-export { SavedQuery, SavedQueryTimeFilter } from '../../../../plugins/data/public';
+export { EsQuerySortValue, FetchOptions, ISearchSource, SortDirection } from './search/types';
+export { SearchSourceFields } from './search/types';
+export {
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
+export { getRequestInspectorStats, getResponseInspectorStats } from './search';
