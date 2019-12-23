@@ -511,6 +511,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('webhookMethodSelect', METHOD);
           form.setInputValue('webhookHostInput', HOST);
           form.setInputValue('webhookPortInput', PORT);
+          form.setInputValue('webhookSchemeSelect', SCHEME);
           form.setInputValue('webhookPathInput', PATH);
           form.setInputValue('webhookUsernameInput', USERNAME);
           form.setInputValue('webhookPasswordInput', PASSWORD);
