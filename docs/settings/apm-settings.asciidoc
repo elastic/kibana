@@ -5,9 +5,21 @@
 <titleabbrev>APM settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use APM. It is enabled by default.
+// This content is reused in the APM app documentation.
+// Any changes made in this file will be seen there as well.
+// tag::general-apm-settings-overview[]
+
+You do not need to configure any settings to use the APM app. It is enabled by default.
 If you'd like to change any of the default values,
 copy and paste the relevant settings below into your `kibana.yml` configuration file.
+Index defaults can can also be changed on the settings page in the APM app:
+
+[role="screenshot"]
+image::settings/images/apm-settings.png[APM app settings in Kibana]
+
+Index settings in the APM app take precedence over those set in `kibana.yml`.
+
+// end::general-apm-settings-overview[]
 
 [float]
 [[general-apm-settings-kb]]
