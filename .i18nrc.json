@@ -11,6 +11,7 @@
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "share": "src/plugins/share",
+    "home": "src/plugins/home",
     "esUi": "src/plugins/es_ui_shared",
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",

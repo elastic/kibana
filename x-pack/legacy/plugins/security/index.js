@@ -130,7 +130,6 @@ export const security = kibana =>
       const config = server.config();
       const xpackInfo = server.plugins.xpack_main.info;
       securityPlugin.__legacyCompat.registerLegacyAPI({
-        savedObjects: server.savedObjects,
         auditLogger: new AuditLogger(server, 'security', config, xpackInfo),
         isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
           server.plugins.kibana.systemApi

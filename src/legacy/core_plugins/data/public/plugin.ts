@@ -18,10 +18,16 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { SearchService, SearchStart } from './search';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setFieldFormats } from '../../../../plugins/data/public/services';
+import {
+  setFieldFormats,
+  setNotifications,
+  setIndexPatterns,
+  setQueryService,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -32,8 +38,9 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataStart {}
+export interface DataStart {
+  search: SearchStart;
+}
 
 /**
  * Data Plugin - public
@@ -48,13 +55,24 @@ export interface DataStart {}
  */
 
 export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
+
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
-    return {};
+    setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
+    setFieldFormats(data.fieldFormats);
+    setNotifications(core.notifications);
+
+    return {
+      search: this.search.start(core),
+    };
   }
 
-  public stop() {}
+  public stop() {
+    this.search.stop();
+  }
 }

@@ -18,7 +18,7 @@ import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { FormattedFieldValue } from './formatted_field';
 import { HOST_NAME_FIELD_NAME } from './constants';
 
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../../lib/kibana');
 
 describe('Events', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
