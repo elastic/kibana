@@ -8,7 +8,6 @@ import { BaseAction } from './base_action';
 import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
-debugger
 export class WebhookAction extends BaseAction {
   constructor(props, errors) {
     props.type = ACTION_TYPES.WEBHOOK;

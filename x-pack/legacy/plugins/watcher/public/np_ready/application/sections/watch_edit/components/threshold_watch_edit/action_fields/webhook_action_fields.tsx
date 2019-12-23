@@ -29,8 +29,7 @@ interface Props {
 
 const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
 
-const SCHEME_VERBS = ['','http','https'];
-
+const SCHEME_VERBS = ['', 'http', 'https'];
 
 export const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,

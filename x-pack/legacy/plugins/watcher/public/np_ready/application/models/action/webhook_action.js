@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 export class WebhookAction extends BaseAction {
   constructor(props = {}) {
     super(props);
-    debugger
     const defaultJson = JSON.stringify(
       { message: '22Watch [{{ctx.metadata.name}}] has exceeded the threshold' },
       null,
