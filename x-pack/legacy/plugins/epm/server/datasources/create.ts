@@ -203,12 +203,12 @@ async function installAssets({
 
   if (datasetsRequested) {
     datasetsRequested.forEach(dataset => {
-      const templateRef = installTemplateForDataset(
-        registryPackageInfo,
+      const templateRef = installTemplateForDataset({
+        pkg: registryPackageInfo,
         callCluster,
         dataset,
-        datasourceName
-      );
+        datasourceName,
+      });
       if (templateRef) {
         templateRefs.push(templateRef as Promise<AssetReference>); // Typescript thinks this may still be undefined here
       }

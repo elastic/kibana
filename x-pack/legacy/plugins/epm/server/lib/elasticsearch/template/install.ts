@@ -24,12 +24,17 @@ const isFields = (path: string) => {
  * in one datasets, they are merged together into 1 and then converted to a template
  * The template is currently loaded with the pkgey-package-dataset
  */
-export async function installTemplateForDataset(
-  pkg: RegistryPackage,
-  callCluster: CallESAsCurrentUser,
-  dataset: Dataset,
-  datasourceName: string
-) {
+export async function installTemplateForDataset({
+  pkg,
+  callCluster,
+  dataset,
+  datasourceName,
+}: {
+  pkg: RegistryPackage;
+  callCluster: CallESAsCurrentUser;
+  dataset: Dataset;
+  datasourceName: string;
+}) {
   // Fetch all field definition files for this dataset
   const fieldDefinitionFiles = await getAssetsData(pkg, isFields, dataset.name);
   // Merge all the fields of a dataset together and create an Elasticsearch index template
@@ -63,12 +68,12 @@ async function installTemplate({
   const templateName = generateTemplateName(dataset);
   let pipelineName;
   if (dataset.ingest_pipeline) {
-    pipelineName = getPipelineNameForInstallation(
-      dataset.ingest_pipeline,
+    pipelineName = getPipelineNameForInstallation({
+      pipelineName: dataset.ingest_pipeline,
       dataset,
-      dataset.package,
-      datasourceName
-    );
+      packageName: dataset.package,
+      datasourceName,
+    });
   }
   const template = getTemplate(templateName + '-*', mappings, pipelineName);
 
