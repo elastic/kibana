@@ -8,7 +8,7 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { encode } from 'rison-node';
-import { QueryString } from 'ui/utils/query_string';
+import qs from 'querystring';
 import url from 'url';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
@@ -61,7 +61,7 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?${QueryString.encode({ _g })}`;
+  const hash = `/explorer?${qs.stringify({ _g })}`;
 
   return url.format({
     pathname,
@@ -94,7 +94,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
     },
   });
 
-  const hash = `/timeseriesexplorer?${QueryString.encode({ _g, _a })}`;
+  const hash = `/timeseriesexplorer?${qs.stringify({ _g, _a })}`;
 
   return url.format({
     pathname,

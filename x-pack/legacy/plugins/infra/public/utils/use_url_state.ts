@@ -7,8 +7,7 @@
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
-import { QueryString } from 'ui/utils/query_string';
-
+import qs from 'querystring';
 import { useHistory } from './history_context';
 
 export const useUrlState = <State>({
@@ -100,7 +99,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = QueryString.decode(queryString)[key];
+  const queryParam = qs.parse(queryString)[key];
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
@@ -108,10 +107,10 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = QueryString.decode(queryString);
+  const previousQueryValues = qs.parse(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return QueryString.encode({
+  return qs.stringify({
     ...previousQueryValues,
     [stateKey]: encodedUrlState,
   });
