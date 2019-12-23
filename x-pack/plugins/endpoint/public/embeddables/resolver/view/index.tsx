@@ -13,6 +13,9 @@ import * as selectors from '../store/selectors';
 import { useAutoUpdatingClientRect } from './use_autoupdating_client_rect';
 import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
 import { DiagnosticDot } from './diagnostic_dot';
+import { ProcessEventDot } from './process_event_dot';
+import { EdgeLine } from './edge_line';
+import * as dataSelectors from '../store/data/selectors';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
@@ -25,6 +28,10 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
 const Resolver = styled(
   React.memo(({ className }: { className?: string }) => {
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
+
+    const { processNodePositions, edgeLineSegments } = useSelector(
+      dataSelectors.processNodePositionsAndEdgeLineSegments
+    );
 
     const [ref, setRef] = useState<null | HTMLDivElement>(null);
 
@@ -153,8 +160,11 @@ const Resolver = styled(
         ref={refCallback}
         onMouseDown={handleMouseDown}
       >
-        {dotPositions.map((worldPosition, index) => (
-          <DiagnosticDot key={index} worldPosition={worldPosition} />
+        {Array.from(processNodePositions).map(([processEvent, position], index) => (
+          <ProcessEventDot key={index} worldPosition={position} processEvent={processEvent} />
+        ))}
+        {edgeLineSegments.map(([startPosition, endPosition], index) => (
+          <EdgeLine key={index} startPosition={startPosition} endPosition={endPosition} />
         ))}
       </div>
     );
