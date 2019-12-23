@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 import {
   SavedObjectsManagementAction,
   SavedObjectsManagementRecord,
-} from 'ui/management/saved_objects_management';
-import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+} from '../../../../../../../src/legacy/core_plugins/management/public';
 import { CopySavedObjectsToSpaceFlyout } from '../../views/management/components/copy_saved_objects_to_space';
-import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../spaces_manager';
 
 export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagementAction {
@@ -31,7 +30,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     },
   };
 
-  constructor(private readonly spacesManager: SpacesManager, private readonly activeSpace: Space) {
+  constructor(private readonly spacesManager: SpacesManager) {
     super();
   }
 
@@ -44,7 +43,6 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
         onClose={this.onClose}
         savedObject={this.record}
         spacesManager={this.spacesManager}
-        activeSpace={this.activeSpace}
         toastNotifications={toastNotifications}
       />
     );

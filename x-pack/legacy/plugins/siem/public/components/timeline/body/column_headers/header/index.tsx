@@ -50,7 +50,7 @@ const HeaderComp = React.memo<HeaderCompProps>(
                 data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
               >
-                <>{header.id}</>
+                <>{header.label ?? header.id}</>
               </EuiToolTip>
             </TruncatableText>
 
@@ -66,7 +66,7 @@ const HeaderComp = React.memo<HeaderCompProps>(
                 data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
               >
-                <>{header.id}</>
+                <>{header.label ?? header.id}</>
               </EuiToolTip>
             </TruncatableText>
           </EventsHeadingTitleSpan>

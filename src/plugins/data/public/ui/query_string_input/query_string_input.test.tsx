@@ -28,6 +28,7 @@ import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput, QueryStringInputUI } from './query_string_input';
 import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../mocks';
 const startMock = coreMock.createStart();
 import { stubIndexPatternWithFields } from '../../stubs';
 
@@ -74,6 +75,7 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
 
   const services = {
     ...startMock,
+    data: dataPluginMock.createStartContract(),
     appName: testProps.appName || 'test',
     storage: storage || createMockStorage(),
   };

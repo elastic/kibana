@@ -21,8 +21,6 @@ import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import chrome from 'ui/chrome';
-import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import {
   KibanaContext,
   KibanaDatatable,
@@ -30,34 +28,36 @@ import {
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
+  Query,
+  TimeRange,
+  esFilters,
+  getTime,
+  FilterManager,
+} from '../../../../../../plugins/data/public';
+import {
   SearchSource,
-  SearchSourceContract,
+  ISearchSource,
   getRequestInspectorStats,
   getResponseInspectorStats,
 } from '../../../../../ui/public/courier';
-// @ts-ignore
-import {
-  FilterBarQueryFilterProvider,
-  QueryFilter,
-} from '../../../../../ui/public/filter_manager/query_filter';
 
 import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
-import { getTime } from '../../../../../ui/public/timefilter';
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
-import { start as data } from '../../../../data/public/legacy';
 import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
 
 export interface RequestHandlerParams {
-  searchSource: SearchSourceContract;
+  searchSource: ISearchSource;
   aggs: AggConfigs;
   timeRange?: TimeRange;
   query?: Query;
   filters?: esFilters.Filter[];
   forceFetch: boolean;
-  queryFilter: QueryFilter;
+  filterManager: FilterManager;
   uiState?: PersistedState;
   partialRows?: boolean;
   inspectorAdapters: Adapters;
@@ -90,7 +90,7 @@ const handleCourierRequest = async ({
   partialRows,
   metricsAtAllLevels,
   inspectorAdapters,
-  queryFilter,
+  filterManager,
   abortSignal,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
@@ -216,7 +216,7 @@ const handleCourierRequest = async ({
   }
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, queryFilter),
+    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, filterManager),
     { returnsFormattedValues: true }
   );
 
@@ -259,10 +259,8 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     },
   },
   async fn(context, args, { inspectorAdapters, abortSignal }) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private: Function = $injector.get('Private');
-    const { indexPatterns } = data.indexPatterns;
-    const queryFilter = Private(FilterBarQueryFilterProvider);
+    const indexPatterns = getIndexPatterns();
+    const { filterManager } = getQueryService();
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
     const indexPattern = await indexPatterns.get(args.index);
@@ -283,7 +281,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       inspectorAdapters,
-      queryFilter,
+      filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 

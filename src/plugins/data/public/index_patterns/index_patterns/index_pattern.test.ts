@@ -26,14 +26,12 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 // @ts-ignore
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
-import { setNotifications, setFieldFormats } from '../services';
+import { setNotifications, setFieldFormats } from '../../services';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { FieldFormatRegisty } from '../../field_formats_provider';
-
-jest.mock('ui/new_platform');
 
 jest.mock('../../../../kibana_utils/public', () => {
   const originalModule = jest.requireActual('../../../../kibana_utils/public');
@@ -47,19 +45,6 @@ jest.mock('../../../../kibana_utils/public', () => {
         _deserialize: jest.fn().mockImplementation(() => []),
       },
     })),
-  };
-});
-
-jest.mock('ui/notify', () => ({
-  toastNotifications: {
-    addDanger: jest.fn(),
-    addError: jest.fn(),
-  },
-}));
-
-jest.mock('ui/saved_objects', () => {
-  return {
-    findObjectByTitle: jest.fn(),
   };
 });
 

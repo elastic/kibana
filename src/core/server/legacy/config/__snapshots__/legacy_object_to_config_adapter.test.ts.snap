@@ -8,6 +8,7 @@ Object {
     "enabled": true,
   },
   "cors": false,
+  "defaultRoute": undefined,
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
@@ -19,6 +20,7 @@ Object {
     "keyPassphrase": "some-phrase",
     "someNewValue": "new",
   },
+  "uuid": undefined,
 }
 `;
 
@@ -30,6 +32,7 @@ Object {
     "enabled": true,
   },
   "cors": false,
+  "defaultRoute": undefined,
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
@@ -41,6 +44,7 @@ Object {
     "enabled": false,
     "key": "key",
   },
+  "uuid": undefined,
 }
 `;
 

@@ -8,12 +8,10 @@ import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
 import '../../mock/match_media';
-import '../../mock/ui_settings';
 import { HeaderGlobal } from './index';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('ui/new_platform');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar
@@ -23,11 +21,7 @@ jest.mock('../search_bar', () => ({
 
 describe('HeaderGlobal', () => {
   test('it renders', () => {
-    const wrapper = shallow(
-      <TestProviders>
-        <HeaderGlobal />
-      </TestProviders>
-    );
+    const wrapper = shallow(<HeaderGlobal />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

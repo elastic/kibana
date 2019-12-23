@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  data-test-subj="loadSearchForm"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={true}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        <FormattedMessage
+          defaultMessage="Open search"
+          id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <SavedObjectFinderUi
+      noItemsMessage={
+        <FormattedMessage
+          defaultMessage="No matching searches found."
+          id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+          values={Object {}}
+        />
+      }
+      onChoose={[Function]}
+      savedObjectMetaData={
+        Array [
+          Object {
+            "getIconForSavedObject": [Function],
+            "name": "Saved search",
+            "type": "search",
+          },
+        ]
+      }
+      savedObjects={Object {}}
+      uiSettings={Object {}}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          href="#/management/kibana/objects?_a=(tab:search)"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Manage searches"
+            id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;

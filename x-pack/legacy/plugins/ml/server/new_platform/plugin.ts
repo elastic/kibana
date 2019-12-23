@@ -11,7 +11,8 @@ import { KibanaConfig, SavedObjectsLegacyService } from 'src/legacy/server/kbn_s
 import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { CloudSetup } from '../../../../../plugins/cloud/server';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
@@ -54,6 +55,7 @@ import { jobAuditMessagesRoutes } from '../routes/job_audit_messages';
 // @ts-ignore: could not find declaration file for module
 import { fileDataVisualizerRoutes } from '../routes/file_data_visualizer';
 import { initMlServerLog, LogInitialization } from '../client/log';
+import { HomeServerPluginSetup } from '../../../../../../src/plugins/home/server';
 
 type CoreHttpSetup = CoreSetup['http'];
 export interface MlHttpServiceSetup extends CoreHttpSetup {
@@ -65,7 +67,6 @@ export interface MlXpackMainPlugin extends XPackMainPlugin {
 }
 
 export interface MlCoreSetup {
-  addAppLinksToSampleDataset: () => any;
   injectUiAppVars: (id: string, callback: () => {}) => any;
   http: MlHttpServiceSetup;
   savedObjects: SavedObjectsLegacyService;
@@ -79,7 +80,9 @@ export interface PluginsSetup {
   xpackMain: MlXpackMainPlugin;
   security: any;
   spaces: any;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
+  home?: HomeServerPluginSetup;
   // TODO: this is temporary for `mirrorPluginStatus`
   ml: any;
 }
@@ -91,6 +94,7 @@ export interface RouteInitialization {
   xpackMainPlugin?: MlXpackMainPlugin;
   savedObjects?: SavedObjectsLegacyService;
   spacesPlugin: any;
+  cloud?: CloudSetup;
 }
 export interface UsageInitialization {
   elasticsearchPlugin: ElasticsearchPlugin;
@@ -109,7 +113,7 @@ export class Plugin {
 
   public setup(core: MlCoreSetup, plugins: PluginsSetup) {
     const xpackMainPlugin: MlXpackMainPlugin = plugins.xpackMain;
-    const { addAppLinksToSampleDataset, http, injectUiAppVars } = core;
+    const { http, injectUiAppVars } = core;
     const pluginId = this.pluginId;
 
     mirrorPluginStatus(xpackMainPlugin, plugins.ml);
@@ -121,10 +125,12 @@ export class Plugin {
 
       // Add links to the Kibana sample data sets if ml is enabled
       // and there is a full license (trial or platinum).
-      if (mlFeature.isEnabled() === true) {
+      if (mlFeature.isEnabled() === true && plugins.home) {
         const licenseCheckResults = mlFeature.getLicenseCheckResults();
         if (licenseCheckResults.licenseType === LICENSE_TYPE.FULL) {
-          addLinksToSampleDatasets({ addAppLinksToSampleDataset });
+          addLinksToSampleDatasets({
+            addAppLinksToSampleDataset: plugins.home.sampleData.addAppLinksToSampleDataset,
+          });
         }
       }
     });
@@ -190,6 +196,7 @@ export class Plugin {
       xpackMainPlugin: plugins.xpackMain,
       savedObjects: core.savedObjects,
       spacesPlugin: plugins.spaces,
+      cloud: plugins.cloud,
     };
     const usageInitializationDeps: UsageInitialization = {
       elasticsearchPlugin: plugins.elasticsearch,

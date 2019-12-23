@@ -7,22 +7,22 @@
 import moment from 'moment-timezone';
 import * as React from 'react';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { pure } from 'recompose';
+
+import { useUiSetting$ } from '../../lib/kibana';
 
 import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_TIMEZONE_BROWSER,
 } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
-export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
-  const [dateFormat] = useKibanaUiSetting(DEFAULT_DATE_FORMAT);
-  const [dateFormatTz] = useKibanaUiSetting(DEFAULT_DATE_FORMAT_TZ);
-  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
+export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) => {
+  const [dateFormat] = useUiSetting$<string>(DEFAULT_DATE_FORMAT);
+  const [dateFormatTz] = useUiSetting$<string>(DEFAULT_DATE_FORMAT_TZ);
+  const [timezone] = useUiSetting$<string>(DEFAULT_TIMEZONE_BROWSER);
 
   return (
     <>
@@ -43,7 +43,7 @@ PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
-export const FormattedDate = pure<{
+export const FormattedDate = React.memo<{
   fieldName: string;
   value?: string | number | null;
 }>(

@@ -14,6 +14,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
+  classification = '100mb',
 }
 
 export type EsIndexName = string;
@@ -34,6 +35,7 @@ export interface FormMessage {
 export enum JOB_TYPES {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
 }
 
 export interface State {
@@ -44,6 +46,7 @@ export interface State {
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
     dependentVariableOptions: Array<{ label: DependentVariable }> | [];
+    description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
@@ -87,6 +90,7 @@ export const getInitialState = (): State => ({
     dependentVariable: '',
     dependentVariableFetchFail: false,
     dependentVariableOptions: [],
+    description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
@@ -129,6 +133,7 @@ export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
+    description: formState.description,
     source: {
       // If a Kibana index patterns includes commas, we need to split
       // the into an array of indices to be in the correct format for
@@ -149,9 +154,12 @@ export const getJobConfigFromFormState = (
     model_memory_limit: formState.modelMemoryLimit,
   };
 
-  if (formState.jobType === JOB_TYPES.REGRESSION) {
+  if (
+    formState.jobType === JOB_TYPES.REGRESSION ||
+    formState.jobType === JOB_TYPES.CLASSIFICATION
+  ) {
     jobConfig.analysis = {
-      regression: {
+      [formState.jobType]: {
         dependent_variable: formState.dependentVariable,
         training_percent: formState.trainingPercent,
       },

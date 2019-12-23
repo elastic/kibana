@@ -4,30 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { ZeekDetails } from './zeek_details';
 
 describe('ZeekDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default ZeekDetails', () => {
-      const wrapper = shallow(
-        <ZeekDetails
-          data={mockTimelineData[2].ecs}
-          browserFields={mockBrowserFields}
-          timelineId="test"
-        />
+      const wrapper = mount(
+        <TestProviders>
+          <ZeekDetails
+            data={mockTimelineData[2].ecs}
+            browserFields={mockBrowserFields}
+            timelineId="test"
+          />
+        </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('ZeekDetails'))).toMatchSnapshot();
     });
 
     test('it returns zeek.connection if the data does contain zeek.connection data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[13].ecs}
@@ -42,7 +45,7 @@ describe('ZeekDetails', () => {
     });
 
     test('it returns zeek.dns if the data does contain zeek.dns data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[14].ecs}
@@ -57,7 +60,7 @@ describe('ZeekDetails', () => {
     });
 
     test('it returns zeek.http if the data does contain zeek.http data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[15].ecs}
@@ -72,7 +75,7 @@ describe('ZeekDetails', () => {
     });
 
     test('it returns zeek.notice if the data does contain zeek.notice data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[16].ecs}
@@ -87,7 +90,7 @@ describe('ZeekDetails', () => {
     });
 
     test('it returns zeek.ssl if the data does contain zeek.ssl data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[17].ecs}
@@ -102,7 +105,7 @@ describe('ZeekDetails', () => {
     });
 
     test('it returns zeek.files if the data does contain zeek.files data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[18].ecs}
@@ -117,7 +120,7 @@ describe('ZeekDetails', () => {
     });
 
     test('it returns null for text if the data contains no zeek data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ZeekDetails
             data={mockTimelineData[0].ecs}
@@ -126,7 +129,12 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(
+        wrapper
+          .find('ZeekDetails')
+          .children()
+          .exists()
+      ).toBeFalsy();
     });
   });
 });

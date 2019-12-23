@@ -8,7 +8,6 @@ import { isEmpty } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
 import { AutocompleteSuggestion, esKuery } from '../../../../../../../../src/plugins/data/public';
-import { setup as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 const getAutocompleteProvider = (language: string) =>
   npStart.plugins.data.autocomplete.getProvider(language);
@@ -64,7 +63,7 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     if (this.cachedIndexPattern) {
       return this.cachedIndexPattern;
     }
-    const res = await data.indexPatterns.indexPatterns.getFieldsForWildcard({
+    const res = await npStart.plugins.data.indexPatterns.getFieldsForWildcard({
       pattern: this.indexPatternName,
     });
     if (isEmpty(res.fields)) {

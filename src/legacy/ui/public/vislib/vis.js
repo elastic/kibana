@@ -30,7 +30,6 @@ import { setPointSeriesTooltipFormatter } from '../vis/components/tooltip/_point
 const config = chrome.getUiSettingsClient();
 
 export function VislibVisProvider(Private) {
-
   setHierarchicalTooltipFormatter(Private);
   setPointSeriesTooltipFormatter(Private);
 
@@ -97,13 +96,11 @@ export function VislibVisProvider(Private) {
       try {
         this.handler[method]();
       } catch (error) {
-
         if (error instanceof VislibError) {
           error.displayToScreen(this.handler);
         } else {
           throw error;
         }
-
       }
     }
 

@@ -13,7 +13,7 @@ import { detectReasonFromException } from './detect_reason_from_exception';
 async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const result = {
     enabled: false,
-    types: []
+    types: [],
   };
 
   const typeBuckets = get(response, 'aggregations.types.buckets', []);
@@ -25,26 +25,29 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
         levels: typeBucket.levels.buckets.map(levelBucket => {
           return {
             level: levelBucket.key.toLowerCase(),
-            count: levelBucket.doc_count
+            count: levelBucket.doc_count,
           };
-        })
+        }),
       };
     });
-  }
-  else {
+  } else {
     result.reason = await detectReason(req, filebeatIndexPattern, opts);
   }
 
   return result;
 }
 
-export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end }) {
+export async function getLogTypes(
+  req,
+  filebeatIndexPattern,
+  { clusterUuid, nodeUuid, indexUuid, start, end }
+) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogTypes');
 
   const metric = { timestampField: '@timestamp' };
   const filter = [
     { term: { 'service.type': 'elasticsearch' } },
-    createTimeFilter({ start, end, metric })
+    createTimeFilter({ start, end, metric }),
   ];
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
@@ -59,42 +62,44 @@ export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, node
   const params = {
     index: filebeatIndexPattern,
     size: 0,
-    filterPath: [
-      'aggregations.levels.buckets',
-      'aggregations.types.buckets',
-    ],
+    filterPath: ['aggregations.levels.buckets', 'aggregations.types.buckets'],
     ignoreUnavailable: true,
     body: {
       sort: { '@timestamp': { order: 'desc' } },
       query: {
         bool: {
           filter,
-        }
+        },
       },
       aggs: {
         types: {
           terms: {
-            field: 'event.dataset'
+            field: 'event.dataset',
           },
           aggs: {
             levels: {
               terms: {
-                field: 'log.level'
-              }
+                field: 'log.level',
+              },
             },
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   let result = {};
   try {
     const response = await callWithRequest(req, 'search', params);
-    result = await handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end });
-  }
-  catch (err) {
+    result = await handleResponse(response, req, filebeatIndexPattern, {
+      clusterUuid,
+      nodeUuid,
+      indexUuid,
+      start,
+      end,
+    });
+  } catch (err) {
     result.reason = detectReasonFromException(err);
   }
   return result;

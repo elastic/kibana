@@ -7,7 +7,7 @@
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { HttpServiceBase, HttpFetchOptions } from 'kibana/public';
+import { HttpSetup, HttpFetchOptions } from 'kibana/public';
 
 export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;
@@ -21,18 +21,11 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
-  const isGet = !fetchOptions.method || fetchOptions.method === 'GET';
-
-  // Need an empty body to pass route validation
-  const body = isGet
-    ? {}
-    : {
-        body: JSON.stringify(fetchOptions.body || {})
-      };
+  const { body, ...rest } = fetchOptions;
 
   return {
-    ...fetchOptions,
-    ...body,
+    ...rest,
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     query: {
       ...fetchOptions.query,
       ...(debugEnabled ? { _debug: true } : {})
@@ -49,7 +42,7 @@ export function clearCache() {
 export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
-  http: HttpServiceBase,
+  http: HttpSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);

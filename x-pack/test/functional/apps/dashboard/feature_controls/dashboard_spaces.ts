@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-// eslint-disable-next-line max-len
 import {
   createDashboardEditUrl,
   DashboardConstants,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { SpacesService } from '../../../../common/services';
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');

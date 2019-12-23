@@ -1,0 +1,82 @@
+{
+  "name": "Updates a query with all possible fields that can be updated",
+  "description": "Kitchen Sink (everything) query that has all possible fields filled out.",
+  "false_positives": [
+    "https://www.example.com/some-article-about-a-false-positive",
+    "some text string about why another condition could be a false positive"
+  ],
+  "rule_id": "rule-id-everything",
+  "filters": [
+    {
+      "query": {
+        "match_phrase": {
+          "host.name": "siem-windows"
+        }
+      }
+    },
+    {
+      "exists": {
+        "field": "host.hostname"
+      }
+    }
+  ],
+  "enabled": false,
+  "immutable": true,
+  "index": ["auditbeat-*", "filebeat-*"],
+  "interval": "5m",
+  "query": "user.name: root or user.name: admin",
+  "output_index": ".siem-signals-default",
+  "meta": {
+    "anything_you_want_ui_related_or_otherwise": {
+      "as_deep_structured_as_you_need": {
+        "any_data_type": {}
+      }
+    }
+  },
+  "language": "kuery",
+  "risk_score": 1,
+  "max_signals": 100,
+  "tags": ["tag 1", "tag 2", "any tag you want"],
+  "to": "now",
+  "from": "now-6m",
+  "severity": "high",
+  "type": "query",
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "techniques": [
+        {
+          "id": "T1499",
+          "name": "endpoint denial of service",
+          "reference": "https://attack.mitre.org/techniques/T1499/"
+        }
+      ]
+    },
+    {
+      "framework": "Some other Framework you want",
+      "tactic": {
+        "id": "some-other-id",
+        "name": "Some other name",
+        "reference": "https://example.com"
+      },
+      "techniques": [
+        {
+          "id": "some-other-id",
+          "name": "some other technique name",
+          "reference": "https://example.com"
+        }
+      ]
+    }
+  ],
+  "references": [
+    "http://www.example.com/some-article-about-attack",
+    "Some plain text string here explaining why this is a valid thing to look out for"
+  ],
+  "timeline_id": "other-timeline-id",
+  "version": 42
+}

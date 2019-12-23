@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 
@@ -15,6 +14,7 @@ import { ID_FIELD_NAME } from '../event_details/event_id';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
 import * as i18n from '../timeline/body/renderers/translations';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import {
   getPorts,
@@ -35,9 +35,9 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
-
 describe('SourceDestinationIp', () => {
+  const mount = useMountAppended();
+
   describe('#isIpFieldPopulated', () => {
     test('it returns true when type is `source` and sourceIp has an IP address', () => {
       expect(

@@ -16,6 +16,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -60,7 +61,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (name: SlmPolicy['name'], { inProgress }: SlmPolicy) => {
+      render: (name: SlmPolicy['name'], { inProgress, isManagedPolicy }: SlmPolicy) => {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -71,8 +72,21 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 data-test-subj="policyLink"
               >
                 {name}
-              </EuiLink>
+              </EuiLink>{' '}
             </EuiFlexItem>
+            {isManagedPolicy ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyList.table.managedPolicyBadgeLabel"
+                      defaultMessage="This is a managed policy"
+                    />
+                  }
+                  position="right"
+                />
+              </EuiFlexItem>
+            ) : null}
             {inProgress ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -182,7 +196,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          render: ({ name, inProgress }: SlmPolicy) => {
+          render: ({ name, inProgress, isManagedPolicy }: SlmPolicy) => {
             return (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
@@ -246,13 +260,19 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 <EuiFlexItem>
                   <PolicyDeleteProvider>
                     {deletePolicyPrompt => {
-                      return (
-                        <EuiToolTip
-                          content={i18n.translate(
+                      const label = !isManagedPolicy
+                        ? i18n.translate(
                             'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
                             { defaultMessage: 'Delete' }
-                          )}
-                        >
+                          )
+                        : i18n.translate(
+                            'xpack.snapshotRestore.policyList.table.deleteManagedPolicyTableActionTooltip',
+                            {
+                              defaultMessage: 'You cannot delete a managed policy.',
+                            }
+                          );
+                      return (
+                        <EuiToolTip content={label}>
                           <EuiButtonIcon
                             aria-label={i18n.translate(
                               'xpack.snapshotRestore.policyList.table.actionDeleteAriaLabel',
@@ -265,6 +285,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                             color="danger"
                             data-test-subj="deletePolicyButton"
                             onClick={() => deletePolicyPrompt([name], onPolicyDeleted)}
+                            isDisabled={isManagedPolicy}
                           />
                         </EuiToolTip>
                       );
@@ -283,7 +304,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   const sorting = {
     sort: {
       field: 'name',
-      direction: 'asc',
+      direction: 'asc' as const,
     },
   };
 
@@ -294,6 +315,17 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: SlmPolicy[]) => setSelectedItems(newSelectedItems),
+    selectable: ({ isManagedPolicy }: SlmPolicy) => !isManagedPolicy,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.snapshotRestore.policyList.table.deleteManagedPolicySelectTooltip',
+          {
+            defaultMessage: 'You cannot delete a managed policy.',
+          }
+        );
+      }
+    },
   };
 
   const search = {
@@ -362,7 +394,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'repository',
         name: i18n.translate('xpack.snapshotRestore.policyList.table.repositoryFilterLabel', {
           defaultMessage: 'Repository',

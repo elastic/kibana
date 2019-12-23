@@ -100,7 +100,10 @@ function GaugeSeriesUi(props) {
       <div className="tvbSeries__body">
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'metrics'} onClick={() => props.switchTab('metrics')}>
-            <FormattedMessage id="visTypeTimeseries.gauge.dataTab.metricsButtonLabel" defaultMessage="Metrics" />
+            <FormattedMessage
+              id="visTypeTimeseries.gauge.dataTab.metricsButtonLabel"
+              defaultMessage="Metrics"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"

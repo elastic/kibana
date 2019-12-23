@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
@@ -20,8 +15,6 @@ import {
   InfraSourceResolvers,
 } from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
-import { SourceConfigurationRuntimeType } from '../../lib/sources';
-import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
@@ -41,21 +34,6 @@ export type InfraSourceLogEntryHighlightsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
-  InfraResolverOf<InfraSourceResolvers.LogSummaryBetweenResolver>,
-  QuerySourceResolver
->;
-
-export type InfraSourceLogSummaryHighlightsBetweenResolver = ChildResolverOf<
-  InfraResolverOf<InfraSourceResolvers.LogSummaryHighlightsBetweenResolver>,
-  QuerySourceResolver
->;
-
-export type InfraSourceLogItem = ChildResolverOf<
-  InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
-  QuerySourceResolver
->;
-
 export const createLogEntriesResolvers = (libs: {
   logEntries: InfraLogEntriesDomain;
 }): {
@@ -63,9 +41,6 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
-    logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
-    logSummaryHighlightsBetween: InfraSourceLogSummaryHighlightsBetweenResolver;
-    logItem: InfraSourceLogItem;
   };
   InfraLogEntryColumn: {
     __resolveType(
@@ -149,50 +124,6 @@ export const createLogEntriesResolvers = (libs: {
         filterQuery: args.filterQuery,
         entries,
       }));
-    },
-    async logSummaryBetween(source, args, { req }) {
-      UsageCollector.countLogs();
-      const buckets = await libs.logEntries.getLogSummaryBucketsBetween(
-        req,
-        source.id,
-        args.start,
-        args.end,
-        args.bucketSize,
-        parseFilterQuery(args.filterQuery)
-      );
-
-      return {
-        start: buckets.length > 0 ? buckets[0].start : null,
-        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
-        buckets,
-      };
-    },
-    async logSummaryHighlightsBetween(source, args, { req }) {
-      const summaryHighlightSets = await libs.logEntries.getLogSummaryHighlightBucketsBetween(
-        req,
-        source.id,
-        args.start,
-        args.end,
-        args.bucketSize,
-        args.highlightQueries.filter(highlightQuery => !!highlightQuery),
-        parseFilterQuery(args.filterQuery)
-      );
-
-      return summaryHighlightSets.map(buckets => ({
-        start: buckets.length > 0 ? buckets[0].start : null,
-        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
-        buckets,
-      }));
-    },
-    async logItem(source, args, { req }) {
-      const sourceConfiguration = pipe(
-        SourceConfigurationRuntimeType.decode(source.configuration),
-        fold(errors => {
-          throw new Error(failure(errors).join('\n'));
-        }, identity)
-      );
-
-      return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
     },
   },
   InfraLogEntryColumn: {

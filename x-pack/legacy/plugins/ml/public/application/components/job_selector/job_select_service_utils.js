@@ -15,14 +15,16 @@ import { mlJobService } from '../../services/job_service';
 
 function warnAboutInvalidJobIds(invalidIds) {
   if (invalidIds.length > 0) {
-    toastNotifications.addWarning(i18n.translate('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
-      defaultMessage: `Requested
+    toastNotifications.addWarning(
+      i18n.translate('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
+        defaultMessage: `Requested
 {invalidIdsLength, plural, one {job {invalidIds} does not exist} other {jobs {invalidIds} do not exist}}`,
-      values: {
-        invalidIdsLength: invalidIds.length,
-        invalidIds,
-      }
-    }));
+        values: {
+          invalidIdsLength: invalidIds.length,
+          invalidIds,
+        },
+      })
+    );
   }
 }
 
@@ -31,13 +33,17 @@ function warnAboutInvalidJobIds(invalidIds) {
 function getInvalidJobIds(ids) {
   return ids.filter(id => {
     const jobExists = mlJobService.jobs.some(job => job.job_id === id);
-    return (jobExists === false && id !== '*');
+    return jobExists === false && id !== '*';
   });
 }
 
-export const jobSelectServiceFactory = (globalState) => {
+export const jobSelectServiceFactory = globalState => {
   const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-  const jobSelectService$ = new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
+  const jobSelectService$ = new BehaviorSubject({
+    selection: jobIds,
+    groups: selectedGroups,
+    resetSelection: false,
+  });
 
   // Subscribe to changes to globalState and trigger
   // a jobSelectService update if the job selection changed.
@@ -45,7 +51,7 @@ export const jobSelectServiceFactory = (globalState) => {
     const { jobIds: newJobIds, selectedGroups: newSelectedGroups } = getSelectedJobIds(globalState);
     const oldSelectedJobIds = jobSelectService$.getValue().selection;
 
-    if (newJobIds && !(isEqual(oldSelectedJobIds, newJobIds))) {
+    if (newJobIds && !isEqual(oldSelectedJobIds, newJobIds)) {
       jobSelectService$.next({ selection: newJobIds, groups: newSelectedGroups });
     }
   };
@@ -59,7 +65,8 @@ export const jobSelectServiceFactory = (globalState) => {
   return { jobSelectService$, unsubscribeFromGlobalState };
 };
 
-function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
+function loadJobIdsFromGlobalState(globalState) {
+  // jobIds, groups
   // fetch to get the latest state
   globalState.fetch();
 
@@ -83,9 +90,11 @@ function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
     let validIds = difference(tempJobIds, invalidIds);
     // if there are no valid ids, warn and then select the first job
     if (validIds.length === 0) {
-      toastNotifications.addWarning(i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
-        defaultMessage: 'No jobs selected, auto selecting first job',
-      }));
+      toastNotifications.addWarning(
+        i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
+          defaultMessage: 'No jobs selected, auto selecting first job',
+        })
+      );
 
       if (mlJobService.jobs.length) {
         validIds = [mlJobService.jobs[0].job_id];
@@ -139,10 +148,10 @@ export function getGroupsFromJobs(jobs) {
   const groups = {};
   const groupsMap = {};
 
-  jobs.forEach((job) => {
+  jobs.forEach(job => {
     // Organize job by group
     if (job.groups !== undefined) {
-      job.groups.forEach((g) => {
+      job.groups.forEach(g => {
         if (groups[g] === undefined) {
           groups[g] = {
             id: g,
@@ -155,7 +164,7 @@ export function getGroupsFromJobs(jobs) {
               fromPx: job.timeRange.fromPx,
               toPx: job.timeRange.toPx,
               widthPx: null,
-            }
+            },
           };
 
           groupsMap[g] = [job.job_id];
@@ -174,7 +183,10 @@ export function getGroupsFromJobs(jobs) {
           if (groups[g].timeRange.toPx === null || job.timeRange.toPx > groups[g].timeRange.toPx) {
             groups[g].timeRange.toPx = job.timeRange.toPx;
           }
-          if (groups[g].timeRange.fromPx === null || job.timeRange.fromPx < groups[g].timeRange.fromPx) {
+          if (
+            groups[g].timeRange.fromPx === null ||
+            job.timeRange.fromPx < groups[g].timeRange.fromPx
+          ) {
             groups[g].timeRange.fromPx = job.timeRange.fromPx;
           }
         }
@@ -182,7 +194,7 @@ export function getGroupsFromJobs(jobs) {
     }
   });
 
-  Object.keys(groups).forEach((groupId) => {
+  Object.keys(groups).forEach(groupId => {
     const group = groups[groupId];
     group.timeRange.widthPx = group.timeRange.toPx - group.timeRange.fromPx;
     group.timeRange.toMoment = moment(group.timeRange.to);
@@ -195,7 +207,7 @@ export function getGroupsFromJobs(jobs) {
       values: {
         fromString,
         toString,
-      }
+      },
     });
   });
 
@@ -203,13 +215,16 @@ export function getGroupsFromJobs(jobs) {
 }
 
 export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
-  const jobsWithTimeRange = jobs.filter((job) => {
-    return (job.timeRange.to !== undefined) && (job.timeRange.from !== undefined);
+  const jobsWithTimeRange = jobs.filter(job => {
+    return job.timeRange.to !== undefined && job.timeRange.from !== undefined;
   });
 
   const min = Math.min(...jobsWithTimeRange.map(job => +job.timeRange.from));
   const max = Math.max(...jobsWithTimeRange.map(job => +job.timeRange.to));
-  const ganttScale = d3.scale.linear().domain([min, max]).range([1, ganttBarWidth]);
+  const ganttScale = d3.scale
+    .linear()
+    .domain([min, max])
+    .range([1, ganttBarWidth]);
 
   jobs.forEach(job => {
     if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
@@ -231,14 +246,14 @@ export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
         values: {
           fromString,
           toString,
-        }
+        },
       });
     } else {
       job.timeRange.widthPx = 0;
       job.timeRange.fromPx = 0;
       job.timeRange.toPx = 0;
       job.timeRange.label = i18n.translate('xpack.ml.jobSelector.noResultsForJobLabel', {
-        defaultMessage: 'No results'
+        defaultMessage: 'No results',
       });
     }
   });

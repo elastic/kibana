@@ -19,7 +19,7 @@
 
 import { KibanaSupertestProvider } from '../../services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
 
   const redirectPort = httpConfig.get('servers.kibana.port') + 1;
@@ -31,13 +31,11 @@ export default async function ({ readConfigFile }) {
   };
 
   return {
-    testFiles: [
-      require.resolve('./'),
-    ],
+    testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
       //eslint-disable-next-line new-cap
-      supertest: (arg) => KibanaSupertestProvider(arg, supertestOptions),
+      supertest: arg => KibanaSupertestProvider(arg, supertestOptions),
     },
     servers: {
       ...httpConfig.get('servers'),

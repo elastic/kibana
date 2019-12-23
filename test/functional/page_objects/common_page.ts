@@ -19,6 +19,7 @@
 
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+import { get } from 'lodash';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -287,6 +288,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       };
     }
 
+    async getSharedItemContainers() {
+      const cssSelector = '[data-shared-items-container]';
+      return find.allByCssSelector(cssSelector);
+    }
+
     async ensureModalOverlayHidden() {
       return retry.try(async () => {
         const shown = await testSubjects.exists('confirmModalTitleText');
@@ -409,6 +415,22 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
       return response.status !== 200;
     }
+
+    async isCloud(): Promise<boolean> {
+      const baseUrl = this.getHostPort();
+      const username = config.get('servers.kibana.username');
+      const password = config.get('servers.kibana.password');
+      const response = await fetch(baseUrl + '/api/stats?extended', {
+        method: 'get',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
+        },
+      });
+      const data = await response.json();
+      return get(data, 'usage.cloud.is_cloud_enabled', false);
+    }
+
     async waitForSaveModalToClose() {
       log.debug('Waiting for save modal to close');
       await retry.try(async () => {

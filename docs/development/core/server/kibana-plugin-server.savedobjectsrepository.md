@@ -4,6 +4,7 @@
 
 ## SavedObjectsRepository class
 
+
 <b>Signature:</b>
 
 ```typescript
@@ -24,8 +25,4 @@ export declare class SavedObjectsRepository
 |  [get(type, id, options)](./kibana-plugin-server.savedobjectsrepository.get.md) |  | Gets a single object |
 |  [incrementCounter(type, id, counterFieldName, options)](./kibana-plugin-server.savedobjectsrepository.incrementcounter.md) |  | Increases a counter field by one. Creates the document if one doesn't exist for the given id. |
 |  [update(type, id, attributes, options)](./kibana-plugin-server.savedobjectsrepository.update.md) |  | Updates an object |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsRepository` class.
 

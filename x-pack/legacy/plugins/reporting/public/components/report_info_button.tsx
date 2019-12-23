@@ -266,7 +266,6 @@ export class ReportInfoButton extends Component<Props, State> {
           info: null,
           error: kfetchError,
         });
-        throw kfetchError;
       }
     }
   };

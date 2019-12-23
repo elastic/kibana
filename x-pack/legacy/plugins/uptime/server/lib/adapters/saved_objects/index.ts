@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UMKibanaSavedObjectsAdapter } from './kibana_saved_objects_adapter';
+export { savedObjectsAdapter } from './kibana_saved_objects_adapter';
 export { UMSavedObjectsAdapter } from './types';

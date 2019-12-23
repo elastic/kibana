@@ -11,23 +11,19 @@ import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
 import Joi from 'joi';
 
-
-function importData({
-  callWithRequest, id, index, settings, mappings, ingestPipeline, data
-}) {
+function importData({ callWithRequest, id, index, settings, mappings, ingestPipeline, data }) {
   const { importData: importDataFunc } = importDataProvider(callWithRequest);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
 export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository) {
   return async request => {
-
     const requestObj = {
       query: request.query,
       payload: request.payload,
       params: request.params,
       auth: request.auth,
-      headers: request.headers
+      headers: request.headers,
     };
 
     // `id` being `undefined` tells us that this is a new import due to create a new index.

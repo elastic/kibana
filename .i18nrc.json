@@ -4,9 +4,14 @@
     "console": "src/legacy/core_plugins/console",
     "core": "src/core",
     "dashboardEmbeddableContainer": "src/plugins/dashboard_embeddable_container",
-    "data": ["src/legacy/core_plugins/data", "src/plugins/data"],
+    "data": [
+      "src/legacy/core_plugins/data",
+      "src/plugins/data"
+    ],
     "embeddableApi": "src/plugins/embeddable",
+    "embeddableExamples": "examples/embeddable_examples",
     "share": "src/plugins/share",
+    "home": "src/plugins/home",
     "esUi": "src/plugins/es_ui_shared",
     "devTools": "src/plugins/dev_tools",
     "expressions": "src/plugins/expressions",
@@ -17,9 +22,11 @@
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
+    "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
     "kibana_react": "src/legacy/core_plugins/kibana_react",
     "kibana-react": "src/plugins/kibana_react",
-    "navigation": "src/legacy/core_plugins/navigation",
+    "kibana_utils": "src/plugins/kibana_utils",
+    "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
     "regionMap": "src/legacy/core_plugins/region_map",
     "server": "src/legacy/server",
@@ -34,8 +41,13 @@
     "visTypeTagCloud": "src/legacy/core_plugins/vis_type_tagcloud",
     "visTypeTimeseries": "src/legacy/core_plugins/vis_type_timeseries",
     "visTypeVega": "src/legacy/core_plugins/vis_type_vega",
-    "visualizations": ["src/plugins/visualizations", "src/legacy/core_plugins/visualizations"]
+    "visualizations": [
+      "src/plugins/visualizations",
+      "src/legacy/core_plugins/visualizations"
+    ]
   },
-  "exclude": ["src/legacy/ui/ui_render/ui_render_mixin.js"],
+  "exclude": [
+    "src/legacy/ui/ui_render/ui_render_mixin.js"
+  ],
   "translations": []
 }

@@ -19,13 +19,9 @@
 
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
-import { PluginInitializerContext } from 'src/core/server';
-import { CoreSetup } from 'src/core/server';
-
-import { plugin } from './server/';
-import { CustomCoreSetup } from './server/plugin';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+import { VisTypeTimeseriesSetup } from '../../../plugins/vis_type_timeseries/server';
 
 const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
@@ -38,10 +34,9 @@ const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
       injectDefaultVars: server => ({}),
     },
     init: (server: Legacy.Server) => {
-      const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
-
-      plugin(initializerContext).setup(core);
+      const visTypeTimeSeriesPlugin = server.newPlatform.setup.plugins
+        .metrics as VisTypeTimeseriesSetup;
+      visTypeTimeSeriesPlugin.__legacy.registerLegacyAPI({ server });
     },
     config(Joi: any) {
       return Joi.object({

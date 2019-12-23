@@ -18,18 +18,16 @@ import { getActionType as getWebhookActionType } from './webhook';
 export function registerBuiltInActionTypes({
   logger,
   actionTypeRegistry,
-  actionsConfigUtils,
+  actionsConfigUtils: configurationUtilities,
 }: {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistry;
   actionsConfigUtils: ActionsConfigurationUtilities;
 }) {
   actionTypeRegistry.register(getServerLogActionType({ logger }));
-  actionTypeRegistry.register(getSlackActionType());
-  actionTypeRegistry.register(getEmailActionType({ logger }));
+  actionTypeRegistry.register(getSlackActionType({ configurationUtilities }));
+  actionTypeRegistry.register(getEmailActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getIndexActionType({ logger }));
-  actionTypeRegistry.register(getPagerDutyActionType({ logger }));
-  actionTypeRegistry.register(
-    getWebhookActionType({ logger, configurationUtilities: actionsConfigUtils })
-  );
+  actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
 }

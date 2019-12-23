@@ -20,7 +20,6 @@ import {
 } from '../graphql/types';
 
 export interface InfraFrontendLibs {
-  framework: InfraFrameworkAdapter;
   apolloClient: InfraApolloClient;
   observableApi: InfraObservableApi;
 }

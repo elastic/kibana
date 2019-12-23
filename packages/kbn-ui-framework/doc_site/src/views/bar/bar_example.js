@@ -22,13 +22,7 @@
 import React from 'react';
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import Bar from './bar';
 import barSource from '!!raw-loader!./bar';
@@ -46,13 +40,16 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Bar"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: barSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: barHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: barSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: barHtml,
+        },
+      ]}
     >
       <GuideText>
         Use the Bar to organize controls in a horizontal layout. This is especially useful for
@@ -71,17 +68,20 @@ export default props => (
 
     <GuideSection
       title="One section"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: barOneSectionSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: barOneSectionHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: barOneSectionSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: barOneSectionHtml,
+        },
+      ]}
     >
       <GuideText>
-        A Bar with one section will align it to the right, by default. To align it to the left,
-        just add another section and leave it empty, or don&rsquo;t use a Bar at all.
+        A Bar with one section will align it to the right, by default. To align it to the left, just
+        add another section and leave it empty, or don&rsquo;t use a Bar at all.
       </GuideText>
 
       <GuideDemo>
@@ -91,17 +91,20 @@ export default props => (
 
     <GuideSection
       title="Three sections"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: barThreeSectionsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: barThreeSectionsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: barThreeSectionsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: barThreeSectionsHtml,
+        },
+      ]}
     >
       <GuideText>
-        Technically the Bar can contain three or more sections, but there&rsquo;s no established use-case
-        for this.
+        Technically the Bar can contain three or more sections, but there&rsquo;s no established
+        use-case for this.
       </GuideText>
 
       <GuideDemo>

@@ -11,23 +11,22 @@ import chrome from 'ui/chrome';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
+import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import {
-  getDefaultDynamicProperties,
-  getDefaultStaticProperties,
-} from '../vector_style_defaults';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_ICON } from '../vector_constants';
 import { i18n } from '@kbn/i18n';
 import { SYMBOL_OPTIONS } from '../symbol_utils';
 
-import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
   state = {
     dateFields: [],
     numberFields: [],
+    fields: [],
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
@@ -40,40 +39,44 @@ export class VectorStyleEditor extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadOrdinalFields();
+    this._loadFields();
     this._loadSupportedFeatures();
   }
 
   componentDidUpdate() {
-    this._loadOrdinalFields();
+    this._loadFields();
     this._loadSupportedFeatures();
   }
 
-  async _loadOrdinalFields() {
-
-    const getFieldMeta = async (field) => {
+  async _loadFields() {
+    const getFieldMeta = async field => {
       return {
         label: await field.getLabel(),
         name: field.getName(),
-        origin: field.getOrigin()
+        origin: field.getOrigin(),
       };
     };
+
     const dateFields = await this.props.layer.getDateFields();
     const dateFieldPromises = dateFields.map(getFieldMeta);
     const dateFieldsArray = await Promise.all(dateFieldPromises);
-
     if (this._isMounted && !_.isEqual(dateFieldsArray, this.state.dateFields)) {
       this.setState({ dateFields: dateFieldsArray });
     }
 
     const numberFields = await this.props.layer.getNumberFields();
     const numberFieldPromises = numberFields.map(getFieldMeta);
-
     const numberFieldsArray = await Promise.all(numberFieldPromises);
     if (this._isMounted && !_.isEqual(numberFieldsArray, this.state.numberFields)) {
       this.setState({ numberFields: numberFieldsArray });
     }
 
+    const fields = await this.props.layer.getFields();
+    const fieldPromises = fields.map(getFieldMeta);
+    const fieldsArray = await Promise.all(fieldPromises);
+    if (this._isMounted && !_.isEqual(fieldsArray, this.state.fields)) {
+      this.setState({ fields: fieldsArray });
+    }
   }
 
   async _loadSupportedFeatures() {
@@ -117,13 +120,21 @@ export class VectorStyleEditor extends Component {
     return [...this.state.dateFields, ...this.state.numberFields];
   }
 
+  _handleSelectedFeatureChange = selectedFeature => {
+    this.setState({ selectedFeature });
+  };
+
+  _onIsTimeAwareChange = event => {
+    this.props.onIsTimeAwareChange(event.target.checked);
+  };
+
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
         swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.fillColor}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
       />
@@ -136,7 +147,7 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.lineColor}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
       />
@@ -148,7 +159,7 @@ export class VectorStyleEditor extends Component {
       <VectorStyleSizeEditor
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.lineWidth}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineWidth.options}
       />
@@ -160,10 +171,44 @@ export class VectorStyleEditor extends Component {
       <VectorStyleSizeEditor
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.iconSize}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconSize.options}
       />
+    );
+  }
+
+  _renderLabelProperties() {
+    return (
+      <Fragment>
+        <VectorStyleLabelEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelText}
+          fields={this.state.fields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelText.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelText.options}
+        />
+        <EuiSpacer size="m" />
+
+        <VectorStyleColorEditor
+          swatches={DEFAULT_LINE_COLORS}
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelColor}
+          fields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelColor.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelColor.options}
+        />
+        <EuiSpacer size="m" />
+
+        <VectorStyleSizeEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelSize}
+          fields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelSize.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelSize.options}
+        />
+        <EuiSpacer size="m" />
+      </Fragment>
     );
   }
 
@@ -171,16 +216,13 @@ export class VectorStyleEditor extends Component {
     let iconOrientation;
     if (this.props.symbolDescriptor.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
       iconOrientation = (
-        <Fragment>
-          <OrientationEditor
-            handlePropertyChange={this.props.handlePropertyChange}
-            styleProperty={this.props.styleProperties.iconOrientation}
-            ordinalFields={this.state.numberFields}
-            defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
-            defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
-          />
-          <EuiSpacer size="m" />
-        </Fragment>
+        <OrientationEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.iconOrientation}
+          fields={this.state.numberFields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
+        />
       );
     }
 
@@ -204,8 +246,12 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {iconOrientation}
+        <EuiSpacer size="m" />
 
         {this._renderSymbolSize()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -235,11 +281,7 @@ export class VectorStyleEditor extends Component {
     );
   }
 
-  _handleSelectedFeatureChange = selectedFeature => {
-    this.setState({ selectedFeature });
-  };
-
-  render() {
+  _renderProperties() {
     const { supportedFeatures, selectedFeature } = this.state;
 
     if (!supportedFeatures) {
@@ -299,6 +341,34 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {styleProperties}
+      </Fragment>
+    );
+  }
+
+  _renderIsTimeAwareSwitch() {
+    if (!this.props.showIsTimeAware) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow display="columnCompressedSwitch">
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
+            defaultMessage: 'Apply global time to style metadata requests',
+          })}
+          checked={this.props.isTimeAware}
+          onChange={this._onIsTimeAwareChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderProperties()}
+        {this._renderIsTimeAwareSwitch()}
       </Fragment>
     );
   }

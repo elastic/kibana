@@ -5,10 +5,8 @@
  */
 import { canInheritTimeRange } from './can_inherit_time_range';
 /** eslint-disable */
-import {
-  HelloWorldEmbeddable,
-  HelloWorldContainer,
-} from '../../../../src/plugins/embeddable/public/lib/test_samples';
+import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/lib/test_samples';
+import { HelloWorldEmbeddable } from '../../../../examples/embeddable_examples/public';
 /** eslint-enable */
 import { TimeRangeEmbeddable, TimeRangeContainer } from './test_helpers';
 

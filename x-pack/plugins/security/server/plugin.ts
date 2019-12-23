@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   IClusterClient,
@@ -13,8 +13,6 @@ import {
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
-  SavedObjectsLegacyService,
-  LegacyRequest,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
@@ -25,9 +23,10 @@ import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
 import { createConfig$ } from './config';
 import { defineRoutes } from './routes';
-import { SecurityLicenseService, SecurityLicense } from './licensing';
+import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -42,9 +41,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  kibanaIndexName: string;
-  cspRules: string;
-  savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -72,12 +68,9 @@ export interface PluginSetupContract {
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
     config: RecursiveReadonly<{
-      session: {
-        idleTimeout: number | null;
-        lifespan: number | null;
-      };
       secureCookies: boolean;
-      authc: { providers: string[] };
+      cookieName: string;
+      loginAssistanceMessage: string;
     }>;
   };
 }
@@ -94,7 +87,7 @@ export class Plugin {
   private readonly logger: Logger;
   private clusterClient?: IClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
-  private licenseSubscription?: Subscription;
+  private securityLicenseService?: SecurityLicenseService;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -121,18 +114,21 @@ export class Plugin {
     core: CoreSetup,
     { features, licensing }: PluginSetupDependencies
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await createConfig$(this.initializerContext, core.http.isTlsEnabled)
+    const [config, legacyConfig] = await combineLatest([
+      createConfig$(this.initializerContext, core.http.isTlsEnabled),
+      this.initializerContext.config.legacy.globalConfig$,
+    ])
       .pipe(first())
       .toPromise();
 
     this.clusterClient = core.elasticsearch.createClient('security', {
-      plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+      plugins: [elasticsearchClientPlugin],
     });
 
-    const { license, update: updateLicense } = new SecurityLicenseService().setup();
-    this.licenseSubscription = licensing.license$.subscribe(rawLicense =>
-      updateLicense(rawLicense)
-    );
+    this.securityLicenseService = new SecurityLicenseService();
+    const { license } = this.securityLicenseService.setup({
+      license$: licensing.license$,
+    });
 
     const authc = await setupAuthentication({
       http: core.http,
@@ -148,10 +144,16 @@ export class Plugin {
       clusterClient: this.clusterClient,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
+      kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
       featuresService: features,
+    });
+
+    setupSavedObjects({
+      auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
+      authz,
+      savedObjects: core.savedObjects,
     });
 
     core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
@@ -164,10 +166,9 @@ export class Plugin {
       config,
       authc,
       authz,
-      getLegacyAPI: this.getLegacyAPI,
+      csp: core.http.csp,
     });
 
-    const adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
     return deepFreeze({
       authc,
 
@@ -186,16 +187,7 @@ export class Plugin {
       },
 
       __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-
-          setupSavedObjects({
-            auditLogger: new SecurityAuditLogger(legacyAPI.auditLogger),
-            adminClusterClient: adminClient,
-            authz,
-            legacyAPI,
-          });
-        },
+        registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
 
@@ -205,13 +197,8 @@ export class Plugin {
         // exception may be `sessionTimeout` as other parts of the app may want to know it.
         config: {
           loginAssistanceMessage: config.loginAssistanceMessage,
-          session: {
-            idleTimeout: config.session.idleTimeout,
-            lifespan: config.session.lifespan,
-          },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
-          authc: { providers: config.authc.providers },
         },
       },
     });
@@ -229,9 +216,9 @@ export class Plugin {
       this.clusterClient = undefined;
     }
 
-    if (this.licenseSubscription) {
-      this.licenseSubscription.unsubscribe();
-      this.licenseSubscription = undefined;
+    if (this.securityLicenseService) {
+      this.securityLicenseService.stop();
+      this.securityLicenseService = undefined;
     }
   }
 

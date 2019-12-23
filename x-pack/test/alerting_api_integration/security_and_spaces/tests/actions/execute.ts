@@ -331,8 +331,10 @@ export default function({ getService }: FtrProviderContext) {
               name: 'test email action',
               actionTypeId: '.email',
               config: {
-                from: 'email-from@example.com',
-                host: 'host-is-ignored-here.example.com',
+                from: 'email-from-1@example.com',
+                // this host is specifically whitelisted in:
+                //    x-pack/test/alerting_api_integration/common/config.ts
+                host: 'some.non.existent.com',
                 port: 666,
               },
               secrets: {
@@ -349,7 +351,7 @@ export default function({ getService }: FtrProviderContext) {
             .send({
               name: 'a test email action 2',
               config: {
-                from: 'email-from@example.com',
+                from: 'email-from-2@example.com',
                 service: '__json',
               },
               secrets: {

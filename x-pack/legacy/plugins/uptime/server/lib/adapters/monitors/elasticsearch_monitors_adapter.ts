@@ -6,17 +6,10 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import {
-  FilterBar,
-  MonitorChart,
-  MonitorPageTitle,
-  Ping,
-  LocationDurationLine,
-} from '../../../../common/graphql/types';
+import { MonitorChart, Ping, LocationDurationLine } from '../../../../common/graphql/types';
 import { getHistogramIntervalFormatted } from '../../helper';
-import { DatabaseAdapter } from '../database';
+import { MonitorError, MonitorLocation } from '../../../../common/runtime_types';
 import { UMMonitorsAdapter } from './adapter_types';
-import { MonitorDetails, Error } from '../../../../common/runtime_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -38,25 +31,8 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   };
 };
 
-export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
-  constructor(private readonly database: DatabaseAdapter) {
-    this.database = database;
-  }
-
-  /**
-   * Fetches data used to populate monitor charts
-   * @param request Kibana request
-   * @param monitorId ID value for the selected monitor
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   */
-  public async getMonitorChartsData(
-    request: any,
-    monitorId: string,
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    location?: string | null
-  ): Promise<MonitorChart> {
+export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
+  getMonitorChartsData: async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -96,7 +72,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const result = await this.database.search(request, params);
+    const result = await callES('search', params);
 
     const dateHistogramBuckets = get<any[]>(result, 'aggregations.timeseries.buckets', []);
     /**
@@ -182,19 +158,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     });
 
     return monitorChartsData;
-  }
+  },
 
-  /**
-   * Fetch options for the filter bar.
-   * @param request Kibana request object
-   * @param dateRangeStart timestamp bounds
-   * @param dateRangeEnd timestamp bounds
-   */
-  public async getFilterBar(
-    request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string
-  ): Promise<FilterBar> {
+  getFilterBar: async ({ callES, dateRangeStart, dateRangeEnd }) => {
     const fields: { [key: string]: string } = {
       ids: 'monitor.id',
       schemes: 'monitor.type',
@@ -220,24 +186,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         }, {}),
       },
     };
-    const { aggregations } = await this.database.search(request, params);
+    const { aggregations } = await callES('search', params);
 
     return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
       const bucketName = fields[field];
       acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
       return acc;
     }, {});
-  }
+  },
 
-  /**
-   * Fetch data for the monitor page title.
-   * @param request Kibana server request
-   * @param monitorId the ID to query
-   */
-  public async getMonitorPageTitle(
-    request: any,
-    monitorId: string
-  ): Promise<MonitorPageTitle | null> {
+  getMonitorPageTitle: async ({ callES, monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -261,7 +219,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const result = await this.database.search(request, params);
+    const result = await callES('search', params);
     const pageTitle: Ping | null = get(result, 'hits.hits[0]._source', null);
     if (pageTitle === null) {
       return null;
@@ -271,13 +229,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       url: get(pageTitle, 'url.full', null),
       name: get(pageTitle, 'monitor.name', null),
     };
-  }
+  },
 
-  public async getMonitorDetails(request: any, monitorId: string): Promise<MonitorDetails> {
+  getMonitorDetails: async ({ callES, monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 1,
+        _source: ['error', '@timestamp'],
         query: {
           bool: {
             must: [
@@ -306,13 +265,108 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const result = await this.database.search(request, params);
+    const result = await callES('search', params);
 
-    const monitorError: Error | undefined = get(result, 'hits.hits[0]._source.error', undefined);
+    const data = result.hits.hits[0]?._source;
+
+    const monitorError: MonitorError | undefined = data?.error;
+    const errorTimeStamp: string | undefined = data?.['@timestamp'];
 
     return {
       monitorId,
       error: monitorError,
+      timestamp: errorTimeStamp,
     };
-  }
-}
+  },
+
+  /**
+   * Fetch data for the monitor page title.
+   * @param request Kibana server request
+   *
+   */
+  getMonitorLocations: async ({ callES, monitorId, dateStart, dateEnd }) => {
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                match: {
+                  'monitor.id': monitorId,
+                },
+              },
+              {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
+                    lte: dateEnd,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          location: {
+            terms: {
+              field: 'observer.geo.name',
+              missing: '__location_missing__',
+            },
+            aggs: {
+              most_recent: {
+                top_hits: {
+                  size: 1,
+                  sort: {
+                    '@timestamp': {
+                      order: 'desc',
+                    },
+                  },
+                  _source: ['monitor', 'summary', 'observer'],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = await callES('search', params);
+    const locations = result?.aggregations?.location?.buckets ?? [];
+
+    const getGeo = (locGeo: any) => {
+      const { name, location } = locGeo;
+      const latLon = location.trim().split(',');
+      return {
+        name,
+        location: {
+          lat: latLon[0],
+          lon: latLon[1],
+        },
+      };
+    };
+
+    const monLocs: MonitorLocation[] = [];
+    locations.forEach((loc: any) => {
+      if (loc?.key !== '__location_missing__') {
+        const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+        const location: MonitorLocation = {
+          summary: mostRecentLocation?.summary,
+          geo: getGeo(mostRecentLocation?.observer?.geo),
+        };
+        monLocs.push(location);
+      }
+    });
+
+    return {
+      monitorId,
+      locations: monLocs,
+    };
+  },
+};

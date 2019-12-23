@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import url from 'url';
 import uuid from 'uuid';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -35,7 +35,7 @@ export interface Schedule {
 }
 
 interface Arguments {
-  http: HttpServiceBase;
+  http: HttpSetup;
   emails: string[];
   schedule: Schedule;
   serviceName: string;
