@@ -6,21 +6,23 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { Services } from '../../types';
+import { ParamsType, SecretsType } from '../servicenow';
 
 interface PostServiceNowOptions {
   apiUrl: string;
-  data: any;
+  data: ParamsType;
   headers: Record<string, string>;
-  services: Services;
+  services?: Services;
+  secrets: SecretsType;
 }
 
 // post an event to pagerduty
 export async function postServiceNow(options: PostServiceNowOptions): Promise<AxiosResponse> {
-  const { apiUrl, data, headers } = options;
+  const { apiUrl, data, headers, secrets } = options;
   const axiosOptions = {
     headers,
     validateStatus: () => true,
+    auth: secrets,
   };
-
-  return axios.post(apiUrl, data, axiosOptions);
+  return axios.post(`${apiUrl}/api/now/v1/table/incident`, data, axiosOptions);
 }
