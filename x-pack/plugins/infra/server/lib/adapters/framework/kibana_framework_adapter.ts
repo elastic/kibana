@@ -6,7 +6,6 @@
 
 /* eslint-disable @typescript-eslint/array-type */
 
-import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
@@ -30,9 +29,11 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
   RouteMethod,
-} from '../../../../../../../../src/core/server';
-import { RequestHandler } from '../../../../../../../../src/core/server';
-import { InfraConfig } from '../../../../../../../plugins/infra/server';
+  APICaller,
+} from '../../../../../../../src/core/server';
+import { RequestHandler } from '../../../../../../../src/core/server';
+import { InfraConfig } from '../../../plugin';
+import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 
 export class KibanaFramework {
   public router: IRouter;
@@ -214,14 +215,10 @@ export class KibanaFramework {
   public getIndexPatternsService(
     requestContext: RequestHandlerContext
   ): Legacy.IndexPatternsService {
-    return this.plugins.indexPatterns.indexPatternsServiceFactory({
-      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
-        const fieldCaps = await this.callWithRequest(requestContext, method, {
-          ...args,
-          allowNoIndices: true,
-        } as GenericParams);
-        return fieldCaps;
-      },
+    return new IndexPatternsFetcher((...rest: Parameters<APICaller>) => {
+      rest[1] = rest[1] || {};
+      rest[1].allowNoIndices = true;
+      return requestContext.core.elasticsearch.adminClient.callAsCurrentUser(...rest);
     });
   }
 
