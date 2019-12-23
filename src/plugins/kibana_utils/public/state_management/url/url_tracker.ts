@@ -17,27 +17,34 @@
  * under the License.
  */
 
-import { createBrowserHistory, History } from 'history';
+import { createBrowserHistory, History, Location } from 'history';
 import { useLayoutEffect } from 'react';
 import { getRelativeToHistoryPath } from './url_storage';
 
+export interface IUrlTracker {
+  startTrackingUrl: (history: History) => () => void;
+  getTrackedUrl: () => string | null;
+  trackUrl: (url: string) => void;
+}
 /**
  * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
  * Persists the url in sessionStorage so it could be restored if navigated back to the app
  */
-export function createUrlTracker(key: string, history: History = createBrowserHistory()) {
+export function createUrlTracker(key: string, storage: Storage = sessionStorage): IUrlTracker {
   return {
-    startTrackingUrl() {
-      return history.listen(location => {
+    startTrackingUrl(history: History = createBrowserHistory()) {
+      const track = (location: Location<any>) => {
         const url = getRelativeToHistoryPath(history.createHref(location), history);
-        sessionStorage.setItem(key, url);
-      });
+        storage.setItem(key, url);
+      };
+      track(history.location);
+      return history.listen(track);
     },
     getTrackedUrl() {
-      return sessionStorage.getItem(key);
+      return storage.getItem(key);
     },
     trackUrl(url: string) {
-      sessionStorage.setItem(key, url);
+      storage.setItem(key, url);
     },
   };
 }
@@ -45,15 +52,16 @@ export function createUrlTracker(key: string, history: History = createBrowserHi
 export function useUrlTracker(
   appInstanceId: string,
   history: History,
-  shouldRestoreUrl: (urlToRestore: string) => boolean = () => true
+  shouldRestoreUrl: (urlToRestore: string) => boolean = () => true,
+  storage: Storage = sessionStorage
 ) {
   useLayoutEffect(() => {
-    const urlTracker = createUrlTracker(`lastUrlTracker:${appInstanceId}`, history);
+    const urlTracker = createUrlTracker(`lastUrlTracker:${appInstanceId}`, storage);
     const urlToRestore = urlTracker.getTrackedUrl();
     if (urlToRestore && shouldRestoreUrl(urlToRestore)) {
       history.replace(urlToRestore);
     }
-    const stopTrackingUrl = urlTracker.startTrackingUrl();
+    const stopTrackingUrl = urlTracker.startTrackingUrl(history);
     return () => {
       stopTrackingUrl();
     };

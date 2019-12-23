@@ -144,7 +144,7 @@ export const createUrlControls = (history: History = createBrowserHistory()): IU
 
       // Schedule url update to the next microtask
       return Promise.resolve().then(() => {
-        if (updater.length === 0) return getCurrentUrl();
+        if (updateQueue.length === 0) return getCurrentUrl();
         const resultUrl = updateQueue.reduce((url, nextUpdate) => nextUpdate(url), getCurrentUrl());
         const newUrl = updateUrl(resultUrl, shouldReplace);
         // queue clean up

@@ -16,11 +16,134 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { createBrowserHistory, createHashHistory } from 'history';
-import { getRelativeToHistoryPath } from './url_storage';
+import '../../storage/hashed_item_store/mock';
+import {
+  History,
+  createBrowserHistory,
+  createHashHistory,
+  createMemoryHistory,
+  createPath,
+} from 'history';
+import {
+  getRelativeToHistoryPath,
+  createUrlControls,
+  IUrlControls,
+  setStateToUrl,
+  getStateFromUrl,
+} from './url_storage';
 
 describe('url_storage', () => {
+  describe('getStateFromUrl & setStateToUrl', () => {
+    const url = 'http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id';
+    const state1 = {
+      testStr: '123',
+      testNumber: 0,
+      testObj: { test: '123' },
+      testNull: null,
+      testArray: [1, 2, {}],
+    };
+    const state2 = {
+      test: '123',
+    };
+
+    it('should set expanded state to url', () => {
+      let newUrl = setStateToUrl('_s', state1, { useHash: false }, url);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')"`
+      );
+      const retrievedState1 = getStateFromUrl('_s', newUrl);
+      expect(retrievedState1).toEqual(state1);
+
+      newUrl = setStateToUrl('_s', state2, { useHash: false }, newUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=(test:'123')"`
+      );
+      const retrievedState2 = getStateFromUrl('_s', newUrl);
+      expect(retrievedState2).toEqual(state2);
+    });
+
+    it('should set hashed state to url', () => {
+      let newUrl = setStateToUrl('_s', state1, { useHash: true }, url);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=h@a897fac"`
+      );
+      const retrievedState1 = getStateFromUrl('_s', newUrl);
+      expect(retrievedState1).toEqual(state1);
+
+      newUrl = setStateToUrl('_s', state2, { useHash: true }, newUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=h@40f94d5"`
+      );
+      const retrievedState2 = getStateFromUrl('_s', newUrl);
+      expect(retrievedState2).toEqual(state2);
+    });
+  });
+
+  describe('urlControls', () => {
+    let history: History;
+    let urlControls: IUrlControls;
+    beforeEach(() => {
+      history = createMemoryHistory();
+      urlControls = createUrlControls(history);
+    });
+
+    const getCurrentUrl = () => createPath(history.location);
+    it('should update url', () => {
+      urlControls.update('/1', false);
+
+      expect(getCurrentUrl()).toBe('/1');
+      expect(history.length).toBe(2);
+
+      urlControls.update('/2', true);
+
+      expect(getCurrentUrl()).toBe('/2');
+      expect(history.length).toBe(2);
+    });
+
+    it('should update url async', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', false);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', false);
+      expect(getCurrentUrl()).toBe('/');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/3');
+    });
+
+    it('should push url state if at least 1 push in async chain', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', true);
+      const pr2 = urlControls.updateAsync(() => '/2', false);
+      const pr3 = urlControls.updateAsync(() => '/3', true);
+      expect(getCurrentUrl()).toBe('/');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/3');
+      expect(history.length).toBe(2);
+    });
+
+    it('should replace url state if all updates in async chain are replace', async () => {
+      const pr1 = urlControls.updateAsync(() => '/1', true);
+      const pr2 = urlControls.updateAsync(() => '/2', true);
+      const pr3 = urlControls.updateAsync(() => '/3', true);
+      expect(getCurrentUrl()).toBe('/');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/3');
+      expect(history.length).toBe(1);
+    });
+
+    it('should listen for url updates', async () => {
+      const cb = jest.fn();
+      urlControls.listen(cb);
+      const pr1 = urlControls.updateAsync(() => '/1', true);
+      const pr2 = urlControls.updateAsync(() => '/2', true);
+      const pr3 = urlControls.updateAsync(() => '/3', true);
+      await Promise.all([pr1, pr2, pr3]);
+
+      urlControls.update('/4', false);
+      urlControls.update('/5', true);
+
+      expect(cb).toHaveBeenCalledTimes(3);
+    });
+  });
+
   describe('getRelativeToHistoryPath', () => {
     it('should extract path relative to browser history without basename', () => {
       const history = createBrowserHistory();

@@ -44,7 +44,7 @@ export const stringifyQueryString = (query: ParsedUrlQuery) =>
  *    sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
  *                     / "*" / "+" / "," / ";" / "="
  */
-function encodeUriQuery(val: string, pctEncodeSpaces: boolean = false) {
+export function encodeUriQuery(val: string, pctEncodeSpaces: boolean = false) {
   return encodeURIComponent(val)
     .replace(/%40/gi, '@')
     .replace(/%3A/gi, ':')
