@@ -5,6 +5,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
+import { AssetType } from '../../../../../ingest/server/libs/types';
 import { AssetReference, Dataset, RegistryPackage } from '../../../../common/types';
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';
@@ -77,6 +78,6 @@ async function installTemplate({
     body: template,
   });
 
-  // The id of a template is it's name
-  return { id: templateName, type: 'index-template' };
+  // The id of a template is its name
+  return { id: templateName, type: AssetType.IndexTemplate };
 }

@@ -110,7 +110,7 @@ async function installKibanaSavedObjects({
 }
 
 function toAssetReference({ id, type }: SavedObject) {
-  const reference: AssetReference = { id, type };
+  const reference: AssetReference = { id, type: type as KibanaAssetType };
 
   return reference;
 }

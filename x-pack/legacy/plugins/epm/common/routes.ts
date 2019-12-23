@@ -42,3 +42,4 @@ export function getRemovePath(pkgkey: string) {
 }
 
 export const getInstallDatasourcePath = () => API_INSTALL_DATASOURCE_PATTERN;
+export const getListPoliciesPath = () => '/api/ingest/policies';
