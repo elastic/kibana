@@ -9,7 +9,6 @@ import { configure, addDecorator, addParameters } from '@storybook/react';
 import { withKnobs } from '@storybook/addon-knobs/react';
 import { create } from '@storybook/theming';
 
-import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 // If we're running Storyshots, be sure to register the require context hook.
@@ -22,9 +21,12 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 // Add New Platform Context for any stories that need it
-addDecorator(fn => (
-  <KibanaContextProvider services={coreMock.createStart()}>{fn()}</KibanaContextProvider>
-));
+const settings = new Map();
+settings.set('darkMode', true);
+const platform = {
+  uiSettings: settings,
+};
+addDecorator(fn => <KibanaContextProvider services={platform}>{fn()}</KibanaContextProvider>);
 
 function loadStories() {
   require('./dll_contexts');
