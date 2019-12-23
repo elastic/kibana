@@ -100,6 +100,22 @@ test('return error when plugin id includes `.` characters', async () => {
   });
 });
 
+test('logs warning if pluginId is not in camelCase format', async () => {
+  mockReadFile.mockImplementation((path, cb) => {
+    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
+  });
+
+  expect(loggingServiceMock.collect(logger).warn).toHaveLength(0);
+  await parseManifest(pluginPath, packageInfo, logger);
+  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Expect plugin \\"id\\" in camelCase, but found: some_name",
+      ],
+    ]
+  `);
+});
+
 test('return error when plugin version is missing', async () => {
   mockReadFile.mockImplementation((path, cb) => {
     cb(null, Buffer.from(JSON.stringify({ id: 'some-id' })));
