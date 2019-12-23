@@ -1,0 +1,17 @@
+{
+  "rule_id": "dda43d7f-69bc-487f-b05c-2b518e9db622",
+  "risk_score": 50,
+  "description": "Indicates that a host was seen to have SQL injection attacks against it. This is tracked by IP address as opposed to hostname.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice HTTP::SQL_Injection_Victim",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"HTTP::SQL_Injection_Victim\" or rule.name: \"HTTP::SQL_Injection_Victim\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
