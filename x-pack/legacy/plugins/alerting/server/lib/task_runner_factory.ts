@@ -21,6 +21,7 @@ import {
   SpaceIdToNamespaceFunction,
   IntervalSchedule,
   Services,
+  State,
 } from '../types';
 import { promiseResult, map } from './result_type';
 
@@ -149,13 +150,16 @@ export class TaskRunnerFactory {
         services: Services,
         { params, throttle, muteAll, mutedInstanceIds }: SavedObject['attributes'],
         executionHandler: ReturnType<typeof createExecutionHandler>
-      ): Promise<Record<string, any>> {
+      ): Promise<State> {
         const {
           params: { alertId },
           state: { alertInstances: alertRawInstances = {}, alertTypeState = {} },
         } = taskInstance;
 
-        const alertInstances = mapValues(alertRawInstances, alert => new AlertInstance(alert));
+        const alertInstances = mapValues<AlertInstances>(
+          alertRawInstances,
+          alert => new AlertInstance(alert)
+        );
 
         const updatedAlertTypeState = await alertType.executor({
           alertId,
@@ -201,6 +205,7 @@ export class TaskRunnerFactory {
       async run() {
         const {
           params: { alertId, spaceId },
+          startedAt: previousStartedAt,
         } = taskInstance;
 
         const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
@@ -223,20 +228,21 @@ export class TaskRunnerFactory {
         );
 
         return {
-          state: map<Record<string, any>, Error, Record<string, any>>(
-            await promiseResult<Record<string, any>, Error>(
+          state: map<State, Error, State>(
+            await promiseResult<State, Error>(
               this.executeAlertInstances(services, { ...attributes, params }, executionHandler)
             ),
-            (stateUpdates: Record<string, any>) => {
+            (stateUpdates: State) => {
               return {
                 ...stateUpdates,
-                previousStartedAt: taskInstance.startedAt!,
+                previousStartedAt,
               };
             },
             (err: Error) => {
+              logger.error(`Executing Alert "${alertId}" has resulted in Error: ${err.message}.`);
               return {
                 ...taskInstance.state,
-                previousStartedAt: taskInstance.startedAt!,
+                previousStartedAt,
               };
             }
           ),
