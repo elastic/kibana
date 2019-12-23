@@ -40,7 +40,6 @@ export const initGetLogEntryCategoriesRoute = ({
           categoryCount,
           sourceId,
           timeRange: { startTime, endTime },
-          // bucketDuration,
           // datasets,
         },
       } = pipe(

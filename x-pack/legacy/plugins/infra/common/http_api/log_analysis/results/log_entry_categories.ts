@@ -23,7 +23,6 @@ export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH =
 export const getLogEntryCategoriesRequestPayloadRT = rt.type({
   data: rt.intersection([
     rt.type({
-      // bucketDuration: rt.number,
       categoryCount: rt.number,
       sourceId: rt.string,
       timeRange: timeRangeRT,
@@ -42,9 +41,16 @@ export type GetLogEntryCategoriesRequestPayload = rt.TypeOf<
  * response
  */
 
+export const logEntryCategoryHistogramBucketRT = rt.type({
+  startTime: rt.number,
+  bucketDuration: rt.number,
+  logEntryCount: rt.number,
+});
+
 export const logEntryCategoryRT = rt.type({
   categoryId: rt.number,
   datasets: rt.array(rt.string),
+  histogramBuckets: rt.array(logEntryCategoryHistogramBucketRT),
   logEntryCount: rt.number,
   regularExpression: rt.string,
 });
@@ -54,7 +60,6 @@ export type LogEntryCategory = rt.TypeOf<typeof logEntryCategoryRT>;
 export const getLogEntryCategoriesSuccessReponsePayloadRT = rt.intersection([
   rt.type({
     data: rt.type({
-      // bucketDuration: rt.number,
       categories: rt.array(logEntryCategoryRT),
     }),
   }),

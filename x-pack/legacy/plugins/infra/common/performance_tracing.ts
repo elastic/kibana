@@ -12,31 +12,22 @@ export const tracingSpanRT = rt.type({
   id: rt.string,
   name: rt.string,
   start: rt.number,
-  parentId: rt.union([rt.string, rt.null]),
 });
+
 export type TracingSpan = rt.TypeOf<typeof tracingSpanRT>;
 
-export const startTracingSpan = (name: string, parentId: string | null = null) => {
+export type ActiveTrace = (endTime?: number) => TracingSpan;
+
+export const startTracingSpan = (name: string): ActiveTrace => {
   const initialState: TracingSpan = {
     duration: Number.POSITIVE_INFINITY,
     id: uuid.v4(),
     name,
-    parentId,
     start: Date.now(),
   };
 
-  const tracingSpan = {
-    stop: () => {
-      tracingSpan.state = {
-        ...tracingSpan.state,
-        duration: Date.now() - initialState.start,
-      };
-
-      return tracingSpan;
-    },
-    startChild: (childSpanName: string) => startTracingSpan(childSpanName, initialState.id),
-    state: initialState,
-  };
-
-  return tracingSpan;
+  return (endTime: number = Date.now()) => ({
+    ...initialState,
+    duration: endTime - initialState.start,
+  });
 };

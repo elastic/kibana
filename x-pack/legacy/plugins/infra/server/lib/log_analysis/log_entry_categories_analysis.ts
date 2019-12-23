@@ -16,6 +16,11 @@ import {
   logEntryCategoriesResponseRT,
   LogEntryCategoryHit,
 } from './queries/log_entry_categories';
+import {
+  logEntryCategoryHistogramsResponseRT,
+  createLogEntryCategoryHistogramsQuery,
+  LogEntryCategoryFilterBucket,
+} from './queries/log_entry_category_histograms';
 
 export class LogEntryCategoriesAnalysis {
   constructor(
@@ -31,9 +36,8 @@ export class LogEntryCategoriesAnalysis {
     startTime: number,
     endTime: number,
     categoryCount: number
-    // bucketDuration: number
   ) {
-    const topLogEntryCategoriesSpan = startTracingSpan('get top categories');
+    const finalizeTopLogEntryCategoriesSpan = startTracingSpan('get top categories');
 
     const logEntryCategoriesCountJobId = getJobId(
       this.libs.framework.getSpaceId(request),
@@ -41,9 +45,77 @@ export class LogEntryCategoriesAnalysis {
       logEntryCategoriesJobTypes[0]
     );
 
-    const fetchTopLogEntryCategoriesAggSpan = topLogEntryCategoriesSpan.startChild(
-      'fetch top categories from ES'
+    const timeIntervalDuration = endTime - startTime;
+    const bucketDuration = Math.round(timeIntervalDuration / 5);
+
+    const {
+      topLogEntryCategories,
+      timing: { spans: fetchTopLogEntryCategoriesAggSpans },
+    } = await this.fetchTopLogEntryCategories(
+      requestContext,
+      logEntryCategoriesCountJobId,
+      startTime,
+      endTime,
+      categoryCount
     );
+
+    const categoryIds = topLogEntryCategories.map(({ categoryId }) => categoryId);
+
+    const {
+      logEntryCategoriesById,
+      timing: { spans: fetchTopLogEntryCategoryPatternsSpans },
+    } = await this.fetchLogEntryCategories(
+      requestContext,
+      logEntryCategoriesCountJobId,
+      categoryIds
+    );
+
+    const {
+      categoryHistogramsById,
+      timing: { spans: fetchTopLogEntryCategoryHistogramsSpans },
+    } = await this.fetchTopLogEntryCategoryHistograms(
+      requestContext,
+      logEntryCategoriesCountJobId,
+      categoryIds,
+      startTime - timeIntervalDuration,
+      endTime,
+      bucketDuration
+    );
+
+    const topLogEntryCategoriesSpan = finalizeTopLogEntryCategoriesSpan();
+
+    return {
+      data: topLogEntryCategories.map(topCategory => ({
+        ...topCategory,
+        regularExpression: logEntryCategoriesById[topCategory.categoryId]?._source.regex ?? '',
+        histogramBuckets:
+          categoryHistogramsById[topCategory.categoryId]?.date_histogram_timestamp.buckets.map(
+            bucket => ({
+              bucketDuration,
+              logEntryCount: bucket.sum_actual.value,
+              startTime: bucket.key,
+            })
+          ) ?? [],
+      })),
+      timing: {
+        spans: [
+          topLogEntryCategoriesSpan,
+          ...fetchTopLogEntryCategoriesAggSpans,
+          ...fetchTopLogEntryCategoryPatternsSpans,
+          ...fetchTopLogEntryCategoryHistogramsSpans,
+        ],
+      },
+    };
+  }
+
+  private async fetchTopLogEntryCategories(
+    requestContext: RequestHandlerContext,
+    logEntryCategoriesCountJobId: string,
+    startTime: number,
+    endTime: number,
+    categoryCount: number
+  ) {
+    const finalizeEsSearchSpan = startTracingSpan('Fetch top categories from ES');
 
     const topLogEntryCategoriesResponse = decodeOrThrow(topLogEntryCategoriesResponseRT)(
       await this.libs.framework.callWithRequest(
@@ -58,7 +130,7 @@ export class LogEntryCategoriesAnalysis {
       )
     );
 
-    fetchTopLogEntryCategoriesAggSpan.stop();
+    const esSearchSpan = finalizeEsSearchSpan();
 
     if (topLogEntryCategoriesResponse._shards.total === 0) {
       throw new NoLogAnalysisResultsIndexError(
@@ -66,7 +138,7 @@ export class LogEntryCategoriesAnalysis {
       );
     }
 
-    const topCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
+    const topLogEntryCategories = topLogEntryCategoriesResponse.aggregations.terms_category_id.buckets.map(
       topCategoryBucket => ({
         categoryId: parseCategoryId(topCategoryBucket.key),
         logEntryCount: topCategoryBucket.sum_actual.value,
@@ -74,11 +146,20 @@ export class LogEntryCategoriesAnalysis {
       })
     );
 
-    const categoryIds = topCategories.map(({ categoryId }) => categoryId);
+    return {
+      topLogEntryCategories,
+      timing: {
+        spans: [esSearchSpan],
+      },
+    };
+  }
 
-    const fetchTopLogEntryCategoryPatternsSpan = topLogEntryCategoriesSpan.startChild(
-      'fetch category patterns from ES'
-    );
+  private async fetchLogEntryCategories(
+    requestContext: RequestHandlerContext,
+    logEntryCategoriesCountJobId: string,
+    categoryIds: number[]
+  ) {
+    const finalizeEsSearchSpan = startTracingSpan('Fetch category patterns from ES');
 
     const logEntryCategoriesResponse = decodeOrThrow(logEntryCategoriesResponseRT)(
       await this.libs.framework.callWithRequest(
@@ -88,7 +169,7 @@ export class LogEntryCategoriesAnalysis {
       )
     );
 
-    fetchTopLogEntryCategoryPatternsSpan.stop();
+    const esSearchSpan = finalizeEsSearchSpan();
 
     const logEntryCategoriesById = logEntryCategoriesResponse.hits.hits.reduce<
       Record<number, LogEntryCategoryHit>
@@ -100,19 +181,54 @@ export class LogEntryCategoriesAnalysis {
       {}
     );
 
-    topLogEntryCategoriesSpan.stop();
+    return {
+      logEntryCategoriesById,
+      timing: {
+        spans: [esSearchSpan],
+      },
+    };
+  }
+
+  private async fetchTopLogEntryCategoryHistograms(
+    requestContext: RequestHandlerContext,
+    logEntryCategoriesCountJobId: string,
+    categoryIds: number[],
+    startTime: number,
+    endTime: number,
+    bucketDuration: number
+  ) {
+    const finalizeEsSearchSpan = startTracingSpan('Fetch category histograms from ES');
+
+    const categoryHistogramsReponse = decodeOrThrow(logEntryCategoryHistogramsResponseRT)(
+      await this.libs.framework.callWithRequest(
+        requestContext,
+        'search',
+        createLogEntryCategoryHistogramsQuery(
+          logEntryCategoriesCountJobId,
+          categoryIds,
+          startTime,
+          endTime,
+          bucketDuration
+        )
+      )
+    );
+
+    const esSearchSpan = finalizeEsSearchSpan();
+
+    const categoryHistogramsById = Object.entries(
+      categoryHistogramsReponse.aggregations.filters_categories.buckets
+    ).reduce<Record<string, LogEntryCategoryFilterBucket>>(
+      (accumulatedHistogramsById, [categoryBucketKey, categoryBucket]) => ({
+        ...accumulatedHistogramsById,
+        [parseCategoryId(categoryBucketKey)]: categoryBucket,
+      }),
+      {}
+    );
 
     return {
-      data: topCategories.map(topCategory => ({
-        ...topCategory,
-        regularExpression: logEntryCategoriesById[topCategory.categoryId]._source.regex,
-      })),
+      categoryHistogramsById,
       timing: {
-        spans: [
-          topLogEntryCategoriesSpan.state,
-          fetchTopLogEntryCategoriesAggSpan.state,
-          fetchTopLogEntryCategoryPatternsSpan.state,
-        ],
+        spans: [esSearchSpan],
       },
     };
   }
