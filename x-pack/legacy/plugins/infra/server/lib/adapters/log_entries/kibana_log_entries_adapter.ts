@@ -89,7 +89,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     params: LogEntriesParams
   ): Promise<any> {
-    const { startTimestamp, endTimestamp, cursor } = params;
+    const { startTimestamp, endTimestamp, query, cursor } = params;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -98,7 +98,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       [sourceConfiguration.fields.tiebreaker]: sortDirection,
     };
 
-    const query = {
+    const esQuery = {
       allowNoIndices: true,
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
@@ -106,12 +106,19 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
         size: 10,
         track_total_hits: false,
         query: {
-          range: {
-            [sourceConfiguration.fields.timestamp]: {
-              gte: startTimestamp,
-              lte: endTimestamp,
-              format: TIMESTAMP_FORMAT,
-            },
+          bool: {
+            filter: [
+              ...createQueryFilterClauses(query),
+              {
+                range: {
+                  [sourceConfiguration.fields.timestamp]: {
+                    gte: startTimestamp,
+                    lte: endTimestamp,
+                    format: TIMESTAMP_FORMAT,
+                  },
+                },
+              },
+            ],
           },
         },
         sort,
@@ -119,7 +126,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       },
     };
 
-    const documents = await this.framework.callWithRequest(requestContext, 'search', query);
+    const documents = await this.framework.callWithRequest(requestContext, 'search', esQuery);
 
     return sortDirection === 'asc' ? documents.hits.hits : documents.hits.hits.reverse();
   }
