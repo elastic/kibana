@@ -154,7 +154,12 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                     />
 
                     {ParametersForm && (
-                      <ParametersForm key={subType ?? type} field={field} allFields={allFields} />
+                      <ParametersForm
+                        key={subType ?? type}
+                        field={field}
+                        allFields={allFields}
+                        isMultiField={isMultiField}
+                      />
                     )}
                   </EuiFlyoutBody>
 

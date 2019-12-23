@@ -11,9 +11,9 @@ import {
   StoreParameter,
   IndexParameter,
   BoostParameter,
-  CoerceParameter,
+  CoerceNumberParameter,
 } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
@@ -26,19 +26,17 @@ interface Props {
 export const RangeType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter hasIndexOptions={false} />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <CoerceParameter />
+      <AdvancedParametersSection>
+        <CoerceNumberParameter />
 
-          <StoreParameter />
+        <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 };

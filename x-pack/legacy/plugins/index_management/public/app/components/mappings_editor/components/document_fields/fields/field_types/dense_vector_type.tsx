@@ -5,14 +5,14 @@
  */
 import React from 'react';
 
-import { EditFieldSection } from '../edit_field';
+import { BasicParametersSection } from '../edit_field';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 
 export const DenseVectorType = () => {
   return (
-    <EditFieldSection>
+    <BasicParametersSection>
       <UseField path="dims" config={getFieldConfig('dims')} component={Field} />
-    </EditFieldSection>
+    </BasicParametersSection>
   );
 };

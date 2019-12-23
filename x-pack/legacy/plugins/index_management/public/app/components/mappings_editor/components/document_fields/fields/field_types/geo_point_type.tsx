@@ -15,7 +15,7 @@ import {
   NullValueParameter,
   IgnoreZValueParameter,
 } from '../../field_parameters';
-import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
@@ -34,39 +34,38 @@ interface Props {
 export const GeoPointType = ({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IgnoreMalformedParameter
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreMalformedFieldDescription',
             {
-              defaultMessage: 'Whether to ignore malformed geo-points.',
+              defaultMessage:
+                'By default, documents that contain malformed geo-points are not indexed. If enabled, these documents are indexed, but fields with malformed geo-points are filtered out. Be careful: if too many documents are indexed this way, queries on the field become meaningless.',
             }
           )}
         />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <IgnoreZValueParameter />
+      <AdvancedParametersSection>
+        <IgnoreZValueParameter />
 
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
-              {
-                defaultMessage:
-                  'Accepts a geopoint value which is substituted for any explicit null values.',
-              }
-            )}
-          >
-            <UseField
-              path="null_value"
-              component={TextAreaField}
-              config={getFieldConfig('null_value_geo_point')}
-            />
-          </NullValueParameter>
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <NullValueParameter
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
+            {
+              defaultMessage:
+                'Replace explicit null values with a geo-point value so that it can be indexed and searched.',
+            }
+          )}
+        >
+          <UseField
+            path="null_value"
+            component={TextAreaField}
+            config={getFieldConfig('null_value_geo_point')}
+          />
+        </NullValueParameter>
+      </AdvancedParametersSection>
     </>
   );
 };

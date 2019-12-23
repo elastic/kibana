@@ -29,7 +29,7 @@ import {
   TermVectorParameter,
   FieldDataParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -77,180 +77,166 @@ export const TextType = React.memo(({ field }: Props) => {
 
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
+      <AdvancedParametersSection>
         <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
-        <EditFieldSection>
-          <EagerGlobalOrdinalsParameter />
+        <EagerGlobalOrdinalsParameter />
 
-          {/* index_phrases */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
-              defaultMessage: 'Index phrases',
-            })}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.indexPhrasesFieldDescription',
-              {
-                defaultMessage:
-                  'Whether to index two-term word combinations into a separate field. Activating this will speed up phrase queries, but could slow down indexing.',
-              }
-            )}
-            docLink={{
-              text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesDocLinkText', {
-                defaultMessage: 'Index phrases documentation',
-              }),
-              href: documentationService.getIndexPhrasesLink(),
-            }}
-            formFieldPath="index_phrases"
-          />
+        {/* index_phrases */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
+            defaultMessage: 'Index phrases',
+          })}
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldDescription', {
+            defaultMessage:
+              'Whether to index two-term word combinations into a separate field. Activating this will speed up phrase queries, but could slow down indexing.',
+          })}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesDocLinkText', {
+              defaultMessage: 'Index phrases documentation',
+            }),
+            href: documentationService.getIndexPhrasesLink(),
+          }}
+          formFieldPath="index_phrases"
+        />
 
-          {/* index_prefixes */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
-              defaultMessage: 'Set index prefixes',
+        {/* index_prefixes */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
+            defaultMessage: 'Set index prefixes',
+          })}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.indexPrefixesFieldDescription',
+            {
+              defaultMessage:
+                'Whether to index prefixes of 2 and 5 characters into a separate field. Activating this will speed up prefix queries, but could slow down indexing.',
+            }
+          )}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesDocLinkText', {
+              defaultMessage: 'Index prefixes documentation',
+            }),
+            href: documentationService.getIndexPrefixesLink(),
+          }}
+          defaultToggleValue={getDefaultToggleValue('indexPrefixes', field.source)}
+        >
+          <EuiFormRow
+            label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesRangeFieldLabel', {
+              defaultMessage: 'Min/max prefix length',
             })}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.indexPrefixesFieldDescription',
-              {
-                defaultMessage:
-                  'Whether to index prefixes of 2 and 5 characters into a separate field. Activating this will speed up prefix queries, but could slow down indexing.',
-              }
-            )}
-            docLink={{
-              text: i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesDocLinkText', {
-                defaultMessage: 'Index prefixes documentation',
-              }),
-              href: documentationService.getIndexPrefixesLink(),
-            }}
-            defaultToggleValue={getDefaultToggleValue('indexPrefixes', field.source)}
+            fullWidth
           >
-            <EuiFormRow
-              label={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesRangeFieldLabel', {
-                defaultMessage: 'Min/max prefix length',
-              })}
-              fullWidth
-            >
-              <UseMultiFields
-                fields={{
-                  min: {
-                    path: 'index_prefixes.min_chars',
-                    config: getFieldConfig('index_prefixes', 'min_chars'),
-                  },
-                  max: {
-                    path: 'index_prefixes.max_chars',
-                    config: getFieldConfig('index_prefixes', 'max_chars'),
-                  },
-                }}
-              >
-                {({ min, max }) => (
-                  <EuiDualRange
-                    min={0}
-                    max={20}
-                    value={[min.value as number, max.value as number]}
-                    onChange={onIndexPrefixesChanage(min, max)}
-                    showInput
-                    fullWidth
-                  />
-                )}
-              </UseMultiFields>
-            </EuiFormRow>
-          </EditFieldFormRow>
-
-          <NormsParameter />
-
-          {/* position_increment_gap */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
-              defaultMessage: 'Set position increment gap',
-            })}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldDescription',
-              {
-                defaultMessage:
-                  'The number of fake term positions which should be inserted between each element of an array of strings.',
-              }
-            )}
-            docLink={{
-              text: i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapDocLinkText', {
-                defaultMessage: 'Position increment gap documentation',
-              }),
-              href: documentationService.getPositionIncrementGapLink(),
-            }}
-            defaultToggleValue={getDefaultToggleValue('position_increment_gap', field.source)}
-          >
-            <FormDataProvider pathsToWatch="index_options">
-              {formData => {
-                return (
-                  <>
-                    <UseField
-                      path="position_increment_gap"
-                      config={getFieldConfig('position_increment_gap')}
-                      component={RangeField}
-                      componentProps={{
-                        euiFieldProps: {
-                          min: 0,
-                          max: 200,
-                          showInput: true,
-                          fullWidth: true,
-                        },
-                      }}
-                    />
-                    {formData.index_options !== 'positions' &&
-                      formData.index_options !== 'offsets' && (
-                        <>
-                          <EuiSpacer size="s" />
-                          <EuiCallOut
-                            title={i18n.translate(
-                              'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
-                              {
-                                defaultMessage: 'Positions not enabled.',
-                              }
-                            )}
-                            color="danger"
-                            iconType="alert"
-                          >
-                            <p>
-                              {i18n.translate(
-                                'xpack.idxMgmt.mappingsEditor.positionsErrorMessage',
-                                {
-                                  defaultMessage:
-                                    'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
-                                }
-                              )}
-                            </p>
-                          </EuiCallOut>
-                        </>
-                      )}
-                  </>
-                );
+            <UseMultiFields
+              fields={{
+                min: {
+                  path: 'index_prefixes.min_chars',
+                  config: getFieldConfig('index_prefixes', 'min_chars'),
+                },
+                max: {
+                  path: 'index_prefixes.max_chars',
+                  config: getFieldConfig('index_prefixes', 'max_chars'),
+                },
               }}
-            </FormDataProvider>
-          </EditFieldFormRow>
-        </EditFieldSection>
+            >
+              {({ min, max }) => (
+                <EuiDualRange
+                  min={0}
+                  max={20}
+                  value={[min.value as number, max.value as number]}
+                  onChange={onIndexPrefixesChanage(min, max)}
+                  showInput
+                  fullWidth
+                />
+              )}
+            </UseMultiFields>
+          </EuiFormRow>
+        </EditFieldFormRow>
 
-        <EditFieldSection>
-          <SimilarityParameter
-            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
-          />
+        <NormsParameter />
 
-          <TermVectorParameter
-            field={field}
-            defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
-          />
+        {/* position_increment_gap */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
+            defaultMessage: 'Set position increment gap',
+          })}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldDescription',
+            {
+              defaultMessage:
+                'The number of fake term positions which should be inserted between each element of an array of strings.',
+            }
+          )}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapDocLinkText', {
+              defaultMessage: 'Position increment gap documentation',
+            }),
+            href: documentationService.getPositionIncrementGapLink(),
+          }}
+          defaultToggleValue={getDefaultToggleValue('position_increment_gap', field.source)}
+        >
+          <FormDataProvider pathsToWatch="index_options">
+            {formData => {
+              return (
+                <>
+                  <UseField
+                    path="position_increment_gap"
+                    config={getFieldConfig('position_increment_gap')}
+                    component={RangeField}
+                    componentProps={{
+                      euiFieldProps: {
+                        min: 0,
+                        max: 200,
+                        showInput: true,
+                        fullWidth: true,
+                      },
+                    }}
+                  />
+                  {formData.index_options !== 'positions' && formData.index_options !== 'offsets' && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiCallOut
+                        title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorTitle', {
+                          defaultMessage: 'Positions not enabled.',
+                        })}
+                        color="danger"
+                        iconType="alert"
+                      >
+                        <p>
+                          {i18n.translate('xpack.idxMgmt.mappingsEditor.positionsErrorMessage', {
+                            defaultMessage:
+                              'You need to set the index options (under the "Searchable" toggle) to "Positions" or "Offsets" in order to be able to change the position increment gap.',
+                          })}
+                        </p>
+                      </EuiCallOut>
+                    </>
+                  )}
+                </>
+              );
+            }}
+          </FormDataProvider>
+        </EditFieldFormRow>
 
-          <FieldDataParameter />
+        <SimilarityParameter
+          defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
+        />
 
-          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
+        <TermVectorParameter
+          field={field}
+          defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
+        />
 
-          <StoreParameter />
+        <FieldDataParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
+
+        <StoreParameter />
+
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 });

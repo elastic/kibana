@@ -20,7 +20,7 @@ import {
   SimilarityParameter,
   SplitQueriesOnWhitespaceParameter,
 } from '../../field_parameters';
-import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;
@@ -43,75 +43,66 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 export const FlattenedType = React.memo(({ field }: Props) => {
   return (
     <>
-      <EditFieldSection>
+      <BasicParametersSection>
         <IndexParameter
           config={getFieldConfig('index_options_flattened')}
           indexOptions={PARAMETERS_OPTIONS.index_options_flattened}
         />
-      </EditFieldSection>
+      </BasicParametersSection>
 
-      <AdvancedSettingsWrapper>
-        <EditFieldSection>
-          <EagerGlobalOrdinalsParameter />
+      <AdvancedParametersSection>
+        <EagerGlobalOrdinalsParameter />
 
-          {/* depth_limit */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
-              defaultMessage: 'Customize depth limit',
-            })}
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
+        {/* depth_limit */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
+            defaultMessage: 'Customize depth limit',
+          })}
+          description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
+            defaultMessage:
+              'The maximum allowed depth of the flattened object field, in terms of nested inner objects. Defaults to 20.',
+          })}
+        >
+          <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
+        </EditFieldFormRow>
+
+        {/* ignore_above */}
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
+            defaultMessage: 'Set length limit',
+          })}
+          description={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
+            {
               defaultMessage:
-                'The maximum allowed depth of the flattened object field, in terms of nested inner objects. Defaults to 20.',
-            })}
-          >
-            <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
-          </EditFieldFormRow>
+                'Prevent leaf values from being indexed if they are beyond a certain length. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
+            }
+          )}
+          docLink={{
+            text: i18n.translate('xpack.idxMgmt.mappingsEditor.flattened.ignoreAboveDocLinkText', {
+              defaultMessage: 'Ignore above documentation',
+            }),
+            href: documentationService.getIgnoreAboveLink(),
+          }}
+          defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
+        >
+          <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
+        </EditFieldFormRow>
 
-          {/* ignore_above */}
-          <EditFieldFormRow
-            title={i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
-              defaultMessage: 'Set length limit',
-            })}
-            description={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
-              {
-                defaultMessage:
-                  'Prevent leaf values from being indexed if they are beyond a certain length. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
-              }
-            )}
-            docLink={{
-              text: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.flattened.ignoreAboveDocLinkText',
-                {
-                  defaultMessage: 'Ignore above documentation',
-                }
-              ),
-              href: documentationService.getIgnoreAboveLink(),
-            }}
-            defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
-          >
-            <UseField
-              path="ignore_above"
-              config={getFieldConfig('ignore_above')}
-              component={Field}
-            />
-          </EditFieldFormRow>
+        <SplitQueriesOnWhitespaceParameter />
 
-          <SplitQueriesOnWhitespaceParameter />
+        <SimilarityParameter
+          defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
+        />
 
-          <SimilarityParameter
-            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
-          />
+        <DocValuesParameter />
 
-          <DocValuesParameter />
+        <NullValueParameter
+          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
+        />
 
-          <NullValueParameter
-            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-          />
-
-          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
-        </EditFieldSection>
-      </AdvancedSettingsWrapper>
+        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+      </AdvancedParametersSection>
     </>
   );
 });
