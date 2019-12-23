@@ -25,7 +25,7 @@ import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -54,7 +54,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
     hostsPagePath,
   }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
-    const core = useKibanaCore();
+    const kibana = useKibana();
     const { tabName } = useParams();
 
     const hostsFilters = React.useMemo(() => {
@@ -75,7 +75,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
               filters: hostsFilters,
