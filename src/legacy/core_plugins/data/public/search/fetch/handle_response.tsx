@@ -20,15 +20,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify/toasts';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
 import { SearchRequest, SearchResponse } from '../types';
 import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getNotifications } from '../../../../../../plugins/data/public/services';
 
 export function handleResponse(request: SearchRequest, response: SearchResponse) {
   if (response.timed_out) {
-    toastNotifications.addWarning({
+    getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
       }),
@@ -62,7 +63,7 @@ export function handleResponse(request: SearchRequest, response: SearchResponse)
       </>
     );
 
-    toastNotifications.addWarning({ title, text });
+    getNotifications().toasts.addWarning({ title, text });
   }
 
   return response;
