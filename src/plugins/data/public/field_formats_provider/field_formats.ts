@@ -267,7 +267,7 @@ export class FieldFormatRegisty {
    * @param  {Record<string, any>} custom params
    * @return {Record<string, any>}
    */
-  private buildMetaParams = (customParams: Record<string, any> = {}): Record<string, any> => ({
+  private buildMetaParams = <T extends ...>(customParams: T = {}): T & {parsedUrl: ParsedUrl} => ({
     parsedUrl: {
       origin: window.location.origin,
       pathname: window.location.pathname,
