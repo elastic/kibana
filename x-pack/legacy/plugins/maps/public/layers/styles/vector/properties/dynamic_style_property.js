@@ -41,6 +41,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return false;
   }
 
+  isRanged() {
+    return true;
+  }
+
   isComplete() {
     return !!this._field;
   }
