@@ -70,7 +70,6 @@
  */
 
 import _ from 'lodash';
-import { npSetup } from 'ui/new_platform';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
@@ -80,11 +79,12 @@ import { filterDocvalueFields } from './filter_docvalue_fields';
 import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';
 import { FetchOptions } from '../fetch/types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSearchService, getUiSettings } from '../../../../../../plugins/data/public/services';
-
-// TODO: remove
-const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout') as number;
+import {
+  getSearchService,
+  getUiSettings,
+  getInjectedMetadata,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/services';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -200,6 +200,7 @@ export class SearchSource {
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
+    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
 
     const response = await fetchSoon(
       searchRequest,

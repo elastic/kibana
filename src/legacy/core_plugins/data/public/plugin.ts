@@ -29,6 +29,7 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
+  setInjectedMetadata,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 
@@ -65,7 +66,9 @@ export class DataPlugin
   implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   private readonly search = new SearchService();
 
-  public setup(core: CoreSetup) {}
+  public setup(core: CoreSetup) {
+    setInjectedMetadata(core.injectedMetadata);
+  }
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
