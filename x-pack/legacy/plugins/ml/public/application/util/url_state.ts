@@ -23,9 +23,9 @@ export type UrlState = [
 
 // Compared to the original appState/globalState,
 // this no longer makes use of fetch/save methods.
-// - Reading from `history.location.search` is the successor of `fetch`.
+// - Reading from `location.search` is the successor of `fetch`.
 // - `history.push()` is the successor of `save`.
-// - The exposed `get/set()` calls make use of the above and make sure that
+// - The exposed state and set call make use of the above and make sure that
 //   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
 
 export const useUrlState = (accessor: string): UrlState => {
