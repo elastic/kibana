@@ -21,13 +21,19 @@ import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AggConfigs } from 'ui/agg_types/agg_configs';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { Query, TimeRange, esFilters, getTime, FilterManager } from 'src/plugins/data/public';
 import {
   KibanaContext,
   KibanaDatatable,
   ExpressionFunction,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
+import {
+  Query,
+  TimeRange,
+  esFilters,
+  getTime,
+  FilterManager,
+} from '../../../../../../plugins/data/public';
 import {
   SearchSource,
   ISearchSource,
