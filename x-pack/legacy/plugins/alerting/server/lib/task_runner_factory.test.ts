@@ -257,8 +257,17 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
+    expect(await taskRunner.run()).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:00:10.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          "startedAt": 1969-12-31T23:55:00.000Z,
+        },
+      }
+    `);
+    expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
+      `Executing Alert \"1\" has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]`
     );
   });
 
@@ -278,8 +287,17 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action reference \\"action_0\\" not found in alert id: 1"`
+    expect(await taskRunner.run()).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:00:10.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+          "startedAt": 1969-12-31T23:55:00.000Z,
+        },
+      }
+    `);
+    expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
+      `Executing Alert \"1\" has resulted in Error: Action reference \"action_0\" not found in alert id: 1`
     );
   });
 

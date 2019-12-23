@@ -153,7 +153,7 @@ export class TaskRunnerFactory {
       ): Promise<State> {
         const {
           params: { alertId },
-          state: { alertInstances: alertRawInstances = {}, alertTypeState = {} },
+          state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
         } = taskInstance;
 
         const alertInstances = mapValues<AlertInstances>(
@@ -170,7 +170,7 @@ export class TaskRunnerFactory {
           params,
           state: alertTypeState,
           startedAt: taskInstance.startedAt!,
-          previousStartedAt: taskInstance.state.previousStartedAt,
+          previousStartedAt,
         });
 
         // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -202,10 +202,33 @@ export class TaskRunnerFactory {
         };
       },
 
+      async validateAndRunAlert(
+        services: Services,
+        apiKey: string | null,
+        attributes: SavedObject['attributes'],
+        references: SavedObject['references']
+      ) {
+        const {
+          params: { alertId, spaceId },
+        } = taskInstance;
+
+        // Validate
+        const params = validateAlertTypeParams(alertType, attributes.params);
+        const executionHandler = this.getExecutionHandler(
+          alertId,
+          spaceId,
+          apiKey,
+          attributes.actions,
+          references
+        );
+        return this.executeAlertInstances(services, { ...attributes, params }, executionHandler);
+      },
+
       async run() {
         const {
           params: { alertId, spaceId },
           startedAt: previousStartedAt,
+          state: originalState,
         } = taskInstance;
 
         const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
@@ -217,20 +240,10 @@ export class TaskRunnerFactory {
           alertId
         );
 
-        // Validate
-        const params = validateAlertTypeParams(alertType, attributes.params);
-        const executionHandler = this.getExecutionHandler(
-          alertId,
-          spaceId,
-          apiKey,
-          attributes.actions,
-          references
-        );
-
         return {
           state: map<State, Error, State>(
             await promiseResult<State, Error>(
-              this.executeAlertInstances(services, { ...attributes, params }, executionHandler)
+              this.validateAndRunAlert(services, apiKey, attributes, references)
             ),
             (stateUpdates: State) => {
               return {
@@ -239,9 +252,9 @@ export class TaskRunnerFactory {
               };
             },
             (err: Error) => {
-              logger.error(`Executing Alert "${alertId}" has resulted in Error: ${err.message}.`);
+              logger.error(`Executing Alert "${alertId}" has resulted in Error: ${err.message}`);
               return {
-                ...taskInstance.state,
+                ...originalState,
                 previousStartedAt,
               };
             }
