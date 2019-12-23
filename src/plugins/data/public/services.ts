@@ -28,6 +28,10 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
   'Notifications'
 );
 
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'UiSettings'
+);
+
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
 );
@@ -41,3 +45,7 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
+
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('Search');

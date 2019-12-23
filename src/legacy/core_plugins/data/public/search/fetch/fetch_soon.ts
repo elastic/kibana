@@ -28,10 +28,10 @@ import { SearchRequest, SearchResponse } from '../types';
 export async function fetchSoon(
   request: SearchRequest,
   options: FetchOptions,
-  { es, config, esShardTimeout }: FetchHandlers
+  { searchService, config, esShardTimeout }: FetchHandlers
 ) {
   const msToDelay = config.get('courier:batchSearches') ? 50 : 0;
-  return delayedFetch(request, options, { es, config, esShardTimeout }, msToDelay);
+  return delayedFetch(request, options, { searchService, config, esShardTimeout }, msToDelay);
 }
 
 /**
@@ -64,7 +64,7 @@ let fetchInProgress: Promise<SearchResponse> | null = null;
 async function delayedFetch(
   request: SearchRequest,
   options: FetchOptions,
-  { es, config, esShardTimeout }: FetchHandlers,
+  { searchService, config, esShardTimeout }: FetchHandlers,
   ms: number
 ) {
   const i = requestsToFetch.length;
@@ -73,7 +73,11 @@ async function delayedFetch(
   const responses = await (fetchInProgress =
     fetchInProgress ||
     delay(() => {
-      const response = callClient(requestsToFetch, requestOptions, { es, config, esShardTimeout });
+      const response = callClient(requestsToFetch, requestOptions, {
+        searchService,
+        config,
+        esShardTimeout,
+      });
       requestsToFetch = [];
       requestOptions = [];
       fetchInProgress = null;

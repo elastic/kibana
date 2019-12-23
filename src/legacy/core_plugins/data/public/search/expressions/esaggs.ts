@@ -34,12 +34,6 @@ import {
   getTime,
   FilterManager,
 } from '../../../../../../plugins/data/public';
-import {
-  SearchSource,
-  ISearchSource,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../../ui/public/courier';
 
 import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
 import { calculateObjectHash } from '../../../../visualizations/public';
@@ -49,6 +43,8 @@ import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
+import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../..';
+import { SearchSource } from '../search_source';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
