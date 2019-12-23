@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { MonoTypeOperatorFunction, queueScheduler, scheduled } from 'rxjs';
+import { MonoTypeOperatorFunction, queueScheduler, scheduled, from } from 'rxjs';
 import { concatAll, distinctUntilChanged, skip } from 'rxjs/operators';
 
 export function distinctUntilChangedWithInitialValue<T>(
@@ -26,7 +26,7 @@ export function distinctUntilChangedWithInitialValue<T>(
 ): MonoTypeOperatorFunction<T> {
   return input$ =>
     scheduled(
-      [isPromise(initialValue) ? initialValue : [initialValue], input$],
+      [isPromise(initialValue) ? from(initialValue) : [initialValue], input$],
       queueScheduler
     ).pipe(concatAll(), distinctUntilChanged(compare), skip(1));
 }
