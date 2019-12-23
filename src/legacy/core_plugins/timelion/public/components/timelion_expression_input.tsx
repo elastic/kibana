@@ -18,8 +18,8 @@
  */
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
-import { EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFormLabel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
@@ -102,13 +102,10 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   }, [kibana.services.http]);
 
   return (
-    <EuiFormRow
-      className="visEditor__timelionExpressionInput"
-      fullWidth
-      label={i18n.translate('timelion.vis.expressionLabel', {
-        defaultMessage: 'Timelion expression',
-      })}
-    >
+    <div className="visEditor__timelionExpressionInput">
+      <EuiFormLabel>
+        <FormattedMessage id="timelion.vis.expressionLabel" defaultMessage="Timelion expression" />
+      </EuiFormLabel>
       <div className="timelionExpressionInput__editor">
         <CodeEditor
           languageId={LANGUAGE_ID}
@@ -120,9 +117,10 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
           }}
           hoverProvider={{ provideHover }}
           options={{
-            automaticLayout: true,
             fixedOverflowWidgets: true,
-            fontSize: 16,
+            fontSize: 14,
+            folding: false,
+            lineNumbers: 'off',
             scrollBeyondLastLine: false,
             minimap: {
               enabled: false,
@@ -141,7 +139,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
           }}
         />
       </div>
-    </EuiFormRow>
+    </div>
   );
 }
 

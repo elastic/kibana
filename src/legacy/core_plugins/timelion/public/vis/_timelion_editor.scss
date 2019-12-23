@@ -8,12 +8,16 @@
     display: flex;
     flex-direction: column;
   }
+
+  .visEditor__sidebar {
+    @include euiBreakpoint('xs', 's', 'm') {
+      width: 100%;
+    }
+  }
 }
 
 .visEditor__timelionExpressionInput {
-  .euiFormRow__fieldWrapper {
-    flex-grow: 1;
-  }
+  margin-top: $euiSize;
 }
 
 .timelionExpressionInput__editor {
@@ -23,5 +27,5 @@
   }
 
   height: 100%;
-  padding-top: $euiSize;
+  padding-top: $euiSizeS;
 }

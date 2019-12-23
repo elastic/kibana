@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { useValidation } from 'ui/vis/editors/default/controls/agg_utils';
+import { isValidEsInterval } from '../../../../core_plugins/data/common';
 
 const intervalOptions = [
   {
@@ -80,20 +82,26 @@ interface TimelionIntervalProps {
 }
 
 function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProps) {
-  const onCustomInterval = (customValue: string) => {
-    setValue(customValue.trim());
-  };
+  const onCustomInterval = useCallback(
+    (customValue: string) => {
+      setValue(customValue.trim());
+    },
+    [setValue]
+  );
 
-  const onChange = (opts: Array<EuiComboBoxOptionProps<string>>) => {
-    setValue((opts[0] && opts[0].value) || '');
-  };
+  const onChange = useCallback(
+    (opts: Array<EuiComboBoxOptionProps<string>>) => {
+      setValue((opts[0] && opts[0].value) || '');
+    },
+    [setValue]
+  );
 
   const selectedOptions = useMemo(
     () => [intervalOptions.find(op => op.value === value) || { label: value, value }],
     [value]
   );
 
-  const isValid = !!value;
+  const isValid = intervalOptions.some(int => int.value === value) || isValidEsInterval(value);
 
   useValidation(setValidity, isValid);
 
@@ -101,10 +109,20 @@ function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProp
     <EuiFormRow
       compressed
       fullWidth
+      helpText={i18n.translate('timelion.vis.selectIntervalHelpText', {
+        defaultMessage:
+          'Select an option or create a custom value. Examples: 30s, 20m, 24h, 2d, 1w, 1M',
+      })}
+      isInvalid={!isValid}
+      error={
+        !isValid &&
+        i18n.translate('timelion.vis.invalidIntervalErrorMessage', {
+          defaultMessage: 'Invalid interval format.',
+        })
+      }
       label={i18n.translate('timelion.vis.intervalLabel', {
         defaultMessage: 'Interval',
       })}
-      isInvalid={!isValid}
     >
       <EuiComboBox
         compressed
