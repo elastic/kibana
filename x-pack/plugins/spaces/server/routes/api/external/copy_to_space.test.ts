@@ -11,7 +11,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory } from 'src/core/server';
+import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   elasticsearchServiceMock,
@@ -22,10 +22,9 @@ import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { initCopyToSpacesApi } from './copy_to_space';
-import { ObjectType } from '@kbn/config-schema';
-import { RouteSchemas } from 'src/core/server/http/router/route';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { securityMock } from '../../../../../security/server/mocks';
+import { ObjectType } from '@kbn/config-schema';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -78,19 +77,11 @@ describe('copy to space', () => {
 
     return {
       copyToSpace: {
-        routeValidation: ctsRouteDefinition.validate as RouteSchemas<
-          ObjectType,
-          ObjectType,
-          ObjectType
-        >,
+        routeValidation: ctsRouteDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: ctsRouteHandler,
       },
       resolveConflicts: {
-        routeValidation: resolveRouteDefinition.validate as RouteSchemas<
-          ObjectType,
-          ObjectType,
-          ObjectType
-        >,
+        routeValidation: resolveRouteDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
@@ -150,7 +141,7 @@ describe('copy to space', () => {
       const { copyToSpace } = await setup();
 
       expect(() =>
-        copyToSpace.routeValidation.body!.validate(payload)
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[spaces]: duplicate space ids are not allowed"`);
     });
 
@@ -163,7 +154,7 @@ describe('copy to space', () => {
       const { copyToSpace } = await setup();
 
       expect(() =>
-        copyToSpace.routeValidation.body!.validate(payload)
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
         `"[spaces.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed"`
       );
@@ -181,7 +172,7 @@ describe('copy to space', () => {
       const { copyToSpace } = await setup();
 
       expect(() =>
-        copyToSpace.routeValidation.body!.validate(payload)
+        (copyToSpace.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
@@ -322,7 +313,7 @@ describe('copy to space', () => {
       const { resolveConflicts } = await setup();
 
       expect(() =>
-        resolveConflicts.routeValidation.body!.validate(payload)
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
@@ -343,7 +334,7 @@ describe('copy to space', () => {
       const { resolveConflicts } = await setup();
 
       expect(() =>
-        resolveConflicts.routeValidation.body!.validate(payload)
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
       ).toThrowErrorMatchingInlineSnapshot(
         `"[retries.key(\\"invalid-space-id!@#$%^&*()\\")]: Invalid space id: invalid-space-id!@#$%^&*()"`
       );
