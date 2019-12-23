@@ -50,7 +50,7 @@ import {
   getServices,
   IndexPattern,
   RequestAdapter,
-  SearchSourceContract,
+  ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
@@ -89,7 +89,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource?: SearchSourceContract;
+  private filtersSearchSource?: ISearchSource;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
