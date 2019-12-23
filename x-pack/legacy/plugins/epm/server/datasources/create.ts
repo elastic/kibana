@@ -62,12 +62,11 @@ export async function createDatasource({
   });
 
   const savedDatasource = await Ingest.createDatasource({ request, datasource });
-
-  await Promise.all(
-    policyIds.map(policyId =>
-      Ingest.addDatasourcesToPolicy({ datasources: [savedDatasource.id], policyId, request })
-    )
+  const datasources = [savedDatasource.id];
+  const addDatasourcesToPolicyPromises = policyIds.map(policyId =>
+    Ingest.addDatasourcesToPolicy({ datasources, policyId, request })
   );
+  await Promise.all(addDatasourcesToPolicyPromises);
 
   return installedAssetReferences;
 }
