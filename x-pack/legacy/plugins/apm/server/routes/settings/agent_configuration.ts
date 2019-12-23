@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import * as t from 'io-ts';
 import Boom from 'boom';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -119,10 +117,19 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await createOrUpdateConfiguration({
-      configuration: context.params.body,
+    const configuration = context.params.body;
+
+    // TODO: Remove logger. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
+    context.logger.info(
+      `Hitting: /api/apm/settings/agent-configuration/new with ${configuration}`
+    );
+    const res = await createOrUpdateConfiguration({
+      configuration,
       setup
     });
+    context.logger.info(`Created agent configuration`);
+
+    return res;
   }
 }));
 
@@ -163,11 +170,14 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     })
   },
   handler: async ({ context, request }) => {
-    // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-    // TODO: Remove console.log before 8.0 to avoid releasing to end users
-    console.log('Hitting: /api/apm/settings/agent-configuration/search');
-    const setup = await setupRequest(context, request);
     const { body } = context.params;
+
+    // TODO: Remove logger. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
+    context.logger.info(
+      `Hitting: /api/apm/settings/agent-configuration/search for ${body.service.name}/${body.service.environment}`
+    );
+
+    const setup = await setupRequest(context, request);
     const config = await searchConfigurations({
       serviceName: body.service.name,
       environment: body.service.environment,
@@ -175,15 +185,15 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     });
 
     if (!config) {
-      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-      console.log(
-        `Config was not found for ${body.service.name}/${body.service.environment}`
-      );
       context.logger.info(
         `Config was not found for ${body.service.name}/${body.service.environment}`
       );
       throw new Boom('Not found', { statusCode: 404 });
     }
+
+    context.logger.info(
+      `Config was found for ${body.service.name}/${body.service.environment}`
+    );
 
     // update `applied_by_agent` field if etags match
     if (body.etag === config._source.etag && !config._source.applied_by_agent) {

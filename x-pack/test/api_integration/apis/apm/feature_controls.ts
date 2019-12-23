@@ -207,12 +207,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-      console.log(`Requesting: ${endpoint.req.url}`);
-      log.info(`Requesting: ${endpoint.req.url}`);
+      console.log(`Requesting: ${endpoint.req.url} ${endpoint.req.body}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
       console.log(`Responded: ${endpoint.req.url}`);
-      log.info(`Responded: ${endpoint.req.url}`);
 
       try {
         if (expectation === 'forbidden') {
@@ -221,9 +218,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           endpoint.expectResponse(result);
         }
       } catch (e) {
-        // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-        console.log(`${endpoint.req.url} failed`);
-        log.warning(`${endpoint.req.url} failed`);
+        console.warn(`Expectation for endpoint: "${endpoint.req.url}" failed`);
 
         const { statusCode, body, req } = result.response;
         throw new Error(
@@ -240,9 +235,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   describe('apm feature controls', () => {
     let res: any;
     before(async () => {
-      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
       console.log(`Creating agent configuration`);
-      log.info('Creating agent configuration');
       res = await executeAsAdmin({
         method: 'post',
         url: '/api/apm/settings/agent-configuration/new',
@@ -251,13 +244,11 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           settings: { transaction_sample_rate: 0.5 },
         },
       });
-      // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
       console.log(`Agent configuration created`);
-      log.info('Agent configuration created');
     });
 
     after(async () => {
-      log.info('deleting agent configuration');
+      console.log('deleting agent configuration');
       const configurationId = res.body._id;
       await executeAsAdmin({
         method: 'delete',

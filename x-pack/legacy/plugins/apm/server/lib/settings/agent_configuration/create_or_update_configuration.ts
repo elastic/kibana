@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import hash from 'object-hash';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
@@ -46,10 +44,5 @@ export async function createOrUpdateConfiguration({
     params.id = configurationId;
   }
 
-  // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-  console.log(`Creating agent configuration`);
-  const res = await internalClient.index(params);
-  // TODO: Remove console.log. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
-  console.log(`Success creating agent configuration`);
-  return res;
+  return internalClient.index(params);
 }
