@@ -17,11 +17,11 @@
  * under the License.
  */
 import React from 'react';
-// @ts-ignore
-import { npStart } from 'ui/new_platform';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getOverlays } from '../../../../../../../plugins/data/public/services';
 import { toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ResponseWithShardFailure, Request } from './shard_failure_types';
@@ -34,7 +34,7 @@ interface Props {
 
 export function ShardFailureOpenModalButton({ request, response, title }: Props) {
   function onClick() {
-    const modal = npStart.core.overlays.openModal(
+    const modal = getOverlays().openModal(
       toMountPoint(
         <ShardFailureModal
           request={request}
