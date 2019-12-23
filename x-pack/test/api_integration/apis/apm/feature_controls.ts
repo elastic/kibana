@@ -207,7 +207,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     spaceId?: string;
   }) {
     for (const endpoint of endpoints) {
-      console.log(`Requesting: ${endpoint.req.url} ${endpoint.req.body}`);
+      console.log(`Requesting: ${endpoint.req.url}. Expecting: ${expectation}`);
       const result = await executeAsUser(endpoint.req, username, password, spaceId);
       console.log(`Responded: ${endpoint.req.url}`);
 

@@ -121,7 +121,7 @@ export const createAgentConfigurationRoute = createRoute(() => ({
 
     // TODO: Remove logger. Only added temporarily to debug flaky test (https://github.com/elastic/kibana/issues/51764)
     context.logger.info(
-      `Hitting: /api/apm/settings/agent-configuration/new with ${configuration}`
+      `Hitting: /api/apm/settings/agent-configuration/new with ${configuration.service.name}/${configuration.service.environment}`
     );
     const res = await createOrUpdateConfiguration({
       configuration,
