@@ -26,4 +26,19 @@ describe('TransactionSummary', () => {
       ).not.toThrowError();
     });
   });
+  describe('renders RUM transaction without request info', () => {
+    const transaction: Transaction = exampleTransactions.httpRumOK;
+
+    const props = {
+      errorCount: 0,
+      totalDuration: 0,
+      transaction
+    };
+
+    it('renders', () => {
+      expect(() =>
+        shallow(<TransactionSummary {...props} />)
+      ).not.toThrowError();
+    });
+  });
 });
