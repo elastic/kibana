@@ -17,7 +17,7 @@ export interface PluginManifest
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [configPath](./kibana-plugin-server.pluginmanifest.configpath.md) | <code>ConfigPath</code> | Root [configuration path](./kibana-plugin-server.configpath.md) used by the plugin, defaults to "id". |
-|  [id](./kibana-plugin-server.pluginmanifest.id.md) | <code>PluginName</code> | Identifier of the plugin. |
+|  [id](./kibana-plugin-server.pluginmanifest.id.md) | <code>PluginName</code> | Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract. Other plugins leverage it to access plugin API, navigate to the plugin, etc. |
 |  [kibanaVersion](./kibana-plugin-server.pluginmanifest.kibanaversion.md) | <code>string</code> | The version of Kibana the plugin is compatible with, defaults to "version". |
 |  [optionalPlugins](./kibana-plugin-server.pluginmanifest.optionalplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that if installed and enabled \*\*may be\*\* leveraged by this plugin for some additional functionality but otherwise are not required for this plugin to work properly. |
 |  [requiredPlugins](./kibana-plugin-server.pluginmanifest.requiredplugins.md) | <code>readonly PluginName[]</code> | An optional list of the other plugins that \*\*must be\*\* installed and enabled for this plugin to function properly. |
