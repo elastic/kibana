@@ -37,6 +37,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return true;
   }
 
+  hasBreaks() {
+    return false;
+  }
+
   isComplete() {
     return !!this._field;
   }

@@ -79,9 +79,15 @@ export class DynamicLegendRow extends React.Component {
     );
   }
 
+  _renderBreakedLegend() {
+    return <span>render breaked legend</span>;
+  }
+
   render() {
     if (this.props.style.isOrdinal()) {
       return this._renderRangeLegend();
+    } else if (this.props.style.hasBreaks()) {
+      return this._renderBreakedLegend();
     } else {
       return null;
     }

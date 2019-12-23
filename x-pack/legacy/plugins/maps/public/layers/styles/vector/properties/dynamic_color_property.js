@@ -68,6 +68,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return this.isOrdinal();
   }
 
+  hasBreaks() {
+    return this.isCustomColorRamp();
+  }
+
   _getMbColor() {
     const isDynamicConfigComplete =
       _.has(this._options, 'field.name') && _.has(this._options, 'color');
