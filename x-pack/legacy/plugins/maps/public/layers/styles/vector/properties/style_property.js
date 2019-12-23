@@ -36,7 +36,7 @@ export class AbstractStyleProperty {
     return this._options || {};
   }
 
-  renderLegendHeader() {
+  renderRangeLegendHeader() {
     return null;
   }
 
