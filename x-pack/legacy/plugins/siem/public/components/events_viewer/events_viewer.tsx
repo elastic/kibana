@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 import { KqlMode } from '../../store/timeline/model';
 import { AutoSizer } from '../auto_sizer';
 import { HeaderSection } from '../header_section';
@@ -93,9 +93,9 @@ export const EventsViewer = React.memo<Props>(
     utilityBar,
   }) => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const core = useKibanaCore();
+    const kibana = useKibana();
     const combinedQueries = combineQueries({
-      config: esQuery.getEsQueryConfig(core.uiSettings),
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       dataProviders,
       indexPattern,
       browserFields,

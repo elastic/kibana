@@ -9,5 +9,5 @@ Wrap a router handler to catch and converts legacy boom errors to proper custom 
 <b>Signature:</b>
 
 ```typescript
-handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+<P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
 ```

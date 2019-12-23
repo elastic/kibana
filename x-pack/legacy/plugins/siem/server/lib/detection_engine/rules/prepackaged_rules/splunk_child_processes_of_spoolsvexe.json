@@ -1,0 +1,17 @@
+{
+  "rule_id": "2f026c73-bb63-455e-abdf-f11f463acf0d",
+  "risk_score": 50,
+  "description": "Splunk - Child Processes of Spoolsv.exe",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Splunk - Child Processes of Spoolsv.exe",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.parent.name:spoolsv.exe and not process.name:regsvr32.exe ",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
