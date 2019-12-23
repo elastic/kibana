@@ -19,7 +19,6 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiPageContent,
@@ -67,7 +66,7 @@ export function DashboardEmptyScreen({
     </p>
   );
   const paragraph = (
-    description1?: string,
+    description1: string | null,
     description2: string,
     linkText: string,
     ariaLabel: string,
