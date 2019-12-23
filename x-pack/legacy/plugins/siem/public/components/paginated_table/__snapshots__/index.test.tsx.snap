@@ -194,7 +194,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         "euiDataGridCellPaddingS": "4px",
         "euiDataGridColumnResizerWidth": "3px",
         "euiDataGridPrefix": ".euiDataGrid--",
-        "euiDataGridStyles": "'bordersAll', 'bordersNone', 'bordersHorizontal', 'paddingSmall', 'paddingMedium', 'paddingLarge', 'stripes', 'rowHoverNone', 'rowHoverHighlight', 'headerShade', 'headerUnderline', 'fontSizeSmall', 'fontSizeLarge'",
+        "euiDataGridStyles": "'bordersAll', 'bordersNone', 'bordersHorizontal', 'paddingSmall', 'paddingMedium', 'paddingLarge', 'stripes', 'rowHoverNone', 'rowHoverHighlight', 'headerShade', 'headerUnderline', 'fontSizeSmall', 'fontSizeLarge', 'noControls'",
         "euiDataGridVerticalBorder": "solid 1px #24272e",
         "euiDatePickerCalendarWidth": "284px",
         "euiDragAndDropSpacing": Object {
