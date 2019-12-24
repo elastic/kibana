@@ -8,7 +8,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import Joi from 'joi';
 
-import { FieldConfig } from 'src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { EuiLink } from '@elastic/eui';
 import {
   FIELD_TYPES,
@@ -16,6 +15,7 @@ import {
   ValidationFunc,
   ValidationFuncArg,
   fieldFormatters,
+  FieldConfig,
 } from '../shared_imports';
 import { AliasOption, DataType, ComboBoxOption } from '../types';
 import { documentationService } from '../../../services/documentation';

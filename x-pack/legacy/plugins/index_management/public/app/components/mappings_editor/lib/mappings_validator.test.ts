@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { serializeProperties, isObject } from './properties_serializer';
+import { validateProperties, isObject } from './mappings_validator';
 
-describe('Properties serializer', () => {
+jest.mock('ui/index_patterns', () => ({
+  ILLEGAL_CHARACTERS: '',
+  validateIndexPattern: () => ({}),
+}));
+
+describe('Properties validator', () => {
   it('should convert non object to empty object', () => {
     const tests = ['abc', 123, [], null, undefined];
 
     tests.forEach(testValue => {
-      const { value, propertiesRemoved } = serializeProperties(testValue as any);
+      const { value, error } = validateProperties(testValue as any);
       expect(isObject(value)).toBe(true);
-      expect(propertiesRemoved.length).toBe(0);
+      expect(error).toBe(undefined);
     });
   });
 
@@ -32,10 +37,10 @@ describe('Properties serializer', () => {
         },
       },
     };
-    const { value, propertiesRemoved } = serializeProperties(properties as any);
+    const { value, error } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual(['prop1', 'prop6']);
-    expect(propertiesRemoved).toEqual(['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2']);
+    expect(error!.propertiesRemoved).toEqual(['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2']);
   });
 
   it(`should strip fields that dont't have a "type" defined`, () => {
@@ -50,10 +55,10 @@ describe('Properties serializer', () => {
         },
       },
     };
-    const { value, propertiesRemoved } = serializeProperties(properties as any);
+    const { value, error } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual(['prop1', 'prop3']);
-    expect(propertiesRemoved).toEqual(['prop2', 'prop3.prop1']);
+    expect(error!.propertiesRemoved).toEqual(['prop2', 'prop3.prop1']);
   });
 
   it('should strip field whose type is not a string or is unknown', () => {
@@ -62,10 +67,10 @@ describe('Properties serializer', () => {
       prop2: { type: 'clearlyUnknown' },
     };
 
-    const { value, propertiesRemoved } = serializeProperties(properties as any);
+    const { value, error } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual([]);
-    expect(propertiesRemoved).toEqual(['prop1', 'prop2']);
+    expect(error!.propertiesRemoved).toEqual(['prop1', 'prop2']);
   });
 
   it('should strip parameters that are unknown', () => {
@@ -80,7 +85,7 @@ describe('Properties serializer', () => {
       },
     };
 
-    const { value } = serializeProperties(properties as any);
+    const { value } = validateProperties(properties as any);
 
     expect(value).toEqual({
       prop1: { type: 'text' },
@@ -96,7 +101,9 @@ describe('Properties serializer', () => {
 
   it(`should strip parameters whose value don't have the valid type.`, () => {
     const properties = {
-      wrong: {
+      // All the parameters in "wrongField" have a wrong format defined
+      // and should be stripped out when running the validation
+      wrongField: {
         type: 'text',
         store: 'abc',
         index: 'abc',
@@ -105,7 +112,6 @@ describe('Properties serializer', () => {
         fielddata: [''],
         fielddata_frequency_filter: [123, 456],
         coerce: 1234,
-        coerce_geo_shape: {},
         coerce_shape: '',
         ignore_malformed: 0,
         null_value: {},
@@ -146,7 +152,9 @@ describe('Properties serializer', () => {
         depth_limit: true,
         dims: false,
       },
-      good: {
+      // All the parameters in "goodField" have the correct format
+      // and should still be there after the validation ran.
+      goodField: {
         type: 'text',
         store: true,
         index: true,
@@ -155,7 +163,6 @@ describe('Properties serializer', () => {
         fielddata: true,
         fielddata_frequency_filter: { min: 1, max: 2, min_segment_size: 10 },
         coerce: true,
-        coerce_geo_shape: true,
         coerce_shape: true,
         ignore_malformed: true,
         null_value: 'NULL',
@@ -198,10 +205,17 @@ describe('Properties serializer', () => {
       },
     };
 
-    const { value } = serializeProperties(properties as any);
+    const { value, error } = validateProperties(properties as any);
 
-    expect(Object.keys(value)).toEqual(['wrong', 'good']);
-    expect(value.wrong).toEqual({ type: 'text' });
-    expect(value.good).toEqual(properties.good);
+    expect(Object.keys(value)).toEqual(['wrongField', 'goodField']);
+
+    expect(value.wrongField).toEqual({ type: 'text' }); // All parameters have been stripped out but the "type".
+    expect(value.goodField).toEqual(properties.goodField); // All parameters are stil there.
+
+    expect(error).not.toBe(undefined);
+    expect(Object.keys(error!.parametersRemoved)).toEqual(['wrongField']);
+    expect(error!.parametersRemoved.wrongField).toEqual(
+      Object.keys(properties.wrongField).filter(v => v !== 'type') // All parameters but the "type"
+    );
   });
 });

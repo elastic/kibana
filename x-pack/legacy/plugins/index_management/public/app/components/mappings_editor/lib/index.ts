@@ -10,4 +10,4 @@ export * from './serializers';
 
 export * from './validators';
 
-export * from './properties_serializer';
+export * from './mappings_validator';
