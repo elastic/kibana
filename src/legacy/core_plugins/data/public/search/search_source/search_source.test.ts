@@ -19,17 +19,26 @@
 
 import { SearchSource } from '../search_source';
 import { IndexPattern } from '../../../../../../plugins/data/public';
+import {
+  setSearchService,
+  setUiSettings,
+  setInjectedMetadata,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/services';
 
-jest.mock('ui/new_platform');
+import {
+  injectedMetadataServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../../core/public/mocks';
+
+setUiSettings(uiSettingsServiceMock.createStartContract());
+setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());
+setSearchService({
+  search: jest.fn(),
+});
 
 jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
-}));
-
-jest.mock('ui/chrome', () => ({
-  dangerouslyGetActiveInjector: () => ({
-    get: jest.fn(),
-  }),
 }));
 
 const getComputedFields = () => ({
