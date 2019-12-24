@@ -20,7 +20,7 @@ import {
   convertMapExtentToPolygon,
   roundCoordinates,
 } from './elasticsearch_geo_utils';
-import { flattenHitWrapper } from 'ui/index_patterns';
+import { indexPatterns } from '../../../../../src/plugins/data/public';
 
 const geoFieldName = 'location';
 const mapExtent = {
@@ -172,7 +172,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     };
-    const indexPatternFlattenHit = flattenHitWrapper(indexPatternMock);
+    const indexPatternFlattenHit = indexPatterns.flattenHitWrapper(indexPatternMock);
 
     it('Should handle geoField being an object', () => {
       const hits = [

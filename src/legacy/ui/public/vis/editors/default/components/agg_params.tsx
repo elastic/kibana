@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { VisState } from 'ui/vis';
 import { aggTypes, AggType, AggParam, AggConfig } from 'ui/agg_types/';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../plugins/data/public';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
