@@ -10,13 +10,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
-import datemath from '@elastic/datemath';
 
 import { throwErrors } from '../../../common/runtime_types';
 
 import { InfraBackendLibs } from '../../lib/infra_types';
 import {
-  ESDate,
   LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
@@ -48,16 +46,9 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           cursor = { after: payload.after };
         }
 
-        const startTimestamp = parseDate(startDate);
-        const endTimestamp = parseDate(endDate);
-
-        if (!startTimestamp || !endTimestamp) {
-          return response.badRequest();
-        }
-
         const entries = await logEntries.getLogEntries(requestContext, sourceId, {
-          startTimestamp,
-          endTimestamp,
+          startDate,
+          endDate,
           query: parseFilterQuery(query),
           cursor,
         });
@@ -79,15 +70,3 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
     }
   );
 };
-
-function parseDate(date: ESDate): number | undefined {
-  if (typeof date === 'number') {
-    return date;
-  }
-
-  const parsedDate = datemath.parse(date);
-
-  if (parsedDate) {
-    return parsedDate.valueOf();
-  }
-}

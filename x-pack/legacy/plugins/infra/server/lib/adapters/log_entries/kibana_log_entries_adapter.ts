@@ -89,7 +89,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     params: LogEntriesParams
   ): Promise<LogEntryDocument[]> {
-    const { startTimestamp, endTimestamp, query, cursor } = params;
+    const { startDate, endDate, query, cursor } = params;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -112,8 +112,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               {
                 range: {
                   [sourceConfiguration.fields.timestamp]: {
-                    gte: startTimestamp,
-                    lte: endTimestamp,
+                    gte: startDate,
+                    lte: endDate,
                     format: TIMESTAMP_FORMAT,
                   },
                 },

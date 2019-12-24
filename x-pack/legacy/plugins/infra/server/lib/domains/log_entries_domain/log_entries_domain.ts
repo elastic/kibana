@@ -5,7 +5,7 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { sortBy, get } from 'lodash';
+import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
@@ -35,8 +35,8 @@ import {
 } from './message';
 
 export interface LogEntriesParams {
-  startTimestamp: number;
-  endTimestamp: number;
+  startDate: number;
+  endDate: number;
   query?: JsonObject;
   cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
 }
