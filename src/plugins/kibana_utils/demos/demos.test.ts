@@ -19,6 +19,7 @@
 
 import { result as counterResult } from './state_containers/counter';
 import { result as todomvcResult } from './state_containers/todomvc';
+import { result as urlSyncResult } from './state_sync/url';
 
 describe('demos', () => {
   describe('state containers', () => {
@@ -31,6 +32,14 @@ describe('demos', () => {
         { id: 0, text: 'Learning state containers', completed: true },
         { id: 1, text: 'Learning transitions...', completed: true },
       ]);
+    });
+  });
+
+  describe('state sync', () => {
+    test('url sync demo works', async () => {
+      expect(await urlSyncResult).toMatchInlineSnapshot(
+        `"http://localhost/#?_s=!((completed:!f,id:0,text:'Learning+state+containers'),(completed:!f,id:2,text:test))"`
+      );
     });
   });
 });
