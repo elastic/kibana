@@ -86,61 +86,61 @@ export const StepScheduleRule = memo<StepScheduleRuleProps>(
     return isReadOnlyView && myStepData != null ? (
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
     ) : (
-        <>
-          <Form form={form} data-test-subj="stepScheduleRule">
-            <UseField
-              path="interval"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleInterval',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-              }}
-            />
-            <UseField
-              path="from"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleFrom',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-              }}
-            />
-          </Form>
+      <>
+        <Form form={form} data-test-subj="stepScheduleRule">
+          <UseField
+            path="interval"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleInterval',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+            }}
+          />
+          <UseField
+            path="from"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleFrom',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+            }}
+          />
+        </Form>
 
-          {!isUpdateView && (
-            <>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="flexEnd"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill={false}
-                    isDisabled={isLoading}
-                    isLoading={isLoading}
-                    onClick={onSubmit.bind(null, false)}
-                  >
-                    {I18n.COMPLETE_WITHOUT_ACTIVATING}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    isDisabled={isLoading}
-                    isLoading={isLoading}
-                    onClick={onSubmit.bind(null, true)}
-                  >
-                    {I18n.COMPLETE_WITH_ACTIVATING}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
-        </>
-      );
+        {!isUpdateView && (
+          <>
+            <EuiHorizontalRule margin="s" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill={false}
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit.bind(null, false)}
+                >
+                  {I18n.COMPLETE_WITHOUT_ACTIVATING}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit.bind(null, true)}
+                >
+                  {I18n.COMPLETE_WITH_ACTIVATING}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </>
+    );
   }
 );

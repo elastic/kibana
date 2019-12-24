@@ -82,127 +82,127 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
     return isReadOnlyView && myStepData != null ? (
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
     ) : (
-        <>
-          <Form form={form} data-test-subj="stepAboutRule">
-            <CommonUseField
-              path="name"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleName',
-                'data-test-subj': 'detectionEngineStepAboutRuleName',
-                euiFieldProps: {
-                  fullWidth: false,
-                  disabled: isLoading,
-                },
-              }}
-            />
-            <CommonUseField
-              path="description"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleDescription',
-                'data-test-subj': 'detectionEngineStepAboutRuleDescription',
-                euiFieldProps: {
-                  disabled: isLoading,
-                },
-              }}
-            />
-            <CommonUseField
-              path="severity"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleSeverity',
-                'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
-                euiFieldProps: {
-                  fullWidth: false,
-                  disabled: isLoading,
-                  options: severityOptions,
-                },
-              }}
-            />
-            <CommonUseField
-              path="riskScore"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleRiskScore',
-                'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
-                euiFieldProps: {
-                  max: 100,
-                  min: 0,
+      <>
+        <Form form={form} data-test-subj="stepAboutRule">
+          <CommonUseField
+            path="name"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleName',
+              'data-test-subj': 'detectionEngineStepAboutRuleName',
+              euiFieldProps: {
+                fullWidth: false,
+                disabled: isLoading,
+              },
+            }}
+          />
+          <CommonUseField
+            path="description"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleDescription',
+              'data-test-subj': 'detectionEngineStepAboutRuleDescription',
+              euiFieldProps: {
+                disabled: isLoading,
+              },
+            }}
+          />
+          <CommonUseField
+            path="severity"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleSeverity',
+              'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
+              euiFieldProps: {
+                fullWidth: false,
+                disabled: isLoading,
+                options: severityOptions,
+              },
+            }}
+          />
+          <CommonUseField
+            path="riskScore"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleRiskScore',
+              'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+              euiFieldProps: {
+                max: 100,
+                min: 0,
 
-                  fullWidth: false,
-                  disabled: isLoading,
-                  options: severityOptions,
-                  showTicks: true,
-                  tickInterval: 25,
-                },
-              }}
-            />
-            <UseField
-              path="references"
-              component={AddItem}
-              componentProps={{
-                addText: I18n.ADD_REFERENCE,
-                idAria: 'detectionEngineStepAboutRuleReferenceUrls',
+                fullWidth: false,
+                disabled: isLoading,
+                options: severityOptions,
+                showTicks: true,
+                tickInterval: 25,
+              },
+            }}
+          />
+          <UseField
+            path="references"
+            component={AddItem}
+            componentProps={{
+              addText: I18n.ADD_REFERENCE,
+              idAria: 'detectionEngineStepAboutRuleReferenceUrls',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
+            }}
+          />
+          <UseField
+            path="falsePositives"
+            component={AddItem}
+            componentProps={{
+              addText: I18n.ADD_FALSE_POSITIVE,
+              idAria: 'detectionEngineStepAboutRuleFalsePositives',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
+            }}
+          />
+          <UseField
+            path="threats"
+            component={AddMitreThreat}
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleMitreThreats',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
+            }}
+          />
+          <CommonUseField
+            path="tags"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleTags',
+              'data-test-subj': 'detectionEngineStepAboutRuleTags',
+              euiFieldProps: {
+                fullWidth: true,
                 isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleReferenceUrls',
-              }}
-            />
-            <UseField
-              path="falsePositives"
-              component={AddItem}
-              componentProps={{
-                addText: I18n.ADD_FALSE_POSITIVE,
-                idAria: 'detectionEngineStepAboutRuleFalsePositives',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
-              }}
-            />
-            <UseField
-              path="threats"
-              component={AddMitreThreat}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleMitreThreats',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
-              }}
-            />
-            <CommonUseField
-              path="tags"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleTags',
-                'data-test-subj': 'detectionEngineStepAboutRuleTags',
-                euiFieldProps: {
-                  fullWidth: true,
-                  isDisabled: isLoading,
-                },
-              }}
-            />
-            <FormDataProvider pathsToWatch="severity">
-              {({ severity }) => {
-                const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-                const riskScoreField = form.getFields().riskScore;
-                if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
-                  riskScoreField.setValue(newRiskScore);
-                }
-                return null;
-              }}
-            </FormDataProvider>
-          </Form>
-          {!isUpdateView && (
-            <>
-              <EuiHorizontalRule margin="m" />
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="flexEnd"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                    {RuleI18n.CONTINUE}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
-        </>
-      );
+              },
+            }}
+          />
+          <FormDataProvider pathsToWatch="severity">
+            {({ severity }) => {
+              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
+              const riskScoreField = form.getFields().riskScore;
+              if (newRiskScore != null && riskScoreField.value !== newRiskScore) {
+                riskScoreField.setValue(newRiskScore);
+              }
+              return null;
+            }}
+          </FormDataProvider>
+        </Form>
+        {!isUpdateView && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                  {RuleI18n.CONTINUE}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </>
+    );
   }
 );

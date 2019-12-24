@@ -32,6 +32,10 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   }
 `;
 
+const MyEuiSelect = styled(EuiSelect)`
+  width: auto;
+`;
+
 export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState('s');
   const [timeVal, setTimeVal] = useState<number>(0);
@@ -93,7 +97,7 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
     >
       <EuiFieldNumber
         append={
-          <EuiSelect
+          <MyEuiSelect
             fullWidth={false}
             options={timeTypeOptions}
             onChange={onChangeTimeType}

@@ -46,7 +46,7 @@ const EuiBadgeWrap = styled(EuiBadge)`
   }
 `;
 
-const EuiFlexItemWidth = styled(EuiFlexItem) <{ direction: string }>`
+const EuiFlexItemWidth = styled(EuiFlexItem)<{ direction: string }>`
   ${props => (props.direction === 'row' ? 'width : 50%;' : 'width: 100%;')};
 `;
 
@@ -153,8 +153,8 @@ const getDescriptionItem = (
                         valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                       />
                     ) : (
-                        <EuiLoadingSpinner size="m" />
-                      )}
+                      <EuiLoadingSpinner size="m" />
+                    )}
                   </EuiBadgeWrap>
                 </EuiFlexItem>
               ))}

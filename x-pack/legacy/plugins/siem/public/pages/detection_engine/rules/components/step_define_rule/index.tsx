@@ -123,96 +123,96 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
         data={myStepData}
       />
     ) : (
-        <>
-          <Form form={form} data-test-subj="stepDefineRule">
-            <CommonUseField
-              path="useIndicesConfig"
-              componentProps={{
-                idAria: 'detectionEngineStepDefineRuleUseIndicesConfig',
-                'data-test-subj': 'detectionEngineStepDefineRuleUseIndicesConfig',
-                euiFieldProps: {
-                  disabled: isLoading,
-                  options: [
-                    {
-                      id: 'true',
-                      label: I18n.CONFIG_INDICES,
-                    },
-                    {
-                      id: 'false',
-                      label: I18n.CUSTOM_INDICES,
-                    },
-                  ],
-                },
-              }}
-            />
-            <CommonUseField
-              path="index"
-              componentProps={{
-                idAria: 'detectionEngineStepDefineRuleIndices',
-                'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-                euiFieldProps: {
-                  fullWidth: true,
-                  isDisabled: isLoading,
-                },
-              }}
-            />
-            <UseField
-              path="queryBar"
-              component={QueryBarDefineRule}
-              componentProps={{
-                loading: indexPatternLoadingQueryBar,
-                idAria: 'detectionEngineStepDefineRuleQueryBar',
-                indexPattern: indexPatternQueryBar,
+      <>
+        <Form form={form} data-test-subj="stepDefineRule">
+          <CommonUseField
+            path="useIndicesConfig"
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRuleUseIndicesConfig',
+              'data-test-subj': 'detectionEngineStepDefineRuleUseIndicesConfig',
+              euiFieldProps: {
+                disabled: isLoading,
+                options: [
+                  {
+                    id: 'true',
+                    label: I18n.CONFIG_INDICES,
+                  },
+                  {
+                    id: 'false',
+                    label: I18n.CUSTOM_INDICES,
+                  },
+                ],
+              },
+            }}
+          />
+          <CommonUseField
+            path="index"
+            componentProps={{
+              idAria: 'detectionEngineStepDefineRuleIndices',
+              'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+              euiFieldProps: {
+                fullWidth: true,
                 isDisabled: isLoading,
-                isLoading: indexPatternLoadingQueryBar,
-                dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-                resizeParentContainer,
-              }}
-            />
-            <FormDataProvider pathsToWatch="useIndicesConfig">
-              {({ useIndicesConfig }) => {
-                if (localUseIndicesConfig !== useIndicesConfig) {
-                  const indexField = form.getFields().index;
-                  if (
-                    indexField != null &&
-                    useIndicesConfig === 'true' &&
-                    !isEqual(indexField.value, indicesConfig)
-                  ) {
-                    indexField.setValue(indicesConfig);
-                    setIndices(indicesConfig);
-                  } else if (
-                    indexField != null &&
-                    useIndicesConfig === 'false' &&
-                    isEqual(indexField.value, indicesConfig)
-                  ) {
-                    indexField.setValue([]);
-                    setIndices([]);
-                  }
-                  setLocalUseIndicesConfig(useIndicesConfig);
+              },
+            }}
+          />
+          <UseField
+            path="queryBar"
+            component={QueryBarDefineRule}
+            componentProps={{
+              loading: indexPatternLoadingQueryBar,
+              idAria: 'detectionEngineStepDefineRuleQueryBar',
+              indexPattern: indexPatternQueryBar,
+              isDisabled: isLoading,
+              isLoading: indexPatternLoadingQueryBar,
+              dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+              resizeParentContainer,
+            }}
+          />
+          <FormDataProvider pathsToWatch="useIndicesConfig">
+            {({ useIndicesConfig }) => {
+              if (localUseIndicesConfig !== useIndicesConfig) {
+                const indexField = form.getFields().index;
+                if (
+                  indexField != null &&
+                  useIndicesConfig === 'true' &&
+                  !isEqual(indexField.value, indicesConfig)
+                ) {
+                  indexField.setValue(indicesConfig);
+                  setIndices(indicesConfig);
+                } else if (
+                  indexField != null &&
+                  useIndicesConfig === 'false' &&
+                  isEqual(indexField.value, indicesConfig)
+                ) {
+                  indexField.setValue([]);
+                  setIndices([]);
                 }
+                setLocalUseIndicesConfig(useIndicesConfig);
+              }
 
-                return null;
-              }}
-            </FormDataProvider>
-          </Form>
-          {!isUpdateView && (
-            <>
-              <EuiHorizontalRule margin="m" />
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="flexEnd"
-                gutterSize="xs"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                    {RuleI18n.CONTINUE}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
-        </>
-      );
+              return null;
+            }}
+          </FormDataProvider>
+        </Form>
+        {!isUpdateView && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                  {RuleI18n.CONTINUE}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </>
+    );
   }
 );
