@@ -52,7 +52,7 @@ export class ManagementSection {
 
   registerApp({ id, title, order, mount }: RegisterManagementAppArgs) {
     const app = new ManagementApp(
-      { id, title, order, mount, basePath: `management/${this.id}/${id}` },
+      { id, title, order, mount, basePath: `/management/${this.id}/${id}` },
       this.sections,
       this.registerLegacyApp,
       this.getLegacyManagementSection

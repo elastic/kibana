@@ -55,8 +55,7 @@ export class ManagementApp {
     this.getLegacyManagementSections = getLegacyManagementSections;
 
     this.registerLegacyApp({
-      // basePath and legacy app id are the same
-      id: basePath,
+      id: basePath.substr(1), // get rid of initial slash
       title,
       mount: async (appMountContext, params) => {
         let appUnmount: Unmount;
