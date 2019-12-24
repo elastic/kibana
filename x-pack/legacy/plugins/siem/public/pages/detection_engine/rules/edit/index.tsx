@@ -49,6 +49,7 @@ interface ScheduleStepRuleForm extends StepRuleForm {
 export const EditRuleComponent = memo(() => {
   const { ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
+  // TODO WEIRD HERE
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
     data: null,
