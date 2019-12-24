@@ -27,15 +27,29 @@ describe('Vertex', () => {
       { id: 'my-prefix:my-really-long-named-generator', type: 'plugin', explicit_id: false },
       { id: 'my-queue', type: 'queue', config_name: 'some-name' },
       { id: 'my-if', type: 'if', config_name: 'some-name' },
-      { id: 'my-grok', type: 'plugin', meta: { source_text: 'foobar', source_line: 33, source_column: 4 } },
-      { id: 'my-sleep', type: 'plugin', explicit_id: true, stats: { mystat1: 100, 'events.in': { min: 100, max: 120 } } }
+      {
+        id: 'my-grok',
+        type: 'plugin',
+        meta: { source_text: 'foobar', source_line: 33, source_column: 4 },
+      },
+      {
+        id: 'my-sleep',
+        type: 'plugin',
+        explicit_id: true,
+        stats: { mystat1: 100, 'events.in': { min: 100, max: 120 } },
+      },
     ],
     edges: [
-      { id: 'abcdef', type: 'plain', from: 'my-prefix:my-really-long-named-generator', to: 'my-queue' },
+      {
+        id: 'abcdef',
+        type: 'plain',
+        from: 'my-prefix:my-really-long-named-generator',
+        to: 'my-queue',
+      },
       { id: '123456', type: 'plain', from: 'my-queue', to: 'my-if' },
       { id: 'if-true', type: 'plain', from: 'my-if', to: 'my-grok' },
-      { id: 'if-false', type: 'plain', from: 'my-if', to: 'my-sleep' }
-    ]
+      { id: 'if-false', type: 'plain', from: 'my-if', to: 'my-sleep' },
+    ],
   };
 
   beforeEach(() => {
@@ -46,7 +60,7 @@ describe('Vertex', () => {
   it('should update the internal json property when update() is called', () => {
     const vertex = graph.getVertexById('my-queue');
     const updatedJson = {
-      config_name: 'my-stdin'
+      config_name: 'my-stdin',
     };
     vertex.update(updatedJson);
     expect(vertex.json).to.eql(updatedJson);
@@ -152,7 +166,6 @@ describe('Vertex', () => {
   });
 
   describe('lineage', () => {
-
     it('should have the correct descendants', () => {
       const vertex1 = graph.getVertexById('my-prefix:my-really-long-named-generator');
       expect(vertex1.descendants().vertices.length).to.be(4);
@@ -197,12 +210,16 @@ describe('Vertex', () => {
           { id: 'I1', type: 'plugin', explicit_id: false },
           { id: 'my-queue', type: 'queue', config_name: 'some-name' },
           { id: 'IF1', type: 'if', config_name: 'some-name' },
-          { id: 'IF2', type: 'plugin', meta: { source_text: 'foobar', source_line: 33, source_column: 4 } },
+          {
+            id: 'IF2',
+            type: 'plugin',
+            meta: { source_text: 'foobar', source_line: 33, source_column: 4 },
+          },
           { id: 'F1', type: 'plugin', explicit_id: true },
           { id: 'F2', type: 'plugin', explicit_id: true },
           { id: 'F3', type: 'plugin', explicit_id: true },
           { id: 'F4', type: 'plugin', explicit_id: true },
-          { id: 'F5', type: 'plugin', explicit_id: true }
+          { id: 'F5', type: 'plugin', explicit_id: true },
         ],
         edges: [
           { id: '1', type: 'plain', from: 'I1', to: 'my-queue' },
@@ -215,7 +232,7 @@ describe('Vertex', () => {
           { id: '8', type: 'plain', from: 'F3', to: 'F5' },
           { id: '9', type: 'plain', from: 'F1', to: 'F4' },
           { id: '10', type: 'plain', from: 'F4', to: 'F5' },
-        ]
+        ],
       };
 
       beforeEach(() => {
@@ -232,5 +249,4 @@ describe('Vertex', () => {
     const vertex2 = graph.getVertexById('my-sleep');
     expect(vertex2.hasExplicitId).to.be(true);
   });
-
 });

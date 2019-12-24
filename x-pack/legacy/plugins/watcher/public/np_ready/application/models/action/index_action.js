@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { get } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
@@ -30,15 +29,13 @@ export class IndexAction extends BaseAction {
     return errors;
   }
 
-
   get upstreamJson() {
     const result = super.upstreamJson;
 
     Object.assign(result, {
-      index: this.index,
       index: {
         index: this.index,
-      }
+      },
     });
 
     return result;
@@ -50,7 +47,7 @@ export class IndexAction extends BaseAction {
       defaultMessage: 'Index {index} has been indexed.',
       values: {
         index,
-      }
+      },
     });
   }
 
@@ -60,7 +57,7 @@ export class IndexAction extends BaseAction {
       defaultMessage: 'Failed to index {index}.',
       values: {
         index,
-      }
+      },
     });
   }
 

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { ml } from '../../../../../services/ml_api_service';
 import { chunk } from 'lodash';
 import moment from 'moment';
@@ -33,10 +32,13 @@ export class Importer {
 
     // if no pipeline has been supplied,
     // send an empty object
-    const ingestPipeline = (pipeline !== undefined) ? {
-      id: `${index}-pipeline`,
-      pipeline,
-    } : {};
+    const ingestPipeline =
+      pipeline !== undefined
+        ? {
+            id: `${index}-pipeline`,
+            pipeline,
+          }
+        : {};
 
     const createIndexResp = await ml.fileDatavisualizer.import({
       id: undefined,
@@ -44,7 +46,7 @@ export class Importer {
       data: [],
       settings,
       mappings,
-      ingestPipeline
+      ingestPipeline,
     });
 
     return createIndexResp;
@@ -54,9 +56,12 @@ export class Importer {
     if (!id || !index) {
       return {
         success: false,
-        error: i18n.translate('xpack.ml.fileDatavisualizer.importView.noIdOrIndexSuppliedErrorMessage', {
-          defaultMessage: 'no ID or index supplied'
-        })
+        error: i18n.translate(
+          'xpack.ml.fileDatavisualizer.importView.noIdOrIndexSuppliedErrorMessage',
+          {
+            defaultMessage: 'no ID or index supplied',
+          }
+        ),
       };
     }
 
@@ -77,7 +82,7 @@ export class Importer {
         data: chunks[i],
         settings: {},
         mappings: {},
-        ingestPipeline
+        ingestPipeline,
       };
 
       let retries = IMPORT_RETRIES;
@@ -137,7 +142,7 @@ function populateFailures(error, failures, chunkCount) {
     // e.g. item 3 in chunk 2 is actually item 20003
     for (let f = 0; f < error.failures.length; f++) {
       const failure = error.failures[f];
-      failure.item = failure.item + (CHUNK_SIZE * chunkCount);
+      failure.item = failure.item + CHUNK_SIZE * chunkCount;
     }
     failures.push(...error.failures);
   }
@@ -152,7 +157,9 @@ function populateFailures(error, failures, chunkCount) {
 // Therefore we need to replace {{ beat.timezone }} with the actual browser timezone
 function updatePipelineTimezone(ingestPipeline) {
   if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
-    const dateProcessor = ingestPipeline.processors.find(p => (p.date !== undefined && p.date.timezone === '{{ beat.timezone }}'));
+    const dateProcessor = ingestPipeline.processors.find(
+      p => p.date !== undefined && p.date.timezone === '{{ beat.timezone }}'
+    );
 
     if (dateProcessor) {
       dateProcessor.date.timezone = moment.tz.guess();

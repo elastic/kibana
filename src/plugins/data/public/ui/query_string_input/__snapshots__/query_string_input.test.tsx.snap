@@ -209,6 +209,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -298,7 +299,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -319,8 +320,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -829,6 +828,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -918,7 +918,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -939,8 +939,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -1437,6 +1435,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -1526,7 +1525,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -1547,8 +1546,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -2054,6 +2051,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -2143,7 +2141,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -2164,8 +2162,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -2662,6 +2658,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -2751,7 +2748,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -2772,8 +2769,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -3279,6 +3274,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -3368,7 +3364,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -3389,8 +3385,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],

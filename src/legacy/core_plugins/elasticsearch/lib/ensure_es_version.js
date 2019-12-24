@@ -41,84 +41,85 @@ export function ensureEsVersion(server, kibanaVersion, ignoreVersionMismatch = f
 
   server.logWithMetadata(['plugin', 'debug'], 'Checking Elasticsearch version');
   return callWithInternalUser('nodes.info', {
-    filterPath: [
-      'nodes.*.version',
-      'nodes.*.http.publish_address',
-      'nodes.*.ip',
-    ]
-  })
-    .then(function (info) {
+    filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+  }).then(function(info) {
     // Aggregate incompatible ES nodes.
-      const incompatibleNodes = [];
+    const incompatibleNodes = [];
 
-      // Aggregate ES nodes which should prompt a Kibana upgrade.
-      const warningNodes = [];
+    // Aggregate ES nodes which should prompt a Kibana upgrade.
+    const warningNodes = [];
 
-      forEach(info.nodes, esNode => {
-        if (!isEsCompatibleWithKibana(esNode.version, kibanaVersion)) {
+    forEach(info.nodes, esNode => {
+      if (!isEsCompatibleWithKibana(esNode.version, kibanaVersion)) {
         // Exit early to avoid collecting ES nodes with newer major versions in the `warningNodes`.
-          return incompatibleNodes.push(esNode);
-        }
-
-        // It's acceptable if ES and Kibana versions are not the same so long as
-        // they are not incompatible, but we should warn about it
-
-        // Ignore version qualifiers
-        // https://github.com/elastic/elasticsearch/issues/36859
-        const looseMismatch = coerce(esNode.version).version !== coerce(kibanaVersion).version;
-        if (looseMismatch) {
-          warningNodes.push(esNode);
-        }
-      });
-
-      function getHumanizedNodeNames(nodes) {
-        return nodes.map(node => {
-          const publishAddress =  get(node, 'http.publish_address') ? (get(node, 'http.publish_address') + ' ') : '';
-          return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
-        });
+        return incompatibleNodes.push(esNode);
       }
 
-      if (warningNodes.length) {
-        const simplifiedNodes = warningNodes.map(node => ({
-          version: node.version,
-          http: {
-            publish_address: get(node, 'http.publish_address')
-          },
-          ip: node.ip,
-        }));
+      // It's acceptable if ES and Kibana versions are not the same so long as
+      // they are not incompatible, but we should warn about it
 
-        // Don't show the same warning over and over again.
-        const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
-        if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
-          lastWarnedNodesForServer.set(server, warningNodeNames);
-          server.logWithMetadata(['warning'],
-            `You're running Kibana ${kibanaVersion} with some different versions of ` +
+      // Ignore version qualifiers
+      // https://github.com/elastic/elasticsearch/issues/36859
+      const looseMismatch = coerce(esNode.version).version !== coerce(kibanaVersion).version;
+      if (looseMismatch) {
+        warningNodes.push(esNode);
+      }
+    });
+
+    function getHumanizedNodeNames(nodes) {
+      return nodes.map(node => {
+        const publishAddress = get(node, 'http.publish_address')
+          ? get(node, 'http.publish_address') + ' '
+          : '';
+        return 'v' + node.version + ' @ ' + publishAddress + '(' + node.ip + ')';
+      });
+    }
+
+    if (warningNodes.length) {
+      const simplifiedNodes = warningNodes.map(node => ({
+        version: node.version,
+        http: {
+          publish_address: get(node, 'http.publish_address'),
+        },
+        ip: node.ip,
+      }));
+
+      // Don't show the same warning over and over again.
+      const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
+      if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
+        lastWarnedNodesForServer.set(server, warningNodeNames);
+        server.logWithMetadata(
+          ['warning'],
+          `You're running Kibana ${kibanaVersion} with some different versions of ` +
             'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
             `version to prevent compatibility issues: ${warningNodeNames}`,
-            {
-              kibanaVersion,
-              nodes: simplifiedNodes,
-            });
-        }
-      }
-
-      if (incompatibleNodes.length && !shouldIgnoreVersionMismatch(server, ignoreVersionMismatch)) {
-        const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
-        throw new Error(
-          `This version of Kibana requires Elasticsearch v` +
-        `${kibanaVersion} on all nodes. I found ` +
-        `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`
+          {
+            kibanaVersion,
+            nodes: simplifiedNodes,
+          }
         );
       }
+    }
 
-      return true;
-    });
+    if (incompatibleNodes.length && !shouldIgnoreVersionMismatch(server, ignoreVersionMismatch)) {
+      const incompatibleNodeNames = getHumanizedNodeNames(incompatibleNodes);
+      throw new Error(
+        `This version of Kibana requires Elasticsearch v` +
+          `${kibanaVersion} on all nodes. I found ` +
+          `the following incompatible nodes in your cluster: ${incompatibleNodeNames.join(', ')}`
+      );
+    }
+
+    return true;
+  });
 }
 
 function shouldIgnoreVersionMismatch(server, ignoreVersionMismatch) {
   const isDevMode = server.config().get('env.dev');
-  if(!isDevMode && ignoreVersionMismatch) {
-    throw new Error(`Option "elasticsearch.ignoreVersionMismatch" can only be used in development mode`);
+  if (!isDevMode && ignoreVersionMismatch) {
+    throw new Error(
+      `Option "elasticsearch.ignoreVersionMismatch" can only be used in development mode`
+    );
   }
 
   return isDevMode && ignoreVersionMismatch;

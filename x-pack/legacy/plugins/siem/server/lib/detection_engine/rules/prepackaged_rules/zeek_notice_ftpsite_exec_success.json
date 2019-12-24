@@ -1,0 +1,17 @@
+{
+  "rule_id": "4b9cb3e9-e26a-4bd2-bd1f-8d451b49838f",
+  "risk_score": 50,
+  "description": "Indicates that a successful response to a “SITE EXEC” command/arg pair was seen.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice FTP::Site_Exec_Success",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"FTP::Site_Exec_Success\" or rule.name: \"FTP::Site_Exec_Success\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

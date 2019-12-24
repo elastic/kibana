@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -38,7 +37,6 @@ function AdvancedSettingsUi({
   indexPatternNameError,
   intl,
 }) {
-
   return (
     <React.Fragment>
       <EuiFormRow
@@ -54,15 +52,15 @@ function AdvancedSettingsUi({
         <EuiFieldText
           placeholder={intl.formatMessage({
             id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder',
-            defaultMessage: 'index name'
+            defaultMessage: 'index name',
           })}
           value={index}
-          disabled={(initialized === true)}
+          disabled={initialized === true}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
           aria-label={intl.formatMessage({
             id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameAriaLabel',
-            defaultMessage: 'Index name, required field'
+            defaultMessage: 'Index name, required field',
           })}
         />
       </EuiFormRow>
@@ -77,8 +75,8 @@ function AdvancedSettingsUi({
             defaultMessage="Create index pattern"
           />
         }
-        checked={(createIndexPattern === true)}
-        disabled={(initialized === true)}
+        checked={createIndexPattern === true}
+        disabled={initialized === true}
         onChange={onCreateIndexPatternChange}
       />
 
@@ -91,13 +89,13 @@ function AdvancedSettingsUi({
             defaultMessage="Index pattern name"
           />
         }
-        disabled={(createIndexPattern === false || initialized === true)}
+        disabled={createIndexPattern === false || initialized === true}
         isInvalid={indexPatternNameError !== ''}
         error={[indexPatternNameError]}
       >
         <EuiFieldText
-          disabled={(createIndexPattern === false || initialized === true)}
-          placeholder={(createIndexPattern === true) ? index : ''}
+          disabled={createIndexPattern === false || initialized === true}
+          placeholder={createIndexPattern === true ? index : ''}
           value={indexPattern}
           onChange={onIndexPatternChange}
           isInvalid={indexPatternNameError !== ''}
@@ -105,7 +103,6 @@ function AdvancedSettingsUi({
       </EuiFormRow>
 
       <EuiFlexGroup>
-
         <EuiFlexItem>
           <IndexSettings
             initialized={initialized}
@@ -129,7 +126,6 @@ function AdvancedSettingsUi({
             onChange={onPipelineStringChange}
           />
         </EuiFlexItem>
-
       </EuiFlexGroup>
     </React.Fragment>
   );
@@ -147,12 +143,12 @@ function IndexSettings({ initialized, data, onChange }) {
             defaultMessage="Index settings"
           />
         }
-        disabled={(initialized === true)}
+        disabled={initialized === true}
         fullWidth
       >
         <MLJobEditor
           mode={EDITOR_MODE.JSON}
-          readOnly={(initialized === true)}
+          readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
           syntaxChecking={false}
@@ -173,12 +169,12 @@ function Mappings({ initialized, data, onChange }) {
             defaultMessage="Mappings"
           />
         }
-        disabled={(initialized === true)}
+        disabled={initialized === true}
         fullWidth
       >
         <MLJobEditor
           mode={EDITOR_MODE.JSON}
-          readOnly={(initialized === true)}
+          readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
           syntaxChecking={false}
@@ -199,12 +195,12 @@ function IngestPipeline({ initialized, data, onChange }) {
             defaultMessage="Ingest pipeline"
           />
         }
-        disabled={(initialized === true)}
+        disabled={initialized === true}
         fullWidth
       >
         <MLJobEditor
           mode={EDITOR_MODE.JSON}
-          readOnly={(initialized === true)}
+          readOnly={initialized === true}
           value={data}
           height={EDITOR_HEIGHT}
           syntaxChecking={false}

@@ -18,7 +18,7 @@ describe('AWS', () => {
       expect(encoding).to.eql(expectedEncoding);
 
       callback(null, ec2Uuid);
-    }
+    },
   };
 
   it('is named "aws"', () => {
@@ -30,7 +30,9 @@ describe('AWS', () => {
       const id = 'abcdef';
       const request = (req, callback) => {
         expect(req.method).to.eql('GET');
-        expect(req.uri).to.eql('http://169.254.169.254/2016-09-02/dynamic/instance-identity/document');
+        expect(req.uri).to.eql(
+          'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document'
+        );
         expect(req.json).to.eql(true);
 
         const body = `{"instanceId": "${id}","availabilityZone":"us-fake-2c", "imageId" : "ami-6df1e514"}`;
@@ -40,7 +42,7 @@ describe('AWS', () => {
       // ensure it does not use the fs to trump the body
       const awsCheckedFileSystem = new AWSCloudService({
         _fs: ec2FileSystem,
-        _isWindows: false
+        _isWindows: false,
       });
 
       const response = await awsCheckedFileSystem._checkIfService(request);
@@ -53,8 +55,8 @@ describe('AWS', () => {
         vm_type: undefined,
         zone: 'us-fake-2c',
         metadata: {
-          imageId: 'ami-6df1e514'
-        }
+          imageId: 'ami-6df1e514',
+        },
       });
     });
 
@@ -62,7 +64,7 @@ describe('AWS', () => {
       const request = (_req, callback) => callback(null, { statusCode: 404 });
       const awsCheckedFileSystem = new AWSCloudService({
         _fs: ec2FileSystem,
-        _isWindows: false
+        _isWindows: false,
       });
 
       const response = await awsCheckedFileSystem._checkIfService(request);
@@ -74,15 +76,16 @@ describe('AWS', () => {
         region: undefined,
         vm_type: undefined,
         zone: undefined,
-        metadata: undefined
+        metadata: undefined,
       });
     });
 
     it('handles request failure by downgrading to UUID detection', async () => {
-      const failedRequest = (_req, callback) => callback(new Error('expected: request failed'), null);
+      const failedRequest = (_req, callback) =>
+        callback(new Error('expected: request failed'), null);
       const awsCheckedFileSystem = new AWSCloudService({
         _fs: ec2FileSystem,
-        _isWindows: false
+        _isWindows: false,
       });
 
       const response = await awsCheckedFileSystem._checkIfService(failedRequest);
@@ -94,7 +97,7 @@ describe('AWS', () => {
         region: undefined,
         vm_type: undefined,
         zone: undefined,
-        metadata: undefined
+        metadata: undefined,
       });
     });
 
@@ -102,7 +105,7 @@ describe('AWS', () => {
       const failedRequest = (_req, callback) => callback(null, null);
       const awsIgnoredFileSystem = new AWSCloudService({
         _fs: ec2FileSystem,
-        _isWindows: true
+        _isWindows: true,
       });
 
       const response = await awsIgnoredFileSystem._checkIfService(failedRequest);
@@ -128,7 +131,7 @@ describe('AWS', () => {
         ramdiskId: null,
         imageId: 'ami-6df1e514',
         pendingTime: '2017-07-06T02:09:12Z',
-        region: 'us-west-2'
+        region: 'us-west-2',
       };
 
       const response = AWS._parseBody(body);
@@ -147,15 +150,15 @@ describe('AWS', () => {
           kernelId: null,
           ramdiskId: null,
           imageId: 'ami-6df1e514',
-          pendingTime: '2017-07-06T02:09:12Z'
-        }
+          pendingTime: '2017-07-06T02:09:12Z',
+        },
       });
     });
 
     it('ignores unexpected response body', () => {
       expect(AWS._parseBody(undefined)).to.be(null);
       expect(AWS._parseBody(null)).to.be(null);
-      expect(AWS._parseBody({ })).to.be(null);
+      expect(AWS._parseBody({})).to.be(null);
       expect(AWS._parseBody({ privateIp: 'a.b.c.d' })).to.be(null);
     });
   });
@@ -164,7 +167,7 @@ describe('AWS', () => {
     it('checks the file system for UUID if not Windows', async () => {
       const awsCheckedFileSystem = new AWSCloudService({
         _fs: ec2FileSystem,
-        _isWindows: false
+        _isWindows: false,
       });
 
       const response = await awsCheckedFileSystem._tryToDetectUuid();
@@ -176,7 +179,7 @@ describe('AWS', () => {
         region: undefined,
         zone: undefined,
         vm_type: undefined,
-        metadata: undefined
+        metadata: undefined,
       });
     });
 
@@ -187,12 +190,12 @@ describe('AWS', () => {
           expect(encoding).to.eql(expectedEncoding);
 
           callback(null, 'notEC2');
-        }
+        },
       };
 
       const awsCheckedFileSystem = new AWSCloudService({
         _fs: notEC2FileSystem,
-        _isWindows: false
+        _isWindows: false,
       });
 
       const response = await awsCheckedFileSystem._tryToDetectUuid();
@@ -203,7 +206,7 @@ describe('AWS', () => {
     it('does NOT check the file system for UUID on Windows', async () => {
       const awsUncheckedFileSystem = new AWSCloudService({
         _fs: ec2FileSystem,
-        _isWindows: true
+        _isWindows: true,
       });
 
       const response = await awsUncheckedFileSystem._tryToDetectUuid();
@@ -217,9 +220,9 @@ describe('AWS', () => {
         _fs: {
           readFile: () => {
             throw fileDNE;
-          }
+          },
         },
-        _isWindows: false
+        _isWindows: false,
       });
 
       try {

@@ -10,17 +10,19 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 import { mockBrowserFields } from '../../../../../../public/containers/source/mock';
 import { mockEndgameDnsRequest } from '../../../../../../public/mock/mock_endgame_ecs_data';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 import { DnsRequestEventDetails } from './dns_request_event_details';
 
 describe('DnsRequestEventDetails', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected text given an Endgame DNS request_event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetails
           browserFields={mockBrowserFields}

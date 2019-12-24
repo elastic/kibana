@@ -11,9 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { AppMountContext, NotificationsStart } from 'src/core/public';
-import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
+import { npStart } from 'ui/new_platform';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -23,6 +22,7 @@ import {
   esFilters,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
+  SavedQuery,
 } from '../../../../../../src/plugins/data/public';
 
 interface State {
@@ -150,7 +150,10 @@ export function App({
     }
   }, [docId]);
 
-  const isSaveable = lastKnownDoc && core.application.capabilities.visualize.save;
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -160,7 +163,7 @@ export function App({
     []
   );
 
-  const { TopNavMenu } = navigation.ui;
+  const { TopNavMenu } = npStart.plugins.navigation.ui;
 
   return (
     <I18nProvider>

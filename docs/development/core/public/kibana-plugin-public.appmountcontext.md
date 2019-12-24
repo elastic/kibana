@@ -4,7 +4,11 @@
 
 ## AppMountContext interface
 
-The context object received when applications are mounted to the DOM.
+> Warning: This API is now obsolete.
+> 
+> 
+
+The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-public.coresetup.getstartservices.md)<!-- -->.
 
 <b>Signature:</b>
 

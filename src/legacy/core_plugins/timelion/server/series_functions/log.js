@@ -26,7 +26,7 @@ export default new Chainable('log', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'base',
@@ -34,7 +34,7 @@ export default new Chainable('log', {
       help: i18n.translate('timelion.help.functions.log.args.baseHelpText', {
         defaultMessage: 'Set logarithmic base, 10 by default',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.logHelpText', {
     defaultMessage:
@@ -42,12 +42,12 @@ export default new Chainable('log', {
   }),
   fn: function logFn(args) {
     const config = args.byName;
-    return alter(args, function (eachSeries) {
-      const data = _.map(eachSeries.data, function (point) {
+    return alter(args, function(eachSeries) {
+      const data = _.map(eachSeries.data, function(point) {
         return [point[0], Math.log(point[1]) / Math.log(config.base || 10)];
       });
       eachSeries.data = data;
       return eachSeries;
     });
-  }
+  },
 });
