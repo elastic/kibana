@@ -29,22 +29,17 @@ function getConfigStub(config: any = {}) {
   } as IUiSettingsClient;
 }
 
-const msearchMockResponse: any = Promise.resolve([]);
-msearchMockResponse.abort = jest.fn();
-const msearchMock = jest.fn().mockReturnValue(msearchMockResponse);
-
 const searchMockResponse: any = Promise.resolve([]);
 searchMockResponse.abort = jest.fn();
-const searchMock = jest.fn().mockReturnValue(searchMockResponse);
+const searchMock = jest.fn().mockReturnValue({
+  toPromise: () => searchMockResponse,
+});
 
 describe('defaultSearchStrategy', function() {
   describe('search', function() {
     let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
 
     beforeEach(() => {
-      msearchMockResponse.abort.mockClear();
-      msearchMock.mockClear();
-
       searchMockResponse.abort.mockClear();
       searchMock.mockClear();
 
@@ -61,20 +56,17 @@ describe('defaultSearchStrategy', function() {
       };
     });
 
-    test('should properly call abort with msearch', () => {
-      const config = getConfigStub({
-        'courier:batchSearches': true,
-      });
-      search({ ...searchArgs, config }).abort();
-      expect(msearchMockResponse.abort).toHaveBeenCalled();
+    test('should call search service', () => {
+      const config = getConfigStub();
+      search({ ...searchArgs, config });
+      expect(searchMock).toHaveBeenCalled();
     });
 
     test('should properly abort with search', async () => {
-      const config = getConfigStub({
-        'courier:batchSearches': false,
-      });
+      const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+      const config = getConfigStub({});
       search({ ...searchArgs, config }).abort();
-      expect(searchMockResponse.abort).toHaveBeenCalled();
+      expect(abortSpy).toHaveBeenCalled();
     });
   });
 });
