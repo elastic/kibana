@@ -190,7 +190,7 @@ export const TodoAppPage: React.FC<{
       useHash: useHashedUrl,
       history: props.history,
     });
-    const destroySyncState = syncState([
+    const [startSyncingState, stopSyncingState] = syncState([
       {
         stateContainer: container,
         syncKey: `_todo-${props.appInstanceId}`,
@@ -207,8 +207,9 @@ export const TodoAppPage: React.FC<{
         syncStrategy: SyncStrategy.SessionStorage,
       },
     ]);
+    startSyncingState();
     return () => {
-      destroySyncState();
+      stopSyncingState();
 
       // reset state containers
       container.set(defaultState);

@@ -49,4 +49,11 @@ function isSyncStrategy(
   return typeof syncStrategy === 'object';
 }
 
-export { isSyncStrategy, ISyncStrategy, SyncStrategy, syncStrategies, createUrlSyncStrategy };
+export {
+  isSyncStrategy,
+  ISyncStrategy,
+  SyncStrategy,
+  syncStrategies,
+  createUrlSyncStrategy,
+  createSessionStorageSyncStrategy,
+};

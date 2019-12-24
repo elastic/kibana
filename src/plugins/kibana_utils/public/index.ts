@@ -48,6 +48,7 @@ export {
   IStateSyncConfig,
   SyncStrategy,
   InitialTruthSource,
-  DestroySyncStateFnType,
+  StartSyncStateFnType,
+  StopSyncStateFnType,
   createUrlSyncStrategy,
 } from './state_sync';

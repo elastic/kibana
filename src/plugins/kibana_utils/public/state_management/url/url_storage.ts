@@ -161,6 +161,7 @@ export const createUrlControls = (history: History = createBrowserHistory()): IU
     if (newUrl === currentUrl) return currentUrl; // skip update
 
     const historyPath = getRelativeToHistoryPath(newUrl, history);
+
     if (replace) {
       history.replace(historyPath);
     } else {

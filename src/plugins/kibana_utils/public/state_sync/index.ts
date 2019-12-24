@@ -19,4 +19,4 @@
 
 export { ISyncStrategy, SyncStrategy, createUrlSyncStrategy } from './state_sync_strategies';
 export { InitialTruthSource, IStateSyncConfig } from './types';
-export { syncState, DestroySyncStateFnType } from './state_sync';
+export { syncState, StartSyncStateFnType, StopSyncStateFnType } from './state_sync';
