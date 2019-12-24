@@ -16,6 +16,20 @@ const ALLOWED_FIELD_PROPERTIES = [
 ];
 
 interface MappingsValidatorResponse {
+  /* The parsed mappings object without any error */
+  value: GenericObject;
+  error?: {
+    /* Keep track of the configuration parameter that will be stripped out */
+    configurationRemoved: string[];
+    /* Keep track of the fields that will be stripped out */
+    propertiesRemoved: string[];
+    /* Keep track of the field parameters that will be stripped out */
+    parametersRemoved: { [key: string]: string[] };
+  };
+}
+
+interface PropertiesValidatorResponse {
+  /* The parsed "properties" object without any error */
   value: GenericObject;
   error?: {
     propertiesRemoved: string[];
@@ -24,6 +38,7 @@ interface MappingsValidatorResponse {
 }
 
 interface FieldValidatorResponse {
+  /* The parsed field. If undefined means that it was invalid */
   value?: GenericObject;
   parametersRemoved: string[];
 }
@@ -77,7 +92,7 @@ const stripUnknownOrInvalidParameter = (field: GenericObject): FieldValidatorRes
       }
       return acc;
     },
-    { value: {}, parametersRemoved: [] } as FieldValidatorResponse
+    { parametersRemoved: [] } as FieldValidatorResponse
   );
 
 const parseField = (field: any): FieldValidatorResponse & { meta?: FieldMeta } => {
@@ -97,7 +112,10 @@ const parseField = (field: any): FieldValidatorResponse & { meta?: FieldMeta } =
   return { ...parsedField, meta };
 };
 
-const parseFields = (properties: GenericObject, path: string[] = []): MappingsValidatorResponse => {
+const parseFields = (
+  properties: GenericObject,
+  path: string[] = []
+): PropertiesValidatorResponse => {
   return Object.entries(properties).reduce(
     (acc, [key, value]) => {
       const fieldPath = [...path, key].join('.');
@@ -142,7 +160,7 @@ const parseFields = (properties: GenericObject, path: string[] = []): MappingsVa
     },
     {
       value: {},
-    } as MappingsValidatorResponse
+    } as PropertiesValidatorResponse
   );
 };
 
@@ -158,7 +176,7 @@ const parseFields = (properties: GenericObject, path: string[] = []): MappingsVa
  *
  * @param properties A mappings "properties" object
  */
-export const validateProperties = (properties = {}): MappingsValidatorResponse => {
+export const validateProperties = (properties = {}): PropertiesValidatorResponse => {
   if (!isObject(properties)) {
     return { value: {} };
   }
@@ -166,7 +184,11 @@ export const validateProperties = (properties = {}): MappingsValidatorResponse =
   return parseFields(properties);
 };
 
-const mappingsSchema = Joi.object().keys({
+/**
+ * Single source of truth to validate the *configuration* of the mappings.
+ * Whenever a user loads a JSON object it will be validate against this Joi schema.
+ */
+export const mappingsConfigurationSchema = Joi.object().keys({
   dynamic: Joi.any().valid([true, false, 'strict']),
   date_detection: Joi.boolean().strict(),
   numeric_detection: Joi.boolean().strict(),
@@ -178,14 +200,58 @@ const mappingsSchema = Joi.object().keys({
   }),
 });
 
+const validateMappingsConfiguration = (
+  mappingsConfiguration: any
+): { value: any; configurationRemoved: string[] } => {
+  // Array to keep track of invalid configuration parameters.
+  const configurationRemoved: string[] = [];
+
+  const { value: parsedConfiguration, error: configurationError } = Joi.validate(
+    mappingsConfiguration,
+    mappingsConfigurationSchema,
+    {
+      stripUnknown: true,
+      abortEarly: false,
+    }
+  );
+
+  if (configurationError) {
+    /**
+     * To keep the logic simple we will strip out the parameters that contain errors
+     */
+    configurationError.details.forEach(error => {
+      const configurationName = error.path[0];
+      configurationRemoved.push(configurationName);
+      delete parsedConfiguration[configurationName];
+    });
+  }
+
+  return { value: parsedConfiguration, configurationRemoved };
+};
+
 export const validateMappings = (mappings: any = {}): MappingsValidatorResponse => {
-  const { properties, ...configuration } = mappings;
+  if (!isObject(mappings)) {
+    return { value: {} };
+  }
 
-  const { value: parsedConfiguration } = Joi.validate(configuration, mappingsSchema, {
-    stripUnknown: true,
-  });
+  const { properties, ...mappingsConfiguration } = mappings;
 
-  const { value: parsedProperties, error } = validateProperties(properties);
+  const { value: parsedConfiguration, configurationRemoved } = validateMappingsConfiguration(
+    mappingsConfiguration
+  );
+  const { value: parsedProperties, error: propertiesError } = validateProperties(properties);
+
+  let error: MappingsValidatorResponse['error'];
+
+  if (propertiesError !== undefined || Boolean(configurationRemoved.length)) {
+    // Build our error response
+    error = {
+      propertiesRemoved: [],
+      parametersRemoved: {},
+      configurationRemoved,
+      ...propertiesError,
+    };
+  }
 
   return {
     value: {

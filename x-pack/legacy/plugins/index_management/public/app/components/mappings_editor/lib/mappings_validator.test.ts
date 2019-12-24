@@ -4,12 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateProperties, isObject } from './mappings_validator';
+import { validateMappings, validateProperties, isObject } from './mappings_validator';
 
 jest.mock('ui/index_patterns', () => ({
   ILLEGAL_CHARACTERS: '',
   validateIndexPattern: () => ({}),
 }));
+
+describe('Mappings configuration validator', () => {
+  it('should convert non object to empty object', () => {
+    const tests = ['abc', 123, [], null, undefined];
+
+    tests.forEach(testValue => {
+      const { value, error } = validateMappings(testValue as any);
+      expect(isObject(value)).toBe(true);
+      expect(error).toBe(undefined);
+    });
+  });
+
+  it('should strip out unknown configuration', () => {
+    const mappings = {
+      dynamic: true,
+      date_detection: true,
+      numeric_detection: true,
+      dynamic_date_formats: ['abc'],
+      _source: {
+        enabled: true,
+        includes: ['abc'],
+        excludes: ['abc'],
+      },
+      properties: { title: { type: 'text' } },
+      unknown: 123,
+    };
+
+    const { value, error } = validateMappings(mappings);
+
+    const { unknown, ...expected } = mappings;
+    expect(value).toEqual(expected);
+    expect(error).toBe(undefined);
+  });
+
+  it('should strip out invalid configuration', () => {
+    const mappings = {
+      dynamic: true,
+      numeric_detection: 123, // wrong format
+      dynamic_date_formats: false, // wrong format
+      _source: {
+        enabled: true,
+        includes: 'abc',
+        excludes: ['abc'],
+        wrong: 123, // parameter not allowed
+      },
+      properties: 'abc',
+    };
+
+    const { value, error } = validateMappings(mappings);
+
+    expect(value).toEqual({
+      dynamic: true,
+      properties: {},
+    });
+
+    expect(error).not.toBe(undefined);
+    expect(error!.configurationRemoved).toEqual([
+      'numeric_detection',
+      'dynamic_date_formats',
+      '_source',
+    ]);
+  });
+});
 
 describe('Properties validator', () => {
   it('should convert non object to empty object', () => {
