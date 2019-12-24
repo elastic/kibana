@@ -23,21 +23,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getServices } from '../kibana_services';
 import { Sheet } from '../helpers/timelion_request_handler';
+import { PanelProps } from './panel';
 
 interface ChartComponentProp {
-  className?: string;
   interval: string;
   renderComplete(): void;
   seriesList: Sheet;
-  search?(): void;
 }
 
-function ChartComponent({ seriesList, interval, search, renderComplete }: ChartComponentProp) {
+function ChartComponent({ seriesList, interval, renderComplete }: ChartComponentProp) {
   if (!seriesList) {
     return null;
   }
 
-  const panelScope = { seriesList, interval, search, renderComplete } as any;
+  const panelScope: PanelProps = { seriesList, interval, renderComplete };
   panelScope.seriesList.render = seriesList.render || {
     type: 'timechart',
   };

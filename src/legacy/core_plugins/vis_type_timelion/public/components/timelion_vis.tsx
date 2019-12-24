@@ -40,7 +40,6 @@ function TimelionVisComponent(props: TimelionVisComponentProp) {
       <ChartComponent
         seriesList={props.visData.sheet[0]}
         renderComplete={props.renderComplete}
-        className="timChart"
         interval={props.vis.getState().params.interval}
       />
     </div>

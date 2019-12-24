@@ -19,12 +19,12 @@
 
 import React, { ReactElement } from 'react';
 
-import { Panel } from './components/panel';
+import { Panel, PanelProps } from './components/panel';
 
-export type IPanelWrapper = (props: any) => ReactElement;
+export type IPanelWrapper = (props: PanelProps) => ReactElement;
 
 function getTimeChart(): [string, IPanelWrapper] {
-  return ['timechart', (props: any) => <Panel name="timechart" {...props} />];
+  return ['timechart', (props: PanelProps) => <Panel {...props} />];
 }
 
 export { getTimeChart };

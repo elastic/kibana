@@ -24,9 +24,6 @@ import { TimelionPluginSetupDependencies } from './plugin';
 import { LegacyDependenciesPlugin } from './shim';
 
 const setupPlugins: Readonly<TimelionPluginSetupDependencies> = {
-  data: npSetup.plugins.data,
-  expressions: npSetup.plugins.expressions,
-
   // Temporary solution
   // It will be removed when all dependent services are migrated to the new platform.
   __LEGACY: new LegacyDependenciesPlugin(),

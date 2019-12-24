@@ -59,8 +59,12 @@ function buildSeriesData(chart: Series[], options: object) {
       merge(options, series._global, (objVal, srcVal) => {
         // This is kind of gross, it means that you can't replace a global value with a null
         // best you can do is an empty string. Deal with it.
-        if (objVal == null) return srcVal;
-        if (srcVal == null) return objVal;
+        if (objVal == null) {
+          return srcVal;
+        }
+        if (srcVal == null) {
+          return objVal;
+        }
       });
     }
 
@@ -101,8 +105,13 @@ interface IOptions {
     backgroundColor: string;
     position: string;
     labelBoxBorderColor: string;
-    labelFormatter(label: string, series: any): string;
+    labelFormatter(label: string, series: { _id: number }): string;
   };
+}
+
+interface TimeRangeBounds {
+  min: Moment | undefined;
+  max: Moment | undefined;
 }
 
 const colors = [
@@ -119,14 +128,14 @@ const colors = [
 ];
 
 function buildOptions(
-  timefilter: TimefilterContract,
   intervalValue: string,
+  timefilter: TimefilterContract,
   uiSettings: IUiSettingsClient,
   clientWidth = 0,
   showGrid?: boolean
 ) {
   // Get the X-axis tick format
-  const time = timefilter.getBounds() as any;
+  const time: TimeRangeBounds = timefilter.getBounds();
   const interval = calculateInterval(
     time.min.valueOf(),
     time.max.valueOf(),
@@ -171,7 +180,7 @@ function buildOptions(
       backgroundColor: 'rgb(255,255,255,0)',
       position: 'nw',
       labelBoxBorderColor: 'rgb(255,255,255,0)',
-      labelFormatter(label: string, series: any) {
+      labelFormatter(label: string, series: { _id: number }) {
         const wrapperSpan = document.createElement('span');
         const labelSpan = document.createElement('span');
         const numberSpan = document.createElement('span');
@@ -191,9 +200,9 @@ function buildOptions(
   };
 
   if (options.yaxes) {
-    options.yaxes.forEach((yaxis: any) => {
+    options.yaxes.forEach(yaxis => {
       if (yaxis && yaxis.units) {
-        const formatters = tickFormatters() as any;
+        const formatters = tickFormatters();
         yaxis.tickFormatter = formatters[yaxis.units.type];
         const byteModes = ['bytes', 'bytes/s'];
         if (byteModes.includes(yaxis.units.type)) {

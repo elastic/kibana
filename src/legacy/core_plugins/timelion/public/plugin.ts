@@ -24,9 +24,6 @@ import {
   IUiSettingsClient,
   HttpSetup,
 } from 'kibana/public';
-import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
-import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
-import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
@@ -36,14 +33,10 @@ export interface TimelionVisualizationDependencies extends LegacyDependenciesPlu
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timelionPanels: Map<string, Panel>;
-  timefilter: TimefilterContract;
 }
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
-  expressions: ReturnType<ExpressionsPlugin['setup']>;
-  data: DataPublicPluginSetup;
-
   // Temporary solution
   __LEGACY: LegacyDependenciesPlugin;
 }
@@ -56,23 +49,17 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
-    core: CoreSetup,
-    { __LEGACY, expressions, data }: TimelionPluginSetupDependencies
-  ) {
+  public async setup(core: CoreSetup, { __LEGACY }: TimelionPluginSetupDependencies) {
     const timelionPanels: Map<string, Panel> = new Map();
 
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
       timelionPanels,
-      timefilter: data.query.timefilter.timefilter,
       ...(await __LEGACY.setup(core, timelionPanels)),
     };
 
     this.registerPanels(dependencies);
-
-    expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
   }
 
   private registerPanels(dependencies: TimelionVisualizationDependencies) {
