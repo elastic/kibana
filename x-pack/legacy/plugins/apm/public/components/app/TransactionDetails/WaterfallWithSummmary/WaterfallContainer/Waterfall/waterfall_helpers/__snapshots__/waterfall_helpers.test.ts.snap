@@ -31,15 +31,69 @@ Object {
   },
   "items": Array [
     Object {
-      "doc": Object {
-        "errorsCount": 2,
-        "id": "myTransactionId1",
-        "name": "GET /api",
-        "parent": undefined,
-        "parentId": undefined,
-        "serviceName": "opbeans-node",
-        "timestamp": 1549324795784006,
+      "custom": Object {
+        "processor": Object {
+          "event": "transaction",
+        },
+        "service": Object {
+          "name": "opbeans-node",
+        },
+        "timestamp": Object {
+          "us": 1549324795784006,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
         "transaction": Object {
+          "duration": Object {
+            "us": 49660,
+          },
+          "id": "myTransactionId1",
+          "name": "GET /api",
+        },
+      },
+      "docType": "transaction",
+      "duration": 49660,
+      "id": "myTransactionId1",
+      "offset": 0,
+      "parent": undefined,
+      "parentId": undefined,
+      "skew": 0,
+    },
+    Object {
+      "custom": Object {
+        "parent": Object {
+          "id": "myTransactionId1",
+        },
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-node",
+        },
+        "span": Object {
+          "duration": Object {
+            "us": 47557,
+          },
+          "id": "mySpanIdD",
+          "name": "GET opbeans-ruby:3000/api/products",
+        },
+        "timestamp": Object {
+          "us": 1549324795785760,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId1",
+        },
+      },
+      "docType": "span",
+      "duration": 47557,
+      "id": "mySpanIdD",
+      "offset": 1754,
+      "parent": Object {
+        "custom": Object {
           "processor": Object {
             "event": "transaction",
           },
@@ -60,55 +114,55 @@ Object {
             "name": "GET /api",
           },
         },
+        "docType": "transaction",
+        "duration": 49660,
+        "id": "myTransactionId1",
+        "offset": 0,
+        "parent": undefined,
+        "parentId": undefined,
+        "skew": 0,
       },
-      "docType": "transaction",
-      "duration": 49660,
-      "offset": 0,
+      "parentId": "myTransactionId1",
       "skew": 0,
     },
     Object {
-      "doc": Object {
-        "id": "mySpanIdD",
-        "name": "GET opbeans-ruby:3000/api/products",
+      "custom": Object {
         "parent": Object {
-          "doc": Object {
-            "errorsCount": 2,
-            "id": "myTransactionId1",
-            "name": "GET /api",
-            "parent": undefined,
-            "parentId": undefined,
-            "serviceName": "opbeans-node",
-            "timestamp": 1549324795784006,
-            "transaction": Object {
-              "processor": Object {
-                "event": "transaction",
-              },
-              "service": Object {
-                "name": "opbeans-node",
-              },
-              "timestamp": Object {
-                "us": 1549324795784006,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "duration": Object {
-                  "us": 49660,
-                },
-                "id": "myTransactionId1",
-                "name": "GET /api",
-              },
+          "id": "mySpanIdD",
+        },
+        "processor": Object {
+          "event": "transaction",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795823304,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "duration": Object {
+            "us": 8634,
+          },
+          "id": "myTransactionId2",
+          "marks": Object {
+            "agent": Object {
+              "domComplete": 383,
+              "domInteractive": 382,
+              "timeToFirstByte": 14,
             },
           },
-          "docType": "transaction",
-          "duration": 49660,
-          "offset": 0,
-          "skew": 0,
+          "name": "Api::ProductsController#index",
         },
-        "parentId": "myTransactionId1",
-        "serviceName": "opbeans-node",
-        "span": Object {
+      },
+      "docType": "transaction",
+      "duration": 8634,
+      "id": "myTransactionId2",
+      "offset": 39298,
+      "parent": Object {
+        "custom": Object {
           "parent": Object {
             "id": "myTransactionId1",
           },
@@ -135,98 +189,80 @@ Object {
             "id": "myTransactionId1",
           },
         },
-        "timestamp": 1549324795785760,
+        "docType": "span",
+        "duration": 47557,
+        "id": "mySpanIdD",
+        "offset": 1754,
+        "parent": Object {
+          "custom": Object {
+            "processor": Object {
+              "event": "transaction",
+            },
+            "service": Object {
+              "name": "opbeans-node",
+            },
+            "timestamp": Object {
+              "us": 1549324795784006,
+            },
+            "trace": Object {
+              "id": "myTraceId",
+            },
+            "transaction": Object {
+              "duration": Object {
+                "us": 49660,
+              },
+              "id": "myTransactionId1",
+              "name": "GET /api",
+            },
+          },
+          "docType": "transaction",
+          "duration": 49660,
+          "id": "myTransactionId1",
+          "offset": 0,
+          "parent": undefined,
+          "parentId": undefined,
+          "skew": 0,
+        },
+        "parentId": "myTransactionId1",
+        "skew": 0,
       },
-      "docType": "span",
-      "duration": 47557,
-      "offset": 1754,
+      "parentId": "mySpanIdD",
       "skew": 0,
     },
     Object {
-      "doc": Object {
-        "errorsCount": 3,
-        "id": "myTransactionId2",
-        "name": "Api::ProductsController#index",
+      "custom": Object {
         "parent": Object {
-          "doc": Object {
-            "id": "mySpanIdD",
-            "name": "GET opbeans-ruby:3000/api/products",
-            "parent": Object {
-              "doc": Object {
-                "errorsCount": 2,
-                "id": "myTransactionId1",
-                "name": "GET /api",
-                "parent": undefined,
-                "parentId": undefined,
-                "serviceName": "opbeans-node",
-                "timestamp": 1549324795784006,
-                "transaction": Object {
-                  "processor": Object {
-                    "event": "transaction",
-                  },
-                  "service": Object {
-                    "name": "opbeans-node",
-                  },
-                  "timestamp": Object {
-                    "us": 1549324795784006,
-                  },
-                  "trace": Object {
-                    "id": "myTraceId",
-                  },
-                  "transaction": Object {
-                    "duration": Object {
-                      "us": 49660,
-                    },
-                    "id": "myTransactionId1",
-                    "name": "GET /api",
-                  },
-                },
-              },
-              "docType": "transaction",
-              "duration": 49660,
-              "offset": 0,
-              "skew": 0,
-            },
-            "parentId": "myTransactionId1",
-            "serviceName": "opbeans-node",
-            "span": Object {
-              "parent": Object {
-                "id": "myTransactionId1",
-              },
-              "processor": Object {
-                "event": "span",
-              },
-              "service": Object {
-                "name": "opbeans-node",
-              },
-              "span": Object {
-                "duration": Object {
-                  "us": 47557,
-                },
-                "id": "mySpanIdD",
-                "name": "GET opbeans-ruby:3000/api/products",
-              },
-              "timestamp": Object {
-                "us": 1549324795785760,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "id": "myTransactionId1",
-              },
-            },
-            "timestamp": 1549324795785760,
-          },
-          "docType": "span",
-          "duration": 47557,
-          "offset": 1754,
-          "skew": 0,
+          "id": "myTransactionId2",
         },
-        "parentId": "mySpanIdD",
-        "serviceName": "opbeans-ruby",
-        "timestamp": 1549324795823304,
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "span": Object {
+          "duration": Object {
+            "us": 6161,
+          },
+          "id": "mySpanIdA",
+          "name": "Api::ProductsController#index",
+        },
+        "timestamp": Object {
+          "us": 1549324795824504,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
         "transaction": Object {
+          "id": "myTransactionId2",
+        },
+      },
+      "docType": "span",
+      "duration": 6161,
+      "id": "mySpanIdA",
+      "offset": 40498,
+      "parent": Object {
+        "custom": Object {
           "parent": Object {
             "id": "mySpanIdD",
           },
@@ -257,140 +293,115 @@ Object {
             "name": "Api::ProductsController#index",
           },
         },
-      },
-      "docType": "transaction",
-      "duration": 8634,
-      "offset": 39298,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "id": "mySpanIdA",
-        "name": "Api::ProductsController#index",
+        "docType": "transaction",
+        "duration": 8634,
+        "id": "myTransactionId2",
+        "offset": 39298,
         "parent": Object {
-          "doc": Object {
-            "errorsCount": 3,
-            "id": "myTransactionId2",
-            "name": "Api::ProductsController#index",
+          "custom": Object {
             "parent": Object {
-              "doc": Object {
-                "id": "mySpanIdD",
-                "name": "GET opbeans-ruby:3000/api/products",
-                "parent": Object {
-                  "doc": Object {
-                    "errorsCount": 2,
-                    "id": "myTransactionId1",
-                    "name": "GET /api",
-                    "parent": undefined,
-                    "parentId": undefined,
-                    "serviceName": "opbeans-node",
-                    "timestamp": 1549324795784006,
-                    "transaction": Object {
-                      "processor": Object {
-                        "event": "transaction",
-                      },
-                      "service": Object {
-                        "name": "opbeans-node",
-                      },
-                      "timestamp": Object {
-                        "us": 1549324795784006,
-                      },
-                      "trace": Object {
-                        "id": "myTraceId",
-                      },
-                      "transaction": Object {
-                        "duration": Object {
-                          "us": 49660,
-                        },
-                        "id": "myTransactionId1",
-                        "name": "GET /api",
-                      },
-                    },
-                  },
-                  "docType": "transaction",
-                  "duration": 49660,
-                  "offset": 0,
-                  "skew": 0,
-                },
-                "parentId": "myTransactionId1",
-                "serviceName": "opbeans-node",
-                "span": Object {
-                  "parent": Object {
-                    "id": "myTransactionId1",
-                  },
-                  "processor": Object {
-                    "event": "span",
-                  },
-                  "service": Object {
-                    "name": "opbeans-node",
-                  },
-                  "span": Object {
-                    "duration": Object {
-                      "us": 47557,
-                    },
-                    "id": "mySpanIdD",
-                    "name": "GET opbeans-ruby:3000/api/products",
-                  },
-                  "timestamp": Object {
-                    "us": 1549324795785760,
-                  },
-                  "trace": Object {
-                    "id": "myTraceId",
-                  },
-                  "transaction": Object {
-                    "id": "myTransactionId1",
-                  },
-                },
-                "timestamp": 1549324795785760,
-              },
-              "docType": "span",
-              "duration": 47557,
-              "offset": 1754,
-              "skew": 0,
+              "id": "myTransactionId1",
             },
-            "parentId": "mySpanIdD",
-            "serviceName": "opbeans-ruby",
-            "timestamp": 1549324795823304,
-            "transaction": Object {
-              "parent": Object {
-                "id": "mySpanIdD",
+            "processor": Object {
+              "event": "span",
+            },
+            "service": Object {
+              "name": "opbeans-node",
+            },
+            "span": Object {
+              "duration": Object {
+                "us": 47557,
               },
+              "id": "mySpanIdD",
+              "name": "GET opbeans-ruby:3000/api/products",
+            },
+            "timestamp": Object {
+              "us": 1549324795785760,
+            },
+            "trace": Object {
+              "id": "myTraceId",
+            },
+            "transaction": Object {
+              "id": "myTransactionId1",
+            },
+          },
+          "docType": "span",
+          "duration": 47557,
+          "id": "mySpanIdD",
+          "offset": 1754,
+          "parent": Object {
+            "custom": Object {
               "processor": Object {
                 "event": "transaction",
               },
               "service": Object {
-                "name": "opbeans-ruby",
+                "name": "opbeans-node",
               },
               "timestamp": Object {
-                "us": 1549324795823304,
+                "us": 1549324795784006,
               },
               "trace": Object {
                 "id": "myTraceId",
               },
               "transaction": Object {
                 "duration": Object {
-                  "us": 8634,
+                  "us": 49660,
                 },
-                "id": "myTransactionId2",
-                "marks": Object {
-                  "agent": Object {
-                    "domComplete": 383,
-                    "domInteractive": 382,
-                    "timeToFirstByte": 14,
-                  },
-                },
-                "name": "Api::ProductsController#index",
+                "id": "myTransactionId1",
+                "name": "GET /api",
               },
             },
+            "docType": "transaction",
+            "duration": 49660,
+            "id": "myTransactionId1",
+            "offset": 0,
+            "parent": undefined,
+            "parentId": undefined,
+            "skew": 0,
           },
-          "docType": "transaction",
-          "duration": 8634,
-          "offset": 39298,
+          "parentId": "myTransactionId1",
           "skew": 0,
         },
-        "parentId": "myTransactionId2",
-        "serviceName": "opbeans-ruby",
+        "parentId": "mySpanIdD",
+        "skew": 0,
+      },
+      "parentId": "myTransactionId2",
+      "skew": 0,
+    },
+    Object {
+      "custom": Object {
+        "parent": Object {
+          "id": "mySpanIdA",
+        },
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
         "span": Object {
+          "duration": Object {
+            "us": 481,
+          },
+          "id": "mySpanIdB",
+          "name": "SELECT FROM products",
+        },
+        "timestamp": Object {
+          "us": 1549324795825633,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId2",
+        },
+      },
+      "docType": "span",
+      "duration": 481,
+      "id": "mySpanIdB",
+      "offset": 41627,
+      "parent": Object {
+        "custom": Object {
           "parent": Object {
             "id": "myTransactionId2",
           },
@@ -417,494 +428,362 @@ Object {
             "id": "myTransactionId2",
           },
         },
-        "timestamp": 1549324795824504,
-      },
-      "docType": "span",
-      "duration": 6161,
-      "offset": 40498,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "id": "mySpanIdB",
-        "name": "SELECT FROM products",
+        "docType": "span",
+        "duration": 6161,
+        "id": "mySpanIdA",
+        "offset": 40498,
         "parent": Object {
-          "doc": Object {
-            "id": "mySpanIdA",
-            "name": "Api::ProductsController#index",
+          "custom": Object {
             "parent": Object {
-              "doc": Object {
-                "errorsCount": 3,
-                "id": "myTransactionId2",
-                "name": "Api::ProductsController#index",
-                "parent": Object {
-                  "doc": Object {
-                    "id": "mySpanIdD",
-                    "name": "GET opbeans-ruby:3000/api/products",
-                    "parent": Object {
-                      "doc": Object {
-                        "errorsCount": 2,
-                        "id": "myTransactionId1",
-                        "name": "GET /api",
-                        "parent": undefined,
-                        "parentId": undefined,
-                        "serviceName": "opbeans-node",
-                        "timestamp": 1549324795784006,
-                        "transaction": Object {
-                          "processor": Object {
-                            "event": "transaction",
-                          },
-                          "service": Object {
-                            "name": "opbeans-node",
-                          },
-                          "timestamp": Object {
-                            "us": 1549324795784006,
-                          },
-                          "trace": Object {
-                            "id": "myTraceId",
-                          },
-                          "transaction": Object {
-                            "duration": Object {
-                              "us": 49660,
-                            },
-                            "id": "myTransactionId1",
-                            "name": "GET /api",
-                          },
-                        },
-                      },
-                      "docType": "transaction",
-                      "duration": 49660,
-                      "offset": 0,
-                      "skew": 0,
-                    },
-                    "parentId": "myTransactionId1",
-                    "serviceName": "opbeans-node",
-                    "span": Object {
-                      "parent": Object {
-                        "id": "myTransactionId1",
-                      },
-                      "processor": Object {
-                        "event": "span",
-                      },
-                      "service": Object {
-                        "name": "opbeans-node",
-                      },
-                      "span": Object {
-                        "duration": Object {
-                          "us": 47557,
-                        },
-                        "id": "mySpanIdD",
-                        "name": "GET opbeans-ruby:3000/api/products",
-                      },
-                      "timestamp": Object {
-                        "us": 1549324795785760,
-                      },
-                      "trace": Object {
-                        "id": "myTraceId",
-                      },
-                      "transaction": Object {
-                        "id": "myTransactionId1",
-                      },
-                    },
-                    "timestamp": 1549324795785760,
-                  },
-                  "docType": "span",
-                  "duration": 47557,
-                  "offset": 1754,
-                  "skew": 0,
-                },
-                "parentId": "mySpanIdD",
-                "serviceName": "opbeans-ruby",
-                "timestamp": 1549324795823304,
-                "transaction": Object {
-                  "parent": Object {
-                    "id": "mySpanIdD",
-                  },
-                  "processor": Object {
-                    "event": "transaction",
-                  },
-                  "service": Object {
-                    "name": "opbeans-ruby",
-                  },
-                  "timestamp": Object {
-                    "us": 1549324795823304,
-                  },
-                  "trace": Object {
-                    "id": "myTraceId",
-                  },
-                  "transaction": Object {
-                    "duration": Object {
-                      "us": 8634,
-                    },
-                    "id": "myTransactionId2",
-                    "marks": Object {
-                      "agent": Object {
-                        "domComplete": 383,
-                        "domInteractive": 382,
-                        "timeToFirstByte": 14,
-                      },
-                    },
-                    "name": "Api::ProductsController#index",
-                  },
-                },
-              },
-              "docType": "transaction",
-              "duration": 8634,
-              "offset": 39298,
-              "skew": 0,
+              "id": "mySpanIdD",
             },
-            "parentId": "myTransactionId2",
-            "serviceName": "opbeans-ruby",
-            "span": Object {
-              "parent": Object {
-                "id": "myTransactionId2",
-              },
-              "processor": Object {
-                "event": "span",
-              },
-              "service": Object {
-                "name": "opbeans-ruby",
-              },
-              "span": Object {
-                "duration": Object {
-                  "us": 6161,
-                },
-                "id": "mySpanIdA",
-                "name": "Api::ProductsController#index",
-              },
-              "timestamp": Object {
-                "us": 1549324795824504,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "id": "myTransactionId2",
-              },
+            "processor": Object {
+              "event": "transaction",
             },
-            "timestamp": 1549324795824504,
-          },
-          "docType": "span",
-          "duration": 6161,
-          "offset": 40498,
-          "skew": 0,
-        },
-        "parentId": "mySpanIdA",
-        "serviceName": "opbeans-ruby",
-        "span": Object {
-          "parent": Object {
-            "id": "mySpanIdA",
-          },
-          "processor": Object {
-            "event": "span",
-          },
-          "service": Object {
-            "name": "opbeans-ruby",
-          },
-          "span": Object {
-            "duration": Object {
-              "us": 481,
+            "service": Object {
+              "name": "opbeans-ruby",
             },
-            "id": "mySpanIdB",
-            "name": "SELECT FROM products",
-          },
-          "timestamp": Object {
-            "us": 1549324795825633,
-          },
-          "trace": Object {
-            "id": "myTraceId",
-          },
-          "transaction": Object {
-            "id": "myTransactionId2",
-          },
-        },
-        "timestamp": 1549324795825633,
-      },
-      "docType": "span",
-      "duration": 481,
-      "offset": 41627,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "id": "mySpanIdC",
-        "name": "SELECT FROM product",
-        "parent": Object {
-          "doc": Object {
-            "id": "mySpanIdA",
-            "name": "Api::ProductsController#index",
-            "parent": Object {
-              "doc": Object {
-                "errorsCount": 3,
-                "id": "myTransactionId2",
-                "name": "Api::ProductsController#index",
-                "parent": Object {
-                  "doc": Object {
-                    "id": "mySpanIdD",
-                    "name": "GET opbeans-ruby:3000/api/products",
-                    "parent": Object {
-                      "doc": Object {
-                        "errorsCount": 2,
-                        "id": "myTransactionId1",
-                        "name": "GET /api",
-                        "parent": undefined,
-                        "parentId": undefined,
-                        "serviceName": "opbeans-node",
-                        "timestamp": 1549324795784006,
-                        "transaction": Object {
-                          "processor": Object {
-                            "event": "transaction",
-                          },
-                          "service": Object {
-                            "name": "opbeans-node",
-                          },
-                          "timestamp": Object {
-                            "us": 1549324795784006,
-                          },
-                          "trace": Object {
-                            "id": "myTraceId",
-                          },
-                          "transaction": Object {
-                            "duration": Object {
-                              "us": 49660,
-                            },
-                            "id": "myTransactionId1",
-                            "name": "GET /api",
-                          },
-                        },
-                      },
-                      "docType": "transaction",
-                      "duration": 49660,
-                      "offset": 0,
-                      "skew": 0,
-                    },
-                    "parentId": "myTransactionId1",
-                    "serviceName": "opbeans-node",
-                    "span": Object {
-                      "parent": Object {
-                        "id": "myTransactionId1",
-                      },
-                      "processor": Object {
-                        "event": "span",
-                      },
-                      "service": Object {
-                        "name": "opbeans-node",
-                      },
-                      "span": Object {
-                        "duration": Object {
-                          "us": 47557,
-                        },
-                        "id": "mySpanIdD",
-                        "name": "GET opbeans-ruby:3000/api/products",
-                      },
-                      "timestamp": Object {
-                        "us": 1549324795785760,
-                      },
-                      "trace": Object {
-                        "id": "myTraceId",
-                      },
-                      "transaction": Object {
-                        "id": "myTransactionId1",
-                      },
-                    },
-                    "timestamp": 1549324795785760,
-                  },
-                  "docType": "span",
-                  "duration": 47557,
-                  "offset": 1754,
-                  "skew": 0,
-                },
-                "parentId": "mySpanIdD",
-                "serviceName": "opbeans-ruby",
-                "timestamp": 1549324795823304,
-                "transaction": Object {
-                  "parent": Object {
-                    "id": "mySpanIdD",
-                  },
-                  "processor": Object {
-                    "event": "transaction",
-                  },
-                  "service": Object {
-                    "name": "opbeans-ruby",
-                  },
-                  "timestamp": Object {
-                    "us": 1549324795823304,
-                  },
-                  "trace": Object {
-                    "id": "myTraceId",
-                  },
-                  "transaction": Object {
-                    "duration": Object {
-                      "us": 8634,
-                    },
-                    "id": "myTransactionId2",
-                    "marks": Object {
-                      "agent": Object {
-                        "domComplete": 383,
-                        "domInteractive": 382,
-                        "timeToFirstByte": 14,
-                      },
-                    },
-                    "name": "Api::ProductsController#index",
-                  },
-                },
-              },
-              "docType": "transaction",
-              "duration": 8634,
-              "offset": 39298,
-              "skew": 0,
+            "timestamp": Object {
+              "us": 1549324795823304,
             },
-            "parentId": "myTransactionId2",
-            "serviceName": "opbeans-ruby",
-            "span": Object {
-              "parent": Object {
-                "id": "myTransactionId2",
-              },
-              "processor": Object {
-                "event": "span",
-              },
-              "service": Object {
-                "name": "opbeans-ruby",
-              },
-              "span": Object {
-                "duration": Object {
-                  "us": 6161,
-                },
-                "id": "mySpanIdA",
-                "name": "Api::ProductsController#index",
-              },
-              "timestamp": Object {
-                "us": 1549324795824504,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "id": "myTransactionId2",
-              },
+            "trace": Object {
+              "id": "myTraceId",
             },
-            "timestamp": 1549324795824504,
-          },
-          "docType": "span",
-          "duration": 6161,
-          "offset": 40498,
-          "skew": 0,
-        },
-        "parentId": "mySpanIdA",
-        "serviceName": "opbeans-ruby",
-        "span": Object {
-          "parent": Object {
-            "id": "mySpanIdA",
-          },
-          "processor": Object {
-            "event": "span",
-          },
-          "service": Object {
-            "name": "opbeans-ruby",
-          },
-          "span": Object {
-            "duration": Object {
-              "us": 532,
-            },
-            "id": "mySpanIdC",
-            "name": "SELECT FROM product",
-          },
-          "timestamp": Object {
-            "us": 1549324795827905,
-          },
-          "trace": Object {
-            "id": "myTraceId",
-          },
-          "transaction": Object {
-            "id": "myTransactionId2",
-          },
-        },
-        "timestamp": 1549324795827905,
-      },
-      "docType": "span",
-      "duration": 532,
-      "offset": 43899,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "error": Object {
-          "agent": Object {
-            "name": "ruby",
-            "version": "2",
-          },
-          "error": Object {
-            "grouping_key": "errorGroupingKey1",
-            "id": "error1",
-            "log": Object {
-              "message": "error message",
-            },
-          },
-          "parent": Object {
-            "id": "myTransactionId1",
-          },
-          "processor": Object {
-            "event": "error",
-          },
-          "service": Object {
-            "name": "opbeans-ruby",
-          },
-          "timestamp": Object {
-            "us": 1549324795810000,
-          },
-          "trace": Object {
-            "id": "myTraceId",
-          },
-          "transaction": Object {
-            "id": "myTransactionId1",
-          },
-        },
-        "id": "error1",
-        "message": "error message",
-        "parent": Object {
-          "doc": Object {
-            "errorsCount": 2,
-            "id": "myTransactionId1",
-            "name": "GET /api",
-            "parent": undefined,
-            "parentId": undefined,
-            "serviceName": "opbeans-node",
-            "timestamp": 1549324795784006,
             "transaction": Object {
+              "duration": Object {
+                "us": 8634,
+              },
+              "id": "myTransactionId2",
+              "marks": Object {
+                "agent": Object {
+                  "domComplete": 383,
+                  "domInteractive": 382,
+                  "timeToFirstByte": 14,
+                },
+              },
+              "name": "Api::ProductsController#index",
+            },
+          },
+          "docType": "transaction",
+          "duration": 8634,
+          "id": "myTransactionId2",
+          "offset": 39298,
+          "parent": Object {
+            "custom": Object {
+              "parent": Object {
+                "id": "myTransactionId1",
+              },
               "processor": Object {
-                "event": "transaction",
+                "event": "span",
               },
               "service": Object {
                 "name": "opbeans-node",
               },
+              "span": Object {
+                "duration": Object {
+                  "us": 47557,
+                },
+                "id": "mySpanIdD",
+                "name": "GET opbeans-ruby:3000/api/products",
+              },
               "timestamp": Object {
-                "us": 1549324795784006,
+                "us": 1549324795785760,
               },
               "trace": Object {
                 "id": "myTraceId",
               },
               "transaction": Object {
-                "duration": Object {
-                  "us": 49660,
-                },
                 "id": "myTransactionId1",
-                "name": "GET /api",
               },
+            },
+            "docType": "span",
+            "duration": 47557,
+            "id": "mySpanIdD",
+            "offset": 1754,
+            "parent": Object {
+              "custom": Object {
+                "processor": Object {
+                  "event": "transaction",
+                },
+                "service": Object {
+                  "name": "opbeans-node",
+                },
+                "timestamp": Object {
+                  "us": 1549324795784006,
+                },
+                "trace": Object {
+                  "id": "myTraceId",
+                },
+                "transaction": Object {
+                  "duration": Object {
+                    "us": 49660,
+                  },
+                  "id": "myTransactionId1",
+                  "name": "GET /api",
+                },
+              },
+              "docType": "transaction",
+              "duration": 49660,
+              "id": "myTransactionId1",
+              "offset": 0,
+              "parent": undefined,
+              "parentId": undefined,
+              "skew": 0,
+            },
+            "parentId": "myTransactionId1",
+            "skew": 0,
+          },
+          "parentId": "mySpanIdD",
+          "skew": 0,
+        },
+        "parentId": "myTransactionId2",
+        "skew": 0,
+      },
+      "parentId": "mySpanIdA",
+      "skew": 0,
+    },
+    Object {
+      "custom": Object {
+        "parent": Object {
+          "id": "mySpanIdA",
+        },
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "span": Object {
+          "duration": Object {
+            "us": 532,
+          },
+          "id": "mySpanIdC",
+          "name": "SELECT FROM product",
+        },
+        "timestamp": Object {
+          "us": 1549324795827905,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId2",
+        },
+      },
+      "docType": "span",
+      "duration": 532,
+      "id": "mySpanIdC",
+      "offset": 43899,
+      "parent": Object {
+        "custom": Object {
+          "parent": Object {
+            "id": "myTransactionId2",
+          },
+          "processor": Object {
+            "event": "span",
+          },
+          "service": Object {
+            "name": "opbeans-ruby",
+          },
+          "span": Object {
+            "duration": Object {
+              "us": 6161,
+            },
+            "id": "mySpanIdA",
+            "name": "Api::ProductsController#index",
+          },
+          "timestamp": Object {
+            "us": 1549324795824504,
+          },
+          "trace": Object {
+            "id": "myTraceId",
+          },
+          "transaction": Object {
+            "id": "myTransactionId2",
+          },
+        },
+        "docType": "span",
+        "duration": 6161,
+        "id": "mySpanIdA",
+        "offset": 40498,
+        "parent": Object {
+          "custom": Object {
+            "parent": Object {
+              "id": "mySpanIdD",
+            },
+            "processor": Object {
+              "event": "transaction",
+            },
+            "service": Object {
+              "name": "opbeans-ruby",
+            },
+            "timestamp": Object {
+              "us": 1549324795823304,
+            },
+            "trace": Object {
+              "id": "myTraceId",
+            },
+            "transaction": Object {
+              "duration": Object {
+                "us": 8634,
+              },
+              "id": "myTransactionId2",
+              "marks": Object {
+                "agent": Object {
+                  "domComplete": 383,
+                  "domInteractive": 382,
+                  "timeToFirstByte": 14,
+                },
+              },
+              "name": "Api::ProductsController#index",
             },
           },
           "docType": "transaction",
-          "duration": 49660,
-          "offset": 0,
+          "duration": 8634,
+          "id": "myTransactionId2",
+          "offset": 39298,
+          "parent": Object {
+            "custom": Object {
+              "parent": Object {
+                "id": "myTransactionId1",
+              },
+              "processor": Object {
+                "event": "span",
+              },
+              "service": Object {
+                "name": "opbeans-node",
+              },
+              "span": Object {
+                "duration": Object {
+                  "us": 47557,
+                },
+                "id": "mySpanIdD",
+                "name": "GET opbeans-ruby:3000/api/products",
+              },
+              "timestamp": Object {
+                "us": 1549324795785760,
+              },
+              "trace": Object {
+                "id": "myTraceId",
+              },
+              "transaction": Object {
+                "id": "myTransactionId1",
+              },
+            },
+            "docType": "span",
+            "duration": 47557,
+            "id": "mySpanIdD",
+            "offset": 1754,
+            "parent": Object {
+              "custom": Object {
+                "processor": Object {
+                  "event": "transaction",
+                },
+                "service": Object {
+                  "name": "opbeans-node",
+                },
+                "timestamp": Object {
+                  "us": 1549324795784006,
+                },
+                "trace": Object {
+                  "id": "myTraceId",
+                },
+                "transaction": Object {
+                  "duration": Object {
+                    "us": 49660,
+                  },
+                  "id": "myTransactionId1",
+                  "name": "GET /api",
+                },
+              },
+              "docType": "transaction",
+              "duration": 49660,
+              "id": "myTransactionId1",
+              "offset": 0,
+              "parent": undefined,
+              "parentId": undefined,
+              "skew": 0,
+            },
+            "parentId": "myTransactionId1",
+            "skew": 0,
+          },
+          "parentId": "mySpanIdD",
           "skew": 0,
         },
-        "parentId": "myTransactionId1",
-        "serviceColor": "#00b3a4",
-        "serviceName": "opbeans-ruby",
-        "timestamp": 1549324795810000,
+        "parentId": "myTransactionId2",
+        "skew": 0,
+      },
+      "parentId": "mySpanIdA",
+      "skew": 0,
+    },
+    Object {
+      "custom": Object {
+        "agent": Object {
+          "name": "ruby",
+          "version": "2",
+        },
+        "error": Object {
+          "grouping_key": "errorGroupingKey1",
+          "id": "error1",
+          "log": Object {
+            "message": "error message",
+          },
+        },
+        "parent": Object {
+          "id": "myTransactionId1",
+        },
+        "processor": Object {
+          "event": "error",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795810000,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId1",
+        },
       },
       "docType": "error",
       "duration": 0,
+      "id": "error1",
       "offset": 25994,
+      "parent": Object {
+        "custom": Object {
+          "processor": Object {
+            "event": "transaction",
+          },
+          "service": Object {
+            "name": "opbeans-node",
+          },
+          "timestamp": Object {
+            "us": 1549324795784006,
+          },
+          "trace": Object {
+            "id": "myTraceId",
+          },
+          "transaction": Object {
+            "duration": Object {
+              "us": 49660,
+            },
+            "id": "myTransactionId1",
+            "name": "GET /api",
+          },
+        },
+        "docType": "transaction",
+        "duration": 49660,
+        "id": "myTransactionId1",
+        "offset": 0,
+        "parent": undefined,
+        "parentId": undefined,
+        "skew": 0,
+      },
+      "parentId": "myTransactionId1",
+      "serviceColor": "#00b3a4",
       "skew": 0,
     },
   ],
@@ -977,15 +856,79 @@ Object {
   },
   "items": Array [
     Object {
-      "doc": Object {
-        "errorsCount": 3,
-        "id": "myTransactionId2",
-        "name": "Api::ProductsController#index",
-        "parent": undefined,
-        "parentId": "mySpanIdD",
-        "serviceName": "opbeans-ruby",
-        "timestamp": 1549324795823304,
+      "custom": Object {
+        "parent": Object {
+          "id": "mySpanIdD",
+        },
+        "processor": Object {
+          "event": "transaction",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "timestamp": Object {
+          "us": 1549324795823304,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
         "transaction": Object {
+          "duration": Object {
+            "us": 8634,
+          },
+          "id": "myTransactionId2",
+          "marks": Object {
+            "agent": Object {
+              "domComplete": 383,
+              "domInteractive": 382,
+              "timeToFirstByte": 14,
+            },
+          },
+          "name": "Api::ProductsController#index",
+        },
+      },
+      "docType": "transaction",
+      "duration": 8634,
+      "id": "myTransactionId2",
+      "offset": 0,
+      "parent": undefined,
+      "parentId": "mySpanIdD",
+      "skew": 0,
+    },
+    Object {
+      "custom": Object {
+        "parent": Object {
+          "id": "myTransactionId2",
+        },
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
+        "span": Object {
+          "duration": Object {
+            "us": 6161,
+          },
+          "id": "mySpanIdA",
+          "name": "Api::ProductsController#index",
+        },
+        "timestamp": Object {
+          "us": 1549324795824504,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId2",
+        },
+      },
+      "docType": "span",
+      "duration": 6161,
+      "id": "mySpanIdA",
+      "offset": 1200,
+      "parent": Object {
+        "custom": Object {
           "parent": Object {
             "id": "mySpanIdD",
           },
@@ -1016,65 +959,51 @@ Object {
             "name": "Api::ProductsController#index",
           },
         },
+        "docType": "transaction",
+        "duration": 8634,
+        "id": "myTransactionId2",
+        "offset": 0,
+        "parent": undefined,
+        "parentId": "mySpanIdD",
+        "skew": 0,
       },
-      "docType": "transaction",
-      "duration": 8634,
-      "offset": 0,
+      "parentId": "myTransactionId2",
       "skew": 0,
     },
     Object {
-      "doc": Object {
-        "id": "mySpanIdA",
-        "name": "Api::ProductsController#index",
+      "custom": Object {
         "parent": Object {
-          "doc": Object {
-            "errorsCount": 3,
-            "id": "myTransactionId2",
-            "name": "Api::ProductsController#index",
-            "parent": undefined,
-            "parentId": "mySpanIdD",
-            "serviceName": "opbeans-ruby",
-            "timestamp": 1549324795823304,
-            "transaction": Object {
-              "parent": Object {
-                "id": "mySpanIdD",
-              },
-              "processor": Object {
-                "event": "transaction",
-              },
-              "service": Object {
-                "name": "opbeans-ruby",
-              },
-              "timestamp": Object {
-                "us": 1549324795823304,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "duration": Object {
-                  "us": 8634,
-                },
-                "id": "myTransactionId2",
-                "marks": Object {
-                  "agent": Object {
-                    "domComplete": 383,
-                    "domInteractive": 382,
-                    "timeToFirstByte": 14,
-                  },
-                },
-                "name": "Api::ProductsController#index",
-              },
-            },
-          },
-          "docType": "transaction",
-          "duration": 8634,
-          "offset": 0,
-          "skew": 0,
+          "id": "mySpanIdA",
         },
-        "parentId": "myTransactionId2",
-        "serviceName": "opbeans-ruby",
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
         "span": Object {
+          "duration": Object {
+            "us": 481,
+          },
+          "id": "mySpanIdB",
+          "name": "SELECT FROM products",
+        },
+        "timestamp": Object {
+          "us": 1549324795825633,
+        },
+        "trace": Object {
+          "id": "myTraceId",
+        },
+        "transaction": Object {
+          "id": "myTransactionId2",
+        },
+      },
+      "docType": "span",
+      "duration": 481,
+      "id": "mySpanIdB",
+      "offset": 2329,
+      "parent": Object {
+        "custom": Object {
           "parent": Object {
             "id": "myTransactionId2",
           },
@@ -1101,290 +1030,164 @@ Object {
             "id": "myTransactionId2",
           },
         },
-        "timestamp": 1549324795824504,
+        "docType": "span",
+        "duration": 6161,
+        "id": "mySpanIdA",
+        "offset": 1200,
+        "parent": Object {
+          "custom": Object {
+            "parent": Object {
+              "id": "mySpanIdD",
+            },
+            "processor": Object {
+              "event": "transaction",
+            },
+            "service": Object {
+              "name": "opbeans-ruby",
+            },
+            "timestamp": Object {
+              "us": 1549324795823304,
+            },
+            "trace": Object {
+              "id": "myTraceId",
+            },
+            "transaction": Object {
+              "duration": Object {
+                "us": 8634,
+              },
+              "id": "myTransactionId2",
+              "marks": Object {
+                "agent": Object {
+                  "domComplete": 383,
+                  "domInteractive": 382,
+                  "timeToFirstByte": 14,
+                },
+              },
+              "name": "Api::ProductsController#index",
+            },
+          },
+          "docType": "transaction",
+          "duration": 8634,
+          "id": "myTransactionId2",
+          "offset": 0,
+          "parent": undefined,
+          "parentId": "mySpanIdD",
+          "skew": 0,
+        },
+        "parentId": "myTransactionId2",
+        "skew": 0,
       },
-      "docType": "span",
-      "duration": 6161,
-      "offset": 1200,
+      "parentId": "mySpanIdA",
       "skew": 0,
     },
     Object {
-      "doc": Object {
-        "id": "mySpanIdB",
-        "name": "SELECT FROM products",
+      "custom": Object {
         "parent": Object {
-          "doc": Object {
-            "id": "mySpanIdA",
-            "name": "Api::ProductsController#index",
-            "parent": Object {
-              "doc": Object {
-                "errorsCount": 3,
-                "id": "myTransactionId2",
-                "name": "Api::ProductsController#index",
-                "parent": undefined,
-                "parentId": "mySpanIdD",
-                "serviceName": "opbeans-ruby",
-                "timestamp": 1549324795823304,
-                "transaction": Object {
-                  "parent": Object {
-                    "id": "mySpanIdD",
-                  },
-                  "processor": Object {
-                    "event": "transaction",
-                  },
-                  "service": Object {
-                    "name": "opbeans-ruby",
-                  },
-                  "timestamp": Object {
-                    "us": 1549324795823304,
-                  },
-                  "trace": Object {
-                    "id": "myTraceId",
-                  },
-                  "transaction": Object {
-                    "duration": Object {
-                      "us": 8634,
-                    },
-                    "id": "myTransactionId2",
-                    "marks": Object {
-                      "agent": Object {
-                        "domComplete": 383,
-                        "domInteractive": 382,
-                        "timeToFirstByte": 14,
-                      },
-                    },
-                    "name": "Api::ProductsController#index",
-                  },
-                },
-              },
-              "docType": "transaction",
-              "duration": 8634,
-              "offset": 0,
-              "skew": 0,
-            },
-            "parentId": "myTransactionId2",
-            "serviceName": "opbeans-ruby",
-            "span": Object {
-              "parent": Object {
-                "id": "myTransactionId2",
-              },
-              "processor": Object {
-                "event": "span",
-              },
-              "service": Object {
-                "name": "opbeans-ruby",
-              },
-              "span": Object {
-                "duration": Object {
-                  "us": 6161,
-                },
-                "id": "mySpanIdA",
-                "name": "Api::ProductsController#index",
-              },
-              "timestamp": Object {
-                "us": 1549324795824504,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "id": "myTransactionId2",
-              },
-            },
-            "timestamp": 1549324795824504,
-          },
-          "docType": "span",
-          "duration": 6161,
-          "offset": 1200,
-          "skew": 0,
+          "id": "mySpanIdA",
         },
-        "parentId": "mySpanIdA",
-        "serviceName": "opbeans-ruby",
+        "processor": Object {
+          "event": "span",
+        },
+        "service": Object {
+          "name": "opbeans-ruby",
+        },
         "span": Object {
-          "parent": Object {
-            "id": "mySpanIdA",
+          "duration": Object {
+            "us": 532,
           },
-          "processor": Object {
-            "event": "span",
-          },
-          "service": Object {
-            "name": "opbeans-ruby",
-          },
-          "span": Object {
-            "duration": Object {
-              "us": 481,
-            },
-            "id": "mySpanIdB",
-            "name": "SELECT FROM products",
-          },
-          "timestamp": Object {
-            "us": 1549324795825633,
-          },
-          "trace": Object {
-            "id": "myTraceId",
-          },
-          "transaction": Object {
-            "id": "myTransactionId2",
-          },
+          "id": "mySpanIdC",
+          "name": "SELECT FROM product",
         },
-        "timestamp": 1549324795825633,
-      },
-      "docType": "span",
-      "duration": 481,
-      "offset": 2329,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "id": "mySpanIdC",
-        "name": "SELECT FROM product",
-        "parent": Object {
-          "doc": Object {
-            "id": "mySpanIdA",
-            "name": "Api::ProductsController#index",
-            "parent": Object {
-              "doc": Object {
-                "errorsCount": 3,
-                "id": "myTransactionId2",
-                "name": "Api::ProductsController#index",
-                "parent": undefined,
-                "parentId": "mySpanIdD",
-                "serviceName": "opbeans-ruby",
-                "timestamp": 1549324795823304,
-                "transaction": Object {
-                  "parent": Object {
-                    "id": "mySpanIdD",
-                  },
-                  "processor": Object {
-                    "event": "transaction",
-                  },
-                  "service": Object {
-                    "name": "opbeans-ruby",
-                  },
-                  "timestamp": Object {
-                    "us": 1549324795823304,
-                  },
-                  "trace": Object {
-                    "id": "myTraceId",
-                  },
-                  "transaction": Object {
-                    "duration": Object {
-                      "us": 8634,
-                    },
-                    "id": "myTransactionId2",
-                    "marks": Object {
-                      "agent": Object {
-                        "domComplete": 383,
-                        "domInteractive": 382,
-                        "timeToFirstByte": 14,
-                      },
-                    },
-                    "name": "Api::ProductsController#index",
-                  },
-                },
-              },
-              "docType": "transaction",
-              "duration": 8634,
-              "offset": 0,
-              "skew": 0,
-            },
-            "parentId": "myTransactionId2",
-            "serviceName": "opbeans-ruby",
-            "span": Object {
-              "parent": Object {
-                "id": "myTransactionId2",
-              },
-              "processor": Object {
-                "event": "span",
-              },
-              "service": Object {
-                "name": "opbeans-ruby",
-              },
-              "span": Object {
-                "duration": Object {
-                  "us": 6161,
-                },
-                "id": "mySpanIdA",
-                "name": "Api::ProductsController#index",
-              },
-              "timestamp": Object {
-                "us": 1549324795824504,
-              },
-              "trace": Object {
-                "id": "myTraceId",
-              },
-              "transaction": Object {
-                "id": "myTransactionId2",
-              },
-            },
-            "timestamp": 1549324795824504,
-          },
-          "docType": "span",
-          "duration": 6161,
-          "offset": 1200,
-          "skew": 0,
+        "timestamp": Object {
+          "us": 1549324795827905,
         },
-        "parentId": "mySpanIdA",
-        "serviceName": "opbeans-ruby",
-        "span": Object {
-          "parent": Object {
-            "id": "mySpanIdA",
-          },
-          "processor": Object {
-            "event": "span",
-          },
-          "service": Object {
-            "name": "opbeans-ruby",
-          },
-          "span": Object {
-            "duration": Object {
-              "us": 532,
-            },
-            "id": "mySpanIdC",
-            "name": "SELECT FROM product",
-          },
-          "timestamp": Object {
-            "us": 1549324795827905,
-          },
-          "trace": Object {
-            "id": "myTraceId",
-          },
-          "transaction": Object {
-            "id": "myTransactionId2",
-          },
+        "trace": Object {
+          "id": "myTraceId",
         },
-        "timestamp": 1549324795827905,
+        "transaction": Object {
+          "id": "myTransactionId2",
+        },
       },
       "docType": "span",
       "duration": 532,
+      "id": "mySpanIdC",
       "offset": 4601,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "mark": "domInteractive",
+      "parent": Object {
+        "custom": Object {
+          "parent": Object {
+            "id": "myTransactionId2",
+          },
+          "processor": Object {
+            "event": "span",
+          },
+          "service": Object {
+            "name": "opbeans-ruby",
+          },
+          "span": Object {
+            "duration": Object {
+              "us": 6161,
+            },
+            "id": "mySpanIdA",
+            "name": "Api::ProductsController#index",
+          },
+          "timestamp": Object {
+            "us": 1549324795824504,
+          },
+          "trace": Object {
+            "id": "myTraceId",
+          },
+          "transaction": Object {
+            "id": "myTransactionId2",
+          },
+        },
+        "docType": "span",
+        "duration": 6161,
+        "id": "mySpanIdA",
+        "offset": 1200,
+        "parent": Object {
+          "custom": Object {
+            "parent": Object {
+              "id": "mySpanIdD",
+            },
+            "processor": Object {
+              "event": "transaction",
+            },
+            "service": Object {
+              "name": "opbeans-ruby",
+            },
+            "timestamp": Object {
+              "us": 1549324795823304,
+            },
+            "trace": Object {
+              "id": "myTraceId",
+            },
+            "transaction": Object {
+              "duration": Object {
+                "us": 8634,
+              },
+              "id": "myTransactionId2",
+              "marks": Object {
+                "agent": Object {
+                  "domComplete": 383,
+                  "domInteractive": 382,
+                  "timeToFirstByte": 14,
+                },
+              },
+              "name": "Api::ProductsController#index",
+            },
+          },
+          "docType": "transaction",
+          "duration": 8634,
+          "id": "myTransactionId2",
+          "offset": 0,
+          "parent": undefined,
+          "parentId": "mySpanIdD",
+          "skew": 0,
+        },
+        "parentId": "myTransactionId2",
+        "skew": 0,
       },
-      "docType": "agentMark",
-      "duration": 0,
-      "offset": 382000,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "mark": "domComplete",
-      },
-      "docType": "agentMark",
-      "duration": 0,
-      "offset": 383000,
-      "skew": 0,
-    },
-    Object {
-      "doc": Object {
-        "mark": "timeToFirstByte",
-      },
-      "docType": "agentMark",
-      "duration": 0,
-      "offset": 14000,
+      "parentId": "mySpanIdA",
       "skew": 0,
     },
   ],
@@ -1418,33 +1221,51 @@ Object {
 exports[`waterfall_helpers getWaterfallItems should handle cyclic references 1`] = `
 Array [
   Object {
-    "doc": Object {
-      "id": "a",
-      "parent": undefined,
-      "timestamp": 10,
+    "custom": Object {
+      "timestamp": Object {
+        "us": 10,
+      },
+      "transaction": Object {
+        "id": "a",
+      },
     },
     "docType": "transaction",
+    "id": "a",
     "offset": 0,
+    "parent": undefined,
     "skew": 0,
   },
   Object {
-    "doc": Object {
-      "id": "b",
+    "custom": Object {
       "parent": Object {
-        "doc": Object {
-          "id": "a",
-          "parent": undefined,
-          "timestamp": 10,
-        },
-        "docType": "transaction",
-        "offset": 0,
-        "skew": 0,
+        "id": "a",
       },
-      "parentId": "a",
-      "timestamp": 20,
+      "span": Object {
+        "id": "b",
+      },
+      "timestamp": Object {
+        "us": 20,
+      },
     },
     "docType": "span",
+    "id": "b",
     "offset": 10,
+    "parent": Object {
+      "custom": Object {
+        "timestamp": Object {
+          "us": 10,
+        },
+        "transaction": Object {
+          "id": "a",
+        },
+      },
+      "docType": "transaction",
+      "id": "a",
+      "offset": 0,
+      "parent": undefined,
+      "skew": 0,
+    },
+    "parentId": "a",
     "skew": 0,
   },
 ]
@@ -1453,198 +1274,279 @@ Array [
 exports[`waterfall_helpers getWaterfallItems should order items correctly 1`] = `
 Array [
   Object {
-    "doc": Object {
-      "errorsCount": 0,
-      "id": "a",
-      "name": "APIRestController#products",
-      "parent": undefined,
-      "serviceName": "opbeans-java",
-      "timestamp": 1536763736366000,
-      "transaction": Object {},
+    "custom": Object {
+      "service": Object {
+        "name": "opbeans-java",
+      },
+      "timestamp": Object {
+        "us": 1536763736366000,
+      },
+      "transaction": Object {
+        "id": "a",
+        "name": "APIRestController#products",
+      },
     },
     "docType": "transaction",
     "duration": 9480,
+    "id": "a",
     "offset": 0,
+    "parent": undefined,
     "skew": 0,
   },
   Object {
-    "doc": Object {
-      "id": "b2",
-      "name": "GET [0:0:0:0:0:0:0:1]",
+    "custom": Object {
       "parent": Object {
-        "doc": Object {
-          "errorsCount": 0,
-          "id": "a",
-          "name": "APIRestController#products",
-          "parent": undefined,
-          "serviceName": "opbeans-java",
-          "timestamp": 1536763736366000,
-          "transaction": Object {},
-        },
-        "docType": "transaction",
-        "duration": 9480,
-        "offset": 0,
-        "skew": 0,
+        "id": "a",
       },
-      "parentId": "a",
-      "serviceName": "opbeans-java",
+      "service": Object {
+        "name": "opbeans-java",
+      },
       "span": Object {
-        "transaction": Object {
-          "id": "a",
-        },
+        "id": "b2",
+        "name": "GET [0:0:0:0:0:0:0:1]",
       },
-      "timestamp": 1536763736367000,
+      "timestamp": Object {
+        "us": 1536763736367000,
+      },
+      "transaction": Object {
+        "id": "a",
+      },
     },
     "docType": "span",
     "duration": 4694,
+    "id": "b2",
     "offset": 1000,
+    "parent": Object {
+      "custom": Object {
+        "service": Object {
+          "name": "opbeans-java",
+        },
+        "timestamp": Object {
+          "us": 1536763736366000,
+        },
+        "transaction": Object {
+          "id": "a",
+          "name": "APIRestController#products",
+        },
+      },
+      "docType": "transaction",
+      "duration": 9480,
+      "id": "a",
+      "offset": 0,
+      "parent": undefined,
+      "skew": 0,
+    },
+    "parentId": "a",
     "skew": 0,
   },
   Object {
-    "doc": Object {
-      "id": "b",
-      "name": "GET [0:0:0:0:0:0:0:1]",
+    "custom": Object {
       "parent": Object {
-        "doc": Object {
-          "errorsCount": 0,
-          "id": "a",
-          "name": "APIRestController#products",
-          "parent": undefined,
-          "serviceName": "opbeans-java",
-          "timestamp": 1536763736366000,
-          "transaction": Object {},
-        },
-        "docType": "transaction",
-        "duration": 9480,
-        "offset": 0,
-        "skew": 0,
+        "id": "a",
       },
-      "parentId": "a",
-      "serviceName": "opbeans-java",
+      "service": Object {
+        "name": "opbeans-java",
+      },
       "span": Object {
-        "transaction": Object {
-          "id": "a",
-        },
+        "id": "b",
+        "name": "GET [0:0:0:0:0:0:0:1]",
       },
-      "timestamp": 1536763736368000,
+      "timestamp": Object {
+        "us": 1536763736368000,
+      },
+      "transaction": Object {
+        "id": "a",
+      },
     },
     "docType": "span",
     "duration": 4694,
+    "id": "b",
     "offset": 2000,
+    "parent": Object {
+      "custom": Object {
+        "service": Object {
+          "name": "opbeans-java",
+        },
+        "timestamp": Object {
+          "us": 1536763736366000,
+        },
+        "transaction": Object {
+          "id": "a",
+          "name": "APIRestController#products",
+        },
+      },
+      "docType": "transaction",
+      "duration": 9480,
+      "id": "a",
+      "offset": 0,
+      "parent": undefined,
+      "skew": 0,
+    },
+    "parentId": "a",
     "skew": 0,
   },
   Object {
-    "doc": Object {
-      "errorsCount": 0,
-      "id": "c",
-      "name": "APIRestController#productsRemote",
+    "custom": Object {
       "parent": Object {
-        "doc": Object {
-          "id": "b",
-          "name": "GET [0:0:0:0:0:0:0:1]",
-          "parent": Object {
-            "doc": Object {
-              "errorsCount": 0,
-              "id": "a",
-              "name": "APIRestController#products",
-              "parent": undefined,
-              "serviceName": "opbeans-java",
-              "timestamp": 1536763736366000,
-              "transaction": Object {},
-            },
-            "docType": "transaction",
-            "duration": 9480,
-            "offset": 0,
-            "skew": 0,
-          },
-          "parentId": "a",
-          "serviceName": "opbeans-java",
-          "span": Object {
-            "transaction": Object {
-              "id": "a",
-            },
-          },
-          "timestamp": 1536763736368000,
-        },
-        "docType": "span",
-        "duration": 4694,
-        "offset": 2000,
-        "skew": 0,
+        "id": "b",
       },
-      "parentId": "b",
-      "serviceName": "opbeans-java",
-      "timestamp": 1536763736369000,
-      "transaction": Object {},
+      "service": Object {
+        "name": "opbeans-java",
+      },
+      "timestamp": Object {
+        "us": 1536763736369000,
+      },
+      "transaction": Object {
+        "id": "c",
+        "name": "APIRestController#productsRemote",
+      },
     },
     "docType": "transaction",
     "duration": 3581,
+    "id": "c",
     "offset": 3000,
+    "parent": Object {
+      "custom": Object {
+        "parent": Object {
+          "id": "a",
+        },
+        "service": Object {
+          "name": "opbeans-java",
+        },
+        "span": Object {
+          "id": "b",
+          "name": "GET [0:0:0:0:0:0:0:1]",
+        },
+        "timestamp": Object {
+          "us": 1536763736368000,
+        },
+        "transaction": Object {
+          "id": "a",
+        },
+      },
+      "docType": "span",
+      "duration": 4694,
+      "id": "b",
+      "offset": 2000,
+      "parent": Object {
+        "custom": Object {
+          "service": Object {
+            "name": "opbeans-java",
+          },
+          "timestamp": Object {
+            "us": 1536763736366000,
+          },
+          "transaction": Object {
+            "id": "a",
+            "name": "APIRestController#products",
+          },
+        },
+        "docType": "transaction",
+        "duration": 9480,
+        "id": "a",
+        "offset": 0,
+        "parent": undefined,
+        "skew": 0,
+      },
+      "parentId": "a",
+      "skew": 0,
+    },
+    "parentId": "b",
     "skew": 0,
   },
   Object {
-    "doc": Object {
-      "id": "d",
-      "name": "SELECT",
+    "custom": Object {
       "parent": Object {
-        "doc": Object {
-          "errorsCount": 0,
-          "id": "c",
-          "name": "APIRestController#productsRemote",
-          "parent": Object {
-            "doc": Object {
-              "id": "b",
-              "name": "GET [0:0:0:0:0:0:0:1]",
-              "parent": Object {
-                "doc": Object {
-                  "errorsCount": 0,
-                  "id": "a",
-                  "name": "APIRestController#products",
-                  "parent": undefined,
-                  "serviceName": "opbeans-java",
-                  "timestamp": 1536763736366000,
-                  "transaction": Object {},
-                },
-                "docType": "transaction",
-                "duration": 9480,
-                "offset": 0,
-                "skew": 0,
-              },
-              "parentId": "a",
-              "serviceName": "opbeans-java",
-              "span": Object {
-                "transaction": Object {
-                  "id": "a",
-                },
-              },
-              "timestamp": 1536763736368000,
-            },
-            "docType": "span",
-            "duration": 4694,
-            "offset": 2000,
-            "skew": 0,
-          },
-          "parentId": "b",
-          "serviceName": "opbeans-java",
-          "timestamp": 1536763736369000,
-          "transaction": Object {},
-        },
-        "docType": "transaction",
-        "duration": 3581,
-        "offset": 3000,
-        "skew": 0,
+        "id": "c",
       },
-      "parentId": "c",
-      "serviceName": "opbeans-java",
+      "service": Object {
+        "name": "opbeans-java",
+      },
       "span": Object {
-        "transaction": Object {
-          "id": "c",
-        },
+        "id": "d",
+        "name": "SELECT",
       },
-      "timestamp": 1536763736371000,
+      "timestamp": Object {
+        "us": 1536763736371000,
+      },
+      "transaction": Object {
+        "id": "c",
+      },
     },
     "docType": "span",
     "duration": 210,
+    "id": "d",
     "offset": 5000,
+    "parent": Object {
+      "custom": Object {
+        "parent": Object {
+          "id": "b",
+        },
+        "service": Object {
+          "name": "opbeans-java",
+        },
+        "timestamp": Object {
+          "us": 1536763736369000,
+        },
+        "transaction": Object {
+          "id": "c",
+          "name": "APIRestController#productsRemote",
+        },
+      },
+      "docType": "transaction",
+      "duration": 3581,
+      "id": "c",
+      "offset": 3000,
+      "parent": Object {
+        "custom": Object {
+          "parent": Object {
+            "id": "a",
+          },
+          "service": Object {
+            "name": "opbeans-java",
+          },
+          "span": Object {
+            "id": "b",
+            "name": "GET [0:0:0:0:0:0:0:1]",
+          },
+          "timestamp": Object {
+            "us": 1536763736368000,
+          },
+          "transaction": Object {
+            "id": "a",
+          },
+        },
+        "docType": "span",
+        "duration": 4694,
+        "id": "b",
+        "offset": 2000,
+        "parent": Object {
+          "custom": Object {
+            "service": Object {
+              "name": "opbeans-java",
+            },
+            "timestamp": Object {
+              "us": 1536763736366000,
+            },
+            "transaction": Object {
+              "id": "a",
+              "name": "APIRestController#products",
+            },
+          },
+          "docType": "transaction",
+          "duration": 9480,
+          "id": "a",
+          "offset": 0,
+          "parent": undefined,
+          "skew": 0,
+        },
+        "parentId": "a",
+        "skew": 0,
+      },
+      "parentId": "b",
+      "skew": 0,
+    },
+    "parentId": "c",
     "skew": 0,
   },
 ]

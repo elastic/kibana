@@ -10,22 +10,19 @@ import { ErrorMarker } from '../ErrorMarker';
 import { IWaterfallError } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 describe('ErrorMarker', () => {
-  const mark = ({
-    doc: {
-      id: '123',
-      name: 'foo',
-      error: {
-        trace: { id: '123' },
-        transaction: { id: '456' },
-        error: { grouping_key: '123' }
-      },
-      serviceColor: '#fff',
-      serviceName: 'bar'
+  const mark = {
+    id: '123',
+    custom: {
+      trace: { id: '123' },
+      transaction: { id: '456' },
+      error: { grouping_key: '123' },
+      service: { name: 'bar' }
     },
+    serviceColor: '#fff',
     offset: 10000,
     skew: 0,
     docType: 'error'
-  } as unknown) as IWaterfallError;
+  } as IWaterfallError;
   it('renders', () => {
     const component = shallow(<ErrorMarker mark={mark} />);
     expect(component).toMatchSnapshot();

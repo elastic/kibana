@@ -12,8 +12,7 @@ import {
   getOrderedWaterfallItems,
   getWaterfall,
   IWaterfallItem,
-  IWaterfallTransaction,
-  IWaterfallAgentMark
+  IWaterfallTransaction
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
 
@@ -137,14 +136,8 @@ describe('waterfall_helpers', () => {
         entryTransactionId
       );
 
-      const agentMarks = waterfall.items.filter(
-        item => item.docType === 'agentMark'
-      );
       expect(waterfall.items.length).toBe(7);
-      expect((waterfall.items[0] as IWaterfallTransaction).doc.id).toBe(
-        'myTransactionId1'
-      );
-      expect(agentMarks.length).toEqual(0);
+      expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(waterfall.errorsCount).toEqual(1);
       expect(waterfall).toMatchSnapshot();
     });
@@ -163,15 +156,8 @@ describe('waterfall_helpers', () => {
         entryTransactionId
       );
 
-      const agentMarks = waterfall.items.filter(
-        item => item.docType === 'agentMark'
-      );
-
-      expect(waterfall.items.length).toBe(7);
-      expect((waterfall.items[0] as IWaterfallTransaction).doc.id).toBe(
-        'myTransactionId2'
-      );
-      expect(agentMarks.length).toEqual(3);
+      expect(waterfall.items.length).toBe(4);
+      expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall.errorsCount).toEqual(0);
       expect(waterfall).toMatchSnapshot();
     });
@@ -182,92 +168,97 @@ describe('waterfall_helpers', () => {
       const items: IWaterfallItem[] = [
         {
           docType: 'span',
-          doc: {
-            id: 'd',
-            parentId: 'c',
-            serviceName: 'opbeans-java',
-            name: 'SELECT',
-            timestamp: 1536763736371000,
+          custom: {
+            parent: { id: 'c' },
+            service: { name: 'opbeans-java' },
+            transaction: {
+              id: 'c'
+            },
+            timestamp: { us: 1536763736371000 },
             span: {
-              transaction: {
-                id: 'c'
-              }
-            } as Span
-          },
+              id: 'd',
+              name: 'SELECT'
+            }
+          } as Span,
+          id: 'd',
+          parentId: 'c',
           duration: 210,
           offset: 0,
           skew: 0
         },
         {
           docType: 'span',
-          doc: {
-            id: 'b',
-            parentId: 'a',
-            serviceName: 'opbeans-java',
-            name: 'GET [0:0:0:0:0:0:0:1]',
-            timestamp: 1536763736368000,
+          custom: {
+            parent: { id: 'a' },
+            service: { name: 'opbeans-java' },
+            transaction: {
+              id: 'a'
+            },
+            timestamp: { us: 1536763736368000 },
             span: {
-              transaction: {
-                id: 'a'
-              }
-            } as Span
-          },
+              id: 'b',
+              name: 'GET [0:0:0:0:0:0:0:1]'
+            }
+          } as Span,
+          id: 'b',
+          parentId: 'a',
           duration: 4694,
           offset: 0,
           skew: 0
         },
         {
           docType: 'span',
-          doc: {
-            id: 'b2',
-            parentId: 'a',
-            serviceName: 'opbeans-java',
-            name: 'GET [0:0:0:0:0:0:0:1]',
-            timestamp: 1536763736367000,
+          custom: {
+            parent: { id: 'a' },
+            service: { name: 'opbeans-java' },
+            transaction: {
+              id: 'a'
+            },
+            timestamp: { us: 1536763736367000 },
             span: {
-              transaction: {
-                id: 'a'
-              }
-            } as Span
-          },
+              id: 'b2',
+              name: 'GET [0:0:0:0:0:0:0:1]'
+            }
+          } as Span,
+          id: 'b2',
+          parentId: 'a',
           duration: 4694,
           offset: 0,
           skew: 0
         },
         {
           docType: 'transaction',
-          doc: {
-            id: 'c',
-            parentId: 'b',
-            serviceName: 'opbeans-java',
-            name: 'APIRestController#productsRemote',
-            timestamp: 1536763736369000,
-            transaction: {} as Transaction,
-            errorsCount: 0
-          },
+          custom: {
+            parent: { id: 'b' },
+            service: { name: 'opbeans-java' },
+            timestamp: { us: 1536763736369000 },
+            transaction: { id: 'c', name: 'APIRestController#productsRemote' }
+          } as Transaction,
+          id: 'c',
+          parentId: 'b',
           duration: 3581,
           offset: 0,
           skew: 0
         },
         {
           docType: 'transaction',
-          doc: {
-            id: 'a',
-            serviceName: 'opbeans-java',
-            name: 'APIRestController#products',
-            timestamp: 1536763736366000,
-            transaction: {} as Transaction,
-            errorsCount: 0
-          },
+          custom: {
+            service: { name: 'opbeans-java' },
+            timestamp: { us: 1536763736366000 },
+            transaction: {
+              id: 'a',
+              name: 'APIRestController#products'
+            }
+          } as Transaction,
+          id: 'a',
           duration: 9480,
           offset: 0,
           skew: 0
         }
       ];
 
-      const childrenByParentId = groupBy(
-        items as Array<Exclude<IWaterfallItem, IWaterfallAgentMark>>,
-        hit => (hit.doc.parentId ? hit.doc.parentId : 'root')
+      const childrenByParentId = groupBy(items, hit =>
+        hit.parentId ? hit.parentId : 'root'
       );
       const entryTransactionItem = childrenByParentId
         .root[0] as IWaterfallTransaction;
@@ -281,17 +272,27 @@ describe('waterfall_helpers', () => {
       const items = [
         {
           docType: 'transaction',
-          doc: { id: 'a', timestamp: 10 }
+          id: 'a',
+          custom: ({
+            transaction: { id: 'a' },
+            timestamp: { us: 10 }
+          } as unknown) as Transaction
         } as IWaterfallItem,
         {
           docType: 'span',
-          doc: { id: 'b', parentId: 'a', timestamp: 20 }
+          id: 'b',
+          parentId: 'a',
+          custom: ({
+            span: {
+              id: 'b'
+            },
+            parent: { id: 'a' },
+            timestamp: { us: 20 }
+          } as unknown) as Span
         } as IWaterfallItem
       ];
       const childrenByParentId = groupBy(items, hit =>
-        hit.docType !== 'agentMark' && hit.doc.parentId
-          ? hit.doc.parentId
-          : 'root'
+        hit.parentId ? hit.parentId : 'root'
       );
       const entryTransactionItem = childrenByParentId
         .root[0] as IWaterfallTransaction;
@@ -305,16 +306,16 @@ describe('waterfall_helpers', () => {
     it('should adjust when child starts before parent', () => {
       const child = {
         docType: 'transaction',
-        doc: {
-          timestamp: 0
+        custom: {
+          timestamp: { us: 0 }
         },
         duration: 50
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
-        doc: {
-          timestamp: 100
+        custom: {
+          timestamp: { us: 100 }
         },
         duration: 100,
         skew: 5
@@ -326,16 +327,16 @@ describe('waterfall_helpers', () => {
     it('should not adjust when child starts after parent has ended', () => {
       const child = {
         docType: 'transaction',
-        doc: {
-          timestamp: 250
+        custom: {
+          timestamp: { us: 250 }
         },
         duration: 50
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
-        doc: {
-          timestamp: 100
+        custom: {
+          timestamp: { us: 100 }
         },
         duration: 100,
         skew: 5
@@ -347,16 +348,16 @@ describe('waterfall_helpers', () => {
     it('should not adjust when child starts within parent duration', () => {
       const child = {
         docType: 'transaction',
-        doc: {
-          timestamp: 150
+        custom: {
+          timestamp: { us: 150 }
         },
         duration: 50
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
-        doc: {
-          timestamp: 100
+        custom: {
+          timestamp: { us: 100 }
         },
         duration: 100,
         skew: 5
@@ -372,8 +373,8 @@ describe('waterfall_helpers', () => {
 
       const parent = {
         docType: 'span',
-        doc: {
-          timestamp: 100
+        custom: {
+          timestamp: { us: 100 }
         },
         duration: 100,
         skew: 5
@@ -382,45 +383,21 @@ describe('waterfall_helpers', () => {
       expect(getClockSkew(child, parent)).toBe(5);
     });
 
-    it('should not adjust when error starts within parent duration', () => {
+    it('should return parent skew for errors', () => {
       const child = {
-        docType: 'error',
-        doc: {
-          timestamp: 200
-        }
+        docType: 'error'
       } as IWaterfallItem;
 
       const parent = {
         docType: 'transaction',
-        doc: {
-          timestamp: 100
+        custom: {
+          timestamp: { us: 100 }
         },
         duration: 100,
         skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(child, parent)).toBe(0);
-    });
-
-    it('should adjust when error starts before parent', () => {
-      const child = {
-        docType: 'error',
-        doc: {
-          timestamp: 10
-        },
-        duration: 0
-      } as IWaterfallItem;
-
-      const parent = {
-        docType: 'transaction',
-        doc: {
-          timestamp: 100
-        },
-        duration: 100,
-        skew: 5
-      } as IWaterfallItem;
-
-      expect(getClockSkew(child, parent)).toBe(145);
+      expect(getClockSkew(child, parent)).toBe(5);
     });
 
     it('should handle missing parent', () => {

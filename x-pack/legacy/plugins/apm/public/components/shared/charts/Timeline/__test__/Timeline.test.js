@@ -31,27 +31,18 @@ describe('Timeline', () => {
       animation: null,
       marks: [
         {
-          doc: {
-            mark: 'timeToFirstByte'
-          },
+          name: 'timeToFirstByte',
           offset: 100000,
-          skew: 0,
           docType: 'agentMark'
         },
         {
-          doc: {
-            mark: 'domInteractive'
-          },
+          name: 'domInteractive',
           offset: 110000,
-          skew: 0,
           docType: 'agentMark'
         },
         {
-          doc: {
-            mark: 'domComplete'
-          },
+          name: 'domComplete',
           offset: 190000,
-          skew: 0,
           docType: 'agentMark'
         }
       ]

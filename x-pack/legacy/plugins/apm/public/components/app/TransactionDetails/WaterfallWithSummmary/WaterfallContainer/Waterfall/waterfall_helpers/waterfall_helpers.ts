@@ -213,17 +213,14 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
     0
   );
 
-const getWaterfallItems = (
-  items: TraceAPIResponse['trace']['items'],
-  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction']
-) =>
+const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
   items.map(item => {
     const docType = item.processor.event;
     switch (docType) {
       case 'span':
         return getSpanItem(item as Span);
       case 'transaction':
-        return getTransactionItem(item as Transaction, errorsPerTransaction);
+        return getTransactionItem(item as Transaction);
       case 'error':
         return getErrorItem(item as APMError);
     }
@@ -254,10 +251,7 @@ export function getWaterfall(
     };
   }
 
-  const waterfallItems: IWaterfallItem[] = getWaterfallItems(
-    trace.items,
-    errorsPerTransaction
-  );
+  const waterfallItems: IWaterfallItem[] = getWaterfallItems(trace.items);
 
   const childrenByParentId = getChildrenGroupedByParentId(waterfallItems);
 
