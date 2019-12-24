@@ -121,7 +121,7 @@ export class MathAgg extends Component {
                 <FormattedMessage
                   id="visTypeTimeseries.math.expressionDescription"
                   defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
-                i.e. {paramsName} To access all the data use {paramsValues} for an array of the values and {paramsTimestamps} for
+                i.e. {paramsName}. To access all the data use {paramsValues} for an array of the values and {paramsTimestamps} for
                 an array of the timestamps. {paramsTimestamp} is available for the current bucket's timestamp,
                 {paramsIndex} is available for the current bucket's index, and {paramsInterval} is available for
                 the interval in milliseconds."
