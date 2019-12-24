@@ -16,9 +16,9 @@ describe('Mappings configuration validator', () => {
     const tests = ['abc', 123, [], null, undefined];
 
     tests.forEach(testValue => {
-      const { value, error } = validateMappings(testValue as any);
+      const { value, errors } = validateMappings(testValue as any);
       expect(isObject(value)).toBe(true);
-      expect(error).toBe(undefined);
+      expect(errors).toBe(undefined);
     });
   });
 
@@ -37,11 +37,11 @@ describe('Mappings configuration validator', () => {
       unknown: 123,
     };
 
-    const { value, error } = validateMappings(mappings);
+    const { value, errors } = validateMappings(mappings);
 
     const { unknown, ...expected } = mappings;
     expect(value).toEqual(expected);
-    expect(error).toBe(undefined);
+    expect(errors).toBe(undefined);
   });
 
   it('should strip out invalid configuration', () => {
@@ -58,18 +58,19 @@ describe('Mappings configuration validator', () => {
       properties: 'abc',
     };
 
-    const { value, error } = validateMappings(mappings);
+    const { value, errors } = validateMappings(mappings);
 
     expect(value).toEqual({
       dynamic: true,
       properties: {},
     });
 
-    expect(error).not.toBe(undefined);
-    expect(error!.configurationRemoved).toEqual([
-      'numeric_detection',
-      'dynamic_date_formats',
-      '_source',
+    expect(errors).not.toBe(undefined);
+    expect(errors!.length).toBe(3);
+    expect(errors!).toEqual([
+      { code: 'ERR_CONFIG', configName: 'numeric_detection' },
+      { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },
+      { code: 'ERR_CONFIG', configName: '_source' },
     ]);
   });
 });
@@ -79,9 +80,9 @@ describe('Properties validator', () => {
     const tests = ['abc', 123, [], null, undefined];
 
     tests.forEach(testValue => {
-      const { value, error } = validateProperties(testValue as any);
+      const { value, errors } = validateProperties(testValue as any);
       expect(isObject(value)).toBe(true);
-      expect(error).toBe(undefined);
+      expect(errors).toEqual([]);
     });
   });
 
@@ -99,10 +100,15 @@ describe('Properties validator', () => {
         },
       },
     };
-    const { value, error } = validateProperties(properties as any);
+    const { value, errors } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual(['prop1', 'prop6']);
-    expect(error!.propertiesRemoved).toEqual(['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2']);
+    expect(errors).toEqual(
+      ['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2'].map(fieldPath => ({
+        code: 'ERR_FIELD',
+        fieldPath,
+      }))
+    );
   });
 
   it(`should set the type to "object" when type is not provided`, () => {
@@ -117,11 +123,11 @@ describe('Properties validator', () => {
         },
       },
     };
-    const { value, error } = validateProperties(properties as any);
+    const { value, errors } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual(['prop1', 'prop2', 'prop3']);
     expect(value.prop2).toEqual({ type: 'object' });
-    expect(error).toBe(undefined);
+    expect(errors).toEqual([]);
   });
 
   it('should strip field whose type is not a string or is unknown', () => {
@@ -130,10 +136,19 @@ describe('Properties validator', () => {
       prop2: { type: 'clearlyUnknown' },
     };
 
-    const { value, error } = validateProperties(properties as any);
+    const { value, errors } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual([]);
-    expect(error!.propertiesRemoved).toEqual(['prop1', 'prop2']);
+    expect(errors).toEqual([
+      {
+        code: 'ERR_FIELD',
+        fieldPath: 'prop1',
+      },
+      {
+        code: 'ERR_FIELD',
+        fieldPath: 'prop2',
+      },
+    ]);
   });
 
   it('should strip parameters that are unknown', () => {
@@ -148,7 +163,7 @@ describe('Properties validator', () => {
       },
     };
 
-    const { value } = validateProperties(properties as any);
+    const { value, errors } = validateProperties(properties as any);
 
     expect(value).toEqual({
       prop1: { type: 'text' },
@@ -160,6 +175,13 @@ describe('Properties validator', () => {
         },
       },
     });
+
+    expect(errors).toEqual([
+      { code: 'ERR_PARAMETER', fieldPath: 'prop1', paramName: 'unknown' },
+      { code: 'ERR_PARAMETER', fieldPath: 'prop1', paramName: 'anotherUnknown' },
+      { code: 'ERR_PARAMETER', fieldPath: 'prop3.hello', paramName: 'unknown' },
+      { code: 'ERR_PARAMETER', fieldPath: 'prop3.hello', paramName: 'anotherUnknown' },
+    ]);
   });
 
   it(`should strip parameters whose value don't have the valid type.`, () => {
@@ -268,17 +290,20 @@ describe('Properties validator', () => {
       },
     };
 
-    const { value, error } = validateProperties(properties as any);
+    const { value, errors } = validateProperties(properties as any);
 
     expect(Object.keys(value)).toEqual(['wrongField', 'goodField']);
 
     expect(value.wrongField).toEqual({ type: 'text' }); // All parameters have been stripped out but the "type".
     expect(value.goodField).toEqual(properties.goodField); // All parameters are stil there.
 
-    expect(error).not.toBe(undefined);
-    expect(Object.keys(error!.parametersRemoved)).toEqual(['wrongField']);
-    expect(error!.parametersRemoved.wrongField).toEqual(
-      Object.keys(properties.wrongField).filter(v => v !== 'type') // All parameters but the "type"
+    const allWrongParameters = Object.keys(properties.wrongField).filter(v => v !== 'type');
+    expect(errors).toEqual(
+      allWrongParameters.map(paramName => ({
+        code: 'ERR_PARAMETER',
+        fieldPath: 'wrongField',
+        paramName,
+      }))
     );
   });
 });

@@ -17,26 +17,21 @@ const ALLOWED_FIELD_PROPERTIES = [
 
 const DEFAULT_FIELD_TYPE = 'object';
 
+type MappingsValidationError =
+  | { code: 'ERR_CONFIG'; configName: string }
+  | { code: 'ERR_FIELD'; fieldPath: string }
+  | { code: 'ERR_PARAMETER'; paramName: string; fieldPath: string };
+
 export interface MappingsValidatorResponse {
   /* The parsed mappings object without any error */
   value: GenericObject;
-  error?: {
-    /* Keep track of the configuration parameter that will be stripped out */
-    configurationRemoved: string[];
-    /* Keep track of the fields that will be stripped out */
-    propertiesRemoved: string[];
-    /* Keep track of the field parameters that will be stripped out */
-    parametersRemoved: { [key: string]: string[] };
-  };
+  errors?: MappingsValidationError[];
 }
 
 interface PropertiesValidatorResponse {
   /* The parsed "properties" object without any error */
   value: GenericObject;
-  error?: {
-    propertiesRemoved: string[];
-    parametersRemoved: { [key: string]: string[] };
-  };
+  errors: MappingsValidationError[];
 }
 
 interface FieldValidatorResponse {
@@ -121,42 +116,41 @@ const parseFields = (
   path: string[] = []
 ): PropertiesValidatorResponse => {
   return Object.entries(properties).reduce(
-    (acc, [key, value]) => {
-      const fieldPath = [...path, key].join('.');
-      const { value: parsedField, parametersRemoved, meta } = parseField(value);
+    (acc, [fieldName, unparsedField]) => {
+      const fieldPath = [...path, fieldName].join('.');
+      const { value: parsedField, parametersRemoved, meta } = parseField(unparsedField);
 
       if (parsedField === undefined) {
         // Field has been stripped out because it was invalid
-        acc.error = acc.error ?? { propertiesRemoved: [], parametersRemoved: {} };
-        acc.error.propertiesRemoved.push(fieldPath);
+        acc.errors.push({ code: 'ERR_FIELD', fieldPath });
       } else {
         if (meta!.hasChildFields || meta!.hasMultiFields) {
           // Recursively parse all the possible children ("properties" or "fields" for multi-fields)
-          const parsedChildren = parseFields(parsedField[meta!.childFieldsName!], [...path, key]);
+          const parsedChildren = parseFields(parsedField[meta!.childFieldsName!], [
+            ...path,
+            fieldName,
+          ]);
           parsedField[meta!.childFieldsName!] = parsedChildren.value;
 
           /**
            * If the children parsed have any error we concatenate them in our accumulator.
            */
-          if (parsedChildren.error) {
-            acc.error = acc.error ?? { propertiesRemoved: [], parametersRemoved: {} };
-
-            acc.error.propertiesRemoved = [
-              ...acc.error!.propertiesRemoved,
-              ...parsedChildren.error!.propertiesRemoved,
-            ];
-            acc.error.parametersRemoved = {
-              ...acc.error.parametersRemoved,
-              ...parsedChildren.error!.parametersRemoved,
-            };
+          if (parsedChildren.errors) {
+            acc.errors = [...acc.errors, ...parsedChildren.errors];
           }
         }
 
-        acc.value[key] = parsedField;
+        acc.value[fieldName] = parsedField;
 
         if (Boolean(parametersRemoved.length)) {
-          acc.error = acc.error ?? { propertiesRemoved: [], parametersRemoved: {} };
-          acc.error.parametersRemoved[fieldPath] = parametersRemoved;
+          acc.errors = [
+            ...acc.errors,
+            ...parametersRemoved.map(paramName => ({
+              code: 'ERR_PARAMETER' as 'ERR_PARAMETER',
+              fieldPath,
+              paramName,
+            })),
+          ];
         }
       }
 
@@ -164,6 +158,7 @@ const parseFields = (
     },
     {
       value: {},
+      errors: [],
     } as PropertiesValidatorResponse
   );
 };
@@ -182,7 +177,7 @@ const parseFields = (
  */
 export const validateProperties = (properties = {}): PropertiesValidatorResponse => {
   if (!isObject(properties)) {
-    return { value: {} };
+    return { value: {}, errors: [] };
   }
 
   return parseFields(properties);
@@ -206,7 +201,7 @@ export const mappingsConfigurationSchema = Joi.object().keys({
 
 const validateMappingsConfiguration = (
   mappingsConfiguration: any
-): { value: any; configurationRemoved: string[] } => {
+): { value: any; errors: MappingsValidationError[] } => {
   // Array to keep track of invalid configuration parameters.
   const configurationRemoved: string[] = [];
 
@@ -230,7 +225,12 @@ const validateMappingsConfiguration = (
     });
   }
 
-  return { value: parsedConfiguration, configurationRemoved };
+  const errors: MappingsValidationError[] = configurationRemoved.map(configName => ({
+    code: 'ERR_CONFIG',
+    configName,
+  }));
+
+  return { value: parsedConfiguration, errors };
 };
 
 export const validateMappings = (mappings: any = {}): MappingsValidatorResponse => {
@@ -240,28 +240,18 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
 
   const { properties, ...mappingsConfiguration } = mappings;
 
-  const { value: parsedConfiguration, configurationRemoved } = validateMappingsConfiguration(
+  const { value: parsedConfiguration, errors: configurationErrors } = validateMappingsConfiguration(
     mappingsConfiguration
   );
-  const { value: parsedProperties, error: propertiesError } = validateProperties(properties);
+  const { value: parsedProperties, errors: propertiesErrors } = validateProperties(properties);
 
-  let error: MappingsValidatorResponse['error'];
-
-  if (propertiesError !== undefined || Boolean(configurationRemoved.length)) {
-    // Build our error response
-    error = {
-      propertiesRemoved: [],
-      parametersRemoved: {},
-      configurationRemoved,
-      ...propertiesError,
-    };
-  }
+  const errors = [...configurationErrors, ...propertiesErrors];
 
   return {
     value: {
       ...parsedConfiguration,
       properties: parsedProperties,
     },
-    error,
+    errors: errors.length ? errors : undefined,
   };
 };
