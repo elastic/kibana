@@ -1,7 +1,7 @@
 {
   "id": "apm_jsbase",
   "title": "APM: RUM Javascript",
-  "description": "Detect anomalies in transactions, spans, and errors coming from the Javascript APM Rum Agent",
+  "description": "Detect anomalies in spans and errors",
   "type": "APM data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*",

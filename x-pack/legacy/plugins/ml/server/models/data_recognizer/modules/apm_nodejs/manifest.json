@@ -1,7 +1,7 @@
 {
   "id": "apm_nodejs",
   "title": "APM: NodeJS",
-  "description": "Detect anomalies in transactions, spans, and errors coming from the NodeJS APM Agent",
+  "description": "Detect anomalies in transactions, spans, and errors",
   "type": "APM data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*",

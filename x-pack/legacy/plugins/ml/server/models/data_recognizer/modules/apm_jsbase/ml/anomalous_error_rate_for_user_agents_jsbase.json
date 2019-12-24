@@ -33,7 +33,7 @@
       {
         "url_name": "APM",
         "time_range": "2h",
-        "url_value": "apm#/services/$service.name$/errors?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=user_agent.name%2520%253A%2520%2522$user_agent.name$%2522&_g=()"
+        "url_value": "apm#/services/$service.name$/errors?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=user_agent.name:\"$user_agent.name$\"&_g=()"
       }
     ]
   }

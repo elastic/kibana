@@ -97,7 +97,11 @@ export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
 // a Kibana Discover or Dashboard page running on the same server as this ML plugin.
 function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
-  return urlValue.startsWith('kibana#/discover') || urlValue.startsWith('kibana#/dashboard');
+  return (
+    urlValue.startsWith('kibana#/discover') ||
+    urlValue.startsWith('kibana#/dashboard') ||
+    urlValue.startsWith('apm#/')
+  );
 }
 
 /**
@@ -155,7 +159,7 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
         commonEscapeCallback
       );
       return str.replace(
-        /(.+query:')([^']*)('.+)/,
+        /(.+query:'|.+&kuery=)([^']*)(['&].+)/,
         (fullMatch, prefix: string, queryString: string, postfix: string) => {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
 
@@ -170,28 +174,39 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
           const queryParts: string[] = [];
           const joinOperator = ' AND ';
 
-          for (let i = 0; i < queryFields.length; i++) {
+          fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
             const field = queryFields[i];
             // Use lodash get to allow nested JSON fields to be retrieved.
-            const tokenValues: string[] | string | null = get(record, field) || null;
+            let tokenValues: string[] | string | null = get(record, field) || null;
             if (tokenValues === null) {
               continue;
             }
+            tokenValues = Array.isArray(tokenValues) ? tokenValues : [tokenValues];
+
             // Create a pair `influencerField:value`.
             // In cases where there are multiple influencer field values for an anomaly
             // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
-            let result = (Array.isArray(tokenValues) ? tokenValues : [tokenValues])
-              .map(value => `${field}:"${getResultTokenValue(value)}"`)
-              .join(' OR ');
-            result = tokenValues.length > 1 ? `(${result})` : result;
+            let result = '';
+            for (let j = 0; j < tokenValues.length; j++) {
+              const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(
+                tokenValues[j]
+              )}"`;
 
-            // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
-            availableCharactersLeft -= result.length - (i === 0 ? 0 : joinOperator.length);
+              // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
+              if (availableCharactersLeft < part.length) {
+                if (result.length > 0) {
+                  queryParts.push(j > 0 ? `(${result})` : result);
+                }
+                break fieldsLoop;
+              }
 
-            if (availableCharactersLeft <= 0) {
-              break;
-            } else {
-              queryParts.push(result);
+              result += part;
+
+              availableCharactersLeft -= result.length;
+            }
+
+            if (result.length > 0) {
+              queryParts.push(tokenValues.length > 1 ? `(${result})` : result);
             }
           }
 

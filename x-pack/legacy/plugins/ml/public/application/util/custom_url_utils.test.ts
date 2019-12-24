@@ -345,6 +345,66 @@ describe('ML - custom URL utils', () => {
       );
     });
 
+    test('returns expected URL for APM', () => {
+      const urlConfig = {
+        url_name: 'APM',
+        time_range: '2h',
+        url_value:
+          'apm#/traces?rangeFrom=$earliest$&rangeTo=$latest$&kuery=trace.id:"$trace.id$" and transaction.name:"$transaction.name$"&_g=()',
+      };
+
+      const testRecords = {
+        job_id: 'abnormal_trace_durations_nodejs',
+        result_type: 'record',
+        probability: 0.025597710862701226,
+        multi_bucket_impact: 5,
+        record_score: 13.124152090331723,
+        initial_record_score: 13.124152090331723,
+        bucket_span: 900,
+        detector_index: 0,
+        is_interim: false,
+        timestamp: 1573339500000,
+        by_field_name: 'transaction.name',
+        by_field_value: 'GET /test-data',
+        function: 'high_mean',
+        function_description: 'mean',
+        typical: [802.0600710562369],
+        actual: [761.1531339031332],
+        field_name: 'transaction.duration.us',
+        influencers: [
+          {
+            influencer_field_name: 'transaction.name',
+            influencer_field_values: ['GET /test-data'],
+          },
+          {
+            influencer_field_name: 'trace.id',
+            influencer_field_values: [
+              '000a09d58a428f38550e7e87637733c1',
+              '0039c771d8bbadf6137767d3aeb89f96',
+              '01279ed5bb9f4249e3822d16dec7f2f2',
+            ],
+          },
+          {
+            influencer_field_name: 'service.name',
+            influencer_field_values: ['example-service'],
+          },
+        ],
+        'trace.id': [
+          '000a09d58a428f38550e7e87637733c1',
+          '0039c771d8bbadf6137767d3aeb89f96',
+          '01279ed5bb9f4249e3822d16dec7f2f2',
+        ],
+        'service.name': ['example-service'],
+        'transaction.name': ['GET /test-data'],
+        earliest: '2019-11-09T20:45:00.000Z',
+        latest: '2019-11-10T01:00:00.000Z',
+      };
+
+      expect(getUrlForRecord(urlConfig, testRecords)).toBe(
+        'apm#/traces?rangeFrom=2019-11-09T20:45:00.000Z&rangeTo=2019-11-10T01:00:00.000Z&kuery=(trace.id:"000a09d58a428f38550e7e87637733c1" OR trace.id:"0039c771d8bbadf6137767d3aeb89f96" OR trace.id:"01279ed5bb9f4249e3822d16dec7f2f2") AND transaction.name:"GET%20%2Ftest-data"&_g=()'
+      );
+    });
+
     test('returns expected URL for other type URL', () => {
       expect(getUrlForRecord(TEST_OTHER_URL, TEST_RECORD)).toBe(
         'http://airlinecodes.info/airline-code-AAL'

@@ -34,7 +34,7 @@
       {
         "url_name": "APM",
         "time_range": "2h",
-        "url_value": "apm#/traces?rangeFrom=$earliest$&rangeTo=$latest$&kuery=trace.id%253A%2520%2522$trace.id$%2522%2520and&_g=()"
+        "url_value": "apm#/traces?rangeFrom=$earliest$&rangeTo=$latest$&kuery=trace.id:\"$trace.id$\"&_g=()"
       }
     ]
   }
