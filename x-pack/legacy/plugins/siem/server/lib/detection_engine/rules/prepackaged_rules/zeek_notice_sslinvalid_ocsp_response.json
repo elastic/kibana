@@ -1,0 +1,17 @@
+{
+  "rule_id": "eb17fcbb-de22-4aa0-81aa-1c059bdd4f2b",
+  "risk_score": 50,
+  "description": "This indicates that the OCSP response was not deemed to be valid.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Invalid_Ocsp_Response",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Invalid_Ocsp_Response\" or rule.name: \"SSL::Invalid_Ocsp_Response\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

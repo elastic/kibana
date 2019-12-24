@@ -1,0 +1,17 @@
+{
+  "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
+  "risk_score": 50,
+  "description": "EQL - Clearing Windows Event Logs",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Clearing Windows Event Logs",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and (process.name:\"wevtutil.exe\" and process.args:\"cl\") or (process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

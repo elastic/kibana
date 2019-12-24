@@ -3,28 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
-import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as hooks from '../../../../hooks/useFetcher';
+import React from 'react';
 import { TraceLink } from '../';
+import * as hooks from '../../../../hooks/useFetcher';
+import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
-import * as routeConfig from '../../Main/route_config';
-import { BreadcrumbRoute } from '../../Main/ProvideBreadcrumbs';
 
 const renderOptions = { wrapper: MockApmPluginContextWrapper };
 
-jest.spyOn(routeConfig, 'getRoutes').mockReturnValue([
-  {
-    path: '/services/:serviceName/transactions/view',
-    name: 'transaction_name'
-  },
-  {
-    path: '/traces',
-    name: 'traces'
-  }
-] as BreadcrumbRoute[]);
+jest.mock('../../Main/route_config', () => ({
+  routes: [
+    {
+      path: '/services/:serviceName/transactions/view',
+      name: 'transaction_name'
+    },
+    {
+      path: '/traces',
+      name: 'traces'
+    }
+  ]
+}));
 
 describe('TraceLink', () => {
   afterAll(() => {

@@ -6,7 +6,7 @@
 
 import { Component, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
-import { CommonProps, EuiInMemoryTable } from '@elastic/eui';
+import { Direction, CommonProps, EuiInMemoryTable } from '@elastic/eui';
 
 // Not using an enum here because the original HorizontalAlignment is also a union type of string.
 type HorizontalAlignment = 'left' | 'center' | 'right';
@@ -66,11 +66,9 @@ interface CustomItemActionType<T> {
   isPrimary?: boolean;
 }
 
-export interface ExpanderColumnType {
+export interface ExpanderColumnType<T> extends ComputedColumnType<T> {
   align?: HorizontalAlignment;
-  width?: string;
-  isExpander: boolean;
-  render: RenderFunc;
+  isExpander: true;
 }
 
 type SupportedItemActionType<T> = DefaultItemActionType<T> | CustomItemActionType<T>;
@@ -85,7 +83,7 @@ export interface ActionsColumnType<T> {
 export type ColumnType<T> =
   | ActionsColumnType<T>
   | ComputedColumnType<T>
-  | ExpanderColumnType
+  | ExpanderColumnType<T>
   | FieldDataColumnType<T>;
 
 type QueryType = any;
@@ -143,14 +141,19 @@ export enum SORT_DIRECTION {
   ASC = 'asc',
   DESC = 'desc',
 }
-export type SortDirection = SORT_DIRECTION.ASC | SORT_DIRECTION.DESC;
-export interface Sorting {
-  sort: {
-    field: string;
-    direction: SortDirection;
-  };
+export type SortDirection = SORT_DIRECTION.ASC | SORT_DIRECTION.DESC | 'asc' | 'desc';
+interface SortFields {
+  field: string;
+  direction: SortDirection | Direction;
 }
-export type SortingPropType = boolean | Sorting;
+export interface Sorting {
+  sort?: SortFields;
+}
+export type SortingPropType =
+  | boolean
+  | {
+      sort: SortFields;
+    };
 
 type SelectionType = any;
 
