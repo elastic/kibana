@@ -92,7 +92,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   switch (item.docType) {
     case 'span': {
       // icon for database spans
-      const isDbType = item.doc.span.span.type.startsWith('db');
+      const isDbType = item.custom.span.type.startsWith('db');
       if (isDbType) {
         return <EuiIcon type="database" />;
       }
@@ -102,7 +102,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
     }
     case 'transaction': {
       // icon for RUM agent transactions
-      if (isRumAgentName(item.doc.transaction.agent.name)) {
+      if (isRumAgentName(item.custom.agent.name)) {
         return <EuiIcon type="globe" />;
       }
 
@@ -125,7 +125,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   if (item?.docType === 'span') {
     return (
       <EuiToolTip
-        content={`${item.doc.span.span.subtype}.${item.doc.span.span.action}`}
+        content={`${item.custom.span.subtype}.${item.custom.span.action}`}
       >
         <>{children}</>
       </EuiToolTip>
@@ -145,9 +145,8 @@ function Duration({ item }: { item: IWaterfallItem }) {
 function HttpStatusCode({ item }: { item: IWaterfallItem }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
-    item.docType === 'transaction' &&
-    item.doc.transaction.transaction.type === 'request'
-      ? item.doc.transaction.transaction.result
+    item.docType === 'transaction' && item.custom.transaction.type === 'request'
+      ? item.custom.transaction.result
       : undefined;
 
   if (!httpStatusCode) {
@@ -160,11 +159,11 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
 function NameLabel({ item }: { item: IWaterfallItem }) {
   switch (item.docType) {
     case 'span':
-      return <EuiText size="s">{item.doc.name}</EuiText>;
+      return <EuiText size="s">{item.custom.span.name}</EuiText>;
     case 'transaction':
       return (
         <EuiTitle size="xxs">
-          <h5>{item.doc.name}</h5>
+          <h5>{item.custom.transaction.name}</h5>
         </EuiTitle>
       );
     default:
@@ -219,10 +218,10 @@ export function WaterfallItem({
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
           <ErrorOverviewLink
-            serviceName={item.doc.transaction.service.name}
+            serviceName={item.custom.service.name}
             query={{
               kuery: encodeURIComponent(
-                `${TRACE_ID} : "${item.doc.transaction.trace.id}" and transaction.id : "${item.doc.transaction.transaction.id}"`
+                `${TRACE_ID} : "${item.custom.trace.id}" and transaction.id : "${item.custom.transaction.id}"`
               )
             }}
             color="danger"

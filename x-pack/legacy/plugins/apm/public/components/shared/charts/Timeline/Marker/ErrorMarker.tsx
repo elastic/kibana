@@ -57,12 +57,12 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
     />
   );
 
-  const errorMark = mark.doc;
+  const error = mark.custom;
 
   const { rangeTo, rangeFrom } = urlParams;
   const query = {
     kuery: encodeURIComponent(
-      `${TRACE_ID} : "${errorMark.error.trace?.id}" and ${TRANSACTION_ID} : "${errorMark.error.transaction?.id}"`
+      `${TRACE_ID} : "${error.trace?.id}" and ${TRANSACTION_ID} : "${error.transaction?.id}"`
     ),
     rangeFrom,
     rangeTo
@@ -84,17 +84,17 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
           )}
         />
         <Legend
-          key={errorMark.serviceColor}
-          color={errorMark.serviceColor}
-          text={errorMark.serviceName}
+          key={mark.serviceColor}
+          color={mark.serviceColor}
+          text={error.service.name}
         />
         <EuiText size="s">
           <ErrorLink
-            serviceName={errorMark.serviceName}
-            errorGroupId={errorMark.error.error.grouping_key}
+            serviceName={error.service.name}
+            errorGroupId={error.error.grouping_key}
             query={query}
           >
-            {errorMark.message}
+            {error.error.log?.message || error.error.exception?.[0]?.message}
           </ErrorLink>
         </EuiText>
       </Popover>

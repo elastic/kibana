@@ -16,13 +16,12 @@ import { history } from '../../../../../../utils/history';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
+import { getAgentMarks } from '../get_agent_marks';
 import { WaterfallFlyout } from './WaterfallFlyout';
 import { WaterfallItem } from './WaterfallItem';
 import {
   IWaterfall,
-  IWaterfallItem,
-  IWaterfallTransaction,
-  IWaterfallSpan
+  IWaterfallItem
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = styled.div`
@@ -42,7 +41,7 @@ const toggleFlyout = ({
   item,
   location
 }: {
-  item?: IWaterfallTransaction | IWaterfallSpan;
+  item?: IWaterfallItem;
   location: Location;
 }) => {
   history.replace({
@@ -51,7 +50,7 @@ const toggleFlyout = ({
       ...toQuery(location.search),
       ...{
         flyoutDetailTab: undefined,
-        waterfallItemId: item ? String(item.doc.id) : undefined
+        waterfallItemId: item ? String(item.id) : undefined
       }
     })
   });
@@ -81,28 +80,27 @@ export const Waterfall: React.FC<Props> = ({
 
   const { serviceColors, duration } = waterfall;
 
-  const marks = waterfall.items.filter(
-    item => item.docType === 'error' || item.docType === 'agentMark'
-  );
+  const agentMarkers = getAgentMarks(waterfall.entryTransaction);
+  const errorMarkers = waterfall.items.filter(item => item.docType === 'error');
 
   const renderWaterfallItem = (item: IWaterfallItem) => {
-    if (item.docType === 'error' || item.docType === 'agentMark') {
+    if (item.docType === 'error') {
       return null;
     }
 
     const errorCount =
       item.docType === 'transaction'
-        ? waterfall.errorsPerTransaction[item.doc.transaction.transaction.id]
+        ? waterfall.errorsPerTransaction[item.custom.transaction.id]
         : 0;
 
     return (
       <WaterfallItem
-        key={item.doc.id}
+        key={item.id}
         timelineMargins={TIMELINE_MARGINS}
-        color={serviceColors[item.doc.serviceName]}
+        color={serviceColors[item.custom.service.name]}
         item={item}
         totalDuration={duration}
-        isSelected={item.doc.id === waterfallItemId}
+        isSelected={item.id === waterfallItemId}
         errorCount={errorCount}
         onClick={() => toggleFlyout({ item, location })}
       />
@@ -124,7 +122,7 @@ export const Waterfall: React.FC<Props> = ({
       )}
       <StickyContainer>
         <Timeline
-          marks={marks}
+          marks={[...agentMarkers, ...errorMarkers]}
           duration={duration}
           height={waterfallHeight}
           margins={TIMELINE_MARGINS}

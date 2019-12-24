@@ -27,7 +27,7 @@ import { DroppedSpansWarning } from './DroppedSpansWarning';
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  errorCount: number;
+  errorCount?: number;
   rootTransactionDuration?: number;
 }
 
@@ -49,7 +49,7 @@ function TransactionPropertiesTable({
 export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
-  errorCount,
+  errorCount = 0,
   rootTransactionDuration
 }: Props) {
   if (!transactionDoc) {

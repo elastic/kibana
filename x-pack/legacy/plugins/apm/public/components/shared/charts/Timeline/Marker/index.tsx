@@ -9,13 +9,11 @@ import styled from 'styled-components';
 import { px } from '../../../../../style/variables';
 import { AgentMarker } from './AgentMarker';
 import { ErrorMarker } from './ErrorMarker';
-import {
-  IWaterfallError,
-  IWaterfallAgentMark
-} from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallError } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/get_agent_marks';
 
 interface Props {
-  mark: IWaterfallError | IWaterfallAgentMark;
+  mark: IWaterfallError | AgentMark;
   x: number;
 }
 
@@ -28,10 +26,10 @@ export const Marker: React.FC<Props> = ({ mark, x }) => {
   const legendWidth = 11;
   return (
     <MarkerContainer style={{ left: px(x - legendWidth / 2) }}>
-      {mark.docType === 'agentMark' ? (
-        <AgentMarker mark={mark} />
-      ) : (
+      {mark.docType === 'error' ? (
         <ErrorMarker mark={mark} />
+      ) : (
+        <AgentMarker mark={mark} />
       )}
     </MarkerContainer>
   );

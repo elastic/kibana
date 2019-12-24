@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { px, units } from '../../../../../style/variables';
 import { asDuration } from '../../../../../utils/formatters';
 import { Legend } from '../../Legend';
-import { IWaterfallAgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/get_agent_marks';
 
 const NameContainer = styled.div`
   border-bottom: 1px solid ${theme.euiColorMediumShade};
@@ -24,18 +24,18 @@ const TimeContainer = styled.div`
 `;
 
 interface Props {
-  mark: IWaterfallAgentMark;
+  mark: AgentMark;
 }
 
 export const AgentMarker: React.FC<Props> = ({ mark }) => {
   return (
     <>
       <EuiToolTip
-        id={mark.doc.mark}
+        id={mark.name}
         position="top"
         content={
           <div>
-            <NameContainer>{mark.doc.mark}</NameContainer>
+            <NameContainer>{mark.name}</NameContainer>
             <TimeContainer>{asDuration(mark.offset)}</TimeContainer>
           </div>
         }

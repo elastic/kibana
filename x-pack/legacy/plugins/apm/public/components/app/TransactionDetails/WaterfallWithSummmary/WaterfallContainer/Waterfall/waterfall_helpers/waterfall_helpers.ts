@@ -40,7 +40,14 @@ export interface IWaterfall {
 
 interface IWaterfallItemBase<T, U> {
   docType: U;
-  doc: T;
+  custom: T;
+
+  serviceColor?: string;
+
+  id: string;
+
+  parent?: IWaterfallItem;
+  parentId?: string;
 
   /**
    * Duration in us
@@ -58,68 +65,24 @@ interface IWaterfallItemBase<T, U> {
   skew: number;
 }
 
-// Interface that represents properties shared between Transaction, Span and Error
-interface ITraceItem {
-  id: string;
-  parentId?: string;
-  parent?: IWaterfallItem;
-  serviceName: string;
-  /**
-   * start timestamp in us
-   */
-  timestamp: number;
-}
-
-export interface ITransaction extends ITraceItem {
-  transaction: Transaction;
-  errorsCount: number;
-  name: string;
-}
-
-export interface ISpan extends ITraceItem {
-  span: Span;
-  name: string;
-}
-
-interface IError extends ITraceItem {
-  error: APMError;
-  message?: string;
-  serviceColor?: string;
-}
-
-interface IAgentMark {
-  mark: string;
-}
-
 export type IWaterfallTransaction = IWaterfallItemBase<
-  ITransaction,
+  Transaction,
   'transaction'
 >;
-export type IWaterfallSpan = IWaterfallItemBase<ISpan, 'span'>;
-export type IWaterfallError = IWaterfallItemBase<IError, 'error'>;
-export type IWaterfallAgentMark = IWaterfallItemBase<IAgentMark, 'agentMark'>;
+export type IWaterfallSpan = IWaterfallItemBase<Span, 'span'>;
+export type IWaterfallError = IWaterfallItemBase<APMError, 'error'>;
 
 export type IWaterfallItem =
   | IWaterfallTransaction
   | IWaterfallSpan
-  | IWaterfallError
-  | IWaterfallAgentMark;
+  | IWaterfallError;
 
-function getTransactionItem(
-  transaction: Transaction,
-  errorsPerTransaction: TraceAPIResponse['errorsPerTransaction']
-): IWaterfallTransaction {
+function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
   return {
     docType: 'transaction',
-    doc: {
-      id: transaction.transaction.id,
-      transaction,
-      errorsCount: errorsPerTransaction[transaction.transaction.id] || 0,
-      parentId: transaction.parent?.id,
-      serviceName: transaction.service.name,
-      timestamp: transaction.timestamp.us,
-      name: transaction.transaction.name
-    },
+    custom: transaction,
+    id: transaction.transaction.id,
+    parentId: transaction.parent?.id,
     duration: transaction.transaction.duration.us,
     offset: 0,
     skew: 0
@@ -129,14 +92,9 @@ function getTransactionItem(
 function getSpanItem(span: Span): IWaterfallSpan {
   return {
     docType: 'span',
-    doc: {
-      id: span.span.id,
-      span,
-      parentId: span.parent?.id,
-      serviceName: span.service.name,
-      timestamp: span.timestamp.us,
-      name: span.span.name
-    },
+    custom: span,
+    id: span.span.id,
+    parentId: span.parent?.id,
     duration: span.span.duration.us,
     offset: 0,
     skew: 0
@@ -146,34 +104,13 @@ function getSpanItem(span: Span): IWaterfallSpan {
 function getErrorItem(error: APMError): IWaterfallError {
   return {
     docType: 'error',
-    doc: {
-      id: error.error.id,
-      error,
-      message: error.error.log?.message || error.error.exception?.[0]?.message,
-      parentId: error.parent?.id,
-      serviceName: error.service.name,
-      timestamp: error.timestamp.us
-    },
+    custom: error,
+    id: error.error.id,
+    parentId: error.parent?.id,
     offset: 0,
     skew: 0,
     duration: 0
   };
-}
-
-function getAgentMarks(transaction?: Transaction): IWaterfallAgentMark[] {
-  const agent = transaction?.transaction.marks?.agent;
-  if (!agent) {
-    return [];
-  }
-  return Object.entries(agent).map(([name, ms]) => ({
-    docType: 'agentMark',
-    doc: {
-      mark: name
-    },
-    offset: ms * 1000,
-    duration: 0,
-    skew: 0
-  }));
 }
 
 export function getClockSkew(
@@ -181,25 +118,20 @@ export function getClockSkew(
   parentItem?: IWaterfallItem
 ) {
   // parent should never be a type of agentMark
-  if (!parentItem || parentItem.docType === 'agentMark') {
+  if (!parentItem) {
     return 0;
   }
   switch (item.docType) {
-    // don't calculate skew for spans. Just use parent's skew
+    // don't calculate skew for spans and errors. Just use parent's skew
+    case 'error':
     case 'span':
       return parentItem.skew;
-    // agentMark doesnt have parent-child relationship, no adjustment is needed
-    case 'agentMark':
-      return 0;
-    // when an error happened before its parent, the skew has to be calculated with the parent skew and duration.
-    // e.g.: An error with a parent that is the entry transaction and it doesnt have parent (skew = 0).
-    case 'error':
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
-      const parentStart = parentItem.doc.timestamp + parentItem.skew;
+      const parentStart = parentItem.custom.timestamp.us + parentItem.skew;
 
       // determine if child starts before the parent
-      const offsetStart = parentStart - item.doc.timestamp;
+      const offsetStart = parentStart - item.custom.timestamp.us;
       if (offsetStart > 0) {
         const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
         return offsetStart + latency;
@@ -218,7 +150,7 @@ export function getOrderedWaterfallItems(
   if (!entryWaterfallTransaction) {
     return [];
   }
-  const entryTimestamp = entryWaterfallTransaction.doc.timestamp;
+  const entryTimestamp = entryWaterfallTransaction.custom.timestamp.us;
   const visitedWaterfallItemSet = new Set();
 
   function getSortedChildren(
@@ -230,18 +162,14 @@ export function getOrderedWaterfallItems(
     }
     visitedWaterfallItemSet.add(item);
 
-    if (item.docType === 'agentMark') {
-      return [item];
-    }
-
     const children = sortBy(
-      childrenByParentId[item.doc.id] || [],
-      'doc.timestamp'
+      childrenByParentId[item.id] || [],
+      'custom.timestamp.us'
     );
 
-    item.doc.parent = parentItem;
+    item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = item.doc.timestamp - entryTimestamp;
+    item.offset = item.custom.timestamp.us - entryTimestamp;
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 
@@ -257,18 +185,14 @@ export function getOrderedWaterfallItems(
 function getRootTransaction(childrenByParentId: IWaterfallGroup) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
-    return item.doc.transaction;
+    return item.custom;
   }
 }
 
 export type IServiceColors = Record<string, string>;
 
 function getServiceColors(waterfallItems: IWaterfallItem[]) {
-  const services = uniq(
-    (waterfallItems.filter(item => item.docType !== 'agentMark') as Array<
-      Exclude<IWaterfallItem, IWaterfallAgentMark>
-    >).map(item => item.doc.serviceName)
-  );
+  const services = uniq(waterfallItems.map(item => item.custom.service.name));
 
   const assignedColors = [
     theme.euiColorVis1,
@@ -306,19 +230,14 @@ const getWaterfallItems = (
   });
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallItem[]) =>
-  groupBy(
-    waterfallItems.filter(item => item.docType !== 'agentMark') as Array<
-      Exclude<IWaterfallItem, IWaterfallAgentMark>
-    >,
-    item => (item.doc.parentId ? item.doc.parentId : 'root')
-  );
+  groupBy(waterfallItems, item => (item.parentId ? item.parentId : 'root'));
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
   waterfallItems: IWaterfallItem[]
 ): IWaterfallTransaction | undefined =>
   waterfallItems.find(
-    item => item.docType === 'transaction' && item.doc.id === entryTransactionId
+    item => item.docType === 'transaction' && item.id === entryTransactionId
   ) as IWaterfallTransaction;
 
 export function getWaterfall(
@@ -356,9 +275,7 @@ export function getWaterfall(
   const duration = getWaterfallDuration(items);
   const serviceColors = getServiceColors(items);
 
-  const entryTransaction = entryWaterfallTransaction?.doc.transaction;
-  // the agentMarks should be added direct inside items, as it doesnt have parent-child relationship
-  items.push(...getAgentMarks(entryTransaction));
+  const entryTransaction = entryWaterfallTransaction?.custom;
 
   const waterfallErrors = items.filter(
     item => item.docType === 'error'
@@ -366,7 +283,7 @@ export function getWaterfall(
 
   // Add the service color into the error waterfall item
   waterfallErrors.map(error => {
-    error.doc.serviceColor = serviceColors[error.doc.serviceName];
+    error.serviceColor = serviceColors[error.custom.service.name];
     return error;
   });
 
