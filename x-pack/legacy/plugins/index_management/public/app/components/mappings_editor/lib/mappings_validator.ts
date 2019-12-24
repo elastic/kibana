@@ -17,7 +17,7 @@ const ALLOWED_FIELD_PROPERTIES = [
 
 const DEFAULT_FIELD_TYPE = 'object';
 
-type MappingsValidationError =
+export type MappingsValidationError =
   | { code: 'ERR_CONFIG'; configName: string }
   | { code: 'ERR_FIELD'; fieldPath: string }
   | { code: 'ERR_PARAMETER'; paramName: string; fieldPath: string };

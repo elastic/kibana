@@ -6,10 +6,12 @@
 
 import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { JsonEditor, OnUpdateHandler } from '../../../json_editor';
-import { validateMappings, MappingsValidatorResponse } from '../../lib';
+import { validateMappings, MappingsValidationError } from '../../lib';
+
+const MAX_ERRORS_TO_DISPLAY = 10;
 
 type OpenJsonModalFunc = () => void;
 
@@ -24,40 +26,55 @@ interface State {
     unparsed: { [key: string]: any };
     parsed: { [key: string]: any };
   };
-  error?: MappingsValidatorResponse['error'];
+  errors?: MappingsValidationError[];
 }
 
 type ModalView = 'json' | 'validationResult';
 
 const getTexts = (view: ModalView) => ({
-  modalTitle: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.title', {
+  modalTitle: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.title', {
     defaultMessage: 'Load mappings from JSON',
   }),
   buttons: {
     confirm:
       view === 'json'
-        ? i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.loadButtonLabel', {
+        ? i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.loadButtonLabel', {
             defaultMessage: 'Load',
           })
-        : i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.acceptWarningLabel', {
+        : i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.acceptWarningLabel', {
             defaultMessage: 'OK',
           }),
     cancel:
       view === 'json'
-        ? i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.cancelButtonLabel', {
+        ? i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.cancelButtonLabel', {
             defaultMessage: 'Cancel',
           })
-        : i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.goBackButtonLabel', {
+        : i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.goBackButtonLabel', {
             defaultMessage: 'Go back',
           }),
   },
   editor: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.jsonEditorLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorLabel', {
       defaultMessage: 'JSON mappings to load',
     }),
-    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.loadMappingsModal.jsonEditorHelpText', {
+    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText', {
       defaultMessage:
         "All unknown parameters or parameters whose values don't have the correct format will be removed.",
+    }),
+  },
+  validationErrors: {
+    title: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorTitle', {
+      defaultMessage: 'Errors detected in the mappings object',
+    }),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorDescription',
+      {
+        defaultMessage:
+          'The mappings provided contains some errors. You can decide to ignore them, the field(s) or parameter(s) containing the errors will be safely removed.',
+      }
+    ),
+    helptext: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorHelpText', {
+      defaultMessage: 'Only the first 10 errors are displayed.',
     }),
   },
 });
@@ -66,7 +83,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const jsonContent = useRef<Parameters<OnUpdateHandler>['0'] | undefined>();
   const view: ModalView =
-    state.json !== undefined && state.error !== undefined ? 'validationResult' : 'json';
+    state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view);
 
   const onJsonUpdate: OnUpdateHandler = jsonUpdateData => {
@@ -87,10 +104,10 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     if (isValidJson) {
       // Parse and validate the JSON to make sure it won't break the UI
       const unparsed = jsonContent.current!.data.format();
-      const { value: parsed, error } = validateMappings(unparsed);
+      const { value: parsed, errors } = validateMappings(unparsed);
 
-      if (error) {
-        setState({ isModalOpen: true, json: { unparsed, parsed }, error });
+      if (errors) {
+        setState({ isModalOpen: true, json: { unparsed, parsed }, errors });
         return;
       }
 
@@ -119,6 +136,45 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     }
   };
 
+  const renderError = (error: MappingsValidationError) => {
+    switch (error.code) {
+      case 'ERR_CONFIG': {
+        return i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.wrongConfiguration',
+          {
+            defaultMessage: 'The "{configName}" configuration is invalid.',
+            values: {
+              configName: error.configName,
+            },
+          }
+        );
+      }
+      case 'ERR_FIELD': {
+        return i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.wrongConfiguration',
+          {
+            defaultMessage: 'The "{fieldPath}" field is invalid.',
+            values: {
+              fieldPath: error.fieldPath,
+            },
+          }
+        );
+      }
+      case 'ERR_PARAMETER': {
+        return i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.wrongConfiguration',
+          {
+            defaultMessage: 'The "{paramName}" parameter on field "{fieldPath}" is invalid.',
+            values: {
+              paramName: error.paramName,
+              fieldPath: error.fieldPath,
+            },
+          }
+        );
+      }
+    }
+  };
+
   return (
     <>
       {children(openModal)}
@@ -132,6 +188,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
             cancelButtonText={i18nTexts.buttons.cancel}
             buttonColor="danger"
             confirmButtonText={i18nTexts.buttons.confirm}
+            maxWidth={600}
           >
             {view === 'json' ? (
               // The CSS override for the EuiCodeEditor requires a parent .application css class
@@ -147,7 +204,31 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
                 />
               </div>
             ) : (
-              <div>Errors in the JSON</div>
+              <>
+                <EuiCallOut
+                  title={i18nTexts.validationErrors.title}
+                  iconType="alert"
+                  color="warning"
+                >
+                  <EuiText>
+                    <p>{i18nTexts.validationErrors.description}</p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <ul>
+                    {state.errors!.slice(0, MAX_ERRORS_TO_DISPLAY).map((error, i) => (
+                      <li key={i}>{renderError(error)}</li>
+                    ))}
+                  </ul>
+                </EuiCallOut>
+                {state.errors!.length > MAX_ERRORS_TO_DISPLAY && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText size="xs" color="subdued">
+                      {i18nTexts.validationErrors.helptext}
+                    </EuiText>
+                  </>
+                )}
+              </>
             )}
           </EuiConfirmModal>
         </EuiOverlayMask>
