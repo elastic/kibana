@@ -42,7 +42,7 @@ export interface ISyncStrategy {
   /**
    * Take in a state object, should serialise and persist
    */
-  toStorage: <State>(syncKey: string, state: State, opts: { replace: boolean }) => Promise<void>;
+  toStorage: <State>(syncKey: string, state: State, opts?: { replace: boolean }) => Promise<void>;
   /**
    * Should retrieve state from the storage and deserialize it
    */
