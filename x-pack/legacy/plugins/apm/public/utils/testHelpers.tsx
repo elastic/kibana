@@ -65,7 +65,6 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
     </MockApmPluginContextWrapper>
   );
 
-  await tick();
   await waitForElement(() => el.container.querySelector('a'));
 
   const a = el.container.querySelector('a');
@@ -80,9 +79,6 @@ export function mockNow(date: string | number | Date) {
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-// Await this when you need to "flush" promises to immediately resolve or throw in tests
-export const tick = () => new Promise(resolve => setImmediate(resolve, 0));
 
 export function expectTextsNotInDocument(output: any, texts: string[]) {
   texts.forEach(text => {
