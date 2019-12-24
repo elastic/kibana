@@ -93,7 +93,6 @@ describe('Properties validator', () => {
       prop4: null, // To be removed
       prop5: [], // To be removed
       prop6: {
-        type: 'object',
         properties: {
           prop1: { type: 'text' },
           prop2: 'abc', // To be removed
@@ -106,7 +105,7 @@ describe('Properties validator', () => {
     expect(error!.propertiesRemoved).toEqual(['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2']);
   });
 
-  it(`should strip fields that dont't have a "type" defined`, () => {
+  it(`should set the type to "object" when type is not provided`, () => {
     const properties = {
       prop1: { type: 'text' },
       prop2: {},
@@ -120,8 +119,9 @@ describe('Properties validator', () => {
     };
     const { value, error } = validateProperties(properties as any);
 
-    expect(Object.keys(value)).toEqual(['prop1', 'prop3']);
-    expect(error!.propertiesRemoved).toEqual(['prop2', 'prop3.prop1']);
+    expect(Object.keys(value)).toEqual(['prop1', 'prop2', 'prop3']);
+    expect(value.prop2).toEqual({ type: 'object' });
+    expect(error).toBe(undefined);
   });
 
   it('should strip field whose type is not a string or is unknown', () => {

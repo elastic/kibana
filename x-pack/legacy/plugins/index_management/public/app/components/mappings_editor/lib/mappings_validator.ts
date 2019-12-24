@@ -15,7 +15,9 @@ const ALLOWED_FIELD_PROPERTIES = [
   'fields',
 ];
 
-interface MappingsValidatorResponse {
+const DEFAULT_FIELD_TYPE = 'object';
+
+export interface MappingsValidatorResponse {
   /* The parsed mappings object without any error */
   value: GenericObject;
   error?: {
@@ -53,6 +55,7 @@ const validateFieldType = (type: any): boolean => {
   if (typeof type !== 'string') {
     return false;
   }
+
   if (!ALL_DATA_TYPES.includes(type)) {
     return false;
   }
@@ -96,18 +99,19 @@ const stripUnknownOrInvalidParameter = (field: GenericObject): FieldValidatorRes
   );
 
 const parseField = (field: any): FieldValidatorResponse & { meta?: FieldMeta } => {
-  // A field has to be an object
+  // A field must be an object...
   if (!isObject(field)) {
     return { parametersRemoved: [] };
   }
-  // With a known type
-  if (!validateFieldType(field.type)) {
+  // ...with a known type
+  if (!validateFieldType(field.type ?? DEFAULT_FIELD_TYPE)) {
     return { parametersRemoved: [] };
   }
 
   // Filter out unknown or invalid "parameters"
-  const parsedField = stripUnknownOrInvalidParameter(field);
-  const meta = getFieldMeta(field);
+  const fieldWithType = { type: DEFAULT_FIELD_TYPE, ...field };
+  const parsedField = stripUnknownOrInvalidParameter(fieldWithType);
+  const meta = getFieldMeta(fieldWithType);
 
   return { ...parsedField, meta };
 };
