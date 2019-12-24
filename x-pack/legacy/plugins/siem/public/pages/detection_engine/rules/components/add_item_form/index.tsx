@@ -121,7 +121,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
               ? { inputRef: handleLastInputRef.bind(null, index) }
               : {}),
             ...((inputsRef.current[index] != null && inputsRef.current[index].value !== item) ||
-            inputsRef.current[index] == null
+              inputsRef.current[index] == null
               ? { value: item }
               : {}),
           };
@@ -138,7 +138,6 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
                   />
                 }
                 onChange={e => updateItem(e, index)}
-                compressed
                 fullWidth
                 {...euiFieldProps}
               />

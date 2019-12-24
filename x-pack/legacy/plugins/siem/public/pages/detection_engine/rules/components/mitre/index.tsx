@@ -26,7 +26,7 @@ import * as I18n from './translations';
 import { IMitreEnterpriseAttack } from '../../types';
 
 const MyEuiFormControlLayout = styled(EuiFormControlLayout)`
-  &.euiFormControlLayout--compressed {
+  &.euiFormControlLayout {
     height: fit-content !important;
   }
 `;
@@ -127,16 +127,14 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
                     aria-label=""
                     onChange={updateTactic.bind(null, index)}
                     prepend={I18n.TACTIC}
-                    compressed
                     fullWidth={false}
                     value={camelCase(item.tactic.name)}
                     {...euiSelectFieldProps}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={true}>
-                  <MyEuiFormControlLayout compressed fullWidth prepend={I18n.TECHNIQUES}>
+                  <MyEuiFormControlLayout fullWidth prepend={I18n.TECHNIQUES}>
                     <EuiComboBox
-                      compressed
                       placeholder={I18n.TECHNIQUES_PLACEHOLDER}
                       options={techniquesOptions.filter(t =>
                         t.tactics.includes(kebabCase(item.tactic.name))

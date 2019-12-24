@@ -46,7 +46,7 @@ const EuiBadgeWrap = styled(EuiBadge)`
   }
 `;
 
-const EuiFlexItemWidth = styled(EuiFlexItem)<{ direction: string }>`
+const EuiFlexItemWidth = styled(EuiFlexItem) <{ direction: string }>`
   ${props => (props.direction === 'row' ? 'width : 50%;' : 'width: 100%;')};
 `;
 
@@ -82,14 +82,14 @@ export const StepRuleDescription = memo<StepRuleDescriptionProps>(
       []
     );
     return (
-      <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
+      <EuiFlexGroup gutterSize="s" direction={direction} justifyContent="spaceAround">
         {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
           <EuiFlexItemWidth
             direction={direction}
             key={`description-step-rule-${index}`}
             grow={false}
           >
-            <EuiDescriptionList listItems={chunckListItems} compressed />
+            <EuiDescriptionList listItems={chunckListItems} />
           </EuiFlexItemWidth>
         ))}
       </EuiFlexGroup>
@@ -153,8 +153,8 @@ const getDescriptionItem = (
                         valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                       />
                     ) : (
-                      <EuiLoadingSpinner size="m" />
-                    )}
+                        <EuiLoadingSpinner size="m" />
+                      )}
                   </EuiBadgeWrap>
                 </EuiFlexItem>
               ))}

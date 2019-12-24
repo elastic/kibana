@@ -94,7 +94,6 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
       <EuiFieldNumber
         append={
           <EuiSelect
-            compressed={true}
             fullWidth={false}
             options={timeTypeOptions}
             onChange={onChangeTimeType}
@@ -102,7 +101,6 @@ export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: Schedu
             {...rest}
           />
         }
-        compressed
         fullWidth
         min={0}
         onChange={onChangeTimeVal}

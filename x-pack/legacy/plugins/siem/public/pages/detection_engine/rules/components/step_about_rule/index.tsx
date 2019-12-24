@@ -90,7 +90,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 idAria: 'detectionEngineStepAboutRuleName',
                 'data-test-subj': 'detectionEngineStepAboutRuleName',
                 euiFieldProps: {
-                  compressed: true,
                   fullWidth: false,
                   disabled: isLoading,
                 },
@@ -99,11 +98,9 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
             <CommonUseField
               path="description"
               componentProps={{
-                compressed: true,
                 idAria: 'detectionEngineStepAboutRuleDescription',
                 'data-test-subj': 'detectionEngineStepAboutRuleDescription',
                 euiFieldProps: {
-                  compressed: true,
                   disabled: isLoading,
                 },
               }}
@@ -114,7 +111,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 idAria: 'detectionEngineStepAboutRuleSeverity',
                 'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
                 euiFieldProps: {
-                  compressed: true,
                   fullWidth: false,
                   disabled: isLoading,
                   options: severityOptions,
@@ -129,7 +125,7 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 euiFieldProps: {
                   max: 100,
                   min: 0,
-                  compressed: true,
+
                   fullWidth: false,
                   disabled: isLoading,
                   options: severityOptions,
@@ -142,7 +138,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               path="references"
               component={AddItem}
               componentProps={{
-                compressed: true,
                 addText: I18n.ADD_REFERENCE,
                 idAria: 'detectionEngineStepAboutRuleReferenceUrls',
                 isDisabled: isLoading,
@@ -153,7 +148,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               path="falsePositives"
               component={AddItem}
               componentProps={{
-                compressed: true,
                 addText: I18n.ADD_FALSE_POSITIVE,
                 idAria: 'detectionEngineStepAboutRuleFalsePositives',
                 isDisabled: isLoading,
@@ -164,7 +158,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               path="threats"
               component={AddMitreThreat}
               componentProps={{
-                compressed: true,
                 idAria: 'detectionEngineStepAboutRuleMitreThreats',
                 isDisabled: isLoading,
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
@@ -176,7 +169,6 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
                 idAria: 'detectionEngineStepAboutRuleTags',
                 'data-test-subj': 'detectionEngineStepAboutRuleTags',
                 euiFieldProps: {
-                  compressed: true,
                   fullWidth: true,
                   isDisabled: isLoading,
                 },
