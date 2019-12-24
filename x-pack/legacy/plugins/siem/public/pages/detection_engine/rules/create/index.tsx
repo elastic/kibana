@@ -28,8 +28,17 @@ const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.schedu
 const ResizeEuiPanel = styled(EuiPanel)<{
   height?: number;
 }>`
+  .euiAccordion__iconWrapper {
+    display: none;
+  }
   .euiAccordion__childWrapper {
     height: ${props => (props.height !== -1 ? `${props.height}px !important` : 'auto')};
+  }
+`;
+
+const MyEuiPanel = styled(EuiPanel)`
+  .euiAccordion__iconWrapper {
+    display: none;
   }
 `;
 
@@ -135,14 +144,8 @@ export const CreateRuleComponent = React.memo(() => {
     (id: RuleStep, isOpen: boolean) => {
       const activeRuleIdx = stepsRuleOrder.findIndex(step => step === openAccordionId);
       const stepRuleIdx = stepsRuleOrder.findIndex(step => step === id);
-      const isLatestStepsRuleValid =
-        stepRuleIdx === 0
-          ? true
-          : stepsRuleOrder
-              .filter((stepRule, index) => index < stepRuleIdx)
-              .every(stepRule => stepsData.current[stepRule].isValid);
 
-      if (stepRuleIdx < activeRuleIdx && !isOpen) {
+      if ((id === openAccordionId || stepRuleIdx < activeRuleIdx) && !isOpen) {
         openCloseAccordion(id);
       } else if (stepRuleIdx >= activeRuleIdx) {
         if (
@@ -153,24 +156,23 @@ export const CreateRuleComponent = React.memo(() => {
           isOpen
         ) {
           openCloseAccordion(id);
-        } else if (!isLatestStepsRuleValid && isOpen) {
-          openCloseAccordion(id);
-        } else if (id !== openAccordionId && isOpen) {
-          setOpenAccordionId(id);
         }
       }
     },
-    [isStepRuleInReadOnlyView, openAccordionId]
+    [isStepRuleInReadOnlyView, openAccordionId, stepsData]
   );
 
   const manageIsEditable = useCallback(
     (id: RuleStep) => {
+      setOpenAccordionId(id);
+      stepsData.current[id] = { ...stepsData.current[id], isValid: false };
+      openCloseAccordion(openAccordionId);
       setIsStepRuleInEditView({
         ...isStepRuleInReadOnlyView,
         [id]: false,
       });
     },
-    [isStepRuleInReadOnlyView]
+    [isStepRuleInReadOnlyView, openAccordionId]
   );
 
   if (isSaved) {
@@ -201,7 +203,7 @@ export const CreateRuleComponent = React.memo(() => {
                   size="xs"
                   onClick={manageIsEditable.bind(null, RuleStep.defineRule)}
                 >
-                  {`Edit`}
+                  {i18n.EDIT_RULE}
                 </EuiButtonEmpty>
               )
             }
@@ -216,7 +218,7 @@ export const CreateRuleComponent = React.memo(() => {
           </EuiAccordion>
         </ResizeEuiPanel>
         <EuiSpacer size="s" />
-        <EuiPanel>
+        <MyEuiPanel>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.aboutRule}
@@ -231,7 +233,7 @@ export const CreateRuleComponent = React.memo(() => {
                   size="xs"
                   onClick={manageIsEditable.bind(null, RuleStep.aboutRule)}
                 >
-                  {`Edit`}
+                  {i18n.EDIT_RULE}
                 </EuiButtonEmpty>
               )
             }
@@ -243,9 +245,9 @@ export const CreateRuleComponent = React.memo(() => {
               setStepData={setStepData}
             />
           </EuiAccordion>
-        </EuiPanel>
+        </MyEuiPanel>
         <EuiSpacer size="s" />
-        <EuiPanel>
+        <MyEuiPanel>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.scheduleRule}
@@ -260,7 +262,7 @@ export const CreateRuleComponent = React.memo(() => {
                   size="xs"
                   onClick={manageIsEditable.bind(null, RuleStep.scheduleRule)}
                 >
-                  {`Edit`}
+                  {i18n.EDIT_RULE}
                 </EuiButtonEmpty>
               )
             }
@@ -272,7 +274,7 @@ export const CreateRuleComponent = React.memo(() => {
               setStepData={setStepData}
             />
           </EuiAccordion>
-        </EuiPanel>
+        </MyEuiPanel>
       </WrapperPage>
 
       <SpyRoute />

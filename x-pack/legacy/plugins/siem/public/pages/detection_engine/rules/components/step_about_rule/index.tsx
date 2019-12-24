@@ -202,7 +202,7 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
             >
               <EuiFlexItem grow={false}>
                 <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                  {myStepData.isNew ? RuleI18n.CONTINUE : RuleI18n.UPDATE}
+                  {RuleI18n.CONTINUE}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
