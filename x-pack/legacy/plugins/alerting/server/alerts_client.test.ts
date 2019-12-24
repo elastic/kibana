@@ -101,7 +101,6 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: '2019-02-12T21:01:22.479Z',
-        updatedAt: null,
         actions: [
           {
             group: 'default',
@@ -209,7 +208,6 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
-        "updatedAt": null,
         "updatedBy": "elastic",
       }
     `);
@@ -317,6 +315,7 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -468,6 +467,7 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -818,7 +818,6 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
-        updatedAt: null,
         enabled: true,
         schedule: { interval: '10s' },
         throttle: null,
@@ -877,7 +876,6 @@ describe('enable()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         updatedBy: 'elastic',
-        updatedAt: new Date().toISOString(),
         apiKey: null,
         apiKeyOwner: null,
       },
@@ -961,7 +959,6 @@ describe('enable()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
-        updatedAt: new Date().toISOString(),
       },
       {
         version: '123',
@@ -1011,7 +1008,6 @@ describe('disable()', () => {
         enabled: false,
         scheduledTaskId: null,
         updatedBy: 'elastic',
-        updatedAt: new Date().toISOString(),
       },
       {
         version: '123',
@@ -1057,7 +1053,6 @@ describe('muteAll()', () => {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
-      updatedAt: new Date().toISOString(),
     });
   });
 });
@@ -1079,7 +1074,6 @@ describe('unmuteAll()', () => {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
-      updatedAt: new Date().toISOString(),
     });
   });
 });
@@ -1108,7 +1102,6 @@ describe('muteInstance()', () => {
       {
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
-        updatedAt: new Date().toISOString(),
       },
       { version: '123' }
     );
@@ -1178,7 +1171,6 @@ describe('unmuteInstance()', () => {
       {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
-        updatedAt: new Date().toISOString(),
       },
       { version: '123' }
     );
@@ -1500,8 +1492,8 @@ describe('update()', () => {
         ],
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       },
+      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1586,7 +1578,6 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
-        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -1653,7 +1644,6 @@ describe('update()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -1682,6 +1672,7 @@ describe('update()', () => {
         ],
         scheduledTaskId: 'task-123',
       },
+      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1832,7 +1823,6 @@ describe('update()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -1846,6 +1836,7 @@ describe('update()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         scheduledTaskId: 'task-123',
       },
+      updated_at: new Date().toISOString(),
       references: [
         {
           name: 'action_0',
@@ -1931,7 +1922,6 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
-        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -2249,7 +2239,6 @@ describe('updateApiKey()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
-        updatedAt: new Date().toISOString(),
       },
       { version: '123' }
     );

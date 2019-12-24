@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash';
 import { createMockServer } from './_mock_server';
 import { createAlertRoute } from './create';
 
@@ -19,8 +20,6 @@ const mockedAlert = {
   params: {
     bar: true,
   },
-  createdAt: new Date(),
-  updatedAt: null,
   actions: [
     {
       group: 'default',
@@ -41,8 +40,12 @@ test('creates an alert with proper parameters', async () => {
     payload: mockedAlert,
   };
 
+  const createdAt = new Date();
+  const updatedAt = null;
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
+    createdAt,
+    updatedAt,
     id: '123',
     actions: [
       {
@@ -54,7 +57,8 @@ test('creates an alert with proper parameters', async () => {
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
   const response = JSON.parse(payload);
-  expect(response).toMatchInlineSnapshot(`
+  expect(new Date(response.createdAt)).toEqual(createdAt);
+  expect(omit(response, 'createdAt')).toMatchInlineSnapshot(`
     Object {
       "actions": Array [
         Object {
@@ -79,6 +83,7 @@ test('creates an alert with proper parameters', async () => {
       "tags": Array [
         "foo",
       ],
+      "updatedAt": null,
     }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);

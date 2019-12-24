@@ -75,7 +75,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 mutedInstanceIds: [],
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
-              expect(match.updatedAt).to.eql(null);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -165,7 +165,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 updatedAt: match.updatedAt,
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
-              expect(match.updatedAt).to.eql(null);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

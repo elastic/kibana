@@ -52,7 +52,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         updatedAt: response.body.updatedAt,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-      expect(response.body.updatedAt).to.eql(null);
+      expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
     });
 
     it(`shouldn't find alert from another space`, async () => {

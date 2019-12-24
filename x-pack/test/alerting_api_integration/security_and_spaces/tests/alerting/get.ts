@@ -69,7 +69,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 mutedInstanceIds: [],
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-              expect(response.body.updatedAt).to.eql(null);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
