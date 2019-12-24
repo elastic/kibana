@@ -5,14 +5,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { licenseMock } from '../common/licensing.mocks';
+import { licenseMock } from '../common/licensing.mock';
 
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 
 describe('createRouteHandlerContext', () => {
   it('returns a function providing the last license value', async () => {
-    const firstLicense = licenseMock.create();
-    const secondLicense = licenseMock.create();
+    const firstLicense = licenseMock.createLicense();
+    const secondLicense = licenseMock.createLicense();
     const license$ = new BehaviorSubject(firstLicense);
 
     const routeHandler = createRouteHandlerContext(license$);

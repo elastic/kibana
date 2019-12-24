@@ -29,5 +29,29 @@ export default function({ getService }: PluginFunctionalProviderContext) {
         .expect(200)
         .expect('Pong via plugin A: true');
     });
+
+    it('extend request handler context with validation', async () => {
+      await supertest
+        .post('/core_plugin_b')
+        .set('kbn-xsrf', 'anything')
+        .query({ id: 'TEST' })
+        .send({ bar: 'hi!', baz: 'hi!' })
+        .expect(200)
+        .expect('ID: TEST - HI!');
+    });
+
+    it('extend request handler context with validation (400)', async () => {
+      await supertest
+        .post('/core_plugin_b')
+        .set('kbn-xsrf', 'anything')
+        .query({ id: 'TEST' })
+        .send({ bar: 'hi!', baz: 1234 })
+        .expect(400)
+        .expect({
+          error: 'Bad Request',
+          message: '[request body]: bar: hi! !== baz: 1234 or they are not string',
+          statusCode: 400,
+        });
+    });
   });
 }

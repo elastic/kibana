@@ -12,10 +12,13 @@ import {
   transformFindAlertsOrError,
   transformOrError,
   transformTags,
+  getIdBulkError,
+  transformOrBulkError,
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { OutputRuleAlertRest } from '../../types';
+import { BulkError } from '../utils';
 
 describe('utils', () => {
   describe('transformAlertToRule', () => {
@@ -736,6 +739,153 @@ describe('utils', () => {
         'tag 1',
         'tag 2',
       ]);
+    });
+  });
+
+  describe('getIdBulkError', () => {
+    test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
+      const error = getIdBulkError({ id: '123', ruleId: undefined });
+      const expected: BulkError = {
+        id: '123',
+        error: { message: 'id: "123" not found', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about id not being found if only id is defined and ruleId is null', () => {
+      const error = getIdBulkError({ id: '123', ruleId: null });
+      const expected: BulkError = {
+        id: '123',
+        error: { message: 'id: "123" not found', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about ruleId not being found if only ruleId is defined and id is undefined', () => {
+      const error = getIdBulkError({ id: undefined, ruleId: 'rule-id-123' });
+      const expected: BulkError = {
+        id: 'rule-id-123',
+        error: { message: 'rule_id: "rule-id-123" not found', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about ruleId not being found if only ruleId is defined and id is null', () => {
+      const error = getIdBulkError({ id: null, ruleId: 'rule-id-123' });
+      const expected: BulkError = {
+        id: 'rule-id-123',
+        error: { message: 'rule_id: "rule-id-123" not found', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about both being not defined when both are undefined', () => {
+      const error = getIdBulkError({ id: undefined, ruleId: undefined });
+      const expected: BulkError = {
+        id: '(unknown id)',
+        error: { message: 'id or rule_id should have been defined', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about both being not defined when both are null', () => {
+      const error = getIdBulkError({ id: null, ruleId: null });
+      const expected: BulkError = {
+        id: '(unknown id)',
+        error: { message: 'id or rule_id should have been defined', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
+      const error = getIdBulkError({ id: null, ruleId: undefined });
+      const expected: BulkError = {
+        id: '(unknown id)',
+        error: { message: 'id or rule_id should have been defined', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+
+    test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
+      const error = getIdBulkError({ id: undefined, ruleId: null });
+      const expected: BulkError = {
+        id: '(unknown id)',
+        error: { message: 'id or rule_id should have been defined', statusCode: 404 },
+      };
+      expect(error).toEqual(expected);
+    });
+  });
+
+  describe('transformOrBulkError', () => {
+    test('outputs 200 if the data is of type siem alert', () => {
+      const output = transformOrBulkError('rule-1', getResult());
+      const expected: OutputRuleAlertRest = {
+        created_by: 'elastic',
+        created_at: '2019-12-13T16:40:33.400Z',
+        updated_at: '2019-12-13T16:40:33.400Z',
+        description: 'Detecting root and admin users',
+        enabled: true,
+        false_positives: [],
+        from: 'now-6m',
+        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        immutable: false,
+        output_index: '.siem-signals',
+        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+        interval: '5m',
+        rule_id: 'rule-1',
+        risk_score: 50,
+        language: 'kuery',
+        max_signals: 100,
+        name: 'Detect Root/Admin Users',
+        query: 'user.name: root or user.name: admin',
+        references: ['http://www.example.com', 'https://ww.example.com'],
+        severity: 'high',
+        updated_by: 'elastic',
+        tags: [],
+        to: 'now',
+        type: 'query',
+        threats: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0040',
+              name: 'impact',
+              reference: 'https://attack.mitre.org/tactics/TA0040/',
+            },
+            techniques: [
+              {
+                id: 'T1499',
+                name: 'endpoint denial of service',
+                reference: 'https://attack.mitre.org/techniques/T1499/',
+              },
+            ],
+          },
+        ],
+        filters: [
+          {
+            query: {
+              match_phrase: {
+                'host.name': 'some-host',
+              },
+            },
+          },
+        ],
+        meta: {
+          someMeta: 'someField',
+        },
+        saved_id: 'some-id',
+        timeline_id: 'some-timeline-id',
+        version: 1,
+      };
+      expect(output).toEqual(expected);
+    });
+
+    test('returns 500 if the data is not of type siem alert', () => {
+      const output = transformOrBulkError('rule-1', { data: [{ random: 1 }] });
+      expect(output).toEqual({
+        id: 'rule-1',
+        error: { message: 'Internal error transforming', statusCode: 500 },
+      });
     });
   });
 });

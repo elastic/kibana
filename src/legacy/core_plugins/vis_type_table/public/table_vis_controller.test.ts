@@ -110,7 +110,7 @@ describe('Table Vis - Controller', () => {
       (cfg: any) => cfg,
       'time',
       stubFields,
-      npStart.core.uiSettings
+      npStart.core
     );
   });
 

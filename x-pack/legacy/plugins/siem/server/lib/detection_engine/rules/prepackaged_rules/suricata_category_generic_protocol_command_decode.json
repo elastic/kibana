@@ -1,0 +1,17 @@
+{
+  "rule_id": "6fd2deb4-a7a9-4221-8b7b-8d26836a8c30",
+  "risk_score": 50,
+  "description": "Suricata Category - Generic Protocol Command Decode",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Generic Protocol Command Decode",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Generic Protocol Command Decode\" or rule.category: \"Generic Protocol Command Decode\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

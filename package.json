@@ -113,7 +113,7 @@
     "@elastic/charts": "^14.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
-    "@elastic/eui": "17.0.0",
+    "@elastic/eui": "17.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
@@ -360,8 +360,8 @@
     "@types/uuid": "^3.4.4",
     "@types/vinyl-fs": "^2.4.11",
     "@types/zen-observable": "^0.8.0",
-    "@typescript-eslint/eslint-plugin": "^2.10.0",
-    "@typescript-eslint/parser": "^2.10.0",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
     "angular-mocks": "^1.7.8",
     "archiver": "^3.1.1",
     "axe-core": "^3.3.2",
@@ -462,7 +462,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "10.15.2",
+    "node": "10.18.0",
     "yarn": "^1.21.1"
   }
 }

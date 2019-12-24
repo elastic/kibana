@@ -5,7 +5,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { AlertAction } from '../../../../../alerting/server/types';
+import { AlertAction, IntervalSchedule } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
 import { UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
@@ -150,7 +150,16 @@ export const updateRules = async ({
         immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
       ),
       name: calculateName({ updatedName: name, originalName: rule.name }),
-      interval: calculateInterval(interval, rule.interval),
+      schedule: {
+        interval: calculateInterval(
+          interval,
+          // TODO: we assume the schedule is an interval schedule due to a problem
+          // in the Alerting api, which should be addressed by the following
+          // issue: https://github.com/elastic/kibana/issues/49703
+          // Once this issue is closed, the type should be correctly returned by alerting
+          (rule.schedule as IntervalSchedule).interval
+        ),
+      },
       actions,
       params: nextParams,
     },
