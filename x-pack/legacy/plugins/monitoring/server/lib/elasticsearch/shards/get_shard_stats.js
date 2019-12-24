@@ -21,11 +21,11 @@ export function handleResponse(resp, includeNodes, includeIndices, cluster) {
   if (buckets && buckets.length !== 0) {
     indices = buckets.reduce(normalizeIndexShards, {});
     indicesTotals = calculateIndicesTotals(indices);
+  }
 
-    if (includeNodes) {
-      const masterNode = get(cluster, 'cluster_state.master_node');
-      nodes = resp.aggregations.nodes.buckets.reduce(normalizeNodeShards(masterNode), {});
-    }
+  if (includeNodes) {
+    const masterNode = get(cluster, 'cluster_state.master_node');
+    nodes = resp.aggregations.nodes.buckets.reduce(normalizeNodeShards(masterNode), {});
   }
 
   return {
@@ -58,7 +58,7 @@ export function getShardStats(
         filters: [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }],
       }),
       aggs: {
-        ...getShardAggs(config, includeNodes),
+        ...getShardAggs(config, includeNodes, includeIndices),
       },
     },
   };
