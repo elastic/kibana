@@ -129,40 +129,28 @@ export const getFormat: FormatFactory = (mapping = {}) => {
     });
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
-    const params = mapping.params;
+    const { params } = mapping;
+    const convert = (val: string, type: string) => {
+      if (val === '__other__') {
+        return params.otherBucketLabel;
+      }
+      if (val === '__missing__') {
+        return params.missingBucketLabel;
+      }
+
+      const format = getFieldFormat(params.id, params);
+      const parsedUrl = {
+        origin: window.location.origin,
+        pathname: window.location.pathname,
+        basePath: chrome.getBasePath(),
+      };
+
+      return format.getConverterFor(type)(val, undefined, undefined, parsedUrl);
+    };
+
     return {
-      getConverterFor: (type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        return (val: string) => {
-          if (val === '__other__') {
-            return params.otherBucketLabel;
-          }
-          if (val === '__missing__') {
-            return params.missingBucketLabel;
-          }
-          const parsedUrl = {
-            origin: window.location.origin,
-            pathname: window.location.pathname,
-            basePath: chrome.getBasePath(),
-          };
-          return format.convert(val, undefined, undefined, parsedUrl);
-        };
-      },
-      convert: (val: string, type: string) => {
-        const format = getFieldFormat(params.id, mapping.params);
-        if (val === '__other__') {
-          return params.otherBucketLabel;
-        }
-        if (val === '__missing__') {
-          return params.missingBucketLabel;
-        }
-        const parsedUrl = {
-          origin: window.location.origin,
-          pathname: window.location.pathname,
-          basePath: chrome.getBasePath(),
-        };
-        return format.convert(val, type, undefined, parsedUrl);
-      },
+      convert,
+      getConverterFor: (type: string) => (val: string) => convert(val, type),
     };
   } else {
     return getFieldFormat(id, mapping.params);
