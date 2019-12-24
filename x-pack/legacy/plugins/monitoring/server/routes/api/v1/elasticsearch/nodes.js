@@ -8,7 +8,7 @@ import Joi from 'joi';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getNodes } from '../../../../lib/elasticsearch/nodes';
-import { getShardStats } from '../../../../lib/elasticsearch/shards';
+import { getShardStats } from '../../../../lib/elasticsearch/shards/get_shard_stats_v2';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';

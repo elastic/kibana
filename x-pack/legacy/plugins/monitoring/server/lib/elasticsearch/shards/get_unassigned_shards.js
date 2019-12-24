@@ -14,8 +14,19 @@ import { get } from 'lodash';
 export function getUnassignedShards(indexShardStats) {
   let unassignedShards = 0;
 
-  unassignedShards += get(indexShardStats, 'unassigned.primary');
-  unassignedShards += get(indexShardStats, 'unassigned.replica');
+  if (!indexShardStats) {
+    return unassignedShards;
+  }
+
+  if (indexShardStats.unassigned) {
+    unassignedShards += get(indexShardStats, 'unassigned.primary');
+    unassignedShards += get(indexShardStats, 'unassigned.replica');
+  }
+
+  if (indexShardStats.hasOwnProperty('unassignedReplica')) {
+    unassignedShards += indexShardStats.unassignedPrimary;
+    unassignedShards += indexShardStats.unassignedReplica;
+  }
 
   return unassignedShards;
 }
