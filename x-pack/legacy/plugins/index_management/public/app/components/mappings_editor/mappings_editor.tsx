@@ -38,7 +38,7 @@ export const MappingsEditor = React.memo(
         numeric_detection,
         date_detection,
         dynamic_date_formats,
-        properties,
+        properties = {},
       } = defaultValue;
 
       return {
