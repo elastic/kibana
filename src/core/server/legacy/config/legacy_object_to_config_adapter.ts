@@ -73,6 +73,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       keepaliveTimeout: configValue.keepaliveTimeout,
       socketTimeout: configValue.socketTimeout,
       compression: configValue.compression,
+      uuid: configValue.uuid,
     };
   }
 

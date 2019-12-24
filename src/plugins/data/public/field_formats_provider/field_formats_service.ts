@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
+import { CoreSetup } from 'src/core/public';
 import { FieldFormatRegisty } from './field_formats';
 
 import {
@@ -38,19 +38,11 @@ import {
   UrlFormat,
 } from '../../common/';
 
-/**
- * Field Format Service
- * @internal
- */
-interface FieldFormatsServiceDependencies {
-  uiSettings: IUiSettingsClient;
-}
-
 export class FieldFormatsService {
   private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
 
-  public setup({ uiSettings }: FieldFormatsServiceDependencies) {
-    this.fieldFormats.init(uiSettings);
+  public setup(core: CoreSetup) {
+    this.fieldFormats.init(core);
 
     this.fieldFormats.register([
       BoolFormat,

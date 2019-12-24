@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpServiceBase } from 'src/core/public';
+import { HttpSetup } from 'src/core/public';
 import { indexPatterns } from '../';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
@@ -33,9 +33,9 @@ export interface GetFieldsOptions {
 export type IIndexPatternsApiClient = PublicMethodsOf<IndexPatternsApiClient>;
 
 export class IndexPatternsApiClient {
-  private http: HttpServiceBase;
+  private http: HttpSetup;
 
-  constructor(http: HttpServiceBase) {
+  constructor(http: HttpSetup) {
     this.http = http;
   }
 

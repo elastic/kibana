@@ -35,7 +35,6 @@ import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
-import { sampleDataMixin } from './sample_data';
 import { capabilitiesMixin } from './capabilities';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
@@ -111,9 +110,6 @@ export default class KbnServer {
 
         // setup capabilities routes
         capabilitiesMixin,
-
-        // setup routes for installing/uninstalling sample data sets
-        sampleDataMixin,
 
         // setup routes for short urls
         urlShorteningMixin,

@@ -1,0 +1,17 @@
+{
+  "rule_id": "eabce895-4602-4d20-8bf9-11c903bb3e08",
+  "risk_score": 50,
+  "description": "Suricata Category - Attempted User Privilege Gain",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Attempted User Privilege Gain",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Attempted User Privilege Gain\" or rule.category: \"Attempted User Privilege Gain\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

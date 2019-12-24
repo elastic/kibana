@@ -205,16 +205,12 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
               }
             }
           >
-            <EuiPageBody
-              component="main"
-              restrictWidth={false}
-            >
+            <EuiPageBody>
               <main
                 className="euiPageBody"
               >
                 <EuiPageContent
                   horizontalPosition="center"
-                  panelPaddingSize="l"
                   verticalPosition="center"
                 >
                   <EuiPanel
@@ -230,14 +226,18 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                         type="dashboardApp"
                       >
                         <EuiIconEmpty
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
+                            aria-hidden={true}
                             className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -330,16 +330,18 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                                 type="arrowDown"
                               >
                                 <EuiIconEmpty
-                                  aria-hidden="true"
+                                  aria-hidden={true}
                                   className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
                                   focusable="false"
+                                  role="img"
                                   style={null}
                                 >
                                   <svg
-                                    aria-hidden="true"
+                                    aria-hidden={true}
                                     className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
                                     focusable="false"
                                     height={16}
+                                    role="img"
                                     style={null}
                                     viewBox="0 0 16 16"
                                     width={16}
@@ -574,16 +576,12 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
               }
             }
           >
-            <EuiPageBody
-              component="main"
-              restrictWidth={false}
-            >
+            <EuiPageBody>
               <main
                 className="euiPageBody"
               >
                 <EuiPageContent
                   horizontalPosition="center"
-                  panelPaddingSize="l"
                   verticalPosition="center"
                 >
                   <EuiPanel
@@ -599,14 +597,18 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                         type="dashboardApp"
                       >
                         <EuiIconEmpty
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
+                            aria-hidden={true}
                             className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
