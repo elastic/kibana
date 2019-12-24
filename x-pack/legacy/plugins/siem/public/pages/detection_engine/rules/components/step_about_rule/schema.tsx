@@ -146,6 +146,13 @@ export const schema: FormSchema = {
     label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsLabel', {
       defaultMessage: 'Tags',
     }),
+    helpText: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText',
+      {
+        defaultMessage:
+          'Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.',
+      }
+    ),
     labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
   },
 };

@@ -171,6 +171,7 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               euiFieldProps: {
                 fullWidth: true,
                 isDisabled: isLoading,
+                placeholder: '',
               },
             }}
           />
