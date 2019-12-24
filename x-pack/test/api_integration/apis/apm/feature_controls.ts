@@ -15,6 +15,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const security = getService('security');
   const spaces = getService('spaces');
   const log = getService('log');
+  const es = getService('legacyEs');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
   const end = encodeURIComponent(new Date().toISOString());
@@ -37,6 +38,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     };
     expectForbidden: (result: any) => void;
     expectResponse: (result: any) => void;
+    onExpectationFail?: () => Promise<any>;
   }
   const endpoints: Endpoint[] = [
     {
@@ -141,6 +143,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       },
       expectForbidden: expect404,
       expectResponse: expect200,
+      onExpectationFail: async () => {
+        const res = await es.search({
+          index: '.apm-agent-configuration',
+        });
+
+        console.warn(JSON.stringify(res, null, 2));
+      },
     },
   ];
 
@@ -218,7 +227,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           endpoint.expectResponse(result);
         }
       } catch (e) {
-        console.warn(`Expectation for endpoint: "${endpoint.req.url}" failed`);
+        if (endpoint.onExpectationFail) {
+          await endpoint.onExpectationFail();
+        }
 
         const { statusCode, body, req } = result.response;
         throw new Error(
