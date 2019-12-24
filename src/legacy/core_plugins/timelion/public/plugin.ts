@@ -30,7 +30,6 @@ import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
-import { setServices } from './kibana_services';
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
@@ -63,7 +62,6 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
-    setServices({ timelionPanels });
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
