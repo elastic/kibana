@@ -92,6 +92,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdBy: user.username,
                 schedule: { interval: '1m' },
                 scheduledTaskId: response.body.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
                 throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,

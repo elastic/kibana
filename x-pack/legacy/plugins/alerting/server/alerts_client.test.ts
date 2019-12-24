@@ -100,6 +100,8 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: null,
         actions: [
           {
             group: 'default',
@@ -160,6 +162,7 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "params": Object {
           "bar": true,
@@ -168,6 +171,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": null,
       }
     `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -189,6 +193,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyOwner": null,
         "consumer": "bar",
+        "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
         "enabled": true,
         "muteAll": false,
@@ -204,6 +209,7 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
+        "updatedAt": null,
         "updatedBy": "elastic",
       }
     `);
@@ -407,6 +413,7 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "params": Object {
           "bar": true,
@@ -415,6 +422,7 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": null,
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
@@ -493,6 +501,7 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "id": "1",
         "params": Object {
@@ -501,6 +510,7 @@ describe('create()', () => {
         "schedule": Object {
           "interval": 10000,
         },
+        "updatedAt": null,
       }
     `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -806,7 +816,9 @@ describe('create()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: null,
         enabled: true,
         schedule: { interval: '10s' },
         throttle: null,
@@ -865,6 +877,7 @@ describe('enable()', () => {
         enabled: true,
         scheduledTaskId: 'task-123',
         updatedBy: 'elastic',
+        updatedAt: new Date().toISOString(),
         apiKey: null,
         apiKeyOwner: null,
       },
@@ -948,6 +961,7 @@ describe('enable()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        updatedAt: new Date().toISOString(),
       },
       {
         version: '123',
@@ -997,6 +1011,7 @@ describe('disable()', () => {
         enabled: false,
         scheduledTaskId: null,
         updatedBy: 'elastic',
+        updatedAt: new Date().toISOString(),
       },
       {
         version: '123',
@@ -1042,6 +1057,7 @@ describe('muteAll()', () => {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
+      updatedAt: new Date().toISOString(),
     });
   });
 });
@@ -1063,6 +1079,7 @@ describe('unmuteAll()', () => {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
+      updatedAt: new Date().toISOString(),
     });
   });
 });
@@ -1091,6 +1108,7 @@ describe('muteInstance()', () => {
       {
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
+        updatedAt: new Date().toISOString(),
       },
       { version: '123' }
     );
@@ -1160,6 +1178,7 @@ describe('unmuteInstance()', () => {
       {
         mutedInstanceIds: [],
         updatedBy: 'elastic',
+        updatedAt: new Date().toISOString(),
       },
       { version: '123' }
     );
@@ -1248,6 +1267,7 @@ describe('get()', () => {
           },
         ],
         "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "id": "1",
         "params": Object {
           "bar": true,
@@ -1255,6 +1275,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "updatedAt": null,
       }
     `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -1347,6 +1368,7 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "123",
+            "createdAt": 2019-02-12T21:01:22.479Z,
             "id": "1",
             "params": Object {
               "bar": true,
@@ -1354,6 +1376,7 @@ describe('find()', () => {
             "schedule": Object {
               "interval": "10s",
             },
+            "updatedAt": null,
           },
         ],
         "page": 1,
@@ -1476,6 +1499,8 @@ describe('update()', () => {
           },
         ],
         scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       references: [
         {
@@ -1517,6 +1542,7 @@ describe('update()', () => {
             },
           },
         ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
         "params": Object {
@@ -1526,6 +1552,7 @@ describe('update()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -1559,6 +1586,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -1624,6 +1652,8 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -1732,6 +1762,7 @@ describe('update()', () => {
             },
           },
         ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
         "params": Object {
@@ -1741,6 +1772,7 @@ describe('update()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
@@ -1799,6 +1831,8 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -1853,6 +1887,7 @@ describe('update()', () => {
           },
         ],
         "apiKey": "MTIzOmFiYw==",
+        "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
         "params": Object {
@@ -1862,6 +1897,7 @@ describe('update()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
@@ -1895,6 +1931,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -2212,6 +2249,7 @@ describe('updateApiKey()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        updatedAt: new Date().toISOString(),
       },
       { version: '123' }
     );

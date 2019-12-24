@@ -20,6 +20,8 @@ const mockedResponse = {
   params: {
     otherField: false,
   },
+  createdAt: new Date(),
+  updatedAt: new Date(),
   actions: [
     {
       group: 'default',

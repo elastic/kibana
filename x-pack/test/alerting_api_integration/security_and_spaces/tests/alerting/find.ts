@@ -66,12 +66,16 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 params: {},
                 createdBy: 'elastic',
                 scheduledTaskId: match.scheduledTaskId,
+                createdAt: match.createdAt,
+                updatedAt: match.updatedAt,
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
               });
+              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+              expect(match.updatedAt).to.eql(null);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -157,7 +161,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
+                createdAt: match.createdAt,
+                updatedAt: match.updatedAt,
               });
+              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+              expect(match.updatedAt).to.eql(null);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

@@ -60,12 +60,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 params: {},
                 createdBy: 'elastic',
                 scheduledTaskId: response.body.scheduledTaskId,
+                updatedAt: response.body.updatedAt,
+                createdAt: response.body.createdAt,
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
               });
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(response.body.updatedAt).to.eql(null);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

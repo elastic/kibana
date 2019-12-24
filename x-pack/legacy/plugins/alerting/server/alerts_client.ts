@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual } from 'lodash';
+import { omit, isEqual, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -77,6 +77,8 @@ interface CreateOptions {
       keyof Alert,
       | 'createdBy'
       | 'updatedBy'
+      | 'createdAt'
+      | 'updatedAt'
       | 'apiKey'
       | 'apiKeyOwner'
       | 'muteAll'
@@ -142,6 +144,8 @@ export class AlertsClient {
       actions,
       createdBy: username,
       updatedBy: username,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
       params: validatedAlertTypeParams,
       muteAll: false,
       mutedInstanceIds: [],
@@ -248,6 +252,7 @@ export class AlertsClient {
         params: validatedAlertTypeParams,
         actions,
         updatedBy: username,
+        updatedAt: new Date().toISOString(),
       },
       {
         version,
@@ -283,6 +288,7 @@ export class AlertsClient {
         ...attributes,
         ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
         updatedBy: username,
+        updatedAt: new Date().toISOString(),
       },
       { version }
     );
@@ -301,6 +307,7 @@ export class AlertsClient {
           enabled: true,
           ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
           updatedBy: username,
+          updatedAt: new Date().toISOString(),
           scheduledTaskId: scheduledTask.id,
         },
         { version }
@@ -321,6 +328,7 @@ export class AlertsClient {
           apiKey: null,
           apiKeyOwner: null,
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
         },
         { version }
       );
@@ -333,6 +341,7 @@ export class AlertsClient {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -341,6 +350,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -361,6 +371,7 @@ export class AlertsClient {
         {
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
         },
         { version }
       );
@@ -382,6 +393,7 @@ export class AlertsClient {
         alertId,
         {
           updatedBy: await this.getUserName(),
+          updatedAt: new Date().toISOString(),
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
         { version }
@@ -436,6 +448,7 @@ export class AlertsClient {
     return {
       id,
       ...rawAlert,
+      ...parseDates(pick(rawAlert, 'createdAt', 'updatedAt')),
       actions,
     };
   }
@@ -494,4 +507,14 @@ export class AlertsClient {
       references,
     };
   }
+}
+
+function parseDates({
+  createdAt,
+  updatedAt,
+}: Pick<RawAlert, 'createdAt' | 'updatedAt'>): Pick<Alert, 'createdAt' | 'updatedAt'> {
+  return {
+    createdAt: new Date(createdAt),
+    updatedAt: updatedAt ? new Date(updatedAt) : null,
+  };
 }

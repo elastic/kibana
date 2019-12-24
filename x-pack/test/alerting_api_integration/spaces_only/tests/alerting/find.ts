@@ -54,7 +54,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: match.createdAt,
+        updatedAt: match.updatedAt,
       });
+      expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+      expect(match.updatedAt).to.eql(null);
     });
 
     it(`shouldn't find alert from another space`, async () => {

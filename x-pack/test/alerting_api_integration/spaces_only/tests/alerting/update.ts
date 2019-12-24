@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect/expect.js';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -35,24 +36,30 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         actions: [],
         throttle: '1m',
       };
-      await supertest
+      const response = await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alert/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .send(updatedData)
-        .expect(200, {
-          ...updatedData,
-          id: createdAlert.id,
-          tags: ['bar'],
-          alertTypeId: 'test.noop',
-          consumer: 'bar',
-          createdBy: null,
-          enabled: true,
-          updatedBy: null,
-          apiKeyOwner: null,
-          muteAll: false,
-          mutedInstanceIds: [],
-          scheduledTaskId: createdAlert.scheduledTaskId,
-        });
+        .expect(200);
+
+      expect(response.body).to.eql({
+        ...updatedData,
+        id: createdAlert.id,
+        tags: ['bar'],
+        alertTypeId: 'test.noop',
+        consumer: 'bar',
+        createdBy: null,
+        enabled: true,
+        updatedBy: null,
+        apiKeyOwner: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        scheduledTaskId: createdAlert.scheduledTaskId,
+        createdAt: response.body.createdAt,
+        updatedAt: response.body.updatedAt,
+      });
+      expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+      expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
     });
 
     it(`shouldn't update alert from another space`, async () => {

@@ -81,7 +81,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 muteAll: false,
                 mutedInstanceIds: [],
                 scheduledTaskId: createdAlert.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
               });
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
