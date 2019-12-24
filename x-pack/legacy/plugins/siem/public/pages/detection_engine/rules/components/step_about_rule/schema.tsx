@@ -63,7 +63,7 @@ export const schema: FormSchema = {
     ],
   },
   severity: {
-    type: FIELD_TYPES.SELECT,
+    type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel',
       {

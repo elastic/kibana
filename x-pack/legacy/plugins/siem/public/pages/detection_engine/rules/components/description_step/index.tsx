@@ -10,11 +10,13 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiTextArea,
   EuiLink,
   EuiText,
   EuiListGroup,
 } from '@elastic/eui';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
 import React, { memo, ReactNode, useState } from 'react';
 import styled from 'styled-components';
@@ -254,6 +256,28 @@ const getDescriptionItem = (
       ];
     }
     return [];
+  } else if (field === 'severity') {
+    const val: string = get(field, value);
+    return [
+      {
+        title: label,
+        description: (
+          <EuiHealth
+            color={
+              val === 'low'
+                ? euiLightVars.euiColorVis0
+                : val === 'medium'
+                ? euiLightVars.euiColorVis5
+                : val === 'high'
+                ? euiLightVars.euiColorVis7
+                : euiLightVars.euiColorVis9
+            }
+          >
+            {val}
+          </EuiHealth>
+        ),
+      },
+    ];
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {
