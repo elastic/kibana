@@ -117,7 +117,6 @@ export function getClockSkew(
   item: IWaterfallItem,
   parentItem?: IWaterfallItem
 ) {
-  // parent should never be a type of agentMark
   if (!parentItem) {
     return 0;
   }
