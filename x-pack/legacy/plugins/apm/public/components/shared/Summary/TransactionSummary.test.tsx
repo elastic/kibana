@@ -7,12 +7,11 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { TransactionSummary } from './TransactionSummary';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import * as exampleTransactions from './__fixtures__/transactions';
 
 describe('TransactionSummary', () => {
   describe('render', () => {
-    const transaction: Transaction = exampleTransactions.httpOk;
+    const transaction = exampleTransactions.httpOk;
 
     const props = {
       errorCount: 0,
@@ -27,7 +26,7 @@ describe('TransactionSummary', () => {
     });
   });
   describe('renders RUM transaction without request info', () => {
-    const transaction: Transaction = exampleTransactions.httpRumOK;
+    const transaction = exampleTransactions.httpRumOK;
 
     const props = {
       errorCount: 0,
