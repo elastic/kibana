@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Management filters and filters and maps section objects into SidebarNav items 1`] = `
+exports[`Management maps legacy sections and apps into SidebarNav items 1`] = `
 Array [
   Object {
     "data-test-subj": "activeSection",
