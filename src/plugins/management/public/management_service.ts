@@ -82,7 +82,6 @@ export class ManagementService {
   public start = (navigateToApp: CoreStart['application']['navigateToApp']) => ({
     getSection: this.getSection.bind(this),
     getAllSections: this.getAllSections.bind(this),
-    // todo
     navigateToApp, // apps are currently registered as top level apps but this may change in the future
   });
 }
