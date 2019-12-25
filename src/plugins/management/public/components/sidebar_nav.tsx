@@ -77,6 +77,7 @@ const legacySectionToNavSection = (section: LegacySection) => ({
   id: section.id,
   icon: section.icon ? <EuiIcon type={section.icon} /> : null,
   items: [],
+  'data-test-subj': section.id,
 });
 
 const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
@@ -110,7 +111,7 @@ const findOrAddSection = (navItems: NavSection[], legacySection: LegacySection):
   }
 };
 
-const mergeLegacyItems = (
+export const mergeLegacyItems = (
   navItems: NavSection[],
   legacySections: LegacySection[],
   selectedId: string

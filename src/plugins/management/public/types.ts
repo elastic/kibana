@@ -21,7 +21,7 @@ import { IconType } from '@elastic/eui';
 import { AppMountContext } from 'kibana/public';
 import { ManagementApp } from './management_app';
 import { ManagementSection } from './management_section';
-import { ChromeBreadcrumb } from '../../../core/public/';
+import { ChromeBreadcrumb, ApplicationStart } from '../../../core/public/';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -41,8 +41,7 @@ interface SectionsServiceSetup {
 interface SectionsServiceStart {
   getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
   getAllSections: () => ManagementSection[];
-  // uses `core.application.navigateToApp` under the hood, automatically prepending the `path` for the link
-  navigateToApp: (appId: string, options?: { path?: string; state?: any }) => void;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 export interface CreateSection {
