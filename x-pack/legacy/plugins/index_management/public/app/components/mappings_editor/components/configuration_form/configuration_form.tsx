@@ -82,7 +82,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   useEffect(() => {
     const subscription = form.subscribe(updatedConfiguration => {
-      dispatch({ type: 'configuration.update', value: updatedConfiguration });
+      dispatch({ type: 'configuration.update', value: { ...updatedConfiguration, form } });
     });
     return subscription.unsubscribe;
   }, [form]);
@@ -95,7 +95,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, []);
 
   return (
-    <Form form={form}>
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={['Some error']}>
       <DynamicMappingSection />
       <EuiSpacer size="xl" />
       <MetaFieldSection />

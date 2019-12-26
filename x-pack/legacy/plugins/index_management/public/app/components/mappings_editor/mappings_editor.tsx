@@ -57,8 +57,8 @@ export const MappingsEditor = React.memo(
 
     const changeTab = async (tab: TabName, [state, dispatch]: [State, Dispatch]) => {
       if (selectedTab === 'advanced') {
-        // Navigating away from the configuration form === "sending" the form: we need to validate its data first.
-        const isConfigurationFormValid = await state.configuration.validate();
+        // When we navigate away we need to submit the form to validate if there are any errors.
+        const { isValid: isConfigurationFormValid } = await state.configuration.form.submit();
 
         if (!isConfigurationFormValid) {
           /**

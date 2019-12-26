@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { OnFormUpdateArg } from './shared_imports';
+import { OnFormUpdateArg, FormHook } from './shared_imports';
 import { Field, NormalizedFields, NormalizedField, FieldsEditor } from './types';
 import {
   getFieldMeta,
@@ -46,7 +46,10 @@ interface DocumentFieldsState {
 
 export interface State {
   isValid: boolean | undefined;
-  configuration: { defaultValue: MappingsConfiguration } & OnFormUpdateArg<MappingsConfiguration>;
+  configuration: {
+    defaultValue: MappingsConfiguration;
+    form: FormHook<MappingsConfiguration>;
+  } & OnFormUpdateArg<MappingsConfiguration>;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
