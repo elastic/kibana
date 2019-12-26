@@ -140,7 +140,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     switch (error.code) {
       case 'ERR_CONFIG': {
         return i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.wrongConfiguration',
+          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.configuration',
           {
             defaultMessage: 'The "{configName}" configuration is invalid.',
             values: {
@@ -150,19 +150,16 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
         );
       }
       case 'ERR_FIELD': {
-        return i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.wrongConfiguration',
-          {
-            defaultMessage: 'The "{fieldPath}" field is invalid.',
-            values: {
-              fieldPath: error.fieldPath,
-            },
-          }
-        );
+        return i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.field', {
+          defaultMessage: 'The "{fieldPath}" field is invalid.',
+          values: {
+            fieldPath: error.fieldPath,
+          },
+        });
       }
       case 'ERR_PARAMETER': {
         return i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.wrongConfiguration',
+          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.parameter',
           {
             defaultMessage: 'The "{paramName}" parameter on field "{fieldPath}" is invalid.',
             values: {
