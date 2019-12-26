@@ -1,0 +1,17 @@
+{
+  "rule_id": "3981f48e-49a5-4a3e-9b44-900a0887526c",
+  "risk_score": 50,
+  "description": "Indicates that a certificate’s NotValidAfter date has lapsed and the certificate is now invalid.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSL::Certificate_Expired",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSL::Certificate_Expired\" or rule.name: \"SSL::Certificate_Expired\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

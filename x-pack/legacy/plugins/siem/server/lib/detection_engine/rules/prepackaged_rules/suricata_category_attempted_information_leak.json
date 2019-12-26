@@ -1,0 +1,17 @@
+{
+  "rule_id": "88d69362-f496-41d6-8e6b-a2dbaed3513f",
+  "risk_score": 50,
+  "description": "Suricata Category - Attempted Information Leak",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Attempted Information Leak",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Attempted Information Leak\" or rule.category: \"Attempted Information Leak\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

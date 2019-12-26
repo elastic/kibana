@@ -11,6 +11,8 @@ import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
 import { BarSeries, ScaleType, Axis } from '@elastic/charts';
 
+jest.mock('../../lib/kibana');
+
 const customHeight = '100px';
 const customWidth = '120px';
 const chartDataSets = [
