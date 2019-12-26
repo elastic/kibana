@@ -6,6 +6,7 @@
 
 import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { JsonEditor, OnUpdateHandler } from '../../../json_editor';
@@ -55,11 +56,11 @@ const getTexts = (view: ModalView) => ({
   },
   editor: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorLabel', {
-      defaultMessage: 'JSON mappings to load',
+      defaultMessage: 'Mappings object',
     }),
     helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText', {
       defaultMessage:
-        "All unknown parameters or parameters whose values don't have the correct format will be removed.",
+        'Provide the complete mappings object with both the configuration and the properties.',
     }),
   },
   validationErrors: {
@@ -70,7 +71,7 @@ const getTexts = (view: ModalView) => ({
       'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorDescription',
       {
         defaultMessage:
-          'The mappings provided contains some errors. You can decide to ignore them, the field(s) or parameter(s) containing the errors will be safely removed.',
+          'The mappings provided contains some errors. You can decide to ignore them, the configuration, field or parameter containing an error will be removed.',
       }
     ),
     helptext: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorHelpText', {
@@ -78,6 +79,45 @@ const getTexts = (view: ModalView) => ({
     }),
   },
 });
+
+const getErrorMessage = (error: MappingsValidationError) => {
+  switch (error.code) {
+    case 'ERR_CONFIG': {
+      return (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.configuration"
+          defaultMessage="The {configName} configuration is invalid."
+          values={{
+            configName: <code>{error.configName}</code>,
+          }}
+        />
+      );
+    }
+    case 'ERR_FIELD': {
+      return (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.field"
+          defaultMessage="The {fieldPath} field is invalid."
+          values={{
+            fieldPath: <code>{error.fieldPath}</code>,
+          }}
+        />
+      );
+    }
+    case 'ERR_PARAMETER': {
+      return (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.field"
+          defaultMessage="The {paramName} parameter on field {fieldPath} is invalid."
+          values={{
+            paramName: <code>{error.paramName}</code>,
+            fieldPath: <code>{error.fieldPath}</code>,
+          }}
+        />
+      );
+    }
+  }
+};
 
 export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
@@ -136,42 +176,6 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
     }
   };
 
-  const renderError = (error: MappingsValidationError) => {
-    switch (error.code) {
-      case 'ERR_CONFIG': {
-        return i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.configuration',
-          {
-            defaultMessage: 'The "{configName}" configuration is invalid.',
-            values: {
-              configName: error.configName,
-            },
-          }
-        );
-      }
-      case 'ERR_FIELD': {
-        return i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.field', {
-          defaultMessage: 'The "{fieldPath}" field is invalid.',
-          values: {
-            fieldPath: error.fieldPath,
-          },
-        });
-      }
-      case 'ERR_PARAMETER': {
-        return i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.parameter',
-          {
-            defaultMessage: 'The "{paramName}" parameter on field "{fieldPath}" is invalid.',
-            values: {
-              paramName: error.paramName,
-              fieldPath: error.fieldPath,
-            },
-          }
-        );
-      }
-    }
-  };
-
   return (
     <>
       {children(openModal)}
@@ -213,7 +217,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
                   <EuiSpacer />
                   <ul>
                     {state.errors!.slice(0, MAX_ERRORS_TO_DISPLAY).map((error, i) => (
-                      <li key={i}>{renderError(error)}</li>
+                      <li key={i}>{getErrorMessage(error)}</li>
                     ))}
                   </ul>
                 </EuiCallOut>
