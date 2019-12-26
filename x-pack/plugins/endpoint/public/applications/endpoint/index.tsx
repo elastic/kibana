@@ -17,9 +17,9 @@ import { Route, Router, Switch } from 'react-router-dom';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const history = createHashHistory()
-  //const history = createBrowserHistory({ basename: appBasePath })
-  ReactDOM.render(<AppRoot history={history}/>, element);
+  const history = createHashHistory();
+  // const history = createBrowserHistory({ basename: appBasePath })
+  ReactDOM.render(<AppRoot history={history} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -30,22 +30,33 @@ interface RouterProps {
   history: History;
 }
 
-const AppRoot: React.FC<RouterProps> = React.memo(({history}) => (
+const AppRoot: React.FC<RouterProps> = React.memo(({ history }) => (
   <I18nProvider>
-      <Router history={history}>
-        <Switch>
-          <Route exact path="/" render={() => (
+    <Router history={history}>
+      <Switch>
+        <Route
+          exact
+          path="/"
+          render={() => (
             <h1 data-test-subj="welcomeTitle">
               <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
             </h1>
-          )} />
-          <Route path="/management" render={() => (
+          )}
+        />
+        <Route
+          path="/management"
+          render={() => (
             <h1 data-test-subj="management">
               <FormattedMessage id="xpack.endpoint.management" defaultMessage="Manage Endpoints" />
             </h1>
-          )} />
-          <Route render={() => <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />} />
-        </Switch>
+          )}
+        />
+        <Route
+          render={() => (
+            <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
+          )}
+        />
+      </Switch>
     </Router>
   </I18nProvider>
 ));
