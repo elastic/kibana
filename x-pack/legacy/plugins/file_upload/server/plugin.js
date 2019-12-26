@@ -13,8 +13,9 @@ export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
     const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;
     const getSavedObjectsRepository = __LEGACY.savedObjects.getSavedObjectsRepository;
+    const router = core.http.createRouter();
 
-    initRoutes(__LEGACY.route, elasticsearchPlugin, getSavedObjectsRepository);
+    initRoutes(router, elasticsearchPlugin, getSavedObjectsRepository);
 
     registerFileUploadUsageCollector(plugins.usageCollection, {
       elasticsearchPlugin,
