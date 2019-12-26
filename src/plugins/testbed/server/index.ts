@@ -80,7 +80,7 @@ class Plugin {
 
     router.get(
       {
-        path: '/requestcontext/render/{id?}',
+        path: '/requestcontext/render/{id}',
         validate: {
           params: schema.object({
             id: schema.maybe(schema.string()),
@@ -88,8 +88,8 @@ class Plugin {
         },
       },
       async (context, req, res) => {
-        const id = req.params.id;
-        const options: Partial<LegacyRenderOptions> = id ? { app: { getId: () => id } } : {};
+        const { id } = req.params;
+        const options: Partial<LegacyRenderOptions> = { app: { getId: () => id! } };
         const body = await context.core.rendering.render(options);
 
         return res.ok({

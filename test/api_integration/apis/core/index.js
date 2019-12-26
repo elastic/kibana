@@ -35,7 +35,6 @@ export default function({ getService }) {
           ));
 
       it('provides access to application rendering client', async () => {
-        await supertest.get('/requestcontext/render').expect(200, /app:core/);
         await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
         await supertest.get('/requestcontext/render/testbed').expect(200, /app:testbed/);
       });
