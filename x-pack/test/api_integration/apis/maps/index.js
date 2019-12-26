@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
+export default function({ loadTestFile, getService }) {
+  const esArchiver = getService('esArchiver');
+
   describe('Maps endpoints', () => {
-    loadTestFile(require.resolve('./migrations'));
+    before(async () => {
+      await esArchiver.loadIfNeeded('logstash_functional');
+    });
+
+    describe('', () => {
+      const esArchiver = getService('esArchiver');
+      loadTestFile(require.resolve('./index_settings'));
+      loadTestFile(require.resolve('./migrations'));
+    });
   });
 }
