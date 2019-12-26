@@ -31,9 +31,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { start as data } from '../../../../../core_plugins/data/public/legacy';
-const { SearchBar } = data.ui;
 import { npStart } from 'ui/new_platform';
+const { SearchBar } = npStart.plugins.data.ui;
+
 const { uiSettings } = npStart.core;
 
 import { esQuery } from '../../../../../../plugins/data/public';
