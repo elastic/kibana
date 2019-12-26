@@ -31,7 +31,7 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',
     }),
-    helpText: () => (
+    helpText: (
       <FormattedMessage
         id="xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorHelpText"
         defaultMessage="Use JSON format: {code}"
@@ -40,31 +40,6 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
         }}
       />
     ),
-    validations: [
-      {
-        validator: (...args) => {
-          const [{ value }] = args;
-
-          try {
-            if (JSON.parse(value)) {
-              return;
-            }
-          } catch (e) {
-            return {
-              message: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorJsonError',
-                {
-                  defaultMessage: 'Invalid JSON: {error}',
-                  values: {
-                    error: e.message,
-                  },
-                }
-              ),
-            };
-          }
-        },
-      },
-    ],
   },
   sourceField: {
     enabled: {

@@ -40,7 +40,7 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
     date_detection,
     dynamic_date_formats,
     _source: { ...sourceField },
-    _meta: JSON.parse(metaField),
+    _meta: metaField,
   };
 };
 
@@ -67,7 +67,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
       includes,
       excludes,
     },
-    metaField: JSON.stringify(_meta),
+    metaField: _meta,
   };
 };
 

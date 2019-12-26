@@ -7,10 +7,11 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
 import { getUseField, FormRow, Field } from '../../../shared_imports';
+import { JsonEditor } from '../../../../json_editor';
 
 const UseField = getUseField({ component: Field });
 
@@ -38,37 +39,27 @@ export const MetaFieldSection = () => (
     }
   >
     <UseField path="metaField">
-      {({ label, helpText, value, setValue, errors }) => {
-        const error = errors.length ? errors[0].message : undefined;
+      {({ label, helpText, value, setValue }) => {
         return (
-          <EuiFormRow
+          <JsonEditor
             label={label}
-            helpText={helpText ? helpText() : undefined}
-            fullWidth
-            isInvalid={errors.length > 0}
-            error={error}
-          >
-            <EuiCodeEditor
-              mode="json"
-              theme="textmate"
-              width="100%"
-              height="400px"
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
-              minLines={6}
-              aria-label={i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel', {
-                defaultMessage: '_meta field data editor',
-              })}
-              value={value}
-              onChange={(updated: string) => setValue(updated)}
-            />
-          </EuiFormRow>
+            helpText={helpText}
+            defaultValue={value as { [key: string]: any }}
+            onUpdate={updatedJson => {
+              if (updatedJson.isValid) {
+                setValue(updatedJson.data.format());
+              }
+            }}
+            euiCodeEditorProps={{
+              height: '400px',
+              'aria-label': i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel',
+                {
+                  defaultMessage: '_meta field data editor',
+                }
+              ),
+            }}
+          />
         );
       }}
     </UseField>

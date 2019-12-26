@@ -13,7 +13,7 @@ import { useJson, OnUpdateHandler } from './use_json';
 interface Props {
   onUpdate: OnUpdateHandler;
   label?: string;
-  helpText?: string | JSX.Element;
+  helpText?: React.ReactNode;
   defaultValue?: { [key: string]: any };
   euiCodeEditorProps?: { [key: string]: any };
 }
