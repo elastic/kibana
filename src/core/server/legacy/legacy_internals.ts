@@ -72,7 +72,7 @@ export class LegacyInternals implements ILegacyInternals {
     return [...(this.injectors.get(id) || [])].reduce(
       async (promise, injector) => ({
         ...(await promise),
-        ...(await injector(this.server)),
+        ...(await injector()),
       }),
       Promise.resolve<LegacyVars>({})
     );

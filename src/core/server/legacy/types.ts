@@ -115,7 +115,7 @@ export interface VarsProvider {
  * @internal
  * @deprecated
  */
-export type VarsInjector = (server: Server) => LegacyVars | Promise<LegacyVars>;
+export type VarsInjector = () => LegacyVars;
 
 /**
  * @internal

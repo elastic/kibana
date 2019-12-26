@@ -211,6 +211,6 @@ export function uiRenderMixin(kbnServer, server, config) {
   });
 
   server.decorate('toolkit', 'renderAppWithDefaultConfig', function(app) {
-    return renderApp(this, app);
+    return renderApp(this, app, false);
   });
 }

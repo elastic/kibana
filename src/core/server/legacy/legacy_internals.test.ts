@@ -75,7 +75,6 @@ describe('LegacyInternals', () => {
         }
       `);
       expect(injector).toHaveBeenCalled();
-      expect(injector).toHaveBeenCalledWith(server);
     });
 
     it('gets with multiple matching injectors', async () => {
