@@ -61,7 +61,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             <EuiLink
               onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
               href={openRepositoryDetailsUrl(name)}
-              data-test-subj="repositoryLink"
+              data-test-subj={'repositoryLink_' + name}
             >
               {name}
             </EuiLink>
@@ -96,6 +96,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       },
     },
     {
+      field: 'actions',
       name: i18n.translate('xpack.snapshotRestore.repositoryList.table.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
@@ -302,8 +303,8 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={() => ({
-        'data-test-subj': 'cell',
+      cellProps={(item, field) => ({
+        'data-test-subj': `${field.name}_cell`,
       })}
       data-test-subj="repositoryTable"
     />
