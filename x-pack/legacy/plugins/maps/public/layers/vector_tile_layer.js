@@ -77,11 +77,12 @@ export class VectorTileLayer extends TileLayer {
   }
 
   _generateMbSourceIdPrefix() {
-    return `${this.getId()}_${this._source.getTileLayerId()}`;
+    const DELIMITTER = '___';
+    return `${this.getId()}${DELIMITTER}${this._source.getTileLayerId()}${DELIMITTER}`;
   }
 
   _generateMbSourceId(name) {
-    return `${this._generateMbSourceIdPrefix()}_${name}`;
+    return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
   _getVectorStyle() {
@@ -132,15 +133,11 @@ export class VectorTileLayer extends TileLayer {
   }
 
   ownsMbLayerId(mbLayerId) {
-    //todo optimize: do not create temp array
-    const mbLayerIds = this.getMbLayerIds();
-    return mbLayerIds.indexOf(mbLayerId) >= 0;
+    return mbLayerId.startsWith(this.getId());
   }
 
   ownsMbSourceId(mbSourceId) {
-    //todo optimize: do not create temp array
-    const mbSourceIds = this.getMbSourceIds();
-    return mbSourceIds.indexOf(mbSourceId) >= 0;
+    return mbSourceId.startsWith(this.getId());
   }
 
   _makeNamespacedImageId(imageId) {
@@ -152,7 +149,7 @@ export class VectorTileLayer extends TileLayer {
     const sourceIdPrefix = this._generateMbSourceIdPrefix();
     const mbStyle = mbMap.getStyle();
     return Object.keys(mbStyle.sources).some(mbSourceId => {
-      const doesMbSourceBelongToLayer = mbSourceId.startsWith(this.getId());
+      const doesMbSourceBelongToLayer = this.ownsMbSourceId(mbSourceId);
       const doesMbSourceBelongToSource = mbSourceId.startsWith(sourceIdPrefix);
       return doesMbSourceBelongToLayer && !doesMbSourceBelongToSource;
     });
@@ -165,21 +162,14 @@ export class VectorTileLayer extends TileLayer {
     }
 
     if (this._requiresPrevSourceCleanup(mbMap)) {
-      console.log('cleaning up old source');
       const mbStyle = mbMap.getStyle();
-      console.log(mbStyle);
       mbStyle.layers.forEach(mbLayer => {
-        const doesMbLayerBelongToLayer = mbLayer.id.startsWith(this.getId());
-        if (doesMbLayerBelongToLayer) {
-          console.log(`removing layer ${mbLayer.id}`);
+        if (this.ownsMbLayerId(mbLayer.id)) {
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      console.log(mbMap.loaded());
       Object.keys(mbStyle.sources).some(mbSourceId => {
-        const doesMbSourceBelongToLayer = mbSourceId.startsWith(this.getId());
-        if (doesMbSourceBelongToLayer) {
-          console.log(`removing source ${mbSourceId}`);
+        if (this.ownsMbSourceId(mbSourceId)) {
           mbMap.removeSource(mbSourceId);
         }
       });
