@@ -102,6 +102,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       }
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
+      ensureNotDefined('server.ssl.keystore.path');
+      ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
       const elasticsearchHosts = (
