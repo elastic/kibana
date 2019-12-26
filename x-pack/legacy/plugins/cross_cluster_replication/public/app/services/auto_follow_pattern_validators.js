@@ -55,7 +55,7 @@ export const validateLeaderIndexPattern = indexPattern => {
   if (indexPattern) {
     const errors = indexPatterns.validate(indexPattern);
 
-    if (errors[indexPatterns.ILLEGAL_CHARACTERS]) {
+    if (errors[indexPatterns.ILLEGAL_CHARACTERS_KEY]) {
       return {
         message: (
           <FormattedMessage
@@ -63,8 +63,10 @@ export const validateLeaderIndexPattern = indexPattern => {
             defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
           {characterList} from the index pattern."
             values={{
-              characterList: <strong>{errors[indexPatterns.ILLEGAL_CHARACTERS].join(' ')}</strong>,
-              characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS].length,
+              characterList: (
+                <strong>{errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].join(' ')}</strong>
+              ),
+              characterListLength: errors[indexPatterns.ILLEGAL_CHARACTERS_KEY].length,
             }}
           />
         ),
