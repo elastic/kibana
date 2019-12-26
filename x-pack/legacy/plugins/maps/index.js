@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { registerMapsUsageCollector } from './server/maps_telemetry/collectors/register';
+import { initTelemetryCollection } from './server/maps_telemetry';
 import { getAppTitle } from './common/i18n_getters';
 import _ from 'lodash';
 import { MapPlugin } from './server/plugin';
@@ -95,7 +95,7 @@ export function maps(kibana) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
-      registerMapsUsageCollector(usageCollection, server);
+      initTelemetryCollection(usageCollection, server);
 
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;

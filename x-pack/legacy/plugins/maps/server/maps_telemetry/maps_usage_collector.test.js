@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerMapsUsageCollector } from './register';
+import { initTelemetryCollection } from './maps_usage_collector';
 
 describe('buildCollectorObj#fetch', () => {
   let makeUsageCollectorStub;
@@ -22,7 +22,7 @@ describe('buildCollectorObj#fetch', () => {
 
   test('makes and registers maps usage collector', async () => {
     const serverPlaceholder = {};
-    registerMapsUsageCollector(usageCollection, serverPlaceholder);
+    initTelemetryCollection(usageCollection, serverPlaceholder);
 
     expect(registerStub).toHaveBeenCalledTimes(1);
     expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
