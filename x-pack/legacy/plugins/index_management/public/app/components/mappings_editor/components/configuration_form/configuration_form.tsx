@@ -105,7 +105,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, []);
 
   return (
-    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={['Some error']}>
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
       <DynamicMappingSection />
       <EuiSpacer size="xl" />
       <MetaFieldSection />
