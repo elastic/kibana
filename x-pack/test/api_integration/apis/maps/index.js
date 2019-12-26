@@ -13,7 +13,6 @@ export default function({ loadTestFile, getService }) {
     });
 
     describe('', () => {
-      const esArchiver = getService('esArchiver');
       loadTestFile(require.resolve('./index_settings'));
       loadTestFile(require.resolve('./migrations'));
     });

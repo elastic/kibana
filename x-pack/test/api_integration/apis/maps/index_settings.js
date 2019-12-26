@@ -12,9 +12,9 @@ export default function({ getService }) {
   describe('index settings', () => {
     it('should return index settings', async () => {
       const resp = await supertest
-          .get(`/api/maps/indexSettings?indexPatternTitle=logstash*`)
-          .set('kbn-xsrf', 'kibana')
-          .expect(200);
+        .get(`/api/maps/indexSettings?indexPatternTitle=logstash*`)
+        .set('kbn-xsrf', 'kibana')
+        .expect(200);
 
       expect(resp.body.maxResultWindow).to.be(10000);
       expect(resp.body.maxInnerResultWindow).to.be(100);
