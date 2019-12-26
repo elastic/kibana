@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { VisSavedObject } from '../legacy_imports';
+import { TimeRange, Query, esFilters } from 'src/plugins/data/public';
+import { VisSavedObject, AppState, PersistedState } from '../legacy_imports';
 
-export { EditorRenderProps } from './editor/types';
+export interface EditorRenderProps {
+  appState: AppState;
+  filters: esFilters.Filter[];
+  uiState: PersistedState;
+  timeRange: TimeRange;
+  query?: Query;
+}
+
 export interface SavedVisualizations {
   urlFor: (id: string) => string;
   get: (id: string) => Promise<VisSavedObject>;

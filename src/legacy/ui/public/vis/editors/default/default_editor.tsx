@@ -20,9 +20,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { VisualizeEmbeddable } from '../../../../../core_plugins/kibana/public/visualize/embeddable';
-import { VisualizeEmbeddableFactory } from '../../../../../core_plugins/kibana/public/visualize/embeddable/visualize_embeddable_factory';
-import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/types';
+import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/np_ready/types';
+import { VisualizeEmbeddable } from '../../../../../core_plugins/kibana/public/visualize_embeddable';
+import { VisualizeEmbeddableFactory } from '../../../../../core_plugins/kibana/public/visualize_embeddable/visualize_embeddable_factory';
 import {
   PanelsContainer,
   Panel,
