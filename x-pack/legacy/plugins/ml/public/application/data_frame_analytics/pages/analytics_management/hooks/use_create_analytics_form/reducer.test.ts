@@ -12,10 +12,6 @@ import { ACTION } from './actions';
 import { reducer, validateAdvancedEditor } from './reducer';
 import { getInitialState, JOB_TYPES } from './state';
 
-jest.mock('ui/index_patterns', () => ({
-  validateIndexPattern: () => true,
-}));
-
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
 const getMockState = ({

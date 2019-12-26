@@ -5,7 +5,7 @@
  */
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
+
 jest.mock('./kibana_services', () => {
   return {
     SPATIAL_FILTER_TYPE: 'spatial_filter',
