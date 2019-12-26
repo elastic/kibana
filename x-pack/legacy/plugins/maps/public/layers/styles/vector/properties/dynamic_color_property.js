@@ -140,6 +140,15 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _renderStopIcon(color, isLinesOnly, isPointsOnly, symbolId) {
+    if (this.getStyleName() === VECTOR_STYLES.LABEL_COLOR) {
+      const style = { color: color };
+      return (
+        <EuiText size={'xs'} style={style}>
+          Tx
+        </EuiText>
+      );
+    }
+
     if (isLinesOnly && this.getStyleName() === VECTOR_STYLES.LINE_COLOR) {
       const style = {
         stroke: color,

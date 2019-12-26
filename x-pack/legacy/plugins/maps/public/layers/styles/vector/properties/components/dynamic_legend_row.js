@@ -7,7 +7,6 @@
 import React from 'react';
 import _ from 'lodash';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
-import { VECTOR_STYLES } from '../../vector_style_defaults';
 const EMPTY_VALUE = '';
 
 export class DynamicLegendRow extends React.Component {
@@ -83,12 +82,6 @@ export class DynamicLegendRow extends React.Component {
   }
 
   _renderBreakedLegend() {
-    if (this.props.style.getStyleName() === VECTOR_STYLES.LABEL_TEXT) {
-      //It is not clear how to render breaked legend yet for text.
-      //Cannot rely on small-legend icon to provide a similar preview
-      return null;
-    }
-
     return this.props.style.renderBreakedLegend({
       fieldLabel: this.state.label,
       isLinesOnly: this.state.isLinesOnly,
