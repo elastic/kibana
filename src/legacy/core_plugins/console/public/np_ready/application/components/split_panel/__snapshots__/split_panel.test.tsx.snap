@@ -68,14 +68,18 @@ exports[`Split panel should render correctly 1`] = `
             type="grabHorizontal"
           >
             <EuiIconEmpty
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading"
               focusable="false"
+              role="img"
               style={null}
             >
               <svg
+                aria-hidden={true}
                 className="euiIcon euiIcon--medium euiIcon-isLoading"
                 focusable="false"
                 height={16}
+                role="img"
                 style={null}
                 viewBox="0 0 16 16"
                 width={16}

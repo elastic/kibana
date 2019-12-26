@@ -40,12 +40,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import {
-  defaultEditor,
-  VisEditorTypesRegistryProvider,
-  VisualizeEmbeddableFactory,
-  VISUALIZE_EMBEDDABLE_TYPE,
-} from './legacy_imports';
+import { VisualizeEmbeddableFactory, VISUALIZE_EMBEDDABLE_TYPE } from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 
