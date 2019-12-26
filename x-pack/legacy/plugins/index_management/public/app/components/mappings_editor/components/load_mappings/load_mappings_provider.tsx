@@ -107,7 +107,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
     case 'ERR_PARAMETER': {
       return (
         <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.field"
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.parameter"
           defaultMessage="The {paramName} parameter on field {fieldPath} is invalid."
           values={{
             paramName: <code>{error.paramName}</code>,
