@@ -19,8 +19,8 @@
 
 import React, { useCallback } from 'react';
 
-import { JsonEditor, OnUpdateHandler } from '../../../../public';
-import { FieldHook } from '../../hook_form_lib';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../public';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -28,29 +28,25 @@ interface Props {
   [key: string]: any;
 }
 
-export const JsonEditorField = ({
-  field: { label, helpText, value, setValue, setErrors },
-  ...rest
-}: Props) => {
-  const onJsonUpdate: OnUpdateHandler = useCallback<OnUpdateHandler>(
+export const JsonEditorField = ({ field, ...rest }: Props) => {
+  const { errorMessage } = getFieldValidityAndErrorMessage(field);
+
+  const { label, helpText, value, setValue } = field;
+
+  const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback<OnJsonEditorUpdateHandler>(
     updatedJson => {
-      if (updatedJson.isValid) {
-        setErrors([]);
-        setValue(updatedJson.data.format());
-      } else {
-        // No need to worry about i18n, the JsonEditor takes care of adding the translated error.
-        setErrors([{ message: 'Invalid JSON' }]);
-      }
+      setValue(updatedJson.data.raw);
     },
-    [setValue, setErrors]
+    [setValue]
   );
 
   return (
     <JsonEditor
       label={label}
       helpText={helpText}
-      defaultValue={value as { [key: string]: any }}
+      value={value as string}
       onUpdate={onJsonUpdate}
+      error={errorMessage}
       {...rest}
     />
   );

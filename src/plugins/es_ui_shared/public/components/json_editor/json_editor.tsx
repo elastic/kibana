@@ -21,30 +21,69 @@ import React, { useCallback } from 'react';
 import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
 import { debounce } from 'lodash';
 
-import { useJson, OnUpdateHandler } from './use_json';
+import { isJSON } from '../../../static/validators/string';
+import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props {
-  onUpdate: OnUpdateHandler;
+  onUpdate: OnJsonEditorUpdateHandler;
   label?: string;
   helpText?: React.ReactNode;
+  value?: string;
   defaultValue?: { [key: string]: any };
   euiCodeEditorProps?: { [key: string]: any };
+  error?: string | null;
 }
 
 export const JsonEditor = React.memo(
-  ({ label, helpText, onUpdate, defaultValue, euiCodeEditorProps }: Props) => {
-    const { content, setContent, error } = useJson({
+  ({
+    label,
+    helpText,
+    onUpdate,
+    value,
+    defaultValue,
+    euiCodeEditorProps,
+    error: propsError,
+  }: Props) => {
+    const isControlled = value !== undefined;
+
+    const { content, setContent, error: internalError } = useJson({
       defaultValue,
       onUpdate,
+      isControlled,
     });
 
     const debouncedSetContent = useCallback(debounce(setContent, 300), [setContent]);
+
+    // We let the consumer control the validation and the error message.
+    const error = isControlled ? propsError : internalError;
+
+    const onEuiCodeEditorChange = useCallback(
+      (updated: string) => {
+        if (isControlled) {
+          onUpdate({
+            data: {
+              raw: updated,
+              format() {
+                return JSON.parse(updated);
+              },
+            },
+            validate() {
+              return isJSON(updated);
+            },
+            isValid: undefined,
+          });
+        } else {
+          debouncedSetContent(updated);
+        }
+      },
+      [isControlled]
+    );
 
     return (
       <EuiFormRow
         label={label}
         helpText={helpText}
-        isInvalid={Boolean(error)}
+        isInvalid={typeof error === 'string'}
         error={error}
         fullWidth
       >
@@ -62,10 +101,8 @@ export const JsonEditor = React.memo(
           }}
           showGutter={false}
           minLines={6}
-          value={content}
-          onChange={(updated: string) => {
-            debouncedSetContent(updated);
-          }}
+          value={isControlled ? value : content}
+          onChange={onEuiCodeEditorChange}
           {...euiCodeEditorProps}
         />
       </EuiFormRow>

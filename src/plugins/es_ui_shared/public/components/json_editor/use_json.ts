@@ -17,23 +17,24 @@
  * under the License.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { isJSON } from '../../../static/validators/string';
 
-export type OnUpdateHandler<T = { [key: string]: any }> = (arg: {
+export type OnJsonEditorUpdateHandler<T = { [key: string]: any }> = (arg: {
   data: {
     raw: string;
     format(): T;
   };
   validate(): boolean;
-  isValid: boolean;
+  isValid: boolean | undefined;
 }) => void;
 
 interface Parameters<T extends object> {
-  onUpdate: OnUpdateHandler<T>;
+  onUpdate: OnJsonEditorUpdateHandler<T>;
   defaultValue?: T;
+  isControlled?: boolean;
 }
 
 const stringifyJson = (json: { [key: string]: any }) =>
@@ -42,7 +43,9 @@ const stringifyJson = (json: { [key: string]: any }) =>
 export const useJson = <T extends object = { [key: string]: any }>({
   defaultValue = {} as T,
   onUpdate,
+  isControlled = false,
 }: Parameters<T>) => {
+  const didMount = useRef(false);
   const [content, setContent] = useState<string>(stringifyJson(defaultValue));
   const [error, setError] = useState<string | null>(null);
 
@@ -68,15 +71,19 @@ export const useJson = <T extends object = { [key: string]: any }>({
   };
 
   useEffect(() => {
-    const isValid = validate();
-    onUpdate({
-      data: {
-        raw: content,
-        format: formatContent,
-      },
-      validate,
-      isValid,
-    });
+    if (didMount.current) {
+      const isValid = isControlled ? undefined : validate();
+      onUpdate({
+        data: {
+          raw: content,
+          format: formatContent,
+        },
+        validate,
+        isValid,
+      });
+    } else {
+      didMount.current = true;
+    }
   }, [content]);
 
   return {

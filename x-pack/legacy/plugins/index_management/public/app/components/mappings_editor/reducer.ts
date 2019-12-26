@@ -48,7 +48,7 @@ export interface State {
   isValid: boolean | undefined;
   configuration: {
     defaultValue: MappingsConfiguration;
-    form: FormHook<MappingsConfiguration>;
+    form?: FormHook<MappingsConfiguration>;
   } & OnFormUpdateArg<MappingsConfiguration>;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
