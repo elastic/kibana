@@ -44,6 +44,7 @@ import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
+import { HomeServerPluginSetup } from '../../plugins/home/server';
 
 // lot of legacy code was assuming this type only had these two methods
 export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;
@@ -99,6 +100,7 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 
 export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
+  home: HomeServerPluginSetup;
   [key: string]: object;
 }
 

@@ -230,11 +230,6 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: true,
     },
   },
-  coerce_geo_shape: {
-    fieldConfig: {
-      defaultValue: false,
-    },
-  },
   coerce_shape: {
     fieldConfig: {
       defaultValue: false,
@@ -250,6 +245,16 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
+    },
+  },
+  null_value_ip: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.TEXT,
+      label: nullValueLabel,
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.nullValueIpHelpText', {
+        defaultMessage: 'Accepts an IP address.',
+      }),
     },
   },
   null_value_numeric: {
@@ -276,6 +281,24 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
+      helpText: () => (
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.parameters.geoPointNullValueHelpText"
+          defaultMessage="Geo-points can be expressed as an object, string, geohash, array or {docsLink} POINT."
+          values={{
+            docsLink: (
+              <EuiLink href={documentationService.getWellKnownTextLink()} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.wellKnownTextDocumentationLink',
+                  {
+                    defaultMessage: 'Well-Known Text',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      ),
       validations: [
         {
           validator: nullValueValidateEmptyField,
@@ -568,7 +591,7 @@ export const PARAMETERS_DEFINITION = {
   },
   points_only: {
     fieldConfig: {
-      defaultValue: true,
+      defaultValue: false,
     },
   },
   norms: {

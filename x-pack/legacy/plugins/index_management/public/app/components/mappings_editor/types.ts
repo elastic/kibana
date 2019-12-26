@@ -69,6 +69,7 @@ export type RangeType =
   | 'integer_range'
   | 'float_range'
   | 'long_range'
+  | 'ip_range'
   | 'double_range'
   | 'date_range';
 
@@ -82,13 +83,13 @@ export type ParameterName =
   | 'doc_values'
   | 'doc_values_binary'
   | 'coerce'
-  | 'coerce_geo_shape'
   | 'coerce_shape'
   | 'ignore_malformed'
   | 'null_value'
   | 'null_value_numeric'
   | 'null_value_boolean'
   | 'null_value_geo_point'
+  | 'null_value_ip'
   | 'copy_to'
   | 'dynamic'
   | 'enabled'

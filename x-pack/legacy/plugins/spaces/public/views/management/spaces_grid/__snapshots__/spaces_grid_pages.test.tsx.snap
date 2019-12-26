@@ -7,7 +7,6 @@ exports[`SpacesGridPage renders as expected 1`] = `
 >
   <EuiPageContent
     horizontalPosition="center"
-    panelPaddingSize="l"
   >
     <EuiFlexGroup
       justifyContent="spaceBetween"

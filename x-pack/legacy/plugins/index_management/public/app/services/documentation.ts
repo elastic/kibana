@@ -156,6 +156,10 @@ class DocumentationService {
   public getIndexOptionsLink() {
     return `${this.esDocsBase}/index-options.html`;
   }
+
+  public getWellKnownTextLink() {
+    return 'http://docs.opengeospatial.org/is/12-063r5/12-063r5.html';
+  }
 }
 
 export const documentationService = new DocumentationService();

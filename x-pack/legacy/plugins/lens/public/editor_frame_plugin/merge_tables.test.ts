@@ -8,6 +8,8 @@ import moment from 'moment';
 import { mergeTables } from './merge_tables';
 import { KibanaDatatable } from 'src/plugins/expressions/public';
 
+jest.mock('ui/new_platform');
+
 describe('lens_merge_tables', () => {
   it('should produce a row with the nested table as defined', () => {
     const sampleTable1: KibanaDatatable = {

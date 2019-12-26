@@ -15,6 +15,8 @@ import {
   BoostParameter,
   NullValueParameter,
 } from '../../field_parameters';
+
+import { UseField, Field } from '../../../../shared_imports';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
@@ -44,9 +46,9 @@ export const IpType = ({ field }: Props) => {
       <AdvancedParametersSection>
         <DocValuesParameter />
 
-        <NullValueParameter
-          defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
-        />
+        <NullValueParameter defaultToggleValue={getDefaultToggleValue('null_value', field.source)}>
+          <UseField path="null_value" config={getFieldConfig('null_value_ip')} component={Field} />
+        </NullValueParameter>
 
         <StoreParameter />
 
