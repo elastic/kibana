@@ -194,7 +194,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const value = this.formatField(config.stop);
       return (
         <EuiFlexItem key={index}>
-          <EuiFlexGroup direction={'row'}>
+          <EuiFlexGroup direction={'row'} gutterSize={'none'}>
             <EuiFlexItem>
               <EuiText size={'xs'}>{value}</EuiText>
             </EuiFlexItem>
@@ -211,7 +211,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return (
       <div>
         <EuiSpacer size="s" />
-        <EuiFlexGroup direction={'column'}>
+        <EuiFlexGroup direction={'column'} gutterSize={'none'}>
           {this._renderColorbreaks({
             isPointsOnly,
             isLinesOnly,

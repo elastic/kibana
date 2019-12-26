@@ -142,7 +142,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     }
 
     return (
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
         {icons.map((icon, index) => {
           const isLast = index === icons.length - 1;
           let spacer;
