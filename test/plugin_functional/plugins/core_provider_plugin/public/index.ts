@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npSetup, npStart } from 'ui/new_platform';
+import '../types';
 
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export {
-  FieldFormat,
-  IFieldFormatType,
-  IFieldFormatId,
-  IFieldFormatMetaParams,
-} from './field_format';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
-export * from './converters';
-export * from './constants';
+window.__coreProvider = {
+  setup: npSetup,
+  start: npStart,
+  testUtils: {
+    delay: (ms: number) => new Promise(res => setTimeout(res, ms)),
+  },
+};

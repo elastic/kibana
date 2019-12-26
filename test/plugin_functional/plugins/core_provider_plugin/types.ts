@@ -16,14 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { LegacyCoreSetup, LegacyCoreStart } from 'kibana/public';
 
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export {
-  FieldFormat,
-  IFieldFormatType,
-  IFieldFormatId,
-  IFieldFormatMetaParams,
-} from './field_format';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
-export * from './converters';
-export * from './constants';
+declare global {
+  interface Window {
+    __coreProvider: {
+      setup: {
+        core: LegacyCoreSetup;
+        plugins: Record<string, any>;
+      };
+      start: {
+        core: LegacyCoreStart;
+        plugins: Record<string, any>;
+      };
+      testUtils: {
+        delay: (ms: number) => Promise<void>;
+      };
+    };
+  }
+}
