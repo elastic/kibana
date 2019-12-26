@@ -10,7 +10,6 @@ import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 export class ESAggMetricField extends AbstractField {
-
   static type = 'ES_AGG';
 
   constructor({ label, source, aggType, esDocField, origin }) {
@@ -25,7 +24,9 @@ export class ESAggMetricField extends AbstractField {
   }
 
   async getLabel() {
-    return this._label ? await this._label : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
+    return this._label
+      ? await this._label
+      : this._source.formatMetricLabel(this.getAggType(), this.getESDocFieldName());
   }
 
   getAggType() {
@@ -33,7 +34,12 @@ export class ESAggMetricField extends AbstractField {
   }
 
   isValid() {
-    return (this.getAggType() === COUNT_AGG_TYPE) ? true : !!this._esDocField;
+    return this.getAggType() === COUNT_AGG_TYPE ? true : !!this._esDocField;
+  }
+
+  async getDataType() {
+    // aggregations only provide numerical data
+    return 'number';
   }
 
   async getDataType() {
@@ -46,7 +52,9 @@ export class ESAggMetricField extends AbstractField {
   }
 
   getRequestDescription() {
-    return this.getAggType() !== COUNT_AGG_TYPE ? `${this.getAggType()} ${this.getESDocFieldName()}` : COUNT_AGG_TYPE;
+    return this.getAggType() !== COUNT_AGG_TYPE
+      ? `${this.getAggType()} ${this.getESDocFieldName()}`
+      : COUNT_AGG_TYPE;
   }
 
   async createTooltipProperty(value) {
@@ -66,7 +74,7 @@ export class ESAggMetricField extends AbstractField {
       enabled: true,
       type: this.getAggType(),
       schema: 'metric',
-      params: {}
+      params: {},
     };
     if (this.getAggType() !== COUNT_AGG_TYPE) {
       metricAggConfig.params = { field: this.getESDocFieldName() };

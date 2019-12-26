@@ -364,9 +364,11 @@ Array [
             }
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
               height={16}
+              role="img"
               style={
                 Object {
                   "fill": "#333",
@@ -713,9 +715,11 @@ exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
           }
         >
           <svg
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
             focusable="false"
             height={16}
+            role="img"
             style={
               Object {
                 "fill": "#333",
@@ -985,9 +989,11 @@ Array [
             }
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
               height={16}
+              role="img"
               style={
                 Object {
                   "fill": "#333",

@@ -10,20 +10,19 @@ import { ES_SPATIAL_RELATIONS } from './constants';
 
 export function getAppTitle() {
   return i18n.translate('xpack.maps.appTitle', {
-    defaultMessage: 'Maps'
+    defaultMessage: 'Maps',
   });
 }
 
-
 export function getDataSourceLabel() {
   return i18n.translate('xpack.maps.source.dataSourceLabel', {
-    defaultMessage: 'Data source'
+    defaultMessage: 'Data source',
   });
 }
 
 export function getUrlLabel() {
   return i18n.translate('xpack.maps.source.urlLabel', {
-    defaultMessage: 'Url'
+    defaultMessage: 'Url',
   });
 }
 
@@ -31,19 +30,19 @@ export function getEsSpatialRelationLabel(spatialRelation) {
   switch (spatialRelation) {
     case ES_SPATIAL_RELATIONS.INTERSECTS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.intersectsLabel', {
-        defaultMessage: 'intersects'
+        defaultMessage: 'intersects',
       });
     case ES_SPATIAL_RELATIONS.DISJOINT:
       return i18n.translate('xpack.maps.common.esSpatialRelation.disjointLabel', {
-        defaultMessage: 'disjoint'
+        defaultMessage: 'disjoint',
       });
     case ES_SPATIAL_RELATIONS.WITHIN:
       return i18n.translate('xpack.maps.common.esSpatialRelation.withinLabel', {
-        defaultMessage: 'within'
+        defaultMessage: 'within',
       });
     case ES_SPATIAL_RELATIONS.CONTAINS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.containsLabel', {
-        defaultMessage: 'contains'
+        defaultMessage: 'contains',
       });
     default:
       return spatialRelation;

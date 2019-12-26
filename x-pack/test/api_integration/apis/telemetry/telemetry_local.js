@@ -23,32 +23,34 @@ function flatKeys(source) {
 }
 
 const disableCollection = {
-  'persistent':
-    {
-      xpack: {
-        monitoring: {
-          collection: {
-            enabled: false
-          }
-        }
-      }
-    }
+  persistent: {
+    xpack: {
+      monitoring: {
+        collection: {
+          enabled: false,
+        },
+      },
+    },
+  },
 };
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
   describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
-      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
+      await esSupertest
+        .put('/_cluster/settings')
+        .send(disableCollection)
+        .expect(200);
       await new Promise(r => setTimeout(r, 1000));
     });
 
     it('should pull local stats and validate data types', async () => {
       const timeRange = {
         min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z'
+        max: '2018-07-23T22:13:00Z',
       };
 
       const { body } = await supertest
@@ -100,7 +102,7 @@ export default function ({ getService }) {
     it('should pull local stats and validate fields', async () => {
       const timeRange = {
         min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z'
+        max: '2018-07-23T22:13:00Z',
       };
 
       const { body } = await supertest
@@ -170,11 +172,10 @@ export default function ({ getService }) {
         'stack_stats.xpack.sql',
         'stack_stats.xpack.watcher',
         'timestamp',
-        'version'
+        'version',
       ];
 
       expect(expected.every(m => actual.includes(m))).to.be.ok();
     });
-
   });
 }

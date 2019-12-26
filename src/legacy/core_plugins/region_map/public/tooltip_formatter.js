@@ -20,7 +20,7 @@
 import $ from 'jquery';
 import template from './tooltip.html';
 
-export const TileMapTooltipFormatter = ($injector) => {
+export const TileMapTooltipFormatter = $injector => {
   const $rootScope = $injector.get('$rootScope');
   const $compile = $injector.get('$compile');
 

@@ -19,7 +19,6 @@
 
 import d3 from 'd3';
 
-
 /*
  * Adds div DOM elements to the `.visAxis__splitAxes--x` element based on the data layout.
  * For example, if the data has rows, it returns the same number of
@@ -27,12 +26,13 @@ import d3 from 'd3';
  */
 
 export function xAxisSplit(selection) {
-  selection.each(function () {
+  selection.each(function() {
     const div = d3.select(this);
     let columns;
-    div.selectAll('.x-axis-div')
+    div
+      .selectAll('.x-axis-div')
       .append('div')
-      .data(function (d) {
+      .data(function(d) {
         columns = d.columns ? d.columns.length : 1;
         return d.columns ? d.columns : [d];
       })

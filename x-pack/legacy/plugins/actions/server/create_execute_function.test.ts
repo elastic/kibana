@@ -138,6 +138,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      apiKey: null,
     });
     expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
       getBasePath: expect.anything(),

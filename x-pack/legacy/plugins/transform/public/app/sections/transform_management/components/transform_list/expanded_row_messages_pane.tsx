@@ -120,8 +120,8 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
   const onChange = ({
     page = { index: 0, size: 10 },
   }: {
-    page: { index: number; size: number };
-    sort: { field: string; direction: string };
+    page?: { index: number; size: number };
+    sort?: { field: string; direction: string };
   }) => {
     const { index, size } = page;
 

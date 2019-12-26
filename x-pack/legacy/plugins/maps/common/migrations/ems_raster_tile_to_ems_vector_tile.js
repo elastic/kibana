@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import {  EMS_TMS, LAYER_TYPE } from '../constants';
+import { EMS_TMS, LAYER_TYPE } from '../constants';
 
 function isEmsTileSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
@@ -23,7 +23,7 @@ export function emsRasterTileToEmsVectorTile({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach((layer) => {
+  layerList.forEach(layer => {
     if (isTileLayer(layer) && isEmsTileSource(layer)) {
       // Just need to switch layer type to migrate TILE layer to VECTOR_TILE layer
       layer.type = LAYER_TYPE.VECTOR_TILE;
