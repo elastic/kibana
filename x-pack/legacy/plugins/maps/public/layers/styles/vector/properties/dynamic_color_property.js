@@ -211,7 +211,14 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return (
       <div>
         <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+        <EuiFlexGroup direction={'column'}>
+          {this._renderColorbreaks({
+            isPointsOnly,
+            isLinesOnly,
+            symbolId,
+          })}
+        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="xs" justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
             <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
               <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
@@ -221,13 +228,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
               </EuiText>
             </EuiToolTip>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup direction={'column'}>
-          {this._renderColorbreaks({
-            isPointsOnly,
-            isLinesOnly,
-            symbolId,
-          })}
         </EuiFlexGroup>
       </div>
     );
