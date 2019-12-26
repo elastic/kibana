@@ -17,15 +17,32 @@
  * under the License.
  */
 
-export * from './text_field';
-export * from './numeric_field';
-export * from './checkbox_field';
-export * from './combobox_field';
-export * from './multi_select_field';
-export * from './radio_group_field';
-export * from './range_field';
-export * from './select_field';
-export * from './super_select_field';
-export * from './toggle_field';
-export * from './text_area_field';
-export * from './json_editor_field';
+import React from 'react';
+
+import { JsonEditor } from '../../../../public';
+import { FieldHook } from '../../hook_form_lib';
+
+interface Props {
+  field: FieldHook;
+  euiCodeEditorProps?: { [key: string]: any };
+  [key: string]: any;
+}
+
+export const JsonEditorField = ({
+  field: { label, helpText, value, setValue },
+  ...rest
+}: Props) => {
+  return (
+    <JsonEditor
+      label={label}
+      helpText={helpText}
+      defaultValue={value as { [key: string]: any }}
+      onUpdate={updatedJson => {
+        if (updatedJson.isValid) {
+          setValue(updatedJson.data.format());
+        }
+      }}
+      {...rest}
+    />
+  );
+};

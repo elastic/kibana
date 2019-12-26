@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
-import { getUseField, FormRow, Field, JsonEditor } from '../../../shared_imports';
+import { getUseField, FormRow, Field, JsonEditorField } from '../../../shared_imports';
 
 const UseField = getUseField({ component: Field });
 
@@ -37,30 +37,17 @@ export const MetaFieldSection = () => (
       </>
     }
   >
-    <UseField path="metaField">
-      {({ label, helpText, value, setValue }) => {
-        return (
-          <JsonEditor
-            label={label}
-            helpText={helpText}
-            defaultValue={value as { [key: string]: any }}
-            onUpdate={updatedJson => {
-              if (updatedJson.isValid) {
-                setValue(updatedJson.data.format());
-              }
-            }}
-            euiCodeEditorProps={{
-              height: '400px',
-              'aria-label': i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel',
-                {
-                  defaultMessage: '_meta field data editor',
-                }
-              ),
-            }}
-          />
-        );
+    <UseField
+      path="metaField"
+      component={JsonEditorField}
+      componentProps={{
+        euiCodeEditorProps: {
+          height: '400px',
+          'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel', {
+            defaultMessage: '_meta field data editor',
+          }),
+        },
       }}
-    </UseField>
+    />
   </FormRow>
 );
