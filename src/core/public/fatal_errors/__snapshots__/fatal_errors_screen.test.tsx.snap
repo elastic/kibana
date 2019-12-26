@@ -2,20 +2,15 @@
 
 exports[`rendering render matches snapshot 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "minHeight": "100vh",
     }
   }
 >
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageContent
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <EuiEmptyPrompt
