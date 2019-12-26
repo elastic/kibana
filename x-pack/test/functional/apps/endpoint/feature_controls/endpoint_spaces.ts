@@ -12,7 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  describe('spaces', () => {
+  describe.only('spaces', () => {
     describe('space with no features disabled', () => {
       before(async () => {
         await spacesService.create({
@@ -41,6 +41,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await testSubjects.existOrFail('welcomeTitle');
+      });
+
+      it(`endpoint management shows 'Manage Endpoints'`, async () => {
+        await pageObjects.common.navigateToActualUrl(
+          'endpoint',
+          '/management',
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await testSubjects.existOrFail('management');
       });
     });
 
