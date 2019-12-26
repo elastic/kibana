@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { JsonEditor } from '../../../../public';
+import { JsonEditor, OnUpdateHandler } from '../../../../public';
 import { FieldHook } from '../../hook_form_lib';
 
 interface Props {
@@ -29,19 +29,28 @@ interface Props {
 }
 
 export const JsonEditorField = ({
-  field: { label, helpText, value, setValue },
+  field: { label, helpText, value, setValue, setErrors },
   ...rest
 }: Props) => {
+  const onJsonUpdate: OnUpdateHandler = useCallback<OnUpdateHandler>(
+    updatedJson => {
+      if (updatedJson.isValid) {
+        setErrors([]);
+        setValue(updatedJson.data.format());
+      } else {
+        // No need to worry about i18n, the JsonEditor takes care of adding the translated error.
+        setErrors([{ message: 'Invalid JSON' }]);
+      }
+    },
+    [setValue, setErrors]
+  );
+
   return (
     <JsonEditor
       label={label}
       helpText={helpText}
       defaultValue={value as { [key: string]: any }}
-      onUpdate={updatedJson => {
-        if (updatedJson.isValid) {
-          setValue(updatedJson.data.format());
-        }
-      }}
+      onUpdate={onJsonUpdate}
       {...rest}
     />
   );

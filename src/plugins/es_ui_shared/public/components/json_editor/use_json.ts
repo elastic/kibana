@@ -52,7 +52,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
     if (!isValid) {
       setError(
         i18n.translate('xpack.idxMgmt.validators.string.invalidJSONError', {
-          defaultMessage: 'Invalid JSON format.',
+          defaultMessage: 'Invalid JSON',
         })
       );
     } else {
