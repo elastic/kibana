@@ -10,7 +10,12 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
-import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  NetworkDnsEdges,
+  NetworkDnsFields,
+  NetworkDnsSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
@@ -102,7 +107,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         if (criteria.sort != null) {
           const newDnsSortField: NetworkDnsSortField = {
             field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
-            direction: criteria.sort.direction,
+            direction: criteria.sort.direction as Direction,
           };
           if (!isEqual(newDnsSortField, sort)) {
             updateNetworkTable({

@@ -28,13 +28,13 @@ import { HostOverviewByNameQuery } from '../../../containers/hosts/overview';
 import { KpiHostDetailsQuery } from '../../../containers/kpi_host_details';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { LastEventIndexKey } from '../../../graphql/types';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useKibana } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { inputsSelectors, State } from '../../../store';
 import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../../store/hosts/actions';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { esQuery, esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { HostsEmptyPage } from '../hosts_empty_page';
 import { HostDetailsTabs } from './details_tabs';
@@ -63,7 +63,31 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
       setHostDetailsTablesActivePageToZero(null);
     }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
-    const core = useKibanaCore();
+    const kibana = useKibana();
+    const hostDetailsPageFilters: esFilters.Filter[] = [
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'host.name',
+          value: detailName,
+          params: {
+            query: detailName,
+          },
+        },
+        query: {
+          match: {
+            'host.name': {
+              query: detailName,
+              type: 'phrase',
+            },
+          },
+        },
+      },
+    ];
+    const getFilters = () => [...hostDetailsPageFilters, ...filters];
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -76,35 +100,11 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
-              filters: [
-                {
-                  meta: {
-                    alias: null,
-                    negate: false,
-                    disabled: false,
-                    type: 'phrase',
-                    key: 'host.name',
-                    value: detailName,
-                    params: {
-                      query: detailName,
-                    },
-                  },
-                  query: {
-                    match: {
-                      'host.name': {
-                        query: detailName,
-                        type: 'phrase',
-                      },
-                    },
-                  },
-                },
-                ...filters,
-              ],
+              filters: getFilters(),
             });
-
             return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
@@ -198,6 +198,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
                   <HostDetailsTabs
                     isInitializing={isInitializing}
                     deleteQuery={deleteQuery}
+                    pageFilters={hostDetailsPageFilters}
                     to={to}
                     from={from}
                     detailName={detailName}

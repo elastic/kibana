@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShardFailureTable renders matching snapshot given valid properties 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "align": "right",
+        "isExpander": true,
+        "render": [Function],
+        "width": "40px",
+      },
+      Object {
+        "field": "shard",
+        "name": "Shard",
+        "sortable": true,
+        "truncateText": true,
+        "width": "80px",
+      },
+      Object {
+        "field": "index",
+        "name": "Index",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "node",
+        "name": "Node",
+        "sortable": true,
+        "truncateText": true,
+      },
+      Object {
+        "field": "reason.type",
+        "name": "Reason",
+        "truncateText": true,
+      },
+    ]
+  }
+  itemId="id"
+  itemIdToExpandedRowMap={Object {}}
+  items={
+    Array [
+      Object {
+        "id": "0",
+        "index": "repro2",
+        "node": "itsmeyournode",
+        "reason": Object {
+          "caused_by": Object {
+            "reason": "Gimme reason",
+            "type": "illegal_argument_exception",
+          },
+          "lang": "painless",
+          "reason": "runtime error",
+          "script": "return doc['targetfield'].value;",
+          "script_stack": Array [
+            "return doc['targetfield'].value;",
+            "           ^---- HERE",
+          ],
+          "type": "script_exception",
+        },
+        "shard": 0,
+      },
+    ]
+  }
+  pagination={true}
+  responsive={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "desc",
+        "field": "index",
+      },
+    }
+  }
+/>
+`;

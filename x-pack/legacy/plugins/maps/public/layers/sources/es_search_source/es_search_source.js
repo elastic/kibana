@@ -125,6 +125,24 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  async getFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.fields
+        .filter(field => {
+          // Ensure fielddata is enabled for field.
+          // Search does not request _source
+          return field.aggregatable;
+        })
+        .map(field => {
+          return this.createField({ fieldName: field.name });
+        });
+    } catch (error) {
+      // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
+      return [];
+    }
+  }
+
   getFieldNames() {
     return [this._descriptor.geoField];
   }

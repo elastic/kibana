@@ -1433,10 +1433,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@17.0.0":
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.0.0.tgz#2b53500b9f4849fdf58f88ea89e10a0b58836acc"
-  integrity sha512-bWTVKbChPGh7AHLxW1o9yp7O3hL9lTVj69DVaaLBOz9K0JnDrWZ5VDvWL9AAguFWq9OEMY9oWjyBhQZr1ZeZbA==
+"@elastic/eui@17.3.1":
+  version "17.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.3.1.tgz#67d883207b2efdb9a48f2d949b95de1e4bbc1064"
+  integrity sha512-fYoPbRXr9mZlTcfSqOCE65yb2Zpsptq4Y1Lg8+aeMw8G5JpMnUx1RaBRe1OJrCRHWpuF0f8Yxg+i1DDqxxLnlA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -29217,10 +29217,10 @@ utila@^0.4.0, utila@~0.4:
   resolved "https://registry.yarnpkg.com/utila/-/utila-0.4.0.tgz#8a16a05d445657a3aea5eecc5b12a4fa5379772c"
   integrity sha1-ihagXURWV6Oupe7MWxKk+lN5dyw=
 
-utility-types@^3.7.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/utility-types/-/utility-types-3.7.0.tgz#51f1c29fa35d4267488345706efcf3f68f2b1933"
-  integrity sha512-mqRJXN7dEArK/NZNJUubjr9kbFFVZcmF/JHDc9jt5O/aYXUVmopHYujDMhLmLil1Bxo2+khe6KAIVvDH9Yc4VA==
+utility-types@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/utility-types/-/utility-types-3.10.0.tgz#ea4148f9a741015f05ed74fd615e1d20e6bed82b"
+  integrity sha512-O11mqxmi7wMKCo6HKFt5AhO4BwY3VV68YU07tgxfz8zJTIxr4BpsezN49Ffwy9j3ZpwwJp4fkRwjRzq3uWE6Rg==
 
 utils-copy-error@^1.0.0:
   version "1.0.1"
