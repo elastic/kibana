@@ -118,23 +118,22 @@ ul.esUiTree {
     border-left: $euiBorderThin;
     margin-left: $euiSizeL;
     padding-bottom: $euiSizeS;
-  }
 
-  .esUiTreeItem__label {
-    font-size: $euiFontSizeS;
-    padding-left: $euiSizeL;
-    position: relative;
+    &__label {
+      padding-left: $euiSizeL;
+      position: relative;
 
-    &::before {
-      content:'';
-      position: absolute;
-      top: 0;
-      left: -1px;
-      bottom: 50%;
-      width: $euiSize;
-      border: $euiBorderThin;
-      border-top: none;
-      border-right: none;
+      &::before {
+        content:'';
+        position: absolute;
+        top: 0;
+        left: -1px;
+        bottom: 50%;
+        width: $euiSize;
+        border: $euiBorderThin;
+        border-top: none;
+        border-right: none;
+      }
     }
   }
 
