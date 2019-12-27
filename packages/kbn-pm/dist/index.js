@@ -3084,10 +3084,24 @@ function times(n, ok, cb) {
 
 var fs = __webpack_require__(23)
 var polyfills = __webpack_require__(24)
-var legacy = __webpack_require__(27)
-var queue = []
+var legacy = __webpack_require__(26)
+var clone = __webpack_require__(28)
 
 var util = __webpack_require__(29)
+
+/* istanbul ignore next - node 0.x polyfill */
+var gracefulQueue
+var previousSymbol
+
+/* istanbul ignore else - node 0.x polyfill */
+if (typeof Symbol === 'function' && typeof Symbol.for === 'function') {
+  gracefulQueue = Symbol.for('graceful-fs.queue')
+  // This is used in testing by future versions
+  previousSymbol = Symbol.for('graceful-fs.previous')
+} else {
+  gracefulQueue = '___graceful-fs.queue'
+  previousSymbol = '___graceful-fs.previous'
+}
 
 function noop () {}
 
@@ -3101,48 +3115,71 @@ else if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || ''))
     console.error(m)
   }
 
-if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
-  process.on('exit', function() {
-    debug(queue)
-    __webpack_require__(30).equal(queue.length, 0)
+// Once time initialization
+if (!global[gracefulQueue]) {
+  // This queue can be shared by multiple loaded instances
+  var queue = []
+  Object.defineProperty(global, gracefulQueue, {
+    get: function() {
+      return queue
+    }
   })
-}
 
-module.exports = patch(__webpack_require__(25))
-if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH) {
-  module.exports = patch(fs)
-}
+  // Patch fs.close/closeSync to shared queue version, because we need
+  // to retry() whenever a close happens *anywhere* in the program.
+  // This is essential when multiple graceful-fs instances are
+  // in play at the same time.
+  fs.close = (function (fs$close) {
+    function close (fd, cb) {
+      return fs$close.call(fs, fd, function (err) {
+        // This function uses the graceful-fs shared queue
+        if (!err) {
+          retry()
+        }
 
-// Always patch fs.close/closeSync, because we want to
-// retry() whenever a close happens *anywhere* in the program.
-// This is essential when multiple graceful-fs instances are
-// in play at the same time.
-module.exports.close =
-fs.close = (function (fs$close) { return function (fd, cb) {
-  return fs$close.call(fs, fd, function (err) {
-    if (!err)
+        if (typeof cb === 'function')
+          cb.apply(this, arguments)
+      })
+    }
+
+    Object.defineProperty(close, previousSymbol, {
+      value: fs$close
+    })
+    return close
+  })(fs.close)
+
+  fs.closeSync = (function (fs$closeSync) {
+    function closeSync (fd) {
+      // This function uses the graceful-fs shared queue
+      fs$closeSync.apply(fs, arguments)
       retry()
+    }
 
-    if (typeof cb === 'function')
-      cb.apply(this, arguments)
-  })
-}})(fs.close)
+    Object.defineProperty(closeSync, previousSymbol, {
+      value: fs$closeSync
+    })
+    return closeSync
+  })(fs.closeSync)
 
-module.exports.closeSync =
-fs.closeSync = (function (fs$closeSync) { return function (fd) {
-  // Note that graceful-fs also retries when fs.closeSync() fails.
-  // Looks like a bug to me, although it's probably a harmless one.
-  var rval = fs$closeSync.apply(fs, arguments)
-  retry()
-  return rval
-}})(fs.closeSync)
+  if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
+    process.on('exit', function() {
+      debug(global[gracefulQueue])
+      __webpack_require__(30).equal(global[gracefulQueue].length, 0)
+    })
+  }
+}
+
+module.exports = patch(clone(fs))
+if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH && !fs.__patched) {
+    module.exports = patch(fs)
+    fs.__patched = true;
+}
 
 function patch (fs) {
   // Everything that references the open() function needs to be in here
   polyfills(fs)
   fs.gracefulify = patch
-  fs.FileReadStream = ReadStream;  // Legacy name.
-  fs.FileWriteStream = WriteStream;  // Legacy name.
+
   fs.createReadStream = createReadStream
   fs.createWriteStream = createWriteStream
   var fs$readFile = fs.readFile
@@ -3228,6 +3265,7 @@ function patch (fs) {
 
       if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
         enqueue([go$readdir, [args]])
+
       else {
         if (typeof cb === 'function')
           cb.apply(this, arguments)
@@ -3247,15 +3285,61 @@ function patch (fs) {
   }
 
   var fs$ReadStream = fs.ReadStream
-  ReadStream.prototype = Object.create(fs$ReadStream.prototype)
-  ReadStream.prototype.open = ReadStream$open
+  if (fs$ReadStream) {
+    ReadStream.prototype = Object.create(fs$ReadStream.prototype)
+    ReadStream.prototype.open = ReadStream$open
+  }
 
   var fs$WriteStream = fs.WriteStream
-  WriteStream.prototype = Object.create(fs$WriteStream.prototype)
-  WriteStream.prototype.open = WriteStream$open
+  if (fs$WriteStream) {
+    WriteStream.prototype = Object.create(fs$WriteStream.prototype)
+    WriteStream.prototype.open = WriteStream$open
+  }
 
-  fs.ReadStream = ReadStream
-  fs.WriteStream = WriteStream
+  Object.defineProperty(fs, 'ReadStream', {
+    get: function () {
+      return ReadStream
+    },
+    set: function (val) {
+      ReadStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+  Object.defineProperty(fs, 'WriteStream', {
+    get: function () {
+      return WriteStream
+    },
+    set: function (val) {
+      WriteStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+
+  // legacy names
+  var FileReadStream = ReadStream
+  Object.defineProperty(fs, 'FileReadStream', {
+    get: function () {
+      return FileReadStream
+    },
+    set: function (val) {
+      FileReadStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
+  var FileWriteStream = WriteStream
+  Object.defineProperty(fs, 'FileWriteStream', {
+    get: function () {
+      return FileWriteStream
+    },
+    set: function (val) {
+      FileWriteStream = val
+    },
+    enumerable: true,
+    configurable: true
+  })
 
   function ReadStream (path, options) {
     if (this instanceof ReadStream)
@@ -3301,11 +3385,11 @@ function patch (fs) {
   }
 
   function createReadStream (path, options) {
-    return new ReadStream(path, options)
+    return new fs.ReadStream(path, options)
   }
 
   function createWriteStream (path, options) {
-    return new WriteStream(path, options)
+    return new fs.WriteStream(path, options)
   }
 
   var fs$open = fs.open
@@ -3334,11 +3418,11 @@ function patch (fs) {
 
 function enqueue (elem) {
   debug('ENQUEUE', elem[0].name, elem[1])
-  queue.push(elem)
+  global[gracefulQueue].push(elem)
 }
 
 function retry () {
-  var elem = queue.shift()
+  var elem = global[gracefulQueue].shift()
   if (elem) {
     debug('RETRY', elem[0].name, elem[1])
     elem[0].apply(null, elem[1])
@@ -3356,8 +3440,7 @@ module.exports = require("fs");
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var fs = __webpack_require__(25)
-var constants = __webpack_require__(26)
+var constants = __webpack_require__(25)
 
 var origCwd = process.cwd
 var cwd = null
@@ -3474,20 +3557,26 @@ function patch (fs) {
   }
 
   // if read() returns EAGAIN, then just try it again.
-  fs.read = (function (fs$read) { return function (fd, buffer, offset, length, position, callback_) {
-    var callback
-    if (callback_ && typeof callback_ === 'function') {
-      var eagCounter = 0
-      callback = function (er, _, __) {
-        if (er && er.code === 'EAGAIN' && eagCounter < 10) {
-          eagCounter ++
-          return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+  fs.read = (function (fs$read) {
+    function read (fd, buffer, offset, length, position, callback_) {
+      var callback
+      if (callback_ && typeof callback_ === 'function') {
+        var eagCounter = 0
+        callback = function (er, _, __) {
+          if (er && er.code === 'EAGAIN' && eagCounter < 10) {
+            eagCounter ++
+            return fs$read.call(fs, fd, buffer, offset, length, position, callback)
+          }
+          callback_.apply(this, arguments)
         }
-        callback_.apply(this, arguments)
       }
+      return fs$read.call(fs, fd, buffer, offset, length, position, callback)
     }
-    return fs$read.call(fs, fd, buffer, offset, length, position, callback)
-  }})(fs.read)
+
+    // This ensures `util.promisify` works as it does for native `fs.read`.
+    read.__proto__ = fs$read
+    return read
+  })(fs.read)
 
   fs.readSync = (function (fs$readSync) { return function (fd, buffer, offset, length, position) {
     var eagCounter = 0
@@ -3503,73 +3592,36 @@ function patch (fs) {
       }
     }
   }})(fs.readSync)
-}
 
-function patchLchmod (fs) {
-  fs.lchmod = function (path, mode, callback) {
-    fs.open( path
-           , constants.O_WRONLY | constants.O_SYMLINK
-           , mode
-           , function (err, fd) {
-      if (err) {
-        if (callback) callback(err)
-        return
-      }
-      // prefer to return the chmod error, if one occurs,
-      // but still try to close, and report closing errors if they occur.
-      fs.fchmod(fd, mode, function (err) {
-        fs.close(fd, function(err2) {
-          if (callback) callback(err || err2)
-        })
-      })
-    })
-  }
-
-  fs.lchmodSync = function (path, mode) {
-    var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
-
-    // prefer to return the chmod error, if one occurs,
-    // but still try to close, and report closing errors if they occur.
-    var threw = true
-    var ret
-    try {
-      ret = fs.fchmodSync(fd, mode)
-      threw = false
-    } finally {
-      if (threw) {
-        try {
-          fs.closeSync(fd)
-        } catch (er) {}
-      } else {
-        fs.closeSync(fd)
-      }
-    }
-    return ret
-  }
-}
-
-function patchLutimes (fs) {
-  if (constants.hasOwnProperty("O_SYMLINK")) {
-    fs.lutimes = function (path, at, mt, cb) {
-      fs.open(path, constants.O_SYMLINK, function (er, fd) {
-        if (er) {
-          if (cb) cb(er)
+  function patchLchmod (fs) {
+    fs.lchmod = function (path, mode, callback) {
+      fs.open( path
+             , constants.O_WRONLY | constants.O_SYMLINK
+             , mode
+             , function (err, fd) {
+        if (err) {
+          if (callback) callback(err)
           return
         }
-        fs.futimes(fd, at, mt, function (er) {
-          fs.close(fd, function (er2) {
-            if (cb) cb(er || er2)
+        // prefer to return the chmod error, if one occurs,
+        // but still try to close, and report closing errors if they occur.
+        fs.fchmod(fd, mode, function (err) {
+          fs.close(fd, function(err2) {
+            if (callback) callback(err || err2)
           })
         })
       })
     }
 
-    fs.lutimesSync = function (path, at, mt) {
-      var fd = fs.openSync(path, constants.O_SYMLINK)
-      var ret
+    fs.lchmodSync = function (path, mode) {
+      var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
+
+      // prefer to return the chmod error, if one occurs,
+      // but still try to close, and report closing errors if they occur.
       var threw = true
+      var ret
       try {
-        ret = fs.futimesSync(fd, at, mt)
+        ret = fs.fchmodSync(fd, mode)
         threw = false
       } finally {
         if (threw) {
@@ -3582,151 +3634,167 @@ function patchLutimes (fs) {
       }
       return ret
     }
-
-  } else {
-    fs.lutimes = function (_a, _b, _c, cb) { if (cb) process.nextTick(cb) }
-    fs.lutimesSync = function () {}
   }
-}
 
-function chmodFix (orig) {
-  if (!orig) return orig
-  return function (target, mode, cb) {
-    return orig.call(fs, target, mode, function (er) {
-      if (chownErOk(er)) er = null
-      if (cb) cb.apply(this, arguments)
-    })
-  }
-}
+  function patchLutimes (fs) {
+    if (constants.hasOwnProperty("O_SYMLINK")) {
+      fs.lutimes = function (path, at, mt, cb) {
+        fs.open(path, constants.O_SYMLINK, function (er, fd) {
+          if (er) {
+            if (cb) cb(er)
+            return
+          }
+          fs.futimes(fd, at, mt, function (er) {
+            fs.close(fd, function (er2) {
+              if (cb) cb(er || er2)
+            })
+          })
+        })
+      }
 
-function chmodFixSync (orig) {
-  if (!orig) return orig
-  return function (target, mode) {
-    try {
-      return orig.call(fs, target, mode)
-    } catch (er) {
-      if (!chownErOk(er)) throw er
+      fs.lutimesSync = function (path, at, mt) {
+        var fd = fs.openSync(path, constants.O_SYMLINK)
+        var ret
+        var threw = true
+        try {
+          ret = fs.futimesSync(fd, at, mt)
+          threw = false
+        } finally {
+          if (threw) {
+            try {
+              fs.closeSync(fd)
+            } catch (er) {}
+          } else {
+            fs.closeSync(fd)
+          }
+        }
+        return ret
+      }
+
+    } else {
+      fs.lutimes = function (_a, _b, _c, cb) { if (cb) process.nextTick(cb) }
+      fs.lutimesSync = function () {}
     }
   }
-}
 
-
-function chownFix (orig) {
-  if (!orig) return orig
-  return function (target, uid, gid, cb) {
-    return orig.call(fs, target, uid, gid, function (er) {
-      if (chownErOk(er)) er = null
-      if (cb) cb.apply(this, arguments)
-    })
-  }
-}
-
-function chownFixSync (orig) {
-  if (!orig) return orig
-  return function (target, uid, gid) {
-    try {
-      return orig.call(fs, target, uid, gid)
-    } catch (er) {
-      if (!chownErOk(er)) throw er
+  function chmodFix (orig) {
+    if (!orig) return orig
+    return function (target, mode, cb) {
+      return orig.call(fs, target, mode, function (er) {
+        if (chownErOk(er)) er = null
+        if (cb) cb.apply(this, arguments)
+      })
     }
   }
-}
+
+  function chmodFixSync (orig) {
+    if (!orig) return orig
+    return function (target, mode) {
+      try {
+        return orig.call(fs, target, mode)
+      } catch (er) {
+        if (!chownErOk(er)) throw er
+      }
+    }
+  }
 
 
-function statFix (orig) {
-  if (!orig) return orig
-  // Older versions of Node erroneously returned signed integers for
-  // uid + gid.
-  return function (target, cb) {
-    return orig.call(fs, target, function (er, stats) {
-      if (!stats) return cb.apply(this, arguments)
+  function chownFix (orig) {
+    if (!orig) return orig
+    return function (target, uid, gid, cb) {
+      return orig.call(fs, target, uid, gid, function (er) {
+        if (chownErOk(er)) er = null
+        if (cb) cb.apply(this, arguments)
+      })
+    }
+  }
+
+  function chownFixSync (orig) {
+    if (!orig) return orig
+    return function (target, uid, gid) {
+      try {
+        return orig.call(fs, target, uid, gid)
+      } catch (er) {
+        if (!chownErOk(er)) throw er
+      }
+    }
+  }
+
+  function statFix (orig) {
+    if (!orig) return orig
+    // Older versions of Node erroneously returned signed integers for
+    // uid + gid.
+    return function (target, options, cb) {
+      if (typeof options === 'function') {
+        cb = options
+        options = null
+      }
+      function callback (er, stats) {
+        if (stats) {
+          if (stats.uid < 0) stats.uid += 0x100000000
+          if (stats.gid < 0) stats.gid += 0x100000000
+        }
+        if (cb) cb.apply(this, arguments)
+      }
+      return options ? orig.call(fs, target, options, callback)
+        : orig.call(fs, target, callback)
+    }
+  }
+
+  function statFixSync (orig) {
+    if (!orig) return orig
+    // Older versions of Node erroneously returned signed integers for
+    // uid + gid.
+    return function (target, options) {
+      var stats = options ? orig.call(fs, target, options)
+        : orig.call(fs, target)
       if (stats.uid < 0) stats.uid += 0x100000000
       if (stats.gid < 0) stats.gid += 0x100000000
-      if (cb) cb.apply(this, arguments)
-    })
+      return stats;
+    }
   }
-}
 
-function statFixSync (orig) {
-  if (!orig) return orig
-  // Older versions of Node erroneously returned signed integers for
-  // uid + gid.
-  return function (target) {
-    var stats = orig.call(fs, target)
-    if (stats.uid < 0) stats.uid += 0x100000000
-    if (stats.gid < 0) stats.gid += 0x100000000
-    return stats;
-  }
-}
-
-// ENOSYS means that the fs doesn't support the op. Just ignore
-// that, because it doesn't matter.
-//
-// if there's no getuid, or if getuid() is something other
-// than 0, and the error is EINVAL or EPERM, then just ignore
-// it.
-//
-// This specific case is a silent failure in cp, install, tar,
-// and most other unix tools that manage permissions.
-//
-// When running as root, or if other types of errors are
-// encountered, then it's strict.
-function chownErOk (er) {
-  if (!er)
-    return true
-
-  if (er.code === "ENOSYS")
-    return true
-
-  var nonroot = !process.getuid || process.getuid() !== 0
-  if (nonroot) {
-    if (er.code === "EINVAL" || er.code === "EPERM")
+  // ENOSYS means that the fs doesn't support the op. Just ignore
+  // that, because it doesn't matter.
+  //
+  // if there's no getuid, or if getuid() is something other
+  // than 0, and the error is EINVAL or EPERM, then just ignore
+  // it.
+  //
+  // This specific case is a silent failure in cp, install, tar,
+  // and most other unix tools that manage permissions.
+  //
+  // When running as root, or if other types of errors are
+  // encountered, then it's strict.
+  function chownErOk (er) {
+    if (!er)
       return true
-  }
 
-  return false
+    if (er.code === "ENOSYS")
+      return true
+
+    var nonroot = !process.getuid || process.getuid() !== 0
+    if (nonroot) {
+      if (er.code === "EINVAL" || er.code === "EPERM")
+        return true
+    }
+
+    return false
+  }
 }
 
 
 /***/ }),
 /* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var fs = __webpack_require__(23)
-
-module.exports = clone(fs)
-
-function clone (obj) {
-  if (obj === null || typeof obj !== 'object')
-    return obj
-
-  if (obj instanceof Object)
-    var copy = { __proto__: obj.__proto__ }
-  else
-    var copy = Object.create(null)
-
-  Object.getOwnPropertyNames(obj).forEach(function (key) {
-    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
-  })
-
-  return copy
-}
-
-
-/***/ }),
-/* 26 */
 /***/ (function(module, exports) {
 
 module.exports = require("constants");
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(28).Stream
+var Stream = __webpack_require__(27).Stream
 
 module.exports = legacy
 
@@ -3847,10 +3915,36 @@ function legacy (fs) {
 
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = require("stream");
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = clone
+
+function clone (obj) {
+  if (obj === null || typeof obj !== 'object')
+    return obj
+
+  if (obj instanceof Object)
+    var copy = { __proto__: obj.__proto__ }
+  else
+    var copy = Object.create(null)
+
+  Object.getOwnPropertyNames(obj).forEach(function (key) {
+    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
+  })
+
+  return copy
+}
+
 
 /***/ }),
 /* 29 */
@@ -15155,7 +15249,7 @@ function retry () {
 /* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var constants = __webpack_require__(26)
+var constants = __webpack_require__(25)
 
 var origCwd = process.cwd
 var cwd = null
@@ -15490,7 +15584,7 @@ function patch (fs) {
 /* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(28).Stream
+var Stream = __webpack_require__(27).Stream
 
 module.exports = legacy
 
@@ -16154,7 +16248,7 @@ function retry () {
 /***/ (function(module, exports, __webpack_require__) {
 
 var fs = __webpack_require__(107)
-var constants = __webpack_require__(26)
+var constants = __webpack_require__(25)
 
 var origCwd = process.cwd
 var cwd = null
@@ -16517,7 +16611,7 @@ function clone (obj) {
 /* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(28).Stream
+var Stream = __webpack_require__(27).Stream
 
 module.exports = legacy
 
@@ -21366,7 +21460,7 @@ module.exports = eos;
 
 "use strict";
 
-const {PassThrough: PassThroughStream} = __webpack_require__(28);
+const {PassThrough: PassThroughStream} = __webpack_require__(27);
 
 module.exports = options => {
 	options = {...options};
@@ -21426,7 +21520,7 @@ module.exports = options => {
 "use strict";
 
 
-const { PassThrough } = __webpack_require__(28);
+const { PassThrough } = __webpack_require__(27);
 
 module.exports = function (/*streams...*/) {
   var sources = []
@@ -22308,7 +22402,7 @@ module.exports.cli = __webpack_require__(168);
 
 
 
-var stream = __webpack_require__(28);
+var stream = __webpack_require__(27);
 var util = __webpack_require__(29);
 var fs = __webpack_require__(23);
 
@@ -22506,7 +22600,7 @@ function lineMerger(host) {
 /* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(28)
+var Stream = __webpack_require__(27)
 
 // through
 //
@@ -22620,7 +22714,7 @@ function through (write, end, opts) {
 /* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(28)
+var Stream = __webpack_require__(27)
 var writeMethods = ["write", "end", "destroy"]
 var readMethods = ["resume", "pause"]
 var readEvents = ["data", "close"]
@@ -23652,7 +23746,7 @@ module.exports = (...arguments_) => {
  * Copyright (c) 2014-2016 Teambition
  * Licensed under the MIT license.
  */
-const Stream = __webpack_require__(28)
+const Stream = __webpack_require__(27)
 const PassThrough = Stream.PassThrough
 const slice = Array.prototype.slice
 
@@ -28052,7 +28146,7 @@ exports.default = ProviderAsync;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(28);
+const stream_1 = __webpack_require__(27);
 const fsStat = __webpack_require__(209);
 const fsWalk = __webpack_require__(214);
 const reader_1 = __webpack_require__(234);
@@ -29053,7 +29147,7 @@ exports.default = Reader;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(28);
+const stream_1 = __webpack_require__(27);
 const async_1 = __webpack_require__(216);
 class StreamProvider {
     constructor(_root, _settings) {
@@ -29487,7 +29581,7 @@ exports.default = EntryTransformer;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(28);
+const stream_1 = __webpack_require__(27);
 const stream_2 = __webpack_require__(208);
 const provider_1 = __webpack_require__(235);
 class ProviderStream extends provider_1.default {
@@ -30527,7 +30621,7 @@ module.exports = path => {
 
 "use strict";
 
-const {Transform} = __webpack_require__(28);
+const {Transform} = __webpack_require__(27);
 
 class ObjectTransform extends Transform {
 	constructor() {
@@ -30928,7 +31022,7 @@ function retry () {
 /* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var constants = __webpack_require__(26)
+var constants = __webpack_require__(25)
 
 var origCwd = process.cwd
 var cwd = null
@@ -31276,7 +31370,7 @@ function patch (fs) {
 /* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream = __webpack_require__(28).Stream
+var Stream = __webpack_require__(27).Stream
 
 module.exports = legacy
 
@@ -67534,7 +67628,7 @@ function readdirSync (dir, options, internalOptions) {
 "use strict";
 
 
-const Readable = __webpack_require__(28).Readable;
+const Readable = __webpack_require__(27).Readable;
 const EventEmitter = __webpack_require__(46).EventEmitter;
 const path = __webpack_require__(16);
 const normalizeOptions = __webpack_require__(650);
@@ -68935,7 +69029,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var stream = __webpack_require__(28);
+var stream = __webpack_require__(27);
 var fsStat = __webpack_require__(665);
 var fs_1 = __webpack_require__(669);
 var FileSystemStream = /** @class */ (function (_super) {
@@ -69169,7 +69263,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var stream = __webpack_require__(28);
+var stream = __webpack_require__(27);
 var readdir = __webpack_require__(647);
 var reader_1 = __webpack_require__(660);
 var fs_stream_1 = __webpack_require__(664);
