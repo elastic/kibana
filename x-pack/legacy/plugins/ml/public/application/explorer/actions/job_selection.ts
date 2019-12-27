@@ -11,12 +11,9 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlJobService } from '../../services/job_service';
 
 import { EXPLORER_ACTION } from '../explorer_constants';
-import { createJobs, RestoredAppState } from '../explorer_utils';
+import { createJobs } from '../explorer_utils';
 
-export function jobSelectionActionCreator(
-  selectedJobIds: string[],
-  { filterData, selectedCells, viewBySwimlaneFieldName }: RestoredAppState
-) {
+export function jobSelectionActionCreator(selectedJobIds: string[]) {
   return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
     map(resp => {
       if (resp.err) {
@@ -35,10 +32,7 @@ export function jobSelectionActionCreator(
         type: EXPLORER_ACTION.JOB_SELECTION_CHANGE,
         payload: {
           loading: false,
-          selectedCells,
           selectedJobs,
-          viewBySwimlaneFieldName,
-          filterData,
         },
       };
     })

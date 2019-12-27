@@ -21,6 +21,7 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
+import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
@@ -99,10 +100,9 @@ const ExplorerUrlStateManager: FC = () => {
     }
   }, [JSON.stringify(globalState?.time)]);
 
-  const restoredAppState = restoreAppState(appState);
   useEffect(() => {
     if (jobIds.length > 0) {
-      explorerService.updateJobSelection(jobIds, restoredAppState);
+      explorerService.updateJobSelection(jobIds);
     } else {
       explorerService.clearJobs();
     }
@@ -134,7 +134,10 @@ const ExplorerUrlStateManager: FC = () => {
 
   const explorerAppState = useObservable(explorerService.appState$);
   useEffect(() => {
-    if (explorerAppState !== undefined) {
+    if (
+      explorerAppState !== undefined &&
+      explorerAppState.mlExplorerSwimlane.viewByFieldName !== undefined
+    ) {
       setAppState(explorerAppState);
     }
   }, [JSON.stringify(explorerAppState)]);
@@ -146,10 +149,18 @@ const ExplorerUrlStateManager: FC = () => {
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
+  const restoredAppState = restoreAppState(appState);
+
+  const [selectedCells, setSelectedCells] = useSelectedCells();
+  useEffect(() => {
+    if (selectedCells !== undefined) {
+      explorerService.setSelectedCells(selectedCells);
+    }
+  }, [JSON.stringify(selectedCells)]);
+
   const appStateMappedToExplorerState: DeepPartial<ExplorerState> = {
     tableInterval,
     tableSeverity: tableSeverity.val,
-    ...restoredAppState,
   };
 
   useEffect(() => {
@@ -187,6 +198,7 @@ const ExplorerUrlStateManager: FC = () => {
         {...{
           annotationsRefresh,
           explorerState,
+          setSelectedCells,
           showCharts,
         }}
       />

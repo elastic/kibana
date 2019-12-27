@@ -37,7 +37,7 @@ export declare const getDefaultSwimlaneData: () => SwimlaneData;
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
 
 export declare const getSelectionInfluencers: (
-  selectedCells: AppStateSelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   fieldName: string
 ) => any[];
 

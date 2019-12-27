@@ -7,7 +7,7 @@
 import { formatHumanReadableDateTime } from '../../../util/date_utils';
 
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
-import { EXPLORER_ACTION, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
+import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
 import { Action } from '../../explorer_dashboard_service';
 import {
   getClearedSelectedAnomaliesState,
@@ -81,21 +81,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
 
     case EXPLORER_ACTION.SET_SELECTED_CELLS:
       const selectedCells = payload;
-      selectedCells.showTopFieldValues = false;
-
-      const currentSwimlaneType = state.selectedCells?.type;
-      const currentShowTopFieldValues = state.selectedCells?.showTopFieldValues;
-      const newSwimlaneType = selectedCells?.type;
-
-      if (
-        (currentSwimlaneType === SWIMLANE_TYPE.OVERALL &&
-          newSwimlaneType === SWIMLANE_TYPE.VIEW_BY) ||
-        newSwimlaneType === SWIMLANE_TYPE.OVERALL ||
-        currentShowTopFieldValues === true
-      ) {
-        selectedCells.showTopFieldValues = true;
-      }
-
       nextState = {
         ...state,
         selectedCells,
@@ -121,7 +106,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     case EXPLORER_ACTION.SET_SWIMLANE_LIMIT:
       nextState = {
         ...state,
-        ...getClearedSelectedAnomaliesState(),
         swimlaneLimit: payload,
       };
       break;

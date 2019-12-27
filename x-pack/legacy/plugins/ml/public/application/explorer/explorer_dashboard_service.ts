@@ -19,13 +19,8 @@ import { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { RestoredAppState, AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
-import {
-  explorerReducer,
-  getExplorerDefaultState,
-  ExplorerAppState,
-  ExplorerState,
-} from './reducers';
+import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
+import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
@@ -54,34 +49,52 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
   scan(explorerReducer, getExplorerDefaultState())
 );
 
+interface ExplorerAppState {
+  mlExplorerSwimlane: {
+    selectedType?: string;
+    selectedLanes?: string[];
+    selectedTimes?: number[];
+    showTopFieldValues?: boolean;
+    viewByFieldName?: string;
+  };
+  mlExplorerFilter: {
+    influencersFilterQuery?: unknown;
+    filterActive?: boolean;
+    filteredFields?: string[];
+    queryString?: string;
+  };
+}
+
 const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
-  map((state: ExplorerState) => {
-    const appState: ExplorerAppState = {
-      mlExplorerFilter: {},
-      mlExplorerSwimlane: {},
-    };
+  map(
+    (state: ExplorerState): ExplorerAppState => {
+      const appState: ExplorerAppState = {
+        mlExplorerFilter: {},
+        mlExplorerSwimlane: {},
+      };
 
-    if (state.selectedCells !== undefined) {
-      const swimlaneSelectedCells = state.selectedCells;
-      appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
-      appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
-      appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-      appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      if (state.selectedCells !== undefined) {
+        const swimlaneSelectedCells = state.selectedCells;
+        appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
+        appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
+        appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
+        appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      }
+
+      if (state.viewBySwimlaneFieldName !== undefined) {
+        appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
+      }
+
+      if (state.filterActive) {
+        appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
+        appState.mlExplorerFilter.filterActive = state.filterActive;
+        appState.mlExplorerFilter.filteredFields = state.filteredFields;
+        appState.mlExplorerFilter.queryString = state.queryString;
+      }
+
+      return appState;
     }
-
-    if (state.viewBySwimlaneFieldName !== undefined) {
-      appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
-    }
-
-    if (state.filterActive) {
-      appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
-      appState.mlExplorerFilter.filterActive = state.filterActive;
-      appState.mlExplorerFilter.filteredFields = state.filteredFields;
-      appState.mlExplorerFilter.queryString = state.queryString;
-    }
-
-    return appState;
-  }),
+  ),
   distinctUntilChanged(isEqual)
 );
 
@@ -103,8 +116,8 @@ export const explorerService = {
   clearSelection: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_SELECTION });
   },
-  updateJobSelection: (selectedJobIds: string[], restoredAppState: RestoredAppState) => {
-    explorerAction$.next(jobSelectionActionCreator(selectedJobIds, restoredAppState));
+  updateJobSelection: (selectedJobIds: string[]) => {
+    explorerAction$.next(jobSelectionActionCreator(selectedJobIds));
   },
   reset: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.RESET });

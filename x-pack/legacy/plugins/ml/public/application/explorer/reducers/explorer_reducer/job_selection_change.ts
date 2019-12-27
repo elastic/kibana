@@ -19,7 +19,6 @@ export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload)
   const { selectedJobs } = payload;
   const stateUpdate: ExplorerState = {
     ...state,
-    ...getClearedSelectedAnomaliesState(),
     noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
     overallSwimlaneData: getDefaultSwimlaneData(),
     selectedJobs,

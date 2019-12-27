@@ -204,9 +204,9 @@ export class Explorer extends React.Component {
     // If selectedCells is an empty object we clear any existing selection,
     // otherwise we save the new selection in AppState and update the Explorer.
     if (Object.keys(selectedCells).length === 0) {
-      explorerService.clearSelection();
+      this.props.setSelectedCells();
     } else {
-      explorerService.setSelectedCells(selectedCells);
+      this.props.setSelectedCells(selectedCells);
     }
   };
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
