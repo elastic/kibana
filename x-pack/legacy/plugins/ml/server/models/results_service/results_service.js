@@ -402,11 +402,73 @@ export function resultsServiceProvider(callWithRequest) {
     return definition;
   }
 
+  /**
+   * Gets the record of partition filed - values pairs.
+   * @param jobId
+   * @param earliestMs
+   * @param latestMs
+   * @returns {Promise<*>}
+   */
+  async function getPartitionFieldsValues(jobId, earliestMs, latestMs) {
+    const resp = await callWithRequest('search', {
+      index: ML_RESULTS_INDEX_PATTERN,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
+                },
+              },
+              {
+                range: {
+                  timestamp: {
+                    gte: earliestMs,
+                    lte: latestMs,
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          partition_field_values: {
+            terms: {
+              size: 100,
+              field: 'partition_field_value',
+            },
+          },
+          over_field_values: {
+            terms: {
+              size: 100,
+              field: 'over_field_value',
+            },
+          },
+          by_field_values: {
+            terms: {
+              size: 100,
+              field: 'by_field_value',
+            },
+          },
+        },
+      },
+    });
+
+    return Object.keys(resp.aggregations).reduce((acc, curr) => {
+      acc[curr] = resp.aggregations[curr].buckets.map(({ key }) => key);
+      return acc;
+    }, {});
+  }
+
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
+    getPartitionFieldsValues,
   };
 }
