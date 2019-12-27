@@ -169,6 +169,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
 
       <EuiForm data-test-subj="templateForm">
         <CurrentStepComponent
+          key={currentStep}
           template={template.current}
           setDataGetter={setStepDataGetter}
           updateCurrentStep={updateCurrentStep}
