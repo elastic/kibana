@@ -20,12 +20,11 @@
 import d3 from 'd3';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { Vis } from '../../vis'; // eslint-disable-line
+import { Vis } from '../../vis';
 import { Chart } from '../../visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function() {
   let persistedState;
-  let Vis;
   let vis;
   let el;
   let myChart;
