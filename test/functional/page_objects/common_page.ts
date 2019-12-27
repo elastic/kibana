@@ -39,6 +39,14 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
 
+  interface NavigateProps {
+    appConfig: {};
+    ensureCurrentUrl: boolean;
+    shouldLoginIfPrompted: boolean;
+    shouldAcceptAlert: boolean;
+    useActualUrl: boolean;
+  }
+
   class CommonPage {
     /**
      * Navigates the browser window to provided URL
@@ -115,13 +123,14 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       return currentUrl;
     }
 
-    private async navigate({
-      appConfig,
-      ensureCurrentUrl,
-      shouldLoginIfPrompted,
-      shouldAcceptAlert,
-      useActualUrl,
-    } = {}) {
+    private async navigate(navigateProps: NavigateProps) {
+      const {
+        appConfig,
+        ensureCurrentUrl,
+        shouldLoginIfPrompted,
+        shouldAcceptAlert,
+        useActualUrl,
+      } = navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
       await retry.try(async () => {

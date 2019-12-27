@@ -29,7 +29,7 @@ interface RouterProps {
   history: History;
 }
 
-const AppRoot: React.FC<RouterProps> = React.memo(({ history }) => (
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ history }) => (
   <I18nProvider>
     <Router history={history}>
       <Switch>
