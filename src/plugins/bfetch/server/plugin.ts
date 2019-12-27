@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin, Logger } from 'src/core/server';
+import {
+  CoreStart,
+  PluginInitializerContext,
+  CoreSetup,
+  Plugin,
+  Logger,
+  KibanaRequest,
+} from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
 import {
@@ -35,14 +42,23 @@ export interface BfetchServerSetupDependencies {}
 // eslint-disable-next-line
 export interface BfetchServerStartDependencies {}
 
+export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
+  onRequestStart: (request: KibanaRequest) => void;
+  onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
+}
+
+export interface StreamingResponseRouteParams<Payload, Response>
+  extends StreamingResponseHandler<Payload, Response>,
+    Pick<BatchProcessingRouteParams<any, any>, 'onRequestStart'> {}
+
 export interface BfetchServerSetup {
-  addBatchProcessingRoute: <Request extends object, Response extends object>(
+  addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
     path: string,
-    onBatchItem: (request: Request) => Promise<Response>
+    params: BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => void;
   addStreamingResponseRoute: <Payload, Response>(
     path: string,
-    handler: StreamingResponseHandler<Payload, Response>
+    params: StreamingResponseRouteParams<Payload, Response>
   ) => void;
 }
 
@@ -103,7 +119,10 @@ export class BfetchServerPlugin
   }: {
     router: ReturnType<CoreSetup['http']['createRouter']>;
     logger: Logger;
-  }): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
+  }): BfetchServerSetup['addStreamingResponseRoute'] => (
+    path,
+    { onRequestStart, getResponseStream }
+  ) => {
     router.post(
       {
         path: `/${removeLeadingSlash(path)}`,
@@ -112,15 +131,17 @@ export class BfetchServerPlugin
         },
       },
       async (context, request, response) => {
+        onRequestStart(request);
         const data = request.body;
+        const headers = {
+          'Content-Type': 'application/x-ndjson',
+          Connection: 'keep-alive',
+          'Transfer-Encoding': 'chunked',
+          'Cache-Control': 'no-cache',
+        };
         return response.ok({
-          headers: {
-            'Content-Type': 'application/x-ndjson',
-            Connection: 'keep-alive',
-            'Transfer-Encoding': 'chunked',
-            'Cache-Control': 'no-cache',
-          },
-          body: createNDJSONStream(data, handler, logger),
+          headers,
+          body: createNDJSONStream(data, { getResponseStream }, logger),
         });
       }
     );
@@ -129,27 +150,29 @@ export class BfetchServerPlugin
   private addBatchProcessingRoute = (
     addStreamingResponseRoute: BfetchServerSetup['addStreamingResponseRoute']
   ): BfetchServerSetup['addBatchProcessingRoute'] => <
-    Request extends object,
-    Response extends object,
+    BatchItemData extends object,
+    BatchItemResult extends object,
     E extends ErrorLike = ErrorLike
   >(
     path: string,
-    onBatchItem: (request: Request) => Promise<Response>
+    { onRequestStart, onBatchItem }: BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => {
-    addStreamingResponseRoute<BatchRequestData<Request>, BatchResponseItem<Response, E>>(path, {
-      onRequest: batch => {
-        const subject = new Subject<BatchResponseItem<Response, E>>();
-        batch.forEach(async (batchItem, id) => {
-          try {
-            const result = await onBatchItem(batchItem);
-            subject.next({ id, result });
-          } catch (err) {
-            const error = normalizeError<E>(err);
-            subject.next({ id, error });
-          }
-        });
-        return subject;
-      },
-    });
+    const getResponseStream: StreamingResponseHandler<
+      BatchRequestData<BatchItemData>,
+      BatchResponseItem<BatchItemResult, E>
+    >['getResponseStream'] = batch => {
+      const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
+      batch.forEach(async (batchItem, id) => {
+        try {
+          const result = await onBatchItem(batchItem);
+          subject.next({ id, result });
+        } catch (err) {
+          const error = normalizeError<E>(err);
+          subject.next({ id, error });
+        }
+      });
+      return subject;
+    };
+    addStreamingResponseRoute(path, { onRequestStart, getResponseStream });
   };
 }
