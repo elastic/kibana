@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
-import { FormattedMessage  } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 const getNodeTooltip = node => {

@@ -6,7 +6,14 @@
 
 import React, { PureComponent } from 'react';
 import { uniq, get } from 'lodash';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiLink,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { Stats } from 'plugins/monitoring/components/beats';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
@@ -14,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
-import { FormattedMessage  } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class Listing extends PureComponent {
   getColumns() {

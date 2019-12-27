@@ -64,10 +64,7 @@ export function License(props) {
     <EuiPage>
       <EuiScreenReaderOnly>
         <h1>
-          <FormattedMessage
-            id="xpack.monitoring.license.heading"
-            defaultMessage="License"
-          />
+          <FormattedMessage id="xpack.monitoring.license.heading" defaultMessage="License" />
         </h1>
       </EuiScreenReaderOnly>
       <EuiPageBody>

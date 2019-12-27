@@ -8,12 +8,14 @@ import React, { Fragment } from 'react';
 import moment from 'moment';
 import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
-import { EuiLink,
+import {
+  EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
-  EuiScreenReaderOnly, } from '@elastic/eui';
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
@@ -21,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { APM_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
-import { FormattedMessage   } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getColumns(setupMode) {
   return [

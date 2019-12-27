@@ -7,7 +7,8 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import { partialRight } from 'lodash';
-import { EuiPage,
+import {
+  EuiPage,
   EuiLink,
   EuiPageBody,
   EuiPageContent,
@@ -15,13 +16,14 @@ import { EuiPage,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiScreenReaderOnly } from '@elastic/eui';
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage   } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
@@ -156,9 +158,7 @@ export class PipelineListing extends Component {
               />
             </h1>
           </EuiScreenReaderOnly>
-          <EuiPanel>
-            {this.renderStats()}
-          </EuiPanel>
+          <EuiPanel>{this.renderStats()}</EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>
             <EuiMonitoringSSPTable

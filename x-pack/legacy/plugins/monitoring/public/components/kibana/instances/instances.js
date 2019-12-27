@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiCallOut,
-  EuiScreenReaderOnly
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';

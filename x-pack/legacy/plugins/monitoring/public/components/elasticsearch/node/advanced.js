@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { FormattedMessage  } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const AdvancedNode = ({ nodeSummary, metrics, ...props }) => {
   const metricsToShow = [

@@ -10,14 +10,8 @@ import { DetailDrawer } from './detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiPage,
-  EuiPageContent,
-  EuiPageBody,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
-import { FormattedMessage   } from '@kbn/i18n/react';
+import { EuiSpacer, EuiPage, EuiPageContent, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class PipelineViewer extends React.Component {
   constructor() {

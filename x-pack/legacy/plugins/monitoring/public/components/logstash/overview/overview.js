@@ -5,17 +5,19 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiPage,
+import {
+  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiScreenReaderOnly } from '@elastic/eui';
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { ClusterStatus } from '../cluster_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { FormattedMessage  } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class Overview extends PureComponent {
   render() {

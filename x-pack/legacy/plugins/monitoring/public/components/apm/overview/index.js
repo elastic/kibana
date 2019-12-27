@@ -17,7 +17,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from '../instances/status';
-import { FormattedMessage   } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ApmOverview({ stats, metrics, ...props }) {
   const seriesToShow = [

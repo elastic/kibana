@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { FormattedMessage  } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const AdvancedIndex = ({ indexSummary, metrics, ...props }) => {
   const metricsToShow = [

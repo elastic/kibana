@@ -6,13 +6,15 @@
 
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
-import { EuiPage,
+import {
+  EuiPage,
   EuiLink,
   EuiPageBody,
   EuiPageContent,
   EuiPanel,
   EuiSpacer,
-  EuiScreenReaderOnly } from '@elastic/eui';
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
