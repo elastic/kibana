@@ -29,7 +29,7 @@ import {
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy/legacy_service';
-import { ElasticsearchServiceSetup, APICaller } from '../elasticsearch';
+import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
@@ -174,7 +174,7 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
 /** @internal */
 export interface SavedObjectsSetupDeps {
   legacyPlugins: LegacyServiceDiscoverPlugins;
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
 }
 
 /** @internal */
