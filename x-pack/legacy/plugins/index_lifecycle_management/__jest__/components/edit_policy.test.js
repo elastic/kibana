@@ -238,7 +238,7 @@ describe('edit policy', () => {
     });
   });
   describe('warm phase', () => {
-    test('should show positive number required equal to or above zero error when trying to save warm phase with 0 for after', () => {
+    test('', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -375,7 +375,7 @@ describe('edit policy', () => {
     });
   });
   describe('cold phase', () => {
-    test('should show positive number required error when trying to save cold phase with less than 0 for after', () => {
+    test('', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -456,7 +456,7 @@ describe('edit policy', () => {
     });
   });
   describe('delete phase', () => {
-    test('should show positive number required error when trying to save delete phase with less than 0 for after', () => {
+    test('', () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
