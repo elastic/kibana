@@ -59,7 +59,7 @@ export function NoData(props) {
           <h1>
             <FormattedMessage
               id="xpack.monitoring.no_data.internal_collection.heading"
-              defaultMessage="No monitoring data found. (Internal collection)"
+              defaultMessage="No monitoring data found."
             />
           </h1>
         </EuiScreenReaderOnly>
