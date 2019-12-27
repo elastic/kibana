@@ -17,7 +17,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 
 import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
 import { enableRules } from '../../../../../containers/detection_engine/rules';
-import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../../../../lib/kibana';
 import { enableRulesAction } from '../../all/actions';
 import { Action } from '../../all/reducer';
 
@@ -50,7 +50,7 @@ export const RuleSwitchComponent = ({
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {

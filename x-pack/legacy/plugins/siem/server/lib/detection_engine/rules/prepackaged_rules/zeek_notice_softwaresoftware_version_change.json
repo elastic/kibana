@@ -1,0 +1,17 @@
+{
+  "rule_id": "ea1d2c1b-ecfe-42a5-bd0b-56c7a1bd8075",
+  "risk_score": 50,
+  "description": "Indicates that an interesting software application changed versions on a host.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Software::Software_Version_Change",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Software::Software_Version_Change\" or rule.name: \"Software::Software_Version_Change\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}
