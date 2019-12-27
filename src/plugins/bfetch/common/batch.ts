@@ -23,7 +23,7 @@ export interface ErrorLike {
 
 export type BatchRequestData<Item> = Item[];
 
-export interface BatchResponseItem<Result extends object, Error extends ErrorLike> {
+export interface BatchResponseItem<Result extends object, Error extends ErrorLike = ErrorLike> {
   id: number;
   result?: Result;
   error?: Error;

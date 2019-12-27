@@ -19,7 +19,14 @@
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin, Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { StreamingResponseHandler, removeLeadingSlash } from '../common';
+import { Subject } from 'rxjs';
+import {
+  StreamingResponseHandler,
+  BatchRequestData,
+  BatchResponseItem,
+  ErrorLike,
+  removeLeadingSlash,
+} from '../common';
 import { createNDJSONStream } from './streaming';
 
 // eslint-disable-next-line
@@ -29,11 +36,38 @@ export interface BfetchServerSetupDependencies {}
 export interface BfetchServerStartDependencies {}
 
 export interface BfetchServerSetup {
-  addStreamingResponseRoute: (path: string, handler: StreamingResponseHandler<any, any>) => void;
+  addBatchProcessingRoute: <Request extends object, Response extends object>(
+    path: string,
+    onBatchItem: (request: Request) => Promise<Response>
+  ) => void;
+  addStreamingResponseRoute: <Payload, Response>(
+    path: string,
+    handler: StreamingResponseHandler<Payload, Response>
+  ) => void;
 }
 
 // eslint-disable-next-line
 export interface BfetchServerStart {}
+
+const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => {
+  if (!err) {
+    return {
+      message: 'Unknown error.',
+    } as E;
+  }
+  if (err instanceof Error) {
+    return { message: err.message } as E;
+  }
+  if (typeof err === 'object') {
+    return {
+      ...err,
+      message: err.message || 'Unknown error.',
+    } as E;
+  }
+  return {
+    message: String(err),
+  } as E;
+};
 
 export class BfetchServerPlugin
   implements
@@ -49,8 +83,10 @@ export class BfetchServerPlugin
     const logger = this.initializerContext.logger.get();
     const router = core.http.createRouter();
     const addStreamingResponseRoute = this.addStreamingResponseRoute({ router, logger });
+    const addBatchProcessingRoute = this.addBatchProcessingRoute(addStreamingResponseRoute);
 
     return {
+      addBatchProcessingRoute,
       addStreamingResponseRoute,
     };
   }
@@ -88,5 +124,32 @@ export class BfetchServerPlugin
         });
       }
     );
+  };
+
+  private addBatchProcessingRoute = (
+    addStreamingResponseRoute: BfetchServerSetup['addStreamingResponseRoute']
+  ): BfetchServerSetup['addBatchProcessingRoute'] => <
+    Request extends object,
+    Response extends object,
+    E extends ErrorLike = ErrorLike
+  >(
+    path: string,
+    onBatchItem: (request: Request) => Promise<Response>
+  ) => {
+    addStreamingResponseRoute<BatchRequestData<Request>, BatchResponseItem<Response, E>>(path, {
+      onRequest: batch => {
+        const subject = new Subject<BatchResponseItem<Response, E>>();
+        batch.forEach(async (batchItem, id) => {
+          try {
+            const result = await onBatchItem(batchItem);
+            subject.next({ id, result });
+          } catch (err) {
+            const error = normalizeError<E>(err);
+            subject.next({ id, error });
+          }
+        });
+        return subject;
+      },
+    });
   };
 }
