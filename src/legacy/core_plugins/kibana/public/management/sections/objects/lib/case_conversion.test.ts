@@ -17,40 +17,20 @@
  * under the License.
  */
 
-import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from './case_conversion';
-
-describe('keysToSnakeCaseShallow', () => {
-  it("should convert all of an object's keys to snake case", () => {
-    const result = keysToSnakeCaseShallow({
-      camelCase: 'camel_case',
-      'kebab-case': 'kebab_case',
-      snake_case: 'snake_case',
-    });
-
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "camel_case": "camel_case",
-  "kebab_case": "kebab_case",
-  "snake_case": "snake_case",
-}
-`);
-  });
-});
+import { keysToCamelCaseShallow } from './case_conversion';
 
 describe('keysToCamelCaseShallow', () => {
   it("should convert all of an object's keys to camel case", () => {
-    const result = keysToCamelCaseShallow({
+    const data = {
       camelCase: 'camelCase',
       'kebab-case': 'kebabCase',
       snake_case: 'snakeCase',
-    });
+    };
 
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "camelCase": "camelCase",
-  "kebabCase": "kebabCase",
-  "snakeCase": "snakeCase",
-}
-`);
+    const result = keysToCamelCaseShallow(data);
+
+    expect(result.camelCase).toBe('camelCase');
+    expect(result.kebabCase).toBe('kebabCase');
+    expect(result.snakeCase).toBe('snakeCase');
   });
 });

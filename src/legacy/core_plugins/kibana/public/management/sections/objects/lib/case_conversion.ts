@@ -17,6 +17,8 @@
  * under the License.
  */
 
-import moment from 'moment';
+import { mapKeys, camelCase } from 'lodash';
 
-export function parseInterval(interval: string): moment.Duration | null;
+export function keysToCamelCaseShallow(object: Record<string, any>) {
+  return mapKeys(object, (value, key) => camelCase(key));
+}

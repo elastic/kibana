@@ -17,16 +17,20 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { keysToSnakeCaseShallow } from './case_conversion';
 
-export function keysToSnakeCaseShallow(object: Record<string, any>) {
-  return _.mapKeys(object, (value, key) => {
-    return _.snakeCase(key);
-  });
-}
+describe('keysToSnakeCaseShallow', () => {
+  it("should convert all of an object's keys to snake case", () => {
+    const data = {
+      camelCase: 'camel_case',
+      'kebab-case': 'kebab_case',
+      snake_case: 'snake_case',
+    };
 
-export function keysToCamelCaseShallow(object: Record<string, any>) {
-  return _.mapKeys(object, (value, key) => {
-    return _.camelCase(key);
+    const result = keysToSnakeCaseShallow(data);
+
+    expect(result.camel_case).toBe('camel_case');
+    expect(result.kebab_case).toBe('kebab_case');
+    expect(result.snake_case).toBe('snake_case');
   });
-}
+});
