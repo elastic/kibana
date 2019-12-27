@@ -53,7 +53,6 @@ describe('Fetch', () => {
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'CustomContentType',
-        'kbn-version': 'VERSION',
       });
     });
 
@@ -79,17 +78,49 @@ describe('Fetch', () => {
         headers: { myHeader: 'foo' },
       });
 
-      expect(fetchMock.lastOptions()!.headers).toEqual({
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
         myheader: 'foo',
       });
     });
 
-    it('should set kbn-system-api header', async () => {
+    it('should not set kbn-system-api header by default', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
         headers: { myHeader: 'foo' },
+      });
+
+      expect(fetchMock.lastOptions()!.headers['kbn-system-api']).toBeUndefined();
+    });
+
+    it('should not set kbn-system-api header when asSystemApi: false', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemApi: false,
+      });
+
+      expect(fetchMock.lastOptions()!.headers['kbn-system-api']).toBeUndefined();
+    });
+
+    it('should set kbn-system-api header when asSystemApi: true', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemApi: true,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-system-api': 'true',
+        myheader: 'foo',
+      });
+    });
+
+    it('should not allow overwriting of internal headers', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!', 'kbn-system-api': 'ANOTHER!' },
         asSystemApi: true,
       });
 

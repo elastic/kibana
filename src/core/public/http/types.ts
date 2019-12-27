@@ -217,7 +217,8 @@ export interface HttpFetchOptions extends HttpRequestInit {
   headers?: HttpHeadersInit;
 
   /**
-   * Whether or not the request should include the "system API" header to differentiate from application-level requests.
+   * Whether or not the request should include the "system API" header to differentiate an end user request from Kibana
+   * internal request.
    * Can be read on the server-side using KibanaRequest#isSystemApi. Defaults to `false`.
    */
   asSystemApi?: boolean;

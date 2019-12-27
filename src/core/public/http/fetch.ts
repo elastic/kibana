@@ -107,9 +107,9 @@ export class Fetch {
       {
         headers: {
           'Content-Type': 'application/json',
+          ...options.headers,
           'kbn-version': this.params.kibanaVersion,
           'kbn-system-api': options.asSystemApi ? 'true' : undefined,
-          ...options.headers,
         },
       }
     );
