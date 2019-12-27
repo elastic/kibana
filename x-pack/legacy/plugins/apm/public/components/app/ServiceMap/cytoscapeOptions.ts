@@ -8,13 +8,12 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { icons, defaultIcon } from './icons';
 
 const layout = {
-  animate: true,
-  animationEasing: theme.euiAnimSlightBounce as cytoscape.Css.TransitionTimingFunction,
-  animationDuration: parseInt(theme.euiAnimSpeedFast, 10),
+  // animate: true,
+  // animationEasing: theme.euiAnimSlightBounce as cytoscape.Css.TransitionTimingFunction,
+  // animationDuration: parseInt(theme.euiAnimSpeedFast, 10),
   name: 'dagre',
   nodeDimensionsIncludeLabels: true,
-  rankDir: 'LR',
-  spacingFactor: 2
+  rankDir: 'LR'
 };
 
 function isDatabaseOrExternal(agentName: string) {
