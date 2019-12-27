@@ -49,7 +49,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('management');
+        await testSubjects.existOrFail('endpointManagement');
       });
     });
 

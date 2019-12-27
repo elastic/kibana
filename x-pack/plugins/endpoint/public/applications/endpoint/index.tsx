@@ -45,8 +45,11 @@ const AppRoot: React.FC<RouterProps> = React.memo(({ history }) => (
         <Route
           path="/management"
           render={() => (
-            <h1 data-test-subj="management ">
-              <FormattedMessage id="xpack.endpoint.management" defaultMessage="Manage Endpoints" />
+            <h1 data-test-subj="endpointManagement">
+              <FormattedMessage
+                id="xpack.endpoint.endpointManagement"
+                defaultMessage="Manage Endpoints"
+              />
             </h1>
           )}
         />
