@@ -124,6 +124,11 @@ declare interface Ml {
 
   results: {
     getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>;
+    fetchPartitionFieldsValues: (
+      jobId: string,
+      earliestMs: number,
+      latestMs: number
+    ) => Observable<Record<string, string[]>>;
   };
 
   jobs: {

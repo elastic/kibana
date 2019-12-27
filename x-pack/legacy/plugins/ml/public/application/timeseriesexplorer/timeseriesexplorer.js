@@ -419,6 +419,10 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
+  /**
+   * Loads available entity values.
+   * @param callback
+   */
   loadEntityValues = (callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
@@ -427,6 +431,12 @@ export class TimeSeriesExplorer extends React.Component {
     // for the selected detector across the full time range. No need to pass through finish().
     const bounds = timefilter.getActiveBounds();
     const detectorIndex = +detectorId;
+
+    mlResultsService
+      .fetchPartitionFieldsValues(selectedJob.job_id, bounds.min.valueOf(), bounds.max.valueOf())
+      .subscribe(v => {
+        console.info(v);
+      });
 
     mlResultsService
       .getRecordsForCriteria(

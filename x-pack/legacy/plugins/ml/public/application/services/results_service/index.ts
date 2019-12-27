@@ -9,6 +9,7 @@ import {
   getModelPlotOutput,
   getRecordsForCriteria,
   getScheduledEventsByBucket,
+  fetchPartitionFieldsValues,
 } from './result_service_rx';
 import {
   getEventDistributionData,
@@ -42,6 +43,7 @@ export const mlResultsService = {
   getEventDistributionData,
   getModelPlotOutput,
   getRecordMaxScoreByTime,
+  fetchPartitionFieldsValues,
 };
 
 type time = string;
