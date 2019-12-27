@@ -44,7 +44,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`endpoint management shows 'Manage Endpoints'`, async () => {
-        await pageObjects.common.navigateToActualUrl('endpoint', '/management', {
+        await pageObjects.common.navigateToRealUrl('endpoint', '/management', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

@@ -8,16 +8,16 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { History, createHashHistory } from 'history';
+import { History, createBrowserHistory } from 'history';
 import { Route, Router, Switch } from 'react-router-dom';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export function renderApp(coreStart: CoreStart, { element }: AppMountParameters) {
+export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const history = createHashHistory();
+  const history = createBrowserHistory({ basename: appBasePath });
   ReactDOM.render(<AppRoot history={history} />, element);
 
   return () => {
