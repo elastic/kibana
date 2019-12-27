@@ -43,22 +43,17 @@ export interface BfetchServerSetupDependencies {}
 export interface BfetchServerStartDependencies {}
 
 export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
-  onRequestStart: (request: KibanaRequest) => void;
   onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
 }
-
-export interface StreamingResponseRouteParams<Payload, Response>
-  extends StreamingResponseHandler<Payload, Response>,
-    Pick<BatchProcessingRouteParams<any, any>, 'onRequestStart'> {}
 
 export interface BfetchServerSetup {
   addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
     path: string,
-    params: BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    handler: (request: KibanaRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => void;
   addStreamingResponseRoute: <Payload, Response>(
     path: string,
-    params: StreamingResponseRouteParams<Payload, Response>
+    params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
   ) => void;
 }
 
@@ -119,10 +114,7 @@ export class BfetchServerPlugin
   }: {
     router: ReturnType<CoreSetup['http']['createRouter']>;
     logger: Logger;
-  }): BfetchServerSetup['addStreamingResponseRoute'] => (
-    path,
-    { onRequestStart, getResponseStream }
-  ) => {
+  }): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
     router.post(
       {
         path: `/${removeLeadingSlash(path)}`,
@@ -131,7 +123,7 @@ export class BfetchServerPlugin
         },
       },
       async (context, request, response) => {
-        onRequestStart(request);
+        const handlerInstance = handler(request);
         const data = request.body;
         const headers = {
           'Content-Type': 'application/x-ndjson',
@@ -141,7 +133,7 @@ export class BfetchServerPlugin
         };
         return response.ok({
           headers,
-          body: createNDJSONStream(data, { getResponseStream }, logger),
+          body: createNDJSONStream(data, handlerInstance, logger),
         });
       }
     );
@@ -155,24 +147,28 @@ export class BfetchServerPlugin
     E extends ErrorLike = ErrorLike
   >(
     path: string,
-    { onRequestStart, onBatchItem }: BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    handler: (request: KibanaRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => {
-    const getResponseStream: StreamingResponseHandler<
+    addStreamingResponseRoute<
       BatchRequestData<BatchItemData>,
       BatchResponseItem<BatchItemResult, E>
-    >['getResponseStream'] = batch => {
-      const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
-      batch.forEach(async (batchItem, id) => {
-        try {
-          const result = await onBatchItem(batchItem);
-          subject.next({ id, result });
-        } catch (err) {
-          const error = normalizeError<E>(err);
-          subject.next({ id, error });
-        }
-      });
-      return subject;
-    };
-    addStreamingResponseRoute(path, { onRequestStart, getResponseStream });
+    >(path, request => {
+      const handlerInstance = handler(request);
+      return {
+        getResponseStream: batch => {
+          const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
+          batch.forEach(async (batchItem, id) => {
+            try {
+              const result = await handlerInstance.onBatchItem(batchItem);
+              subject.next({ id, result });
+            } catch (err) {
+              const error = normalizeError<E>(err);
+              subject.next({ id, error });
+            }
+          });
+          return subject;
+        },
+      };
+    });
   };
 }

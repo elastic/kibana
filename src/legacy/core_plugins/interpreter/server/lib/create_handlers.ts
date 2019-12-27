@@ -17,9 +17,17 @@
  * under the License.
  */
 
-export const createHandlers = (request: any, server: any) => {
+import { Legacy } from '../../../../../../kibana';
+
+export const createHandlers = (request: Legacy.Request, server: Legacy.Server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const config = server.config();
+
+  /*
+  { environment: 'server',
+  serverUri: 'http://localhost:5603/gzu',
+  elasticsearchClient: [AsyncFunction: elasticsearchClient] }
+  */
 
   return {
     environment: 'server',
