@@ -40,7 +40,7 @@ export interface ExplorerState {
   noInfluencersConfigured: boolean;
   overallSwimlaneData: SwimlaneData;
   queryString: string;
-  selectedCells: any;
+  selectedCells: SelectedCells;
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
   swimlaneContainerWidth: number;

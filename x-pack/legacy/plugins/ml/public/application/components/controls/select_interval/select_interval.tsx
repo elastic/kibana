@@ -65,7 +65,7 @@ export const useTableInterval = () => {
   const [appState, setAppState] = useUrlState('_a');
 
   return [
-    appState[TABLE_INTERVAL_APP_STATE_NAME] || TABLE_INTERVAL_DEFAULT,
+    (appState && appState[TABLE_INTERVAL_APP_STATE_NAME]) || TABLE_INTERVAL_DEFAULT,
     (d: TableInterval) => setAppState(TABLE_INTERVAL_APP_STATE_NAME, d),
   ];
 };

@@ -53,7 +53,7 @@ export const ExplorerChartSingleMetric = injectI18n(
     static propTypes = {
       tooManyBuckets: PropTypes.bool,
       seriesConfig: PropTypes.object,
-      severityThreshold: PropTypes.number,
+      severity: PropTypes.number,
     };
 
     componentDidMount() {
@@ -69,7 +69,7 @@ export const ExplorerChartSingleMetric = injectI18n(
 
       const element = this.rootNode;
       const config = this.props.seriesConfig;
-      const severityThreshold = this.props.severityThreshold;
+      const severity = this.props.severity;
 
       if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
         // just return so the empty directive renders without an error later on
@@ -318,7 +318,7 @@ export const ExplorerChartSingleMetric = injectI18n(
           .attr('cy', d => lineChartYScale(d.value))
           .attr('class', d => {
             let markerClass = 'metric-value';
-            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severityThreshold.val) {
+            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity) {
               markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
             }
             return markerClass;

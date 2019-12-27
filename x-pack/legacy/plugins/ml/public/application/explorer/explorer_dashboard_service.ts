@@ -9,14 +9,14 @@
  * components in the Explorer dashboard.
  */
 
-import { isEqual, pick } from 'lodash';
+import { isEqual } from 'lodash';
 
-import { from, isObservable, BehaviorSubject, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, flatMap, map, pairwise, scan } from 'rxjs/operators';
+import { from, isObservable, Observable, Subject } from 'rxjs';
+import { distinctUntilChanged, flatMap, map, scan } from 'rxjs/operators';
 
 import { DeepPartial } from '../../../common/types/common';
 
-import { jobSelectionActionCreator, loadExplorerData } from './actions';
+import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { RestoredAppState, SelectedCells, TimeRangeBounds } from './explorer_utils';
@@ -32,7 +32,7 @@ export const ALLOW_CELL_RANGE_SELECTION = true;
 export const dragSelect$ = new Subject();
 
 type ExplorerAction = Action | Observable<ActionPayload>;
-const explorerAction$ = new Subject<ExplorerAction>();
+export const explorerAction$ = new Subject<ExplorerAction>();
 
 export type ActionPayload = any;
 
@@ -51,42 +51,13 @@ const explorerFilteredAction$ = explorerAction$.pipe(
 
 // applies action and returns state
 const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
-  scan(explorerReducer, getExplorerDefaultState()),
-  pairwise(),
-  map(([prev, curr]) => {
-    if (
-      curr.selectedJobs !== null &&
-      curr.bounds !== undefined &&
-      !isEqual(getCompareState(prev), getCompareState(curr))
-    ) {
-      explorerAction$.next(loadExplorerData(curr).pipe(map(d => setStateActionCreator(d))));
-    }
-    return curr;
-  })
+  scan(explorerReducer, getExplorerDefaultState())
 );
 
 const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
   map((state: ExplorerState) => state.appState),
   distinctUntilChanged(isEqual)
 );
-
-function getCompareState(state: ExplorerState) {
-  return pick(state, [
-    'bounds',
-    'filterActive',
-    'filteredFields',
-    'influencersFilterQuery',
-    'isAndOperator',
-    'noInfluencersConfigured',
-    'selectedCells',
-    'selectedJobs',
-    'swimlaneContainerWidth',
-    'swimlaneLimit',
-    'tableInterval',
-    'tableSeverity',
-    'viewBySwimlaneFieldName',
-  ]);
-}
 
 export const setStateActionCreator = (payload: DeepPartial<ExplorerState>) => ({
   type: EXPLORER_ACTION.SET_STATE,

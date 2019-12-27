@@ -77,15 +77,15 @@ function optionValueToThreshold(value: number) {
   return threshold;
 }
 
-export const TABLE_INTERVAL_DEFAULT = SEVERITY_OPTIONS[0];
-export const TABLE_INTERVAL_APP_STATE_NAME = 'mlSelectSeverity';
+export const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
+export const TABLE_SEVERITY_APP_STATE_NAME = 'mlSelectSeverity';
 
 export const useTableSeverity = () => {
   const [appState, setAppState] = useUrlState('_a');
 
   return [
-    appState[TABLE_INTERVAL_APP_STATE_NAME] || TABLE_INTERVAL_DEFAULT,
-    (d: TableSeverity) => setAppState(TABLE_INTERVAL_APP_STATE_NAME, d),
+    (appState && appState[TABLE_SEVERITY_APP_STATE_NAME]) || TABLE_SEVERITY_DEFAULT,
+    (d: TableSeverity) => setAppState(TABLE_SEVERITY_APP_STATE_NAME, d),
   ];
 };
 

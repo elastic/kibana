@@ -144,9 +144,9 @@ export function loadExplorerData(state: ExplorerState) {
     // Trigger a side-effect to update the charts.
     tap(({ anomalyChartRecords }) => {
       if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
-        updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
+        updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs, tableSeverity);
       } else {
-        updateCharts([], timerange.earliestMs, timerange.latestMs);
+        updateCharts([], timerange.earliestMs, timerange.latestMs, tableSeverity);
       }
     }),
     // Load view-by swimlane data and filtered top influencers.

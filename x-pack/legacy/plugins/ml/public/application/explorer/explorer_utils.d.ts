@@ -185,7 +185,7 @@ declare interface FilterData {
   queryString: string;
 }
 
-declare interface SelectedCells {
+export declare interface SelectedCells {
   type: string;
   lanes: string[];
   times: number[];

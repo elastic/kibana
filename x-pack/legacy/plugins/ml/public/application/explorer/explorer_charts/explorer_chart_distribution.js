@@ -50,7 +50,7 @@ export const ExplorerChartDistribution = injectI18n(
   class ExplorerChartDistribution extends React.Component {
     static propTypes = {
       seriesConfig: PropTypes.object,
-      severityThreshold: PropTypes.number,
+      severity: PropTypes.number,
     };
 
     componentDidMount() {
@@ -66,7 +66,7 @@ export const ExplorerChartDistribution = injectI18n(
 
       const element = this.rootNode;
       const config = this.props.seriesConfig;
-      const severityThreshold = this.props.severityThreshold;
+      const severity = this.props.severity;
 
       if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
         // just return so the empty directive renders without an error later on
@@ -406,7 +406,7 @@ export const ExplorerChartDistribution = injectI18n(
           .attr('cy', d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
           .attr('class', d => {
             let markerClass = 'metric-value';
-            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severityThreshold.val) {
+            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity) {
               markerClass += ' anomaly-marker ';
               markerClass += getSeverityWithLow(d.anomalyScore).id;
             }

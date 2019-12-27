@@ -15,7 +15,6 @@ import { ExplorerState } from '../explorer/reducers';
 declare interface ExplorerProps {
   annotationsRefresh: boolean;
   explorerState: ExplorerState;
-  jobSelection: JobSelection;
   showCharts: boolean;
 }
 

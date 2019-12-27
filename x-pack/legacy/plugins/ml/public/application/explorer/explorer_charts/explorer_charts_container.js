@@ -52,7 +52,7 @@ function getChartId(series) {
 }
 
 // Wrapper for a single explorer chart
-function ExplorerChartContainer({ series, tooManyBuckets, wrapLabel }) {
+function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel }) {
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -121,10 +121,20 @@ function ExplorerChartContainer({ series, tooManyBuckets, wrapLabel }) {
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION
         ) {
           return (
-            <ExplorerChartDistribution tooManyBuckets={tooManyBuckets} seriesConfig={series} />
+            <ExplorerChartDistribution
+              tooManyBuckets={tooManyBuckets}
+              seriesConfig={series}
+              severity={severity}
+            />
           );
         }
-        return <ExplorerChartSingleMetric tooManyBuckets={tooManyBuckets} seriesConfig={series} />;
+        return (
+          <ExplorerChartSingleMetric
+            tooManyBuckets={tooManyBuckets}
+            seriesConfig={series}
+            severity={severity}
+          />
+        );
       })()}
     </React.Fragment>
   );
@@ -146,7 +156,7 @@ export class ExplorerChartsContainer extends React.Component {
   }
 
   render() {
-    const { chartsPerRow, seriesToPlot, tooManyBuckets } = this.props;
+    const { chartsPerRow, seriesToPlot, severity, tooManyBuckets } = this.props;
 
     // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
     // If that's the case we trick it doing that with the following settings:
@@ -166,6 +176,7 @@ export class ExplorerChartsContainer extends React.Component {
             >
               <ExplorerChartContainer
                 series={series}
+                severity={severity}
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
               />

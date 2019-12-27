@@ -206,7 +206,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
   );
 
   // Does a sanity check on the selected `viewBySwimlaneFieldName`
-  // and return the available `viewBySwimlaneOptions`.
+  // and returns the available `viewBySwimlaneOptions`.
   const { viewBySwimlaneFieldName, viewBySwimlaneOptions } = getViewBySwimlaneOptions({
     currentViewBySwimlaneFieldName: nextState.viewBySwimlaneFieldName,
     filterActive: nextState.filterActive,

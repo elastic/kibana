@@ -47,11 +47,11 @@ export function explorerChartsContainerServiceFactory(callback) {
 
   callback(getDefaultChartsData());
 
-  const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, threshold) {
+  const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, severity) {
     const data = getDefaultChartsData();
 
     const filteredRecords = anomalyRecords.filter(record => {
-      return Number(record.record_score) >= threshold.val;
+      return Number(record.record_score) >= severity;
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.

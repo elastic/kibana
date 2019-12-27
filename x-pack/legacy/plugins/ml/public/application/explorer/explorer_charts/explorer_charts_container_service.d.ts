@@ -15,4 +15,4 @@ export declare const getDefaultChartsData: () => ExplorerChartsData;
 
 export declare const explorerChartsContainerServiceFactory: (
   callback: (data: ExplorerChartsData) => void
-) => (anomalyRecords: any[], earliestMs: number, latestMs: number) => void;
+) => (anomalyRecords: any[], earliestMs: number, latestMs: number, severity: number) => void;

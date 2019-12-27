@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash';
 import moment from 'moment';
 import React, { FC, useEffect } from 'react';
 import { useObservable } from 'react-use';
-import { merge, Subscription } from 'rxjs';
+import { merge, Subject, Subscription } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 
 import { timefilter } from 'ui/timefilter';
+
+import { DeepPartial } from '../../../../common/types/common';
+
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
@@ -19,15 +24,19 @@ import { Explorer } from '../../explorer';
 import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { ExplorerAppState } from '../../explorer/reducers';
-import { explorerService } from '../../explorer/explorer_dashboard_service';
+import { ExplorerAppState, ExplorerState } from '../../explorer/reducers';
+import { loadExplorerData } from '../../explorer/actions';
+import {
+  explorerAction$,
+  explorerService,
+  setStateActionCreator,
+} from '../../explorer/explorer_dashboard_service';
 import { restoreAppState } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useUrlState } from '../../util/url_state';
-
+import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
-import { SHOW_CHARTS_DEFAULT } from '../../components/controls/checkbox_showcharts';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
@@ -60,11 +69,17 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   );
 };
 
+const loadExplorerData$ = new Subject<ExplorerState>();
+const loadExplorerDataWithSwitchMap$ = loadExplorerData$.pipe(
+  switchMap((s: ExplorerState) => loadExplorerData(s).pipe(map(d => setStateActionCreator(d))))
+);
+
 const ExplorerUrlStateManager: FC = () => {
   const [appState, setAppState] = useUrlState('_a');
   const [globalState] = useUrlState('_g');
 
-  const jobSelection = useJobSelection();
+  const { jobIds } = useJobSelection();
+  jobIds.sort();
 
   useEffect(() => {
     timefilter.enableTimeRangeSelector();
@@ -82,15 +97,23 @@ const ExplorerUrlStateManager: FC = () => {
         max: moment(globalState.time.to),
       });
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [JSON.stringify(globalState?.time)]);
 
+  const restoredAppState = restoreAppState(appState);
   useEffect(() => {
-    if (jobSelection.jobIds.length > 0) {
-      explorerService.updateJobSelection(jobSelection.jobIds, restoreAppState(appState));
+    if (jobIds.length > 0) {
+      explorerService.updateJobSelection(jobIds, restoredAppState);
     } else {
       explorerService.clearJobs();
     }
-  }, [jobSelection.jobIds]);
+  }, [JSON.stringify(jobIds)]);
+
+  const explorerAppState = useObservable(explorerService.appState$);
+  useEffect(() => {
+    if (explorerAppState !== undefined) {
+      setAppState(explorerAppState);
+    }
+  }, [JSON.stringify(explorerAppState)]);
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -98,18 +121,12 @@ const ExplorerUrlStateManager: FC = () => {
     // Pass the current URL AppState on to anomaly explorer's reactive state.
     // After this hand-off, the appState stored in explorerState$ is the single
     // source of truth.
-    explorerService.setAppState({
-      mlExplorerSwimlane: appState?.mlExplorerSwimlane || {},
-      mlExplorerFilter: appState?.mlExplorerFilter || {},
-    });
+    const { mlExplorerSwimlane, mlExplorerFilter } = appState || {};
 
-    // Now that appState in explorerState$ is the single source of truth,
-    // subscribe to it and update the actual URL appState on changes.
-    subscriptions.add(
-      explorerService.appState$.subscribe((appStateIn: ExplorerAppState) => {
-        setAppState(appStateIn);
-      })
-    );
+    explorerService.setAppState({
+      mlExplorerSwimlane: mlExplorerSwimlane || {},
+      mlExplorerFilter: mlExplorerFilter || {},
+    });
 
     // Refresh all the data when the time range is altered.
     subscriptions.add(
@@ -121,6 +138,12 @@ const ExplorerUrlStateManager: FC = () => {
       })
     );
 
+    subscriptions.add(
+      loadExplorerDataWithSwitchMap$.subscribe(d => {
+        explorerAction$.next(d);
+      })
+    );
+
     return () => {
       subscriptions.unsubscribe();
     };
@@ -128,16 +151,43 @@ const ExplorerUrlStateManager: FC = () => {
 
   const annotationsRefresh = useObservable(annotationsRefresh$);
   const explorerState = useObservable(explorerService.state$);
-  const showCharts = appState?.mlShowCharts || SHOW_CHARTS_DEFAULT;
 
+  const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
+
+  const appStateMappedToExplorerState: DeepPartial<ExplorerState> = {
+    tableInterval,
+    tableSeverity: tableSeverity.val,
+    ...(restoredAppState.selectedCells !== undefined
+      ? { selectedCells: restoredAppState.selectedCells }
+      : {}),
+    viewBySwimlaneFieldName: restoredAppState.viewBySwimlaneFieldName,
+  };
   useEffect(() => {
-    explorerService.setState({
-      tableInterval,
-      tableSeverity: tableSeverity.val,
-    });
-  }, [tableInterval, tableSeverity.val]);
+    explorerService.setState(appStateMappedToExplorerState);
+  }, [JSON.stringify(appStateMappedToExplorerState)]);
+
+  useEffect(() => {
+    if (explorerState !== undefined) {
+      loadExplorerData$.next(explorerState);
+    }
+  }, [
+    JSON.stringify(
+      pick(explorerState || {}, [
+        'bounds',
+        'influencersFilterQuery',
+        'noInfluencersConfigured',
+        'selectedCells',
+        'selectedJobs',
+        'swimlaneBucketInterval',
+        'swimlaneLimit',
+        'tableInterval',
+        'tableSeverity',
+        'viewBySwimlaneFieldName',
+      ])
+    ),
+  ]);
 
   if (annotationsRefresh === undefined || explorerState === undefined || showCharts === undefined) {
     return null;
@@ -149,7 +199,6 @@ const ExplorerUrlStateManager: FC = () => {
         {...{
           annotationsRefresh,
           explorerState,
-          jobSelection,
           showCharts,
         }}
       />

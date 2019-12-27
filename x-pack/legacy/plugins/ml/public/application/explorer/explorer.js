@@ -98,7 +98,6 @@ export class Explorer extends React.Component {
     annotationsRefresh: PropTypes.bool,
     explorerState: PropTypes.object.isRequired,
     explorer: PropTypes.object,
-    jobSelection: PropTypes.object.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
 
@@ -286,6 +285,8 @@ export class Explorer extends React.Component {
       overallSwimlaneData,
       queryString,
       selectedCells,
+      selectedJobs,
+      severity,
       swimlaneContainerWidth,
       tableData,
       tableQueryString,
@@ -296,12 +297,11 @@ export class Explorer extends React.Component {
       viewBySwimlaneOptions,
     } = this.props.explorerState;
 
-    const { jobIds: selectedJobIds } = this.props.jobSelection;
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
     };
 
-    const noJobsFound = selectedJobIds.length === 0;
+    const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
 
     if (loading === true) {
@@ -567,7 +567,7 @@ export class Explorer extends React.Component {
             <EuiSpacer size="m" />
 
             <div className="euiText explorer-charts">
-              {showCharts && <ExplorerChartsContainer {...chartsData} />}
+              {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
             </div>
 
             <AnomaliesTable
