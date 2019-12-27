@@ -13,7 +13,7 @@ import React, { createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
 import {
@@ -47,9 +47,9 @@ import { LoadingIndicator } from '../components/loading_indicator/loading_indica
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
-import { SelectInterval, interval$ } from '../components/controls/select_interval/select_interval';
+import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectLimit, limit$ } from './select_limit/select_limit';
-import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
+import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
   getKqlQueryValues,
   removeFilterFromQueryString,
@@ -78,8 +78,6 @@ import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/pub
 import { timefilter } from 'ui/timefilter';
 import { toastNotifications } from 'ui/notify';
 
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
-
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
     value: option,
@@ -101,7 +99,6 @@ export class Explorer extends React.Component {
     explorerState: PropTypes.object.isRequired,
     explorer: PropTypes.object,
     jobSelection: PropTypes.object.isRequired,
-    jobSelectService$: PropTypes.object.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
 
@@ -155,38 +152,12 @@ export class Explorer extends React.Component {
   };
 
   componentDidMount() {
-    timefilter.enableTimeRangeSelector();
-    timefilter.enableAutoRefreshSelector();
-
-    explorerService.setBounds(timefilter.getActiveBounds());
-
-    // Refresh all the data when the time range is altered.
-    merge(mlTimefilterRefresh$, timefilter.getFetch$())
-      .pipe(takeUntil(this._unsubscribeAll))
-      .subscribe(() => {
-        explorerService.setBounds(timefilter.getActiveBounds());
-      });
-
     limit$
       .pipe(
         takeUntil(this._unsubscribeAll),
         map(d => d.val)
       )
       .subscribe(explorerService.setSwimlaneLimit);
-
-    interval$
-      .pipe(
-        takeUntil(this._unsubscribeAll),
-        map(d => ({ tableInterval: d.val }))
-      )
-      .subscribe(explorerService.setState);
-
-    severity$
-      .pipe(
-        takeUntil(this._unsubscribeAll),
-        map(d => ({ tableSeverity: d.val }))
-      )
-      .subscribe(explorerService.setState);
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -299,7 +270,7 @@ export class Explorer extends React.Component {
   };
 
   render() {
-    const { jobSelectService$, showCharts } = this.props;
+    const { showCharts } = this.props;
 
     const {
       annotationsData,
@@ -325,12 +296,9 @@ export class Explorer extends React.Component {
       viewBySwimlaneOptions,
     } = this.props.explorerState;
 
-    const { jobIds: selectedJobIds, selectedGroups } = this.props.jobSelection;
+    const { jobIds: selectedJobIds } = this.props.jobSelection;
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
-      jobSelectService$,
-      selectedJobIds,
-      selectedGroups,
     };
 
     const noJobsFound = selectedJobIds.length === 0;

@@ -6,10 +6,11 @@
 
 import { Observable } from 'rxjs';
 import { Annotation } from '../../../../common/types/annotations';
+import { Dictionary } from '../../../../common/types/common';
 import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
-import { MlSummaryJobs } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/jobs';
 import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
@@ -128,6 +129,9 @@ declare interface Ml {
 
   jobs: {
     jobsSummary(jobIds: string[]): Promise<MlSummaryJobs>;
+    jobsWithTimerange(
+      dateFormatTz: string
+    ): Promise<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }>;
     jobs(jobIds: string[]): Promise<object>;
     groups(): Promise<object>;
     updateGroups(updatedJobs: string[]): Promise<object>;

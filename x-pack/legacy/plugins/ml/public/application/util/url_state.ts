@@ -4,22 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { isEqual } from 'lodash';
 // @ts-ignore
 import queryString from 'query-string';
 import { decode, encode } from 'rison-node';
-import { LocationState } from 'history';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
 
-export type UrlState = [
-  Dictionary<any>,
-  (attribute: string | Dictionary<any>, value?: any) => void
-];
+export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
+export type UrlState = [Dictionary<any>, SetUrlState];
 
 // Compared to the original appState/globalState,
 // this no longer makes use of fetch/save methods.
@@ -30,75 +27,66 @@ export type UrlState = [
 
 export const useUrlState = (accessor: string): UrlState => {
   const history = useHistory();
-  const location = useLocation();
+  const { search } = useLocation();
 
-  const getStateFromUrl = (l: LocationState) => {
-    try {
-      const parsedQueryString = queryString.parse(l.search);
-      const newUrlState: Dictionary<any> = {};
-      Object.keys(parsedQueryString).forEach(a => {
-        newUrlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
-      });
-      return newUrlState;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Could not read url state', accessor, error);
-      return {};
-    }
-  };
+  const urlState: Dictionary<any> = {};
+  const parsedQueryString = queryString.parse(search);
 
-  const persistStateToUrl = (l: LocationState, newUrlState: Dictionary<any>) => {
-    try {
-      const parsedQueryString = queryString.parse(l.search);
-      const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+  try {
+    Object.keys(parsedQueryString).forEach(a => {
+      urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Could not read url state', accessor, error);
+  }
 
-      Object.keys(newUrlState).forEach(a => {
-        parsedQueryString[a] = encode(newUrlState[a]);
-      });
-      const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+  const persistStateToUrl = useCallback(
+    (newUrlState: Dictionary<any>) => {
+      try {
+        const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
 
-      if (oldLocationSearch !== newLocationSearch) {
-        history.push({
-          search: queryString.stringify(parsedQueryString),
+        Object.keys(newUrlState).forEach(a => {
+          parsedQueryString[a] = encode(newUrlState[a]);
+        });
+        const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+
+        if (oldLocationSearch !== newLocationSearch) {
+          history.push({
+            search: queryString.stringify(parsedQueryString),
+          });
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not save url state', error);
+      }
+    },
+    [parsedQueryString]
+  );
+
+  const setUrlState = useCallback(
+    (attribute: string | Dictionary<any>, value?: any) => {
+      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+        urlState[accessor] = {};
+      }
+
+      if (typeof attribute === 'string') {
+        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+          return;
+        }
+
+        urlState[accessor][attribute] = value;
+      } else {
+        const attributes = attribute;
+        Object.keys(attributes).forEach(a => {
+          urlState[accessor][a] = attributes[a];
         });
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Could not save url state', error);
-    }
-  };
 
-  // check if the accessor is present, if not, initialize it with an empty object.
-  useEffect(() => {
-    const urlState = getStateFromUrl(location);
-    if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-      urlState[accessor] = {};
-      persistStateToUrl(location, urlState);
-    }
-  }, [location]);
+      persistStateToUrl(urlState);
+    },
+    [JSON.stringify(urlState)]
+  );
 
-  const setFactory = (l: LocationState) => (attribute: string | Dictionary<any>, value?: any) => {
-    const newUrlState = getStateFromUrl(location);
-
-    if (!Object.prototype.hasOwnProperty.call(newUrlState, accessor)) {
-      throw new Error(`useUrlState: set() failed, accessor '${accessor}' is not present.`);
-    }
-
-    if (typeof attribute === 'string') {
-      if (isEqual(getNestedProperty(newUrlState, `${accessor}.${attribute}`), value)) {
-        return;
-      }
-
-      newUrlState[accessor][attribute] = value;
-    } else {
-      const attributes = attribute;
-      Object.keys(attributes).forEach(a => {
-        newUrlState[accessor][a] = attributes[a];
-      });
-    }
-
-    persistStateToUrl(l, newUrlState);
-  };
-
-  return [getStateFromUrl(location)[accessor], setFactory(location)];
+  return [urlState[accessor], setUrlState];
 };

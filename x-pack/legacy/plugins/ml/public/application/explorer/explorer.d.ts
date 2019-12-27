@@ -16,7 +16,6 @@ declare interface ExplorerProps {
   annotationsRefresh: boolean;
   explorerState: ExplorerState;
   jobSelection: JobSelection;
-  jobSelectService$: any;
   showCharts: boolean;
 }
 

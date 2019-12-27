@@ -23,7 +23,6 @@ import {
 } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
-import { severity$ } from '../../components/controls/select_severity/select_severity';
 import { getChartContainerWidth } from '../legacy_utils';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -48,10 +47,8 @@ export function explorerChartsContainerServiceFactory(callback) {
 
   callback(getDefaultChartsData());
 
-  const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs) {
+  const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs, threshold) {
     const data = getDefaultChartsData();
-
-    const threshold = severity$.getValue();
 
     const filteredRecords = anomalyRecords.filter(record => {
       return Number(record.record_score) >= threshold.val;

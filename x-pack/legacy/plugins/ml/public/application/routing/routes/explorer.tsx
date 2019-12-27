@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import React, { FC, useEffect } from 'react';
 import { useObservable } from 'react-use';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,17 +18,16 @@ import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
 import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
+import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { ExplorerAppState } from '../../explorer/reducers';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { restoreAppState } from '../../explorer/explorer_utils';
-import { getJobSelectService$ } from '../../components/job_selector/job_select_service_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
-import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { useUrlState } from '../../util/url_state';
 
-import { interval$ } from '../../components/controls/select_interval';
-import { severity$ } from '../../components/controls/select_severity';
-import { showCharts$, SHOW_CHARTS_DEFAULT } from '../../components/controls/checkbox_showcharts';
+import { useTableInterval } from '../../components/controls/select_interval';
+import { useTableSeverity } from '../../components/controls/select_severity';
+import { SHOW_CHARTS_DEFAULT } from '../../components/controls/checkbox_showcharts';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
@@ -64,17 +64,33 @@ const ExplorerUrlStateManager: FC = () => {
   const [appState, setAppState] = useUrlState('_a');
   const [globalState] = useUrlState('_g');
 
-  const jobSelectService$ = getJobSelectService$(globalState);
   const jobSelection = useJobSelection();
 
   useEffect(() => {
-    if (globalState?.time) {
+    timefilter.enableTimeRangeSelector();
+    timefilter.enableAutoRefreshSelector();
+  }, []);
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
       });
+      explorerService.setBounds({
+        min: moment(globalState.time.from),
+        max: moment(globalState.time.to),
+      });
     }
-  }, [globalState]);
+  }, [globalState?.time?.from, globalState?.time?.to]);
+
+  useEffect(() => {
+    if (jobSelection.jobIds.length > 0) {
+      explorerService.updateJobSelection(jobSelection.jobIds, restoreAppState(appState));
+    } else {
+      explorerService.clearJobs();
+    }
+  }, [jobSelection.jobIds]);
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -95,35 +111,14 @@ const ExplorerUrlStateManager: FC = () => {
       })
     );
 
-    // restore state stored in URL via AppState and subscribe to
-    // job updates via job selector.
-    if (mlJobService.jobs.length > 0) {
-      let initialized = false;
-
-      subscriptions.add(
-        jobSelectService$.subscribe(({ selection }) => {
-          if (selection !== undefined) {
-            if (!initialized) {
-              explorerService.initialize(selection, restoreAppState(appState));
-              initialized = true;
-            } else {
-              explorerService.updateJobSelection(selection, restoreAppState(appState));
-            }
-          }
-        })
-      );
-    } else {
-      explorerService.clearJobs();
-    }
-
+    // Refresh all the data when the time range is altered.
     subscriptions.add(
-      subscribeAppStateToObservable(appState, setAppState, 'mlShowCharts', showCharts$)
-    );
-    subscriptions.add(
-      subscribeAppStateToObservable(appState, setAppState, 'mlSelectInterval', interval$)
-    );
-    subscriptions.add(
-      subscribeAppStateToObservable(appState, setAppState, 'mlSelectSeverity', severity$)
+      merge(mlTimefilterRefresh$, timefilter.getFetch$()).subscribe(() => {
+        const activeBounds = timefilter.getActiveBounds();
+        if (activeBounds !== undefined) {
+          explorerService.setBounds(activeBounds);
+        }
+      })
     );
 
     return () => {
@@ -133,7 +128,16 @@ const ExplorerUrlStateManager: FC = () => {
 
   const annotationsRefresh = useObservable(annotationsRefresh$);
   const explorerState = useObservable(explorerService.state$);
-  const showCharts = useObservable(showCharts$, SHOW_CHARTS_DEFAULT);
+  const showCharts = appState?.mlShowCharts || SHOW_CHARTS_DEFAULT;
+
+  const [tableInterval] = useTableInterval();
+  const [tableSeverity] = useTableSeverity();
+  useEffect(() => {
+    explorerService.setState({
+      tableInterval,
+      tableSeverity: tableSeverity.val,
+    });
+  }, [tableInterval, tableSeverity.val]);
 
   if (annotationsRefresh === undefined || explorerState === undefined || showCharts === undefined) {
     return null;
@@ -146,7 +150,6 @@ const ExplorerUrlStateManager: FC = () => {
           annotationsRefresh,
           explorerState,
           jobSelection,
-          jobSelectService$,
           showCharts,
         }}
       />

@@ -5,15 +5,16 @@
  */
 
 import { difference } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import d3 from 'd3';
 
+import { Dictionary } from '../../../../common/types/common';
+import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 import { mlJobService } from '../../services/job_service';
 
-function warnAboutInvalidJobIds(invalidIds) {
+function warnAboutInvalidJobIds(invalidIds: string[]) {
   if (invalidIds.length > 0) {
     toastNotifications.addWarning(
       i18n.translate('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
@@ -21,39 +22,35 @@ function warnAboutInvalidJobIds(invalidIds) {
 {invalidIdsLength, plural, one {job {invalidIds} does not exist} other {jobs {invalidIds} do not exist}}`,
         values: {
           invalidIdsLength: invalidIds.length,
-          invalidIds,
+          invalidIds: invalidIds.join(),
         },
       })
     );
   }
 }
 
+interface JobGroup {
+  groupId: string;
+  jobIds: string[];
+}
+
 // check that the ids read from the url exist by comparing them to the
 // jobs loaded via mlJobsService.
-function getInvalidJobIds(ids) {
+function getInvalidJobIds(ids: string[]): string[] {
   return ids.filter(id => {
     const jobExists = mlJobService.jobs.some(job => job.job_id === id);
     return jobExists === false && id !== '*';
   });
 }
 
-let jobSelectService$;
-export const getJobSelectService$ = globalState => {
-  if (jobSelectService$ === undefined) {
-    const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
-    jobSelectService$ = new BehaviorSubject({
-      selection: jobIds,
-      groups: selectedGroups,
-      resetSelection: false,
-    });
-  }
-
-  return jobSelectService$;
-};
-
-function loadJobIdsFromGlobalState(globalState) {
-  const jobIds = [];
-  let groups = [];
+function loadJobIdsFromGlobalState(
+  globalState: Dictionary<any>
+): {
+  jobIds: string[];
+  selectedGroups: JobGroup[];
+} {
+  const jobIds: string[] = [];
+  let groups: JobGroup[] = [];
 
   if (globalState === undefined) {
     return { jobIds, selectedGroups: groups };
@@ -61,7 +58,7 @@ function loadJobIdsFromGlobalState(globalState) {
 
   const ml = globalState.ml;
   if (ml && ml.jobIds) {
-    let tempJobIds = [];
+    let tempJobIds: string[] = [];
     groups = ml.groups || [];
 
     if (typeof ml.jobIds === 'string') {
@@ -97,41 +94,14 @@ function loadJobIdsFromGlobalState(globalState) {
   return { jobIds, selectedGroups: groups };
 }
 
-// TODO:
-// Merge `setGlobalStateSkipRefresh()` and `setGlobalState()` into
-// a single function similar to how we do `appStateHandler()`.
-// When changing jobs in job selector it would trigger multiple events
-// which in return would be consumed by Single Metric Viewer and could cause
-// race conditions when updating the whole page. Because we don't control
-// the internals of the involved timefilter event triggering, we use
-// a global `skipRefresh` to control when Single Metric Viewer should
-// skip updates triggered by timefilter.
-export function setGlobalStateSkipRefresh(globalState, setGlobalState, skipRefresh) {
-  const ml = globalState?.ml || {};
-  ml.skipRefresh = skipRefresh;
-  setGlobalState('ml', ml);
-}
-
-export function setGlobalStateSelection(
-  globalState,
-  setGlobalState,
-  { selectedIds, selectedGroups, skipRefresh }
-) {
-  const ml = globalState?.ml || {};
-  ml.jobIds = selectedIds;
-  ml.groups = selectedGroups || [];
-  ml.skipRefresh = !!skipRefresh;
-  setGlobalState('ml', ml);
-}
-
 // called externally to retrieve the selected jobs ids
-export function getSelectedJobIds(globalState) {
+export function getSelectedJobIds(globalState: Dictionary<any>) {
   return loadJobIdsFromGlobalState(globalState);
 }
 
-export function getGroupsFromJobs(jobs) {
-  const groups = {};
-  const groupsMap = {};
+export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
+  const groups: Dictionary<any> = {};
+  const groupsMap: Dictionary<any> = {};
 
   jobs.forEach(job => {
     // Organize job by group
@@ -199,7 +169,11 @@ export function getGroupsFromJobs(jobs) {
   return { groups: Object.keys(groups).map(g => groups[g]), groupsMap };
 }
 
-export function normalizeTimes(jobs, dateFormatTz, ganttBarWidth) {
+export function normalizeTimes(
+  jobs: MlJobWithTimeRange[],
+  dateFormatTz: string,
+  ganttBarWidth: number
+) {
   const jobsWithTimeRange = jobs.filter(job => {
     return job.timeRange.to !== undefined && job.timeRange.from !== undefined;
   });

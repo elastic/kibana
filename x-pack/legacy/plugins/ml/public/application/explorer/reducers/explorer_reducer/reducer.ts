@@ -20,7 +20,6 @@ import { appStateReducer } from '../app_state_reducer';
 
 import { checkSelectedCells } from './check_selected_cells';
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
-import { initialize } from './initialize';
 import { jobSelectionChange } from './job_selection_change';
 import { getExplorerDefaultState, ExplorerState } from './state';
 import { setInfluencerFilterSettings } from './set_influencer_filter_settings';
@@ -56,10 +55,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
           type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
         }),
       };
-      break;
-
-    case EXPLORER_ACTION.INITIALIZE:
-      nextState = initialize(state, payload);
       break;
 
     case EXPLORER_ACTION.JOB_SELECTION_CHANGE:

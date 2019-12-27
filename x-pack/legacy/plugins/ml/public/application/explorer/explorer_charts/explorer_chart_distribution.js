@@ -32,7 +32,6 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { TimeBuckets } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
-import { severity$ } from '../../components/controls/select_severity/select_severity';
 
 import { CHART_TYPE } from '../explorer_constants';
 
@@ -51,6 +50,7 @@ export const ExplorerChartDistribution = injectI18n(
   class ExplorerChartDistribution extends React.Component {
     static propTypes = {
       seriesConfig: PropTypes.object,
+      severityThreshold: PropTypes.number,
     };
 
     componentDidMount() {
@@ -66,6 +66,7 @@ export const ExplorerChartDistribution = injectI18n(
 
       const element = this.rootNode;
       const config = this.props.seriesConfig;
+      const severityThreshold = this.props.severityThreshold;
 
       if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
         // just return so the empty directive renders without an error later on
@@ -400,13 +401,12 @@ export const ExplorerChartDistribution = injectI18n(
           .on('mouseout', () => mlChartTooltipService.hide());
 
         // Update all dots to new positions.
-        const threshold = severity$.getValue();
         dots
           .attr('cx', d => lineChartXScale(d.date))
           .attr('cy', d => lineChartYScale(d[CHART_Y_ATTRIBUTE]))
           .attr('class', d => {
             let markerClass = 'metric-value';
-            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
+            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severityThreshold.val) {
               markerClass += ' anomaly-marker ';
               markerClass += getSeverityWithLow(d.anomalyScore).id;
             }

@@ -5,14 +5,20 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-
+import { useEffect } from 'react';
 import { distinctUntilChanged } from 'rxjs/operators';
+
+import { useUrlState } from './url_state';
 
 function hasEqualKeys(a, b) {
   return isEqual(Object.keys(a).sort(), Object.keys(b).sort());
 }
 
 export function initializeAppState(appState, setAppState, stateName, defaultState) {
+  if (appState === undefined) {
+    appState = {};
+  }
+
   // Store the state to the AppState so that it's
   // restored on page refresh.
   if (appState.stateName === undefined) {
@@ -47,15 +53,16 @@ export function initializeAppState(appState, setAppState, stateName, defaultStat
 // to persist these state changes to AppState and save the state to the url.
 // distinctUntilChanged() makes sure the callback is only triggered upon changes
 // of the state and filters consecutive triggers of the same value.
-export function subscribeAppStateToObservable(appState, setAppState, appStateName, o$, callback) {
+export function useAppStateToObservableSubscription(appStateName, o$) {
+  const [appState, setAppState] = useUrlState('_a');
+
   initializeAppState(appState, setAppState, appStateName, o$.getValue());
 
-  const subscription = o$.pipe(distinctUntilChanged()).subscribe(payload => {
-    setAppState(appStateName, payload);
-    if (typeof callback === 'function') {
-      callback(payload);
-    }
-  });
+  useEffect(() => {
+    const subscription = o$.pipe(distinctUntilChanged()).subscribe(payload => {
+      setAppState(appStateName, payload);
+    });
 
-  return subscription;
+    return () => subscription.unsubscribe();
+  }, []);
 }

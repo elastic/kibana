@@ -42,7 +42,6 @@ import { TimeBuckets } from '../../util/time_buckets';
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
-import { severity$ } from '../../components/controls/select_severity/select_severity';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -54,6 +53,7 @@ export const ExplorerChartSingleMetric = injectI18n(
     static propTypes = {
       tooManyBuckets: PropTypes.bool,
       seriesConfig: PropTypes.object,
+      severityThreshold: PropTypes.number,
     };
 
     componentDidMount() {
@@ -69,6 +69,7 @@ export const ExplorerChartSingleMetric = injectI18n(
 
       const element = this.rootNode;
       const config = this.props.seriesConfig;
+      const severityThreshold = this.props.severityThreshold;
 
       if (typeof config === 'undefined' || Array.isArray(config.chartData) === false) {
         // just return so the empty directive renders without an error later on
@@ -312,13 +313,12 @@ export const ExplorerChartSingleMetric = injectI18n(
           .on('mouseout', () => mlChartTooltipService.hide());
 
         // Update all dots to new positions.
-        const threshold = severity$.getValue();
         dots
           .attr('cx', d => lineChartXScale(d.date))
           .attr('cy', d => lineChartYScale(d.value))
           .attr('class', d => {
             let markerClass = 'metric-value';
-            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
+            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severityThreshold.val) {
               markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
             }
             return markerClass;

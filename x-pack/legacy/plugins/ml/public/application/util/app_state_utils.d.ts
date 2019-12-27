@@ -13,10 +13,7 @@ export const initializeAppState: (
   defaultState: any
 ) => any;
 
-export const subscribeAppStateToObservable: (
-  appState: any,
-  setAppState: any,
+export const useAppStateToObservableSubscription: (
   appStateName: string,
-  o$: Observable<any>,
-  callback?: (payload: any) => void
+  o$: Observable<any>
 ) => any;

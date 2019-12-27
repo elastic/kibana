@@ -32,7 +32,7 @@ export const ALLOW_CELL_RANGE_SELECTION = true;
 export const dragSelect$ = new Subject();
 
 type ExplorerAction = Action | Observable<ActionPayload>;
-const explorerAction$ = new BehaviorSubject<ExplorerAction>({ type: EXPLORER_ACTION.RESET });
+const explorerAction$ = new Subject<ExplorerAction>();
 
 export type ActionPayload = any;
 
@@ -121,18 +121,7 @@ export const explorerService = {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_SELECTION });
   },
   updateJobSelection: (selectedJobIds: string[], restoredAppState: RestoredAppState) => {
-    explorerAction$.next(
-      jobSelectionActionCreator(
-        EXPLORER_ACTION.JOB_SELECTION_CHANGE,
-        selectedJobIds,
-        restoredAppState
-      )
-    );
-  },
-  initialize: (selectedJobIds: string[], restoredAppState: RestoredAppState) => {
-    explorerAction$.next(
-      jobSelectionActionCreator(EXPLORER_ACTION.INITIALIZE, selectedJobIds, restoredAppState)
-    );
+    explorerAction$.next(jobSelectionActionCreator(selectedJobIds, restoredAppState));
   },
   reset: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.RESET });

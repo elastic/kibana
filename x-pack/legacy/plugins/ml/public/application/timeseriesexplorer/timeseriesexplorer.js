@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
+import { chain, each, find, first, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -46,11 +46,6 @@ import {
 } from '../../../common/util/job_utils';
 
 import { ChartTooltip } from '../components/chart_tooltip';
-import {
-  getJobSelectService$,
-  setGlobalStateSelection,
-  getSelectedJobIds,
-} from '../components/job_selector/job_select_service_utils';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
@@ -184,12 +179,6 @@ export class TimeSeriesExplorer extends React.Component {
   subscriptions = new Subscription();
 
   _criteriaFields = null;
-
-  constructor(props) {
-    super(props);
-    const jobSelectService$ = getJobSelectService$(props.globalState);
-    this.jobSelectService$ = jobSelectService$;
-  }
 
   resizeRef = createRef();
   resizeChecker = undefined;
@@ -524,14 +513,8 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   refresh = (fullRefresh = true) => {
-    // Skip the refresh if:
-    // a) The global state's `skipRefresh` was set to true by the job selector to avoid race conditions
-    //    when loading the Single Metric Viewer after a job/group and time range update.
-    // b) A 'soft' refresh without a full page reload is already happening.
-    if (
-      get(this.props.globalState, 'ml.skipRefresh') ||
-      (this.state.loading && fullRefresh === false)
-    ) {
+    // Skip the refresh if a 'soft' refresh without a full page reload is already happening.
+    if (this.state.loading && fullRefresh === false) {
       return;
     }
 
@@ -925,7 +908,7 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   componentDidMount() {
-    const { appStateHandler, globalState, timefilter } = this.props;
+    const { appStateHandler, timefilter } = this.props;
 
     this.setState({ jobs: [] });
 
@@ -957,6 +940,7 @@ export class TimeSeriesExplorer extends React.Component {
     );
 
     // Listen for changes to job selection.
+    /*
     this.subscriptions.add(
       this.jobSelectService$.subscribe(({ selection: selectedJobIds }) => {
         const jobs = createTimeSeriesJobData(mlJobService.jobs);
@@ -1051,6 +1035,7 @@ export class TimeSeriesExplorer extends React.Component {
         }
       })
     );
+    */
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -1169,13 +1154,20 @@ export class TimeSeriesExplorer extends React.Component {
     );
   }
 
+  componenDidUpdate(previousProps) {
+    console.warn('componentDidUpdate');
+    if (previousProps.selectedJobIds !== this.props.selectedJobIds) {
+      console.warn('component class jobs change');
+    }
+  }
+
   componentWillUnmount() {
     this.subscriptions.unsubscribe();
     this.resizeChecker.destroy();
   }
 
   render() {
-    const { dateFormatTz, globalState, timefilter } = this.props;
+    const { dateFormatTz, timefilter } = this.props;
 
     const {
       autoZoomDuration,
@@ -1228,7 +1220,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusChartData,
       focusForecastData,
       focusAggregationInterval,
-      skipRefresh: loading || !!get(this.props.globalState, 'ml.skipRefresh'),
       svgWidth,
       zoomFrom,
       zoomTo,
@@ -1237,13 +1228,8 @@ export class TimeSeriesExplorer extends React.Component {
       autoZoomDuration,
     };
 
-    const { jobIds: selectedJobIds, selectedGroups } = getSelectedJobIds(globalState);
     const jobSelectorProps = {
       dateFormatTz,
-      globalState,
-      jobSelectService$: this.jobSelectService$,
-      selectedJobIds,
-      selectedGroups,
       singleSelection: true,
       timeseriesOnly: true,
     };

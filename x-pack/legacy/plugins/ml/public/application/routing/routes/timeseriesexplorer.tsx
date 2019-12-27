@@ -60,13 +60,19 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
     setAppState('mlTimeSeriesExplorer', {});
   }
 
-  const globalStateTime = globalState.time;
-  if (globalStateTime) {
-    timefilter.setTime({
-      from: globalStateTime.from,
-      to: globalStateTime.to,
-    });
-  }
+  useEffect(() => {
+    const globalStateTime = globalState.time;
+    if (globalStateTime) {
+      timefilter.setTime({
+        from: globalStateTime.from,
+        to: globalStateTime.to,
+      });
+    }
+  }, [JSON.stringify([appState, globalState])]);
+
+  useEffect(() => {
+    const selectedJobIds = globalState?.ml?.jobIds;
+  }, [globalState?.ml?.jobIds]);
 
   const appStateHandler = (action: string, payload: any) => {
     const mlTimeSeriesExplorer = appState.mlTimeSeriesExplorer;
@@ -135,6 +141,7 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
         appStateHandler,
         dateFormatTz,
         globalState,
+        selectedJobIds: globalState?.ml?.jobIds,
         timefilter,
       }}
     />

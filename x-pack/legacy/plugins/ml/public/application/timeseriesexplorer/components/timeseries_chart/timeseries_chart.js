@@ -106,7 +106,6 @@ const TimeseriesChartIntl = injectI18n(
       focusAnnotationData: PropTypes.array,
       focusChartData: PropTypes.array,
       focusForecastData: PropTypes.array,
-      skipRefresh: PropTypes.bool.isRequired,
       modelPlotEnabled: PropTypes.bool.isRequired,
       renderFocusChartOnly: PropTypes.bool.isRequired,
       selectedJob: PropTypes.object,
@@ -234,10 +233,6 @@ const TimeseriesChartIntl = injectI18n(
     }
 
     componentDidUpdate() {
-      if (this.props.skipRefresh) {
-        return;
-      }
-
       if (this.props.renderFocusChartOnly === false) {
         this.renderChart();
         this.drawContextChartSelection();
