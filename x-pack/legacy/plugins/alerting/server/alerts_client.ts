@@ -15,6 +15,7 @@ import {
 } from 'src/core/server';
 import {
   Alert,
+  PartialAlert,
   RawAlert,
   AlertTypeRegistry,
   AlertAction,
@@ -63,28 +64,26 @@ export interface FindOptions {
   };
 }
 
-interface FindResult {
+export interface FindResult<T extends Alert = Alert> {
   page: number;
   perPage: number;
   total: number;
-  data: object[];
+  data: T[];
 }
 
 interface CreateOptions {
-  data: Pick<
+  data: Omit<
     Alert,
-    Exclude<
-      keyof Alert,
-      | 'createdBy'
-      | 'updatedBy'
-      | 'createdAt'
-      | 'updatedAt'
-      | 'apiKey'
-      | 'apiKeyOwner'
-      | 'muteAll'
-      | 'mutedInstanceIds'
-      | 'actions'
-    >
+    | 'id'
+    | 'createdBy'
+    | 'updatedBy'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'apiKey'
+    | 'apiKeyOwner'
+    | 'muteAll'
+    | 'mutedInstanceIds'
+    | 'actions'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     migrationVersion?: Record<string, string>;
@@ -129,7 +128,7 @@ export class AlertsClient {
     this.createAPIKey = createAPIKey;
   }
 
-  public async create({ data, options }: CreateOptions) {
+  public async create({ data, options }: CreateOptions): Promise<Alert> {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
@@ -182,19 +181,27 @@ export class AlertsClient {
     );
   }
 
-  public async get({ id }: { id: string }) {
+  public async get({ id }: { id: string }): Promise<Alert> {
     const result = await this.savedObjectsClient.get('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 
-  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
-    const results = await this.savedObjectsClient.find({
+  public async find<T extends Alert = Alert>({ options = {} }: FindOptions = {}): Promise<
+    FindResult<T>
+  > {
+    const results = await this.savedObjectsClient.find<RawAlert>({
       ...options,
       type: 'alert',
     });
 
-    const data = results.saved_objects.map(result =>
-      this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references)
+    const data = results.saved_objects.map(
+      result =>
+        this.getAlertFromRaw(
+          result.id,
+          result.attributes,
+          result.updated_at,
+          result.references
+        ) as T
     );
 
     return {
@@ -214,7 +221,7 @@ export class AlertsClient {
     return removeResult;
   }
 
-  public async update({ id, data }: UpdateOptions) {
+  public async update({ id, data }: UpdateOptions): Promise<PartialAlert> {
     const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
     const updateResult = await this.updateAlert({ id, data }, alert);
 
@@ -235,7 +242,7 @@ export class AlertsClient {
   private async updateAlert(
     { id, data }: UpdateOptions,
     { attributes, version }: SavedObject<RawAlert>
-  ) {
+  ): Promise<PartialAlert> {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
@@ -262,7 +269,7 @@ export class AlertsClient {
         references,
       }
     );
-    return this.getAlertFromRaw(
+    return this.getPartialAlertFromRaw(
       id,
       updatedObject.attributes,
       updatedObject.updated_at,
@@ -438,23 +445,33 @@ export class AlertsClient {
 
   private getAlertFromRaw(
     id: string,
+    rawAlert: RawAlert,
+    updatedAt: SavedObject['updated_at'],
+    references: SavedObjectReference[] | undefined
+  ): Alert {
+    // In order to support the partial update API of Saved Objects we have to support
+    // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
+    // to cast the result to an Alert
+    return this.getPartialAlertFromRaw(id, rawAlert, updatedAt, references) as Alert;
+  }
+
+  private getPartialAlertFromRaw(
+    id: string,
     rawAlert: Partial<RawAlert>,
     updatedAt: SavedObject['updated_at'],
     references: SavedObjectReference[] | undefined
-  ) {
-    if (!rawAlert.actions) {
-      return {
-        id,
-        ...rawAlert,
-      };
-    }
-    const actions = this.injectReferencesIntoActions(rawAlert.actions, references || []);
+  ): PartialAlert {
     return {
       id,
       ...rawAlert,
+      // we currently only support the Interval Schedule type
+      // Once we support additional types, this type signature will likely change
+      schedule: rawAlert.schedule as IntervalSchedule,
       updatedAt: updatedAt ? new Date(updatedAt) : null,
       createdAt: new Date(rawAlert.createdAt!),
-      actions,
+      actions: rawAlert.actions
+        ? this.injectReferencesIntoActions(rawAlert.actions, references || [])
+        : [],
     };
   }
 

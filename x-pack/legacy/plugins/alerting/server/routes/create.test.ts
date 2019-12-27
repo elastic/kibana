@@ -31,6 +31,17 @@ const mockedAlert = {
   ],
 };
 
+const mockedAlertComputerFields = {
+  enabled: true,
+  muteAll: false,
+  createdBy: '',
+  updatedBy: '',
+  apiKey: '',
+  apiKeyOwner: '',
+  throttle: '30s',
+  mutedInstanceIds: [],
+};
+
 beforeEach(() => jest.resetAllMocks());
 
 test('creates an alert with proper parameters', async () => {
@@ -44,6 +55,7 @@ test('creates an alert with proper parameters', async () => {
   const updatedAt = null;
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
+    ...mockedAlertComputerFields,
     createdAt,
     updatedAt,
     id: '123',
@@ -71,8 +83,14 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
+      "apiKey": "",
+      "apiKeyOwner": "",
       "consumer": "bar",
+      "createdBy": "",
+      "enabled": true,
       "id": "123",
+      "muteAll": false,
+      "mutedInstanceIds": Array [],
       "name": "abc",
       "params": Object {
         "bar": true,
@@ -83,7 +101,9 @@ test('creates an alert with proper parameters', async () => {
       "tags": Array [
         "foo",
       ],
+      "throttle": "30s",
       "updatedAt": null,
+      "updatedBy": "",
     }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
