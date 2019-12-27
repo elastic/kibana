@@ -116,11 +116,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async navigate({
-      appConfig = {},
-      ensureCurrentUrl = true,
-      shouldLoginIfPrompted = true,
-      shouldAcceptAlert = true,
-      useActualUrl = false,
+      appConfig,
+      ensureCurrentUrl,
+      shouldLoginIfPrompted,
+      shouldAcceptAlert,
+      useActualUrl,
     } = {}) {
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
