@@ -45,9 +45,10 @@ const markdownIt = new MarkdownIt({
  * create the visualization
  */
 export class Handler {
-  constructor(vis, visConfig) {
+  constructor(vis, visConfig, deps) {
     this.el = visConfig.get('el');
     this.ChartClass = chartTypes[visConfig.get('type')];
+    this.deps = deps;
     this.charts = [];
 
     this.vis = vis;
@@ -151,7 +152,7 @@ export class Handler {
     let loadedCount = 0;
     const chartSelection = selection.selectAll('.chart');
     chartSelection.each(function(chartData) {
-      const chart = new self.ChartClass(self, this, chartData);
+      const chart = new self.ChartClass(self, this, chartData, self.deps);
 
       self.vis.eventNames().forEach(function(event) {
         self.enable(event, chart);

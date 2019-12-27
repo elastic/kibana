@@ -21,173 +21,158 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
 
-import {
-  chrome,
-  setHierarchicalTooltipFormatter,
-  setPointSeriesTooltipFormatter,
-} from '../legacy_imports';
 import { VislibError } from './errors';
 import { VisConfig } from './lib/vis_config';
 import { Handler } from './lib/handler';
 
-const config = chrome.getUiSettingsClient();
+/**
+ * Creates the visualizations.
+ *
+ * @class Vis
+ * @constructor
+ * @param element {HTMLElement} jQuery selected HTML element
+ * @param config {Object} Parameters that define the chart type and chart options
+ */
+export class Vis extends EventEmitter {
+  constructor(element, visConfigArgs, deps) {
+    super();
+    this.element = element.get ? element.get(0) : element;
+    this.visConfigArgs = _.cloneDeep(visConfigArgs);
+    this.visConfigArgs.dimmingOpacity = deps.uiSettings.get('visualization:dimmingOpacity');
+    this.visConfigArgs.heatmapMaxBuckets = deps.uiSettings.get('visualization:heatmap:maxBuckets');
+    this.deps = deps;
+  }
 
-export function VislibVisProvider(Private) {
-  setHierarchicalTooltipFormatter(Private);
-  setPointSeriesTooltipFormatter(Private);
+  hasLegend() {
+    return this.visConfigArgs.addLegend;
+  }
+
+  initVisConfig(data, uiState) {
+    this.data = data;
+    this.uiState = uiState;
+    this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.element);
+  }
 
   /**
-   * Creates the visualizations.
+   * Renders the visualization
    *
-   * @class Vis
-   * @constructor
-   * @param $el {HTMLElement} jQuery selected HTML element
-   * @param config {Object} Parameters that define the chart type and chart options
+   * @method render
+   * @param data {Object} Elasticsearch query results
    */
-  class Vis extends EventEmitter {
-    constructor($el, visConfigArgs) {
-      super();
-      this.el = $el.get ? $el.get(0) : $el;
-      this.visConfigArgs = _.cloneDeep(visConfigArgs);
-      this.visConfigArgs.dimmingOpacity = config.get('visualization:dimmingOpacity');
-      this.visConfigArgs.heatmapMaxBuckets = config.get('visualization:heatmap:maxBuckets');
+  render(data, uiState) {
+    if (!data) {
+      throw new Error('No valid data!');
     }
 
-    hasLegend() {
-      return this.visConfigArgs.addLegend;
+    if (this.handler) {
+      this.data = null;
+      this._runOnHandler('destroy');
     }
 
-    initVisConfig(data, uiState) {
-      this.data = data;
+    this.initVisConfig(data, uiState);
 
-      this.uiState = uiState;
+    this.handler = new Handler(this, this.visConfig, this.deps);
+    this._runOnHandler('render');
+  }
 
-      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
-    }
+  getLegendLabels() {
+    return this.visConfig ? this.visConfig.get('legend.labels', null) : null;
+  }
 
-    /**
-     * Renders the visualization
-     *
-     * @method render
-     * @param data {Object} Elasticsearch query results
-     */
-    render(data, uiState) {
-      if (!data) {
-        throw new Error('No valid data!');
+  getLegendColors() {
+    return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
+  }
+
+  _runOnHandler(method) {
+    try {
+      this.handler[method]();
+    } catch (error) {
+      if (error instanceof VislibError) {
+        error.displayToScreen(this.handler);
+      } else {
+        throw error;
       }
-
-      if (this.handler) {
-        this.data = null;
-        this._runOnHandler('destroy');
-      }
-
-      this.initVisConfig(data, uiState);
-
-      this.handler = new Handler(this, this.visConfig);
-      this._runOnHandler('render');
-    }
-
-    getLegendLabels() {
-      return this.visConfig ? this.visConfig.get('legend.labels', null) : null;
-    }
-
-    getLegendColors() {
-      return this.visConfig ? this.visConfig.get('legend.colors', null) : null;
-    }
-
-    _runOnHandler(method) {
-      try {
-        this.handler[method]();
-      } catch (error) {
-        if (error instanceof VislibError) {
-          error.displayToScreen(this.handler);
-        } else {
-          throw error;
-        }
-      }
-    }
-
-    /**
-     * Destroys the visualization
-     * Removes chart and all elements associated with it.
-     * Removes chart and all elements associated with it.
-     * Remove event listeners and pass destroy call down to owned objects.
-     *
-     * @method destroy
-     */
-    destroy() {
-      const selection = d3.select(this.el).select('.visWrapper');
-
-      if (this.handler) this._runOnHandler('destroy');
-
-      selection.remove();
-    }
-
-    /**
-     * Sets attributes on the visualization
-     *
-     * @method set
-     * @param name {String} An attribute name
-     * @param val {*} Value to which the attribute name is set
-     */
-    set(name, val) {
-      this.visConfigArgs[name] = val;
-      this.render(this.data, this.uiState);
-    }
-
-    /**
-     * Gets attributes from the visualization
-     *
-     * @method get
-     * @param name {String} An attribute name
-     * @returns {*} The value of the attribute name
-     */
-    get(name) {
-      return this.visConfig.get(name);
-    }
-
-    /**
-     * Turns on event listeners.
-     *
-     * @param event {String}
-     * @param listener{Function}
-     * @returns {*}
-     */
-    on(event, listener) {
-      const first = this.listenerCount(event) === 0;
-      const ret = EventEmitter.prototype.on.call(this, event, listener);
-      const added = this.listenerCount(event) > 0;
-
-      // if this is the first listener added for the event
-      // enable the event in the handler
-      if (first && added && this.handler) this.handler.enable(event);
-
-      return ret;
-    }
-
-    /**
-     * Turns off event listeners.
-     *
-     * @param event {String}
-     * @param listener{Function}
-     * @returns {*}
-     */
-    off(event, listener) {
-      const last = this.listenerCount(event) === 1;
-      const ret = EventEmitter.prototype.off.call(this, event, listener);
-      const removed = this.listenerCount(event) === 0;
-
-      // Once all listeners are removed, disable the events in the handler
-      if (last && removed && this.handler) this.handler.disable(event);
-      return ret;
-    }
-
-    removeAllListeners(event) {
-      const ret = EventEmitter.prototype.removeAllListeners.call(this, event);
-      this.handler.disable(event);
-      return ret;
     }
   }
 
-  return Vis;
+  /**
+   * Destroys the visualization
+   * Removes chart and all elements associated with it.
+   * Removes chart and all elements associated with it.
+   * Remove event listeners and pass destroy call down to owned objects.
+   *
+   * @method destroy
+   */
+  destroy() {
+    const selection = d3.select(this.element).select('.visWrapper');
+
+    if (this.handler) this._runOnHandler('destroy');
+
+    selection.remove();
+  }
+
+  /**
+   * Sets attributes on the visualization
+   *
+   * @method set
+   * @param name {String} An attribute name
+   * @param val {*} Value to which the attribute name is set
+   */
+  set(name, val) {
+    this.visConfigArgs[name] = val;
+    this.render(this.data, this.uiState);
+  }
+
+  /**
+   * Gets attributes from the visualization
+   *
+   * @method get
+   * @param name {String} An attribute name
+   * @returns {*} The value of the attribute name
+   */
+  get(name) {
+    return this.visConfig.get(name);
+  }
+
+  /**
+   * Turns on event listeners.
+   *
+   * @param event {String}
+   * @param listener{Function}
+   * @returns {*}
+   */
+  on(event, listener) {
+    const first = this.listenerCount(event) === 0;
+    const ret = EventEmitter.prototype.on.call(this, event, listener);
+    const added = this.listenerCount(event) > 0;
+
+    // if this is the first listener added for the event
+    // enable the event in the handler
+    if (first && added && this.handler) this.handler.enable(event);
+
+    return ret;
+  }
+
+  /**
+   * Turns off event listeners.
+   *
+   * @param event {String}
+   * @param listener{Function}
+   * @returns {*}
+   */
+  off(event, listener) {
+    const last = this.listenerCount(event) === 1;
+    const ret = EventEmitter.prototype.off.call(this, event, listener);
+    const removed = this.listenerCount(event) === 0;
+
+    // Once all listeners are removed, disable the events in the handler
+    if (last && removed && this.handler) this.handler.disable(event);
+    return ret;
+  }
+
+  removeAllListeners(event) {
+    const ret = EventEmitter.prototype.removeAllListeners.call(this, event);
+    this.handler.disable(event);
+    return ret;
+  }
 }

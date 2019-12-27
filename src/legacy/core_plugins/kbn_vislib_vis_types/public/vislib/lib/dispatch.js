@@ -21,9 +21,7 @@ import d3 from 'd3';
 import { get } from 'lodash';
 import $ from 'jquery';
 
-import { SimpleEmitter, chrome } from '../../legacy_imports';
-
-const config = chrome.getUiSettingsClient();
+import { SimpleEmitter } from '../../legacy_imports';
 
 /**
  * Handles event responses
@@ -33,9 +31,10 @@ const config = chrome.getUiSettingsClient();
  * @param handler {Object} Reference to Handler Class Object
  */
 export class Dispatch extends SimpleEmitter {
-  constructor(handler) {
+  constructor(handler, uiSettings) {
     super();
     this.handler = handler;
+    this.uiSettings = uiSettings;
     this._listeners = {};
   }
 
@@ -196,7 +195,7 @@ export class Dispatch extends SimpleEmitter {
     const addEvent = this.addEvent;
     const $el = this.handler.el;
     if (!this.handler.highlight) {
-      this.handler.highlight = self.highlight;
+      this.handler.highlight = self.getHighlighter(self.uiSettings);
     }
 
     function hover(d, i) {
@@ -289,21 +288,23 @@ export class Dispatch extends SimpleEmitter {
   }
 
   /**
-   * Highlight the element that is under the cursor
+   * return function to Highlight the element that is under the cursor
    * by reducing the opacity of all the elements on the graph.
-   * @param element {d3.Selection}
-   * @method highlight
+   * @param uiSettings
+   * @method getHighlighter
    */
-  highlight(element) {
-    const label = this.getAttribute('data-label');
-    if (!label) return;
-    const dimming = config.get('visualization:dimmingOpacity');
-    $(element)
-      .parent()
-      .find('[data-label]')
-      .css('opacity', 1) //Opacity 1 is needed to avoid the css application
-      .not((els, el) => String($(el).data('label')) === label)
-      .css('opacity', justifyOpacity(dimming));
+  getHighlighter(uiSettings) {
+    return function highlight(element) {
+      const label = this.getAttribute('data-label');
+      if (!label) return;
+      const dimming = uiSettings.get('visualization:dimmingOpacity');
+      $(element)
+        .parent()
+        .find('[data-label]')
+        .css('opacity', 1) //Opacity 1 is needed to avoid the css application
+        .not((els, el) => String($(el).data('label')) === label)
+        .css('opacity', justifyOpacity(dimming));
+    };
   }
 
   /**

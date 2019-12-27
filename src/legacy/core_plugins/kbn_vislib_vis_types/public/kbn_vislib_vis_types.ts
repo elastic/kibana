@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export { histogramDefinition } from './histogram';
-export { lineDefinition } from './line';
-export { pieDefinition } from './pie';
-export { areaDefinition } from './area';
-export { heatmapDefinition } from './heatmap';
-export { horizontalBarDefinition } from './horizontal_bar';
-export { gaugeDefinition } from './gauge';
-export { goalDefinition } from './goal';
+export { createHistogramVisTypeDefinition } from './histogram';
+export { createLineVisTypeDefinition } from './line';
+export { createPieVisTypeDefinition } from './pie';
+export { createAreaVisTypeDefinition } from './area';
+export { createHeatmapVisTypeDefinition } from './heatmap';
+export { createHorizontalBarVisTypeDefinition } from './horizontal_bar';
+export { createGaugeVisTypeDefinition } from './gauge';
+export { createGoalVisTypeDefinition } from './goal';

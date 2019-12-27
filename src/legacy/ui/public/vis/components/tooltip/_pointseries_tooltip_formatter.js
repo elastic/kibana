@@ -18,6 +18,9 @@
  */
 
 import $ from 'jquery';
+
+import chrome from 'ui/chrome';
+
 import template from './_pointseries_tooltip.html';
 
 export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
@@ -75,6 +78,8 @@ export const getPointSeriesTooltipFormatter = () => {
   return _tooltipFormatter;
 };
 
-export const setPointSeriesTooltipFormatter = Private => {
+export const setPointSeriesTooltipFormatter = async () => {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const Private = $injector.get('Private');
   _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
 };

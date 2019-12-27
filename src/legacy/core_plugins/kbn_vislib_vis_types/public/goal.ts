@@ -22,16 +22,17 @@ import { i18n } from '@kbn/i18n';
 import { Schemas, AggGroupNames, ColorSchemas } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
-export const goalDefinition = {
+export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'goal',
   title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
   description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
-  visualization: VislibVisController,
+  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       addTooltip: true,
@@ -107,4 +108,4 @@ export const goalDefinition = {
     ]),
   },
   useCustomNoDataScreen: true,
-};
+});

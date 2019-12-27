@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { Schemas, AggGroupNames, ColorSchemas, RangeValues } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, Alignments, ColorModes, GaugeTypes } from './utils/collections';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
 import { ColorSchemaVislibParams, Labels, Style } from './types';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
 export interface Gauge extends ColorSchemaVislibParams {
   backStyle: 'Full';
@@ -53,7 +54,7 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const gaugeDefinition = {
+export const createGaugeVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'gauge',
   title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
@@ -107,7 +108,7 @@ export const gaugeDefinition = {
       },
     },
   },
-  visualization: VislibVisController,
+  visualization: createVislibVisController(deps),
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
@@ -143,4 +144,4 @@ export const gaugeDefinition = {
     ]),
   },
   useCustomNoDataScreen: true,
-};
+});

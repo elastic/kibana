@@ -19,6 +19,9 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
+
+import chrome from 'ui/chrome';
+
 import { collectBranch } from './_collect_branch';
 import numeral from 'numeral';
 import template from './_hierarchical_tooltip.html';
@@ -68,6 +71,8 @@ export const getHierarchicalTooltipFormatter = () => {
   return _tooltipFormatter;
 };
 
-export const setHierarchicalTooltipFormatter = Private => {
+export const setHierarchicalTooltipFormatter = async () => {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const Private = $injector.get('Private');
   _tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
 };

@@ -35,9 +35,10 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
-export const histogramDefinition = {
+export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'histogram',
   title: i18n.translate('kbnVislibVisTypes.histogram.histogramTitle', {
     defaultMessage: 'Vertical Bar',
@@ -46,7 +47,7 @@ export const histogramDefinition = {
   description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription', {
     defaultMessage: 'Assign a continuous variable to each axis',
   }),
-  visualization: VislibVisController,
+  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       type: 'histogram',
@@ -185,4 +186,4 @@ export const histogramDefinition = {
       },
     ]),
   },
-};
+});

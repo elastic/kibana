@@ -23,8 +23,7 @@ import './lib/types';
 import './lib/layout/layout_types';
 import './lib/data';
 import './visualizations/vis_types';
-import { mappedColors } from '../legacy_imports';
-import { VislibVisProvider } from './vis';
+import { Vis } from './vis';
 
 // prefetched for faster optimization runs
 // end prefetching
@@ -36,11 +35,9 @@ import { VislibVisProvider } from './vis';
  * @main vislib
  * @return {Object} Contains the version number and the Vis Class for creating visualizations
  */
-export function VislibProvider(Private, $rootScope) {
-  $rootScope.$on('$routeChangeStart', () => mappedColors.purge());
-
+export function VislibProvider() {
   return {
     version: '0.0.0',
-    Vis: Private(VislibVisProvider),
+    Vis,
   };
 }

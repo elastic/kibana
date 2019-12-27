@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-
 export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
 export { Schemas } from 'ui/vis/editors/default/schemas';
 export { RangeValues, RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
@@ -43,13 +41,7 @@ export { mappedColors } from 'ui/vis/components/color/mapped_colors';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 export { mountReactNode } from '../../../../core/public/utils';
 export { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
-export { chrome };
 /* eslint-disable prettier/prettier */
-export {
-  setHierarchicalTooltipFormatter,
-  getHierarchicalTooltipFormatter,
-  // @ts-ignore
-} from 'ui/vis/components/tooltip/_hierarchical_tooltip_formatter';
 export {
   setPointSeriesTooltipFormatter,
   getPointSeriesTooltipFormatter,

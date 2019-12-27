@@ -25,12 +25,12 @@ import {
   VisLegend,
   Vis,
   VisParams,
-  chrome,
   mountReactNode,
 } from './legacy_imports';
 // @ts-ignore
-import { VislibVisProvider } from './vislib/vis';
+import { Vis as Vislib } from './vislib/vis';
 import { Positions } from './utils/collections';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -39,116 +39,114 @@ const legendClassName = {
   right: 'visLib--legend-right',
 };
 
-export class VislibVisController {
-  unmount: (() => void) | null = null;
-  visParams?: VisParams;
-  legendRef: RefObject<VisLegend>;
-  container: HTMLDivElement;
-  chartEl: HTMLDivElement;
-  legendEl: HTMLDivElement;
-  vislibVis: any;
-  Vislib: any;
+export const createVislibVisController = (deps: KbnVislibVisTypesDependencies) => {
+  return class VislibVisController {
+    unmount: (() => void) | null = null;
+    visParams?: VisParams;
+    legendRef: RefObject<VisLegend>;
+    container: HTMLDivElement;
+    chartEl: HTMLDivElement;
+    legendEl: HTMLDivElement;
+    vislibVis: any;
 
-  constructor(public el: Element, public vis: Vis) {
-    this.el = el;
-    this.vis = vis;
-    this.unmount = null;
-    this.legendRef = React.createRef();
+    constructor(public el: Element, public vis: Vis) {
+      this.el = el;
+      this.vis = vis;
+      this.unmount = null;
+      this.legendRef = React.createRef();
 
-    // vis mount point
-    this.container = document.createElement('div');
-    this.container.className = 'visLib';
-    this.el.appendChild(this.container);
+      // vis mount point
+      this.container = document.createElement('div');
+      this.container.className = 'visLib';
+      this.el.appendChild(this.container);
 
-    // chart mount point
-    this.chartEl = document.createElement('div');
-    this.chartEl.className = 'visLib__chart';
-    this.container.appendChild(this.chartEl);
+      // chart mount point
+      this.chartEl = document.createElement('div');
+      this.chartEl.className = 'visLib__chart';
+      this.container.appendChild(this.chartEl);
 
-    // legend mount point
-    this.legendEl = document.createElement('div');
-    this.legendEl.className = 'visLib__legend';
-    this.container.appendChild(this.legendEl);
-  }
-
-  render(esResponse: any, visParams: VisParams) {
-    if (this.vislibVis) {
-      this.destroy();
+      // legend mount point
+      this.legendEl = document.createElement('div');
+      this.legendEl.className = 'visLib__legend';
+      this.container.appendChild(this.legendEl);
     }
 
-    return new Promise(async resolve => {
-      if (!this.Vislib) {
-        const $injector = await chrome.dangerouslyGetActiveInjector();
-        const Private: any = $injector.get('Private');
-        this.Vislib = Private(VislibVisProvider);
+    render(esResponse: any, visParams: VisParams) {
+      if (this.vislibVis) {
+        this.destroy();
       }
 
-      if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-        return resolve();
-      }
+      return new Promise(async resolve => {
+        if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
+          return resolve();
+        }
 
-      this.vislibVis = new this.Vislib(this.chartEl, visParams);
-      this.vislibVis.on('brush', this.vis.API.events.brush);
-      this.vislibVis.on('click', this.vis.API.events.filter);
-      this.vislibVis.on('renderComplete', resolve);
+        await deps.setHierarchicalTooltipFormatter();
+        await deps.setPointSeriesTooltipFormatter();
 
-      this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+        this.vislibVis = new Vislib(this.chartEl, visParams, deps);
+        this.vislibVis.on('brush', this.vis.API.events.brush);
+        this.vislibVis.on('click', this.vis.API.events.filter);
+        this.vislibVis.on('renderComplete', resolve);
 
-      if (visParams.addLegend) {
-        $(this.container)
-          .attr('class', (i, cls) => {
-            return cls.replace(/visLib--legend-\S+/g, '');
-          })
-          .addClass((legendClassName as any)[visParams.legendPosition]);
+        this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
 
-        this.mountLegend(esResponse, visParams.legendPosition);
-      }
+        if (visParams.addLegend) {
+          $(this.container)
+            .attr('class', (i, cls) => {
+              return cls.replace(/visLib--legend-\S+/g, '');
+            })
+            .addClass((legendClassName as any)[visParams.legendPosition]);
 
-      this.vislibVis.render(esResponse, this.vis.getUiState());
+          this.mountLegend(esResponse, visParams.legendPosition);
+        }
 
-      // refreshing the legend after the chart is rendered.
-      // this is necessary because some visualizations
-      // provide data necessary for the legend only after a render cycle.
-      if (
-        visParams.addLegend &&
-        CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
-      ) {
-        this.unmountLegend();
-        this.mountLegend(esResponse, visParams.legendPosition);
         this.vislibVis.render(esResponse, this.vis.getUiState());
+
+        // refreshing the legend after the chart is rendered.
+        // this is necessary because some visualizations
+        // provide data necessary for the legend only after a render cycle.
+        if (
+          visParams.addLegend &&
+          CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
+        ) {
+          this.unmountLegend();
+          this.mountLegend(esResponse, visParams.legendPosition);
+          this.vislibVis.render(esResponse, this.vis.getUiState());
+        }
+      });
+    }
+
+    mountLegend(visData: any, position: Positions) {
+      this.unmount = mountReactNode(
+        <VisLegend
+          ref={this.legendRef}
+          vis={this.vis}
+          vislibVis={this.vislibVis}
+          visData={visData}
+          position={position}
+          uiState={this.vis.getUiState()}
+        />
+      )(this.legendEl);
+    }
+
+    unmountLegend() {
+      if (this.unmount) {
+        this.unmount();
       }
-    });
-  }
-
-  mountLegend(visData: any, position: Positions) {
-    this.unmount = mountReactNode(
-      <VisLegend
-        ref={this.legendRef}
-        vis={this.vis}
-        vislibVis={this.vislibVis}
-        visData={visData}
-        position={position}
-        uiState={this.vis.getUiState()}
-      />
-    )(this.legendEl);
-  }
-
-  unmountLegend() {
-    if (this.unmount) {
-      this.unmount();
-    }
-  }
-
-  destroy() {
-    if (this.unmount) {
-      this.unmount();
     }
 
-    if (this.vislibVis) {
-      this.vislibVis.off('brush', this.vis.API.events.brush);
-      this.vislibVis.off('click', this.vis.API.events.filter);
-      this.vislibVis.destroy();
-      delete this.vislibVis;
+    destroy() {
+      if (this.unmount) {
+        this.unmount();
+      }
+
+      if (this.vislibVis) {
+        this.vislibVis.off('brush', this.vis.API.events.brush);
+        this.vislibVis.off('click', this.vis.API.events.filter);
+        this.vislibVis.destroy();
+        delete this.vislibVis;
+      }
     }
-  }
-}
+  };
+};

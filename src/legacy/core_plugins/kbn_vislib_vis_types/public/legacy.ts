@@ -17,11 +17,27 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
+import { PluginInitializerContext } from 'kibana/public';
+
+/* eslint-disable prettier/prettier */
+import {
+  setHierarchicalTooltipFormatter,
+  getHierarchicalTooltipFormatter,
+  // @ts-ignore
+} from 'ui/vis/components/tooltip/_hierarchical_tooltip_formatter';
+import {
+  setPointSeriesTooltipFormatter,
+  getPointSeriesTooltipFormatter,
+  // @ts-ignore
+} from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
+import {
+  vislibSeriesResponseHandlerProvider,
+  vislibSlicesResponseHandlerProvider,
+  // @ts-ignore
+} from 'ui/vis/response_handlers/vislib';
 
 import { plugin } from '.';
-
 import {
   KbnVislibVisTypesPluginSetupDependencies,
   KbnVislibVisTypesPluginStartDependencies,
@@ -34,6 +50,14 @@ import {
 const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
+  __LEGACY: {
+    setHierarchicalTooltipFormatter,
+    getHierarchicalTooltipFormatter,
+    setPointSeriesTooltipFormatter,
+    getPointSeriesTooltipFormatter,
+    vislibSeriesResponseHandlerProvider,
+    vislibSlicesResponseHandlerProvider,
+  },
 };
 
 const startPlugins: Readonly<KbnVislibVisTypesPluginStartDependencies> = {

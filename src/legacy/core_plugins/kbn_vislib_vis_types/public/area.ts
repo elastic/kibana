@@ -35,16 +35,17 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
-export const areaDefinition = {
+export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'area',
   title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
   description: i18n.translate('kbnVislibVisTypes.area.areaDescription', {
     defaultMessage: 'Emphasize the quantity beneath a line chart',
   }),
-  visualization: VislibVisController,
+  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       type: 'area',
@@ -133,7 +134,9 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', { defaultMessage: 'Y-axis' }),
+        title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', {
+          defaultMessage: 'Y-axis',
+        }),
         aggFilter: ['!geo_centroid', '!geo_bounds'],
         min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
@@ -141,7 +144,9 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', { defaultMessage: 'Dot size' }),
+        title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', {
+          defaultMessage: 'Dot size',
+        }),
         min: 0,
         max: 1,
         aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
@@ -149,7 +154,9 @@ export const areaDefinition = {
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', { defaultMessage: 'X-axis' }),
+        title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', {
+          defaultMessage: 'X-axis',
+        }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
@@ -176,4 +183,4 @@ export const areaDefinition = {
       },
     ]),
   },
-};
+});

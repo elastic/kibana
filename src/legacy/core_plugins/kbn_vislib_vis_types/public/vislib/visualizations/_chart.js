@@ -22,12 +22,7 @@ import _ from 'lodash';
 
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';
-import {
-  Tooltip,
-  getFormat,
-  getHierarchicalTooltipFormatter,
-  getPointSeriesTooltipFormatter,
-} from '../../legacy_imports';
+import { Tooltip, getFormat } from '../../legacy_imports';
 
 /**
  * The Base Class for all visualizations.
@@ -39,26 +34,26 @@ import {
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class Chart {
-  constructor(handler, el, chartData) {
+  constructor(handler, element, chartData, deps) {
     this.handler = handler;
-    this.chartEl = el;
+    this.chartEl = element;
     this.chartData = chartData;
     this.tooltips = [];
 
-    const events = (this.events = new Dispatch(handler));
+    const events = (this.events = new Dispatch(handler, deps.uiSettings));
 
     const fieldFormatter = getFormat(this.handler.data.get('tooltipFormatter'));
     const tooltipFormatterProvider =
       this.handler.visConfig.get('type') === 'pie'
-        ? getHierarchicalTooltipFormatter()
-        : getPointSeriesTooltipFormatter();
+        ? deps.getHierarchicalTooltipFormatter()
+        : deps.getPointSeriesTooltipFormatter();
     const tooltipFormatter = tooltipFormatterProvider(fieldFormatter);
 
     if (this.handler.visConfig && this.handler.visConfig.get('addTooltip', false)) {
-      const $el = this.handler.el;
+      const element = this.handler.el;
 
       // Add tooltip
-      this.tooltip = new Tooltip('chart', $el, tooltipFormatter, events);
+      this.tooltip = new Tooltip('chart', element, tooltipFormatter, events);
       this.tooltips.push(this.tooltip);
     }
 

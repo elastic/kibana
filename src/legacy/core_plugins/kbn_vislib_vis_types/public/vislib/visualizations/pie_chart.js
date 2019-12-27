@@ -42,8 +42,8 @@ const defaults = {
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class PieChart extends Chart {
-  constructor(handler, chartEl, chartData) {
-    super(handler, chartEl, chartData);
+  constructor(handler, chartEl, chartData, deps) {
+    super(handler, chartEl, chartData, deps);
     const charts = this.handler.data.getVisData();
     this._validatePieData(charts);
     this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);

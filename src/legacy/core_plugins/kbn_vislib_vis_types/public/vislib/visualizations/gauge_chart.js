@@ -22,8 +22,8 @@ import { Chart } from './_chart';
 import { gaugeTypes } from './gauges/gauge_types';
 
 export class GaugeChart extends Chart {
-  constructor(handler, chartEl, chartData) {
-    super(handler, chartEl, chartData);
+  constructor(handler, chartEl, chartData, deps) {
+    super(handler, chartEl, chartData, deps);
     this.gaugeConfig = handler.visConfig.get('gauge', {});
     this.gauge = new gaugeTypes[this.gaugeConfig.type](this);
   }

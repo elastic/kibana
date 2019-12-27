@@ -16,32 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  IUiSettingsClient,
+  PluginInitializerContext,
+} from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { createKbnVislibVisTypesFn } from './kbn_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
-  histogramDefinition,
-  lineDefinition,
-  pieDefinition,
-  areaDefinition,
-  heatmapDefinition,
-  horizontalBarDefinition,
-  gaugeDefinition,
-  goalDefinition,
+  createHistogramVisTypeDefinition,
+  createLineVisTypeDefinition,
+  createPieVisTypeDefinition,
+  createAreaVisTypeDefinition,
+  createHeatmapVisTypeDefinition,
+  createHorizontalBarVisTypeDefinition,
+  createGaugeVisTypeDefinition,
+  createGoalVisTypeDefinition,
   // @ts-ignore
 } from './kbn_vislib_vis_types';
 
 type KbnVislibVisTypesCoreSetup = CoreSetup<KbnVislibVisTypesPluginStartDependencies>;
 
-export interface KbnVislibVisTypesDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface LegacyDependencies {
+  setHierarchicalTooltipFormatter: () => Promise<void>;
+  getHierarchicalTooltipFormatter: () => Promise<void>;
+  setPointSeriesTooltipFormatter: () => void;
+  getPointSeriesTooltipFormatter: () => void;
+  vislibSeriesResponseHandlerProvider: () => void;
+  vislibSlicesResponseHandlerProvider: () => void;
+}
+
+export type KbnVislibVisTypesDependencies = LegacyDependencies & {
+  uiSettings: IUiSettingsClient;
+};
 
 /** @internal */
 export interface KbnVislibVisTypesPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  __LEGACY: LegacyDependencies;
 }
 
 /** @internal */
@@ -56,22 +74,27 @@ export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: KbnVislibVisTypesCoreSetup,
-    { expressions, visualizations }: KbnVislibVisTypesPluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: KbnVislibVisTypesPluginSetupDependencies
   ) {
     // @ts-ignore
-    const visualizationDependencies: Readonly<KbnVislibVisTypesDependencies> = {};
+    const visualizationDependencies: Readonly<KbnVislibVisTypesDependencies> = {
+      ...__LEGACY,
+      uiSettings: core.uiSettings,
+    };
 
     expressions.registerFunction(createKbnVislibVisTypesFn);
     expressions.registerFunction(createPieVisFn);
 
-    visualizations.types.createBaseVisualization(histogramDefinition);
-    visualizations.types.createBaseVisualization(lineDefinition);
-    visualizations.types.createBaseVisualization(pieDefinition);
-    visualizations.types.createBaseVisualization(areaDefinition);
-    visualizations.types.createBaseVisualization(heatmapDefinition);
-    visualizations.types.createBaseVisualization(horizontalBarDefinition);
-    visualizations.types.createBaseVisualization(gaugeDefinition);
-    visualizations.types.createBaseVisualization(goalDefinition);
+    [
+      createHistogramVisTypeDefinition,
+      createLineVisTypeDefinition,
+      createPieVisTypeDefinition,
+      createAreaVisTypeDefinition,
+      createHeatmapVisTypeDefinition,
+      createHorizontalBarVisTypeDefinition,
+      createGaugeVisTypeDefinition,
+      createGoalVisTypeDefinition,
+    ].forEach(vis => visualizations.types.createBaseVisualization(vis(visualizationDependencies)));
   }
 
   public start(core: CoreStart, deps: KbnVislibVisTypesPluginStartDependencies) {

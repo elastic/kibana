@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { Schemas, AggGroupNames } from './legacy_imports';
 import { PieOptions } from './components/options';
 import { getPositions, Positions } from './utils/collections';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
 import { CommonVislibParams } from './types';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
@@ -37,14 +38,14 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const pieDefinition = {
+export const createPieVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'pie',
   title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
   description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', {
     defaultMessage: 'Compare parts of a whole',
   }),
-  visualization: VislibVisController,
+  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       type: 'pie',
@@ -102,4 +103,4 @@ export const pieDefinition = {
   },
   hierarchicalData: true,
   responseHandler: 'vislib_slices',
-};
+});

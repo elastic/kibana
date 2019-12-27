@@ -35,16 +35,17 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { VislibVisController } from './vis_controller';
+import { createVislibVisController } from './vis_controller';
+import { KbnVislibVisTypesDependencies } from './plugin';
 
-export const lineDefinition = {
+export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'line',
   title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
   description: i18n.translate('kbnVislibVisTypes.line.lineDescription', {
     defaultMessage: 'Emphasize trends',
   }),
-  visualization: VislibVisController,
+  visualization: createVislibVisController(deps),
   visConfig: {
     defaults: {
       type: 'line',
@@ -176,4 +177,4 @@ export const lineDefinition = {
       },
     ]),
   },
-};
+});
