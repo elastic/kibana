@@ -40,6 +40,12 @@ export interface LogEntriesParams {
   query?: JsonObject;
   cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
 }
+export interface LogEntriesAroundParams {
+  startDate: number;
+  endDate: number;
+  center: LogEntriesCursor;
+  query?: JsonObject;
+}
 
 export class InfraLogEntriesDomain {
   constructor(
@@ -47,6 +53,44 @@ export class InfraLogEntriesDomain {
     private readonly libs: { sources: InfraSources }
   ) {}
 
+  /* Name is temporary until we can clean up the GraphQL implementation */
+  /* eslint-disable-next-line @typescript-eslint/camelcase */
+  public async getLogEntriesAround__new(
+    requestContext: RequestHandlerContext,
+    sourceId: string,
+    params: LogEntriesAroundParams
+  ) {
+    const { startDate, endDate, center, query } = params;
+
+    const entriesBefore = await this.getLogEntries(requestContext, sourceId, {
+      startDate,
+      endDate,
+      query,
+      cursor: { before: center },
+    });
+
+    /* Elasticsearch's `search_after` returns documents after the specified cursor.
+     * - If we have documents before the center, we search after the last of
+     *   those. The first document of the new group is the center.
+     * - If there were no documents, we search one milisecond before the
+     *   center. It then becomes the first document.
+     */
+    const cursorAfter =
+      entriesBefore.length > 0
+        ? entriesBefore[entriesBefore.length - 1].cursor
+        : { time: center.time - 1, tiebreaker: 0 };
+
+    const entriesAfter = await this.getLogEntries(requestContext, sourceId, {
+      startDate,
+      endDate,
+      query,
+      cursor: { after: cursorAfter },
+    });
+
+    return [...entriesBefore, ...entriesAfter];
+  }
+
+  /** @deprecated */
   public async getLogEntriesAround(
     requestContext: RequestHandlerContext,
     sourceId: string,

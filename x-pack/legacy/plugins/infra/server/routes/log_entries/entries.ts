@@ -46,12 +46,22 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           cursor = { after: payload.after };
         }
 
-        const entries = await logEntries.getLogEntries(requestContext, sourceId, {
-          startDate,
-          endDate,
-          query: parseFilterQuery(query),
-          cursor,
-        });
+        let entries;
+        if ('center' in payload) {
+          entries = await logEntries.getLogEntriesAround__new(requestContext, sourceId, {
+            startDate,
+            endDate,
+            query: parseFilterQuery(query),
+            center: payload.center,
+          });
+        } else {
+          entries = await logEntries.getLogEntries(requestContext, sourceId, {
+            startDate,
+            endDate,
+            query: parseFilterQuery(query),
+            cursor,
+          });
+        }
 
         return response.ok({
           body: logEntriesResponseRT.encode({
