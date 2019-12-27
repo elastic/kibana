@@ -3,6 +3,15 @@
 exports[`Ccr that it renders normally 1`] = `
 <EuiPage>
   <EuiPageBody>
+    <EuiScreenReaderOnly>
+      <h1>
+        <FormattedMessage
+          defaultMessage="CCR"
+          id="xpack.monitoring.elasticsearch.ccr.heading"
+          values={Object {}}
+        />
+      </h1>
+    </EuiScreenReaderOnly>
     <EuiPageContent>
       <EuiPageContentBody>
         <EuiInMemoryTable
