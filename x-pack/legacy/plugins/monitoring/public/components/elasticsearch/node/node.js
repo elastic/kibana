@@ -19,7 +19,11 @@ import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
-import { FormattedMessage  } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+function formatScreenReaderMsg(msg, nodeSummary) {
+  return msg + ' ' + nodeSummary.name;
+}
 
 export const Node = ({
   nodeSummary,
@@ -40,7 +44,6 @@ export const Node = ({
     metrics.node_latency,
     metrics.node_segment_count,
   ];
-
   return (
     <EuiPage>
       <EuiPageBody>
@@ -48,7 +51,7 @@ export const Node = ({
           <h1>
             <FormattedMessage
               id="xpack.monitoring.elasticsearch.node.heading"
-              defaultMessage="Elasticsearch node"
+              defaultMessage={formatScreenReaderMsg('Elasticsearch node', nodeSummary)}
             />
           </h1>
         </EuiScreenReaderOnly>
