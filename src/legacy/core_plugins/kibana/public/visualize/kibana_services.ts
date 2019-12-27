@@ -48,7 +48,6 @@ export interface VisualizeKibanaServices {
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectRegistry: any;
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
