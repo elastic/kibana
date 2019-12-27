@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useShowCharts, CheckboxShowCharts, SHOW_CHARTS_DEFAULT } from './checkbox_showcharts';
+export { useShowCharts, CheckboxShowCharts } from './checkbox_showcharts';

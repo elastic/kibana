@@ -17,8 +17,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useUrlState } from '../../../util/url_state';
 
-export const SHOW_CHARTS_DEFAULT = true;
-export const SHOW_CHARTS_APP_STATE_NAME = 'mlShowCharts';
+const SHOW_CHARTS_DEFAULT = true;
+const SHOW_CHARTS_APP_STATE_NAME = 'mlShowCharts';
 
 export const useShowCharts = () => {
   const [appState, setAppState] = useUrlState('_a');

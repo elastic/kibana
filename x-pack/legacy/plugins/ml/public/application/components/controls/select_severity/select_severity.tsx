@@ -77,8 +77,8 @@ function optionValueToThreshold(value: number) {
   return threshold;
 }
 
-export const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
-export const TABLE_SEVERITY_APP_STATE_NAME = 'mlSelectSeverity';
+const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
+const TABLE_SEVERITY_APP_STATE_NAME = 'mlSelectSeverity';
 
 export const useTableSeverity = () => {
   const [appState, setAppState] = useUrlState('_a');

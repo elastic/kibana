@@ -58,8 +58,8 @@ function optionValueToInterval(value: string) {
   return interval;
 }
 
-export const TABLE_INTERVAL_DEFAULT = OPTIONS[0].value;
-export const TABLE_INTERVAL_APP_STATE_NAME = 'mlSelectInterval';
+const TABLE_INTERVAL_DEFAULT = OPTIONS[0].value;
+const TABLE_INTERVAL_APP_STATE_NAME = 'mlSelectInterval';
 
 export const useTableInterval = () => {
   const [appState, setAppState] = useUrlState('_a');
