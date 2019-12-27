@@ -20,7 +20,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { supports } from 'ui/utils/supports';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
@@ -29,6 +28,7 @@ import { createTileMapVisualization } from './tile_map_visualization';
 import { Status } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
+import { cssFilters } from './css_filters';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -44,7 +44,7 @@ export function createTileMapTypeDefinition(dependencies) {
       defaultMessage: 'Plot latitude and longitude coordinates on a map',
     }),
     visConfig: {
-      canDesaturate: !!supports.cssFilters,
+      canDesaturate: Boolean(cssFilters),
       defaults: {
         colorSchema: 'Yellow to Red',
         mapType: 'Scaled Circle Markers',
