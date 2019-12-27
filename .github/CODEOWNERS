@@ -8,6 +8,16 @@
 /src/plugins/share/ @elastic/kibana-app
 /src/legacy/server/url_shortening/ @elastic/kibana-app
 /src/legacy/server/sample_data/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/visualize/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
+/src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
+/src/plugins/home/ @elastic/kibana-app
+/src/plugins/kibana_legacy/ @elastic/kibana-app
+/src/plugins/timelion/ @elastic/kibana-app
+/src/plugins/dev_tools/ @elastic/kibana-app
 
 # App Architecture
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -56,6 +66,13 @@
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
 /x-pack/test/functional/services/transform.ts @elastic/ml-ui
+
+# Maps
+/x-pack/legacy/plugins/maps/ @elastic/kibana-gis
+/x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
+/x-pack/test/functional/apps/maps/ @elastic/kibana-gis
+/x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
+/x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations
