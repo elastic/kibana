@@ -75,7 +75,7 @@ export function loadExplorerData(state: ExplorerState) {
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
 
   const jobIds =
-    selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes
       : selectedJobs.map(d => d.id);
 
@@ -126,7 +126,7 @@ export function loadExplorerData(state: ExplorerState) {
       influencersFilterQuery
     ),
     topFieldValues:
-      selectedCells !== null && selectedCells.showTopFieldValues === true
+      selectedCells !== undefined && selectedCells.showTopFieldValues === true
         ? loadViewByTopFieldValuesForSelectedTime(
             timerange.earliestMs,
             timerange.latestMs,
@@ -143,7 +143,7 @@ export function loadExplorerData(state: ExplorerState) {
     tap(explorerService.setViewBySwimlaneLoading),
     // Trigger a side-effect to update the charts.
     tap(({ anomalyChartRecords }) => {
-      if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
+      if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
         updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs, tableSeverity);
       } else {
         updateCharts([], timerange.earliestMs, timerange.latestMs, tableSeverity);

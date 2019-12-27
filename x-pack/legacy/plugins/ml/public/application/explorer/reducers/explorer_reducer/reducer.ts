@@ -16,7 +16,6 @@ import {
   getSwimlaneBucketInterval,
   getViewBySwimlaneOptions,
 } from '../../explorer_utils';
-import { appStateReducer } from '../app_state_reducer';
 
 import { checkSelectedCells } from './check_selected_cells';
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
@@ -39,9 +38,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = {
         ...state,
         ...getClearedSelectedAnomaliesState(),
-        appState: appStateReducer(state.appState, {
-          type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
-        }),
         loading: false,
         selectedJobs: [],
       };
@@ -51,23 +47,11 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = {
         ...state,
         ...getClearedSelectedAnomaliesState(),
-        appState: appStateReducer(state.appState, {
-          type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
-        }),
       };
       break;
 
     case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
       nextState = jobSelectionChange(state, payload);
-      break;
-
-    case EXPLORER_ACTION.APP_STATE_SET:
-    case EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION:
-    case EXPLORER_ACTION.APP_STATE_SAVE_SELECTION:
-    case EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME:
-    case EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS:
-    case EXPLORER_ACTION.APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS:
-      nextState = { ...state, appState: appStateReducer(state.appState, nextAction) };
       break;
 
     case EXPLORER_ACTION.RESET:
@@ -114,10 +98,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
 
       nextState = {
         ...state,
-        appState: appStateReducer(state.appState, {
-          type: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION,
-          payload,
-        }),
         selectedCells,
       };
       break;
@@ -141,9 +121,6 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     case EXPLORER_ACTION.SET_SWIMLANE_LIMIT:
       nextState = {
         ...state,
-        appState: appStateReducer(state.appState, {
-          type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
-        }),
         ...getClearedSelectedAnomaliesState(),
         swimlaneLimit: payload,
       };
@@ -161,18 +138,9 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
           filteredFields.includes(viewBySwimlaneFieldName) === false;
       }
 
-      const appStateClearedSelection = appStateReducer(state.appState, {
-        type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
-      });
-      const appStateWithViewBySwimlane = appStateReducer(appStateClearedSelection, {
-        type: EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME,
-        payload: { viewBySwimlaneFieldName },
-      });
-
       nextState = {
         ...state,
         ...getClearedSelectedAnomaliesState(),
-        appState: appStateWithViewBySwimlane,
         maskAll,
         viewBySwimlaneFieldName,
       };
@@ -228,7 +196,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     ...nextState,
     swimlaneBucketInterval,
     viewByLoadedForTimeFormatted:
-      selectedCells !== null && selectedCells.showTopFieldValues === true
+      selectedCells !== undefined && selectedCells.showTopFieldValues === true
         ? formatHumanReadableDateTime(timerange.earliestMs)
         : null,
     viewBySwimlaneFieldName,

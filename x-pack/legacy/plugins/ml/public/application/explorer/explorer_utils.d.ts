@@ -12,7 +12,7 @@ import { TimeBucketsInterval } from '../util/time_buckets';
 
 interface ClearedSelectedAnomaliesState {
   anomalyChartRecords: [];
-  selectedCells: null;
+  selectedCells: undefined;
   viewByLoadedForTimeFormatted: null;
 }
 
@@ -37,7 +37,7 @@ export declare const getDefaultSwimlaneData: () => SwimlaneData;
 export declare const getInfluencers: (selectedJobs: any[]) => string[];
 
 export declare const getSelectionInfluencers: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells,
   fieldName: string
 ) => any[];
 
@@ -47,7 +47,7 @@ interface SelectionTimeRange {
 }
 
 export declare const getSelectionTimeRange: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells,
   interval: number,
   bounds: TimeRangeBounds
 ) => SelectionTimeRange;
@@ -62,7 +62,7 @@ interface ViewBySwimlaneOptionsArgs {
   filterActive: boolean;
   filteredFields: any[];
   isAndOperator: boolean;
-  selectedCells: SelectedCells;
+  selectedCells: AppStateSelectedCells;
   selectedJobs: ExplorerJob[];
 }
 
@@ -94,7 +94,7 @@ declare interface SwimlaneBounds {
 }
 
 export declare const loadAnnotationsTableData: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells,
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds
@@ -109,7 +109,7 @@ export declare interface AnomaliesTableData {
 }
 
 export declare const loadAnomaliesTableData: (
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells,
   selectedJobs: ExplorerJob[],
   dateFormatTz: any,
   interval: number,
@@ -125,7 +125,7 @@ export declare const loadDataForCharts: (
   earliestMs: number,
   latestMs: number,
   influencers: any[],
-  selectedCells: SelectedCells,
+  selectedCells: AppStateSelectedCells,
   influencersFilterQuery: any
 ) => Promise<any[] | undefined>;
 
@@ -185,7 +185,7 @@ declare interface FilterData {
   queryString: string;
 }
 
-export declare interface SelectedCells {
+export declare interface AppStateSelectedCells {
   type: string;
   lanes: string[];
   times: number[];
@@ -194,7 +194,7 @@ export declare interface SelectedCells {
 }
 
 export declare interface RestoredAppState {
-  selectedCells?: SelectedCells;
+  selectedCells?: AppStateSelectedCells;
   filterData: {} | FilterData;
   viewBySwimlaneFieldName: string;
 }

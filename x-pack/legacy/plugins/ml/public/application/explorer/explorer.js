@@ -555,7 +555,7 @@ export class Explorer extends React.Component {
                   <SelectInterval />
                 </EuiFormRow>
               </EuiFlexItem>
-              {anomalyChartRecords.length > 0 && selectedCells !== null && (
+              {anomalyChartRecords.length > 0 && selectedCells !== undefined && (
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <EuiFormRow label="&#8203;">
                     <CheckboxShowCharts />

@@ -54,7 +54,7 @@ export function createJobs(jobs) {
 export function getClearedSelectedAnomaliesState() {
   return {
     anomalyChartRecords: [],
-    selectedCells: null,
+    selectedCells: undefined,
     viewByLoadedForTimeFormatted: null,
   };
 }
@@ -195,7 +195,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
   let earliestMs = bounds.min.valueOf();
   let latestMs = bounds.max.valueOf();
 
-  if (selectedCells !== null && selectedCells.times !== undefined) {
+  if (selectedCells !== undefined && selectedCells.times !== undefined) {
     // time property of the cell data is an array, with the elements being
     // the start times of the first and last cell selected.
     earliestMs =
@@ -212,7 +212,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
 
 export function getSelectionInfluencers(selectedCells, fieldName) {
   if (
-    selectedCells !== null &&
+    selectedCells !== undefined &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
@@ -525,7 +525,7 @@ export function processViewByResults(
 
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds =
-    selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes
       : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
@@ -587,7 +587,7 @@ export async function loadAnomaliesTableData(
   influencersFilterQuery
 ) {
   const jobIds =
-    selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes
       : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
@@ -705,7 +705,7 @@ export async function loadDataForCharts(
         }
 
         if (
-          (selectedCells !== null && Object.keys(selectedCells).length > 0) ||
+          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
           influencersFilterQuery !== undefined
         ) {
           console.log('Explorer anomaly charts data set:', resp.records);

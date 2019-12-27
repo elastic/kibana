@@ -19,7 +19,7 @@ import { DeepPartial } from '../../../common/types/common';
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { RestoredAppState, SelectedCells, TimeRangeBounds } from './explorer_utils';
+import { RestoredAppState, AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
 import {
   explorerReducer,
   getExplorerDefaultState,
@@ -55,7 +55,33 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
 );
 
 const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
-  map((state: ExplorerState) => state.appState),
+  map((state: ExplorerState) => {
+    const appState: ExplorerAppState = {
+      mlExplorerFilter: {},
+      mlExplorerSwimlane: {},
+    };
+
+    if (state.selectedCells !== undefined) {
+      const swimlaneSelectedCells = state.selectedCells;
+      appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
+      appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
+      appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
+      appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+    }
+
+    if (state.viewBySwimlaneFieldName !== undefined) {
+      appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
+    }
+
+    if (state.filterActive) {
+      appState.mlExplorerFilter.influencersFilterQuery = state.influencersFilterQuery;
+      appState.mlExplorerFilter.filterActive = state.filterActive;
+      appState.mlExplorerFilter.filteredFields = state.filteredFields;
+      appState.mlExplorerFilter.queryString = state.queryString;
+    }
+
+    return appState;
+  }),
   distinctUntilChanged(isEqual)
 );
 
@@ -64,24 +90,10 @@ export const setStateActionCreator = (payload: DeepPartial<ExplorerState>) => ({
   payload,
 });
 
-interface AppStateSelection {
-  type: string;
-  lanes: string[];
-  times: number[];
-  showTopFieldValues: boolean;
-  viewByFieldName: string;
-}
-
 // Export observable state and action dispatchers as service
 export const explorerService = {
   appState$: explorerAppState$,
   state$: explorerState$,
-  appStateClearSelection: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION });
-  },
-  appStateSaveSelection: (payload: AppStateSelection) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_SAVE_SELECTION, payload });
-  },
   clearInfluencerFilterSettings: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
   },
@@ -97,9 +109,6 @@ export const explorerService = {
   reset: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.RESET });
   },
-  setAppState: (payload: DeepPartial<ExplorerAppState>) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.APP_STATE_SET, payload });
-  },
   setBounds: (payload: TimeRangeBounds) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_BOUNDS, payload });
   },
@@ -112,7 +121,7 @@ export const explorerService = {
       payload,
     });
   },
-  setSelectedCells: (payload: SelectedCells) => {
+  setSelectedCells: (payload: AppStateSelectedCells) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SELECTED_CELLS,
       payload,

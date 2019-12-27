@@ -24,7 +24,7 @@ import { Explorer } from '../../explorer';
 import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { ExplorerAppState, ExplorerState } from '../../explorer/reducers';
+import { ExplorerState } from '../../explorer/reducers';
 import { loadExplorerData } from '../../explorer/actions';
 import {
   explorerAction$,
@@ -108,25 +108,8 @@ const ExplorerUrlStateManager: FC = () => {
     }
   }, [JSON.stringify(jobIds)]);
 
-  const explorerAppState = useObservable(explorerService.appState$);
-  useEffect(() => {
-    if (explorerAppState !== undefined) {
-      setAppState(explorerAppState);
-    }
-  }, [JSON.stringify(explorerAppState)]);
-
   useEffect(() => {
     const subscriptions = new Subscription();
-
-    // Pass the current URL AppState on to anomaly explorer's reactive state.
-    // After this hand-off, the appState stored in explorerState$ is the single
-    // source of truth.
-    const { mlExplorerSwimlane, mlExplorerFilter } = appState || {};
-
-    explorerService.setAppState({
-      mlExplorerSwimlane: mlExplorerSwimlane || {},
-      mlExplorerFilter: mlExplorerFilter || {},
-    });
 
     // Refresh all the data when the time range is altered.
     subscriptions.add(
@@ -149,6 +132,13 @@ const ExplorerUrlStateManager: FC = () => {
     };
   }, []);
 
+  const explorerAppState = useObservable(explorerService.appState$);
+  useEffect(() => {
+    if (explorerAppState !== undefined) {
+      setAppState(explorerAppState);
+    }
+  }, [JSON.stringify(explorerAppState)]);
+
   const annotationsRefresh = useObservable(annotationsRefresh$);
   const explorerState = useObservable(explorerService.state$);
 
@@ -159,11 +149,9 @@ const ExplorerUrlStateManager: FC = () => {
   const appStateMappedToExplorerState: DeepPartial<ExplorerState> = {
     tableInterval,
     tableSeverity: tableSeverity.val,
-    ...(restoredAppState.selectedCells !== undefined
-      ? { selectedCells: restoredAppState.selectedCells }
-      : {}),
-    viewBySwimlaneFieldName: restoredAppState.viewBySwimlaneFieldName,
+    ...restoredAppState,
   };
+
   useEffect(() => {
     explorerService.setState(appStateMappedToExplorerState);
   }, [JSON.stringify(appStateMappedToExplorerState)]);

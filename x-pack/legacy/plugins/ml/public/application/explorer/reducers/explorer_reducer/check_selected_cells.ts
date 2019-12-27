@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EXPLORER_ACTION, SWIMLANE_TYPE } from '../../explorer_constants';
+import { SWIMLANE_TYPE } from '../../explorer_constants';
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
-
-import { appStateReducer } from '../app_state_reducer';
 
 import { ExplorerState } from './state';
 
@@ -21,18 +19,26 @@ interface SwimlanePoint {
 // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
 // Ok to keep cellSelection in this case
 export const checkSelectedCells = (state: ExplorerState) => {
-  const { filterActive, selectedCells, viewBySwimlaneData, viewBySwimlaneDataLoading } = state;
+  const {
+    filterActive,
+    loading,
+    selectedCells,
+    viewBySwimlaneData,
+    viewBySwimlaneDataLoading,
+  } = state;
 
-  if (viewBySwimlaneDataLoading) {
+  if (loading || viewBySwimlaneDataLoading) {
     return {};
   }
 
   let clearSelection = false;
   if (
+    selectedCells !== undefined &&
     selectedCells !== null &&
     selectedCells.type === SWIMLANE_TYPE.VIEW_BY &&
     viewBySwimlaneData !== undefined &&
-    viewBySwimlaneData.points !== undefined
+    viewBySwimlaneData.points !== undefined &&
+    viewBySwimlaneData.points.length > 0
   ) {
     clearSelection =
       filterActive === false &&
@@ -49,9 +55,6 @@ export const checkSelectedCells = (state: ExplorerState) => {
 
   if (clearSelection === true) {
     return {
-      appState: appStateReducer(state.appState, {
-        type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
-      }),
       ...getClearedSelectedAnomaliesState(),
     };
   }

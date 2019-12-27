@@ -15,16 +15,14 @@ import {
   getDefaultSwimlaneData,
   AnomaliesTableData,
   ExplorerJob,
+  AppStateSelectedCells,
   SwimlaneData,
   TimeRangeBounds,
 } from '../../explorer_utils';
 
-import { getExplorerDefaultAppState, ExplorerAppState } from '../app_state_reducer';
-
 export interface ExplorerState {
   annotationsData: any[];
   anomalyChartRecords: any[];
-  appState: ExplorerAppState;
   bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
@@ -40,7 +38,7 @@ export interface ExplorerState {
   noInfluencersConfigured: boolean;
   overallSwimlaneData: SwimlaneData;
   queryString: string;
-  selectedCells: SelectedCells;
+  selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
   swimlaneContainerWidth: number;
@@ -64,7 +62,6 @@ export function getExplorerDefaultState(): ExplorerState {
   return {
     annotationsData: [],
     anomalyChartRecords: [],
-    appState: getExplorerDefaultAppState(),
     bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
@@ -80,7 +77,7 @@ export function getExplorerDefaultState(): ExplorerState {
     noInfluencersConfigured: true,
     overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
-    selectedCells: null,
+    selectedCells: undefined,
     selectedJobs: null,
     swimlaneBucketInterval: undefined,
     swimlaneContainerWidth: 0,

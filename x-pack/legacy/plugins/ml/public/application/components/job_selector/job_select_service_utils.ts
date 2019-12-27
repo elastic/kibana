@@ -43,7 +43,7 @@ function getInvalidJobIds(ids: string[]): string[] {
   });
 }
 
-function loadJobIdsFromGlobalState(
+export function getSelectedJobIds(
   globalState: Dictionary<any>
 ): {
   jobIds: string[];
@@ -92,11 +92,6 @@ function loadJobIdsFromGlobalState(
     }
   }
   return { jobIds, selectedGroups: groups };
-}
-
-// called externally to retrieve the selected jobs ids
-export function getSelectedJobIds(globalState: Dictionary<any>) {
-  return loadJobIdsFromGlobalState(globalState);
 }
 
 export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
