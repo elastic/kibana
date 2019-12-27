@@ -130,7 +130,7 @@ export const validatePhase = (type, phase, errors) => {
       } else if (
         (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE ||
           numberedAttribute === PHASE_PRIMARY_SHARD_COUNT) &&
-        phase[numberedAttribute] <= 0
+        phase[numberedAttribute] < 0
       ) {
         phaseErrors[numberedAttribute] = [positiveNumbersEqualAboveZeroErrorMessage];
       }
