@@ -26,6 +26,7 @@ function generator({
   usePublicArtifact,
   baseOSImage,
   ubiImageFlavor,
+  dockerBuildDate,
 }) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
@@ -115,6 +116,8 @@ function generator({
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
     org.label-schema.vcs-url="https://github.com/elastic/kibana" \\
     org.label-schema.license="${license}" \\
+    org.label-schema.usage="https://www.elastic.co/guide/en/kibana/index.html" \\
+    org.label-schema.build-date="${dockerBuildDate}" \\
     license="${license}"
 
   ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
