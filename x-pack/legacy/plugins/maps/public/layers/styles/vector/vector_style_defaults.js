@@ -27,6 +27,8 @@ export const VECTOR_STYLES = {
   LABEL_TEXT: 'labelText',
   LABEL_COLOR: 'labelColor',
   LABEL_SIZE: 'labelSize',
+  LABEL_BORDER_COLOR: 'labelBorderColor',
+  LABEL_BORDER_WIDTH: 'labelBorderWidth',
 };
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
@@ -106,6 +108,18 @@ export function getDefaultStaticProperties(mapColors = []) {
         size: 14,
       },
     },
+    [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        color: isDarkMode ? '#000000' : '#FFFFFF',
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_WIDTH]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        size: 2,
+      },
+    },
   };
 }
 
@@ -158,7 +172,7 @@ export function getDefaultDynamicProperties() {
       },
     },
     [VECTOR_STYLES.ICON_ORIENTATION]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         field: undefined,
         fieldMetaOptions: {
@@ -168,13 +182,13 @@ export function getDefaultDynamicProperties() {
       },
     },
     [VECTOR_STYLES.LABEL_TEXT]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         field: undefined,
       },
     },
     [VECTOR_STYLES.LABEL_COLOR]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
         field: undefined,
@@ -185,10 +199,33 @@ export function getDefaultDynamicProperties() {
       },
     },
     [VECTOR_STYLES.LABEL_SIZE]: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         minSize: DEFAULT_MIN_SIZE,
         maxSize: DEFAULT_MAX_SIZE,
+        field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        },
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_COLOR]: {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        color: COLOR_GRADIENTS[0].value,
+        field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        },
+      },
+    },
+    [VECTOR_STYLES.LABEL_BORDER_WIDTH]: {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        minSize: 1,
+        maxSize: 10,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,

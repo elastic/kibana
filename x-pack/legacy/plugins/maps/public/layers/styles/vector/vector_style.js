@@ -98,6 +98,14 @@ export class VectorStyle extends AbstractStyle {
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
       VECTOR_STYLES.LABEL_COLOR
     );
+    this._labelBorderWidthStyleProperty = this._makeSizeProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_WIDTH],
+      VECTOR_STYLES.LABEL_BORDER_WIDTH
+    );
+    this._labelBorderColorStyleProperty = this._makeColorProperty(
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
+      VECTOR_STYLES.LABEL_BORDER_COLOR
+    );
   }
 
   _getAllStyleProperties() {
@@ -110,6 +118,8 @@ export class VectorStyle extends AbstractStyle {
       this._labelStyleProperty,
       this._labelSizeStyleProperty,
       this._labelColorStyleProperty,
+      this._labelBorderWidthStyleProperty,
+      this._labelBorderColorStyleProperty,
     ];
   }
 
@@ -572,7 +582,8 @@ export class VectorStyle extends AbstractStyle {
     mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
     this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
     this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
-    this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
+    this._labelBorderWidthStyleProperty.syncLabelBorderWidthWithMb(textLayerId, mbMap);
+    this._labelBorderColorStyleProperty.syncLabelBorderColorWithMb(textLayerId, mbMap);
   }
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {

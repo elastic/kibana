@@ -208,6 +208,25 @@ export class VectorStyleEditor extends Component {
           defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelSize.options}
         />
         <EuiSpacer size="m" />
+
+        <VectorStyleColorEditor
+          swatches={DEFAULT_LINE_COLORS}
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelBorderColor}
+          fields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelBorderColor.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelBorderColor.options}
+        />
+        <EuiSpacer size="m" />
+
+        <VectorStyleSizeEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelBorderWidth}
+          fields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelBorderWidth.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelBorderWidth.options}
+        />
+        <EuiSpacer size="m" />
       </Fragment>
     );
   }

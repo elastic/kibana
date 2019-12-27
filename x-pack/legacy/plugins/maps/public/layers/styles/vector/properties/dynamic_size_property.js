@@ -98,6 +98,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
   }
 
+  syncLabelBorderWidthWithMb(mbLayerId, mbMap) {
+    const lineWidth = this._getMbSize();
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-width', lineWidth);
+  }
+
   _getMbSize() {
     if (this._isSizeDynamicConfigComplete(this._options)) {
       return this._getMbDataDrivenSize({

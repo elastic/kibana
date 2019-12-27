@@ -52,6 +52,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }
 
+  syncLabelBorderColorWithMb(mbLayerId, mbMap) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-color', color);
+  }
+
   isCustomColorRamp() {
     return this._options.useCustomColorRamp;
   }
