@@ -384,9 +384,10 @@ export const getAllChildFields = (
 };
 
 /**
- * If we delete an object or a field with multifield, we need to know if any of its "child"
- * fields has an `alias` that points to it.
- * This method traverse the field descendant tree and returns all the aliases found.
+ * If we delete an object with child fields or a text/keyword with multi-field,
+ * we need to know if any of its "child" fields has an `alias` that points to it.
+ * This method traverse the field descendant tree and returns all the aliases found
+ * on the field and its possible children.
  */
 export const getAllDescendantAliases = (
   field: NormalizedField,

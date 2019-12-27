@@ -32,7 +32,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
   const dispatch = useDispatch();
 
   const { fields } = useMappingsState();
-  const { byId } = fields;
+  const { byId, aliases } = fields;
 
   const confirmButtonText = i18n.translate(
     'xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription',
@@ -65,7 +65,7 @@ export const UpdateFieldProvider = ({ children }: Props) => {
   const updateField: UpdateFieldFunc = field => {
     const previousField = byId[field.id];
 
-    const showConfirmationAfterTypeChanged = (oldType: DataType, newType: DataType): boolean => {
+    const willDeleteChildFields = (oldType: DataType, newType: DataType): boolean => {
       const { hasChildFields, hasMultiFields } = field;
 
       if (!hasChildFields && !hasMultiFields) {
@@ -77,10 +77,9 @@ export const UpdateFieldProvider = ({ children }: Props) => {
     };
 
     if (field.source.type !== previousField.source.type) {
-      const aliases = getAllDescendantAliases(field, fields)
-        .map(id => byId[id].path)
-        .sort();
-      const hasAliases = Boolean(aliases.length);
+      const aliasesOnField = aliases[field.id];
+      const aliasesOnFieldAndDescendants = getAllDescendantAliases(field, fields);
+      const doSomeAliasPointsOnCurrentField = aliasesOnField && Boolean(aliasesOnField.length);
       const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
         field.source.type
       );
@@ -88,13 +87,30 @@ export const UpdateFieldProvider = ({ children }: Props) => {
       // We need to check if, by changing the type, we will also
       // delete possible child properties ("fields" or "properties").
       // If we will, we need to warn the user about it.
-      const requiresConfirmation =
-        hasAliases && !nextTypeCanHaveAlias
-          ? true
-          : showConfirmationAfterTypeChanged(previousField.source.type, field.source.type);
+      let requiresConfirmation: boolean;
+      let aliasesToDelete: string[] = [];
+
+      if (doSomeAliasPointsOnCurrentField && !nextTypeCanHaveAlias) {
+        aliasesToDelete = aliasesOnFieldAndDescendants;
+        requiresConfirmation = true;
+      } else {
+        requiresConfirmation = willDeleteChildFields(previousField.source.type, field.source.type);
+        if (requiresConfirmation) {
+          // We will only delete aliases that points to possible children (fields or multi-fields)
+          aliasesToDelete = aliasesOnFieldAndDescendants.filter(
+            id => aliasesOnField.includes(id) === false
+          );
+        }
+      }
 
       if (requiresConfirmation) {
-        setState({ isModalOpen: true, field, aliases: hasAliases ? aliases : undefined });
+        setState({
+          isModalOpen: true,
+          field,
+          aliases: Boolean(aliasesToDelete.length)
+            ? aliasesToDelete.map(id => byId[id].path).sort()
+            : undefined,
+        });
         return;
       }
     }
