@@ -131,13 +131,13 @@ export const MetricsExplorerChart = ({
               />
             ))}
             <Axis
-              id={getAxisId('timestamp')}
+              id={'timestamp'}
               position={Position.Bottom}
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
             <Axis
-              id={getAxisId('values')}
+              id={'values'}
               position={Position.Left}
               tickFormat={yAxisFormater}
               domain={domain}
