@@ -1,0 +1,17 @@
+{
+  "rule_id": "68a33102-3680-4581-a48a-210b23925905",
+  "risk_score": 50,
+  "description": "Indicates that a host performed a heartbleed attack or scan.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Heartbleed::SSL_Heartbeat_Attack",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Heartbleed::SSL_Heartbeat_Attack\" or rule.name: \"Heartbleed::SSL_Heartbeat_Attack\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

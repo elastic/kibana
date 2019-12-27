@@ -16,21 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin } from 'src/core/server';
-import { TutorialsRegistry, TutorialsRegistrySetup, TutorialsRegistryStart } from './services';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import {
+  TutorialsRegistry,
+  TutorialsRegistrySetup,
+  TutorialsRegistryStart,
+  SampleDataRegistry,
+  SampleDataRegistrySetup,
+  SampleDataRegistryStart,
+} from './services';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+
+interface HomeServerPluginSetupDependencies {
+  usage_collection?: UsageCollectionSetup;
+}
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
+  constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
+  private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
+      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usage_collection) },
     };
   }
 
-  public start() {
+  public start(): HomeServerPluginStart {
     return {
       tutorials: { ...this.tutorialsRegistry.start() },
+      sampleData: { ...this.sampleDataRegistry.start() },
     };
   }
 }
@@ -38,9 +54,11 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
 /** @public */
 export interface HomeServerPluginSetup {
   tutorials: TutorialsRegistrySetup;
+  sampleData: SampleDataRegistrySetup;
 }
 
 /** @public */
 export interface HomeServerPluginStart {
   tutorials: TutorialsRegistryStart;
+  sampleData: SampleDataRegistryStart;
 }

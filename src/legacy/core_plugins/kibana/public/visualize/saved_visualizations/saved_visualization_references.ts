@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
-import { VisSavedObject } from '../embeddable/visualize_embeddable';
+import { VisSavedObject } from '../../visualize_embeddable/visualize_embeddable';
 
 export function extractReferences({
   attributes,

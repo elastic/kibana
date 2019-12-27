@@ -9,9 +9,9 @@ import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-import { useUiSetting$ } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
+import { useUiSetting$ } from '../../../../../lib/kibana';
 import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
