@@ -24,6 +24,7 @@ import {
   LogEntryDocument,
   LogEntryQuery,
   LogSummaryBucket,
+  LOG_ENTRIES_PAGE_SIZE,
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
 import { SortedSearchHit } from '../framework';
@@ -89,7 +90,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     params: LogEntriesParams
   ): Promise<LogEntryDocument[]> {
-    const { startDate, endDate, query, cursor } = params;
+    const { startDate, endDate, query, cursor, size } = params;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -103,7 +104,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
-        size: 10,
+        size: size ? size : LOG_ENTRIES_PAGE_SIZE,
         track_total_hits: false,
         query: {
           bool: {

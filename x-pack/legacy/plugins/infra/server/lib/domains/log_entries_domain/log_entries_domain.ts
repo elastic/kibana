@@ -37,15 +37,19 @@ import {
 export interface LogEntriesParams {
   startDate: number;
   endDate: number;
+  size?: number;
   query?: JsonObject;
   cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
 }
 export interface LogEntriesAroundParams {
   startDate: number;
   endDate: number;
+  size?: number;
   center: LogEntriesCursor;
   query?: JsonObject;
 }
+
+export const LOG_ENTRIES_PAGE_SIZE = 200;
 
 export class InfraLogEntriesDomain {
   constructor(
@@ -60,16 +64,28 @@ export class InfraLogEntriesDomain {
     sourceId: string,
     params: LogEntriesAroundParams
   ) {
-    const { startDate, endDate, center, query } = params;
+    const { startDate, endDate, center, query, size } = params;
+
+    /*
+     * For odd sizes we will round this value down for the first half, and up
+     * for the second. This keeps the center cursor right in the center.
+     *
+     * For even sizes the half before is one entry bigger than the half after.
+     * [1, 2, 3, 4, 5, *6*, 7, 8, 9, 10]
+     *  | 5 entries |       |4 entries|
+     */
+    const halfSize = (size || LOG_ENTRIES_PAGE_SIZE) / 2;
 
     const entriesBefore = await this.getLogEntries(requestContext, sourceId, {
       startDate,
       endDate,
       query,
       cursor: { before: center },
+      size: Math.floor(halfSize),
     });
 
-    /* Elasticsearch's `search_after` returns documents after the specified cursor.
+    /*
+     * Elasticsearch's `search_after` returns documents after the specified cursor.
      * - If we have documents before the center, we search after the last of
      *   those. The first document of the new group is the center.
      * - If there were no documents, we search one milisecond before the
@@ -85,6 +101,7 @@ export class InfraLogEntriesDomain {
       endDate,
       query,
       cursor: { after: cursorAfter },
+      size: Math.ceil(halfSize),
     });
 
     return [...entriesBefore, ...entriesAfter];
