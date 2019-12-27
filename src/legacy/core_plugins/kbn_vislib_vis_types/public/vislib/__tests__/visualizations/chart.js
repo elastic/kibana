@@ -20,7 +20,7 @@
 import d3 from 'd3';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { VislibVisProvider } from '../../vis';
+import { Vis } from '../../vis'; // eslint-disable-line
 import { Chart } from '../../visualizations/_chart';
 
 describe('Vislib _chart Test Suite', function() {
@@ -109,8 +109,7 @@ describe('Vislib _chart Test Suite', function() {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      Vis = Private(VislibVisProvider);
+    ngMock.inject(function(_, $injector) {
       persistedState = new ($injector.get('PersistedState'))();
 
       el = d3

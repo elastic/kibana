@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { VislibVisProvider } from '../../../vis';
+import { Vis } from '../../../vis';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -52,9 +52,8 @@ afterEach(function() {
   count = 0;
 });
 
-export default function VislibFixtures(Private) {
+export default function VislibFixtures() {
   return function(visLibParams) {
-    const Vis = Private(VislibVisProvider);
     return new Vis(
       $visCanvas.new(),
       _.defaults({}, visLibParams || {}, {
