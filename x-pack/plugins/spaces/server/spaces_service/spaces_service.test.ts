@@ -74,7 +74,7 @@ const createService = async (serverBasePath: string = '') => {
 
   const spacesServiceSetup = await spacesService.setup({
     http: httpSetup,
-    elasticsearch: elasticsearchServiceMock.createSetupContract(),
+    elasticsearch: elasticsearchServiceMock.createSetup(),
     config$: Rx.of(spacesConfig),
     authorization: securityMock.createSetup().authz,
     getSpacesAuditLogger: () => new SpacesAuditLogger({}),

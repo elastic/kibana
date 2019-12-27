@@ -168,7 +168,7 @@ describe('onPostAuthInterceptor', () => {
 
     const spacesService = await service.setup({
       http: (http as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetup(),
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),

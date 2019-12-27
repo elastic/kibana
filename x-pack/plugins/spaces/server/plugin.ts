@@ -5,7 +5,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import {
@@ -168,9 +167,8 @@ export class Plugin {
           );
         },
         createDefaultSpace: async () => {
-          const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-          return createDefaultSpace({
-            esClient,
+          return await createDefaultSpace({
+            esClient: core.elasticsearch.adminClient,
             savedObjects: this.getLegacyAPI().savedObjects,
           });
         },

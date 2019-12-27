@@ -42,7 +42,7 @@ describe('GET /spaces/space', () => {
     const service = new SpacesService(log, () => legacyAPI);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetupContract(),
+      elasticsearch: elasticsearchServiceMock.createSetup(),
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),

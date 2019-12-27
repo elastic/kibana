@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { first } from 'rxjs/operators';
 import { Plugin, CoreSetup } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../../common/constants';
@@ -23,7 +22,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     { http, elasticsearch: elasticsearchService }: CoreSetup,
     { __LEGACY: serverShim }: { __LEGACY: ServerShim }
   ) {
-    const elasticsearch = await elasticsearchService.adminClient$.pipe(first()).toPromise();
+    const elasticsearch = await elasticsearchService.adminClient;
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
       elasticsearch,

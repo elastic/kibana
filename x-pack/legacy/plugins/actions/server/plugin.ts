@@ -69,7 +69,7 @@ export class Plugin {
     plugins: ActionsPluginsSetup
   ): Promise<PluginSetupContract> {
     const config = await this.config$.pipe(first()).toPromise();
-    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.adminClient = core.elasticsearch.adminClient;
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
     this.licenseState = new LicenseState(plugins.licensing.license$);

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import {
@@ -84,9 +84,7 @@ class Plugin {
           return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
-      pingElasticsearch$: core.elasticsearch.adminClient$.pipe(
-        mergeMap(client => client.callAsInternalUser('ping'))
-      ),
+      pingElasticsearch: () => core.elasticsearch.adminClient.callAsInternalUser('ping'),
     };
   }
 
