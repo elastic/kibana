@@ -73,6 +73,7 @@ export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
+  ICustomClusterClient,
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,

@@ -97,8 +97,10 @@ export interface FakeRequest {
  *
  * @public
  */
-export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
+export type IClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type ICustomClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
 
+export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 /**
  * {@inheritDoc IClusterClient}
  * @public
@@ -174,7 +176,7 @@ export class ClusterClient implements IClusterClient {
    * @param request - Request the `IScopedClusterClient` instance will be scoped to.
    * Supports request optionality, Legacy.Request & FakeRequest for BWC with LegacyPlatform
    */
-  public asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient {
+  public asScoped(request?: ScopeableRequest): IScopedClusterClient {
     // It'd have been quite expensive to create and configure client for every incoming
     // request since it involves parsing of the config, reading of the SSL certificate and
     // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same

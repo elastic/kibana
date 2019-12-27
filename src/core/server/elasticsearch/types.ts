@@ -20,7 +20,7 @@
 import { Observable } from 'rxjs';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
-import { IClusterClient } from './cluster_client';
+import { IClusterClient, ICustomClusterClient } from './cluster_client';
 
 /**
  * @public
@@ -46,29 +46,29 @@ export interface ElasticsearchServiceSetup {
   readonly createClient: (
     type: string,
     clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => IClusterClient;
+  ) => ICustomClusterClient;
 
   /**
    * Observable of clients for the `admin` cluster. Observable emits when Elasticsearch config changes on the Kibana
    * server. See {@link IClusterClient}.
    *
-   * @exmaple
+   * @example
    * ```js
    * const client = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
    * ```
    */
-  readonly adminClient$: Observable<IClusterClient>;
+  readonly adminClient: IClusterClient;
 
   /**
    * Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana
    * server. See {@link IClusterClient}.
    *
-   * @exmaple
+   * @example
    * ```js
    * const client = await elasticsearch.dataClient$.pipe(take(1)).toPromise();
    * ```
    */
-  readonly dataClient$: Observable<IClusterClient>;
+  readonly dataClient: IClusterClient;
 }
 
 /** @internal */
@@ -77,4 +77,7 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
   readonly legacy: {
     readonly config$: Observable<ElasticsearchConfig>;
   };
+
+  readonly adminClient$: Observable<IClusterClient>;
+  readonly dataClient$: Observable<IClusterClient>;
 }

@@ -18,7 +18,7 @@
  */
 
 export { ElasticsearchService } from './elasticsearch_service';
-export { IClusterClient, ClusterClient, FakeRequest } from './cluster_client';
+export { IClusterClient, ICustomClusterClient, ClusterClient, FakeRequest } from './cluster_client';
 export { IScopedClusterClient, ScopedClusterClient, Headers } from './scoped_cluster_client';
 export { ElasticsearchClientConfig } from './elasticsearch_client_config';
 export { config } from './elasticsearch_config';
