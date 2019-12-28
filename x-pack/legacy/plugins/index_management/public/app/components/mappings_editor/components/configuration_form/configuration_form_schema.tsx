@@ -14,7 +14,7 @@ import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../.
 import { MappingsConfiguration } from '../../reducer';
 import { ComboBoxOption } from '../../types';
 
-const { containsCharsField } = fieldValidators;
+const { containsCharsField, isJsonField } = fieldValidators;
 
 const fieldPathComboBoxConfig = {
   helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldPathComboBoxHelpText', {
@@ -28,12 +28,12 @@ const fieldPathComboBoxConfig = {
 
 export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
   metaField: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.mappingsEditor.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',
     }),
-    helpText: () => (
+    helpText: (
       <FormattedMessage
-        id="xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorHelpText"
+        id="xpack.idxMgmt.mappingsEditor.mappingsEditor.metaFieldEditorHelpText"
         defaultMessage="Use JSON format: {code}"
         values={{
           code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
@@ -42,27 +42,11 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
     ),
     validations: [
       {
-        validator: (...args) => {
-          const [{ value }] = args;
-
-          try {
-            if (JSON.parse(value)) {
-              return;
-            }
-          } catch (e) {
-            return {
-              message: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.stepSettings.metaFieldEditorJsonError',
-                {
-                  defaultMessage: 'Invalid JSON: {error}',
-                  values: {
-                    error: e.message,
-                  },
-                }
-              ),
-            };
-          }
-        },
+        validator: isJsonField(
+          i18n.translate('xpack.idxMgmt.mappingsEditor.mappingsEditor.metaFieldEditorJsonError', {
+            defaultMessage: 'The _meta field JSON is not valid.',
+          })
+        ),
       },
     ],
   },

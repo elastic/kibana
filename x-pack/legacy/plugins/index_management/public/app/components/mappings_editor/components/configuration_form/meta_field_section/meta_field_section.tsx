@@ -7,10 +7,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiCodeEditor, EuiFormRow } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
-import { getUseField, FormRow, Field } from '../../../shared_imports';
+import { getUseField, FormRow, Field, JsonEditorField } from '../../../shared_imports';
 
 const UseField = getUseField({ component: Field });
 
@@ -37,40 +37,17 @@ export const MetaFieldSection = () => (
       </>
     }
   >
-    <UseField path="metaField">
-      {({ label, helpText, value, setValue, errors }) => {
-        const error = errors.length ? errors[0].message : undefined;
-        return (
-          <EuiFormRow
-            label={label}
-            helpText={helpText ? helpText() : undefined}
-            fullWidth
-            isInvalid={errors.length > 0}
-            error={error}
-          >
-            <EuiCodeEditor
-              mode="json"
-              theme="textmate"
-              width="100%"
-              height="400px"
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
-              minLines={6}
-              aria-label={i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel', {
-                defaultMessage: '_meta field data editor',
-              })}
-              value={value}
-              onChange={(updated: string) => setValue(updated)}
-            />
-          </EuiFormRow>
-        );
+    <UseField
+      path="metaField"
+      component={JsonEditorField}
+      componentProps={{
+        euiCodeEditorProps: {
+          height: '400px',
+          'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel', {
+            defaultMessage: '_meta field data editor',
+          }),
+        },
       }}
-    </UseField>
+    />
   </FormRow>
 );

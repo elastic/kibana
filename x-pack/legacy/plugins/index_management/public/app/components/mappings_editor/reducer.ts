@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { OnFormUpdateArg } from './shared_imports';
+import { OnFormUpdateArg, FormHook } from './shared_imports';
 import { Field, NormalizedFields, NormalizedField, FieldsEditor } from './types';
 import {
   getFieldMeta,
@@ -46,7 +46,10 @@ interface DocumentFieldsState {
 
 export interface State {
   isValid: boolean | undefined;
-  configuration: { defaultValue: MappingsConfiguration } & OnFormUpdateArg<MappingsConfiguration>;
+  configuration: {
+    defaultValue: MappingsConfiguration;
+    form?: FormHook<MappingsConfiguration>;
+  } & OnFormUpdateArg<MappingsConfiguration>;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
@@ -58,6 +61,7 @@ export interface State {
 
 export type Action =
   | { type: 'configuration.update'; value: Partial<State['configuration']> }
+  | { type: 'configuration.save' }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -232,6 +236,25 @@ export const reducer = (state: State, action: Action): State => {
       const isValid = isStateValid(nextState);
       nextState.isValid = isValid;
       return nextState;
+    }
+    case 'configuration.save': {
+      const {
+        data: { raw, format },
+      } = state.configuration;
+      const configurationData = format();
+
+      return {
+        ...state,
+        configuration: {
+          isValid: true,
+          defaultValue: configurationData,
+          data: {
+            raw,
+            format: () => configurationData,
+          },
+          validate: async () => true,
+        },
+      };
     }
     case 'fieldForm.update': {
       const nextState = {

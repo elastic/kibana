@@ -115,6 +115,20 @@ export function useForm<T extends FormData = FormData>(
           {} as T
         );
 
+  const getErrors: FormHook['getErrors'] = () => {
+    if (isValid === true) {
+      return [];
+    }
+
+    return fieldsToArray().reduce((acc, field) => {
+      const fieldError = field.getErrorsMessages();
+      if (fieldError === null) {
+        return acc;
+      }
+      return [...acc, fieldError];
+    }, [] as string[]);
+  };
+
   const isFieldValid = (field: FieldHook) =>
     field.getErrorsMessages() === null && !field.isValidating;
 
@@ -281,6 +295,7 @@ export function useForm<T extends FormData = FormData>(
     setFieldErrors,
     getFields,
     getFormData,
+    getErrors,
     getFieldDefaultValue,
     reset,
     __options: formOptions,

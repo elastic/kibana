@@ -19,6 +19,9 @@ interface Props {
   defaultValue?: MappingsConfiguration;
 }
 
+const stringifyJson = (json: { [key: string]: any }) =>
+  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
+
 const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
   const {
     dynamicMapping: {
@@ -34,13 +37,20 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
 
+  let parsedMeta;
+  try {
+    parsedMeta = JSON.parse(metaField);
+  } catch {
+    parsedMeta = {};
+  }
+
   return {
     dynamic,
     numeric_detection,
     date_detection,
     dynamic_date_formats,
     _source: { ...sourceField },
-    _meta: JSON.parse(metaField),
+    _meta: parsedMeta,
   };
 };
 
@@ -67,7 +77,7 @@ const formDeserializer = (formData: { [key: string]: any }) => {
       includes,
       excludes,
     },
-    metaField: JSON.stringify(_meta),
+    metaField: stringifyJson(_meta),
   };
 };
 
@@ -82,13 +92,20 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   useEffect(() => {
     const subscription = form.subscribe(updatedConfiguration => {
-      dispatch({ type: 'configuration.update', value: updatedConfiguration });
+      dispatch({ type: 'configuration.update', value: { ...updatedConfiguration, form } });
     });
     return subscription.unsubscribe;
   }, [form]);
 
+  useEffect(() => {
+    return () => {
+      // On unmount, we save in the state a snapshot of the current form data.
+      dispatch({ type: 'configuration.save' });
+    };
+  }, []);
+
   return (
-    <Form form={form}>
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
       <DynamicMappingSection />
       <EuiSpacer size="xl" />
       <MetaFieldSection />
