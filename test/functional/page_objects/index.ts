@@ -48,9 +48,11 @@ import { TimePickerPageProvider } from './time_picker';
 // @ts-ignore not TS yet
 import { TimelionPageProvider } from './timelion_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
-// @ts-ignore not TS yet
 import { VisualizePageProvider } from './visualize_page';
-import { VisualEditorPageProvider } from './visual_editor_page';
+import { VisualizeEditorPageProvider } from './visualize_editor_page';
+import { VisualizeChartPageProvider } from './visualize_chart_page';
+import { TileMapPageProvider } from './tile_map_page';
+import { TagCloudPageProvider } from './tag_cloud_page';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -71,5 +73,8 @@ export const pageObjects = {
   timePicker: TimePickerPageProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,
-  visEditor: VisualEditorPageProvider,
+  visEditor: VisualizeEditorPageProvider,
+  visChart: VisualizeChartPageProvider,
+  tileMap: TileMapPageProvider,
+  tagCloud: TagCloudPageProvider,
 };

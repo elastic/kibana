@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header', 'timePicker', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker', 'visualize', 'visChart']);
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const log = getService('log');
@@ -40,7 +40,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         it.skip('should have some initial vega spec text', async function() {
-          const vegaSpec = await PageObjects.visualize.getVegaSpec();
+          const vegaSpec = await PageObjects.visChart.getVegaSpec();
           expect(vegaSpec)
             .to.contain('{')
             .and.to.contain('data');
@@ -48,7 +48,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('should have view and control containers', async function() {
-          const view = await PageObjects.visualize.getVegaViewContainer();
+          const view = await PageObjects.visChart.getVegaViewContainer();
           expect(view).to.be.ok();
           const size = await view.getSize();
           expect(size)
@@ -57,7 +57,7 @@ export default function({ getService, getPageObjects }) {
           expect(size.width).to.be.above(0);
           expect(size.height).to.be.above(0);
 
-          const controls = await PageObjects.visualize.getVegaControlContainer();
+          const controls = await PageObjects.visChart.getVegaControlContainer();
           expect(controls).to.be.ok();
         });
       });

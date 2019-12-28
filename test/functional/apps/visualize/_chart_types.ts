@@ -23,7 +23,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'visChart']);
   let isOss = true;
 
   describe('chart types', function() {
@@ -61,7 +61,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('oss= ' + isOss);
 
       // find all the chart types and make sure there all there
-      const chartTypes = await PageObjects.visualize.getChartTypes();
+      const chartTypes = await PageObjects.visChart.getChartTypes();
       log.debug('returned chart types = ' + chartTypes);
       log.debug('expected chart types = ' + expectedChartTypes);
       expect(chartTypes).to.eql(expectedChartTypes);

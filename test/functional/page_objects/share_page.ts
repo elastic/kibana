@@ -78,7 +78,7 @@ export function SharePageProvider({ getService, getPageObjects }: FtrProviderCon
 
     async checkShortenUrl() {
       const shareForm = await testSubjects.find('shareUrlForm');
-      await PageObjects.visualize.checkCheckbox('useShortUrl');
+      await testSubjects.setCheckbox('useShortUrl', 'check');
       await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 

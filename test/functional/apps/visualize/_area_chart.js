@@ -24,7 +24,15 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'header',
+    'settings',
+    'timePicker',
+  ]);
 
   describe('area charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
@@ -38,17 +46,17 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Click X-axis');
-      await PageObjects.visualize.clickBucket('X-axis');
+      await PageObjects.visEditor.clickBucket('X-axis');
       log.debug('Click Date Histogram');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
       log.debug('Check field value');
-      const fieldValues = await PageObjects.visualize.getField();
+      const fieldValues = await PageObjects.visEditor.getField();
       log.debug('fieldValue = ' + fieldValues);
       expect(fieldValues[0]).to.be('@timestamp');
-      const intervalValue = await PageObjects.visualize.getInterval();
+      const intervalValue = await PageObjects.visEditor.getInterval();
       log.debug('intervalValue = ' + intervalValue);
       expect(intervalValue[0]).to.be('Auto');
-      return PageObjects.visualize.clickGo();
+      return PageObjects.visEditor.clickGo();
     };
 
     before(initAreaChart);
@@ -70,7 +78,7 @@ export default function({ getService, getPageObjects }) {
     it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function() {
@@ -113,14 +121,14 @@ export default function({ getService, getPageObjects }) {
       ];
 
       await retry.try(async function tryingForTime() {
-        const labels = await PageObjects.visualize.getXAxisLabels();
+        const labels = await PageObjects.visChart.getXAxisLabels();
         log.debug('X-Axis labels = ' + labels);
         expect(labels).to.eql(xAxisLabels);
       });
-      const labels = await PageObjects.visualize.getYAxisLabels();
+      const labels = await PageObjects.visChart.getYAxisLabels();
       log.debug('Y-Axis labels = ' + labels);
       expect(labels).to.eql(yAxisLabels);
-      const paths = await PageObjects.visualize.getAreaChartData('Count');
+      const paths = await PageObjects.visChart.getAreaChartData('Count');
       log.debug('expectedAreaChartData = ' + expectedAreaChartData);
       log.debug('actual chart data =     ' + paths);
       expect(paths).to.eql(expectedAreaChartData);
@@ -185,9 +193,9 @@ export default function({ getService, getPageObjects }) {
           ['2015-09-20 19:00', '55'],
         ];
 
-        await PageObjects.visualize.toggleOpenEditor(2);
-        await PageObjects.visualize.setInterval('Second');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.toggleOpenEditor(2);
+        await PageObjects.visEditor.setInterval('Second');
+        await PageObjects.visEditor.clickGo();
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
@@ -217,9 +225,9 @@ export default function({ getService, getPageObjects }) {
           ['2015-09-20 19:00', '0.015'],
         ];
 
-        await PageObjects.visualize.toggleAdvancedParams('2');
-        await PageObjects.visualize.toggleScaleMetrics();
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.toggleAdvancedParams('2');
+        await PageObjects.visEditor.toggleScaleMetrics();
+        await PageObjects.visEditor.clickGo();
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
@@ -249,11 +257,11 @@ export default function({ getService, getPageObjects }) {
           ['2015-09-20 19:00', '55', '2.053KB'],
         ];
 
-        await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
-        await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
-        await PageObjects.visualize.selectField('bytes', 'metrics');
-        await PageObjects.visualize.selectAggregateWith('average');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
+        await PageObjects.visEditor.selectField('bytes', 'metrics');
+        await PageObjects.visEditor.selectAggregateWith('average');
+        await PageObjects.visEditor.clickGo();
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
@@ -285,13 +293,13 @@ export default function({ getService, getPageObjects }) {
       const axisId = 'ValueAxis-1';
 
       it('should show ticks on selecting log scale', async () => {
-        await PageObjects.visualize.clickMetricsAndAxes();
-        await PageObjects.visualize.clickYAxisOptions(axisId);
-        await PageObjects.visualize.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visualize.clickYAxisAdvancedOptions(axisId);
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.clickMetricsAndAxes();
+        await PageObjects.visEditor.clickYAxisOptions(axisId);
+        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
+        await PageObjects.visEditor.clickYAxisAdvancedOptions(axisId);
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = [
           '2',
           '3',
@@ -317,9 +325,9 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = [
           '2',
           '3',
@@ -345,10 +353,10 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show ticks on selecting square root scale', async () => {
-        await PageObjects.visualize.selectYAxisScaleType(axisId, 'square root');
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'square root');
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = [
           '0',
           '200',
@@ -364,18 +372,18 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
       it('should show ticks on selecting linear scale', async () => {
-        await PageObjects.visualize.selectYAxisScaleType(axisId, 'linear');
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, false);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.selectYAxisScaleType(axisId, 'linear');
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = [
           '0',
@@ -392,9 +400,9 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
-        await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
-        await PageObjects.visualize.clickGo();
-        const labels = await PageObjects.visualize.getYAxisLabels();
+        await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
+        await PageObjects.visEditor.clickGo();
+        const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
@@ -412,16 +420,16 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('Click X-axis');
-        await PageObjects.visualize.clickBucket('X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
         log.debug('Click Date Histogram');
-        await PageObjects.visualize.selectAggregation('Date Histogram');
-        await PageObjects.visualize.selectField('@timestamp');
-        await PageObjects.visualize.setInterval('Yearly');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.setInterval('Yearly');
+        await PageObjects.visEditor.clickGo();
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
         // 7 points compose the lower line (usually called y0)
-        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         const numberOfSegments = 7 * 2;
         expect(paths.length).to.eql(numberOfSegments);
@@ -435,17 +443,17 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('Click X-axis');
-        await PageObjects.visualize.clickBucket('X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
         log.debug('Click Date Histogram');
-        await PageObjects.visualize.selectAggregation('Date Histogram');
-        await PageObjects.visualize.selectField('@timestamp');
-        await PageObjects.visualize.setInterval('Monthly');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+        await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.setInterval('Monthly');
+        await PageObjects.visEditor.clickGo();
         // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
         // 67 points are used to draw the upper line (usually called y1)
         // 67 points compose the lower line (usually called y0)
         const numberOfSegments = 67 * 2;
-        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         expect(paths.length).to.eql(numberOfSegments);
       });

@@ -24,7 +24,13 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+  ]);
 
   describe('metric chart', function() {
     before(async function() {
@@ -45,21 +51,21 @@ export default function({ getService, getPageObjects }) {
 
       // initial metric of "Count" is selected by default
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(expectedCount).to.eql(metricValue);
       });
     });
 
     it('should show Average', async function() {
       const avgMachineRam = ['13,104,036,080.615', 'Average machine.ram'];
-      await PageObjects.visualize.clickMetricEditor();
+      await PageObjects.visEditor.clickMetricEditor();
       log.debug('Aggregation = Average');
-      await PageObjects.visualize.selectAggregation('Average', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Average', 'metrics');
       log.debug('Field = machine.ram');
-      await PageObjects.visualize.selectField('machine.ram', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(avgMachineRam).to.eql(metricValue);
       });
     });
@@ -67,12 +73,12 @@ export default function({ getService, getPageObjects }) {
     it('should show Sum', async function() {
       const sumPhpMemory = ['85,865,880', 'Sum of phpmemory'];
       log.debug('Aggregation = Sum');
-      await PageObjects.visualize.selectAggregation('Sum', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Sum', 'metrics');
       log.debug('Field = phpmemory');
-      await PageObjects.visualize.selectField('phpmemory', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('phpmemory', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(sumPhpMemory).to.eql(metricValue);
       });
     });
@@ -81,12 +87,12 @@ export default function({ getService, getPageObjects }) {
       const medianBytes = ['5,565.263', '50th percentile of bytes'];
       //  For now, only comparing the text label part of the metric
       log.debug('Aggregation = Median');
-      await PageObjects.visualize.selectAggregation('Median', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Median', 'metrics');
       log.debug('Field = bytes');
-      await PageObjects.visualize.selectField('bytes', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('bytes', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         // only comparing the text label!
         expect(medianBytes[1]).to.eql(metricValue[1]);
       });
@@ -95,12 +101,12 @@ export default function({ getService, getPageObjects }) {
     it('should show Min', async function() {
       const minTimestamp = ['Sep 20, 2015 @ 00:00:00.000', 'Min @timestamp'];
       log.debug('Aggregation = Min');
-      await PageObjects.visualize.selectAggregation('Min', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Min', 'metrics');
       log.debug('Field = @timestamp');
-      await PageObjects.visualize.selectField('@timestamp', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('@timestamp', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(minTimestamp).to.eql(metricValue);
       });
     });
@@ -111,12 +117,12 @@ export default function({ getService, getPageObjects }) {
         'Max relatedContent.article:modified_time',
       ];
       log.debug('Aggregation = Max');
-      await PageObjects.visualize.selectAggregation('Max', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Max', 'metrics');
       log.debug('Field = relatedContent.article:modified_time');
-      await PageObjects.visualize.selectField('relatedContent.article:modified_time', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('relatedContent.article:modified_time', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(maxRelatedContentArticleModifiedTime).to.eql(metricValue);
       });
     });
@@ -124,12 +130,12 @@ export default function({ getService, getPageObjects }) {
     it('should show Unique Count', async function() {
       const uniqueCountClientip = ['1,000', 'Unique count of clientip'];
       log.debug('Aggregation = Unique Count');
-      await PageObjects.visualize.selectAggregation('Unique Count', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Unique Count', 'metrics');
       log.debug('Field = clientip');
-      await PageObjects.visualize.selectField('clientip', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('clientip', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(uniqueCountClientip).to.eql(metricValue);
       });
     });
@@ -153,12 +159,12 @@ export default function({ getService, getPageObjects }) {
       ];
 
       log.debug('Aggregation = Percentiles');
-      await PageObjects.visualize.selectAggregation('Percentiles', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Percentiles', 'metrics');
       log.debug('Field =  machine.ram');
-      await PageObjects.visualize.selectField('machine.ram', 'metrics');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(percentileMachineRam).to.eql(metricValue);
       });
     });
@@ -166,14 +172,14 @@ export default function({ getService, getPageObjects }) {
     it('should show Percentile Ranks', async function() {
       const percentileRankBytes = ['2.036%', 'Percentile rank 99 of "memory"'];
       log.debug('Aggregation = Percentile Ranks');
-      await PageObjects.visualize.selectAggregation('Percentile Ranks', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Percentile Ranks', 'metrics');
       log.debug('Field =  bytes');
-      await PageObjects.visualize.selectField('memory', 'metrics');
+      await PageObjects.visEditor.selectField('memory', 'metrics');
       log.debug('Values =  99');
-      await PageObjects.visualize.setValue('99');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setValue('99');
+      await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getMetric();
+        const metricValue = await PageObjects.visChart.getMetric();
         expect(percentileRankBytes).to.eql(metricValue);
       });
     });
@@ -191,12 +197,12 @@ export default function({ getService, getPageObjects }) {
 
       it('should allow filtering with buckets', async function() {
         log.debug('Bucket = Split Group');
-        await PageObjects.visualize.clickBucket('Split group');
+        await PageObjects.visEditor.clickBucket('Split group');
         log.debug('Aggregation = Terms');
-        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visEditor.selectAggregation('Terms');
         log.debug('Field = machine.os.raw');
-        await PageObjects.visualize.selectField('machine.os.raw');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.selectField('machine.os.raw');
+        await PageObjects.visEditor.clickGo();
 
         let filterCount = 0;
         await retry.try(async function tryingForTime() {

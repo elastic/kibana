@@ -30,6 +30,8 @@ export default function({ getService, getPageObjects }) {
     'header',
     'pointSeries',
     'timePicker',
+    'visEditor',
+    'visChart',
   ]);
   const pointSeriesVis = PageObjects.pointSeries;
   const inspector = getService('inspector');
@@ -42,18 +44,18 @@ export default function({ getService, getPageObjects }) {
     await PageObjects.visualize.clickNewSearch();
     await PageObjects.timePicker.setDefaultAbsoluteRange();
     log.debug('Bucket = X-axis');
-    await PageObjects.visualize.clickBucket('X-axis');
+    await PageObjects.visEditor.clickBucket('X-axis');
     log.debug('Aggregation = Date Histogram');
-    await PageObjects.visualize.selectAggregation('Date Histogram');
+    await PageObjects.visEditor.selectAggregation('Date Histogram');
     log.debug('Field = @timestamp');
-    await PageObjects.visualize.selectField('@timestamp');
+    await PageObjects.visEditor.selectField('@timestamp');
     // add another metrics
     log.debug('Metric = Value Axis');
-    await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
+    await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
     log.debug('Aggregation = Average');
-    await PageObjects.visualize.selectAggregation('Average', 'metrics');
+    await PageObjects.visEditor.selectAggregation('Average', 'metrics');
     log.debug('Field = memory');
-    await PageObjects.visualize.selectField('machine.ram', 'metrics');
+    await PageObjects.visEditor.selectField('machine.ram', 'metrics');
     // go to options page
     log.debug('Going to axis options');
     await pointSeriesVis.clickAxisOptions();
@@ -61,11 +63,11 @@ export default function({ getService, getPageObjects }) {
     log.debug('adding axis');
     await pointSeriesVis.clickAddAxis();
     // set average count to use second value axis
-    await PageObjects.visualize.toggleAccordion('visEditorSeriesAccordion3');
+    await PageObjects.visEditor.toggleAccordion('visEditorSeriesAccordion3');
     log.debug('Average memory value axis - ValueAxis-2');
     await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
-    await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-    await PageObjects.visualize.clickGo();
+    await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+    await PageObjects.visEditor.clickGo();
   }
 
   describe('point series', function describeIndexTests() {
@@ -158,7 +160,7 @@ export default function({ getService, getPageObjects }) {
     describe('multiple chart types', function() {
       it('should change average series type to histogram', async function() {
         await pointSeriesVis.setSeriesType(1, 'histogram');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
         const length = await pointSeriesVis.getHistogramSeries();
         expect(length).to.be(1);
       });
@@ -166,12 +168,12 @@ export default function({ getService, getPageObjects }) {
 
     describe('grid lines', function() {
       before(async function() {
-        await pointSeriesVis.clickOptions();
+        await PageObjects.visEditor.clickOptionsTab();
       });
 
       it('should show category grid lines', async function() {
         await pointSeriesVis.toggleGridCategoryLines();
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
         const gridLines = await pointSeriesVis.getGridLines();
         expect(gridLines.length).to.be(9);
         gridLines.forEach(gridLine => {
@@ -182,7 +184,7 @@ export default function({ getService, getPageObjects }) {
       it('should show value axis grid lines', async function() {
         await pointSeriesVis.setGridValueAxis('ValueAxis-2');
         await pointSeriesVis.toggleGridCategoryLines();
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
         const gridLines = await pointSeriesVis.getGridLines();
         expect(gridLines.length).to.be(9);
         gridLines.forEach(gridLine => {
@@ -199,36 +201,36 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.visualize.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.clickMetricsAndAxes();
-        await PageObjects.visualize.clickYAxisOptions('ValueAxis-1');
+        await PageObjects.visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
+        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickMetricsAndAxes();
+        await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
       });
 
       it('should render a custom label when one is set', async function() {
-        const title = await PageObjects.visualize.getYAxisTitle();
+        const title = await PageObjects.visChart.getYAxisTitle();
         expect(title).to.be(customLabel);
       });
 
       it('should render a custom axis title when one is set, overriding the custom label', async function() {
         await pointSeriesVis.setAxisTitle(axisTitle);
-        await PageObjects.visualize.clickGo();
-        const title = await PageObjects.visualize.getYAxisTitle();
+        await PageObjects.visEditor.clickGo();
+        const title = await PageObjects.visChart.getYAxisTitle();
         expect(title).to.be(axisTitle);
       });
 
       it('should preserve saved axis titles after a vis is saved and reopened', async function() {
         await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visChart.waitForVisualization();
         await PageObjects.visualize.loadSavedVisualization(visName);
-        await PageObjects.visualize.waitForRenderingCount();
-        await PageObjects.visualize.clickData();
-        await PageObjects.visualize.toggleOpenEditor(1);
-        await PageObjects.visualize.setCustomLabel('test', 1);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.clickMetricsAndAxes();
-        await PageObjects.visualize.clickYAxisOptions('ValueAxis-1');
-        const title = await PageObjects.visualize.getYAxisTitle();
+        await PageObjects.visChart.waitForRenderingCount();
+        await PageObjects.visEditor.clickData();
+        await PageObjects.visEditor.toggleOpenEditor(1);
+        await PageObjects.visEditor.setCustomLabel('test', 1);
+        await PageObjects.visEditor.clickGo();
+        await PageObjects.visEditor.clickMetricsAndAxes();
+        await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
+        const title = await PageObjects.visChart.getYAxisTitle();
         expect(title).to.be(axisTitle);
       });
     });
@@ -238,7 +240,7 @@ export default function({ getService, getPageObjects }) {
 
       it('should show round labels in default timezone', async function() {
         await initChart();
-        const labels = await PageObjects.visualize.getXAxisLabels();
+        const labels = await PageObjects.visChart.getXAxisLabels();
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
@@ -248,7 +250,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.header.awaitKibanaChrome();
         await initChart();
 
-        const labels = await PageObjects.visualize.getXAxisLabels();
+        const labels = await PageObjects.visChart.getXAxisLabels();
 
         expect(labels.join()).to.contain(expectedLabels.join());
       });
@@ -258,10 +260,10 @@ export default function({ getService, getPageObjects }) {
         const toTime = 'Sep 22, 2015 @ 16:08:34.554';
         // note that we're setting the absolute time range while we're in 'America/Phoenix' tz
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.waitForRenderingCount();
+        await PageObjects.visChart.waitForRenderingCount();
 
         await retry.waitFor('wait for x-axis labels to match expected for Phoenix', async () => {
-          const labels = await PageObjects.visualize.getXAxisLabels();
+          const labels = await PageObjects.visChart.getXAxisLabels();
           log.debug(`Labels: ${labels}`);
           return (
             labels.toString() === ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'].toString()
@@ -303,11 +305,11 @@ export default function({ getService, getPageObjects }) {
         await browser.refresh();
         // wait some time before trying to check for rendering count
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.visualize.waitForRenderingCount();
+        await PageObjects.visChart.waitForRenderingCount();
         log.debug('getXAxisLabels');
 
         await retry.waitFor('wait for x-axis labels to match expected for UTC', async () => {
-          const labels2 = await PageObjects.visualize.getXAxisLabels();
+          const labels2 = await PageObjects.visChart.getXAxisLabels();
           log.debug(`Labels: ${labels2}`);
           return (
             labels2.toString() === ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'].toString()

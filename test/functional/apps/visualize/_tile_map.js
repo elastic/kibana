@@ -27,7 +27,15 @@ export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+    'settings',
+    'tileMap',
+  ]);
 
   describe('tile map visualize app', function() {
     describe('incomplete config', function describeIndexTests() {
@@ -45,8 +53,8 @@ export default function({ getService, getPageObjects }) {
 
       it('should be able to zoom in twice', async () => {
         //should not throw
-        await PageObjects.visualize.clickMapZoomIn();
-        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.tileMap.clickMapZoomIn();
+        await PageObjects.tileMap.clickMapZoomIn();
       });
     });
 
@@ -61,14 +69,14 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Geo Coordinates');
-        await PageObjects.visualize.clickBucket('Geo coordinates');
+        await PageObjects.visEditor.clickBucket('Geo coordinates');
         log.debug('Click aggregation Geohash');
-        await PageObjects.visualize.selectAggregation('Geohash');
+        await PageObjects.visEditor.selectAggregation('Geohash');
         log.debug('Click field geo.coordinates');
         await retry.try(async function tryingForTime() {
-          await PageObjects.visualize.selectField('geo.coordinates');
+          await PageObjects.visEditor.selectField('geo.coordinates');
         });
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
       });
 
       /**
@@ -106,9 +114,9 @@ export default function({ getService, getPageObjects }) {
             ['-', '8', '108', { lat: 18, lon: -157 }],
           ];
           //level 1
-          await PageObjects.visualize.clickMapZoomOut();
+          await PageObjects.tileMap.clickMapZoomOut();
           //level 0
-          await PageObjects.visualize.clickMapZoomOut();
+          await PageObjects.tileMap.clickMapZoomOut();
 
           await inspector.open();
           await inspector.setTablePageSize(50);
@@ -118,8 +126,8 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('should not be able to zoom out beyond 0', async function() {
-          await PageObjects.visualize.zoomAllTheWayOut();
-          const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
+          await PageObjects.tileMap.zoomAllTheWayOut();
+          const enabled = await PageObjects.tileMap.getMapZoomOutEnabled();
           expect(enabled).to.be(false);
         });
 
@@ -148,7 +156,7 @@ export default function({ getService, getPageObjects }) {
             ['-', 'b7', '167', { lat: 64, lon: -163 }],
           ];
 
-          await PageObjects.visualize.clickMapFitDataBounds();
+          await PageObjects.tileMap.clickMapFitDataBounds();
           await inspector.open();
           const data = await inspector.getTableData();
           await inspector.close();
@@ -164,8 +172,8 @@ export default function({ getService, getPageObjects }) {
 
           await filterBar.addFilter('bytes', 'is between', '19980', '19990');
           await filterBar.toggleFilterPinned('bytes');
-          await PageObjects.visualize.zoomAllTheWayOut();
-          await PageObjects.visualize.clickMapFitDataBounds();
+          await PageObjects.tileMap.zoomAllTheWayOut();
+          await PageObjects.tileMap.clickMapFitDataBounds();
 
           await inspector.open();
           const data = await inspector.getTableData();
@@ -178,15 +186,15 @@ export default function({ getService, getPageObjects }) {
         it('Newly saved visualization retains map bounds', async () => {
           const vizName1 = 'Visualization TileMap';
 
-          await PageObjects.visualize.clickMapZoomIn();
-          await PageObjects.visualize.clickMapZoomIn();
+          await PageObjects.tileMap.clickMapZoomIn();
+          await PageObjects.tileMap.clickMapZoomIn();
 
-          const mapBounds = await PageObjects.visualize.getMapBounds();
+          const mapBounds = await PageObjects.tileMap.getMapBounds();
           await inspector.close();
 
           await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
 
-          const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
+          const afterSaveMapBounds = await PageObjects.tileMap.getMapBounds();
 
           await inspector.close();
           // For some reason the values are slightly different, so we can't check that they are equal. But we did
@@ -207,17 +215,17 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('when not checked does not add filters to aggregation', async () => {
-          await PageObjects.visualize.toggleOpenEditor(2);
-          await PageObjects.visualize.setIsFilteredByCollarCheckbox(false);
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.toggleOpenEditor(2);
+          await PageObjects.visEditor.setIsFilteredByCollarCheckbox(false);
+          await PageObjects.visEditor.clickGo();
           await inspector.open();
           await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
         after(async () => {
-          await PageObjects.visualize.setIsFilteredByCollarCheckbox(true);
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.setIsFilteredByCollarCheckbox(true);
+          await PageObjects.visEditor.clickGo();
         });
       });
     });
@@ -245,18 +253,18 @@ export default function({ getService, getPageObjects }) {
 
         const zoomLevel = 9;
         for (let i = 0; i < zoomLevel; i++) {
-          await PageObjects.visualize.clickMapZoomIn();
+          await PageObjects.tileMap.clickMapZoomIn();
         }
       });
 
       beforeEach(async function() {
-        await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+        await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
       });
 
       afterEach(async function() {
         if (!last) {
           await PageObjects.common.sleep(toastDefaultLife);
-          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+          await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
         }
       });
 
@@ -270,11 +278,11 @@ export default function({ getService, getPageObjects }) {
 
       it('should suppress zoom warning if suppress warnings button clicked', async () => {
         last = true;
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visChart.waitForVisualization();
         await find.clickByCssSelector('[data-test-subj="suppressZoomWarnings"]');
-        await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+        await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
         await testSubjects.waitForDeleted('suppressZoomWarnings');
-        await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+        await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
 
         await testSubjects.missingOrFail('maxZoomWarning');
       });
