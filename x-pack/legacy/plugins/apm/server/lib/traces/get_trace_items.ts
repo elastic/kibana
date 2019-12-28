@@ -37,7 +37,12 @@ export async function getTraceItems(
           filter: [
             { term: { [TRACE_ID]: traceId } },
             {
-              terms: { [PROCESSOR_EVENT]: ['span', ProcessorEvent.transaction] }
+              terms: {
+                [PROCESSOR_EVENT]: [
+                  ProcessorEvent.span,
+                  ProcessorEvent.transaction
+                ]
+              }
             },
             { range: rangeFilter(start, end) }
           ],
