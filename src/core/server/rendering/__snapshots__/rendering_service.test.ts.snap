@@ -501,7 +501,7 @@ Object {
 }
 `;
 
-exports[`RenderingService setup() render() renders "legacy" with custom injectedVarsOverrides 1`] = `
+exports[`RenderingService setup() render() renders "legacy" with custom vars 1`] = `
 Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -645,7 +645,7 @@ Object {
 }
 `;
 
-exports[`RenderingService setup() render() renders "legacy" with excluded user settings and custom injectedVarsOverrides 1`] = `
+exports[`RenderingService setup() render() renders "legacy" with excluded user settings and custom vars 1`] = `
 Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
