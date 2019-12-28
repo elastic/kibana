@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
@@ -29,7 +30,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -51,7 +52,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -70,7 +71,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -95,7 +96,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -124,7 +125,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -148,7 +149,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -172,7 +173,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -199,7 +200,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -223,7 +224,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -257,7 +258,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: { ...results },
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );
@@ -281,7 +282,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
           body: results,
         });
       } catch (e) {
-        return response.forbidden({ body: e.message });
+        return response.customError(wrapError(e));
       }
     })
   );

@@ -66,6 +66,8 @@ import { HomeServerPluginSetup } from '../../../../../../src/plugins/home/server
 // @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from '../client/elasticsearch_ml';
 
+export const PLUGIN_ID = 'ml';
+
 type CoreHttpSetup = CoreSetup['http'];
 export interface MlHttpServiceSetup extends CoreHttpSetup {
   route(route: ServerRoute | ServerRoute[]): void;
@@ -121,8 +123,6 @@ declare module 'kibana/server' {
     };
   }
 }
-
-export const PLUGIN_ID = 'ml';
 
 export class Plugin {
   private readonly pluginId: string = PLUGIN_ID;
@@ -208,7 +208,6 @@ export class Plugin {
 
     // Can access via new platform router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = core.elasticsearch.createClient('ml', { plugins: [elasticsearchJsPlugin] });
-    // @ts-ignore // 'ml' not 'search' or 'security' or 'licensing
     http.registerRouteHandlerContext('ml', (context, request) => {
       return {
         mlClient: mlClient.asScoped(request),

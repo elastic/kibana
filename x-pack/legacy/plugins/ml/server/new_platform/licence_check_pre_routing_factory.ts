@@ -25,11 +25,10 @@ export const licensePreRoutingFactory = (
     const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN_ID).getLicenseCheckResults();
 
     if (!licenseCheckResults.isAvailable) {
-      return response.customError({
+      return response.forbidden({
         body: {
           message: licenseCheckResults.message,
         },
-        statusCode: 403,
       });
     }
 
