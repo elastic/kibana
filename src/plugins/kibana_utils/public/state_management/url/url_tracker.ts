@@ -50,8 +50,8 @@ export function createUrlTracker(key: string, storage: Storage = sessionStorage)
 }
 
 export function useUrlTracker(
-  key: string,
-  history?: History,
+  appInstanceId: string,
+  history: History,
   shouldRestoreUrl: (urlToRestore: string) => boolean = () => true,
   storage: Storage = sessionStorage
 ) {
