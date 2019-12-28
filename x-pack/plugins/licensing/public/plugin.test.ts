@@ -64,7 +64,7 @@ describe('licensing plugin', () => {
 
         await refresh();
 
-        expect(coreSetup.http.get.mock.calls[0][1]).toMatchObject({
+        expect(coreSetup.http.get.mock.calls[0][0]).toMatchObject({
           headers: {
             'kbn-system-api': 'true',
           },

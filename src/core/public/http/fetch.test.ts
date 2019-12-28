@@ -24,7 +24,7 @@ import { join } from 'path';
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
-import { IHttpResponse } from './types';
+import { HttpResponse, HttpFetchOptionsWithPath } from './types';
 
 function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
@@ -177,9 +177,23 @@ describe('Fetch', () => {
 
       const response = await fetchInstance.fetch('/my/path', { asResponse: true });
 
+      expect(response.fetchOptions).toMatchObject({
+        path: '/my/path',
+        asResponse: true,
+      });
       expect(response.request).toBeInstanceOf(Request);
       expect(response.response).toBeInstanceOf(Response);
       expect(response.body).toEqual({ foo: 'bar' });
+    });
+
+    it('should expose asSystemApi on detailed response object when asResponse = true', async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      const response = await fetchInstance.fetch('/my/path', {
+        asResponse: true,
+        asSystemApi: true,
+      });
+      expect(response.fetchOptions.asSystemApi).toBe(true);
     });
 
     it('should reject on network error', async () => {
@@ -301,13 +315,18 @@ describe('Fetch', () => {
 
     it('should be able to manipulate request instance', async () => {
       fetchInstance.intercept({
-        request(request) {
-          request.headers.set('Content-Type', 'CustomContentType');
+        request(options) {
+          return {
+            headers: {
+              ...options.headers,
+              'Content-Type': 'CustomContentType',
+            },
+          };
         },
       });
       fetchInstance.intercept({
-        request(request) {
-          return new Request('/my/route', request);
+        request() {
+          return { path: '/my/route' };
         },
       });
 
@@ -318,7 +337,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'CustomContentType',
       });
-      expect(fetchMock.lastUrl()).toBe('/my/route');
+      expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/route');
     });
 
     it('should call interceptors in correct order', async () => {
@@ -458,8 +477,8 @@ describe('Fetch', () => {
 
       fetchInstance.intercept({
         request: unusedSpy,
-        requestError({ request }) {
-          return new Request('/my/route', request);
+        requestError() {
+          return { path: '/my/route' };
         },
         response: usedSpy,
       });
@@ -479,16 +498,16 @@ describe('Fetch', () => {
 
     it('should accumulate request information', async () => {
       const routes = ['alpha', 'beta', 'gamma'];
-      const createRequest = jest.fn(
-        (request: Request) => new Request(`/api/${routes.shift()}`, request)
-      );
+      const createRequest = jest.fn((options: HttpFetchOptionsWithPath) => ({
+        path: `/api/${routes.shift()}`,
+      }));
 
       fetchInstance.intercept({
         request: createRequest,
       });
       fetchInstance.intercept({
         requestError(httpErrorRequest) {
-          return httpErrorRequest.request;
+          return httpErrorRequest.fetchOptions;
         },
       });
       fetchInstance.intercept({
@@ -506,15 +525,15 @@ describe('Fetch', () => {
       await expect(fetchInstance.fetch('/my/route')).resolves.toEqual({ foo: 'bar' });
       expect(fetchMock.called()).toBe(true);
       expect(routes.length).toBe(0);
-      expect(createRequest.mock.calls[0][0].url).toContain('/my/route');
-      expect(createRequest.mock.calls[1][0].url).toContain('/api/alpha');
-      expect(createRequest.mock.calls[2][0].url).toContain('/api/beta');
+      expect(createRequest.mock.calls[0][0].path).toContain('/my/route');
+      expect(createRequest.mock.calls[1][0].path).toContain('/api/alpha');
+      expect(createRequest.mock.calls[2][0].path).toContain('/api/beta');
       expect(fetchMock.lastCall()!.request.url).toContain('/api/gamma');
     });
 
     it('should accumulate response information', async () => {
       const bodies = ['alpha', 'beta', 'gamma'];
-      const createResponse = jest.fn((httpResponse: IHttpResponse) => ({
+      const createResponse = jest.fn((httpResponse: HttpResponse) => ({
         body: bodies.shift(),
       }));
 
@@ -606,7 +625,7 @@ describe('Fetch', () => {
 
       fetchInstance.intercept({
         requestError(httpErrorRequest) {
-          return httpErrorRequest.request;
+          return httpErrorRequest.fetchOptions;
         },
         response: usedSpy,
       });

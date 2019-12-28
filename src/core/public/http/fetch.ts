@@ -20,10 +20,16 @@
 import { merge } from 'lodash';
 import { format } from 'url';
 
-import { IBasePath, HttpInterceptor, HttpHandler, HttpFetchOptions, IHttpResponse } from './types';
+import {
+  IBasePath,
+  HttpInterceptor,
+  HttpHandler,
+  HttpFetchOptions,
+  HttpResponse,
+  HttpFetchOptionsWithPath,
+} from './types';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
-import { HttpResponse } from './response';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
@@ -60,23 +66,26 @@ export class Fetch {
   public readonly put = this.shorthand('PUT');
 
   public fetch: HttpHandler = async <TResponseBody>(
-    path: string,
+    pathOrOptions: string | HttpFetchOptionsWithPath,
     options: HttpFetchOptions = {}
   ) => {
-    const initialRequest = this.createRequest(path, options);
+    const optionsWithPath: HttpFetchOptionsWithPath =
+      typeof pathOrOptions === 'string' ? { ...options, path: pathOrOptions } : pathOrOptions;
+
     const controller = new HttpInterceptController();
 
     // We wrap the interception in a separate promise to ensure that when
     // a halt is called we do not resolve or reject, halting handling of the promise.
-    return new Promise<TResponseBody | IHttpResponse<TResponseBody>>(async (resolve, reject) => {
+    return new Promise<TResponseBody | HttpResponse<TResponseBody>>(async (resolve, reject) => {
       try {
-        const interceptedRequest = await interceptRequest(
-          initialRequest,
+        const interceptedOptions = await interceptRequest(
+          optionsWithPath,
           this.interceptors,
           controller
         );
-        const initialResponse = this.fetchResponse(interceptedRequest);
+        const initialResponse = this.fetchResponse(interceptedOptions);
         const interceptedResponse = await interceptResponse(
+          interceptedOptions,
           initialResponse,
           this.interceptors,
           controller
@@ -95,9 +104,15 @@ export class Fetch {
     });
   };
 
-  private createRequest(path: string, options: HttpFetchOptions = {}): Request {
+  private createRequest(options: HttpFetchOptionsWithPath): Request {
     // Merge and destructure options out that are not applicable to the Fetch API.
-    const { query, prependBasePath: shouldPrependBasePath, asResponse, ...fetchOptions } = merge(
+    const {
+      query,
+      prependBasePath: shouldPrependBasePath,
+      asResponse,
+      asSystemApi,
+      ...fetchOptions
+    } = merge(
       {
         method: 'GET',
         credentials: 'same-origin',
@@ -114,14 +129,15 @@ export class Fetch {
       }
     );
     const url = format({
-      pathname: shouldPrependBasePath ? this.params.basePath.prepend(path) : path,
+      pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
       query,
     });
 
     return new Request(url, fetchOptions);
   }
 
-  private async fetchResponse(request: Request) {
+  private async fetchResponse(fetchOptions: HttpFetchOptionsWithPath): Promise<HttpResponse<any>> {
+    const request = this.createRequest(fetchOptions);
     let response: Response;
     let body = null;
 
@@ -159,11 +175,14 @@ export class Fetch {
       throw new HttpFetchError(response.statusText, request, response, body);
     }
 
-    return new HttpResponse({ request, response, body });
+    return { fetchOptions, request, response, body };
   }
 
-  private shorthand(method: string) {
-    return (path: string, options: HttpFetchOptions = {}) =>
-      this.fetch(path, { ...options, method });
+  private shorthand(method: string): HttpHandler {
+    return (pathOrOptions: string | HttpFetchOptionsWithPath, options: HttpFetchOptions = {}) => {
+      const optionsWithPath: HttpFetchOptionsWithPath =
+        typeof pathOrOptions === 'string' ? { ...options, path: pathOrOptions } : pathOrOptions;
+      return this.fetch({ ...optionsWithPath, method });
+    };
   }
 }
