@@ -16,5 +16,5 @@ export interface HttpErrorRequest
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [error](./kibana-plugin-public.httperrorrequest.error.md) | <code>Error</code> |  |
-|  [request](./kibana-plugin-public.httperrorrequest.request.md) | <code>Request</code> |  |
+|  [fetchOptions](./kibana-plugin-public.httperrorrequest.fetchoptions.md) | <code>Readonly&lt;HttpFetchOptionsWithPath&gt;</code> |  |
 

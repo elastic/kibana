@@ -9,14 +9,14 @@ Define an interceptor to be executed after a response is received.
 <b>Signature:</b>
 
 ```typescript
-response?(httpResponse: IHttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  httpResponse | <code>IHttpResponse</code> |  |
+|  httpResponse | <code>HttpResponse</code> |  |
 |  controller | <code>IHttpInterceptController</code> |  |
 
 <b>Returns:</b>

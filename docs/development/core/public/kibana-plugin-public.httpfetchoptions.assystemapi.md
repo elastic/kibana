@@ -4,7 +4,7 @@
 
 ## HttpFetchOptions.asSystemApi property
 
-Whether or not the request should include the "system API" header to differentiate from application-level requests. Can be read on the server-side using KibanaRequest\#isSystemApi. Defaults to `false`<!-- -->.
+Whether or not the request should include the "system API" header to differentiate an end user request from Kibana internal request. Can be read on the server-side using KibanaRequest\#isSystemApi. Defaults to `false`<!-- -->.
 
 <b>Signature:</b>
 

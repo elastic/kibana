@@ -581,13 +581,15 @@ export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
     // (undocumented)
-    request: Request;
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>;
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends IHttpResponse {
+export interface HttpErrorResponse extends HttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
+    // (undocumented)
+    request: Readonly<Request>;
 }
 
 // @public
@@ -599,6 +601,12 @@ export interface HttpFetchOptions extends HttpRequestInit {
     query?: HttpFetchQuery;
 }
 
+// @public
+export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
+    // (undocumented)
+    path: string;
+}
+
 // @public (undocumented)
 export interface HttpFetchQuery {
     // (undocumented)
@@ -607,12 +615,18 @@ export interface HttpFetchQuery {
 
 // @public
 export interface HttpHandler {
-    // (undocumented)
+    // @deprecated (undocumented)
     <TResponseBody = any>(path: string, options: HttpFetchOptions & {
         asResponse: true;
-    }): Promise<IHttpResponse<TResponseBody>>;
+    }): Promise<HttpResponse<TResponseBody>>;
     // (undocumented)
+    <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
+        asResponse: true;
+    }): Promise<HttpResponse<TResponseBody>>;
+    // @deprecated (undocumented)
     <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+    // (undocumented)
+    <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 // @public (undocumented)
@@ -623,9 +637,9 @@ export interface HttpHeadersInit {
 
 // @public
 export interface HttpInterceptor {
-    request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: IHttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+    request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): Promise<Partial<HttpFetchOptionsWithPath>> | Partial<HttpFetchOptionsWithPath> | void;
+    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Partial<HttpFetchOptionsWithPath>> | Partial<HttpFetchOptionsWithPath> | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
     responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 }
 
@@ -645,6 +659,14 @@ export interface HttpRequestInit {
     referrerPolicy?: ReferrerPolicy;
     signal?: AbortSignal | null;
     window?: null;
+}
+
+// @public (undocumented)
+export interface HttpResponse<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
+    readonly request: Readonly<Request>;
+    readonly response?: Readonly<Response>;
 }
 
 // @public (undocumented)
@@ -700,8 +722,6 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 
 // @public (undocumented)
 export interface IHttpFetchError extends Error {
-    // (undocumented)
-    readonly body?: any;
     // @deprecated (undocumented)
     readonly req: Request;
     // (undocumented)
@@ -716,13 +736,6 @@ export interface IHttpFetchError extends Error {
 export interface IHttpInterceptController {
     halt(): void;
     halted: boolean;
-}
-
-// @public (undocumented)
-export interface IHttpResponse<TResponseBody = any> {
-    readonly body?: TResponseBody;
-    readonly request: Readonly<Request>;
-    readonly response?: Readonly<Response>;
 }
 
 // @public
