@@ -72,7 +72,6 @@ export type ILegacyService = PublicMethodsOf<LegacyService>;
 export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
-  private hasDiscovered = false;
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
@@ -158,8 +157,6 @@ export class LegacyService implements CoreService {
       );
     }
 
-    this.hasDiscovered = true;
-
     return {
       pluginSpecs,
       disabledPluginSpecs,
@@ -173,7 +170,7 @@ export class LegacyService implements CoreService {
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.log.debug('setting up legacy service');
 
-    if (!this.hasDiscovered) {
+    if (!this.legacyPlugins) {
       throw new Error(
         'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
       );
@@ -187,7 +184,7 @@ export class LegacyService implements CoreService {
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
 
-    if (!setupDeps || !this.hasDiscovered) {
+    if (!setupDeps || !this.legacyPlugins) {
       throw new Error('Legacy service is not setup yet.');
     }
 

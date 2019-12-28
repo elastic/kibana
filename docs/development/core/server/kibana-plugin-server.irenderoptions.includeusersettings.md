@@ -4,7 +4,7 @@
 
 ## IRenderOptions.includeUserSettings property
 
-Set whether to output user settings in the page metadata.
+Set whether to output user settings in the page metadata. `true` by default.
 
 <b>Signature:</b>
 

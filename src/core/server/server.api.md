@@ -988,9 +988,7 @@ export type LegacyUiExports = SavedObjectsLegacyUiExports & {
     navLinkSpecs?: LegacyNavLinkSpec[] | null;
     uiAppSpecs?: Array<LegacyAppSpec | undefined>;
     unknown?: [{
-        pluginSpec: {
-            getId: () => unknown;
-        };
+        pluginSpec: LegacyPluginSpec;
         type: unknown;
     }];
 };
@@ -1972,6 +1970,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:159:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:160:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:161:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:162:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts

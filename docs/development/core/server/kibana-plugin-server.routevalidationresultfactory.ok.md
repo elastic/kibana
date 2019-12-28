@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-<T>(value: T) => {
-        T;
+ok: <T>(value: T) => {
+        value: T;
     };
 ```

@@ -81,6 +81,7 @@ export interface RenderingSetupDeps {
 export interface IRenderOptions {
   /**
    * Set whether to output user settings in the page metadata.
+   * `true` by default.
    */
   includeUserSettings?: boolean;
 }

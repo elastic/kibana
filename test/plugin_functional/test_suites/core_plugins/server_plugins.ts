@@ -55,10 +55,6 @@ export default function({ getService }: PluginFunctionalProviderContext) {
         });
     });
 
-    it('renders core application implicitly', async () => {
-      await supertest.get('/requestcontext/render').expect(200, /app:core/);
-    });
-
     it('renders core application explicitly', async () => {
       await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
     });

@@ -159,7 +159,7 @@ export type LegacyUiExports = SavedObjectsLegacyUiExports & {
   injectedVarsReplacers?: VarsReplacer[];
   navLinkSpecs?: LegacyNavLinkSpec[] | null;
   uiAppSpecs?: Array<LegacyAppSpec | undefined>;
-  unknown?: [{ pluginSpec: { getId: () => unknown }; type: unknown }];
+  unknown?: [{ pluginSpec: LegacyPluginSpec; type: unknown }];
 };
 
 /**
