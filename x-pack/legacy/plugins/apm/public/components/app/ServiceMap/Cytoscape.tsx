@@ -62,10 +62,22 @@ export function Cytoscape({
   // Trigger a custom "data" event when data changes
   useEffect(() => {
     if (cy) {
+      cy.remove(cy.nodes());
       cy.add(elements);
       cy.trigger('data');
     }
   }, [cy, elements]);
+
+  useEffect(() => {
+    if (cy) {
+      cy.on('click', 'node', e => {
+        const node = e.target;
+        if (node.data('href')) {
+          window.location.href = node.data('href');
+        }
+      });
+    }
+  }, [cy]);
 
   // Set up cytoscape event handlers
   useEffect(() => {
@@ -73,6 +85,7 @@ export function Cytoscape({
       cy.on('data', event => {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
+          cy.nodes().removeClass('primary');
           cy.getElementById(serviceName).addClass('primary');
         }
 

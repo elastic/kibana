@@ -19,6 +19,8 @@ import { Cytoscape } from './Cytoscape';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { useCallApmApi } from '../../../hooks/useCallApmApi';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
+import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { useLocation } from '../../../hooks/useLocation';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -80,6 +82,8 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   });
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
+
+  const { search } = useLocation();
 
   const getNext = (input: { reset?: boolean; after?: string | undefined }) => {
     const { start, end, uiFilters: strippedUiFilters, ...query } = params;
@@ -161,10 +165,19 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
 
     return [
       ...(Object.values(nodesById) as ConnectionNode[]).map(node => {
+        const href =
+          'service.name' in node
+            ? getAPMHref(
+                `/services/${node['service.name']}/service-map`,
+                search
+              )
+            : undefined;
+
         return {
           group: 'nodes' as const,
           data: {
             id: getConnectionNodeId(node, destMap),
+            href,
             ...('agent.name' in node ? { agentName: node['agent.name'] } : {})
           }
         };
@@ -180,7 +193,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         };
       })
     ];
-  }, [responses]);
+  }, [responses, search]);
 
   const license = useLicense();
 
