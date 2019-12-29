@@ -51,7 +51,7 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { LegacyConfig } from '../../../legacy/config';
+import { LegacyConfig } from '../../../legacy';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
