@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
-import { deepFreeze } from '../../../utils';
 
-const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
-  capabilities: deepFreeze({
-    catalogue: {},
-    management: {},
-    navLinks: {},
-  }),
-});
+import { App, LegacyApp, Mounter } from './types';
+import { ApplicationService } from './application_service';
 
-const createMock = (): jest.Mocked<PublicMethodsOf<CapabilitiesService>> => ({
-  start: jest.fn().mockImplementation(createStartContractMock),
-});
-
-export const capabilitiesServiceMock = {
-  create: createMock,
-  createStartContract: createStartContractMock,
-};
+/** @internal */
+export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
+/** @internal */
+export type EitherApp = App | LegacyApp;
+/** @internal */
+export type MockedMounter<T extends EitherApp> = jest.Mocked<Mounter<jest.Mocked<T>>>;
+/** @internal */
+export type MockedMounterTuple<T extends EitherApp> = [string, MockedMounter<T>];
+/** @internal */
+export type MockedMounterMap<T extends EitherApp> = Map<string, MockedMounter<T>>;
+/** @internal */
+export type MockLifecycle<
+  T extends keyof ApplicationService,
+  U = Parameters<ApplicationService[T]>[0]
+> = { [P in keyof U]: jest.Mocked<U[P]> };
