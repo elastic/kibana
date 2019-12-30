@@ -17,9 +17,12 @@ import { ComboBoxOption } from '../../types';
 const { containsCharsField, isJsonField } = fieldValidators;
 
 const fieldPathComboBoxConfig = {
-  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldPathComboBoxHelpText', {
-    defaultMessage: 'Accepts a path to the field, including wildcards.',
-  }),
+  helpText: i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.configuration.sourceFieldPathComboBoxHelpText',
+    {
+      defaultMessage: 'Accepts a path to the field, including wildcards.',
+    }
+  ),
   type: FIELD_TYPES.COMBO_BOX,
   defaultValue: [],
   serializer: (options: ComboBoxOption[]): string[] => options.map(({ label }) => label),
@@ -28,12 +31,12 @@ const fieldPathComboBoxConfig = {
 
 export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
   metaField: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.mappingsEditor.metaFieldEditorLabel', {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',
     }),
     helpText: (
       <FormattedMessage
-        id="xpack.idxMgmt.mappingsEditor.mappingsEditor.metaFieldEditorHelpText"
+        id="xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorHelpText"
         defaultMessage="Use JSON format: {code}"
         values={{
           code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
@@ -43,7 +46,7 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
     validations: [
       {
         validator: isJsonField(
-          i18n.translate('xpack.idxMgmt.mappingsEditor.mappingsEditor.metaFieldEditorJsonError', {
+          i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorJsonError', {
             defaultMessage: 'The _meta field JSON is not valid.',
           })
         ),
@@ -52,20 +55,20 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
   },
   sourceField: {
     enabled: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.sourceFieldLabel', {
         defaultMessage: 'Enable _source field',
       }),
       type: FIELD_TYPES.TOGGLE,
       defaultValue: true,
     },
     includes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.includeSourceFieldsLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.includeSourceFieldsLabel', {
         defaultMessage: 'Include fields',
       }),
       ...fieldPathComboBoxConfig,
     },
     excludes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.excludeSourceFieldsLabel', {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.excludeSourceFieldsLabel', {
         defaultMessage: 'Exclude fields',
       }),
       ...fieldPathComboBoxConfig,
@@ -89,10 +92,13 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
           defaultMessage: 'Throw an exception when a document contains an unmapped field',
         }
       ),
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicMappingStrictHelpText', {
-        defaultMessage:
-          'By default, unmapped fields will be silently ignored when dynamic mapping is disabled. Optionally, you can choose to throw an exception when a document contains an unmapped field.',
-      }),
+      helpText: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.configuration.dynamicMappingStrictHelpText',
+        {
+          defaultMessage:
+            'By default, unmapped fields will be silently ignored when dynamic mapping is disabled. Optionally, you can choose to throw an exception when a document contains an unmapped field.',
+        }
+      ),
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
