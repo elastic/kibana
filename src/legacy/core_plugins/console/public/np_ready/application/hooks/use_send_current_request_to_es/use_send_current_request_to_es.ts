@@ -28,12 +28,7 @@ import mappings from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
-    services: {
-      history,
-      settings,
-      notifications,
-      metrics: { trackUiMetric, METRIC_TYPE },
-    },
+    services: { history, settings, notifications, trackUiMetric },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -52,7 +47,7 @@ export const useSendCurrentRequestToES = () => {
       }
 
       // Fire and forget
-      track(requests, editor, trackUiMetric, METRIC_TYPE.COUNT);
+      setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
       const results = await sendRequestToES({ requests });
 
@@ -89,5 +84,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric, METRIC_TYPE.COUNT]);
+  }, [dispatch, settings, history, notifications, trackUiMetric]);
 };

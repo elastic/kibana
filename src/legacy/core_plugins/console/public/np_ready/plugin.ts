@@ -29,7 +29,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { I18nContext, elasticsearchUrl, category, metrics },
+      __LEGACY: { I18nContext, elasticsearchUrl, category },
       dev_tools,
       home,
     } = pluginSet;
@@ -63,7 +63,6 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
             I18nContext,
             notifications,
             elasticsearchUrl,
-            metrics,
           }),
           element
         );

@@ -64,7 +64,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
     mockedAppContextValue = {
       elasticsearchUrl: 'test',
       services: {
-        metrics: { trackUiMetric: jest.fn(), METRIC_TYPE: {} as any },
+        trackUiMetric: { count: () => {}, load: () => {} },
         settings: {} as any,
         storage: {} as any,
         history: {

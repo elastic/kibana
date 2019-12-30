@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import { Metrics } from '../../../../legacy';
 import { SenseEditor } from '../../models/sense_editor';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
+import { MetricsTracker } from '../../../types';
 
-export const track = (
-  requests: any[],
-  editor: SenseEditor,
-  trackUiMetric: Metrics['trackUiMetric'],
-  type: Metrics['METRIC_TYPE']['COUNT']
-) => {
+export const track = (requests: any[], editor: SenseEditor, trackUiMetric: MetricsTracker) => {
   const coreEditor = editor.getCoreEditor();
   // `getEndpointFromPosition` gets values from the server-side generated JSON files which
   // are a combination of JS, automatically generated JSON and manual overrides. That means
@@ -39,7 +34,7 @@ export const track = (
   );
 
   if (requests[0] && endpointDescription) {
-    const eventName = `${requests[0].method} ${endpointDescription.id ?? 'unknown'}`;
-    trackUiMetric(type, eventName);
+    const eventName = `${requests[0].method}_${endpointDescription.id ?? 'unknown'}`;
+    trackUiMetric.count(eventName);
   }
 };

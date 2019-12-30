@@ -20,7 +20,7 @@
 import React, { createContext, useContext } from 'react';
 import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
-import { Metrics } from '../../../legacy';
+import { MetricsTracker } from '../../types';
 
 export interface ContextValue {
   services: {
@@ -28,7 +28,7 @@ export interface ContextValue {
     storage: Storage;
     settings: Settings;
     notifications: NotificationsSetup;
-    metrics: Metrics;
+    trackUiMetric: MetricsTracker;
   };
   elasticsearchUrl: string;
   docLinkVersion: string;

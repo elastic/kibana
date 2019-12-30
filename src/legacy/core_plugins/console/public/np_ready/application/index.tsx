@@ -22,7 +22,7 @@ import { NotificationsSetup } from 'kibana/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
-import { Metrics } from '../../legacy';
+import { createUsageTracker } from '../services/tracker';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -34,17 +34,11 @@ export function boot(deps: {
   I18nContext: any;
   notifications: NotificationsSetup;
   elasticsearchUrl: string;
-  metrics: Metrics;
 }) {
-  const {
-    I18nContext,
-    notifications,
-    docLinkVersion,
-    elasticsearchUrl,
-    metrics: { METRIC_TYPE, trackUiMetric },
-  } = deps;
+  const { I18nContext, notifications, docLinkVersion, elasticsearchUrl } = deps;
 
-  trackUiMetric(METRIC_TYPE.LOADED, 'opened_app');
+  const trackUiMetric = createUsageTracker();
+  trackUiMetric.load('opened_app');
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -65,7 +59,7 @@ export function boot(deps: {
             history,
             settings,
             notifications,
-            metrics: { trackUiMetric, METRIC_TYPE },
+            trackUiMetric,
           },
         }}
       >
