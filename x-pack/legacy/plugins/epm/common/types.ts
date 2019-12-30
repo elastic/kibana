@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Follow pattern from https://github.com/elastic/kibana/pull/52447
+// TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import {
   SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../src/core/server';
+} from '../../../../../src/core/public';
 import { AssetType as IngestAssetType } from '../../ingest/server/libs/types';
 
 export enum InstallationStatus {
