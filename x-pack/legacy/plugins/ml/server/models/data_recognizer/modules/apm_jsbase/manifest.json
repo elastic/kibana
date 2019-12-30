@@ -1,7 +1,7 @@
 {
   "id": "apm_jsbase",
   "title": "APM: RUM Javascript",
-  "description": "Detect anomalies in spans and errors",
+  "description": "Detect problematic spans and identify user agents that are potentially causing issues.",
   "type": "APM data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*",

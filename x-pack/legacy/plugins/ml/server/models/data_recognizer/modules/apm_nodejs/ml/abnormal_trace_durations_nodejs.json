@@ -28,7 +28,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-apm-nosejs",
+    "created_by": "ml-module-apm-nodejs",
     "custom_urls": [
       {
         "url_name": "APM",

@@ -1,7 +1,7 @@
 {
   "id": "apm_nodejs",
   "title": "APM: NodeJS",
-  "description": "Detect anomalies in transactions, spans, and errors",
+  "description": "Detect abnormal traces, anomalous spans, and identify periods of decreased throughput.",
   "type": "APM data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*",
