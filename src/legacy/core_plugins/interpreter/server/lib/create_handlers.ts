@@ -35,6 +35,6 @@ export const createHandlers = (request: Legacy.Request, server: Legacy.Server) =
       config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
         ? `${server.info.uri}${config.get('server.basePath')}`
         : server.info.uri,
-    elasticsearchClient: async (...args: any) => callWithRequest(request, ...args),
+    elasticsearchClient: async (...args: any) => (callWithRequest as any)(request, ...args),
   };
 };

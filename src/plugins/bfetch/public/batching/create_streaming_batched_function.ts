@@ -27,13 +27,6 @@ import {
 } from '../../common';
 import { fetchStreaming } from '../streaming';
 
-export interface StreamingBatchedFunctionParams<Payload, Result> {
-  url: string;
-  fetchStreaming?: typeof fetchStreaming;
-  flushOnMaxItems?: ItemBufferParams<any>['flushOnMaxItems'];
-  maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
-}
-
 export interface BatchItem<Payload, Result> {
   payload: Payload;
   future: Defer<Result>;
@@ -41,11 +34,41 @@ export interface BatchItem<Payload, Result> {
 
 export type BatchedFunc<Payload, Result> = (payload: Payload) => Promise<Result>;
 
-export const createStreamingBatchedFunction = <
-  Payload,
-  Result extends object,
-  E extends ErrorLike = ErrorLike
->(
+export interface StreamingBatchedFunctionParams<Payload, Result> {
+  /**
+   * URL endpoint that will receive a batch of requests. This endpoint is expected
+   * to receive batch as a serialized JSON array. It should stream responses back
+   * in ND-JSON format using `Transfer-Encoding: chunked` HTTP/1 streaming.
+   */
+  url: string;
+
+  /**
+   * The instance of `fetchStreaming` function that will perform ND-JSON handling.
+   * There should be a version of this function available in setup contract of `bfetch`
+   * plugin.
+   */
+  fetchStreaming?: typeof fetchStreaming;
+
+  /**
+   * The maximum size of function call buffer before sending the batch request.
+   */
+  flushOnMaxItems?: ItemBufferParams<any>['flushOnMaxItems'];
+
+  /**
+   * The maximum timeout in milliseconds of the oldest item in the batch
+   * before sending the batch request.
+   */
+  maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
+}
+
+/**
+ * Returns a function that does not execute immediately but buffers the call internally until
+ * `params.flushOnMaxItems` is reached or after `params.maxItemAge` timeout in milliseconds is reached. Once
+ * one of those thresholds is reached all buffered calls are sent in one batch to the
+ * server using `params.fetchStreaming` in a POST request. Responses are streamed back
+ * and each batch item is resolved once corresponding response is received.
+ */
+export const createStreamingBatchedFunction = <Payload, Result extends object>(
   params: StreamingBatchedFunctionParams<Payload, Result>
 ): BatchedFunc<Payload, Result> => {
   const {
@@ -71,7 +94,7 @@ export const createStreamingBatchedFunction = <
           method: 'POST',
         });
         stream.subscribe(json => {
-          const response = JSON.parse(json) as BatchResponseItem<Result, E>;
+          const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
           if (response.error) {
             const error = new Error(response.error.message);
             for (const [key, value] of Object.entries(response.error)) (error as any)[key] = value;

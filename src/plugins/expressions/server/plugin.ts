@@ -41,7 +41,7 @@ export class ExpressionsServerPlugin
       ExpressionsServerSetupDependencies,
       ExpressionsServerStartDependencies
     > {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,

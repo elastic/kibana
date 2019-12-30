@@ -21,12 +21,12 @@ import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
 // eslint-disable-next-line
 import { split } from '../../../../../plugins/bfetch/public/streaming';
-import { BfetchPublicApi } from '../../../../../plugins/bfetch/public';
+import { BfetchPublicContract } from '../../../../../plugins/bfetch/public';
 import { defer } from '../../../../../plugins/kibana_utils/public';
 import { FUNCTIONS_URL } from './consts';
 
 export interface Options {
-  fetchStreaming: BfetchPublicApi['fetchStreaming'];
+  fetchStreaming: BfetchPublicContract['fetchStreaming'];
   serialize: any;
   ms?: number;
 }
@@ -111,7 +111,7 @@ export function batchedFetch({ fetchStreaming, serialize, ms = 10 }: Options) {
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(fetchStreaming: BfetchPublicApi['fetchStreaming'], batch: Batch) {
+async function processBatch(fetchStreaming: BfetchPublicContract['fetchStreaming'], batch: Batch) {
   const { stream, promise } = fetchStreaming({
     url: FUNCTIONS_URL,
     body: JSON.stringify({

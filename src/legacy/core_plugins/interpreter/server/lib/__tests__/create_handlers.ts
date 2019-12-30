@@ -19,12 +19,13 @@
 
 import expect from '@kbn/expect';
 import { createHandlers } from '../create_handlers';
+import { Legacy } from '../../../../../../../kibana';
 
-const mockRequest = {
+const mockRequest = ({
   headers: 'i can haz headers',
-};
+} as unknown) as Legacy.Request;
 
-const mockServer = {
+const mockServer = ({
   plugins: {
     elasticsearch: {
       getCluster: () => ({
@@ -39,7 +40,7 @@ const mockServer = {
   info: {
     uri: 'serveruri',
   },
-};
+} as unknown) as Legacy.Server;
 
 describe('server createHandlers', () => {
   it('provides helper methods and properties', () => {

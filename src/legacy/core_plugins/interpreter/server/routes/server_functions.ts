@@ -19,7 +19,6 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { CoreSetup } from 'src/core/server';
 import { serializeProvider } from '../../../../../plugins/expressions/common';
 import { ExpressionsServerSetup } from '../../../../../plugins/expressions/server';
 import { BfetchServerSetup } from '../../../../../plugins/bfetch/server';
@@ -33,7 +32,7 @@ const API_ROUTE = '/api/interpreter';
  * @param {*} server - The Kibana server
  */
 export function registerServerFunctions(server: any) {
-  const setup = server.newPlatform.start.core as CoreSetup;
+  // const setup = server.newPlatform.start.core as CoreSetup;
   const bfetch = server.newPlatform.setup.plugins.bfetch as BfetchServerSetup;
   const expressions = server.newPlatform.setup.plugins.expressions as ExpressionsServerSetup;
 
