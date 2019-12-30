@@ -77,6 +77,10 @@ kibana_vars=(
     server.ssl.enabled
     server.ssl.key
     server.ssl.keyPassphrase
+    server.ssl.keystore.path
+    server.ssl.keystore.password
+    server.ssl.truststore.path
+    server.ssl.truststore.password
     server.ssl.redirectHttpFromPort
     server.ssl.supportedProtocols
     server.xsrf.whitelist

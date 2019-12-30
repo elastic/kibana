@@ -65,10 +65,12 @@ Object {
     ],
     "clientAuthentication": "none",
     "enabled": false,
+    "keystore": Object {},
     "supportedProtocols": Array [
       "TLSv1.1",
       "TLSv1.2",
     ],
+    "truststore": Object {},
   },
 }
 `;

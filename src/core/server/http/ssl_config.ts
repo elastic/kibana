@@ -20,6 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
 import { readFileSync } from 'fs';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
 
 // `crypto` type definitions doesn't currently include `crypto.constants`, see
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
@@ -45,6 +46,14 @@ export const sslSchema = schema.object(
     }),
     key: schema.maybe(schema.string()),
     keyPassphrase: schema.maybe(schema.string()),
+    keystore: schema.object({
+      path: schema.maybe(schema.string()),
+      password: schema.maybe(schema.string()),
+    }),
+    truststore: schema.object({
+      path: schema.maybe(schema.string()),
+      password: schema.maybe(schema.string()),
+    }),
     redirectHttpFromPort: schema.maybe(schema.number()),
     supportedProtocols: schema.arrayOf(
       schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
@@ -57,8 +66,16 @@ export const sslSchema = schema.object(
   },
   {
     validate: ssl => {
-      if (ssl.enabled && (!ssl.key || !ssl.certificate)) {
-        return 'must specify [certificate] and [key] when ssl is enabled';
+      if (ssl.key && ssl.keystore.path) {
+        return 'cannot use [key] when [keystore.path] is specified';
+      }
+
+      if (ssl.certificate && ssl.keystore.path) {
+        return 'cannot use [certificate] when [keystore.path] is specified';
+      }
+
+      if (ssl.enabled && (!ssl.key || !ssl.certificate) && !ssl.keystore.path) {
+        return 'must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled';
       }
 
       if (!ssl.enabled && ssl.clientAuthentication !== 'none') {
@@ -94,10 +111,33 @@ export class SslConfig {
     this.requestCert = config.clientAuthentication !== 'none';
     this.rejectUnauthorized = config.clientAuthentication === 'required';
 
-    if (config.key && config.certificate) {
+    const addCAs = (ca: string[] | undefined) => {
+      if (ca && ca.length) {
+        this.certificateAuthorities = this.certificateAuthorities
+          ? this.certificateAuthorities.concat(ca)
+          : ca;
+      }
+    };
+
+    if (config.keystore?.path) {
+      const { key, cert, ca } = readPkcs12Keystore(config.keystore.path, config.keystore.password);
+      if (!key) {
+        throw new Error(`Did not find private key in keystore at [keystore.path].`);
+      } else if (!cert) {
+        throw new Error(`Did not find certificate in keystore at [keystore.path].`);
+      }
+      this.key = key;
+      this.certificate = cert;
+      addCAs(ca);
+    } else if (config.key && config.certificate) {
       this.key = readFile(config.key);
       this.keyPassphrase = config.keyPassphrase;
       this.certificate = readFile(config.certificate);
+    }
+
+    if (config.truststore?.path) {
+      const ca = readPkcs12Truststore(config.truststore.path, config.truststore.password);
+      addCAs(ca);
     }
 
     const ca = config.certificateAuthorities;
@@ -108,7 +148,7 @@ export class SslConfig {
         for (const path of paths) {
           parsed.push(readFile(path));
         }
-        this.certificateAuthorities = parsed;
+        addCAs(parsed);
       }
     }
   }

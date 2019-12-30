@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export const mockReadFileSync = jest.fn();
-jest.mock('fs', () => {
-  return { readFileSync: mockReadFileSync };
-});
+export default function({ getService }) {
+  const supertest = getService('supertest');
 
-export const mockReadPkcs12Keystore = jest.fn();
-export const mockReadPkcs12Truststore = jest.fn();
-jest.mock('../../utils', () => ({
-  readPkcs12Keystore: mockReadPkcs12Keystore,
-  readPkcs12Truststore: mockReadPkcs12Truststore,
-}));
+  describe('kibana server with ssl', () => {
+    it('handles requests using ssl', async () => {
+      await supertest.get('/').expect(302);
+    });
+  });
+}
