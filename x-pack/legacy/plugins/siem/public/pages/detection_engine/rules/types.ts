@@ -80,7 +80,6 @@ export interface AboutStepRule extends StepRuleData {
 }
 
 export interface DefineStepRule extends StepRuleData {
-  useIndicesConfig: string;
   index: string[];
   queryBar: FieldValueQueryBar;
 }

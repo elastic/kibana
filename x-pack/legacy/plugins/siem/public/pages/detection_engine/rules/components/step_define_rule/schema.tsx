@@ -10,7 +10,6 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
-import * as RuleI18n from '../../translations';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,
@@ -19,33 +18,27 @@ import {
   FormSchema,
   ValidationFunc,
 } from '../shared_imports';
-import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY } from './translations';
+import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
 
 const { emptyField } = fieldValidators;
 
 export const schema: FormSchema = {
-  useIndicesConfig: {
-    type: FIELD_TYPES.RADIO_GROUP,
-    label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldIndicesTypeLabel',
-      {
-        defaultMessage: 'Indices type',
-      }
-    ),
-  },
   index: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate('xpack.siem.detectionEngine.createRule.stepAboutRule.fiedIndicesLabel', {
-      defaultMessage: 'Indices',
-    }),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
+      {
+        defaultMessage: 'Index patterns',
+      }
+    ),
+    helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
         validator: emptyField(
           i18n.translate(
             'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
             {
-              defaultMessage: 'An output indice name for signals is required.',
+              defaultMessage: 'An index patterns for signals is required.',
             }
           )
         ),
