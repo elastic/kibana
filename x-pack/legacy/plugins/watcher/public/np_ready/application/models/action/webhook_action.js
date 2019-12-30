@@ -26,7 +26,13 @@ export class WebhookAction extends BaseAction {
     this.password = get(props, 'password');
     this.contentType = get(props, 'contentType');
 
-    this.fullPath = `${this.host}:${this.port}${this.path}`;
+    if (typeof this.path !== "undefined") 
+    {
+      this.fullPath = `${this.host}:${this.port}/${this.path}`;
+    } 
+    else {
+      this.fullPath = `${this.host}:${this.port}`;
+    }
   }
 
   validate() {
