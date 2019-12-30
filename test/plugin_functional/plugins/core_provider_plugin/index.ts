@@ -17,23 +17,20 @@
  * under the License.
  */
 
-const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
 
-export function mergeVariables(...sources: Array<Record<string, any>>) {
-  const result: Record<string, any> = {};
+// eslint-disable-next-line import/no-default-export
+export default function CoreProviderPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'core-provider',
+    require: [],
+    publicDir: resolve(__dirname, 'public'),
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      hacks: [resolve(__dirname, 'public/index')],
+    },
+  };
 
-  for (const source of sources) {
-    Object.entries(source).forEach(([key, value]) => {
-      if (ELIGIBLE_FLAT_MERGE_KEYS.includes(key)) {
-        result[key] = {
-          ...value,
-          ...result[key],
-        };
-      } else if (!result.hasOwnProperty(key)) {
-        result[key] = value;
-      }
-    });
-  }
-
-  return result;
+  return new kibana.Plugin(config);
 }

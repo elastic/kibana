@@ -17,21 +17,19 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
+import { mockCoreContext } from '../../core_context.mock';
+import { httpServiceMock } from '../../http/http_service.mock';
+import { pluginServiceMock } from '../../plugins/plugins_service.mock';
+import { legacyServiceMock } from '../../legacy/legacy_service.mock';
 
-declare global {
-  interface Window {
-    uiSettingsPlugin?: Record<string, any>;
-    uiSettingsPluginValue?: string;
-  }
-}
+const context = mockCoreContext.create();
+const http = httpServiceMock.createSetupContract();
+const plugins = pluginServiceMock.createSetupContract();
+const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 
-export class UiSettingsPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
-    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
-  }
-
-  public start() {}
-  public stop() {}
-}
+export const mockRenderingServiceParams = context;
+export const mockRenderingSetupDeps = {
+  http,
+  legacyPlugins,
+  plugins,
+};

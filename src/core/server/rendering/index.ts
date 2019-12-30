@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiSettingsPlugin } from './plugin';
 
-export const plugin = () => new UiSettingsPlugin();
+export { RenderingService } from './rendering_service';
+export * from './types';
