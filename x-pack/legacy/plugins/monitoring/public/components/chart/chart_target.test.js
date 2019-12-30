@@ -8,7 +8,8 @@ import React from 'react';
 import expect from '@kbn/expect';
 import { shallow } from 'enzyme';
 import { ChartTarget } from './chart_target';
-import { coreMock, notificationServiceMock } from 'src/core/public/mocks'; // eslint-disable-line import/no-unresolved
+
+import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 const props = {
   seriesToShow: ['Max Heap', 'Max Heap Used'],
@@ -46,30 +47,27 @@ const props = {
 
 jest.mock('../../np_imports/ui/chrome', () => {
   return {
-    getBasePath: () => ''
+    getBasePath: () => '',
   };
 });
 
 describe('Test legends to toggle series: ', () => {
-
   beforeEach(async () => {
     jest.doMock('ui/new_platform', () => ({
       npSetup: {
         core: {
           ...coreMock.createSetup(),
-          notifications: notificationServiceMock.createStartContract()
-        }
-      }
+          notifications: notificationServiceMock.createStartContract(),
+        },
+      },
     }));
   });
 
-  const ids = props.series.map((item) => item.id);
+  const ids = props.series.map(item => item.id);
 
   describe('props.series: ', () => {
     it('should toggle based on seriesToShow array', () => {
-      const component = shallow(
-        <ChartTarget {...props} />
-      );
+      const component = shallow(<ChartTarget {...props} />);
 
       const componentClass = component.instance();
 
