@@ -298,6 +298,14 @@
         ],
       },
       {
+        groupSlug: 'node-forge',
+        groupName: 'node-forge related packages',
+        packageNames: [
+          'node-forge',
+          '@types/node-forge',
+        ],
+      },
+      {
         groupSlug: 'bluebird',
         groupName: 'bluebird related packages',
         packageNames: [
