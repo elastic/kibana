@@ -21,6 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 
+import { tap } from 'rxjs/operators';
 import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
 import { InjectedMetadataStart } from '../injected_metadata';
@@ -59,6 +60,14 @@ export class RenderingService {
 
     const legacyMode = injectedMetadata.getLegacyMode();
     const legacyRef = legacyMode ? React.createRef<HTMLDivElement>() : null;
+    application.currentAppId$
+      .pipe(
+        tap(appId => {
+          // eslint-disable-next-line no-console
+          console.log(`${new Date().toISOString()} - (${legacyMode}) ApplicationID: ${appId}`);
+        })
+      )
+      .subscribe();
 
     ReactDOM.render(
       <I18nProvider>

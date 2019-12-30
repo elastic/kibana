@@ -223,6 +223,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
+      // TODO: AFH Set the "enabled" flag in telemetry for each plugin
       if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {

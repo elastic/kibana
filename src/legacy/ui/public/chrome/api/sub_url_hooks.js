@@ -40,8 +40,26 @@ export function registerSubUrlHooks(angularModule, internals) {
 
     function onRouteChange($event) {
       if (subUrlRouteFilter($event)) {
+        updateUsage($event);
         updateSubUrls();
       }
+    }
+
+    function updateUsage($event) {
+      // TODO: AFH Find a proper way to identify the differences between a filter is changed and a visualisation is changed
+      // const prevAppId = getAppId($event.currentScope);
+      const newAppID = getAppId($event.targetScope);
+      // if (prevAppId !== newAppID) {
+      // eslint-disable-next-line no-console
+      console.log(`${new Date().toISOString()} - ApplicationID: ${newAppID}`);
+      // } else {
+      // console.log(`${new Date().toISOString()} - ${prevAppId} === ${newAppID}`);
+      // }
+    }
+
+    function getAppId(scope) {
+      const app = scope.chrome.getApp();
+      return app.id === 'kibana' ? scope.getFirstPathSegment() : app.id;
     }
 
     $rootScope.$on('$locationChangeStart', (e, newUrl) => {
