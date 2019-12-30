@@ -404,12 +404,12 @@ export function resultsServiceProvider(callWithRequest) {
 
   /**
    * Gets the record of partition filed - values pairs.
-   * @param jobId
+   * @param criteriaFields
    * @param earliestMs
    * @param latestMs
    * @returns {Promise<*>}
    */
-  async function getPartitionFieldsValues(jobId, earliestMs, latestMs) {
+  async function getPartitionFieldsValues(criteriaFields, earliestMs, latestMs) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
@@ -417,11 +417,13 @@ export function resultsServiceProvider(callWithRequest) {
         query: {
           bool: {
             filter: [
-              {
-                term: {
-                  job_id: jobId,
-                },
-              },
+              ...criteriaFields.map(({ fieldName, fieldValue }) => {
+                return {
+                  term: {
+                    [fieldName]: fieldValue,
+                  },
+                };
+              }),
               {
                 range: {
                   timestamp: {
@@ -435,6 +437,21 @@ export function resultsServiceProvider(callWithRequest) {
           },
         },
         aggs: {
+          partition_field_name: {
+            terms: {
+              field: 'partition_field_name',
+            },
+          },
+          over_field_name: {
+            terms: {
+              field: 'over_field_name',
+            },
+          },
+          by_field_name: {
+            terms: {
+              field: 'by_field_name',
+            },
+          },
           partition_field_values: {
             terms: {
               size: 100,
@@ -457,10 +474,31 @@ export function resultsServiceProvider(callWithRequest) {
       },
     });
 
-    return Object.keys(resp.aggregations).reduce((acc, curr) => {
-      acc[curr] = resp.aggregations[curr].buckets.map(({ key }) => key);
-      return acc;
-    }, {});
+    const {
+      partition_field_name: partitionFieldName,
+      over_field_name: overFieldName,
+      by_field_name: byFieldName,
+      partition_field_values: partitionFieldValues,
+      over_field_values: overFieldValues,
+      by_field_values: byFieldValues,
+    } = resp.aggregations;
+
+    return {
+      ...getFieldObject(partitionFieldName, partitionFieldValues, 'partition_field'),
+      ...getFieldObject(overFieldName, overFieldValues, 'over_field'),
+      ...getFieldObject(byFieldName, byFieldValues, 'by_field'),
+    };
+  }
+
+  function getFieldObject(fieldName, values, field) {
+    return fieldName.buckets.length > 0
+      ? {
+          [field]: {
+            name: fieldName.buckets[0].key,
+            values: values.buckets.map(({ key }) => key),
+          },
+        }
+      : {};
   }
 
   return {
