@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+
 import { KibanaSupertestProvider } from '../../services';
 
 export default async function({ readConfigFile }) {
@@ -54,8 +56,9 @@ export default async function({ readConfigFile }) {
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
         '--server.ssl.enabled=true',
-        `--server.ssl.key=${require.resolve('../../../dev_certs/server.key')}`,
-        `--server.ssl.certificate=${require.resolve('../../../dev_certs/server.crt')}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`, // this is needed for the test runner to trust the server certificate
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.redirectHttpFromPort=${redirectPort}`,
       ],
     },
