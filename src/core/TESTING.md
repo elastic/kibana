@@ -16,11 +16,10 @@ This document outlines best practices and patterns for testing Kibana Plugins.
 
 In general, we recommend three tiers of tests:
 - Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies 
-- Integration tests: higher-level tests that verify API behavior through sending real HTTP requests to Kibana server
-  - **TODO: what's the equivalent of integration tests for frontend code? Karma replacement?**
-- Functional tests: full end-to-end tests that verify user-facing behavior through the browser
+- Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, Elasticsearch API calls, calling other plugin contracts).
+- End-to-end tests (e2e): tests that verify user-facing behavior through the browser
 
-These tiers should roughly follow the traditional "testing pyramid", where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level. 
+These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level. 
 
 ## New concerns in the Kibana Platform
 
@@ -72,6 +71,7 @@ Kibana Platform applications have less control over the page than legacy applica
 
 These long-lived sessions make cleanup more important than before. It's entirely possible a user has a single browsing session open for weeks at a time, without ever doing a full-page refresh. Common things that need to be cleaned up (and tested!) when your application is unmounted:
 - Subscriptions and polling (eg. `uiSettings.get$()`)
+- Any Core API calls that set state (eg. `core.chrome.setIsVisible`).
 - Open connections (eg. a Websocket)
 
 While applications do get an opportunity to unmount and run cleanup logic, it is also important that you do not _depend_ on this logic to run. The browser tab may get closed without running cleanup logic, so it is not guaranteed to be run. For instance, you should not depend on unmounting logic to run in order to save state to `localStorage` or to the backend.
@@ -99,7 +99,10 @@ class Plugin {
 }
 ```
 
-We _could_ still write tests for this logic:
+We _could_ still write tests for this logic, but you may find that you're just asserting the same things that would be covered by type-checks.
+
+<details>
+<summary>See example</summary>
 
 ```ts
 /** public/plugin.test.ts */
@@ -137,7 +140,9 @@ describe('Plugin', () => {
 });
 ```
 
-But you may find that you're just asserting the same things that would be covered by type-checks. The more interesting logic is in `renderApp`:
+</details>
+
+The more interesting logic is in `renderApp`:
 
 ```ts
 /** public/application.ts */
@@ -148,11 +153,19 @@ import { AppMountParams, CoreStart } from 'src/core/public';
 import { AppRoot } from './components/app_root';
 
 export const renderApp = ({ element, appBasePath }: AppMountParams, core: CoreStart, plugins: MyPluginDepsStart) => {
+  // Hide the chrome while this app is mounted for a full screen experience
+  core.chrome.setIsVisible(false);
+
   // uiSettings subscription
   const uiSettingsClient = core.uiSettings.client;
-  const settings$ = combineLatest(uiSettingClient.get$('mysetting1'), uiSettingClient.get$('mysetting2'));
+  const pollingSubscription = uiSettingClient.get$('mysetting1').subscribe(async mySetting1 => {
+    const value = core.http.fetch(/** use `mySetting1` in request **/);
+    // ...
+  });
+
+  // Render app
   ReactDOM.render(
-    <AppRoot routerBasePath={appBasePath} core={core} plugins={plugins} settings$={settings$} />,
+    <AppRoot routerBasePath={appBasePath} core={core} plugins={plugins} />,
     element
   );
 
@@ -160,7 +173,9 @@ export const renderApp = ({ element, appBasePath }: AppMountParams, core: CoreSt
     // Unmount UI
     ReactDOM.unmountComponentAtNode(element);
     // Close any subscriptions
-    settings$.complete();
+    pollingSubscription.unsubscribe();
+    // Make chrome visible again
+    core.chrome.setIsVisible(true);
   };
 };
 ```
@@ -188,8 +203,32 @@ describe('renderApp', () => {
   });
 
   it('unsubscribes from uiSettings', () => {
-    // TODO: use rxjs/testing??
+    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const core = coreMock.createStart();
+    // Create a fake Subject you can use to monitor observers
+    const settings$ = new Subject();
+    core.uiSettings.get$.mockReturnValue(settings$);
+
+    // Verify mounting adds an observer
+    const unmount = renderApp(params, core, {});
+    expect(settings$.observers.length).toBe(1);
+    // Verify no observers remaining after unmount is called
+    unmount();
+    expect(settings$.observers.length).toBe(0);
   });
+
+  it('resets chrome visibility', () => {
+    const params = { element: document.createElement('div'), appBasePath: '/fake/base/path' };
+    const core = coreMock.createStart();
+
+    // Verify stateful Core API was called on mount
+    const unmount = renderApp(params, core, {});
+    expect(core.chrome.setIsVisible).toHaveBeenCalledWith(false);
+    core.chrome.setIsVisible.mockClear(); // reset mock
+    // Verify stateful Core API was called on unmount
+    unmount();
+    expect(core.chrome.setIsVisible).toHaveBeenCalledWith(true);
+  })
 });
 ```
 
@@ -208,3 +247,8 @@ _How to test against specific plugin APIs (eg. data plugin)_
 ## Plugin Contracts
 
 _How to test your plugin's exposed API_
+
+Guidelines:
+- Plugins should never interact with other plugins' REST API directly
+- Plugins should interact with other plugins via JavaScript contracts
+- Exposed contracts need to be well tested to ensure breaking changes are detected easily
