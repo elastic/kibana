@@ -68,6 +68,27 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.watcher.sections.watchEdit.threshold.webhookAction.SchemeFieldLabel',
+              {
+                defaultMessage: 'Scheme',
+              }
+            )}
+          >
+            <EuiSelect
+              name="scheme"
+              value={scheme}
+              data-test-subj="webhookSchemeSelect"
+              options={SCHEME_VERBS.map(verb => ({ text: verb, value: verb }))}
+              onChange={e => {
+                editAction({ key: 'scheme', value: e.target.value });
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
           <ErrableFormRow
             id="webhookHost"
             errorKey="host"
@@ -128,27 +149,6 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
               }}
             />
           </ErrableFormRow>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.watcher.sections.watchEdit.threshold.webhookAction.SchemeFieldLabel',
-              {
-                defaultMessage: 'Scheme',
-              }
-            )}
-          >
-            <EuiSelect
-              name="scheme"
-              value={scheme}
-              data-test-subj="webhookSchemeSelect"
-              options={SCHEME_VERBS.map(verb => ({ text: verb, value: verb }))}
-              onChange={e => {
-                editAction({ key: 'scheme', value: e.target.value });
-              }}
-            />
-          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem>
