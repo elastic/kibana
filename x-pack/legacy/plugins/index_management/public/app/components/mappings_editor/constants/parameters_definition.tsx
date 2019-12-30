@@ -456,6 +456,7 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: '',
       type: FIELD_TYPES.NUMBER,
+      deserializer: (value: string | number) => +value,
       formatters: [toInt],
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorLabel', {
         defaultMessage: 'Scaling factor',
@@ -490,7 +491,7 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Value must be greater than 0.',
       }),
     } as FieldConfig,
-    schema: Joi.string(),
+    schema: Joi.number(),
   },
   dynamic: {
     fieldConfig: {
