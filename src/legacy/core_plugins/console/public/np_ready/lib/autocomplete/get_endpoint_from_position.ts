@@ -26,10 +26,11 @@ import { getTopLevelUrlCompleteComponents } from '../kb/kb';
 import { populateContext } from './engine';
 
 export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: any) {
+  const lineValue = editor.getLineValue(pos.lineNumber);
   const context = {
     ...getCurrentMethodAndTokenPaths(
       editor,
-      { column: pos.column, lineNumber: pos.lineNumber },
+      { column: lineValue.length, lineNumber: pos.lineNumber },
       parser,
       true
     ),
