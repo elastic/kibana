@@ -162,7 +162,7 @@ export const TodoAppPage: React.FC<{
   appInstanceId: string;
   appTitle: string;
   appBasePath: string;
-  isBasePathRoute: () => boolean;
+  isInitialRoute: () => boolean;
 }> = props => {
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
 
@@ -171,10 +171,11 @@ export const TodoAppPage: React.FC<{
    * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
    */
   useUrlTracker(`lastUrlTracker:${props.appInstanceId}`, props.history, urlToRestore => {
+    if (!urlToRestore) return false;
     // shouldRestoreUrl:
     // App decides if it should restore url or not
-    // In this specific case, restore only if navigated to app base path
-    if (props.isBasePathRoute()) {
+    // In this specific case, restore only if navigated to initial route
+    if (props.isInitialRoute()) {
       // navigated to the base path, so should restore the url
       return true;
     } else {
@@ -199,12 +200,12 @@ export const TodoAppPage: React.FC<{
       {
         stateContainer: globalStateContainer,
         syncKey: '_g',
-        syncStrategy: urlSyncStrategy,
+        syncStrategy: SyncStrategy.SessionStorage,
       },
       {
         stateContainer: globalStateContainer,
         syncKey: '_g',
-        syncStrategy: SyncStrategy.SessionStorage,
+        syncStrategy: urlSyncStrategy,
       },
     ]);
     startSyncingState();

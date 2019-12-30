@@ -48,17 +48,17 @@ export const renderApp = (
       appInstanceId={appInstanceId}
       appTitle={appTitle}
       appBasePath={appBasePath}
-      isBasePathRoute={() => {
+      isInitialRoute={() => {
         const stripTrailingSlash = (path: string) =>
           path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
         const currentAppUrl = stripTrailingSlash(history.createHref(history.location));
         if (historyType === History.Browser) {
           // browser history
           const basePath = stripTrailingSlash(appBasePath);
-          return currentAppUrl === basePath;
+          return currentAppUrl === basePath && !history.location.search && !history.location.hash;
         } else {
           // hashed history
-          return currentAppUrl === '#';
+          return currentAppUrl === '#' && !history.location.search;
         }
       }}
     />,
