@@ -17,10 +17,19 @@
  * under the License.
  */
 
-import { ElasticsearchConfig, config } from './elasticsearch_config';
+import { ElasticsearchConfig, config, ElasticsearchConfigType } from './elasticsearch_config';
+import { loggingServiceMock } from '../mocks';
+import { Logger } from '../logging';
+
+const createElasticsearchConfig = (rawConfig: ElasticsearchConfigType, log?: Logger) => {
+  if (!log) {
+    log = loggingServiceMock.create().get('config');
+  }
+  return new ElasticsearchConfig(rawConfig, log);
+};
 
 test('set correct defaults', () => {
-  const configValue = new ElasticsearchConfig(config.schema.validate({}));
+  const configValue = createElasticsearchConfig(config.schema.validate({}));
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
       "apiVersion": "master",
@@ -52,17 +61,17 @@ test('set correct defaults', () => {
 });
 
 test('#hosts accepts both string and array of strings', () => {
-  let configValue = new ElasticsearchConfig(
+  let configValue = createElasticsearchConfig(
     config.schema.validate({ hosts: 'http://some.host:1234' })
   );
   expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  configValue = new ElasticsearchConfig(
+  configValue = createElasticsearchConfig(
     config.schema.validate({ hosts: ['http://some.host:1234'] })
   );
   expect(configValue.hosts).toEqual(['http://some.host:1234']);
 
-  configValue = new ElasticsearchConfig(
+  configValue = createElasticsearchConfig(
     config.schema.validate({
       hosts: ['http://some.host:1234', 'https://some.another.host'],
     })
@@ -71,17 +80,17 @@ test('#hosts accepts both string and array of strings', () => {
 });
 
 test('#requestHeadersWhitelist accepts both string and array of strings', () => {
-  let configValue = new ElasticsearchConfig(
+  let configValue = createElasticsearchConfig(
     config.schema.validate({ requestHeadersWhitelist: 'token' })
   );
   expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  configValue = new ElasticsearchConfig(
+  configValue = createElasticsearchConfig(
     config.schema.validate({ requestHeadersWhitelist: ['token'] })
   );
   expect(configValue.requestHeadersWhitelist).toEqual(['token']);
 
-  configValue = new ElasticsearchConfig(
+  configValue = createElasticsearchConfig(
     config.schema.validate({
       requestHeadersWhitelist: ['token', 'X-Forwarded-Proto'],
     })
@@ -90,17 +99,17 @@ test('#requestHeadersWhitelist accepts both string and array of strings', () => 
 });
 
 test('#ssl.certificateAuthorities accepts both string and array of strings', () => {
-  let configValue = new ElasticsearchConfig(
+  let configValue = createElasticsearchConfig(
     config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
   );
   expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
 
-  configValue = new ElasticsearchConfig(
+  configValue = createElasticsearchConfig(
     config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
   );
   expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
 
-  configValue = new ElasticsearchConfig(
+  configValue = createElasticsearchConfig(
     config.schema.validate({
       ssl: { certificateAuthorities: ['some-path', 'another-path'] },
     })
