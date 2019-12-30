@@ -82,56 +82,56 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   pluckStyleMetaFromFeatures(features) {
-    if (this.isOrdinal()) {
-      const name = this.getField().getName();
-      let min = Infinity;
-      let max = -Infinity;
-      for (let i = 0; i < features.length; i++) {
-        const feature = features[i];
-        const newValue = parseFloat(feature.properties[name]);
-        if (!isNaN(newValue)) {
-          min = Math.min(min, newValue);
-          max = Math.max(max, newValue);
-        }
-      }
-
-      return min === Infinity || max === -Infinity
-        ? null
-        : {
-            min: min,
-            max: max,
-            delta: max - min,
-          };
-    } else {
+    if (!this.isOrdinal()) {
       return null;
     }
+
+    const name = this.getField().getName();
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const newValue = parseFloat(feature.properties[name]);
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
+      }
+    }
+
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min: min,
+          max: max,
+          delta: max - min,
+        };
   }
 
   pluckStyleMetaFromFieldMetaData(fieldMetaData) {
-    if (this.isOrdinal()) {
-      const realFieldName = this._field.getESDocFieldName
-        ? this._field.getESDocFieldName()
-        : this._field.getName();
-      const stats = fieldMetaData[realFieldName];
-      if (!stats) {
-        return null;
-      }
-
-      const sigma = _.get(this.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA);
-      const stdLowerBounds = stats.avg - stats.std_deviation * sigma;
-      const stdUpperBounds = stats.avg + stats.std_deviation * sigma;
-      const min = Math.max(stats.min, stdLowerBounds);
-      const max = Math.min(stats.max, stdUpperBounds);
-      return {
-        min,
-        max,
-        delta: max - min,
-        isMinOutsideStdRange: stats.min < stdLowerBounds,
-        isMaxOutsideStdRange: stats.max > stdUpperBounds,
-      };
-    } else {
+    if (!this.isOrdinal()) {
       return null;
     }
+
+    const realFieldName = this._field.getESDocFieldName
+      ? this._field.getESDocFieldName()
+      : this._field.getName();
+    const stats = fieldMetaData[realFieldName];
+    if (!stats) {
+      return null;
+    }
+
+    const sigma = _.get(this.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA);
+    const stdLowerBounds = stats.avg - stats.std_deviation * sigma;
+    const stdUpperBounds = stats.avg + stats.std_deviation * sigma;
+    const min = Math.max(stats.min, stdLowerBounds);
+    const max = Math.min(stats.max, stdUpperBounds);
+    return {
+      min,
+      max,
+      delta: max - min,
+      isMinOutsideStdRange: stats.min < stdLowerBounds,
+      isMaxOutsideStdRange: stats.max > stdUpperBounds,
+    };
   }
 
   formatField(value) {

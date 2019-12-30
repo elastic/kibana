@@ -91,6 +91,10 @@ export class DynamicLegendRow extends React.Component {
   }
 
   render() {
+    if (this.state.label === EMPTY_VALUE) {
+      return null;
+    }
+
     if (this.props.style.isRanged()) {
       return this._renderRangeLegend();
     } else if (this.props.style.hasBreaks()) {
