@@ -26,6 +26,7 @@ import {
   ErrorLike,
 } from '../../common';
 import { fetchStreaming } from '../streaming';
+import { normalizeError } from '../../common';
 
 export interface BatchItem<Payload, Result> {
   payload: Payload;
@@ -33,6 +34,10 @@ export interface BatchItem<Payload, Result> {
 }
 
 export type BatchedFunc<Payload, Result> = (payload: Payload) => Promise<Result>;
+
+export interface BatchedFunctionProtocolError extends ErrorLike {
+  code: string;
+}
 
 export interface StreamingBatchedFunctionParams<Payload, Result> {
   /**
@@ -88,20 +93,38 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     },
     onBatch: async items => {
       try {
+        let responsesReceived = 0;
         const { promise, stream } = fetchStreamingInjected({
           url,
-          body: JSON.stringify(items),
+          body: JSON.stringify(items.map(({ payload }) => ({ payload }))),
           method: 'POST',
         });
-        stream.subscribe(json => {
-          const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
-          if (response.error) {
-            const error = new Error(response.error.message);
-            for (const [key, value] of Object.entries(response.error)) (error as any)[key] = value;
-            items[response.id].future.reject(error);
-          } else if (response.result) {
-            items[response.id].future.resolve(response.result);
-          }
+        stream.subscribe({
+          next: json => {
+            const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+            if (response.error) {
+              responsesReceived++;
+              items[response.id].future.reject(response.error);
+            } else if (response.result) {
+              responsesReceived++;
+              items[response.id].future.resolve(response.result);
+            }
+          },
+          error: error => {
+            const normalizedError = normalizeError<BatchedFunctionProtocolError>(error);
+            normalizedError.code = 'STREAM';
+            for (const { future } of items) future.reject(normalizedError);
+          },
+          complete: () => {
+            const streamTerminatedPrematurely = responsesReceived !== items.length;
+            if (streamTerminatedPrematurely) {
+              const error: BatchedFunctionProtocolError = {
+                message: 'Connection terminated prematurely.',
+                code: 'CONNECTION',
+              };
+              for (const { future } of items) future.reject(error);
+            }
+          },
         });
         await promise;
       } catch (error) {
