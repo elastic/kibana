@@ -81,7 +81,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
 
   const errorUrl = error.error.page?.url || error.url?.full;
 
-  const method = error.http?.request.method;
+  const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
 
   return (

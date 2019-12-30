@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setOverlays } from '../../../../../../../plugins/data/public/services';
+import { OverlayStart } from 'kibana/public';
+
 export const openModal = jest.fn();
 
-jest.doMock('ui/new_platform', () => {
-  return {
-    npStart: {
-      core: {
-        overlays: {
-          openModal,
-        },
-      },
-    },
-  };
-});
+setOverlays(({
+  openModal,
+} as unknown) as OverlayStart);

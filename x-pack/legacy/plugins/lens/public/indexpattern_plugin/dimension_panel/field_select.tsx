@@ -9,10 +9,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  // @ts-ignore
-  EuiHighlight,
-} from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
