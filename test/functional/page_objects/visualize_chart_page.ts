@@ -59,9 +59,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         );
     }
 
-    /*
-     ** This method gets the chart data and scales it based on chart height and label.
-     ** Returns an array of height values
+    /**
+     * Gets the chart data and scales it based on chart height and label.
+     * @param dataLabel data-label value
+     * @param axis  axis value, 'ValueAxis-1' by default
+     *
+     * Returns an array of height values
      */
     public async getAreaChartData(dataLabel: string, axis = 'ValueAxis-1') {
       const yAxisRatio = await this.getChartYAxisRatio(axis);
@@ -87,7 +90,6 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         .replace(/ /g, ',')
         .split('L');
       const chartSections = tempArray.length / 2;
-      // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
       for (let i = 0; i < chartSections; i++) {
         chartData[i] = Math.round((yAxisHeight - Number(tempArray[i].split(',')[1])) * yAxisRatio);
@@ -96,8 +98,9 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return chartData;
     }
 
-    /*
-     ** This method returns the paths that compose an area chart.
+    /**
+     * Returns the paths that compose an area chart.
+     * @param dataLabel data-label value
      */
     public async getAreaChartPaths(dataLabel: string) {
       const path = await retry.try(
@@ -113,8 +116,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return data.split('L');
     }
 
-    // The current test shows dots, not a line.  This function gets the dots and normalizes their height.
-    async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
+    /**
+     * Gets the dots and normalizes their height.
+     * @param dataLabel data-label value
+     * @param axis axis value, 'ValueAxis-1' by default
+     */
+    public async getLineChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 2). find and save the y-axis pixel size (the chart height)
@@ -141,11 +148,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return chartData;
     }
 
-    // this is ALMOST identical to DiscoverPage.getBarChartData
-    async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
-      // 1). get the range/pixel ratio
+    /**
+     * Returns bar chart data in pixels
+     * @param dataLabel data-label value
+     * @param axis axis value, 'ValueAxis-1' by default
+     */
+    public async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       const yAxisRatio = await this.getChartYAxisRatio(axis);
-      // 3). get the visWrapper__chart elements
       const svg = await find.byCssSelector('div.chart');
       const $ = await svg.parseDomContent();
       const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`)
@@ -158,8 +167,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return chartData;
     }
 
-    // Returns value per pixel
-    async getChartYAxisRatio(axis = 'ValueAxis-1') {
+    /**
+     * Returns the range/pixel ratio
+     * @param axis axis value, 'ValueAxis-1' by default
+     */
+    private async getChartYAxisRatio(axis = 'ValueAxis-1') {
       // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
         async () =>
@@ -180,7 +192,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return (Number(maxYLabel) - Number(minYLabel)) / (minYLabelYPosition - maxYLabelYPosition);
     }
 
-    async toggleLegend(show = true) {
+    public async toggleLegend(show = true) {
       await retry.try(async () => {
         const isVisible = find.byCssSelector('.visLegend');
         if ((show && !isVisible) || (!show && isVisible)) {
@@ -189,7 +201,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    async filterLegend(name: string) {
+    public async filterLegend(name: string) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
       const filters = await testSubjects.find(`legend-${name}-filters`);
@@ -198,23 +210,23 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       await this.waitForVisualizationRenderingStabilized();
     }
 
-    async doesLegendColorChoiceExist(color: string) {
+    public async doesLegendColorChoiceExist(color: string) {
       return await testSubjects.exists(`legendSelectColor-${color}`);
     }
 
-    async selectNewLegendColorChoice(color: string) {
+    public async selectNewLegendColorChoice(color: string) {
       await testSubjects.click(`legendSelectColor-${color}`);
     }
 
-    async doesSelectedLegendColorExist(color: string) {
+    public async doesSelectedLegendColorExist(color: string) {
       return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
 
-    async expectError() {
-      return await testSubjects.existOrFail('visLibVisualizeError');
+    public async expectError() {
+      await testSubjects.existOrFail('visLibVisualizeError');
     }
 
-    async getChartTypes() {
+    public async getChartTypes() {
       const chartTypeField = await testSubjects.find('visNewDialogTypes');
       const $ = await chartTypeField.parseDomContent();
       return $('button')
@@ -227,13 +239,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         );
     }
 
-    async getVisualizationRenderingCount() {
+    public async getVisualizationRenderingCount() {
       const visualizationLoader = await testSubjects.find('visualizationLoader');
       const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
       return Number(renderingCount);
     }
 
-    async waitForRenderingCount(minimumCount = 1) {
+    public async waitForRenderingCount(minimumCount = 1) {
       await retry.waitFor(
         `rendering count to be greater than or equal to [${minimumCount}]`,
         async () => {
@@ -244,7 +256,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
     }
 
-    async waitForVisualizationRenderingStabilized() {
+    public async waitForVisualizationRenderingStabilized() {
       // assuming rendering is done when data-rendering-count is constant within 1000 ms
       await retry.waitFor('rendering count to stabilize', async () => {
         const firstCount = await this.getVisualizationRenderingCount();
@@ -259,12 +271,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    async waitForVisualization() {
+    public async waitForVisualization() {
       await this.waitForVisualizationRenderingStabilized();
       return await find.byCssSelector('.visualization');
     }
 
-    async getLegendEntries() {
+    public async getLegendEntries() {
       const legendEntries = await find.allByCssSelector(
         '.visLegend__button',
         defaultFindTimeout * 2
@@ -274,7 +286,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
     }
 
-    async openLegendOptionColors(name: string) {
+    public async openLegendOptionColors(name: string) {
       await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
         // This click has been flaky in opening the legend, hence the retry.  See
@@ -289,7 +301,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    async filterOnTableCell(column: string, row: string) {
+    public async filterOnTableCell(column: string, row: string) {
       await retry.try(async () => {
         const tableVis = await testSubjects.find('tableVis');
         const cell = await tableVis.findByCssSelector(
@@ -301,18 +313,18 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    async getMarkdownText() {
+    public async getMarkdownText() {
       const markdownContainer = await testSubjects.find('markdownBody');
       return markdownContainer.getVisibleText();
     }
 
-    async getMarkdownBodyDescendentText(selector: string) {
+    public async getMarkdownBodyDescendentText(selector: string) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
       return element.getVisibleText();
     }
 
-    async getVegaSpec() {
+    public async getVegaSpec() {
       // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
       const editor = await testSubjects.find('vega-editor');
       const lines = await editor.findAllByClassName('ace_line_group');
@@ -324,18 +336,18 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return linesText.join('\n');
     }
 
-    async getVegaViewContainer() {
+    public async getVegaViewContainer() {
       return await find.byCssSelector('div.vgaVis__view');
     }
 
-    async getVegaControlContainer() {
+    public async getVegaControlContainer() {
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
      */
-    async getTableVisData() {
+    public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
     }
 
@@ -344,7 +356,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      * It uses a better return format, than the old getTableVisData, by properly splitting
      * cell values into arrays. Please use this function for newer tests.
      */
-    async getTableVisContent({ stripEmptyRows = true } = {}) {
+    public async getTableVisContent({ stripEmptyRows = true } = {}) {
       return await retry.try(async () => {
         const container = await testSubjects.find('tableVis');
         const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
@@ -374,7 +386,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       });
     }
 
-    async getMetric() {
+    public async getMetric() {
       const elements = await find.allByCssSelector(
         '[data-test-subj="visualizationLoader"] .mtrVis__container'
       );
@@ -389,7 +401,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         .reduce((arr: string[], item) => arr.concat(item.split('\n')), []);
     }
 
-    async getGaugeValue() {
+    public async getGaugeValue() {
       const elements = await find.allByCssSelector(
         '[data-test-subj="visualizationLoader"] .chart svg text'
       );

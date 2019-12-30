@@ -224,7 +224,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visChart.waitForVisualization();
         await PageObjects.visualize.loadSavedVisualization(visName);
         await PageObjects.visChart.waitForRenderingCount();
-        await PageObjects.visEditor.clickData();
+        await PageObjects.visEditor.clickDataTab();
         await PageObjects.visEditor.toggleOpenEditor(1);
         await PageObjects.visEditor.setCustomLabel('test', 1);
         await PageObjects.visEditor.clickGo();

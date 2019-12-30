@@ -141,7 +141,7 @@ export default function({ getService, getPageObjects }) {
       await expectValidTableData();
 
       // check that it works after selecting a column that's deleted
-      await PageObjects.visEditor.clickData();
+      await PageObjects.visEditor.clickDataTab();
       await PageObjects.visEditor.clickBucket('Metric', 'metrics');
       await PageObjects.visEditor.selectAggregation('Average', 'metrics');
       await PageObjects.visEditor.selectField('bytes', 'metrics');
@@ -373,7 +373,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should show metrics other than count on each level', async () => {
-        await PageObjects.visEditor.clickData();
+        await PageObjects.visEditor.clickDataTab();
         await PageObjects.visEditor.clickBucket('Metric', 'metrics');
         await PageObjects.visEditor.selectAggregation('Average', 'metrics');
         await PageObjects.visEditor.selectField('bytes', 'metrics');

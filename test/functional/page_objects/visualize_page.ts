@@ -35,12 +35,11 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       LOGSTASH_NON_TIME_BASED: 'logstash*',
     };
 
-    async gotoVisualizationLandingPage() {
-      log.debug('gotoVisualizationLandingPage');
+    public async gotoVisualizationLandingPage() {
       await common.navigateToApp('visualize');
     }
 
-    async clickNewVisualization() {
+    public async clickNewVisualization() {
       // newItemButton button is only visible when there are items in the listing table is displayed.
       const exists = await testSubjects.exists('newItemButton');
       if (exists) {
@@ -48,7 +47,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async waitForVisualizationSelectPage() {
+    public async waitForVisualizationSelectPage() {
       await retry.try(async () => {
         const visualizeSelectTypePage = await testSubjects.find('visNewDialogTypes');
         if (!(await visualizeSelectTypePage.isDisplayed())) {
@@ -57,79 +56,78 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
-    async navigateToNewVisualization() {
-      log.debug('navigateToApp visualize');
+    public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
       await this.clickNewVisualization();
       await this.waitForVisualizationSelectPage();
     }
 
-    async clickVisType(type: string) {
+    public async clickVisType(type: string) {
       await testSubjects.click(`visType-${type}`);
       await header.waitUntilLoadingHasFinished();
     }
 
-    async clickAreaChart() {
+    public async clickAreaChart() {
       await this.clickVisType('area');
     }
 
-    async clickDataTable() {
+    public async clickDataTable() {
       await this.clickVisType('table');
     }
 
-    async clickLineChart() {
+    public async clickLineChart() {
       await this.clickVisType('line');
     }
 
-    async clickRegionMap() {
+    public async clickRegionMap() {
       await this.clickVisType('region_map');
     }
 
-    async clickMarkdownWidget() {
+    public async clickMarkdownWidget() {
       await this.clickVisType('markdown');
     }
 
-    async clickMetric() {
+    public async clickMetric() {
       await this.clickVisType('metric');
     }
 
-    async clickGauge() {
+    public async clickGauge() {
       await this.clickVisType('gauge');
     }
 
-    async clickPieChart() {
+    public async clickPieChart() {
       await this.clickVisType('pie');
     }
 
-    async clickTileMap() {
+    public async clickTileMap() {
       await this.clickVisType('tile_map');
     }
 
-    async clickTagCloud() {
+    public async clickTagCloud() {
       await this.clickVisType('tagcloud');
     }
 
-    async clickVega() {
+    public async clickVega() {
       await this.clickVisType('vega');
     }
 
-    async clickVisualBuilder() {
+    public async clickVisualBuilder() {
       await this.clickVisType('metrics');
     }
 
-    async clickVerticalBarChart() {
+    public async clickVerticalBarChart() {
       await this.clickVisType('histogram');
     }
 
-    async clickHeatmapChart() {
+    public async clickHeatmapChart() {
       await this.clickVisType('heatmap');
     }
 
-    async clickInputControlVis() {
+    public async clickInputControlVis() {
       await this.clickVisType('input_control_vis');
     }
 
-    async createSimpleMarkdownViz(vizName: string) {
+    public async createSimpleMarkdownViz(vizName: string) {
       await this.gotoVisualizationLandingPage();
       await this.navigateToNewVisualization();
       await this.clickMarkdownWidget();
@@ -138,17 +136,12 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await this.saveVisualization(vizName);
     }
 
-    async getCountOfItemsInListingTable() {
-      const elements = await find.allByCssSelector('[data-test-subj^="visListingTitleLink"]');
-      return elements.length;
-    }
-
-    async clickNewSearch(indexPattern = this.defaultIndex.LOGSTASH_TIME_BASED) {
+    public async clickNewSearch(indexPattern = this.defaultIndex.LOGSTASH_TIME_BASED) {
       await testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
 
-    async selectVisSourceIfRequired() {
+    public async selectVisSourceIfRequired() {
       log.debug('selectVisSourceIfRequired');
       const selectPage = await testSubjects.findAll('visualizeSelectSearch');
       if (selectPage.length) {
@@ -157,11 +150,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    /*
-    This method should use retry loop to delete visualizations from multiple pages until we find the createVisualizationPromptButton.
-    Perhaps it *could* set the page size larger than the default 10, but it might still need to loop anyway.
-    */
-    async deleteAllVisualizations() {
+    /**
+     * Deletes all existing visualizations
+     */
+    public async deleteAllVisualizations() {
       await retry.try(async () => {
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
@@ -170,41 +162,41 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
-    async isBetaInfoShown() {
+    public async isBetaInfoShown() {
       return await testSubjects.exists('betaVisInfo');
     }
 
-    async getBetaTypeLinks() {
+    public async getBetaTypeLinks() {
       return await find.allByCssSelector('[data-vis-stage="beta"]');
     }
 
-    async getExperimentalTypeLinks() {
+    public async getExperimentalTypeLinks() {
       return await find.allByCssSelector('[data-vis-stage="experimental"]');
     }
 
-    async isExperimentalInfoShown() {
+    public async isExperimentalInfoShown() {
       return await testSubjects.exists('experimentalVisInfo');
     }
 
-    async getExperimentalInfo() {
+    public async getExperimentalInfo() {
       return await testSubjects.find('experimentalVisInfo');
     }
 
-    async getSideEditorExists() {
+    public async getSideEditorExists() {
       return await find.existsByCssSelector('.collapsible-sidebar');
     }
 
-    async clickSavedSearch(savedSearchName: string) {
+    public async clickSavedSearch(savedSearchName: string) {
       await testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
       await header.waitUntilLoadingHasFinished();
     }
 
-    async clickUnlinkSavedSearch() {
+    public async clickUnlinkSavedSearch() {
       await testSubjects.doubleClick('unlinkSavedSearch');
       await header.waitUntilLoadingHasFinished();
     }
 
-    async ensureSavePanelOpen() {
+    public async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
       await header.waitUntilLoadingHasFinished();
       const isOpen = await testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
@@ -213,34 +205,34 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async clickLoadSavedVisButton() {
+    public async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
       await find.clickByCssSelector('[href="#/visualize"]');
     }
 
-    async clickVisualizationByName(vizName: string) {
+    public async clickVisualizationByName(vizName: string) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
       return find.clickByPartialLinkText(vizName);
     }
 
-    async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
+    public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
       if (navigateToVisualize) {
         await this.clickLoadSavedVisButton();
       }
       await this.openSavedVisualization(vizName);
     }
 
-    async openSavedVisualization(vizName: string) {
+    public async openSavedVisualization(vizName: string) {
       await this.clickVisualizationByName(vizName);
       await header.waitUntilLoadingHasFinished();
     }
 
-    async waitForVisualizationSavedToastGone() {
+    public async waitForVisualizationSavedToastGone() {
       return await testSubjects.waitForDeleted('saveVisualizationSuccess');
     }
 
-    async clickLandingPageBreadcrumbLink() {
+    public async clickLandingPageBreadcrumbLink() {
       log.debug('clickLandingPageBreadcrumbLink');
       await find.clickByCssSelector(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`);
     }
@@ -249,13 +241,13 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
      * Returns true if already on the landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
      */
-    async onLandingPage() {
+    public async onLandingPage() {
       log.debug(`VisualizePage.onLandingPage`);
       const exists = await testSubjects.exists('visualizeLandingPage');
       return exists;
     }
 
-    async gotoLandingPage() {
+    public async gotoLandingPage() {
       log.debug('VisualizePage.gotoLandingPage');
       const onPage = await this.onLandingPage();
       if (!onPage) {
@@ -267,7 +259,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async saveVisualization(vizName: string, { saveAsNew = false } = {}) {
+    public async saveVisualization(vizName: string, { saveAsNew = false } = {}) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('savedObjectTitle', vizName);
       if (saveAsNew) {
@@ -287,7 +279,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       return message;
     }
 
-    async saveVisualizationExpectSuccess(vizName: string, { saveAsNew = false } = {}) {
+    public async saveVisualizationExpectSuccess(vizName: string, { saveAsNew = false } = {}) {
       const saveMessage = await this.saveVisualization(vizName, { saveAsNew });
       if (!saveMessage) {
         throw new Error(
@@ -296,7 +288,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    async saveVisualizationExpectSuccessAndBreadcrumb(vizName: string, { saveAsNew = false } = {}) {
+    public async saveVisualizationExpectSuccessAndBreadcrumb(
+      vizName: string,
+      { saveAsNew = false } = {}
+    ) {
       await this.saveVisualizationExpectSuccess(vizName, { saveAsNew });
       await retry.waitFor(
         'last breadcrumb to have new vis name',

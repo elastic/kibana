@@ -66,8 +66,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should change results after changing layer to world', async function() {
-        // not sure here?!
-        await PageObjects.visEditor.clickOptions();
+        await PageObjects.visEditor.clickOptionsTab();
         await PageObjects.visEditor.setSelectByOptionText(
           'regionMapOptionsSelectLayer',
           'World Countries'
