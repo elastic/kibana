@@ -189,7 +189,7 @@ export default function({ getService, getPageObjects }) {
         let filterCount = 0;
         await retry.try(async function tryingForTime() {
           // click first metric bucket
-          await PageObjects.visualize.clickMetricByIndex(0);
+          await PageObjects.visEditor.clickMetricByIndex(0);
           filterCount = await filterBar.getFilterCount();
         });
         expect(filterCount).to.equal(0);
@@ -207,7 +207,7 @@ export default function({ getService, getPageObjects }) {
         let filterCount = 0;
         await retry.try(async function tryingForTime() {
           // click first metric bucket
-          await PageObjects.visualize.clickMetricByIndex(0);
+          await PageObjects.visEditor.clickMetricByIndex(0);
           filterCount = await filterBar.getFilterCount();
         });
         await filterBar.removeAllFilters();

@@ -397,7 +397,6 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async setInterval(newValue: string) {
-      log.debug(`Visualize.setInterval(${newValue})`);
       await comboBox.set('visEditorInterval', newValue);
     }
 
@@ -406,7 +405,6 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async setCustomInterval(newValue: string) {
-      log.debug(`Visualize.setCustomInterval(${newValue})`);
       await comboBox.setCustom('visEditorInterval', newValue);
     }
 
@@ -427,7 +425,6 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickMetricByIndex(index: number) {
-      log.debug(`clickMetricByIndex(${index})`);
       const metrics = await find.allByCssSelector(
         '[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container'
       );

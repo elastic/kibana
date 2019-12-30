@@ -127,7 +127,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should show the tags and relative size', function() {
-      return PageObjects.visualize.getTextSizes().then(function(results) {
+      return PageObjects.tagCloud.getTextSizes().then(function(results) {
         log.debug('results here ' + results);
         expect(results).to.eql(['72px', '63px', '25px', '32px', '18px']);
       });

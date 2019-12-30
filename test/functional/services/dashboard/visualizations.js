@@ -107,7 +107,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       }
       await this.ensureNewVisualizationDialogIsShowing();
       await PageObjects.visualize.clickMarkdownWidget();
-      await PageObjects.visualize.setMarkdownTxt(markdown);
+      await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
