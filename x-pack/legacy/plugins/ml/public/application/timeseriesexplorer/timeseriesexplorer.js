@@ -45,17 +45,17 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 
-import { ChartTooltip } from '../components/chart_tooltip';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
+import { ChartTooltip } from '../components/chart_tooltip';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { JobSelector } from '../components/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
-import { severity$, SelectSeverity } from '../components/controls/select_severity/select_severity';
-import { interval$, SelectInterval } from '../components/controls/select_interval/select_interval';
+import { SelectInterval } from '../components/controls/select_interval/select_interval';
+import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
 import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
@@ -171,6 +171,8 @@ export class TimeSeriesExplorer extends React.Component {
     appStateHandler: PropTypes.func.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
     globalState: PropTypes.object.isRequired,
+    tableInterval: PropTypes.string.isRequired,
+    tableSeverity: PropTypes.object.isRequired,
     timefilter: PropTypes.object.isRequired,
   };
 
@@ -349,7 +351,7 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
-    const { dateFormatTz } = this.props;
+    const { dateFormatTz, tableInterval, tableSeverity } = this.props;
     const { selectedJob } = this.state;
 
     return ml.results
@@ -357,8 +359,8 @@ export class TimeSeriesExplorer extends React.Component {
         [selectedJob.job_id],
         this._criteriaFields,
         [],
-        interval$.getValue().val,
-        severity$.getValue().val,
+        tableInterval,
+        tableSeverity.val,
         earliestMs,
         latestMs,
         dateFormatTz,
@@ -920,19 +922,7 @@ export class TimeSeriesExplorer extends React.Component {
       this.setState({ loading: false });
     }
 
-    // Reload the anomalies table if the Interval or Threshold controls are changed.
-    const tableControlsListener = () => {
-      const { zoomFrom, zoomTo } = this.state;
-      if (zoomFrom !== undefined && zoomTo !== undefined) {
-        this.loadAnomaliesTableData(zoomFrom.getTime(), zoomTo.getTime()).subscribe(res =>
-          this.setState(res)
-        );
-      }
-    };
-
     this.subscriptions.add(annotationsRefresh$.subscribe(this.refresh));
-    this.subscriptions.add(interval$.subscribe(tableControlsListener));
-    this.subscriptions.add(severity$.subscribe(tableControlsListener));
     this.subscriptions.add(
       mlTimefilterRefresh$.subscribe(() => {
         this.refresh(true);
@@ -1158,6 +1148,23 @@ export class TimeSeriesExplorer extends React.Component {
     console.warn('componentDidUpdate');
     if (previousProps.selectedJobIds !== this.props.selectedJobIds) {
       console.warn('component class jobs change');
+    }
+
+    // Reload the anomalies table if the Interval or Threshold controls are changed.
+    const tableControlsListener = () => {
+      const { zoomFrom, zoomTo } = this.state;
+      if (zoomFrom !== undefined && zoomTo !== undefined) {
+        this.loadAnomaliesTableData(zoomFrom.getTime(), zoomTo.getTime()).subscribe(res =>
+          this.setState(res)
+        );
+      }
+    };
+
+    if (
+      previousProps.tableInterval !== this.props.tableInterval ||
+      !isEqual(previousProps.tableSeverity, this.props.tableSeverity)
+    ) {
+      tableControlsListener();
     }
   }
 

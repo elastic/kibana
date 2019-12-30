@@ -7,7 +7,6 @@
 import React, { FC, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { Subscription } from 'rxjs';
 
 // @ts-ignore
 import queryString from 'query-string';
@@ -18,10 +17,9 @@ import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { mlJobService } from '../../services/job_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
-import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { useUrlState } from '../../util/url_state';
-import { interval$ } from '../../components/controls/select_interval';
-import { severity$ } from '../../components/controls/select_severity';
+import { useTableInterval } from '../../components/controls/select_interval';
+import { useTableSeverity } from '../../components/controls/select_severity';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 export const timeSeriesExplorerRoute: MlRoute = {
@@ -70,9 +68,7 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
     }
   }, [JSON.stringify([appState, globalState])]);
 
-  useEffect(() => {
-    const selectedJobIds = globalState?.ml?.jobIds;
-  }, [globalState?.ml?.jobIds]);
+  const selectedJobIds = globalState?.ml?.jobIds;
 
   const appStateHandler = (action: string, payload: any) => {
     const mlTimeSeriesExplorer = appState.mlTimeSeriesExplorer;
@@ -114,19 +110,8 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
     setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
   };
 
-  useEffect(() => {
-    const subscriptions = new Subscription();
-    subscriptions.add(
-      subscribeAppStateToObservable(appState, setAppState, 'mlSelectInterval', interval$)
-    );
-    subscriptions.add(
-      subscribeAppStateToObservable(appState, setAppState, 'mlSelectSeverity', severity$)
-    );
-
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, []);
+  const [tableInterval] = useTableInterval();
+  const [tableSeverity] = useTableSeverity();
 
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
@@ -141,7 +126,9 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
         appStateHandler,
         dateFormatTz,
         globalState,
-        selectedJobIds: globalState?.ml?.jobIds,
+        selectedJobIds,
+        tableInterval,
+        tableSeverity,
         timefilter,
       }}
     />
