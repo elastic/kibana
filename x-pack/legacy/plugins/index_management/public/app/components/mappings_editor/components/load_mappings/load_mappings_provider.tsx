@@ -32,7 +32,7 @@ interface State {
 
 type ModalView = 'json' | 'validationResult';
 
-const getTexts = (view: ModalView) => ({
+const getTexts = (view: ModalView, totalErrors = 0) => ({
   modalTitle: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.title', {
     defaultMessage: 'Load mappings from JSON',
   }),
@@ -65,7 +65,11 @@ const getTexts = (view: ModalView) => ({
   },
   validationErrors: {
     title: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorTitle', {
-      defaultMessage: 'Errors detected in the mappings object',
+      defaultMessage:
+        '{totalErrors} {totalErrors, plural, one {error} other {errors}} detected in the mappings object',
+      values: {
+        totalErrors,
+      },
     }),
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorDescription',
@@ -124,7 +128,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const jsonContent = useRef<Parameters<OnUpdateHandler>['0'] | undefined>();
   const view: ModalView =
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
-  const i18nTexts = getTexts(view);
+  const i18nTexts = getTexts(view, state.errors?.length);
 
   const onJsonUpdate: OnUpdateHandler = jsonUpdateData => {
     jsonContent.current = jsonUpdateData;
@@ -215,11 +219,11 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
                     <p>{i18nTexts.validationErrors.description}</p>
                   </EuiText>
                   <EuiSpacer />
-                  <ul>
+                  <ol>
                     {state.errors!.slice(0, MAX_ERRORS_TO_DISPLAY).map((error, i) => (
                       <li key={i}>{getErrorMessage(error)}</li>
                     ))}
-                  </ul>
+                  </ol>
                 </EuiCallOut>
                 {state.errors!.length > MAX_ERRORS_TO_DISPLAY && (
                   <>
