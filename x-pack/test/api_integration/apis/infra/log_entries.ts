@@ -9,6 +9,21 @@ import { ascending, pairs } from 'd3-array';
 import gql from 'graphql-tag';
 import { v4 as uuidv4 } from 'uuid';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
+
+import {
+  createPlainError,
+  throwErrors,
+} from '../../../../legacy/plugins/infra/common/runtime_types';
+
+import {
+  LOG_ENTRIES_PATH,
+  logEntriesRequestRT,
+  logEntriesResponseRT,
+} from '../../../../legacy/plugins/infra/common/http_api';
+
 import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -88,14 +103,61 @@ const logEntriesBetweenQuery = gql`
   ${sharedFragments.InfraLogEntryFields}
 `;
 
+const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
+
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
+  const supertest = getService('supertest');
   const sourceConfigurationService = getService('infraOpsSourceConfiguration');
 
   describe('log entry apis', () => {
     before(() => esArchiver.load('infra/metrics_and_logs'));
     after(() => esArchiver.unload('infra/metrics_and_logs'));
+
+    describe('/log_entries/entries', () => {
+      describe('with the default source', () => {
+        before(() => esArchiver.load('empty_kibana'));
+        after(() => esArchiver.unload('empty_kibana'));
+
+        it('works', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: EARLIEST_KEY_WITH_DATA.time,
+                endDate: KEY_WITHIN_DATA_RANGE.time,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const entries = logEntriesResponse.data.entries;
+          const firstEntry = entries[0];
+          const lastEntry = entries[entries.length - 1];
+
+          // Has the default page size
+          expect(entries).to.have.length(200);
+
+          // Cursors are set correctly
+          expect(firstEntry.cursor).to.eql(logEntriesResponse.data.topCursor);
+          expect(lastEntry.cursor).to.eql(logEntriesResponse.data.bottomCursor);
+
+          // Entries fall within range
+          // @kbn/expect doesn't have a `lessOrEqualThan` or `moreOrEqualThan` comparators
+          expect(firstEntry.cursor.time >= EARLIEST_KEY_WITH_DATA.time).to.be(true);
+          expect(lastEntry.cursor.time <= KEY_WITHIN_DATA_RANGE.time).to.be(true);
+        });
+      });
+    });
 
     describe('logEntriesAround', () => {
       describe('with the default source', () => {
