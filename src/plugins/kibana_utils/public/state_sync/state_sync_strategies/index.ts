@@ -21,6 +21,7 @@ import { createBrowserHistory } from 'history';
 import { ISyncStrategy } from './types';
 import { createKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
 import { createSessionStorageSyncStrategy } from './create_session_storage_sync_strategy';
+import { createKbnGlobalStateSyncStrategy } from './create_kbn_global_state_sync_strategy';
 
 // strategies provided out of the box
 enum SyncStrategy {
@@ -50,4 +51,5 @@ export {
   syncStrategies,
   createKbnUrlSyncStrategy,
   createSessionStorageSyncStrategy,
+  createKbnGlobalStateSyncStrategy,
 };

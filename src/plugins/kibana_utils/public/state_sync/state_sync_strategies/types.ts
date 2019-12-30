@@ -46,7 +46,10 @@ export interface ISyncStrategy {
   /**
    * Should retrieve state from the storage and deserialize it
    */
-  fromStorage: <State = unknown>(syncKey: string) => Promise<State | null>;
+  fromStorage: <State = unknown>(
+    syncKey: string,
+    opts?: { isRestoringInitialState: boolean }
+  ) => Promise<State | null>;
   /**
    * Should notify when the storage has changed
    */

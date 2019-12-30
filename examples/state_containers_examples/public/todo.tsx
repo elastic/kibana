@@ -32,12 +32,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import {
+  createKbnUrlSyncStrategy,
   createStateContainer,
   createStateContainerReactHelpers,
-  createKbnUrlSyncStrategy,
   PureTransition,
   syncState,
-  SyncStrategy,
   useUrlTracker,
 } from '../../../src/plugins/kibana_utils/public';
 import {
@@ -46,6 +45,10 @@ import {
   TodoActions,
   TodoState,
 } from '../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+import {
+  createKbnGlobalStateSyncStrategy,
+  createSessionStorageSyncStrategy,
+} from '../../../src/plugins/kibana_utils/public/state_sync/state_sync_strategies';
 
 interface GlobalState {
   text: string;
@@ -164,6 +167,7 @@ export const TodoAppPage: React.FC<{
   appBasePath: string;
   isInitialRoute: () => boolean;
 }> = props => {
+  const initialAppUrl = React.useRef(window.location.href);
   const [useHashedUrl, setUseHashedUrl] = React.useState(false);
 
   /**
@@ -171,7 +175,6 @@ export const TodoAppPage: React.FC<{
    * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
    */
   useUrlTracker(`lastUrlTracker:${props.appInstanceId}`, props.history, urlToRestore => {
-    if (!urlToRestore) return false;
     // shouldRestoreUrl:
     // App decides if it should restore url or not
     // In this specific case, restore only if navigated to initial route
@@ -191,6 +194,12 @@ export const TodoAppPage: React.FC<{
       useHash: useHashedUrl,
       history: props.history,
     });
+    const sessionStorageSyncStrategy = createSessionStorageSyncStrategy();
+    const kbnGlobalStateSyncStrategy = createKbnGlobalStateSyncStrategy(
+      urlSyncStrategy,
+      sessionStorageSyncStrategy,
+      initialAppUrl.current
+    );
     const [startSyncingState, stopSyncingState] = syncState([
       {
         stateContainer: container,
@@ -200,12 +209,7 @@ export const TodoAppPage: React.FC<{
       {
         stateContainer: globalStateContainer,
         syncKey: '_g',
-        syncStrategy: urlSyncStrategy,
-      },
-      {
-        stateContainer: globalStateContainer,
-        syncKey: '_g',
-        syncStrategy: SyncStrategy.SessionStorage,
+        syncStrategy: kbnGlobalStateSyncStrategy,
       },
     ]);
     startSyncingState();

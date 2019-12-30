@@ -132,8 +132,14 @@ export function syncState(
         : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.KbnUrl];
 
       // returned boolean indicates if update happen
-      const updateState = async (): Promise<boolean> => {
-        const storageState = await fromStorage(stateSyncConfig.syncKey);
+      const updateState = async ({
+        isRestoringInitialState,
+      }: {
+        isRestoringInitialState: boolean;
+      }): Promise<boolean> => {
+        const storageState = await fromStorage(stateSyncConfig.syncKey, {
+          isRestoringInitialState,
+        });
 
         if (!storageState) {
           return false;
@@ -151,9 +157,17 @@ export function syncState(
       };
 
       // returned boolean indicates if update happen
-      const updateStorage = async ({ replace = false } = {}): Promise<boolean> => {
+      const updateStorage = async ({
+        replace,
+        isRestoringInitialState,
+      }: {
+        replace: boolean;
+        isRestoringInitialState: boolean;
+      }): Promise<boolean> => {
         const newStorageState = stateSyncConfig.stateContainer.get();
-        const oldStorageState = await fromStorage(stateSyncConfig.syncKey);
+        const oldStorageState = await fromStorage(stateSyncConfig.syncKey, {
+          isRestoringInitialState,
+        });
         if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
           await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
         }
@@ -164,14 +178,14 @@ export function syncState(
       // initial syncing of stateContainer state and storage state
       const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
       if (initialTruthSource === InitialTruthSource.Storage) {
-        const hasUpdated = await updateState();
+        const hasUpdated = await updateState({ isRestoringInitialState: true });
         // if there is nothing by state key in storage
         // then we should fallback and consider state source of truth
         if (!hasUpdated) {
-          await updateStorage({ replace: true });
+          await updateStorage({ replace: true, isRestoringInitialState: true });
         }
       } else if (initialTruthSource === InitialTruthSource.StateContainer) {
-        await updateStorage({ replace: true });
+        await updateStorage({ replace: true, isRestoringInitialState: true });
       }
 
       // subscribe to state and storage updates
@@ -182,7 +196,7 @@ export function syncState(
               stateSyncConfig.stateContainer.get(),
               defaultComparator
             ),
-            concatMap(() => updateStorage())
+            concatMap(() => updateStorage({ isRestoringInitialState: false, replace: false }))
           )
           .subscribe()
       );
@@ -195,11 +209,11 @@ export function syncState(
                 defaultComparator
               ),
               concatMap(t => {
-                return updateState().then(hasUpdated => {
+                return updateState({ isRestoringInitialState: false }).then(hasUpdated => {
                   // if there is nothing by state key in storage
                   // then we should fallback and consider state source of truth
                   if (!hasUpdated) {
-                    return updateStorage({ replace: true });
+                    return updateStorage({ replace: true, isRestoringInitialState: false });
                   }
                 });
               })
