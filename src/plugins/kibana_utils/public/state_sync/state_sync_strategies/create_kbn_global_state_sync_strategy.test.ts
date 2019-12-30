@@ -133,8 +133,11 @@ describe('KbnGlobalStateSyncStrategy', () => {
       .toPromise();
 
     history.push(`/#?${key}=(ok:1,test:test)`);
+    expect(JSON.parse(storage.getItem(key)!)).toEqual({ test: 'test', ok: 1 });
     history.push(`/?query=test#?${key}=(ok:2,test:test)&some=test`);
+    expect(JSON.parse(storage.getItem(key)!)).toEqual({ test: 'test', ok: 2 });
     history.push(`/?query=test#?some=test`);
+    expect(JSON.parse(storage.getItem(key)!)).toEqual(null);
 
     destroy$.next();
     destroy$.complete();

@@ -18,8 +18,7 @@
  */
 
 import isEqual from 'react-fast-compare';
-import { concatMap, map, share } from 'rxjs/operators';
-import { from } from 'rxjs';
+import { share, tap } from 'rxjs/operators';
 import { ISyncStrategy } from './types';
 import { getStateFromKbnUrl } from '../../state_management/url';
 
@@ -90,10 +89,8 @@ export const createKbnGlobalStateSyncStrategy = (
     },
     storageChange$: <State>(syncKey: string) =>
       urlSyncStrategy.storageChange$!<State>(syncKey).pipe(
-        concatMap(newState => {
-          return from(sessionStorageSyncStrategy.toStorage<State>(syncKey, newState!)).pipe(
-            map(() => newState)
-          );
+        tap(newState => {
+          sessionStorageSyncStrategy.toStorage<State>(syncKey, newState!);
         }),
         share()
       ),
