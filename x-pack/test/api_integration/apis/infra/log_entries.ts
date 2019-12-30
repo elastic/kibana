@@ -276,6 +276,33 @@ export default function({ getService }: FtrProviderContext) {
           expect(bothPages.data.topCursor).to.eql(secondToLastPage.data.topCursor);
           expect(bothPages.data.bottomCursor).to.eql(lastPage.data.bottomCursor);
         });
+
+        it('centers entries around a point', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: EARLIEST_KEY_WITH_DATA.time,
+                endDate: LATEST_KEY_WITH_DATA.time,
+                center: KEY_WITHIN_DATA_RANGE,
+              })
+            )
+            .expect(200);
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const entries = logEntriesResponse.data.entries;
+          const firstEntry = entries[0];
+          const lastEntry = entries[entries.length - 1];
+
+          expect(entries).to.have.length(200);
+          expect(firstEntry.cursor.time >= EARLIEST_KEY_WITH_DATA.time).to.be(true);
+          expect(lastEntry.cursor.time <= LATEST_KEY_WITH_DATA.time).to.be(true);
+        });
       });
     });
 
