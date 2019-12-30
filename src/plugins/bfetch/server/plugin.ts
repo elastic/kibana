@@ -136,8 +136,9 @@ export class BfetchServerPlugin
     >(path, request => {
       const handlerInstance = handler(request);
       return {
-        getResponseStream: batch => {
+        getResponseStream: ({ batch }) => {
           const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
+          let cnt = batch.length;
           batch.forEach(async (batchItem, id) => {
             try {
               const result = await handlerInstance.onBatchItem(batchItem);
@@ -145,6 +146,9 @@ export class BfetchServerPlugin
             } catch (err) {
               const error = normalizeError<E>(err);
               subject.next({ id, error });
+            } finally {
+              cnt--;
+              if (!cnt) subject.complete();
             }
           });
           return subject;

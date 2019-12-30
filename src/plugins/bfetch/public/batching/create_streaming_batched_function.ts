@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { filter } from 'rxjs/operators';
 import { defer, Defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
@@ -25,7 +26,7 @@ import {
   BatchResponseItem,
   ErrorLike,
 } from '../../common';
-import { fetchStreaming } from '../streaming';
+import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
 
 export interface BatchItem<Payload, Result> {
@@ -94,13 +95,14 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     onBatch: async items => {
       try {
         let responsesReceived = 0;
+        const batch = items.map(({ payload }) => payload);
         const { promise, stream } = fetchStreamingInjected({
           url,
-          body: JSON.stringify(items.map(({ payload }) => ({ payload }))),
+          body: JSON.stringify({ batch }),
           method: 'POST',
         });
-        stream.subscribe({
-          next: json => {
+        stream.pipe(split('\n')).subscribe({
+          next: (json: string) => {
             const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
             if (response.error) {
               responsesReceived++;

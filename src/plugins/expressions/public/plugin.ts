@@ -159,13 +159,17 @@ export class ExpressionsPublicPlugin
             serialize,
           });
 
+          // const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fff` });
+
           // For every sever-side function, register a client-side
           // function that matches its definition, but which simply
           // calls the server-side function endpoint.
           Object.keys(serverFunctionList).forEach(functionName => {
             const fn = () => ({
               ...serverFunctionList[functionName],
-              fn: (context: any, args: any) => batch({ functionName, args, context }),
+              fn: (context: any, args: any) => {
+                return batch({ functionName, args, context });
+              },
             });
             registerFunction(fn);
           });

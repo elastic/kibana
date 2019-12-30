@@ -20,8 +20,6 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { serializeProvider } from '../../../../../plugins/expressions/common';
-import { ExpressionsServerSetup } from '../../../../../plugins/expressions/server';
-import { BfetchServerSetup } from '../../../../../plugins/bfetch/server';
 import { createHandlers } from '../lib/create_handlers';
 
 const API_ROUTE = '/api/interpreter';
@@ -32,33 +30,6 @@ const API_ROUTE = '/api/interpreter';
  * @param {*} server - The Kibana server
  */
 export function registerServerFunctions(server: any) {
-  // const setup = server.newPlatform.start.core as CoreSetup;
-  const bfetch = server.newPlatform.setup.plugins.bfetch as BfetchServerSetup;
-  const expressions = server.newPlatform.setup.plugins.expressions as ExpressionsServerSetup;
-
-  bfetch.addBatchProcessingRoute(API_ROUTE + '/fns2', request => {
-    const basePath = '/kjh'; // setup.http.basePath.get(request);
-    const handlers = {
-      environment: 'server',
-      serverUri: basePath,
-      // config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
-      // ? `${server.info.uri}${config.get('server.basePath')}`
-      // : server.info.uri,
-      // elasticsearchClient: async (...args: any) => callWithRequest(request, ...args),
-    };
-    return {
-      onBatchItem: async (data: any) => {
-        const registries = expressions.__LEGACY.registries();
-        const { functionName, args, context } = data;
-        const types = registries.types.toJS();
-        const { deserialize } = serializeProvider(types);
-        const fnDef = registries.serverFunctions.toJS()[functionName];
-        if (!fnDef) throw Boom.notFound(`Function "${functionName}" could not be found.`);
-        return fnDef.fn(deserialize(context), args, handlers);
-      },
-    };
-  });
-
   runServerFunctions(server);
 }
 

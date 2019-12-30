@@ -24,10 +24,12 @@
 // @ts-ignore
 import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common';
 
+import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, Logger, IClusterClient } from 'src/core/server';
 import { ExpressionsServerSetupDependencies } from './plugin';
 import { typeSpecs as types, Type } from '../common';
+import { serializeProvider } from '../common';
 
 export class TypesRegistry extends Registry<any, any> {
   wrapper(obj: any) {
@@ -63,6 +65,7 @@ export const createLegacyServerInterpreterApi = (): LegacyInterpreterServerApi =
 
 export const createLegacyServerEndpoints = (
   api: LegacyInterpreterServerApi,
+  logger: Logger,
   core: CoreSetup,
   plugins: ExpressionsServerSetupDependencies
 ) => {
@@ -86,4 +89,47 @@ export const createLegacyServerEndpoints = (
       });
     }
   );
+
+  /**
+   * Run a single Canvas function.
+   *
+   * @param {*} server - The Kibana server object
+   * @param {*} handlers - The Canvas handlers
+   * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
+   */
+  async function runFunction(handlers: any, fnCall: any) {
+    const { functionName, args, context } = fnCall;
+    const { deserialize } = serializeProvider(registries.types.toJS());
+    const fnDef = registries.serverFunctions.toJS()[functionName];
+    if (!fnDef) throw Boom.notFound(`Function "${functionName}" could not be found.`);
+    const result = fnDef.fn(deserialize(context), args, handlers);
+    return result;
+  }
+
+  let client: IClusterClient;
+  core.elasticsearch.dataClient$.subscribe(newClient => {
+    client = newClient;
+  });
+
+  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fff`, request => {
+    const scopedClient = client.asScoped(request);
+    const handlers = {
+      environment: 'server',
+      elasticsearchClient: async (
+        endpoint: string,
+        clientParams: Record<string, any> = {},
+        options?: any
+      ) => scopedClient.callAsCurrentUser(endpoint, clientParams, options),
+    };
+
+    return {
+      onBatchItem: async (fnCall: any) => {
+        const result = await runFunction(handlers, fnCall);
+        if (typeof result === 'undefined') {
+          throw new Error(`Function ${fnCall.functionName} did not return anything.`);
+        }
+        return result;
+      },
+    };
+  });
 };

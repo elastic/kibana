@@ -21,20 +21,9 @@ import { Legacy } from '../../../../../../kibana';
 
 export const createHandlers = (request: Legacy.Request, server: Legacy.Server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const config = server.config();
-
-  /*
-  { environment: 'server',
-  serverUri: 'http://localhost:5603/gzu',
-  elasticsearchClient: [AsyncFunction: elasticsearchClient] }
-  */
 
   return {
     environment: 'server',
-    serverUri:
-      config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
-        ? `${server.info.uri}${config.get('server.basePath')}`
-        : server.info.uri,
     elasticsearchClient: async (...args: any) => (callWithRequest as any)(request, ...args),
   };
 };

@@ -50,14 +50,16 @@ export class ExpressionsServerPlugin
       ExpressionsServerSetupDependencies,
       ExpressionsServerStartDependencies
     > {
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
     plugins: ExpressionsServerSetupDependencies
   ): ExpressionsServerSetup {
+    const logger = this.initializerContext.logger.get();
+
     const legacyApi = createLegacyServerInterpreterApi();
-    createLegacyServerEndpoints(legacyApi, core, plugins);
+    createLegacyServerEndpoints(legacyApi, logger, core, plugins);
 
     return {
       __LEGACY: legacyApi,
