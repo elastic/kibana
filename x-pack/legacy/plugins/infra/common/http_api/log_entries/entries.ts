@@ -17,6 +17,7 @@ export const logEntriesBaseRequestRT = rt.intersection([
   }),
   rt.partial({
     query: rt.string,
+    size: rt.number,
   }),
 ]);
 

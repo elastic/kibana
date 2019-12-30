@@ -37,7 +37,7 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { startDate, endDate, sourceId, query } = payload;
+        const { startDate, endDate, sourceId, query, size } = payload;
 
         let cursor;
         if ('before' in payload) {
@@ -53,6 +53,7 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
             endDate,
             query: parseFilterQuery(query),
             center: payload.center,
+            size,
           });
         } else {
           entries = await logEntries.getLogEntries(requestContext, sourceId, {
@@ -60,6 +61,7 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
             endDate,
             query: parseFilterQuery(query),
             cursor,
+            size,
           });
         }
 
