@@ -38,6 +38,10 @@ export enum JOB_TYPES {
   CLASSIFICATION = 'classification',
 }
 
+export interface Option {
+  label: string;
+}
+
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
@@ -45,20 +49,22 @@ export interface State {
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
-    dependentVariableOptions: Array<{ label: DependentVariable }> | [];
+    dependentVariableOptions: Option[] | [];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    excludes: string[];
+    excludesOptions: Option[];
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
-    loadingDepFieldOptions: boolean;
+    loadingFieldOptions: boolean;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     sourceIndex: EsIndexName;
@@ -96,13 +102,15 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    excludes: [],
+    excludesOptions: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    loadingDepFieldOptions: false,
+    loadingFieldOptions: false,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     sourceIndex: '',
@@ -146,7 +154,7 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: [],
+      excludes: formState.excludes,
     },
     analysis: {
       outlier_detection: {},
