@@ -18,7 +18,7 @@
  */
 
 /**
- * Given a promise returns a 3-tuple, with the following members:
+ * Given a promise awaits it and returns a 3-tuple, with the following members:
  *
  * - First entry is either the resolved value of the promise or `undefined`.
  * - Second entry is either the error thrown by promise or `undefined`.

@@ -17,5 +17,24 @@
  * under the License.
  */
 
-export * from './normalize_error';
-export * from './remove_leading_slash';
+import { ErrorLike } from '../batch';
+
+export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => {
+  if (!err) {
+    return {
+      message: 'Unknown error.',
+    } as E;
+  }
+  if (err instanceof Error) {
+    return { message: err.message } as E;
+  }
+  if (typeof err === 'object') {
+    return {
+      ...err,
+      message: err.message || 'Unknown error.',
+    } as E;
+  }
+  return {
+    message: String(err),
+  } as E;
+};
