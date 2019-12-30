@@ -19,7 +19,7 @@
 
 import { Metrics } from '../../../../legacy';
 import { SenseEditor } from '../../models/sense_editor';
-import { getEndpointFromPosition } from '../../../lib/autocomplete/autocomplete';
+import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 
 export const track = (
   requests: any[],
@@ -27,19 +27,19 @@ export const track = (
   trackUiMetric: Metrics['trackUiMetric'],
   type: Metrics['METRIC_TYPE']['COUNT']
 ) => {
+  const coreEditor = editor.getCoreEditor();
   // `getEndpointFromPosition` gets values from the server-side generated JSON files which
   // are a combination of JS, automatically generated JSON and manual overrides. That means
   // the metrics reported from here will be tied to the definitions in those files.
   // See src/legacy/core_plugins/console/server/api_server/spec
   const endpointDescription = getEndpointFromPosition(
-    editor,
-    editor.getCoreEditor().getCurrentPosition(),
+    coreEditor,
+    coreEditor.getCurrentPosition(),
     editor.parser
   );
 
-  if (endpointDescription) {
-    const eventName = `${requests[0]?.method ?? ''} ${endpointDescription.patterns?.join('|') ??
-      'no pattern found'}`;
+  if (requests[0] && endpointDescription) {
+    const eventName = `${requests[0].method} ${endpointDescription.id ?? 'unknown'}`;
     trackUiMetric(type, eventName);
   }
 };

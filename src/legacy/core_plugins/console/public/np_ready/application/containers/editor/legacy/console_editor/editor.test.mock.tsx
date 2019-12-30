@@ -53,6 +53,6 @@ jest.mock('../../../../models/sense_editor', () => {
 jest.mock('../../../../hooks/use_send_current_request_to_es/send_request_to_es', () => ({
   sendRequestToES: jest.fn(),
 }));
-jest.mock('../../../../../lib/autocomplete/autocomplete', () => ({
+jest.mock('../../../../../lib/autocomplete/get_endpoint_from_position', () => ({
   getEndpointFromPosition: jest.fn(),
 }));

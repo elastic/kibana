@@ -17,8 +17,24 @@
  * under the License.
  */
 
-export * from './create';
-export * from '../legacy_core_editor/create_readonly';
-export { MODE } from '../../../lib/row_parser';
-export { SenseEditor } from './sense_editor';
-export { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
+import { CoreEditor, Position } from '../../types';
+import { getCurrentMethodAndTokenPaths } from './autocomplete';
+
+// @ts-ignore
+import { getTopLevelUrlCompleteComponents } from '../kb/kb';
+// @ts-ignore
+import { populateContext } from './engine';
+
+export function getEndpointFromPosition(editor: CoreEditor, pos: Position, parser: any) {
+  const context = {
+    ...getCurrentMethodAndTokenPaths(
+      editor,
+      { column: pos.column, lineNumber: pos.lineNumber },
+      parser,
+      true
+    ),
+  };
+  const components = getTopLevelUrlCompleteComponents(context.method);
+  populateContext(context.urlTokenPath, context, editor, true, components);
+  return context.endpoint;
+}

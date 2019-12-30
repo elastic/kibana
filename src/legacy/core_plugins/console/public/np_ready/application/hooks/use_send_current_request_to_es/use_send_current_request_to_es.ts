@@ -22,6 +22,7 @@ import { instance as registry } from '../../contexts/editor_context/editor_regis
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
+
 // @ts-ignore
 import mappings from '../../../lib/mappings/mappings';
 

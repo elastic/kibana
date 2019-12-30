@@ -37,7 +37,7 @@ import {
 
 // Mocked functions
 import { sendRequestToES } from '../../../../hooks/use_send_current_request_to_es/send_request_to_es';
-import { getEndpointFromPosition } from '../../../../../lib/autocomplete/autocomplete';
+import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
 
 import * as consoleMenuActions from '../console_menu_actions';
 import { Editor } from './editor';
