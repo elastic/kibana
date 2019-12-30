@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for rendering the form fields for editing the scope section of a rule.
  */
@@ -12,27 +11,22 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiCheckbox,
-  EuiLink,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiCheckbox, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../privilege/check_privilege';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 function NoFilterListsCallOut() {
   return (
     <EuiCallOut
-      title={<FormattedMessage
-        id="xpack.ml.ruleEditor.scopeSection.noFilterListsConfiguredTitle"
-        defaultMessage="No filter lists configured"
-      />}
+      title={
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.scopeSection.noFilterListsConfiguredTitle"
+          defaultMessage="No filter lists configured"
+        />
+      }
       iconType="gear"
     >
       <p>
@@ -48,7 +42,7 @@ function NoFilterListsCallOut() {
                   defaultMessage="Filter Lists"
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </p>
@@ -59,10 +53,12 @@ function NoFilterListsCallOut() {
 function NoPermissionCallOut() {
   return (
     <EuiCallOut
-      title={<FormattedMessage
-        id="xpack.ml.ruleEditor.scopeSection.noPermissionToViewFilterListsTitle"
-        defaultMessage="You do not have permission to view filter lists"
-      />}
+      title={
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.scopeSection.noPermissionToViewFilterListsTitle"
+          defaultMessage="You do not have permission to view filter lists"
+        />
+      }
       iconType="gear"
     />
   );
@@ -74,8 +70,8 @@ export function ScopeSection({
   partitioningFieldNames,
   filterListIds,
   scope,
-  updateScope }) {
-
+  updateScope,
+}) {
   const canGetFilters = checkPermission('canGetFilters');
 
   if (partitioningFieldNames === null || partitioningFieldNames.length === 0) {
@@ -104,7 +100,7 @@ export function ScopeSection({
         />
       );
     });
-  } else if(canGetFilters === false) {
+  } else if (canGetFilters === false) {
     content = <NoPermissionCallOut />;
   } else {
     content = <NoFilterListsCallOut />;
@@ -123,23 +119,20 @@ export function ScopeSection({
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="enable_scope_checkbox"
-        label={<FormattedMessage
-          id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-          defaultMessage="Add a filter list to limit where the rule applies."
-        />}
+        label={
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+            defaultMessage="Add a filter list to limit where the rule applies."
+          />
+        }
         checked={isEnabled}
         onChange={onEnabledChange}
       />
       <EuiSpacer size="s" />
-      {isEnabled &&
-        <React.Fragment>
-          {content}
-        </React.Fragment>
-      }
+      {isEnabled && <React.Fragment>{content}</React.Fragment>}
       <EuiSpacer size="xxl" />
     </React.Fragment>
   );
-
 }
 ScopeSection.propTypes = {
   isEnabled: PropTypes.bool.isRequired,
@@ -147,5 +140,5 @@ ScopeSection.propTypes = {
   partitioningFieldNames: PropTypes.array.isRequired,
   filterListIds: PropTypes.array.isRequired,
   scope: PropTypes.object,
-  updateScope: PropTypes.func.isRequired
+  updateScope: PropTypes.func.isRequired,
 };

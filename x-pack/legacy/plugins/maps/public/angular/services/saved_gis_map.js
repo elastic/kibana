@@ -5,9 +5,7 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
-import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import {
   getTimeFilters,
   getMapZoom,
@@ -24,96 +22,89 @@ import { copyPersistentState } from '../../reducers/util';
 import { extractReferences, injectReferences } from '../../../common/migrations/references';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
-const module = uiModules.get('app/maps');
+export function createSavedGisMapClass(services) {
+  const SavedObjectClass = createSavedObjectClass(services);
 
-module.factory('SavedGisMap', function (Private) {
-  const SavedObject = Private(SavedObjectProvider);
-  createLegacyClass(SavedGisMap).inherits(SavedObject);
-  function SavedGisMap(id) {
-    SavedGisMap.Super.call(this, {
-      type: SavedGisMap.type,
-      mapping: SavedGisMap.mapping,
-      searchSource: SavedGisMap.searchsource,
-      extractReferences,
-      injectReferences: (savedObject, references) => {
-        const { attributes } = injectReferences({
-          attributes: { layerListJSON: savedObject.layerListJSON },
-          references
-        });
+  class SavedGisMap extends SavedObjectClass {
+    static type = MAP_SAVED_OBJECT_TYPE;
 
-        savedObject.layerListJSON = attributes.layerListJSON;
+    // Mappings are used to place object properties into saved object _source
+    static mapping = {
+      title: 'text',
+      description: 'text',
+      mapStateJSON: 'text',
+      layerListJSON: 'text',
+      uiStateJSON: 'text',
+      bounds: {
+        type: 'object',
+      },
+    };
+    static fieldOrder = ['title', 'description'];
+    static searchSource = false;
 
-        const indexPatternIds = references
-          .filter(reference => {
-            return reference.type === 'index-pattern';
-          })
-          .map(reference => {
-            return reference.id;
+    constructor(id) {
+      super({
+        type: SavedGisMap.type,
+        mapping: SavedGisMap.mapping,
+        searchSource: SavedGisMap.searchSource,
+        extractReferences,
+        injectReferences: (savedObject, references) => {
+          const { attributes } = injectReferences({
+            attributes: { layerListJSON: savedObject.layerListJSON },
+            references,
           });
-        savedObject.indexPatternIds = _.uniq(indexPatternIds);
-      },
 
-      // if this is null/undefined then the SavedObject will be assigned the defaults
-      id: id,
+          savedObject.layerListJSON = attributes.layerListJSON;
 
-      // default values that will get assigned if the doc is new
-      defaults: {
-        title: 'New Map',
-        description: '',
-      },
-    });
+          const indexPatternIds = references
+            .filter(reference => {
+              return reference.type === 'index-pattern';
+            })
+            .map(reference => {
+              return reference.id;
+            });
+          savedObject.indexPatternIds = _.uniq(indexPatternIds);
+        },
 
-    this.showInRecentlyAccessed = true;
-  }
+        // if this is null/undefined then the SavedObject will be assigned the defaults
+        id: id,
 
-  SavedGisMap.type = MAP_SAVED_OBJECT_TYPE;
-
-  // Mappings are used to place object properties into saved object _source
-  SavedGisMap.mapping = {
-    title: 'text',
-    description: 'text',
-    mapStateJSON: 'text',
-    layerListJSON: 'text',
-    uiStateJSON: 'text',
-    bounds: {
-      type: 'object'
+        // default values that will get assigned if the doc is new
+        defaults: {
+          title: 'New Map',
+          description: '',
+        },
+      });
+      this.showInRecentlyAccessed = true;
     }
-  };
+    getFullPath() {
+      return `/app/maps#map/${this.id}`;
+    }
+    getLayerList() {
+      return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
+    }
 
-  SavedGisMap.fieldOrder = ['title', 'description'];
+    syncWithStore(state) {
+      const layerList = getLayerListRaw(state);
+      const layerListConfigOnly = copyPersistentState(layerList);
+      this.layerListJSON = JSON.stringify(layerListConfigOnly);
 
-  SavedGisMap.searchsource = false;
+      this.mapStateJSON = JSON.stringify({
+        zoom: getMapZoom(state),
+        center: getMapCenter(state),
+        timeFilters: getTimeFilters(state),
+        refreshConfig: getRefreshConfig(state),
+        query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
+        filters: getFilters(state),
+      });
 
-  SavedGisMap.prototype.getFullPath = function () {
-    return `/app/maps#map/${this.id}`;
-  };
+      this.uiStateJSON = JSON.stringify({
+        isLayerTOCOpen: getIsLayerTOCOpen(state),
+        openTOCDetails: getOpenTOCDetails(state),
+      });
 
-  SavedGisMap.prototype.getLayerList = function () {
-    return this.layerListJSON ? JSON.parse(this.layerListJSON) : null;
-  };
-
-  SavedGisMap.prototype.syncWithStore = function (state) {
-    const layerList = getLayerListRaw(state);
-    const layerListConfigOnly = copyPersistentState(layerList);
-    this.layerListJSON = JSON.stringify(layerListConfigOnly);
-
-    this.mapStateJSON = JSON.stringify({
-      zoom: getMapZoom(state),
-      center: getMapCenter(state),
-      timeFilters: getTimeFilters(state),
-      refreshConfig: getRefreshConfig(state),
-      query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
-      filters: getFilters(state),
-    });
-
-    this.uiStateJSON = JSON.stringify({
-      isLayerTOCOpen: getIsLayerTOCOpen(state),
-      openTOCDetails: getOpenTOCDetails(state),
-    });
-
-    this.bounds = convertMapExtentToPolygon(getMapExtent(state));
-  };
-
+      this.bounds = convertMapExtentToPolygon(getMapExtent(state));
+    }
+  }
   return SavedGisMap;
-});
-
+}

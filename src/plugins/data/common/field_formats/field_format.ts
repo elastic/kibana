@@ -24,6 +24,8 @@ import {
   FIELD_FORMAT_IDS,
   FieldFormatConvert,
   FieldFormatConvertFunction,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
 } from './types';
 import {
   htmlContentTypeSetup,
@@ -34,6 +36,15 @@ import {
 import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
+
+export interface IFieldFormatMetaParams {
+  [key: string]: any;
+  parsedUrl?: {
+    origin: string;
+    pathname?: string;
+    basePath?: string;
+  };
+}
 
 export abstract class FieldFormat {
   /**
@@ -63,8 +74,20 @@ export abstract class FieldFormat {
    */
   convertObject: FieldFormatConvert | undefined;
 
+  /**
+   * @property {htmlConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
   htmlConvert: HtmlContextTypeConvert | undefined;
 
+  /**
+   * @property {textConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
   textConvert: TextContextTypeConvert | undefined;
 
   /**
@@ -76,7 +99,7 @@ export abstract class FieldFormat {
   protected readonly _params: any;
   protected getConfig: Function | undefined;
 
-  constructor(_params: any = {}, getConfig?: Function) {
+  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: Function) {
     this._params = _params;
 
     if (getConfig) {
@@ -94,11 +117,15 @@ export abstract class FieldFormat {
    *                    injecting into the DOM or a DOM attribute
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
+  convert(
+    value: any,
+    contentType: ContentType = DEFAULT_CONTEXT_TYPE,
+    options?: HtmlContextTypeOptions | TextContextTypeOptions
+  ): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
-      return converter.call(this, value);
+      return converter.call(this, value, options);
     }
 
     return value;
@@ -193,6 +220,10 @@ export abstract class FieldFormat {
       [TEXT_CONTEXT_TYPE]: textContentTypeSetup(this, this.textConvert),
       [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
+  }
+
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
   }
 }
 

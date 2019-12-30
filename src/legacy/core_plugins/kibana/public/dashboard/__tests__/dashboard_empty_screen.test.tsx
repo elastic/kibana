@@ -18,7 +18,10 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DashboardEmptyScreen, DashboardEmptyScreenProps } from '../dashboard_empty_screen';
+import {
+  DashboardEmptyScreen,
+  DashboardEmptyScreenProps,
+} from '../np_ready/dashboard_empty_screen';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -46,5 +49,16 @@ describe('DashboardEmptyScreen', () => {
     expect(component).toMatchSnapshot();
     const paragraph = findTestSubject(component, 'linkToVisualizeParagraph');
     expect(paragraph.length).toBe(0);
+  });
+
+  test('when specified, prop onVisualizeClick is called correctly', () => {
+    const onVisualizeClick = jest.fn();
+    const component = mountComponent({
+      ...defaultProps,
+      ...{ showLinkToVisualize: true, onVisualizeClick },
+    });
+    const button = findTestSubject(component, 'addVisualizationButton');
+    button.simulate('click');
+    expect(onVisualizeClick).toHaveBeenCalled();
   });
 });

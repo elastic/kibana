@@ -25,7 +25,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
-import { AppMountContext } from 'kibana/public';
+import { AppMountContext, AppMountDeprecated } from 'kibana/public';
 import { DevTool } from './plugin';
 
 interface DevToolsWrapperProps {
@@ -91,10 +91,10 @@ function DevToolsWrapper({
             if (mountedTool.current) {
               mountedTool.current.unmountHandler();
             }
-            const unmountHandler = await activeDevTool.mount(appMountContext, {
-              element,
-              appBasePath: '',
-            });
+            const params = { element, appBasePath: '' };
+            const unmountHandler = isAppMountDeprecated(activeDevTool.mount)
+              ? await activeDevTool.mount(appMountContext, params)
+              : await activeDevTool.mount(params);
             mountedTool.current = {
               devTool: activeDevTool,
               mountpoint: element,
@@ -181,4 +181,9 @@ export function renderApp(
   );
 
   return () => ReactDOM.unmountComponentAtNode(element);
+}
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
 }

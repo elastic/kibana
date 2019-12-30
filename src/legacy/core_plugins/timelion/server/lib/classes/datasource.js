@@ -19,15 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 import loadFunctions from '../load_functions.js';
-const fitFunctions  = loadFunctions('fit_functions');
+const fitFunctions = loadFunctions('fit_functions');
 import TimelionFunction from './timelion_function';
 import { offsetTime, preprocessOffset } from '../offset_time';
 import _ from 'lodash';
 
-
 function offsetSeries(response, offset) {
   if (offset) {
-    response = _.map(response, function (point) {
+    response = _.map(response, function(point) {
       return [offsetTime(point[0], offset, true), point[1]];
     });
   }
@@ -36,7 +35,6 @@ function offsetSeries(response, offset) {
 
 export default class Datasource extends TimelionFunction {
   constructor(name, config) {
-
     // Additional arguments that every dataSource take
     config.args.push({
       name: 'offset',
@@ -59,12 +57,12 @@ export default class Datasource extends TimelionFunction {
         values: {
           fitFunctions: _.keys(fitFunctions).join(', '),
         },
-      })
+      }),
     });
 
     // Wrap the original function so we can modify inputs/outputs with offset & fit
     const originalFunction = config.fn;
-    config.fn = function (args, tlConfig) {
+    config.fn = function(args, tlConfig) {
       const config = _.clone(tlConfig);
       let offset = args.byName.offset;
       if (offset) {
@@ -74,15 +72,14 @@ export default class Datasource extends TimelionFunction {
         config.time.to = offsetTime(config.time.to, offset);
       }
 
-      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
-        seriesList.list = _.map(seriesList.list, function (series) {
+      return Promise.resolve(originalFunction(args, config)).then(function(seriesList) {
+        seriesList.list = _.map(seriesList.list, function(series) {
           if (series.data.length === 0) throw new Error(name + '() returned no results');
           series.data = offsetSeries(series.data, offset);
           series.fit = args.byName.fit || series.fit || 'nearest';
           return series;
         });
         return seriesList;
-
       });
     };
 
@@ -92,10 +89,9 @@ export default class Datasource extends TimelionFunction {
     // otherwise teh series will end up being offset twice.
     this.timelionFn = originalFunction;
     this.datasource = true;
-    this.cacheKey = function (item) {
+    this.cacheKey = function(item) {
       return item.text;
     };
     Object.freeze(this);
   }
-
 }

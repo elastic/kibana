@@ -17,8 +17,9 @@
  * under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { forOwn, isFunction, memoize } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
@@ -26,6 +27,7 @@ import {
   IFieldFormatType,
   IFieldFormatId,
   FieldFormat,
+  IFieldFormatMetaParams,
 } from '../../common';
 import { FieldType } from './types';
 
@@ -33,6 +35,7 @@ export class FieldFormatRegisty {
   private fieldFormats: Map<IFieldFormatId, IFieldFormatType>;
   private uiSettings!: IUiSettingsClient;
   private defaultMap: Record<string, FieldType>;
+  private basePath?: string;
 
   constructor() {
     this.fieldFormats = new Map();
@@ -41,8 +44,9 @@ export class FieldFormatRegisty {
 
   getConfig = (key: string, override?: any) => this.uiSettings.get(key, override);
 
-  init(uiSettings: IUiSettingsClient) {
+  init({ uiSettings, http }: CoreSetup) {
     this.uiSettings = uiSettings;
+    this.basePath = http.basePath.get();
 
     this.parseDefaultTypeMap(this.uiSettings.get('format:defaultTypeMap'));
 
@@ -73,10 +77,20 @@ export class FieldFormatRegisty {
    * Get a derived FieldFormat class by its id.
    *
    * @param  {IFieldFormatId} formatId - the format id
-   * @return {FieldFormat}
+   * @return {FieldFormat | undefined}
    */
   getType = (formatId: IFieldFormatId): IFieldFormatType | undefined => {
-    return this.fieldFormats.get(formatId);
+    const fieldFormat = this.fieldFormats.get(formatId);
+
+    if (fieldFormat) {
+      const decoratedFieldFormat: any = this.fieldFormatMetaParamsDecorator(fieldFormat);
+
+      if (decoratedFieldFormat) {
+        return decoratedFieldFormat as IFieldFormatType;
+      }
+    }
+
+    return undefined;
   };
 
   /**
@@ -86,7 +100,7 @@ export class FieldFormatRegisty {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {FieldFormat}
+   * @return {FieldFormat | undefined}
    */
   getDefaultType = (
     fieldType: KBN_FIELD_TYPES,
@@ -102,11 +116,11 @@ export class FieldFormatRegisty {
    * using the format:defaultTypeMap config map
    *
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {ES_FIELD_TYPES}
+   * @return {ES_FIELD_TYPES | undefined}
    */
   getTypeNameByEsTypes = (esTypes: ES_FIELD_TYPES[] | undefined): ES_FIELD_TYPES | undefined => {
     if (!Array.isArray(esTypes)) {
-      return;
+      return undefined;
     }
 
     return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type].es);
@@ -136,14 +150,14 @@ export class FieldFormatRegisty {
    * @return {FIELD_FORMATS_INSTANCES[number]}
    */
   getInstance = memoize(
-    (formatId: IFieldFormatId): FieldFormat => {
+    (formatId: IFieldFormatId, params: Record<string, any> = {}): FieldFormat => {
       const DerivedFieldFormat = this.getType(formatId);
 
       if (!DerivedFieldFormat) {
         throw new Error(`Field Format '${formatId}' not found!`);
       }
 
-      return new DerivedFieldFormat({}, this.getConfig);
+      return new DerivedFieldFormat(params, this.getConfig);
     }
   );
 
@@ -190,9 +204,12 @@ export class FieldFormatRegisty {
    * @return {FieldFormat[]}
    */
   getByFieldType(fieldType: KBN_FIELD_TYPES): IFieldFormatType[] {
-    return [...this.fieldFormats.values()].filter(
-      (format: IFieldFormatType) => format.fieldType.indexOf(fieldType) !== -1
-    );
+    return [...this.fieldFormats.values()]
+      .filter((format: IFieldFormatType) => format && format.fieldType.indexOf(fieldType) !== -1)
+      .map(
+        (format: IFieldFormatType) =>
+          this.fieldFormatMetaParamsDecorator(format) as IFieldFormatType
+      );
   }
 
   /**
@@ -217,10 +234,50 @@ export class FieldFormatRegisty {
   }
 
   register = (fieldFormats: IFieldFormatType[]) => {
-    fieldFormats.forEach(fieldFormat => {
-      this.fieldFormats.set(fieldFormat.id, fieldFormat);
-    });
+    fieldFormats.forEach(fieldFormat => this.fieldFormats.set(fieldFormat.id, fieldFormat));
 
     return this;
   };
+
+  /**
+   * FieldFormat decorator - provide a one way to add meta-params for all field formatters
+   *
+   * @private
+   * @param  {IFieldFormatType} fieldFormat - field format type
+   * @return {FieldFormat | undefined}
+   */
+  private fieldFormatMetaParamsDecorator = (
+    fieldFormat: IFieldFormatType
+  ): IFieldFormatType | undefined => {
+    const getMetaParams = (customParams: Record<string, any>) => this.buildMetaParams(customParams);
+
+    if (fieldFormat) {
+      return class DecoratedFieldFormat extends fieldFormat {
+        static id = fieldFormat.id;
+        static fieldType = fieldFormat.fieldType;
+
+        constructor(params: Record<string, any> = {}, getConfig?: Function) {
+          super(getMetaParams(params), getConfig);
+        }
+      };
+    }
+
+    return undefined;
+  };
+
+  /**
+   * Build Meta Params
+   *
+   * @static
+   * @param  {Record<string, any>} custom params
+   * @return {Record<string, any>}
+   */
+  private buildMetaParams = <T extends IFieldFormatMetaParams>(customParams: T): T => ({
+    parsedUrl: {
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+      basePath: this.basePath,
+    },
+    ...customParams,
+  });
 }

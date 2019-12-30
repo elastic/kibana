@@ -19,19 +19,11 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFieldNumber,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import {
-  DefaultFormatEditor
-} from '../default';
+import { DefaultFormatEditor } from '../default';
 
-import {
-  FormatEditorSamples
-} from '../../samples';
+import { FormatEditorSamples } from '../../samples';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -49,9 +41,9 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     const output = super.getDerivedStateFromProps(nextProps, state);
     let error = null;
 
-    if(!nextProps.format.isHuman() && nextProps.formatParams.outputPrecision > 20) {
+    if (!nextProps.format.isHuman() && nextProps.formatParams.outputPrecision > 20) {
       error = i18n.translate('common.ui.fieldEditor.durationErrorMessage', {
-        defaultMessage: 'Decimal places must be between 0 and 20'
+        defaultMessage: 'Decimal places must be between 0 and 20',
       });
       nextProps.onError(error);
       return {
@@ -74,7 +66,12 @@ export class DurationFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.duration.inputFormatLabel" defaultMessage="Input format"/>}
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.duration.inputFormatLabel"
+              defaultMessage="Input format"
+            />
+          }
           isInvalid={!!error}
           error={hasDecimalError ? null : error}
         >
@@ -86,14 +83,19 @@ export class DurationFormatEditor extends DefaultFormatEditor {
                 text: format.text,
               };
             })}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ inputFormat: e.target.value });
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.duration.outputFormatLabel" defaultMessage="Output format"/>}
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.duration.outputFormatLabel"
+              defaultMessage="Output format"
+            />
+          }
           isInvalid={!!error}
         >
           <EuiSelect
@@ -104,34 +106,35 @@ export class DurationFormatEditor extends DefaultFormatEditor {
                 text: format.text,
               };
             })}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ outputFormat: e.target.value });
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
-        {
-          !format.isHuman() ? (
-            <EuiFormRow
-              label={<FormattedMessage id="common.ui.fieldEditor.duration.decimalPlacesLabel" defaultMessage="Decimal places"/>}
-              isInvalid={!!error}
-              error={hasDecimalError ? error : null}
-            >
-              <EuiFieldNumber
-                value={formatParams.outputPrecision}
-                min={0}
-                max={20}
-                onChange={(e) => {
-                  this.onChange({ outputPrecision: e.target.value ? Number(e.target.value) : null });
-                }}
-                isInvalid={!!error}
+        {!format.isHuman() ? (
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="common.ui.fieldEditor.duration.decimalPlacesLabel"
+                defaultMessage="Decimal places"
               />
-            </EuiFormRow>
-          ) : null
-        }
-        <FormatEditorSamples
-          samples={samples}
-        />
+            }
+            isInvalid={!!error}
+            error={hasDecimalError ? error : null}
+          >
+            <EuiFieldNumber
+              value={formatParams.outputPrecision}
+              min={0}
+              max={20}
+              onChange={e => {
+                this.onChange({ outputPrecision: e.target.value ? Number(e.target.value) : null });
+              }}
+              isInvalid={!!error}
+            />
+          </EuiFormRow>
+        ) : null}
+        <FormatEditorSamples samples={samples} />
       </Fragment>
     );
   }

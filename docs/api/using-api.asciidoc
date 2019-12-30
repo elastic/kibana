@@ -1,7 +1,7 @@
 [[using-api]]
 == Using the APIs
 
-Interact with the {kib} APIs through the `curl` command and HTTP and HTTPs protocols. 
+Interact with the {kib} APIs through the `curl` command and HTTP and HTTPs protocols.
 
 It is recommended that you use HTTPs on port 5601 because it is more secure.
 
@@ -34,13 +34,37 @@ For example, the following `curl` command exports a dashboard:
 curl -X POST -u $USER:$PASSWORD "localhost:5601/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c"
 --
 
-The following {kib} APIs are available:
+[float]
+[[api-request-headers]]
+=== Request headers
 
-* <<features-api-get, Get features API>>
-* <<spaces-api, Kibana spaces API>>
-* <<role-management-api, Kibana role management APIs>>
-* <<saved-objects-api, Saved objects APIs>>
-* <<dashboard-api, Import and export dashboards APIs>>
-* <<logstash-configuration-management-api, Logstash configuration mangaement APIs>>
-* <<url-shortening-api, Shorten URL API>>
-* <<upgrade-assistant-api, Upgrade assistant APIs>>
+For all APIs, you must use a request header. The {kib} APIs support the `kbn-xsrf` and `Content-Type` headers.
+
+`kbn-xsrf: true`::
+  By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
+
+* The API endpoint uses the `GET` or `HEAD` methods
+
+* The path is whitelisted using the <<settings, `server.xsrf.whitelist`>> setting
+
+* XSRF protections are disabled using the `server.xsrf.disableProtection` setting
+
+`Content-Type: application/json`::
+  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON. Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header. 
+
+Request header example:
+
+[source,sh]
+--
+curl -X POST \
+  http://localhost:5601/api/spaces/space \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: true' \
+  -d '{
+	"id": "sales",
+	"name": "Sales",
+	"description": "This is your Sales Space!",
+	"disabledFeatures": []
+}
+'
+--
