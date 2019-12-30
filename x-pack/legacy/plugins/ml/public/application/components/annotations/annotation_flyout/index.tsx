@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ComponentType, Fragment, ReactNode } from 'react';
+import React, { Component, Fragment, FC, ReactNode } from 'react';
+import { useObservable } from 'react-use';
 import * as Rx from 'rxjs';
 
 import {
@@ -32,7 +33,6 @@ import {
   annotationsRefresh$,
   AnnotationState,
 } from '../../../services/annotations_service';
-import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 
@@ -344,7 +344,8 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   }
 }
 
-export const AnnotationFlyout = injectObservablesAsProps(
-  { annotation: annotation$ },
-  (injectI18n(AnnotationFlyoutIntl) as any) as ComponentType
-);
+export const AnnotationFlyout: FC<any> = props => {
+  const annotation = useObservable(annotation$);
+  const AnnotationFlyoutIntlInjected = injectI18n(AnnotationFlyoutIntl);
+  return <AnnotationFlyoutIntlInjected annotation={annotation} {...props} />;
+};

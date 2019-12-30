@@ -11,6 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useObservable } from 'react-use';
 
 import _ from 'lodash';
 import d3 from 'd3';
@@ -23,7 +24,6 @@ import {
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
 import { annotation$ } from '../../../services/annotations_service';
-import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -1723,7 +1723,7 @@ const TimeseriesChartIntl = injectI18n(
   }
 );
 
-export const TimeseriesChart = injectObservablesAsProps(
-  { annotation: annotation$ },
-  TimeseriesChartIntl
-);
+export const TimeseriesChart = props => {
+  const annotation = useObservable(annotation$);
+  return <TimeseriesChartIntl annotation={annotation} {...props} />;
+};

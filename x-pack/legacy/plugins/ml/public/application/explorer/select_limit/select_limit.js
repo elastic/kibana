@@ -9,11 +9,10 @@
  */
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 
 import { EuiSelect } from '@elastic/eui';
-
-import { injectObservablesAsProps } from '../../util/observable_utils';
 
 const optionsMap = {
   '5': 5,
@@ -70,11 +69,7 @@ SelectLimitUnwrapped.defaultProps = {
   limit: LIMIT_OPTIONS[1],
 };
 
-const SelectLimit = injectObservablesAsProps(
-  {
-    limit: limit$,
-  },
-  SelectLimitUnwrapped
-);
-
-export { SelectLimit };
+export const SelectLimit = props => {
+  const limit = useObservable(limit$);
+  return <SelectLimitUnwrapped limit={limit} {...props} />;
+};

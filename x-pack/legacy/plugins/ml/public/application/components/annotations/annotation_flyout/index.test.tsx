@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectObservablesAsProps } from '../../../util/observable_utils';
+import { useObservable } from 'react-use';
+
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 
-import React, { ComponentType } from 'react';
+import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Annotation } from '../../../../../common/types/annotations';
@@ -25,11 +26,11 @@ describe('AnnotationFlyout', () => {
     const annotation = mockAnnotations[1] as Annotation;
     annotation$.next(annotation);
 
-    // injectObservablesAsProps wraps the observable in a new component
-    const ObservableComponent = injectObservablesAsProps(
-      { annotation: annotation$ },
-      (AnnotationFlyout as any) as ComponentType
-    );
+    // useObservable wraps the observable in a new component
+    const ObservableComponent = (props: any) => {
+      const annotationProp = useObservable(annotation$);
+      return <AnnotationFlyout annotation={annotationProp} {...props} />;
+    };
 
     const wrapper = mountWithIntl(<ObservableComponent />);
     const updateBtn = wrapper.find('EuiButton').first();
@@ -40,11 +41,11 @@ describe('AnnotationFlyout', () => {
     const annotation = mockAnnotations[2] as Annotation;
     annotation$.next(annotation);
 
-    // injectObservablesAsProps wraps the observable in a new component
-    const ObservableComponent = injectObservablesAsProps(
-      { annotation: annotation$ },
-      (AnnotationFlyout as any) as ComponentType
-    );
+    // useObservable wraps the observable in a new component
+    const ObservableComponent = (props: any) => {
+      const annotationProp = useObservable(annotation$);
+      return <AnnotationFlyout annotation={annotationProp} {...props} />;
+    };
 
     const wrapper = mountWithIntl(<ObservableComponent />);
     const updateBtn = wrapper.find('EuiButton').first();

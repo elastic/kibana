@@ -48,8 +48,8 @@ export type AnnotationState = Annotation | null;
   - To add it to a given components state, just use
     `annotation$.subscribe(annotation => this.setState({ annotation }));` in `componentDidMount()`.
 
-  2. injectObservablesAsProps() from public/utils/observable_utils.tsx, as the name implies, offers
-     a way to wrap observables into another component which passes on updated values as props.
+  2. useObservable() from 'react-use', offers a way to wrap observables
+     into another component which passes on updated values as props.
 
   - To subscribe to updates this way, wrap your component like:
 
@@ -62,10 +62,10 @@ export type AnnotationState = Annotation | null;
         return <span>{annotation.annotation}</span>;
       }
 
-      export const MyObservableComponent = injectObservablesAsProps(
-        { annotation: annotaton$ },
-        MyOriginalComponent
-      );
+      export const MyObservableComponent = (props) => {
+        const annotation = useObservable(annotation$);
+        return <MyOriginalComponent annotation={annotation} {...props} />;
+      };
 */
 export const annotation$ = new BehaviorSubject<AnnotationState>(null);
 
