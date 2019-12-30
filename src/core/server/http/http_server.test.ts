@@ -18,11 +18,7 @@
  */
 
 import { Server } from 'http';
-
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
-
+import { readFileSync } from 'fs';
 import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
@@ -39,6 +35,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const cookieOptions = {
   name: 'sid',
@@ -55,6 +52,14 @@ const loggingService = loggingServiceMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
+let certificate: string;
+let key: string;
+
+beforeAll(() => {
+  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
+  key = readFileSync(KBN_KEY_PATH, 'utf8');
+});
+
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
@@ -68,10 +73,10 @@ beforeEach(() => {
     ...config,
     ssl: {
       enabled: true,
-      certificate: '/certificate',
+      certificate,
       cipherSuites: ['cipherSuite'],
       getSecureOptions: () => 0,
-      key: '/key',
+      key,
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;

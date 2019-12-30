@@ -19,6 +19,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import crypto from 'crypto';
+import { readFileSync } from 'fs';
 
 // `crypto` type definitions doesn't currently include `crypto.constants`, see
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
@@ -88,14 +89,28 @@ export class SslConfig {
   constructor(config: SslConfigType) {
     this.enabled = config.enabled;
     this.redirectHttpFromPort = config.redirectHttpFromPort;
-    this.key = config.key;
-    this.certificate = config.certificate;
-    this.certificateAuthorities = this.initCertificateAuthorities(config.certificateAuthorities);
-    this.keyPassphrase = config.keyPassphrase;
     this.cipherSuites = config.cipherSuites;
     this.supportedProtocols = config.supportedProtocols;
     this.requestCert = config.clientAuthentication !== 'none';
     this.rejectUnauthorized = config.clientAuthentication === 'required';
+
+    if (config.key && config.certificate) {
+      this.key = readFile(config.key);
+      this.keyPassphrase = config.keyPassphrase;
+      this.certificate = readFile(config.certificate);
+    }
+
+    const ca = config.certificateAuthorities;
+    if (ca) {
+      const parsed: string[] = [];
+      const paths = Array.isArray(ca) ? ca : [ca];
+      if (paths.length > 0) {
+        for (const path of paths) {
+          parsed.push(readFile(path));
+        }
+        this.certificateAuthorities = parsed;
+      }
+    }
   }
 
   /**
@@ -117,12 +132,8 @@ export class SslConfig {
         : secureOptions | secureOption; // eslint-disable-line no-bitwise
     }, 0);
   }
-
-  private initCertificateAuthorities(certificateAuthorities?: string[] | string) {
-    if (certificateAuthorities === undefined || Array.isArray(certificateAuthorities)) {
-      return certificateAuthorities;
-    }
-
-    return [certificateAuthorities];
-  }
 }
+
+const readFile = (file: string) => {
+  return readFileSync(file, 'utf8');
+};

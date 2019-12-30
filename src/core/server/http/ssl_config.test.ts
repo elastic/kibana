@@ -17,10 +17,46 @@
  * under the License.
  */
 
+import { mockReadFileSync } from './ssl_config.test.mocks';
+
 import { sslSchema, SslConfig } from './ssl_config';
 
+const createConfig = (obj: any) => new SslConfig(sslSchema.validate(obj));
+
+beforeEach(() => {
+  mockReadFileSync.mockReset();
+  mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+});
+
 describe('throws when config is invalid', () => {
-  test('throws if TLS is enabled but `key` is not specified', () => {
+  beforeEach(() => {
+    const realFs = jest.requireActual('fs');
+    mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
+  });
+
+  test('throws if `key` is invalid', () => {
+    const obj = { key: '/invalid/key', certificate: '/valid/certificate' };
+    expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
+      `"ENOENT: no such file or directory, open '/invalid/key'"`
+    );
+  });
+
+  test('throws if `certificate` is invalid', () => {
+    mockReadFileSync.mockImplementationOnce((path: string) => `content-of-${path}`);
+    const obj = { key: '/valid/key', certificate: '/invalid/certificate' };
+    expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
+      `"ENOENT: no such file or directory, open '/invalid/certificate'"`
+    );
+  });
+
+  test('throws if `certificateAuthorities` is invalid', () => {
+    const obj = { certificateAuthorities: '/invalid/ca' };
+    expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
+      `"ENOENT: no such file or directory, open '/invalid/ca'"`
+    );
+  });
+
+  test('throws if TLS is enabled but `certificate` is specified and `key` is not', () => {
     const obj = {
       certificate: '/path/to/certificate',
       enabled: true,
@@ -30,7 +66,7 @@ describe('throws when config is invalid', () => {
     );
   });
 
-  test('throws if TLS is enabled but `certificate` is not specified', () => {
+  test('throws if TLS is enabled but `key` is specified and `certificate` is not', () => {
     const obj = {
       enabled: true,
       key: '/path/to/key',
@@ -61,28 +97,32 @@ describe('throws when config is invalid', () => {
   });
 });
 
-test('can specify single `certificateAuthority` as a string', () => {
-  const obj = {
-    certificate: '/path/to/certificate',
-    certificateAuthorities: '/authority/',
-    enabled: true,
-    key: '/path/to/key',
-  };
+describe('reads files', () => {
+  it('reads certificate authorities when `certificateAuthorities` is specified', () => {
+    let configValue = createConfig({ certificateAuthorities: 'some-path' });
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.certificateAuthorities).toEqual(['content-of-some-path']);
 
-  const configValue = sslSchema.validate(obj);
-  expect(configValue.certificateAuthorities).toBe('/authority/');
-});
+    mockReadFileSync.mockClear();
+    configValue = createConfig({ certificateAuthorities: ['some-path'] });
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.certificateAuthorities).toEqual(['content-of-some-path']);
 
-test('can specify several `certificateAuthorities`', () => {
-  const obj = {
-    certificate: '/path/to/certificate',
-    certificateAuthorities: ['/authority/1', '/authority/2'],
-    enabled: true,
-    key: '/path/to/key',
-  };
+    mockReadFileSync.mockClear();
+    configValue = createConfig({ certificateAuthorities: ['some-path', 'another-path'] });
+    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+    expect(configValue.certificateAuthorities).toEqual([
+      'content-of-some-path',
+      'content-of-another-path',
+    ]);
+  });
 
-  const configValue = sslSchema.validate(obj);
-  expect(configValue.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
+  it('reads a private key and certificate when `key` and `certificate` are specified', () => {
+    const configValue = createConfig({ key: 'some-path', certificate: 'another-path' });
+    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+    expect(configValue.key).toEqual('content-of-some-path');
+    expect(configValue.certificate).toEqual('content-of-another-path');
+  });
 });
 
 describe('#supportedProtocols', () => {
