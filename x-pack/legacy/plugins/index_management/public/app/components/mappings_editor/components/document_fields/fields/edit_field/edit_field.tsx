@@ -155,6 +155,9 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
                     {ParametersForm && (
                       <ParametersForm
+                        // As the component "ParametersForm" does not change when switching type, and all the props
+                        // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
+                        // This will trigger an unmount of all the previous form fields and then mount the new ones.
                         key={subType ?? type}
                         field={field}
                         allFields={allFields}
