@@ -75,7 +75,7 @@ const getTexts = (view: ModalView, totalErrors = 0) => ({
       'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorDescription',
       {
         defaultMessage:
-          'The mappings provided contains some errors. You can decide to ignore them, the configuration, field or parameter containing an error will be removed.',
+          'The mappings provided contains some errors. You can decide to ignore them, in which case any configuration, field or parameter containing an error will be discared before loading the mappings object in the editor.',
       }
     ),
     helptext: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorHelpText', {
