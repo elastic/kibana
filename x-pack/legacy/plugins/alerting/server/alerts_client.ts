@@ -64,11 +64,11 @@ export interface FindOptions {
   };
 }
 
-export interface FindResult<T extends Alert = Alert> {
+export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: T[];
+  data: Alert[];
 }
 
 interface CreateOptions {
@@ -186,29 +186,24 @@ export class AlertsClient {
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 
-  public async find<T extends Alert = Alert>({ options = {} }: FindOptions = {}): Promise<
-    FindResult<T>
-  > {
-    const results = await this.savedObjectsClient.find<RawAlert>({
+  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
+    const {
+      page,
+      per_page: perPage,
+      total,
+      saved_objects: data,
+    } = await this.savedObjectsClient.find<RawAlert>({
       ...options,
       type: 'alert',
     });
 
-    const data = results.saved_objects.map(
-      result =>
-        this.getAlertFromRaw(
-          result.id,
-          result.attributes,
-          result.updated_at,
-          result.references
-        ) as T
-    );
-
     return {
-      page: results.page,
-      perPage: results.per_page,
-      total: results.total,
-      data,
+      page,
+      perPage,
+      total,
+      data: data.map(({ id, attributes, updated_at, references }) =>
+        this.getAlertFromRaw(id, attributes, updated_at, references)
+      ),
     };
   }
 

@@ -24,7 +24,7 @@ export const findRules = async ({
   sortField,
   sortOrder,
 }: FindRuleParams) => {
-  return alertsClient.find<RuleAlertType>({
+  return alertsClient.find({
     options: {
       fields,
       page,
@@ -33,5 +33,10 @@ export const findRules = async ({
       sortOrder,
       sortField,
     },
-  });
+  }) as Promise<{
+    page: number;
+    perPage: number;
+    total: number;
+    data: RuleAlertType[];
+  }>;
 };
