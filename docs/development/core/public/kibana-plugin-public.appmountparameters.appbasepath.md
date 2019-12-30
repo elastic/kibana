@@ -4,7 +4,7 @@
 
 ## AppMountParameters.appBasePath property
 
-The base path for configuring the application's router.
+The route path for configuring navigation to the application. This string should not include the base path from HTTP.
 
 <b>Signature:</b>
 
@@ -22,6 +22,7 @@ export class MyPlugin implements Plugin {
   setup({ application }) {
     application.register({
      id: 'my-app',
+     appRoute: '/my-app',
      async mount(params) {
        const { renderApp } = await import('./application');
        return renderApp(params);
