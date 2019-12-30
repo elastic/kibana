@@ -35,15 +35,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setIndexPatternValidityResponse();
 
-    ({
-      find,
-      exists,
-      actions,
-      getEuiStepsHorizontalActive,
-      goToStep,
-      table,
-      form,
-    } = setup());
+    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form } = setup());
   });
 
   const numericFields = ['a-numericField', 'b-numericField'];
@@ -134,10 +126,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       it('should display the histogram fields available', async () => {
         const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
 
-        expect(tableCellsValues).toEqual([
-          ['a-numericField'],
-          ['b-numericField'],
-        ]);
+        expect(tableCellsValues).toEqual([['a-numericField'], ['b-numericField']]);
       });
 
       it('should add histogram field to the field list when clicking on it', () => {

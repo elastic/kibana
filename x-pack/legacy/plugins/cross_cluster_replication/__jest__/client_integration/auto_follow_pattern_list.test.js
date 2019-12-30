@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers, nextTick, findTestSubject, getRandomString } from './helpers';
+import {
+  setupEnvironment,
+  pageHelpers,
+  nextTick,
+  findTestSubject,
+  getRandomString,
+} from './helpers';
 
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
@@ -89,11 +95,11 @@ describe('<AutoFollowPatternList />', () => {
 
     const autoFollowPattern1 = getAutoFollowPatternClientMock({
       name: `a${getRandomString()}`,
-      followIndexPattern: `${testPrefix}{{leader_index}}${testSuffix}`
+      followIndexPattern: `${testPrefix}{{leader_index}}${testSuffix}`,
     });
     const autoFollowPattern2 = getAutoFollowPatternClientMock({
       name: `b${getRandomString()}`,
-      followIndexPattern: '{{leader_index}}' // no prefix nor suffix
+      followIndexPattern: '{{leader_index}}', // no prefix nor suffix
     });
     const autoFollowPatterns = [autoFollowPattern1, autoFollowPattern2];
 
@@ -101,13 +107,7 @@ describe('<AutoFollowPatternList />', () => {
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
-      ({
-        find,
-        exists,
-        component,
-        table,
-        actions,
-      } = setup());
+      ({ find, exists, component, table, actions } = setup());
 
       await nextTick(); // Make sure that the Http request is fulfilled
       component.update();
@@ -133,20 +133,24 @@ describe('<AutoFollowPatternList />', () => {
     test('should list the auto-follow patterns in the table', () => {
       expect(tableCellsValues.length).toEqual(autoFollowPatterns.length);
       expect(tableCellsValues).toEqual([
-        [ '', // Empty because the first column is the checkbox to select row
+        [
+          '', // Empty because the first column is the checkbox to select row
           autoFollowPattern1.name,
           autoFollowPattern1.remoteCluster,
           autoFollowPattern1.leaderIndexPatterns.join(', '),
           testPrefix,
           testSuffix,
-          '' // Empty because the last column is for the "actions" on the resource
-        ], [ '',
+          '', // Empty because the last column is for the "actions" on the resource
+        ],
+        [
+          '',
           autoFollowPattern2.name,
           autoFollowPattern2.remoteCluster,
           autoFollowPattern2.leaderIndexPatterns.join(', '),
           '', // no prefix
           '', // no suffix
-          '' ]
+          '',
+        ],
       ]);
     });
 
@@ -181,7 +185,9 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse({ itemsDeleted: [autoFollowPattern1.name] });
+        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse({
+          itemsDeleted: [autoFollowPattern1.name],
+        });
 
         actions.selectAutoFollowPatternAt(0);
         actions.clickBulkDeleteButton();
@@ -234,7 +240,11 @@ describe('<AutoFollowPatternList />', () => {
 
       test('should have a "settings" section', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(find('settingsSection').find('h3').text()).toEqual('Settings');
+        expect(
+          find('settingsSection')
+            .find('h3')
+            .text()
+        ).toEqual('Settings');
         expect(exists('settingsValues')).toBe(true);
       });
 
@@ -242,7 +252,9 @@ describe('<AutoFollowPatternList />', () => {
         actions.clickAutoFollowPatternAt(0);
 
         expect(find('remoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);
-        expect(find('leaderIndexPatterns').text()).toEqual(autoFollowPattern1.leaderIndexPatterns.join(', '));
+        expect(find('leaderIndexPatterns').text()).toEqual(
+          autoFollowPattern1.leaderIndexPatterns.join(', ')
+        );
         expect(find('patternPrefix').text()).toEqual(testPrefix);
         expect(find('patternSuffix').text()).toEqual(testSuffix);
       });
@@ -264,7 +276,9 @@ describe('<AutoFollowPatternList />', () => {
       test('should have a link to view the indices in Index Management', () => {
         actions.clickAutoFollowPatternAt(0);
         expect(exists('viewIndexManagementLink')).toBe(true);
-        expect(find('viewIndexManagementLink').text()).toBe('View your follower indices in Index Management');
+        expect(find('viewIndexManagementLink').text()).toBe(
+          'View your follower indices in Index Management'
+        );
       });
 
       test('should have a "close", "delete" and "edit" button in the footer', () => {
@@ -294,13 +308,16 @@ describe('<AutoFollowPatternList />', () => {
 
       test('should display the recent errors', async () => {
         const message = 'bar';
-        const recentAutoFollowErrors = [{
-          leaderIndex: `${autoFollowPattern1.name}:my-leader-test`,
-          autoFollowException: { type: 'exception', reason: message }
-        }, {
-          leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
-          autoFollowException: { type: 'exception', reason: message }
-        }];
+        const recentAutoFollowErrors = [
+          {
+            leaderIndex: `${autoFollowPattern1.name}:my-leader-test`,
+            autoFollowException: { type: 'exception', reason: message },
+          },
+          {
+            leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
+            autoFollowException: { type: 'exception', reason: message },
+          },
+        ];
         httpRequestsMockHelpers.setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
         actions.clickAutoFollowPatternAt(0);
@@ -314,7 +331,9 @@ describe('<AutoFollowPatternList />', () => {
 
         expect(exists('autoFollowPatternDetail.errors')).toBe(true);
         expect(exists('autoFollowPatternDetail.titleErrors')).toBe(true);
-        expect(find('autoFollowPatternDetail.recentError').map(error => error.text())).toEqual([message]);
+        expect(find('autoFollowPatternDetail.recentError').map(error => error.text())).toEqual([
+          message,
+        ]);
       });
     });
   });

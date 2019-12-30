@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import {
   CustomSeriesColorsMap,
   DARK_THEME,
@@ -21,6 +20,7 @@ import {
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import styled from 'styled-components';
+import { useUiSetting } from '../../lib/kibana';
 import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
 
 export const defaultChartHeight = '100%';
@@ -95,27 +95,28 @@ export const getSeriesStyle = (
 };
 
 // Apply margins and paddings: https://ela.st/charts-spacing
-export const getTheme = () => {
-  const theme: PartialTheme = {
-    chartMargins: {
-      left: 0,
-      right: 0,
-      // Apply some paddings to the top to avoid chopping the y tick https://ela.st/chopping-edge
-      top: 4,
-      bottom: 0,
-    },
-    chartPaddings: {
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    },
-    scales: {
-      barsPadding: 0.05,
-    },
-  };
-  const isDarkMode: boolean = chrome.getUiSettingsClient().get(DEFAULT_DARK_MODE);
+const theme: PartialTheme = {
+  chartMargins: {
+    left: 0,
+    right: 0,
+    // Apply some paddings to the top to avoid chopping the y tick https://ela.st/chopping-edge
+    top: 4,
+    bottom: 0,
+  },
+  chartPaddings: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  scales: {
+    barsPadding: 0.05,
+  },
+};
+export const useTheme = () => {
+  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const defaultTheme = isDarkMode ? DARK_THEME : LIGHT_THEME;
+
   return mergeWithDefaultTheme(theme, defaultTheme);
 };
 
@@ -126,11 +127,12 @@ export const chartDefaultSettings = {
   showLegend: false,
   showLegendDisplayValue: false,
   debug: false,
-  theme: getTheme(),
 };
 
-const kibanaTimezone: string = chrome.getUiSettingsClient().get(DEFAULT_DATE_FORMAT_TZ);
-export const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
+export const useBrowserTimeZone = () => {
+  const kibanaTimezone = useUiSetting<string>(DEFAULT_DATE_FORMAT_TZ);
+  return kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
+};
 
 export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {
   const height = customHeight || autoSizerHeight;

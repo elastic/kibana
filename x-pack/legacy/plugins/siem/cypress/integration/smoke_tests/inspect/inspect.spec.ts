@@ -45,7 +45,7 @@ describe('Inspect', () => {
       toggleTimelineVisibility();
       executeKQL(hostExistsQuery);
       cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
-      cy.get(TIMELINE_INSPECT_BUTTON).should('not.be.disabled', { timeout: DEFAULT_TIMEOUT });
+      cy.get(TIMELINE_INSPECT_BUTTON, { timeout: DEFAULT_TIMEOUT }).should('not.be.disabled');
       cy.get(TIMELINE_INSPECT_BUTTON).trigger('click', { force: true });
       cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
     });

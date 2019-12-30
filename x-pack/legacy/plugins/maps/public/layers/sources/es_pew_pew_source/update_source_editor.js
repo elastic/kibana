@@ -61,7 +61,10 @@ export class UpdateSourceEditor extends Component {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage id="xpack.maps.source.pewPew.metricsLabel" defaultMessage="Metrics" />
+              <FormattedMessage
+                id="xpack.maps.source.pewPew.metricsLabel"
+                defaultMessage="Metrics"
+              />
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />

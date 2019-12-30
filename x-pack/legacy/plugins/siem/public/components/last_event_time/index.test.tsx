@@ -10,12 +10,11 @@ import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
-import { mount } from 'enzyme';
 
 const mockUseLastEventTimeQuery: jest.Mock = useLastEventTimeQuery as jest.Mock;
 jest.mock('../../containers/events/last_event_time', () => ({
@@ -23,6 +22,8 @@ jest.mock('../../containers/events/last_event_time', () => ({
 }));
 
 describe('Last Event Time Stat', () => {
+  const mount = useMountAppended();
+
   beforeEach(() => {
     mockUseLastEventTimeQuery.mockReset();
   });

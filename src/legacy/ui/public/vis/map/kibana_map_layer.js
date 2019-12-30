@@ -19,7 +19,6 @@
 
 import { EventEmitter } from 'events';
 
-
 export class KibanaMapLayer extends EventEmitter {
   constructor() {
     super();
@@ -38,24 +37,13 @@ export class KibanaMapLayer extends EventEmitter {
     leafletMap.removeLayer(this._leafletLayer);
   }
 
-  appendLegendContents() {
-  }
+  appendLegendContents() {}
 
-  updateExtent() {
-  }
+  updateExtent() {}
 
-  movePointer() {
-  }
+  movePointer() {}
 
   getAttributions() {
     return this._attribution;
   }
 }
-
-
-
-
-
-
-
-

@@ -20,6 +20,7 @@ Object {
     "keyPassphrase": "some-phrase",
     "someNewValue": "new",
   },
+  "uuid": undefined,
 }
 `;
 
@@ -43,6 +44,7 @@ Object {
     "enabled": false,
     "key": "key",
   },
+  "uuid": undefined,
 }
 `;
 

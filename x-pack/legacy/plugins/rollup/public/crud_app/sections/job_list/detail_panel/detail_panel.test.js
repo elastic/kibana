@@ -17,6 +17,7 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
+jest.mock('ui/new_platform');
 jest.mock('../../../services', () => {
   const services = require.requireActual('../../../services');
   return {
@@ -56,11 +57,11 @@ describe('<DetailPanel />', () => {
       expect(title.text()).toEqual(job.id);
     });
 
-    it('should have children if it\'s open', () => {
+    it("should have children if it's open", () => {
       expect(component.find('DetailPanelUi').children().length).toBeTruthy();
     });
 
-    it('should *not* have children if it\s closed', () => {
+    it('should *not* have children if its closed', () => {
       ({ component } = initTestBed({ isOpen: false }));
       expect(component.find('DetailPanelUi').children().length).toBeFalsy();
     });
@@ -86,8 +87,8 @@ describe('<DetailPanel />', () => {
     const tabActive = JOB_DETAILS_TAB_SUMMARY;
     const { component } = initTestBed({ panelType: tabActive });
     const tabs = component.find('EuiTab');
-    const getTab = (id) => {
-      const found = tabs.findWhere((tab) => {
+    const getTab = id => {
+      const found = tabs.findWhere(tab => {
         return tab.text() === tabToHumanizedMap[id].props.defaultMessage;
       });
       return found.first();
@@ -113,7 +114,7 @@ describe('<DetailPanel />', () => {
       expect(openDetailPanel.mock.calls.length).toBe(1);
       expect(openDetailPanel.mock.calls[0][0]).toEqual({
         jobId: job.id,
-        panelType: JOB_DETAILS_TAB_TERMS
+        panelType: JOB_DETAILS_TAB_TERMS,
       });
     });
   });
@@ -140,22 +141,25 @@ describe('<DetailPanel />', () => {
         const LOGISTICS_SUBSECTIONS = ['IndexPattern', 'RollupIndex', 'Cron', 'Delay'];
 
         it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
-          const logisticsSubsectionsTitles = LOGISTICS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (find(`rollupJobDetailLogistics${subSection}Title`)) {
-              subSections.push(subSection);
-            }
-            return subSections;
-          }, []);
+          const logisticsSubsectionsTitles = LOGISTICS_SUBSECTIONS.reduce(
+            (subSections, subSection) => {
+              if (find(`rollupJobDetailLogistics${subSection}Title`)) {
+                subSections.push(subSection);
+              }
+              return subSections;
+            },
+            []
+          );
           expect(logisticsSubsectionsTitles).toEqual(LOGISTICS_SUBSECTIONS);
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          LOGISTICS_SUBSECTIONS.forEach((subSection) => {
+          LOGISTICS_SUBSECTIONS.forEach(subSection => {
             const wrapper = find(`rollupJobDetailLogistics${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
-            switch(subSection) {
+            switch (subSection) {
               case 'IndexPattern':
                 expect(description).toEqual(defaultJob.indexPattern);
                 break;
@@ -170,7 +174,9 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+                throw new Error(
+                  'Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'
+                );
             }
           });
         });
@@ -180,22 +186,25 @@ describe('<DetailPanel />', () => {
         const DATE_HISTOGRAMS_SUBSECTIONS = ['TimeField', 'Timezone', 'Interval'];
 
         it('should have "Time field", "Timezone", "Interval" subsections', () => {
-          const dateHistogramSubsections = DATE_HISTOGRAMS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (find(`rollupJobDetailDateHistogram${subSection}Title`)) {
-              subSections.push(subSection);
-            }
-            return subSections;
-          }, []);
+          const dateHistogramSubsections = DATE_HISTOGRAMS_SUBSECTIONS.reduce(
+            (subSections, subSection) => {
+              if (find(`rollupJobDetailDateHistogram${subSection}Title`)) {
+                subSections.push(subSection);
+              }
+              return subSections;
+            },
+            []
+          );
           expect(dateHistogramSubsections).toEqual(DATE_HISTOGRAMS_SUBSECTIONS);
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          DATE_HISTOGRAMS_SUBSECTIONS.forEach((subSection) => {
+          DATE_HISTOGRAMS_SUBSECTIONS.forEach(subSection => {
             const wrapper = find(`rollupJobDetailDateHistogram${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
-            switch(subSection) {
+            switch (subSection) {
               case 'TimeField':
                 expect(description).toEqual(defaultJob.dateHistogramField);
                 break;
@@ -207,14 +216,21 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant DATE_HISTOGRAMS_SUBSECTIONS is probably missing a new subsection'));
+                throw new Error(
+                  'Should not get here. The constant DATE_HISTOGRAMS_SUBSECTIONS is probably missing a new subsection'
+                );
             }
           });
         });
       });
 
       describe('Stats section', () => {
-        const STATS_SUBSECTIONS = ['DocumentsProcessed', 'PagesProcessed', 'RollupsIndexed', 'TriggerCount'];
+        const STATS_SUBSECTIONS = [
+          'DocumentsProcessed',
+          'PagesProcessed',
+          'RollupsIndexed',
+          'TriggerCount',
+        ];
 
         it('should have "Documents processed", "Pages processed", "Rollups indexed" and "Trigger count" subsections', () => {
           const statsSubSections = STATS_SUBSECTIONS.reduce((subSections, subSection) => {
@@ -227,12 +243,12 @@ describe('<DetailPanel />', () => {
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          STATS_SUBSECTIONS.forEach((subSection) => {
+          STATS_SUBSECTIONS.forEach(subSection => {
             const wrapper = find(`rollupJobDetailStats${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
-            switch(subSection) {
+            switch (subSection) {
               case 'DocumentsProcessed':
                 expect(description).toEqual(defaultJob.documentsProcessed.toString());
                 break;
@@ -247,7 +263,9 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant STATS_SUBSECTIONS is probably missing a new subsection'));
+                throw new Error(
+                  'Should not get here. The constant STATS_SUBSECTIONS is probably missing a new subsection'
+                );
             }
           });
         });

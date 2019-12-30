@@ -23,7 +23,13 @@ import { shallow } from 'enzyme';
 import { ScriptingHelpFlyout } from './help_flyout';
 
 jest.mock('ui/documentation_links', () => ({
-  getDocLink: (doc) => `(docLink for ${doc})`,
+  getDocLink: doc => `(docLink for ${doc})`,
+}));
+
+jest.mock('./test_script', () => ({
+  TestScript: () => {
+    return `<div>mockTestScript</div>`;
+  },
 }));
 
 const indexPatternMock = {};

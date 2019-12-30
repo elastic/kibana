@@ -46,7 +46,7 @@ export function getUsageStats(rawStats) {
       index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
       graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
       timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
-      indices: rollUpIndices(rolledUpStats)
+      indices: rollUpIndices(rolledUpStats),
     };
 
     // Get the stats provided by telemetry collectors.
@@ -70,8 +70,8 @@ export function getUsageStats(rawStats) {
       ...accum,
       [clusterUuid]: {
         ...stats,
-        plugins
-      }
+        plugins,
+      },
     };
   }, {});
 }
@@ -82,8 +82,8 @@ export function combineStats(highLevelStats, usageStats = {}) {
       ...accum,
       [currClusterUuid]: {
         ...highLevelStats[currClusterUuid],
-        ...usageStats[currClusterUuid]
-      }
+        ...usageStats[currClusterUuid],
+      },
     };
   }, {});
 }
@@ -93,11 +93,17 @@ export function combineStats(highLevelStats, usageStats = {}) {
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(server, callCluster, clusterUuids, start, end) {
-  const rawStats = await fetchHighLevelStats(server, callCluster, clusterUuids, start, end, KIBANA_SYSTEM_ID);
+  const rawStats = await fetchHighLevelStats(
+    server,
+    callCluster,
+    clusterUuids,
+    start,
+    end,
+    KIBANA_SYSTEM_ID
+  );
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
   const usageStats = getUsageStats(rawStats);
   const stats = combineStats(highLevelStats, usageStats);
 
   return stats;
 }
-
