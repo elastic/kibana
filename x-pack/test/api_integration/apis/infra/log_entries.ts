@@ -156,6 +156,126 @@ export default function({ getService }: FtrProviderContext) {
           expect(firstEntry.cursor.time >= EARLIEST_KEY_WITH_DATA.time).to.be(true);
           expect(lastEntry.cursor.time <= KEY_WITHIN_DATA_RANGE.time).to.be(true);
         });
+
+        it('Paginates correctly with `after`', async () => {
+          const { body: firstPageBody } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: EARLIEST_KEY_WITH_DATA.time,
+                endDate: KEY_WITHIN_DATA_RANGE.time,
+                size: 10,
+              })
+            );
+          const firstPage = pipe(
+            logEntriesResponseRT.decode(firstPageBody),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const { body: secondPageBody } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: EARLIEST_KEY_WITH_DATA.time,
+                endDate: KEY_WITHIN_DATA_RANGE.time,
+                after: firstPage.data.bottomCursor,
+                size: 10,
+              })
+            );
+          const secondPage = pipe(
+            logEntriesResponseRT.decode(secondPageBody),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const { body: bothPagesBody } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: EARLIEST_KEY_WITH_DATA.time,
+                endDate: KEY_WITHIN_DATA_RANGE.time,
+                size: 20,
+              })
+            );
+          const bothPages = pipe(
+            logEntriesResponseRT.decode(bothPagesBody),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(bothPages.data.entries).to.eql([
+            ...firstPage.data.entries,
+            ...secondPage.data.entries,
+          ]);
+
+          expect(bothPages.data.topCursor).to.eql(firstPage.data.topCursor);
+          expect(bothPages.data.bottomCursor).to.eql(secondPage.data.bottomCursor);
+        });
+
+        it('Paginates correctly with `before`', async () => {
+          const { body: lastPageBody } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: KEY_WITHIN_DATA_RANGE.time,
+                endDate: LATEST_KEY_WITH_DATA.time,
+                before: 'last',
+                size: 10,
+              })
+            );
+          const lastPage = pipe(
+            logEntriesResponseRT.decode(lastPageBody),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const { body: secondToLastPageBody } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: KEY_WITHIN_DATA_RANGE.time,
+                endDate: LATEST_KEY_WITH_DATA.time,
+                before: lastPage.data.topCursor,
+                size: 10,
+              })
+            );
+          const secondToLastPage = pipe(
+            logEntriesResponseRT.decode(secondToLastPageBody),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const { body: bothPagesBody } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate: KEY_WITHIN_DATA_RANGE.time,
+                endDate: LATEST_KEY_WITH_DATA.time,
+                before: 'last',
+                size: 20,
+              })
+            );
+          const bothPages = pipe(
+            logEntriesResponseRT.decode(bothPagesBody),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(bothPages.data.entries).to.eql([
+            ...secondToLastPage.data.entries,
+            ...lastPage.data.entries,
+          ]);
+
+          expect(bothPages.data.topCursor).to.eql(secondToLastPage.data.topCursor);
+          expect(bothPages.data.bottomCursor).to.eql(lastPage.data.bottomCursor);
+        });
       });
     });
 
