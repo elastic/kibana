@@ -54,7 +54,7 @@ export const useJson = <T extends object = { [key: string]: any }>({
     const isValid = content.trim() === '' ? true : isJSON(content);
     if (!isValid) {
       setError(
-        i18n.translate('xpack.idxMgmt.validators.string.invalidJSONError', {
+        i18n.translate('esUi.validation.string.invalidJSONError', {
           defaultMessage: 'Invalid JSON',
         })
       );
