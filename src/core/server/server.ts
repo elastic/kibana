@@ -216,6 +216,7 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
+        // it consumes elasticsearch observables to provide the same client throughout the context lifetime.
         const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
         const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
         const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
@@ -226,8 +227,6 @@ export class Server {
             render: rendering.render.bind(rendering, req, uiSettingsClient),
           },
           savedObjects: {
-            // Note: the client provider doesn't support new ES clients
-            // emitted from adminClient$
             client: savedObjectsClient,
           },
           elasticsearch: {

@@ -49,23 +49,23 @@ export interface ElasticsearchServiceSetup {
   ) => ICustomClusterClient;
 
   /**
-   * Observable of clients for the `admin` cluster. Observable emits when Elasticsearch config changes on the Kibana
-   * server. See {@link IClusterClient}.
+   * A client for the `admin` cluster. All Elasticsearch config value changes are processed under the hood.
+   * See {@link IClusterClient}.
    *
    * @example
    * ```js
-   * const client = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
+   * const client = core.elasticsearch.adminClient;
    * ```
    */
   readonly adminClient: IClusterClient;
 
   /**
-   * Observable of clients for the `data` cluster. Observable emits when Elasticsearch config changes on the Kibana
-   * server. See {@link IClusterClient}.
+   * A client for the `data` cluster. All Elasticsearch config value changes are processed under the hood.
+   * See {@link IClusterClient}.
    *
    * @example
    * ```js
-   * const client = await elasticsearch.dataClient$.pipe(take(1)).toPromise();
+   * const client = core.elasticsearch.dataClient;
    * ```
    */
   readonly dataClient: IClusterClient;
