@@ -16,8 +16,6 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
-
 describe('EventDetails', () => {
   const mount = useMountAppended();
 

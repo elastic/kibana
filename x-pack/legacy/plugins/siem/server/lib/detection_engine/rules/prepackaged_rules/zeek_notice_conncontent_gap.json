@@ -1,0 +1,17 @@
+{
+  "rule_id": "22d12b64-33f4-40ce-ad57-49dd870bc8e5",
+  "risk_score": 50,
+  "description": "Data has sequence hole; perhaps due to filtering.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Conn::Content_Gap",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Conn::Content_Gap\" or rule.name: \"Conn::Content_Gap\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

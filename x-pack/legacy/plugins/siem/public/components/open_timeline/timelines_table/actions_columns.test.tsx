@@ -17,7 +17,7 @@ import { OpenTimelineResult } from '../types';
 import { TimelinesTable } from '.';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../lib/kibana');
 
 describe('#getActionsColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

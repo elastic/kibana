@@ -17,7 +17,7 @@
  * under the License.
  */
 import angular from 'angular'; // just used in embeddables and discover controller
-import { DiscoverServices } from './helpers/build_services';
+import { DiscoverServices } from './build_services';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -47,6 +47,10 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
+// import directives that
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
+
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
@@ -59,7 +63,10 @@ export {
   hasSearchStategyForIndexPattern,
   isDefaultTypeIndexPattern,
   SearchSource,
-} from '../../../../ui/public/courier';
+  EsQuerySortValue,
+  SortDirection,
+  ISearchSource,
+} from 'ui/courier';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
 // @ts-ignore
@@ -78,6 +85,8 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+// @ts-ignore
+export { formatMsg, formatStack } from 'ui/notify/lib/index';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
@@ -87,6 +96,7 @@ export {
   IndexPattern,
   IFieldType,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from './doc_views/doc_views_types';
+export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
-export { Chrome } from 'ui/chrome';
+export { Chrome, IInjector } from 'ui/chrome';
+export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

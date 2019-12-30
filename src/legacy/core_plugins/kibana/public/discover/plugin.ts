@@ -21,20 +21,21 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public'
 import angular from 'angular';
 import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { registerFeature } from './helpers/register_feature';
+import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { Chrome, setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
-import { buildServices } from './helpers/build_services';
+import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
-import { DocViewsRegistry } from './doc_views/doc_views_registry';
-import { DocViewInput, DocViewInputFn } from './doc_views/doc_views_types';
-import { DocViewTable } from './components/table/table';
-import { JsonCodeBlock } from './components/json_code_block/json_code_block';
+import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
+import { DocViewInput, DocViewInputFn } from './np_ready/doc_views/doc_views_types';
+import { DocViewTable } from './np_ready/components/table/table';
+import { JsonCodeBlock } from './np_ready/components/json_code_block/json_code_block';
+import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -52,6 +53,7 @@ export interface DiscoverSetupPlugins {
   __LEGACY: {
     chrome: Chrome;
   };
+  home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
@@ -111,10 +113,11 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         }
         await this.initializeServices();
         await this.initializeInnerAngular();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./np_ready/application');
         return renderApp(innerAngularName, params.element);
       },
     });
+    registerFeature(plugins.home);
 
     return {
       addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
@@ -146,14 +149,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     };
 
     this.registerEmbeddable(core, plugins);
-    registerFeature();
   }
 
   /**
    * register embeddable with a slimmer embeddable version of inner angular
    */
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
-    const { SearchEmbeddableFactory } = await import('./embeddable');
+    const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
     const getInjector = async () => {
       if (!this.initializeServices) {
         throw Error('Discover plugin registerEmbeddable:  initializeServices is undefined');
