@@ -9,7 +9,7 @@ Create application specific Elasticsearch cluster API client with customized con
 <b>Signature:</b>
 
 ```typescript
-readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => IClusterClient;
+readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
 ```
 
 ## Example

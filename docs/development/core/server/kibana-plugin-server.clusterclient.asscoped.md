@@ -9,14 +9,14 @@ Creates an instance of [IScopedClusterClient](./kibana-plugin-server.iscopedclus
 <b>Signature:</b>
 
 ```typescript
-asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
+asScoped(request?: ScopeableRequest): IScopedClusterClient;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  request | <code>KibanaRequest &#124; LegacyRequest &#124; FakeRequest</code> | Request the <code>IScopedClusterClient</code> instance will be scoped to. Supports request optionality, Legacy.Request &amp; FakeRequest for BWC with LegacyPlatform |
+|  request | <code>ScopeableRequest</code> | Request the <code>IScopedClusterClient</code> instance will be scoped to. Supports request optionality, Legacy.Request &amp; FakeRequest for BWC with LegacyPlatform |
 
 <b>Returns:</b>
 

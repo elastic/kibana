@@ -84,6 +84,7 @@ export {
   ElasticsearchServiceSetup,
   APICaller,
   FakeRequest,
+  ScopeableRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
 export {

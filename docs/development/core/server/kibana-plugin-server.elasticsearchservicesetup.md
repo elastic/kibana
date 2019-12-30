@@ -15,17 +15,7 @@ export interface ElasticsearchServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [adminClient$](./kibana-plugin-server.elasticsearchservicesetup.adminclient_.md) | <code>Observable&lt;IClusterClient&gt;</code> | Observable of clients for the <code>admin</code> cluster. Observable emits when Elasticsearch config changes on the Kibana server. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->.
-```js
-const client = await elasticsearch.adminClient$.pipe(take(1)).toPromise();
-
-```
- |
-|  [createClient](./kibana-plugin-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; IClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
-|  [dataClient$](./kibana-plugin-server.elasticsearchservicesetup.dataclient_.md) | <code>Observable&lt;IClusterClient&gt;</code> | Observable of clients for the <code>data</code> cluster. Observable emits when Elasticsearch config changes on the Kibana server. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->.
-```js
-const client = await elasticsearch.dataClient$.pipe(take(1)).toPromise();
-
-```
- |
+|  [adminClient](./kibana-plugin-server.elasticsearchservicesetup.adminclient.md) | <code>IClusterClient</code> | A client for the <code>admin</code> cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
+|  [createClient](./kibana-plugin-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
+|  [dataClient](./kibana-plugin-server.elasticsearchservicesetup.dataclient.md) | <code>IClusterClient</code> | A client for the <code>data</code> cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
 
