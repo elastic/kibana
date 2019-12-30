@@ -34,6 +34,10 @@ kibana_vars=(
     elasticsearch.ssl.certificateAuthorities
     elasticsearch.ssl.key
     elasticsearch.ssl.keyPassphrase
+    elasticsearch.ssl.keystore.path
+    elasticsearch.ssl.keystore.password
+    elasticsearch.ssl.truststore.path
+    elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
     elasticsearch.startupTimeout
     elasticsearch.username
