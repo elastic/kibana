@@ -19,4 +19,4 @@
 
 export { ISyncStrategy, SyncStrategy, createKbnUrlSyncStrategy } from './state_sync_strategies';
 export { InitialTruthSource, IStateSyncConfig } from './types';
-export { syncState, StartSyncStateFnType, StopSyncStateFnType } from './state_sync';
+export { syncState, syncStates, StartSyncStateFnType, StopSyncStateFnType } from './state_sync';

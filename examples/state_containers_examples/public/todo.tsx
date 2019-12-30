@@ -36,7 +36,7 @@ import {
   createStateContainer,
   createStateContainerReactHelpers,
   PureTransition,
-  syncState,
+  syncStates,
   useUrlTracker,
 } from '../../../src/plugins/kibana_utils/public';
 import {
@@ -200,7 +200,7 @@ export const TodoAppPage: React.FC<{
       sessionStorageSyncStrategy,
       initialAppUrl.current
     );
-    const [startSyncingState, stopSyncingState] = syncState([
+    const [startSyncingState, stopSyncingState] = syncStates([
       {
         stateContainer: container,
         syncKey: `_todo-${props.appInstanceId}`,

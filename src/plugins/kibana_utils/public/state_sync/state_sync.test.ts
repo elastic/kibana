@@ -24,7 +24,7 @@ import {
   TodoActions,
   TodoState,
 } from '../../demos/state_containers/todomvc';
-import { syncState } from './state_sync';
+import { syncState, syncStates } from './state_sync';
 import { ISyncStrategy } from './state_sync_strategies/types';
 import { Observable, Subject } from 'rxjs';
 import {
@@ -178,7 +178,7 @@ describe('state_sync', () => {
         '/#?_s1=!((completed:!f,id:3,text:todo3))&_s2=!((completed:!t,id:4,text:todo4))'
       );
 
-      const [start, stop] = syncState([
+      const [start, stop] = syncStates([
         {
           stateContainer: container1,
           syncKey: key1,
@@ -238,7 +238,7 @@ describe('state_sync', () => {
         initialAppUrl
       );
 
-      const [start, stop] = syncState([
+      const [start, stop] = syncStates([
         {
           stateContainer: container1,
           syncKey: key1,
@@ -264,7 +264,7 @@ describe('state_sync', () => {
     });
 
     it('change to one storage should also update other storage', async () => {
-      const [start, stop] = syncState([
+      const [start, stop] = syncStates([
         {
           stateContainer: container1,
           syncKey: key1,

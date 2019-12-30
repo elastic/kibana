@@ -77,7 +77,7 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  * 6. multiple different sync configs
  * const stateAToStorage = s => ({ t: s.tab });
  * const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
- * syncState([
+ * syncStates([
  *   {
  *     syncKey: '_a',
  *     syncStrategy: SyncStrategy.Url,
@@ -106,9 +106,8 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
 export type StartSyncStateFnType = () => Promise<void>; // resolves when initial state is rehydrated
 export type StopSyncStateFnType = () => void;
 export function syncState(
-  config: IStateSyncConfig[] | IStateSyncConfig
+  stateSyncConfig: IStateSyncConfig
 ): [StartSyncStateFnType, StopSyncStateFnType] {
-  const stateSyncConfigs = Array.isArray(config) ? config : [config];
   const subscriptions: Subscription[] = [];
   let isSyncing = false;
   return [start, stop];
@@ -124,103 +123,116 @@ export function syncState(
     }
     isSyncing = true;
 
-    for (const stateSyncConfig of stateSyncConfigs) {
-      const { toStorage, fromStorage, storageChange$ } = isSyncStrategy(
-        stateSyncConfig.syncStrategy
-      )
-        ? stateSyncConfig.syncStrategy
-        : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.KbnUrl];
+    const { toStorage, fromStorage, storageChange$ } = isSyncStrategy(stateSyncConfig.syncStrategy)
+      ? stateSyncConfig.syncStrategy
+      : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.KbnUrl];
 
-      // returned boolean indicates if update happen
-      const updateState = async ({
+    // returned boolean indicates if update happen
+    const updateState = async ({
+      isRestoringInitialState,
+    }: {
+      isRestoringInitialState: boolean;
+    }): Promise<boolean> => {
+      const storageState = await fromStorage(stateSyncConfig.syncKey, {
         isRestoringInitialState,
-      }: {
-        isRestoringInitialState: boolean;
-      }): Promise<boolean> => {
-        const storageState = await fromStorage(stateSyncConfig.syncKey, {
-          isRestoringInitialState,
-        });
+      });
 
-        if (!storageState) {
-          return false;
-        }
-
-        if (
-          isSyncing &&
-          storageState &&
-          !defaultComparator(storageState, stateSyncConfig.stateContainer.get())
-        ) {
-          stateSyncConfig.stateContainer.set(storageState);
-        }
-
-        return true;
-      };
-
-      // returned boolean indicates if update happen
-      const updateStorage = async ({
-        replace,
-        isRestoringInitialState,
-      }: {
-        replace: boolean;
-        isRestoringInitialState: boolean;
-      }): Promise<boolean> => {
-        const newStorageState = stateSyncConfig.stateContainer.get();
-        const oldStorageState = await fromStorage(stateSyncConfig.syncKey, {
-          isRestoringInitialState,
-        });
-        if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
-          await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
-        }
-
-        return true;
-      };
-
-      // initial syncing of stateContainer state and storage state
-      const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
-      if (initialTruthSource === InitialTruthSource.Storage) {
-        const hasUpdated = await updateState({ isRestoringInitialState: true });
-        // if there is nothing by state key in storage
-        // then we should fallback and consider state source of truth
-        if (!hasUpdated) {
-          await updateStorage({ replace: true, isRestoringInitialState: true });
-        }
-      } else if (initialTruthSource === InitialTruthSource.StateContainer) {
-        await updateStorage({ replace: true, isRestoringInitialState: true });
+      if (!storageState) {
+        return false;
       }
 
-      // subscribe to state and storage updates
+      if (
+        isSyncing &&
+        storageState &&
+        !defaultComparator(storageState, stateSyncConfig.stateContainer.get())
+      ) {
+        stateSyncConfig.stateContainer.set(storageState);
+      }
+
+      return true;
+    };
+
+    // returned boolean indicates if update happen
+    const updateStorage = async ({
+      replace,
+      isRestoringInitialState,
+    }: {
+      replace: boolean;
+      isRestoringInitialState: boolean;
+    }): Promise<boolean> => {
+      const newStorageState = stateSyncConfig.stateContainer.get();
+      const oldStorageState = await fromStorage(stateSyncConfig.syncKey, {
+        isRestoringInitialState,
+      });
+      if (isSyncing && !defaultComparator(newStorageState, oldStorageState)) {
+        await toStorage(stateSyncConfig.syncKey, newStorageState, { replace });
+      }
+
+      return true;
+    };
+
+    // initial syncing of stateContainer state and storage state
+    const initialTruthSource = stateSyncConfig.initialTruthSource ?? InitialTruthSource.Storage;
+    if (initialTruthSource === InitialTruthSource.Storage) {
+      const hasUpdated = await updateState({ isRestoringInitialState: true });
+      // if there is nothing by state key in storage
+      // then we should fallback and consider state source of truth
+      if (!hasUpdated) {
+        await updateStorage({ replace: true, isRestoringInitialState: true });
+      }
+    } else if (initialTruthSource === InitialTruthSource.StateContainer) {
+      await updateStorage({ replace: true, isRestoringInitialState: true });
+    }
+
+    // subscribe to state and storage updates
+    subscriptions.push(
+      stateSyncConfig.stateContainer.state$
+        .pipe(
+          distinctUntilChangedWithInitialValue(
+            stateSyncConfig.stateContainer.get(),
+            defaultComparator
+          ),
+          concatMap(() => updateStorage({ isRestoringInitialState: false, replace: false }))
+        )
+        .subscribe()
+    );
+    if (storageChange$) {
       subscriptions.push(
-        stateSyncConfig.stateContainer.state$
+        storageChange$(stateSyncConfig.syncKey)
           .pipe(
             distinctUntilChangedWithInitialValue(
-              stateSyncConfig.stateContainer.get(),
+              fromStorage(stateSyncConfig.syncKey),
               defaultComparator
             ),
-            concatMap(() => updateStorage({ isRestoringInitialState: false, replace: false }))
+            concatMap(t => {
+              return updateState({ isRestoringInitialState: false }).then(hasUpdated => {
+                // if there is nothing by state key in storage
+                // then we should fallback and consider state source of truth
+                if (!hasUpdated) {
+                  return updateStorage({ replace: true, isRestoringInitialState: false });
+                }
+              });
+            })
           )
           .subscribe()
       );
-      if (storageChange$) {
-        subscriptions.push(
-          storageChange$(stateSyncConfig.syncKey)
-            .pipe(
-              distinctUntilChangedWithInitialValue(
-                fromStorage(stateSyncConfig.syncKey),
-                defaultComparator
-              ),
-              concatMap(t => {
-                return updateState({ isRestoringInitialState: false }).then(hasUpdated => {
-                  // if there is nothing by state key in storage
-                  // then we should fallback and consider state source of truth
-                  if (!hasUpdated) {
-                    return updateStorage({ replace: true, isRestoringInitialState: false });
-                  }
-                });
-              })
-            )
-            .subscribe()
-        );
-      }
     }
   }
+}
+
+export function syncStates(
+  stateSyncConfig: IStateSyncConfig[]
+): [StartSyncStateFnType, StopSyncStateFnType] {
+  const syncs = stateSyncConfig.map(config => syncState(config));
+  async function start() {
+    for (const [startSync] of syncs) {
+      await startSync();
+    }
+  }
+
+  function stop() {
+    syncs.forEach(([, stopSync]) => stopSync());
+  }
+
+  return [start, stop];
 }

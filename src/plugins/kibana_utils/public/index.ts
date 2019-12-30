@@ -44,6 +44,7 @@ export {
 } from './state_management/url';
 export {
   syncState,
+  syncStates,
   ISyncStrategy,
   IStateSyncConfig,
   SyncStrategy,
