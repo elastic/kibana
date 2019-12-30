@@ -19,10 +19,6 @@
 
 import { Writer } from 'mustache';
 import { getServices } from '../../../kibana_services';
-<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/replace_template_strings.js
-
-=======
->>>>>>> upstream/master:src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/replace_template_strings.js
 
 const TEMPLATE_TAGS = ['{', '}'];
 

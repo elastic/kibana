@@ -22,14 +22,8 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Tutorial } from './tutorial';
 
-<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/tutorial.test.js
-
-jest.mock('../../../kibana_services', () =>({
-  getServices: () =>({
-=======
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
->>>>>>> upstream/master:src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/tutorial.test.js
     getBasePath: jest.fn(() => 'path'),
     chrome: {
       setBreadcrumbs: () => {},

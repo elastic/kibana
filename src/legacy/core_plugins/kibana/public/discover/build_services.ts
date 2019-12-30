@@ -27,6 +27,7 @@ import {
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 import { createSavedSearchesService } from './saved_searches';
+// @ts-ignore
 import { DiscoverStartPlugins } from './plugin';
 import { DataStart } from '../../../data/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
