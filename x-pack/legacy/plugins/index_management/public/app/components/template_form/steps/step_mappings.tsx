@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -16,24 +16,30 @@ import {
 } from '@elastic/eui';
 import { documentationService } from '../../../services/documentation';
 import { StepProps } from '../types';
-import { MappingsEditor, OnUpdateHandler } from '../../mappings_editor';
+import { MappingsEditor, OnUpdateHandler, LoadMappingsFromJsonButton } from '../../mappings_editor';
 
 export const StepMappings: React.FunctionComponent<StepProps> = ({
   template,
   setDataGetter,
   onStepValidityChange,
 }) => {
+  const [mappings, setMappings] = useState(template.mappings);
+
   const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
     ({ isValid, getData, validate }) => {
       onStepValidityChange(isValid);
       setDataGetter(async () => {
         const isMappingsValid = isValid === undefined ? await validate() : isValid;
-        const mappings = getData(isMappingsValid);
-        return Promise.resolve({ isValid: isMappingsValid, data: { mappings } });
+        const data = getData(isMappingsValid);
+        return Promise.resolve({ isValid: isMappingsValid, data: { mappings: data } });
       });
     },
     [setDataGetter, onStepValidityChange]
   );
+
+  const onJsonLoaded = (json: { [key: string]: any }): void => {
+    setMappings(json);
+  };
 
   return (
     <div data-test-subj="stepMappings">
@@ -73,6 +79,8 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
               defaultMessage="Mapping docs"
             />
           </EuiButtonEmpty>
+          <br />
+          <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -80,7 +88,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
 
       {/* Mappings code editor */}
       <MappingsEditor
-        defaultValue={template.mappings}
+        defaultValue={mappings}
         onUpdate={onMappingsEditorUpdate}
         indexSettings={template.settings}
       />

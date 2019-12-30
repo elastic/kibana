@@ -56,7 +56,9 @@ export interface State {
 }
 
 export type Action =
+  | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
   | { type: 'configuration.update'; value: Partial<State['configuration']> }
+  | { type: 'configuration.save' }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -222,6 +224,23 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case 'editor.replaceMappings': {
+      return {
+        ...state,
+        fieldForm: undefined,
+        fields: action.value.fields,
+        configuration: {
+          ...state.configuration,
+          defaultValue: action.value.configuration,
+        },
+        documentFields: {
+          ...state.documentFields,
+          status: 'idle',
+          fieldToAddFieldTo: undefined,
+          fieldToEdit: undefined,
+        },
+      };
+    }
     case 'configuration.update': {
       const nextState = {
         ...state,
@@ -231,6 +250,25 @@ export const reducer = (state: State, action: Action): State => {
       const isValid = isStateValid(nextState);
       nextState.isValid = isValid;
       return nextState;
+    }
+    case 'configuration.save': {
+      const {
+        data: { raw, format },
+      } = state.configuration;
+      const configurationData = format();
+
+      return {
+        ...state,
+        configuration: {
+          isValid: true,
+          defaultValue: configurationData,
+          data: {
+            raw,
+            format: () => configurationData,
+          },
+          validate: async () => true,
+        },
+      };
     }
     case 'fieldForm.update': {
       const nextState = {

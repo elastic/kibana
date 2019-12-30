@@ -20,7 +20,7 @@ import {
 } from '../types';
 
 import {
-  MAIN_DATA_TYPE_DEFINITION,
+  SUB_TYPE_MAP_TO_MAIN,
   MAX_DEPTH_DEFAULT_EDITOR,
   PARAMETERS_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
@@ -120,31 +120,8 @@ const replaceAliasPathByAliasId = (
   return { aliases, byId };
 };
 
-/**
- * Return a map of subType -> mainType
- *
- * @example
- *
- * {
- *   long: 'numeric',
- *   integer: 'numeric',
- *   short: 'numeric',
- * }
- */
-const subTypesMapToType = Object.entries(MAIN_DATA_TYPE_DEFINITION).reduce(
-  (acc, [type, definition]) => {
-    if ({}.hasOwnProperty.call(definition, 'subTypes')) {
-      definition.subTypes!.types.forEach(subType => {
-        acc[subType] = type;
-      });
-    }
-    return acc;
-  },
-  {} as Record<SubType, string>
-);
-
 export const getMainTypeFromSubType = (subType: SubType): MainType =>
-  subTypesMapToType[subType] as MainType;
+  SUB_TYPE_MAP_TO_MAIN[subType] as MainType;
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
