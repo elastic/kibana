@@ -19,13 +19,9 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import fs from 'fs';
-import { promisify } from 'bluebird';
 import { getElasticsearchProxyConfig } from '../elasticsearch_proxy_config';
 import https from 'https';
 import http from 'http';
-
-const readFileAsync = promisify(fs.readFile, fs);
 
 const getDefaultElasticsearchConfig = () => {
   return {
@@ -124,10 +120,10 @@ describe('plugins/console', function() {
       it(`sets ca when certificateAuthorities are specified`, function() {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
-          ssl: { ...config.ssl, certificateAuthorities: [__dirname + '/fixtures/ca.crt'] },
+          ssl: { ...config.ssl, certificateAuthorities: ['content-of-some-path'] },
         });
 
-        expect(agent.options.ca).to.contain('test ca certificate\n');
+        expect(agent.options.ca).to.contain('content-of-some-path');
       });
 
       describe('when alwaysPresentCertificate is false', () => {
@@ -137,8 +133,8 @@ describe('plugins/console', function() {
             ssl: {
               ...config.ssl,
               alwaysPresentCertificate: false,
-              certificate: __dirname + '/fixtures/cert.crt',
-              key: __dirname + '/fixtures/cert.key',
+              certificate: 'content-of-some-path',
+              key: 'content-of-another-path',
             },
           });
 
@@ -152,8 +148,8 @@ describe('plugins/console', function() {
             ssl: {
               ...config.ssl,
               alwaysPresentCertificate: false,
-              certificate: __dirname + '/fixtures/cert.crt',
-              key: __dirname + '/fixtures/cert.key',
+              certificate: 'content-of-some-path',
+              key: 'content-of-another-path',
               keyPassphrase: 'secret',
             },
           });
@@ -163,22 +159,19 @@ describe('plugins/console', function() {
       });
 
       describe('when alwaysPresentCertificate is true', () => {
-        it(`sets cert and key when certificate and key paths are specified`, async function() {
-          const certificatePath = __dirname + '/fixtures/cert.crt';
-          const keyPath = __dirname + '/fixtures/cert.key';
-
+        it(`sets cert and key when certificate and key are specified`, async function() {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
               alwaysPresentCertificate: true,
-              certificate: certificatePath,
-              key: keyPath,
+              certificate: 'content-of-some-path',
+              key: 'content-of-another-path',
             },
           });
 
-          expect(agent.options.cert).to.be(await readFileAsync(certificatePath, 'utf8'));
-          expect(agent.options.key).to.be(await readFileAsync(keyPath, 'utf8'));
+          expect(agent.options.cert).to.be('content-of-some-path');
+          expect(agent.options.key).to.be('content-of-another-path');
         });
 
         it(`sets passphrase when certificate, key and keyPassphrase are specified`, function() {
@@ -187,8 +180,8 @@ describe('plugins/console', function() {
             ssl: {
               ...config.ssl,
               alwaysPresentCertificate: true,
-              certificate: __dirname + '/fixtures/cert.crt',
-              key: __dirname + '/fixtures/cert.key',
+              certificate: 'content-of-some-path',
+              key: 'content-of-another-path',
               keyPassphrase: 'secret',
             },
           });
@@ -197,13 +190,12 @@ describe('plugins/console', function() {
         });
 
         it(`doesn't set cert when only certificate path is specified`, async function() {
-          const certificatePath = __dirname + '/fixtures/cert.crt';
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
               alwaysPresentCertificate: true,
-              certificate: certificatePath,
+              certificate: 'content-of-some-path',
               key: undefined,
             },
           });
@@ -213,14 +205,13 @@ describe('plugins/console', function() {
         });
 
         it(`doesn't set key when only key path is specified`, async function() {
-          const keyPath = __dirname + '/fixtures/cert.key';
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
               ...config.ssl,
               alwaysPresentCertificate: true,
               certificate: undefined,
-              key: keyPath,
+              key: 'content-of-some-path',
             },
           });
 

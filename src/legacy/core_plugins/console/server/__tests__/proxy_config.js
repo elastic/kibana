@@ -21,7 +21,6 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import fs from 'fs';
 import https, { Agent as HttpsAgent } from 'https';
 import { parse as parseUrl } from 'url';
 
@@ -36,14 +35,6 @@ const parsedGoogle = parseUrl('https://google.com/search');
 const parsedLocalEs = parseUrl('https://localhost:5601/search');
 
 describe('ProxyConfig', function() {
-  beforeEach(function() {
-    sinon.stub(fs, 'readFileSync').callsFake(path => ({ path }));
-  });
-
-  afterEach(function() {
-    fs.readFileSync.restore();
-  });
-
   describe('constructor', function() {
     beforeEach(function() {
       sinon.stub(https, 'Agent');
@@ -56,7 +47,7 @@ describe('ProxyConfig', function() {
     it('uses ca to create sslAgent', function() {
       const config = new ProxyConfig({
         ssl: {
-          ca: ['path/to/ca'],
+          ca: ['content-of-some-path'],
         },
       });
 
@@ -64,7 +55,7 @@ describe('ProxyConfig', function() {
       sinon.assert.calledOnce(https.Agent);
       const sslAgentOpts = https.Agent.firstCall.args[0];
       expect(sslAgentOpts).to.eql({
-        ca: [{ path: 'path/to/ca' }],
+        ca: ['content-of-some-path'],
         cert: undefined,
         key: undefined,
         rejectUnauthorized: true,
@@ -74,8 +65,8 @@ describe('ProxyConfig', function() {
     it('uses cert, and key to create sslAgent', function() {
       const config = new ProxyConfig({
         ssl: {
-          cert: 'path/to/cert',
-          key: 'path/to/key',
+          cert: 'content-of-some-path',
+          key: 'content-of-another-path',
         },
       });
 
@@ -84,8 +75,8 @@ describe('ProxyConfig', function() {
       const sslAgentOpts = https.Agent.firstCall.args[0];
       expect(sslAgentOpts).to.eql({
         ca: undefined,
-        cert: { path: 'path/to/cert' },
-        key: { path: 'path/to/key' },
+        cert: 'content-of-some-path',
+        key: 'content-of-another-path',
         rejectUnauthorized: true,
       });
     });
@@ -93,9 +84,9 @@ describe('ProxyConfig', function() {
     it('uses ca, cert, and key to create sslAgent', function() {
       const config = new ProxyConfig({
         ssl: {
-          ca: ['path/to/ca'],
-          cert: 'path/to/cert',
-          key: 'path/to/key',
+          ca: ['content-of-some-path'],
+          cert: 'content-of-another-path',
+          key: 'content-of-yet-another-path',
           rejectUnauthorized: true,
         },
       });
@@ -104,9 +95,9 @@ describe('ProxyConfig', function() {
       sinon.assert.calledOnce(https.Agent);
       const sslAgentOpts = https.Agent.firstCall.args[0];
       expect(sslAgentOpts).to.eql({
-        ca: [{ path: 'path/to/ca' }],
-        cert: { path: 'path/to/cert' },
-        key: { path: 'path/to/key' },
+        ca: ['content-of-some-path'],
+        cert: 'content-of-another-path',
+        key: 'content-of-yet-another-path',
         rejectUnauthorized: true,
       });
     });

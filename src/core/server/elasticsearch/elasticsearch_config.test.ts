@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { mockReadFileSync } from './elasticsearch_config.test.mocks';
+
 import { ElasticsearchConfig, config, ElasticsearchConfigType } from './elasticsearch_config';
 import { loggingServiceMock } from '../mocks';
 import { Logger } from '../logging';
@@ -52,7 +54,10 @@ test('set correct defaults', () => {
       "sniffOnStart": false,
       "ssl": Object {
         "alwaysPresentCertificate": false,
+        "certificate": undefined,
         "certificateAuthorities": undefined,
+        "key": undefined,
+        "keyPassphrase": undefined,
         "verificationMode": "full",
       },
       "username": undefined,
@@ -98,23 +103,114 @@ test('#requestHeadersWhitelist accepts both string and array of strings', () => 
   expect(configValue.requestHeadersWhitelist).toEqual(['token', 'X-Forwarded-Proto']);
 });
 
-test('#ssl.certificateAuthorities accepts both string and array of strings', () => {
-  let configValue = createElasticsearchConfig(
-    config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
-  );
-  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
+describe('reads files', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
+  });
 
-  configValue = createElasticsearchConfig(
-    config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
-  );
-  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path']);
+  it('reads certificate authorities when ssl.certificateAuthorities is specified', () => {
+    let configValue = createElasticsearchConfig(
+      config.schema.validate({ ssl: { certificateAuthorities: 'some-path' } })
+    );
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
 
-  configValue = createElasticsearchConfig(
-    config.schema.validate({
-      ssl: { certificateAuthorities: ['some-path', 'another-path'] },
-    })
-  );
-  expect(configValue.ssl.certificateAuthorities).toEqual(['some-path', 'another-path']);
+    mockReadFileSync.mockClear();
+    configValue = createElasticsearchConfig(
+      config.schema.validate({ ssl: { certificateAuthorities: ['some-path'] } })
+    );
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.certificateAuthorities).toEqual(['content-of-some-path']);
+
+    mockReadFileSync.mockClear();
+    configValue = createElasticsearchConfig(
+      config.schema.validate({
+        ssl: { certificateAuthorities: ['some-path', 'another-path'] },
+      })
+    );
+    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+    expect(configValue.ssl.certificateAuthorities).toEqual([
+      'content-of-some-path',
+      'content-of-another-path',
+    ]);
+  });
+
+  it('reads a private key when ssl.key is specified', () => {
+    const configValue = createElasticsearchConfig(
+      config.schema.validate({ ssl: { key: 'some-path' } })
+    );
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.key).toEqual('content-of-some-path');
+  });
+
+  it('reads a certificate when ssl.certificate is specified', () => {
+    const configValue = createElasticsearchConfig(
+      config.schema.validate({ ssl: { certificate: 'some-path' } })
+    );
+    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
+    expect(configValue.ssl.certificate).toEqual('content-of-some-path');
+  });
+});
+
+describe('throws when config is invalid', () => {
+  beforeAll(() => {
+    const realFs = jest.requireActual('fs');
+    mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
+  });
+
+  it('throws if key is invalid', () => {
+    const value = { ssl: { key: '/invalid/key' } };
+    expect(() =>
+      createElasticsearchConfig(config.schema.validate(value))
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"ENOENT: no such file or directory, open '/invalid/key'"`
+    );
+  });
+
+  it('throws if certificate is invalid', () => {
+    const value = { ssl: { certificate: '/invalid/cert' } };
+    expect(() =>
+      createElasticsearchConfig(config.schema.validate(value))
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"ENOENT: no such file or directory, open '/invalid/cert'"`
+    );
+  });
+
+  it('throws if certificateAuthorities is invalid', () => {
+    const value = { ssl: { certificateAuthorities: '/invalid/ca' } };
+    expect(() =>
+      createElasticsearchConfig(config.schema.validate(value))
+    ).toThrowErrorMatchingInlineSnapshot(`"ENOENT: no such file or directory, open '/invalid/ca'"`);
+  });
+});
+
+describe('logs warnings', () => {
+  let logger: ReturnType<typeof loggingServiceMock.create>;
+  let log: Logger;
+
+  beforeAll(() => {
+    mockReadFileSync.mockResolvedValue('foo');
+  });
+
+  beforeEach(() => {
+    logger = loggingServiceMock.create();
+    log = logger.get('config');
+  });
+
+  it('warns if ssl.key is set and ssl.certificate is not', () => {
+    createElasticsearchConfig(config.schema.validate({ ssl: { key: 'some-path' } }), log);
+    expect(loggingServiceMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
+      `"Detected a key without a certificate; mutual TLS authentication is disabled."`
+    );
+  });
+
+  it('warns if ssl.certificate is set and ssl.key is not', () => {
+    createElasticsearchConfig(config.schema.validate({ ssl: { certificate: 'some-path' } }), log);
+    expect(loggingServiceMock.collect(logger).warn[0][0]).toMatchInlineSnapshot(
+      `"Detected a certificate without a key; mutual TLS authentication is disabled."`
+    );
+  });
 });
 
 test('#username throws if equal to "elastic", only while running from source', () => {

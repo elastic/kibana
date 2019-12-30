@@ -18,12 +18,9 @@
  */
 
 import _ from 'lodash';
-import { readFileSync } from 'fs';
 import http from 'http';
 import https from 'https';
 import url from 'url';
-
-const readFile = (file: string) => readFileSync(file, 'utf8');
 
 const createAgent = (legacyConfig: any) => {
   const target = url.parse(_.head(legacyConfig.hosts));
@@ -49,22 +46,12 @@ const createAgent = (legacyConfig: any) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (
-    legacyConfig.ssl &&
-    Array.isArray(legacyConfig.ssl.certificateAuthorities) &&
-    legacyConfig.ssl.certificateAuthorities.length > 0
-  ) {
-    agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
-  }
+  agentOptions.ca = legacyConfig.ssl?.certificateAuthorities;
 
-  if (
-    legacyConfig.ssl &&
-    legacyConfig.ssl.alwaysPresentCertificate &&
-    legacyConfig.ssl.certificate &&
-    legacyConfig.ssl.key
-  ) {
-    agentOptions.cert = readFile(legacyConfig.ssl.certificate);
-    agentOptions.key = readFile(legacyConfig.ssl.key);
+  const ignoreCertAndKey = !legacyConfig.ssl?.alwaysPresentCertificate;
+  if (!ignoreCertAndKey && legacyConfig.ssl?.certificate && legacyConfig.ssl?.key) {
+    agentOptions.cert = legacyConfig.ssl.certificate;
+    agentOptions.key = legacyConfig.ssl.key;
     agentOptions.passphrase = legacyConfig.ssl.keyPassphrase;
   }
 
