@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
+import { difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -423,7 +423,7 @@ export class TimeSeriesExplorer extends React.Component {
    * Loads available entity values.
    * @param callback
    */
-  loadEntityValues = (callback = () => {}) => {
+  loadEntityValues = async (callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
@@ -432,55 +432,44 @@ export class TimeSeriesExplorer extends React.Component {
     const bounds = timefilter.getActiveBounds();
     const detectorIndex = +detectorId;
 
-    mlResultsService
-      .fetchPartitionFieldsValues(selectedJob.job_id, bounds.min.valueOf(), bounds.max.valueOf())
-      .subscribe(v => {
-        console.info(v);
-      });
-
-    mlResultsService
-      .getRecordsForCriteria(
-        [selectedJob.job_id],
-        [{ fieldName: 'detector_index', fieldValue: detectorIndex }],
-        0,
+    const {
+      partition_field: partitionField,
+      over_field: overField,
+      by_field: byField,
+    } = await mlResultsService
+      .fetchPartitionFieldsValues(
+        [
+          {
+            fieldName: 'job_id',
+            fieldValue: selectedJob.job_id,
+          },
+          {
+            fieldName: 'detector_index',
+            fieldValue: detectorIndex,
+          },
+        ],
         bounds.min.valueOf(),
-        bounds.max.valueOf(),
-        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+        bounds.max.valueOf()
       )
-      .toPromise()
-      .then(resp => {
-        if (resp.records && resp.records.length > 0) {
-          const firstRec = resp.records[0];
+      .toPromise();
 
-          this.setState(
-            {
-              entities: entities.map(entity => {
-                const newEntity = { ...entity };
-                if (firstRec.partition_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('partition_field_value')
-                    .uniq()
-                    .value();
-                }
-                if (firstRec.over_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('over_field_value')
-                    .uniq()
-                    .value();
-                }
-                if (firstRec.by_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('by_field_value')
-                    .uniq()
-                    .value();
-                }
-                return newEntity;
-              }),
-            },
-            callback
-          );
-        }
-      });
+    this.setState(
+      {
+        entities: entities.map(entity => {
+          if (partitionField.name === entity.fieldName) {
+            entity.fieldValues = partitionField.values;
+          }
+          if (overField.name === entity.fieldName) {
+            entity.fieldValues = overField.values;
+          }
+          if (byField.name === entity.fieldName) {
+            entity.fieldValues = byField.values;
+          }
+          return entity;
+        }),
+      },
+      callback
+    );
   };
 
   loadForForecastId = forecastId => {
