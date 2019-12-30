@@ -131,14 +131,14 @@ export default function({ getService, getPageObjects }) {
         ];
 
         await retry.try(async () => {
-          const data = await PageObjects.visualize.getLineChartData('Count');
+          const data = await PageObjects.visChart.getLineChartData('Count');
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
           expect(data).to.eql(expectedChartValues[0]);
         });
 
         await retry.try(async () => {
-          const avgMemoryData = await PageObjects.visualize.getLineChartData(
+          const avgMemoryData = await PageObjects.visChart.getLineChartData(
             'Average machine.ram',
             'ValueAxis-2'
           );

@@ -435,7 +435,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('response.raw');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
         const expectedEntries = ['200', '404', '503'];
@@ -472,13 +472,13 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('response.raw');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
 
         await PageObjects.visEditor.toggleOpenEditor(3, 'false');
         await PageObjects.visEditor.clickBucket('Split series');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('machine.os');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
         const expectedEntries = [
@@ -521,7 +521,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.toggleOpenEditor(2, 'false');
         await PageObjects.visEditor.toggleOpenEditor(1);
         await PageObjects.visEditor.selectAggregation('Derivative', 'metrics');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         await PageObjects.visEditor.clickGo();
 
         const expectedEntries = ['Derivative of Count'];

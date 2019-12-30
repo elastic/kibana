@@ -66,7 +66,7 @@ export default function({ getService, getPageObjects }) {
 
       // sleep a bit before trying to get the chart data
       await PageObjects.common.sleep(3000);
-      const data = await PageObjects.visualize.getLineChartData();
+      const data = await PageObjects.visChart.getLineChartData();
       log.debug('data=' + data);
       const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
       for (let x = 0; x < data.length; x++) {
@@ -100,7 +100,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.selectOrderByMetric(2, '_key');
       await PageObjects.visEditor.clickGo();
       await retry.try(async function() {
-        const data = await PageObjects.visualize.getLineChartData();
+        const data = await PageObjects.visChart.getLineChartData();
         log.debug('data=' + data);
         const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
         for (let x = 0; x < data.length; x++) {
