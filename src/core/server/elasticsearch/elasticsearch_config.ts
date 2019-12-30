@@ -212,14 +212,5 @@ export class ElasticsearchConfig {
       ...rawConfig.ssl,
       certificateAuthorities,
     };
-
-    if (this.username === 'elastic' && log !== undefined) {
-      // logger is optional / not used during tests
-      // TODO: logger can be removed when issue #40255 is resolved to support deprecations in NP config service
-      log.warn(
-        `Setting the elasticsearch username to "elastic" is deprecated. You should use the "kibana" user instead.`,
-        { tags: ['deprecation'] }
-      );
-    }
   }
 }
