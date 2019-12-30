@@ -298,22 +298,6 @@
         ],
       },
       {
-        groupSlug: 'tar',
-        groupName: 'tar related packages',
-        packageNames: [
-          'tar',
-          '@types/tar',
-        ],
-      },
-      {
-        groupSlug: 'yauzl',
-        groupName: 'yauzl related packages',
-        packageNames: [
-          'yauzl',
-          '@types/yauzl',
-        ],
-      },
-      {
         groupSlug: 'bluebird',
         groupName: 'bluebird related packages',
         packageNames: [
@@ -711,14 +695,6 @@
         packageNames: [
           'git-url-parse',
           '@types/git-url-parse',
-        ],
-      },
-      {
-        groupSlug: 'js-search',
-        groupName: 'js-search related packages',
-        packageNames: [
-          'js-search',
-          '@types/js-search',
         ],
       },
       {
