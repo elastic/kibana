@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KbnHeaders } from '../../../../core/utils';
+const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
 
 /**
  * Adds a custom header designating request as system API
@@ -26,7 +26,7 @@ import { KbnHeaders } from '../../../../core/utils';
  */
 export function addSystemApiHeader(originalHeaders) {
   const systemApiHeaders = {
-    [KbnHeaders.SYSTEM_API]: true,
+    [SYSTEM_API_HEADER_NAME]: true,
   };
   return {
     ...originalHeaders,
@@ -41,5 +41,5 @@ export function addSystemApiHeader(originalHeaders) {
  * @return true if request is a system API request; false otherwise
  */
 export function isSystemApiRequest(request) {
-  return !!request.headers[KbnHeaders.SYSTEM_API];
+  return !!request.headers[SYSTEM_API_HEADER_NAME];
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KbnHeaders } from '../../../../../core/utils';
+const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
 
 /**
  * Checks on the *server-side*, if an HTTP request is a system API request
@@ -27,5 +27,5 @@ import { KbnHeaders } from '../../../../../core/utils';
  * @deprecated Use KibanaRequest#isSystemApi
  */
 export function isSystemApiRequest(request) {
-  return !!request.headers[KbnHeaders.SYSTEM_API];
+  return !!request.headers[SYSTEM_API_HEADER_NAME];
 }
