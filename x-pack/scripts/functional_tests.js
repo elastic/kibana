@@ -35,6 +35,8 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/ui_capabilities/spaces_only/config.ts'),
   require.resolve('../test/upgrade_assistant_integration/config.js'),
   require.resolve('../test/licensing_plugin/config.ts'),
+  require.resolve('../test/licensing_plugin/config.public.ts'),
+  require.resolve('../test/licensing_plugin/config.legacy.ts'),
 ];
 
 require('@kbn/plugin-helpers').babelRegister();

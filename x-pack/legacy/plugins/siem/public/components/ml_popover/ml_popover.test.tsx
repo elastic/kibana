@@ -9,7 +9,8 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { MlPopover } from './ml_popover';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('ui/new_platform');
+jest.mock('../../lib/kibana');
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
   hasMlAdminPermissions: () => true,
