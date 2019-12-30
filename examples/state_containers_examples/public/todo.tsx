@@ -200,12 +200,12 @@ export const TodoAppPage: React.FC<{
       {
         stateContainer: globalStateContainer,
         syncKey: '_g',
-        syncStrategy: SyncStrategy.SessionStorage,
+        syncStrategy: urlSyncStrategy,
       },
       {
         stateContainer: globalStateContainer,
         syncKey: '_g',
-        syncStrategy: urlSyncStrategy,
+        syncStrategy: SyncStrategy.SessionStorage,
       },
     ]);
     startSyncingState();
