@@ -7,7 +7,7 @@
 import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../../../../../plugins/features/public';
 import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';
@@ -46,6 +46,7 @@ const buildProps = (customProps: any = {}) => {
         id: 'feature1',
         name: 'Feature 1',
         app: ['app'],
+        icon: 'spacesApp',
         privileges: {
           all: {
             app: ['app'],

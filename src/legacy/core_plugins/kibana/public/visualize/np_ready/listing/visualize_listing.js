@@ -27,7 +27,9 @@ import { getServices } from '../../kibana_services';
 import { wrapInI18nContext } from '../../legacy_imports';
 
 export function initListingDirective(app) {
-  app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+  app.directive('visualizeListingTable', reactDirective =>
+    reactDirective(wrapInI18nContext(VisualizeListingTable))
+  );
   app.directive('newVisModal', reactDirective =>
     reactDirective(wrapInI18nContext(NewVisModal), [
       ['visTypesRegistry', { watchDepth: 'collection' }],
@@ -35,6 +37,7 @@ export function initListingDirective(app) {
       ['addBasePath', { watchDepth: 'reference' }],
       ['uiSettings', { watchDepth: 'reference' }],
       ['savedObjects', { watchDepth: 'reference' }],
+      ['usageCollection', { watchDepth: 'reference' }],
       'isOpen',
     ])
   );
@@ -45,8 +48,8 @@ export function VisualizeListingController($injector, createNewVis) {
     addBasePath,
     chrome,
     legacyChrome,
-    savedObjectRegistry,
     savedObjectsClient,
+    savedVisualizations,
     data: {
       query: {
         timefilter: { timefilter },
@@ -56,6 +59,7 @@ export function VisualizeListingController($injector, createNewVis) {
     uiSettings,
     visualizations,
     core: { docLinks, savedObjects },
+    usageCollection,
   } = getServices();
   const kbnUrl = $injector.get('kbnUrl');
 
@@ -66,6 +70,7 @@ export function VisualizeListingController($injector, createNewVis) {
   this.addBasePath = addBasePath;
   this.uiSettings = uiSettings;
   this.savedObjects = savedObjects;
+  this.usageCollection = usageCollection;
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
@@ -92,15 +97,11 @@ export function VisualizeListingController($injector, createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
     this.createNewVis();
   }
-
-  // TODO: Extract this into an external service.
-  const services = savedObjectRegistry.byLoaderPropertiesName;
-  const visualizationService = services.visualizations;
   this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
-    return visualizationService
+    return savedVisualizations
       .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;

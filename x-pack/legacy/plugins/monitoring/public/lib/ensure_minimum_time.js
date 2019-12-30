@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /**
  * When you make an async request, typically you want to show the user a spinner while they wait.
  * However, if the request takes less than 300 ms, the spinner will flicker in the UI and the user
@@ -14,7 +13,10 @@
 
 export const DEFAULT_MINIMUM_TIME_MS = 300;
 
-export async function ensureMinimumTime(promiseOrPromises, minimumTimeMs = DEFAULT_MINIMUM_TIME_MS) {
+export async function ensureMinimumTime(
+  promiseOrPromises,
+  minimumTimeMs = DEFAULT_MINIMUM_TIME_MS
+) {
   let returnValue;
 
   // https://kibana-ci.elastic.co/job/elastic+kibana+6.x+multijob-intake/128/console
@@ -37,7 +39,8 @@ export async function ensureMinimumTime(promiseOrPromises, minimumTimeMs = DEFAU
 
   // Wait longer if the async action completed too quickly.
   if (asyncActionDuration < bufferedMinimumTimeMs) {
-    const additionalWaitingTime = bufferedMinimumTimeMs - (asyncActionCompletionTime - asyncActionStartTime);
+    const additionalWaitingTime =
+      bufferedMinimumTimeMs - (asyncActionCompletionTime - asyncActionStartTime);
     await new Promise(resolve => setTimeout(resolve, additionalWaitingTime));
   }
 

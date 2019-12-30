@@ -29,7 +29,7 @@ import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { SearchSourceContract } from 'ui/courier';
+import { ISearchSource } from 'ui/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -47,16 +47,21 @@ import {
   APPLY_FILTER_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SavedSearch } from '../discover/np_ready/types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
-  searchSource: SearchSourceContract;
+  searchSource: ISearchSource;
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
+  savedSearchRefName?: string;
+  savedSearchId?: string;
+  savedSearch?: SavedSearch;
+  visState: any;
 }
 
 export interface VisualizeEmbeddableConfiguration {
@@ -272,7 +277,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
-      const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega'];
+      const visTypesWithoutInspector = [
+        'markdown',
+        'input_control_vis',
+        'metrics',
+        'vega',
+        'timelion',
+      ];
       if (visTypesWithoutInspector.includes(this.vis.type.name)) {
         return false;
       }

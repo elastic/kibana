@@ -26,11 +26,11 @@ import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
 
-jest.mock('../../kibana_services', () =>({
+jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
-    getInjected: () => ''
-  })
+    getInjected: () => '',
+  }),
 }));
 
 describe('home', () => {
@@ -57,21 +57,22 @@ describe('home', () => {
         decrement: sinon.mock(),
       },
       localStorage: {
-        getItem: sinon.spy((path) => {
+        getItem: sinon.spy(path => {
           expect(path).toEqual('home:welcome:show');
           return 'false';
         }),
         setItem: sinon.mock(),
       },
       urlBasePath: 'goober',
+      onOptInSeen() {
+        return false;
+      },
+      getOptInStatus: jest.fn(),
     };
   });
 
   async function renderHome(props = {}) {
-    const component = shallow(<Home
-      {...defaultProps}
-      {...props}
-    />);
+    const component = shallow(<Home {...defaultProps} {...props} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -98,7 +99,7 @@ describe('home', () => {
         icon: 'dashboardApp',
         path: 'dashboard_landing_page',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.DATA
+        category: FeatureCatalogueCategory.DATA,
       };
 
       const component = await renderHome({
@@ -116,7 +117,7 @@ describe('home', () => {
         icon: 'indexPatternApp',
         path: 'index_management_landing_page',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN
+        category: FeatureCatalogueCategory.ADMIN,
       };
 
       const component = await renderHome({
@@ -134,7 +135,7 @@ describe('home', () => {
         icon: 'managementApp',
         path: 'management_landing_page',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN
+        category: FeatureCatalogueCategory.ADMIN,
       };
 
       const component = await renderHome({
@@ -220,4 +221,3 @@ describe('home', () => {
     });
   });
 });
-

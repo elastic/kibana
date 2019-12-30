@@ -13,15 +13,11 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent
+  EuiPageContent,
 } from '@elastic/eui';
 import { Status } from '../instances/status';
 
-export function ApmOverview({
-  stats,
-  metrics,
-  ...props
-}) {
+export function ApmOverview({ stats, metrics, ...props }) {
   const seriesToShow = [
     metrics.apm_responses_valid,
     metrics.apm_responses_errors,
@@ -32,7 +28,6 @@ export function ApmOverview({
     metrics.apm_requests,
     metrics.apm_transformations,
 
-
     metrics.apm_cpu,
     metrics.apm_memory,
 
@@ -42,10 +37,7 @@ export function ApmOverview({
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
       <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
+        <MonitoringTimeseriesContainer series={data} {...props} />
       </EuiPanel>
     </EuiFlexItem>
   ));
@@ -54,11 +46,9 @@ export function ApmOverview({
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <Status stats={stats}/>
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
+          <Status stats={stats} />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

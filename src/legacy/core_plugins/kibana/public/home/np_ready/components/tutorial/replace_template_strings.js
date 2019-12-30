@@ -19,7 +19,10 @@
 
 import { Writer } from 'mustache';
 import { getServices } from '../../../kibana_services';
+<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/replace_template_strings.js
 
+=======
+>>>>>>> upstream/master:src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/replace_template_strings.js
 
 const TEMPLATE_TAGS = ['{', '}'];
 
@@ -43,7 +46,7 @@ export function replaceTemplateStrings(text, params = {}) {
     curlyClose: '}',
     config: {
       cloud: {
-        id: getInjected('cloudId')
+        id: getInjected('cloudId'),
       },
       docs: {
         base_url: docLinks.ELASTIC_WEBSITE_URL,
@@ -56,13 +59,13 @@ export function replaceTemplateStrings(text, params = {}) {
           auditbeat: docLinks.links.auditbeat.base,
         },
         logstash: docLinks.links.logstash.base,
-        version: docLinks.DOC_LINK_VERSION
+        version: docLinks.DOC_LINK_VERSION,
       },
       kibana: {
-        version: metadata.version
-      }
+        version: metadata.version,
+      },
     },
-    params: params
+    params: params,
   };
   mustacheWriter.parse(text, TEMPLATE_TAGS);
   return mustacheWriter.render(text, variables);

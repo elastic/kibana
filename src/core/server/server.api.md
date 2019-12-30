@@ -115,6 +115,7 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse } from 'elasticsearch';
@@ -564,6 +565,8 @@ export interface CoreSetup {
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
+    // (undocumented)
+    uuid: UuidServiceSetup;
 }
 
 // @public
@@ -572,6 +575,24 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
+    // (undocumented)
+    uiSettings: UiSettingsServiceStart;
+}
+
+// @public
+export class CspConfig implements ICspConfig {
+    // @internal
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    // (undocumented)
+    static readonly DEFAULT: CspConfig;
+    // (undocumented)
+    readonly header: string;
+    // (undocumented)
+    readonly rules: string[];
+    // (undocumented)
+    readonly strict: boolean;
+    // (undocumented)
+    readonly warnLegacyBrowsers: boolean;
 }
 
 // @public
@@ -713,6 +734,7 @@ export interface HttpServiceSetup {
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
+    csp: ICspConfig;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
@@ -742,6 +764,14 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
+export interface ICspConfig {
+    readonly header: string;
+    readonly rules: string[];
+    readonly strict: boolean;
+    readonly warnLegacyBrowsers: boolean;
+}
+
+// @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
     // (undocumented)
     readonly options: HttpResponseOptions;
@@ -768,6 +798,11 @@ export interface IndexSettingsDeprecationInfo {
     [indexName: string]: DeprecationInfo[];
 }
 
+// @public (undocumented)
+export interface IRenderOptions {
+    includeUserSettings?: boolean;
+}
+
 // @public
 export interface IRouter {
     delete: RouteRegistrar<'delete'>;
@@ -776,7 +811,7 @@ export interface IRouter {
     // 
     // @internal
     getRoutes: () => RouterRoute[];
-    handleLegacyErrors: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -791,6 +826,11 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+
+// @public (undocumented)
+export interface IScopedRenderingClient {
+    render(options?: IRenderOptions): Promise<string>;
+}
 
 // @public
 export interface IUiSettingsClient {
@@ -812,8 +852,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
-    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P["type"], Q["type"], B["type"], any>;
+    static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -865,33 +907,91 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
+// @internal @deprecated
+export interface LegacyConfig {
+    // (undocumented)
+    get<T>(key?: string): T;
+    // (undocumented)
+    has(key: string): boolean;
+    // (undocumented)
+    set(key: string, value: any): void;
+    // Warning: (ae-forgotten-export) The symbol "LegacyVars" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    set(config: LegacyVars): void;
+}
+
+// Warning: (ae-forgotten-export) The symbol "ILegacyInternals" needs to be exported by the entry point index.d.ts
+// 
+// @internal @deprecated (undocumented)
+export class LegacyInternals implements ILegacyInternals {
+    constructor(uiExports: LegacyUiExports, config: LegacyConfig, server: Server);
+    // (undocumented)
+    getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
+    // (undocumented)
+    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
+    private get defaultVars();
+    // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    injectUiAppVars(id: string, injector: VarsInjector): void;
+    }
+
+// @internal @deprecated (undocumented)
+export interface LegacyRenderOptions extends IRenderOptions {
+    app?: {
+        getId(): string;
+    };
+    vars?: Record<string, any>;
+}
+
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
 }
 
+// Warning: (ae-forgotten-export) The symbol "LegacyPlugins" needs to be exported by the entry point index.d.ts
+// 
+// @internal @deprecated (undocumented)
+export interface LegacyServiceDiscoverPlugins extends LegacyPlugins {
+    // (undocumented)
+    pluginExtendedConfig: LegacyConfig;
+    // (undocumented)
+    settings: LegacyVars;
+}
+
 // @public @deprecated (undocumented)
 export interface LegacyServiceSetupDeps {
-    // Warning: (ae-forgotten-export) The symbol "InternalCoreSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "LegacyCoreSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    core: InternalCoreSetup & {
-        plugins: PluginsServiceSetup;
-    };
+    core: LegacyCoreSetup;
     // (undocumented)
     plugins: Record<string, unknown>;
 }
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceStartDeps {
-    // Warning: (ae-forgotten-export) The symbol "InternalCoreStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "LegacyCoreStart" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    core: InternalCoreStart & {
-        plugins: PluginsServiceStart;
-    };
+    core: LegacyCoreStart;
     // (undocumented)
     plugins: Record<string, unknown>;
 }
+
+// Warning: (ae-forgotten-export) The symbol "SavedObjectsLegacyUiExports" needs to be exported by the entry point index.d.ts
+// 
+// @internal @deprecated (undocumented)
+export type LegacyUiExports = SavedObjectsLegacyUiExports & {
+    defaultInjectedVarProviders?: VarsProvider[];
+    injectedVarsReplacers?: VarsReplacer[];
+    navLinkSpecs?: LegacyNavLinkSpec[] | null;
+    uiAppSpecs?: Array<LegacyAppSpec | undefined>;
+    unknown?: [{
+        pluginSpec: LegacyPluginSpec;
+        type: unknown;
+    }];
+};
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 // 
@@ -903,6 +1003,7 @@ export interface Logger {
     debug(message: string, meta?: LogMeta): void;
     error(errorOrMessage: string | Error, meta?: LogMeta): void;
     fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
+    get(...childContextPaths: string[]): Logger;
     info(message: string, meta?: LogMeta): void;
     // @internal (undocumented)
     log(record: LogRecord): void;
@@ -1128,13 +1229,19 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
+// @internal (undocumented)
+export interface RenderingServiceSetup {
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
+}
+
 // @public
-export type RequestHandler<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
+        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
         };
@@ -1171,10 +1278,10 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>, Method extends RouteMethod> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
-    validate: RouteSchemas<P, Q, B> | false;
+    validate: RouteValidatorFullConfig<P, Q, B> | false;
 }
 
 // @public
@@ -1199,16 +1306,54 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType | Type<Buffer> | Type<Stream>> {
+export class RouteValidationError extends SchemaTypeError {
+    constructor(error: Error | string, path?: string[]);
+}
+
+// @public
+export type RouteValidationFunction<T> = (data: any, validationResult: RouteValidationResultFactory) => {
+    value: T;
+    error?: never;
+} | {
+    value?: never;
+    error: RouteValidationError;
+};
+
+// @public
+export interface RouteValidationResultFactory {
     // (undocumented)
-    body?: B;
+    badRequest: (error: Error | string, path?: string[]) => {
+        error: RouteValidationError;
+    };
     // (undocumented)
-    params?: P;
-    // (undocumented)
-    query?: Q;
+    ok: <T>(value: T) => {
+        value: T;
+    };
+}
+
+// @public
+export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
+
+// @public
+export interface RouteValidatorConfig<P, Q, B> {
+    body?: RouteValidationSpec<B>;
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+}
+
+// @public
+export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> & RouteValidatorOptions;
+
+// @public
+export interface RouteValidatorOptions {
+    unsafe?: {
+        params?: boolean;
+        query?: boolean;
+        body?: boolean;
+    };
 }
 
 // @public (undocumented)
@@ -1647,7 +1792,6 @@ export class SavedObjectsRepository {
     bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
     // 
     // @internal
     static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;
@@ -1794,6 +1938,11 @@ export interface UiSettingsServiceSetup {
     register(settings: Record<string, UiSettingsParams>): void;
 }
 
+// @public (undocumented)
+export interface UiSettingsServiceStart {
+    asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
 // @public
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
@@ -1806,12 +1955,22 @@ export interface UserProvidedValues<T = any> {
 }
 
 // @public
+export interface UuidServiceSetup {
+    getInstanceUuid(): string;
+}
+
+// @public
 export const validBodyOutput: readonly ["data", "stream"];
 
 
 // Warnings were encountered during analysis:
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:158:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:159:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:160:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:161:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:162:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts

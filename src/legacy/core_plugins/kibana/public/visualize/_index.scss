@@ -1,10 +1,2 @@
-// Prefix all styles with "vis" to avoid conflicts.
-// Examples
-//   visChart
-//   visChart__legend
-//   visChart__legend--small
-//   visChart__legend-isLoading
-
-@import 'np_ready/editor/index';
-@import 'np_ready/listing/index';
-@import 'np_ready/wizard/index';
+// Visualize plugin styles
+@import 'np_ready/index';

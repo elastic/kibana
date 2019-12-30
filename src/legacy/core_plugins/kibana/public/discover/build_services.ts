@@ -26,9 +26,7 @@ import {
 } from 'kibana/public';
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
-// @ts-ignore
-import { createSavedSearchesService } from './saved_searches/saved_searches';
-// @ts-ignore
+import { createSavedSearchesService } from './saved_searches';
 import { DiscoverStartPlugins } from './plugin';
 import { DataStart } from '../../../data/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';

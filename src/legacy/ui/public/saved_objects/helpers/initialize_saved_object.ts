@@ -37,7 +37,7 @@ export async function intializeSavedObject(
     _.assign(savedObject, savedObject.defaults);
     await savedObject.hydrateIndexPattern!();
     if (typeof config.afterESResp === 'function') {
-      await config.afterESResp.call(savedObject);
+      savedObject = await config.afterESResp(savedObject);
     }
     return savedObject;
   }

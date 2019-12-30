@@ -5,20 +5,16 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-
-import { StylePropertyLegendRow } from './style_property_legend_row';
+import React, { Component, Fragment } from 'react';
 
 export class VectorStyleLegend extends Component {
-
   state = {
-    rows: [],
-  }
+    styles: [],
+  };
 
   componentDidMount() {
     this._isMounted = true;
-    this._prevRowDescriptors = undefined;
+    this._prevStyleDescriptors = undefined;
     this._loadRows();
   }
 
@@ -31,32 +27,26 @@ export class VectorStyleLegend extends Component {
   }
 
   _loadRows = _.debounce(async () => {
-    const rows = await this.props.loadRows();
-    const rowDescriptors = rows.map(row => {
+    const styles = await this.props.getLegendDetailStyleProperties();
+    const styleDescriptorPromises = styles.map(async style => {
       return {
-        label: row.label,
-        range: row.meta,
-        styleOptions: row.style.getOptions(),
+        type: style.getStyleName(),
+        options: style.getOptions(),
+        fieldMeta: style.getFieldMeta(),
+        label: await style.getField().getLabel(),
       };
     });
-    if (this._isMounted && !_.isEqual(rowDescriptors, this._prevRowDescriptors)) {
-      this._prevRowDescriptors = rowDescriptors;
-      this.setState({ rows });
+
+    const styleDescriptors = await Promise.all(styleDescriptorPromises);
+    if (this._isMounted && !_.isEqual(styleDescriptors, this._prevStyleDescriptors)) {
+      this._prevStyleDescriptors = styleDescriptors;
+      this.setState({ styles: styles });
     }
   }, 100);
 
   render() {
-    return this.state.rows.map(rowProps => {
-      return (
-        <StylePropertyLegendRow
-          key={rowProps.style.getStyleName()}
-          {...rowProps}
-        />
-      );
+    return this.state.styles.map(style => {
+      return <Fragment key={style.getStyleName()}>{style.renderLegendDetailRow()}</Fragment>;
     });
   }
 }
-
-VectorStyleLegend.propTypes = {
-  loadRows: PropTypes.func.isRequired,
-};

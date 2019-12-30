@@ -7,8 +7,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -123,8 +121,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -252,8 +248,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -381,8 +375,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -497,8 +489,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -613,8 +603,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -729,8 +717,6 @@ exports[`home should render home component 1`] = `
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -845,8 +831,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -961,8 +945,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>
@@ -1072,8 +1054,8 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
 <Welcome
+  onOptInSeen={[Function]}
   onSkip={[Function]}
-  showTelemetryDisclaimer=""
   urlBasePath="goober"
 />
 `;
@@ -1085,8 +1067,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
 >
   <EuiPageBody
     className="eui-displayBlock"
-    component="main"
-    restrictWidth={false}
   >
     <EuiScreenReaderOnly>
       <h1>

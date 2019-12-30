@@ -26,14 +26,17 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
-import { ensureDefaultIndexPattern, registerTimefilterWithGlobalStateFactory } from '../legacy_imports';
+import {
+  ensureDefaultIndexPattern,
+  registerTimefilterWithGlobalStateFactory,
+} from '../legacy_imports';
 import { syncOnMount } from './global_state_sync';
 
 import {
   getLandingBreadcrumbs,
   getWizardStep1Breadcrumbs,
   getCreateBreadcrumbs,
-  getEditBreadcrumbs
+  getEditBreadcrumbs,
 } from './breadcrumbs';
 
 export function initVisualizeApp(app, deps) {
@@ -51,7 +54,7 @@ export function initVisualizeApp(app, deps) {
     );
   });
 
-  app.config(function ($routeProvider) {
+  app.config(function($routeProvider) {
     const defaults = {
       reloadOnSearch: false,
       requireUICapability: 'visualize.show',
@@ -81,7 +84,8 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
+          hasDefaultIndex: ($rootScope, kbnUrl) =>
+            ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -92,7 +96,8 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
+          hasDefaultIndex: ($rootScope, kbnUrl) =>
+            ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
@@ -100,49 +105,51 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function (redirectWhenMissing, $route, $rootScope, kbnUrl) {
+          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
             const { core, data, savedVisualizations, visualizations } = deps;
             const visTypes = visualizations.types.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
-            const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
+            const hasIndex =
+              $route.current.params.indexPattern || $route.current.params.savedSearchId;
             if (shouldHaveIndex && !hasIndex) {
               throw new Error(
-                i18n.translate('kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage', {
-                  defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
-                })
+                i18n.translate(
+                  'kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
+                  {
+                    defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
+                  }
+                )
               );
             }
 
-            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
+            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+              .then(() => savedVisualizations.get($route.current.params))
               .then(savedVis => {
                 if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis)
-                    .catch(() => savedVis);
+                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
                 }
                 return savedVis;
               })
-              .catch(redirectWhenMissing({
-                '*': '/visualize'
-              }));
-          }
-        }
+              .catch(
+                redirectWhenMissing({
+                  '*': '/visualize',
+                })
+              );
+          },
+        },
       })
       .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
         ...defaults,
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          savedVis: function (redirectWhenMissing, $route, $rootScope, kbnUrl) {
+          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
             const { chrome, core, data, savedVisualizations } = deps;
             return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
-                chrome.recentlyAccessed.add(
-                  savedVis.getFullPath(),
-                  savedVis.title,
-                  savedVis.id
-                );
+                chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
                 return savedVis;
               })
               .then(savedVis => {
@@ -153,14 +160,17 @@ export function initVisualizeApp(app, deps) {
               })
               .catch(
                 redirectWhenMissing({
-                  'visualization': '/visualize',
-                  'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
+                  visualization: '/visualize',
+                  search:
+                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  'index-pattern':
+                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  'index-pattern-field':
+                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
                 })
               );
-          }
-        }
+          },
+        },
       })
       .when(`visualize/:tail*?`, {
         redirectTo: `/${deps.core.injectedMetadata.getInjectedVar('kbnDefaultAppId')}`,

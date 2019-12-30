@@ -20,53 +20,48 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import {
-  InstructionSet,
-} from './instruction_set';
+import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
-
 
 const instructions = [
   {
     title: 'step 1',
-    commands: [
-      'do stuff in command line',
-    ],
+    commands: ['do stuff in command line'],
   },
   {
     title: 'step 2',
-    commands: [
-      'do more stuff in command line',
-    ],
-  }
+    commands: ['do more stuff in command line'],
+  },
 ];
 
 const instructionVariants = [
   {
     id: 'OSX',
-    instructions: instructions
+    instructions: instructions,
   },
   {
     id: 'windows',
     instructions: instructions,
-  }
+  },
 ];
 
 jest.mock('../../../../../../kibana_react/public', () => {
   return {
-    Markdown: () => <div className="markdown"/>,
+    Markdown: () => <div className="markdown" />,
   };
 });
 
 test('render', () => {
-  const component = shallowWithIntl(<InstructionSet.WrappedComponent
-    title="title1"
-    instructionVariants={instructionVariants}
-    onStatusCheck={() => {}}
-    offset={1}
-    paramValues={{}}
-    replaceTemplateStrings={() => {}}
-  />);
+  const component = shallowWithIntl(
+    <InstructionSet.WrappedComponent
+      title="title1"
+      instructionVariants={instructionVariants}
+      onStatusCheck={() => {}}
+      offset={1}
+      paramValues={{}}
+      replaceTemplateStrings={() => {}}
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
@@ -80,72 +75,82 @@ describe('statusCheckState', () => {
   };
 
   test('initial state - no check has been attempted', () => {
-    const component = shallowWithIntl(<InstructionSet.WrappedComponent
-      title="title1"
-      instructionVariants={instructionVariants}
-      onStatusCheck={() => {}}
-      offset={1}
-      paramValues={{}}
-      statusCheckConfig={statusCheckConfig}
-      replaceTemplateStrings={() => {}}
-      statusCheckState={StatusCheckStates.FETCHING}
-    />);
+    const component = shallowWithIntl(
+      <InstructionSet.WrappedComponent
+        title="title1"
+        instructionVariants={instructionVariants}
+        onStatusCheck={() => {}}
+        offset={1}
+        paramValues={{}}
+        statusCheckConfig={statusCheckConfig}
+        replaceTemplateStrings={() => {}}
+        statusCheckState={StatusCheckStates.FETCHING}
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('checking status', () => {
-    const component = shallowWithIntl(<InstructionSet.WrappedComponent
-      title="title1"
-      instructionVariants={instructionVariants}
-      onStatusCheck={() => {}}
-      offset={1}
-      paramValues={{}}
-      statusCheckConfig={statusCheckConfig}
-      replaceTemplateStrings={() => {}}
-      statusCheckState={StatusCheckStates.FETCHING}
-    />);
+    const component = shallowWithIntl(
+      <InstructionSet.WrappedComponent
+        title="title1"
+        instructionVariants={instructionVariants}
+        onStatusCheck={() => {}}
+        offset={1}
+        paramValues={{}}
+        statusCheckConfig={statusCheckConfig}
+        replaceTemplateStrings={() => {}}
+        statusCheckState={StatusCheckStates.FETCHING}
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('failed status check - error', () => {
-    const component = shallowWithIntl(<InstructionSet.WrappedComponent
-      title="title1"
-      instructionVariants={instructionVariants}
-      onStatusCheck={() => {}}
-      offset={1}
-      paramValues={{}}
-      statusCheckConfig={statusCheckConfig}
-      replaceTemplateStrings={() => {}}
-      statusCheckState={StatusCheckStates.ERROR}
-    />);
+    const component = shallowWithIntl(
+      <InstructionSet.WrappedComponent
+        title="title1"
+        instructionVariants={instructionVariants}
+        onStatusCheck={() => {}}
+        offset={1}
+        paramValues={{}}
+        statusCheckConfig={statusCheckConfig}
+        replaceTemplateStrings={() => {}}
+        statusCheckState={StatusCheckStates.ERROR}
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('failed status check - no data', () => {
-    const component = shallowWithIntl(<InstructionSet.WrappedComponent
-      title="title1"
-      instructionVariants={instructionVariants}
-      onStatusCheck={() => {}}
-      offset={1}
-      paramValues={{}}
-      statusCheckConfig={statusCheckConfig}
-      replaceTemplateStrings={() => {}}
-      statusCheckState={StatusCheckStates.NO_DATA}
-    />);
+    const component = shallowWithIntl(
+      <InstructionSet.WrappedComponent
+        title="title1"
+        instructionVariants={instructionVariants}
+        onStatusCheck={() => {}}
+        offset={1}
+        paramValues={{}}
+        statusCheckConfig={statusCheckConfig}
+        replaceTemplateStrings={() => {}}
+        statusCheckState={StatusCheckStates.NO_DATA}
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('successful status check', () => {
-    const component = shallowWithIntl(<InstructionSet.WrappedComponent
-      title="title1"
-      instructionVariants={instructionVariants}
-      onStatusCheck={() => {}}
-      offset={1}
-      paramValues={{}}
-      statusCheckConfig={statusCheckConfig}
-      replaceTemplateStrings={() => {}}
-      statusCheckState={StatusCheckStates.HAS_DATA}
-    />);
+    const component = shallowWithIntl(
+      <InstructionSet.WrappedComponent
+        title="title1"
+        instructionVariants={instructionVariants}
+        onStatusCheck={() => {}}
+        offset={1}
+        paramValues={{}}
+        statusCheckConfig={statusCheckConfig}
+        replaceTemplateStrings={() => {}}
+        statusCheckState={StatusCheckStates.HAS_DATA}
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 });

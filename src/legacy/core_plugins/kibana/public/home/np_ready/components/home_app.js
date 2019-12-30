@@ -28,17 +28,14 @@ import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../../kibana_services';
-
 export function HomeApp({ directories }) {
   const {
     getInjected,
     savedObjectsClient,
     getBasePath,
     addBasePath,
-    telemetryOptInProvider: {
-      setOptInNoticeSeen,
-    },
     environment,
+    telemetryOptInProvider: { setOptInNoticeSeen, getOptIn },
   } = getServices();
   const isCloudEnabled = environment.cloud;
   const mlEnabled = environment.ml;
@@ -88,6 +85,7 @@ export function HomeApp({ directories }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               onOptInSeen={setOptInNoticeSeen}
+              getOptInStatus={getOptIn}
             />
           </Route>
           <Route path="/home">

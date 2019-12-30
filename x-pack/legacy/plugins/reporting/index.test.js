@@ -10,14 +10,11 @@ import { getConfigSchema } from '../../../test_utils';
 // The snapshot records the number of cpus available
 // to make the snapshot deterministic `os.cpus` needs to be mocked
 // but the other members on `os` must remain untouched
-jest.mock(
-  'os',
-  () => {
-    const os = jest.requireActual('os');
-    os.cpus = () => [{}, {}, {}, {}];
-    return os;
-  }
-);
+jest.mock('os', () => {
+  const os = jest.requireActual('os');
+  os.cpus = () => [{}, {}, {}, {}];
+  return os;
+});
 
 const describeWithContext = describe.each([
   [{ dev: false, dist: false }],
@@ -26,7 +23,7 @@ const describeWithContext = describe.each([
   [{ dev: true, dist: true }],
 ]);
 
-describeWithContext('config schema with context %j', (context) => {
+describeWithContext('config schema with context %j', context => {
   it('produces correct config', async () => {
     const schema = await getConfigSchema(reporting);
     const value = await schema.validate({}, { context });

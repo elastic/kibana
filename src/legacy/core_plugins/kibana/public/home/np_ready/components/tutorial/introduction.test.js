@@ -24,52 +24,62 @@ import { Introduction } from './introduction';
 
 jest.mock('../../../../../../kibana_react/public', () => {
   return {
-    Markdown: () => <div className="markdown"/>,
+    Markdown: () => <div className="markdown" />,
   };
 });
 
 test('render', () => {
-  const component = shallowWithIntl(<Introduction.WrappedComponent
-    description="this is a great tutorial about..."
-    title="Great tutorial"
-  />);
+  const component = shallowWithIntl(
+    <Introduction.WrappedComponent
+      description="this is a great tutorial about..."
+      title="Great tutorial"
+    />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 describe('props', () => {
   test('iconType', () => {
-    const component = shallowWithIntl(<Introduction.WrappedComponent
-      description="this is a great tutorial about..."
-      title="Great tutorial"
-      iconType="logoElastic"
-    />);
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        iconType="logoElastic"
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('exportedFieldsUrl', () => {
-    const component = shallowWithIntl(<Introduction.WrappedComponent
-      description="this is a great tutorial about..."
-      title="Great tutorial"
-      exportedFieldsUrl="exported_fields_url"
-    />);
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        exportedFieldsUrl="exported_fields_url"
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('previewUrl', () => {
-    const component = shallowWithIntl(<Introduction.WrappedComponent
-      description="this is a great tutorial about..."
-      title="Great tutorial"
-      previewUrl="preview_image_url"
-    />);
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        previewUrl="preview_image_url"
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 
   test('isBeta', () => {
-    const component = shallowWithIntl(<Introduction.WrappedComponent
-      description="this is a great tutorial about..."
-      title="Great tutorial"
-      isBeta={true}
-    />);
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        isBeta={true}
+      />
+    );
     expect(component).toMatchSnapshot(); // eslint-disable-line
   });
 });

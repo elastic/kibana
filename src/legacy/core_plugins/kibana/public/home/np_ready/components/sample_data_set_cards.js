@@ -20,29 +20,21 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
-import {
-  SampleDataSetCard,
-  INSTALLED_STATUS,
-  UNINSTALLED_STATUS,
-} from './sample_data_set_card';
+import { SampleDataSetCard, INSTALLED_STATUS, UNINSTALLED_STATUS } from './sample_data_set_card';
 
 import { getServices } from '../../kibana_services';
 
 import {
   listSampleDataSets,
   installSampleDataSet,
-  uninstallSampleDataSet
+  uninstallSampleDataSet,
 } from '../sample_data_client';
 
 import { i18n } from '@kbn/i18n';
 
 export class SampleDataSetCards extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -71,8 +63,8 @@ export class SampleDataSetCards extends React.Component {
     } catch (fetchError) {
       this.toastNotifications.addDanger({
         title: i18n.translate('kbn.home.sampleDataSet.unableToLoadListErrorMessage', {
-          defaultMessage: 'Unable to load sample data sets list' }
-        ),
+          defaultMessage: 'Unable to load sample data sets list',
+        }),
         text: `${fetchError.message}`,
       });
       sampleDataSets = [];
@@ -83,42 +75,42 @@ export class SampleDataSetCards extends React.Component {
     }
 
     this.setState({
-      sampleDataSets: sampleDataSets
-        .sort((a, b) => {
-          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-        }),
+      sampleDataSets: sampleDataSets.sort((a, b) => {
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      }),
       processingStatus: {},
     });
-  }
+  };
 
-  install = async (id) => {
-    const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
+  install = async id => {
+    const targetSampleDataSet = this.state.sampleDataSets.find(sampleDataSet => {
       return sampleDataSet.id === id;
     });
 
-    this.setState((prevState) => ({
-      processingStatus: { ...prevState.processingStatus, [id]: true }
+    this.setState(prevState => ({
+      processingStatus: { ...prevState.processingStatus, [id]: true },
     }));
 
     try {
       await installSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
-        this.setState((prevState) => ({
-          processingStatus: { ...prevState.processingStatus, [id]: false }
+        this.setState(prevState => ({
+          processingStatus: { ...prevState.processingStatus, [id]: false },
         }));
       }
       this.toastNotifications.addDanger({
         title: i18n.translate('kbn.home.sampleDataSet.unableToInstallErrorMessage', {
-          defaultMessage: 'Unable to install sample data set: {name}', values: { name: targetSampleDataSet.name } }
-        ),
+          defaultMessage: 'Unable to install sample data set: {name}',
+          values: { name: targetSampleDataSet.name },
+        }),
         text: `${fetchError.message}`,
       });
       return;
     }
 
     if (this._isMounted) {
-      this.setState((prevState) => ({
+      this.setState(prevState => ({
         processingStatus: { ...prevState.processingStatus, [id]: false },
         sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
           if (sampleDataSet.id === id) {
@@ -131,40 +123,42 @@ export class SampleDataSetCards extends React.Component {
 
     this.toastNotifications.addSuccess({
       title: i18n.translate('kbn.home.sampleDataSet.installedLabel', {
-        defaultMessage: '{name} installed', values: { name: targetSampleDataSet.name } }
-      ),
-      ['data-test-subj']: 'sampleDataSetInstallToast'
+        defaultMessage: '{name} installed',
+        values: { name: targetSampleDataSet.name },
+      }),
+      ['data-test-subj']: 'sampleDataSetInstallToast',
     });
-  }
+  };
 
-  uninstall = async (id) => {
-    const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
+  uninstall = async id => {
+    const targetSampleDataSet = this.state.sampleDataSets.find(sampleDataSet => {
       return sampleDataSet.id === id;
     });
 
-    this.setState((prevState) => ({
-      processingStatus: { ...prevState.processingStatus, [id]: true }
+    this.setState(prevState => ({
+      processingStatus: { ...prevState.processingStatus, [id]: true },
     }));
 
     try {
       await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
-        this.setState((prevState) => ({
-          processingStatus: { ...prevState.processingStatus, [id]: false }
+        this.setState(prevState => ({
+          processingStatus: { ...prevState.processingStatus, [id]: false },
         }));
       }
       this.toastNotifications.addDanger({
         title: i18n.translate('kbn.home.sampleDataSet.unableToUninstallErrorMessage', {
-          defaultMessage: 'Unable to uninstall sample data set: {name}', values: { name: targetSampleDataSet.name } }
-        ),
+          defaultMessage: 'Unable to uninstall sample data set: {name}',
+          values: { name: targetSampleDataSet.name },
+        }),
         text: `${fetchError.message}`,
       });
       return;
     }
 
     if (this._isMounted) {
-      this.setState((prevState) => ({
+      this.setState(prevState => ({
         processingStatus: { ...prevState.processingStatus, [id]: false },
         sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
           if (sampleDataSet.id === id) {
@@ -177,42 +171,41 @@ export class SampleDataSetCards extends React.Component {
 
     this.toastNotifications.addSuccess({
       title: i18n.translate('kbn.home.sampleDataSet.uninstalledLabel', {
-        defaultMessage: '{name} uninstalled', values: { name: targetSampleDataSet.name } }
-      ),
-      ['data-test-subj']: 'sampleDataSetUninstallToast'
+        defaultMessage: '{name} uninstalled',
+        values: { name: targetSampleDataSet.name },
+      }),
+      ['data-test-subj']: 'sampleDataSetUninstallToast',
     });
-  }
+  };
 
-  lightOrDarkImage = (sampleDataSet) => {
+  lightOrDarkImage = sampleDataSet => {
     return getServices().uiSettings.get('theme:darkMode') && sampleDataSet.darkPreviewImagePath
       ? sampleDataSet.darkPreviewImagePath
       : sampleDataSet.previewImagePath;
-  }
+  };
 
   render() {
     return (
       <EuiFlexGrid columns={3} className="homSampleDataSetCards">
-        {
-          this.state.sampleDataSets.map(sampleDataSet => {
-            return (
-              <EuiFlexItem key={sampleDataSet.id}>
-                <SampleDataSetCard
-                  id={sampleDataSet.id}
-                  description={sampleDataSet.description}
-                  name={sampleDataSet.name}
-                  overviewDashboard={sampleDataSet.overviewDashboard}
-                  appLinks={sampleDataSet.appLinks}
-                  status={sampleDataSet.status}
-                  isProcessing={_.get(this.state.processingStatus, sampleDataSet.id, false)}
-                  statusMsg={sampleDataSet.statusMsg}
-                  previewUrl={this.props.addBasePath(this.lightOrDarkImage(sampleDataSet))}
-                  onInstall={this.install}
-                  onUninstall={this.uninstall}
-                />
-              </EuiFlexItem>
-            );
-          })
-        }
+        {this.state.sampleDataSets.map(sampleDataSet => {
+          return (
+            <EuiFlexItem key={sampleDataSet.id}>
+              <SampleDataSetCard
+                id={sampleDataSet.id}
+                description={sampleDataSet.description}
+                name={sampleDataSet.name}
+                overviewDashboard={sampleDataSet.overviewDashboard}
+                appLinks={sampleDataSet.appLinks}
+                status={sampleDataSet.status}
+                isProcessing={_.get(this.state.processingStatus, sampleDataSet.id, false)}
+                statusMsg={sampleDataSet.statusMsg}
+                previewUrl={this.props.addBasePath(this.lightOrDarkImage(sampleDataSet))}
+                onInstall={this.install}
+                onUninstall={this.uninstall}
+              />
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGrid>
     );
   }

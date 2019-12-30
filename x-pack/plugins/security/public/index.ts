@@ -6,6 +6,7 @@
 
 import { PluginInitializer } from 'src/core/public';
 import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+export { SessionInfo } from './types';
 
 export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = () =>
   new SecurityPlugin();

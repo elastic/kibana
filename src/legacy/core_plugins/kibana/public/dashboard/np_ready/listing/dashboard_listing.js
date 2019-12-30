@@ -19,9 +19,9 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { TableListView } from '../../../../../../../plugins/kibana_react/public';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
@@ -13,6 +13,7 @@ import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { rowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
@@ -23,6 +24,8 @@ describe('get_column_renderer', () => {
   let zeek: Ecs;
   let system: Ecs;
   let auditd: Ecs;
+  const mount = useMountAppended();
+
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);

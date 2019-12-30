@@ -52,12 +52,19 @@ describe('Security Plugin', () => {
                     "cookieName": "sid",
                     "loginAssistanceMessage": undefined,
                     "secureCookies": true,
-                    "session": Object {
-                      "idleTimeout": 1500,
-                      "lifespan": null,
-                    },
                   },
                   "license": Object {
+                    "features$": Observable {
+                      "_isScalar": false,
+                      "operator": MapOperator {
+                        "project": [Function],
+                        "thisArg": undefined,
+                      },
+                      "source": Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      },
+                    },
                     "getFeatures": [Function],
                     "isEnabled": [Function],
                   },

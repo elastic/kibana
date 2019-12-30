@@ -8,103 +8,127 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
+import { DynamicLegendRow } from './components/dynamic_legend_row';
+import React from 'react';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
-    static type = STYLE_TYPE.DYNAMIC;
+  static type = STYLE_TYPE.DYNAMIC;
 
-    constructor(options, styleName, field) {
-      super(options, styleName);
-      this._field = field;
-    }
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter) {
+    super(options, styleName);
+    this._field = field;
+    this._getFieldMeta = getFieldMeta;
+    this._getFieldFormatter = getFieldFormatter;
+  }
 
-    getField() {
-      return this._field;
-    }
+  getFieldMeta() {
+    return this._getFieldMeta && this._field ? this._getFieldMeta(this._field.getName()) : null;
+  }
 
-    isDynamic() {
-      return true;
-    }
+  getField() {
+    return this._field;
+  }
 
-    isComplete() {
-      return !!this._field;
-    }
+  isDynamic() {
+    return true;
+  }
 
-    getFieldOrigin() {
-      return this._field.getOrigin();
-    }
+  isOrdinal() {
+    return true;
+  }
 
-    isFieldMetaEnabled() {
-      const fieldMetaOptions = this.getFieldMetaOptions();
-      return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
-    }
+  isComplete() {
+    return !!this._field;
+  }
 
-    supportsFieldMeta() {
-      return this.isComplete() && this.isScaled() && this._field.supportsFieldMeta();
-    }
+  getFieldOrigin() {
+    return this._field.getOrigin();
+  }
 
-    async getFieldMetaRequest() {
-      const fieldMetaOptions = this.getFieldMetaOptions();
-      return this._field.getFieldMetaRequest({
-        sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
-      });
-    }
+  isFieldMetaEnabled() {
+    const fieldMetaOptions = this.getFieldMetaOptions();
+    return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
+  }
 
-    supportsFeatureState() {
-      return true;
-    }
+  supportsFieldMeta() {
+    return this.isComplete() && this.isScaled() && this._field.supportsFieldMeta();
+  }
 
-    isScaled() {
-      return true;
-    }
+  async getFieldMetaRequest() {
+    const fieldMetaOptions = this.getFieldMetaOptions();
+    return this._field.getFieldMetaRequest({
+      sigma: _.get(fieldMetaOptions, 'sigma', DEFAULT_SIGMA),
+    });
+  }
 
-    getFieldMetaOptions() {
-      return _.get(this.getOptions(), 'fieldMetaOptions', {});
-    }
+  supportsFeatureState() {
+    return true;
+  }
 
+  isScaled() {
+    return true;
+  }
 
-    pluckStyleMetaFromFeatures(features) {
+  getFieldMetaOptions() {
+    return _.get(this.getOptions(), 'fieldMetaOptions', {});
+  }
 
-      const name = this.getField().getName();
-      let min = Infinity;
-      let max = -Infinity;
-      for (let i = 0; i < features.length; i++) {
-        const feature = features[i];
-        const newValue = parseFloat(feature.properties[name]);
-        if (!isNaN(newValue)) {
-          min = Math.min(min, newValue);
-          max = Math.max(max, newValue);
-        }
+  pluckStyleMetaFromFeatures(features) {
+    const name = this.getField().getName();
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      const newValue = parseFloat(feature.properties[name]);
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
       }
-
-      return (min === Infinity || max === -Infinity) ?  null : ({
-        min: min,
-        max: max,
-        delta: max - min
-      });
-
     }
 
-    pluckStyleMetaFromFieldMetaData(fieldMetaData) {
+    return min === Infinity || max === -Infinity
+      ? null
+      : {
+          min: min,
+          max: max,
+          delta: max - min,
+        };
+  }
 
-      const realFieldName = this._field.getESDocFieldName ? this._field.getESDocFieldName() : this._field.getName();
-      const stats = fieldMetaData[realFieldName];
-      if (!stats) {
-        return null;
-      }
-
-      const sigma = _.get(this.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA);
-      const stdLowerBounds = stats.avg - (stats.std_deviation * sigma);
-      const stdUpperBounds = stats.avg + (stats.std_deviation * sigma);
-      const min = Math.max(stats.min, stdLowerBounds);
-      const max = Math.min(stats.max, stdUpperBounds);
-      return {
-        min,
-        max,
-        delta: max - min,
-        isMinOutsideStdRange: stats.min < stdLowerBounds,
-        isMaxOutsideStdRange: stats.max > stdUpperBounds,
-      };
-
+  pluckStyleMetaFromFieldMetaData(fieldMetaData) {
+    const realFieldName = this._field.getESDocFieldName
+      ? this._field.getESDocFieldName()
+      : this._field.getName();
+    const stats = fieldMetaData[realFieldName];
+    if (!stats) {
+      return null;
     }
 
+    const sigma = _.get(this.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA);
+    const stdLowerBounds = stats.avg - stats.std_deviation * sigma;
+    const stdUpperBounds = stats.avg + stats.std_deviation * sigma;
+    const min = Math.max(stats.min, stdLowerBounds);
+    const max = Math.min(stats.max, stdUpperBounds);
+    return {
+      min,
+      max,
+      delta: max - min,
+      isMinOutsideStdRange: stats.min < stdLowerBounds,
+      isMaxOutsideStdRange: stats.max > stdUpperBounds,
+    };
+  }
+
+  formatField(value) {
+    if (this.getField()) {
+      const fieldName = this.getField().getName();
+      const fieldFormatter = this._getFieldFormatter(fieldName);
+      return fieldFormatter ? fieldFormatter(value) : value;
+    } else {
+      return value;
+    }
+  }
+
+  renderLegendDetailRow() {
+    return <DynamicLegendRow style={this} />;
+  }
 }

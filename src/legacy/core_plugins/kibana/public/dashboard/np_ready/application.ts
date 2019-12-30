@@ -42,13 +42,14 @@ import {
   RedirectWhenMissingProvider,
   confirmModalFactory,
   configureAppAngularModule,
+  SavedObjectLoader,
   IPrivate,
 } from '../legacy_imports';
 
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
-import { NavigationStart } from '../../../../navigation/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
 
@@ -57,9 +58,8 @@ export interface RenderDeps {
   npDataStart: NpDataStart;
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectRegistry: any;
+  savedDashboards: SavedObjectLoader;
   dashboardConfig: any;
-  savedDashboards: any;
   dashboardCapabilities: any;
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;

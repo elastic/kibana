@@ -21,7 +21,7 @@ export function initRoutes(server) {
         }),
       },
     },
-    handler: (request) => {
+    handler: request => {
       nonce = request.payload.nonce;
       return {};
     },
@@ -64,35 +64,38 @@ export function initRoutes(server) {
     path: '/api/oidc_provider/userinfo_endpoint',
     method: 'GET',
     config: {
-      auth: false
+      auth: false,
     },
-    handler: (request) => {
+    handler: request => {
       const accessToken = request.headers.authorization.substring(7);
       if (accessToken === 'valid-access-token1') {
-        return { 'sub': 'user1',
-          'name': 'Tony Stark',
-          'given_name': 'Tony',
-          'family_name': 'Stark',
-          'preferred_username': 'ironman',
-          'email': 'ironman@avengers.com'
+        return {
+          sub: 'user1',
+          name: 'Tony Stark',
+          given_name: 'Tony',
+          family_name: 'Stark',
+          preferred_username: 'ironman',
+          email: 'ironman@avengers.com',
         };
       }
       if (accessToken === 'valid-access-token2') {
-        return { 'sub': 'user2',
-          'name': 'Peter Parker',
-          'given_name': 'Peter',
-          'family_name': 'Parker',
-          'preferred_username': 'spiderman',
-          'email': 'spiderman@avengers.com'
+        return {
+          sub: 'user2',
+          name: 'Peter Parker',
+          given_name: 'Peter',
+          family_name: 'Parker',
+          preferred_username: 'spiderman',
+          email: 'spiderman@avengers.com',
         };
       }
       if (accessToken === 'valid-access-token3') {
-        return { 'sub': 'user3',
-          'name': 'Bruce Banner',
-          'given_name': 'Bruce',
-          'family_name': 'Banner',
-          'preferred_username': 'hulk',
-          'email': 'hulk@avengers.com'
+        return {
+          sub: 'user3',
+          name: 'Bruce Banner',
+          given_name: 'Bruce',
+          family_name: 'Banner',
+          preferred_username: 'hulk',
+          email: 'hulk@avengers.com',
         };
       }
       return {};
