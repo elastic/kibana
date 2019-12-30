@@ -30,6 +30,7 @@ import { Observable, Subject } from 'rxjs';
 import {
   createSessionStorageSyncStrategy,
   createKbnUrlSyncStrategy,
+  createKbnGlobalStateSyncStrategy,
 } from './state_sync_strategies';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
@@ -207,6 +208,56 @@ describe('state_sync', () => {
       expect(JSON.parse(sessionStorage.getItem(key2)!)).toEqual(urlStorageState2);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_s1=!((completed:!f,id:1,text:todo1))&_s2=!((completed:!t,id:4,text:todo4))"`
+      );
+
+      stop();
+    });
+
+    it('kbnGlobalStateSyncStrategy', async () => {
+      const sessionStorageState1 = [{ id: 1, text: 'todo1', completed: false }];
+      const sessionStorageState2 = [{ id: 2, text: 'todo2', completed: true }];
+      sessionStorage.setItem(key1, JSON.stringify(sessionStorageState1));
+      sessionStorage.setItem(key2, JSON.stringify(sessionStorageState2));
+      // @ts-ignore
+      const urlStorageState1 = [{ id: 3, text: 'todo3', completed: false }];
+      // @ts-ignore
+      const urlStorageState2 = [{ id: 4, text: 'todo4', completed: true }];
+      history.replace(
+        '/#?_s1=!((completed:!f,id:3,text:todo3))&_s2=!((completed:!t,id:4,text:todo4))'
+      );
+
+      const initialAppUrl =
+        'http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s1=!((completed:!f,id:5,text:todo5))';
+      const initialAppUrlState1 = [{ id: 5, text: 'todo5', completed: false }];
+      // @ts-ignore
+      const initialAppUrlState2 = [{ id: 6, text: 'todo6', completed: true }];
+
+      const syncStrategy = createKbnGlobalStateSyncStrategy(
+        urlSyncStrategy,
+        sessionStorageSyncStrategy,
+        initialAppUrl
+      );
+
+      const [start, stop] = syncState([
+        {
+          stateContainer: container1,
+          syncKey: key1,
+          syncStrategy,
+        },
+        {
+          stateContainer: container2,
+          syncKey: key2,
+          syncStrategy,
+        },
+      ]);
+      await start();
+
+      expect(container1.getState()).toEqual(initialAppUrlState1);
+      expect(container2.getState()).toEqual(sessionStorageState2);
+
+      expect(JSON.parse(sessionStorage.getItem(key1)!)).toEqual(initialAppUrlState1);
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/#?_s1=!((completed:!f,id:5,text:todo5))&_s2=!((completed:!t,id:2,text:todo2))"`
       );
 
       stop();
