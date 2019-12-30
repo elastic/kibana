@@ -35,7 +35,7 @@ def withDefaultPrComments(closure) {
     def message = getNextCommentMessage(info)
     postComment(message)
 
-    if (lastComment) {
+    if (lastComment && lastComment.user.login == 'kibanamachine') {
       deleteComment(lastComment.id)
     }
   }
