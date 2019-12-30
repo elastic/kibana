@@ -45,7 +45,7 @@ interface DocumentFieldsState {
 
 export interface State {
   isValid: boolean | undefined;
-  configuration: OnFormUpdateArg<MappingsConfiguration>;
+  configuration: { defaultValue: MappingsConfiguration } & OnFormUpdateArg<MappingsConfiguration>;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
@@ -56,7 +56,7 @@ export interface State {
 }
 
 export type Action =
-  | { type: 'configuration.update'; value: OnFormUpdateArg<MappingsConfiguration> }
+  | { type: 'configuration.update'; value: Partial<State['configuration']> }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -225,7 +225,7 @@ export const reducer = (state: State, action: Action): State => {
     case 'configuration.update': {
       const nextState = {
         ...state,
-        configuration: action.value,
+        configuration: { ...state.configuration, ...action.value },
       };
 
       const isValid = isStateValid(nextState);

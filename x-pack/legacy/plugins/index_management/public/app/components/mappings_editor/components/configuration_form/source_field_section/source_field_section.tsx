@@ -17,6 +17,120 @@ export const SourceFieldSection = () => {
   const [includeComboBoxOptions, setIncludeComboBoxOptions] = useState<ComboBoxOption[]>([]);
   const [excludeComboBoxOptions, setExcludeComboBoxOptions] = useState<ComboBoxOption[]>([]);
 
+  const renderWarning = () => (
+    <EuiCallOut
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutTitle', {
+        defaultMessage: 'Use caution when disabling the _source field',
+      })}
+      iconType="alert"
+      color="warning"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1"
+          defaultMessage="Disabling {source} lowers storage overhead within the index, but this comes at a cost. It also disables important features, such as the ability to reindex or debug queries by viewing the original document."
+          values={{
+            source: (
+              <code>
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1.sourceText',
+                  {
+                    defaultMessage: '_source',
+                  }
+                )}
+              </code>
+            ),
+          }}
+        />
+      </p>
+
+      <p>
+        <a href={documentationService.getDisablingMappingSourceFieldLink()} target="_blank">
+          <FormattedMessage
+            id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
+            defaultMessage="Learn more about alternatives to disabling the {source} field."
+            values={{
+              source: (
+                <code>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2.sourceText',
+                    {
+                      defaultMessage: '_source',
+                    }
+                  )}
+                </code>
+              ),
+            }}
+          />
+        </a>
+      </p>
+    </EuiCallOut>
+  );
+
+  const renderFormFields = () => (
+    <>
+      <UseField path="sourceField.includes">
+        {({ label, helpText, value, setValue }) => (
+          <EuiFormRow label={label} helpText={helpText} fullWidth>
+            <EuiComboBox
+              placeholder={i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.sourceIncludeField.placeholderLabel',
+                {
+                  defaultMessage: 'path.to.field.*',
+                }
+              )}
+              options={includeComboBoxOptions}
+              selectedOptions={value as ComboBoxOption[]}
+              onChange={newValue => {
+                setValue(newValue);
+              }}
+              onCreateOption={(searchValue: string) => {
+                const newOption = {
+                  label: searchValue,
+                };
+
+                setValue([...(value as ComboBoxOption[]), newOption]);
+                setIncludeComboBoxOptions([...includeComboBoxOptions, newOption]);
+              }}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
+      </UseField>
+
+      <EuiSpacer size="m" />
+
+      <UseField path="sourceField.excludes">
+        {({ label, helpText, value, setValue }) => (
+          <EuiFormRow label={label} helpText={helpText} fullWidth>
+            <EuiComboBox
+              placeholder={i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.sourceExcludeField.placeholderLabel',
+                {
+                  defaultMessage: 'path.to.field.*',
+                }
+              )}
+              options={excludeComboBoxOptions}
+              selectedOptions={value as ComboBoxOption[]}
+              onChange={newValue => {
+                setValue(newValue);
+              }}
+              onCreateOption={(searchValue: string) => {
+                const newOption = {
+                  label: searchValue,
+                };
+
+                setValue([...(value as ComboBoxOption[]), newOption]);
+                setExcludeComboBoxOptions([...excludeComboBoxOptions, newOption]);
+              }}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
+      </UseField>
+    </>
+  );
+
   return (
     <FormRow
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldTitle', {
@@ -46,124 +160,11 @@ export const SourceFieldSection = () => {
         {formData => {
           const { 'sourceField.enabled': enabled } = formData;
 
-          if (enabled) {
-            return (
-              <>
-                <UseField path="sourceField.includes">
-                  {({ label, helpText, value, setValue }) => (
-                    <EuiFormRow label={label} helpText={helpText} fullWidth>
-                      <EuiComboBox
-                        placeholder={i18n.translate(
-                          'xpack.idxMgmt.mappingsEditor.sourceIncludeField.placeholderLabel',
-                          {
-                            defaultMessage: 'path.to.field.*',
-                          }
-                        )}
-                        options={includeComboBoxOptions}
-                        selectedOptions={value as ComboBoxOption[]}
-                        onChange={newValue => {
-                          setValue(newValue);
-                        }}
-                        onCreateOption={(searchValue: string) => {
-                          const newOption = {
-                            label: searchValue,
-                          };
-
-                          setValue([...(value as ComboBoxOption[]), newOption]);
-                          setIncludeComboBoxOptions([...includeComboBoxOptions, newOption]);
-                        }}
-                        fullWidth
-                      />
-                    </EuiFormRow>
-                  )}
-                </UseField>
-
-                <EuiSpacer size="m" />
-
-                <UseField path="sourceField.excludes">
-                  {({ label, helpText, value, setValue }) => (
-                    <EuiFormRow label={label} helpText={helpText} fullWidth>
-                      <EuiComboBox
-                        placeholder={i18n.translate(
-                          'xpack.idxMgmt.mappingsEditor.sourceExcludeField.placeholderLabel',
-                          {
-                            defaultMessage: 'path.to.field.*',
-                          }
-                        )}
-                        options={excludeComboBoxOptions}
-                        selectedOptions={value as ComboBoxOption[]}
-                        onChange={newValue => {
-                          setValue(newValue);
-                        }}
-                        onCreateOption={(searchValue: string) => {
-                          const newOption = {
-                            label: searchValue,
-                          };
-
-                          setValue([...(value as ComboBoxOption[]), newOption]);
-                          setExcludeComboBoxOptions([...excludeComboBoxOptions, newOption]);
-                        }}
-                        fullWidth
-                      />
-                    </EuiFormRow>
-                  )}
-                </UseField>
-              </>
-            );
+          if (enabled === undefined) {
+            return null;
           }
 
-          return (
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutTitle',
-                {
-                  defaultMessage: 'Use caution when disabling the _source field',
-                }
-              )}
-              iconType="alert"
-              color="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1"
-                  defaultMessage="Disabling {source} lowers storage overhead within the index, but this comes at a cost. It also disables important features, such as the ability to reindex or debug queries by viewing the original document."
-                  values={{
-                    source: (
-                      <code>
-                        {i18n.translate(
-                          'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1.sourceText',
-                          {
-                            defaultMessage: '_source',
-                          }
-                        )}
-                      </code>
-                    ),
-                  }}
-                />
-              </p>
-
-              <p>
-                <a href={documentationService.getDisablingMappingSourceFieldLink()} target="_blank">
-                  <FormattedMessage
-                    id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
-                    defaultMessage="Learn more about alternatives to disabling the {source} field."
-                    values={{
-                      source: (
-                        <code>
-                          {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2.sourceText',
-                            {
-                              defaultMessage: '_source',
-                            }
-                          )}
-                        </code>
-                      ),
-                    }}
-                  />
-                </a>
-              </p>
-            </EuiCallOut>
-          );
+          return enabled ? renderFormFields() : renderWarning();
         }}
       </FormDataProvider>
     </FormRow>
