@@ -44,7 +44,7 @@ describe('Mappings configuration validator', () => {
     expect(errors).toBe(undefined);
   });
 
-  it('should strip out invalid configuration', () => {
+  it('should strip out invalid configuration and returns the errors for each of them', () => {
     const mappings = {
       dynamic: true,
       numeric_detection: 123, // wrong format
@@ -102,7 +102,16 @@ describe('Properties validator', () => {
     };
     const { value, errors } = validateProperties(properties as any);
 
-    expect(Object.keys(value)).toEqual(['prop1', 'prop6']);
+    expect(value).toEqual({
+      prop1: { type: 'text' },
+      prop6: {
+        type: 'object',
+        properties: {
+          prop1: { type: 'text' },
+        },
+      },
+    });
+
     expect(errors).toEqual(
       ['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2'].map(fieldPath => ({
         code: 'ERR_FIELD',
@@ -125,8 +134,25 @@ describe('Properties validator', () => {
     };
     const { value, errors } = validateProperties(properties as any);
 
-    expect(Object.keys(value)).toEqual(['prop1', 'prop2', 'prop3']);
-    expect(value.prop2).toEqual({ type: 'object' });
+    expect(value).toEqual({
+      prop1: {
+        type: 'text',
+      },
+      prop2: {
+        type: 'object',
+      },
+      prop3: {
+        type: 'object',
+        properties: {
+          prop1: {
+            type: 'object',
+          },
+          prop2: {
+            type: 'keyword',
+          },
+        },
+      },
+    });
     expect(errors).toEqual([]);
   });
 
@@ -207,7 +233,7 @@ describe('Properties validator', () => {
         locale: 1,
         orientation: [],
         boost: { a: 123 },
-        scaling_factor: 1,
+        scaling_factor: 'some_string',
         dynamic: [true],
         enabled: 'false',
         format: null,
@@ -258,7 +284,7 @@ describe('Properties validator', () => {
         locale: 'en',
         orientation: 'ccw',
         boost: 1.5,
-        scaling_factor: 'abc',
+        scaling_factor: 2.5,
         dynamic: true,
         enabled: true,
         format: 'strict_date_optional_time',
