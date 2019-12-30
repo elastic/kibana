@@ -21,7 +21,11 @@ import { getFieldConfig } from '../../../lib';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 
-export const FieldDataParameter = () => {
+interface Props {
+  defaultToggleValue: boolean;
+}
+
+export const FieldDataParameter = ({ defaultToggleValue }: Props) => {
   const onFrequencyFilterChange = (minField: FieldHook, maxField: FieldHook) => ([
     min,
     max,
@@ -49,6 +53,7 @@ export const FieldDataParameter = () => {
         href: documentationService.getFielddataLink(),
       }}
       formFieldPath="fielddata"
+      defaultToggleValue={defaultToggleValue}
     >
       {/* fielddata_frequency_filter */}
       <EuiFormRow
