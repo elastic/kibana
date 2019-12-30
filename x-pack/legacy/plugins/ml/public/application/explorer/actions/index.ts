@@ -5,4 +5,4 @@
  */
 
 export { jobSelectionActionCreator } from './job_selection';
-export { loadExplorerData$, useExplorerData } from './load_explorer_data';
+export { useExplorerData } from './load_explorer_data';

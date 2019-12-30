@@ -17,19 +17,9 @@ export const DRAG_SELECT_ACTION = {
 };
 
 export const EXPLORER_ACTION = {
-  APP_STATE_SET: 'appStateSet',
-  APP_STATE_CLEAR_INFLUENCER_FILTER_SETTINGS: 'appStateClearInfluencerFilterSettings',
-  APP_STATE_CLEAR_SELECTION: 'appStateClearSelection',
-  APP_STATE_SAVE_SELECTION: 'appStateSaveSelection',
-  APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME: 'appStateSaveViewBySwimlaneFieldName',
-  APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS: 'appStateSaveInfluencerFilterSettings',
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
   CLEAR_JOBS: 'clearJobs',
-  CLEAR_SELECTION: 'clearSelection',
-  INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
-  LOAD_JOBS: 'loadJobs',
-  RESET: 'reset',
   SET_BOUNDS: 'setBounds',
   SET_CHARTS: 'setCharts',
   SET_EXPLORER_DATA: 'setExplorerData',

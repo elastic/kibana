@@ -113,14 +113,8 @@ export const explorerService = {
   clearJobs: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_JOBS });
   },
-  clearSelection: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_SELECTION });
-  },
   updateJobSelection: (selectedJobIds: string[]) => {
     explorerAction$.next(jobSelectionActionCreator(selectedJobIds));
-  },
-  reset: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.RESET });
   },
   setBounds: (payload: TimeRangeBounds) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_BOUNDS, payload });

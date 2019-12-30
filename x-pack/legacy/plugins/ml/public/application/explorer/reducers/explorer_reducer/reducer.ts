@@ -20,7 +20,7 @@ import {
 import { checkSelectedCells } from './check_selected_cells';
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
-import { getExplorerDefaultState, ExplorerState } from './state';
+import { ExplorerState } from './state';
 import { setInfluencerFilterSettings } from './set_influencer_filter_settings';
 import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
 
@@ -43,19 +43,8 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
-    case EXPLORER_ACTION.CLEAR_SELECTION:
-      nextState = {
-        ...state,
-        ...getClearedSelectedAnomaliesState(),
-      };
-      break;
-
     case EXPLORER_ACTION.JOB_SELECTION_CHANGE:
       nextState = jobSelectionChange(state, payload);
-      break;
-
-    case EXPLORER_ACTION.RESET:
-      nextState = getExplorerDefaultState();
       break;
 
     case EXPLORER_ACTION.SET_BOUNDS:
