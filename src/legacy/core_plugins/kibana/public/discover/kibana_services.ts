@@ -100,3 +100,4 @@ export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { Adapters } from 'ui/inspector/types';
 export { Chrome, IInjector } from 'ui/chrome';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
+export { FieldName } from 'ui/directives/field_name/field_name';

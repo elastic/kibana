@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

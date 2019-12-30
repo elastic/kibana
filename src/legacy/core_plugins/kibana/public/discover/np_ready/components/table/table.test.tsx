@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { mount } from 'enzyme';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../kibana_services';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { flattenHitWrapper } from '../../../../../../data/public';
