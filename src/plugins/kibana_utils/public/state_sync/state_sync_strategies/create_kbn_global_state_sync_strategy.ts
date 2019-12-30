@@ -20,6 +20,8 @@
 import isEqual from 'react-fast-compare';
 import { ISyncStrategy } from './types';
 import { getStateFromKbnUrl } from '../../state_management/url';
+import { concatMap, map, share } from 'rxjs/operators';
+import { from } from 'rxjs';
 
 /**
  * This strategy implements state restoration similar to what GlobalState in legacy world did
@@ -86,6 +88,14 @@ export const createKbnGlobalStateSyncStrategy = (
 
       return urlSyncStrategy.fromStorage<State>(syncKey);
     },
-    storageChange$: urlSyncStrategy.storageChange$,
+    storageChange$: <State>(syncKey: string) =>
+      urlSyncStrategy.storageChange$!<State>(syncKey).pipe(
+        concatMap(newState => {
+          return from(sessionStorageSyncStrategy.toStorage<State>(syncKey, newState!)).pipe(
+            map(() => newState)
+          );
+        }),
+        share()
+      ),
   };
 };
