@@ -17,23 +17,5 @@
  * under the License.
  */
 
-const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
-
-export function mergeVariables(...sources: Array<Record<string, any>>) {
-  const result: Record<string, any> = {};
-
-  for (const source of sources) {
-    Object.entries(source).forEach(([key, value]) => {
-      if (ELIGIBLE_FLAT_MERGE_KEYS.includes(key)) {
-        result[key] = {
-          ...value,
-          ...result[key],
-        };
-      } else if (!result.hasOwnProperty(key)) {
-        result[key] = value;
-      }
-    });
-  }
-
-  return result;
-}
+export { RenderingService } from './rendering_service';
+export * from './types';
