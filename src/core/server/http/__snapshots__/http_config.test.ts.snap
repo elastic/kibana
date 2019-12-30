@@ -81,24 +81,6 @@ exports[`throws if basepath is not specified, but rewriteBasePath is set 1`] = `
 
 exports[`throws if invalid hostname 1`] = `"[host]: value is [asdf$%^] but it must be a valid hostname (see RFC 1123)."`;
 
-exports[`with TLS should accept known protocols\` 1`] = `
-"[ssl.supportedProtocols.0]: types that failed validation:
-- [ssl.supportedProtocols.0.0]: expected value to equal [TLSv1] but got [SOMEv100500]
-- [ssl.supportedProtocols.0.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
-- [ssl.supportedProtocols.0.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
-`;
-
-exports[`with TLS should accept known protocols\` 2`] = `
-"[ssl.supportedProtocols.3]: types that failed validation:
-- [ssl.supportedProtocols.3.0]: expected value to equal [TLSv1] but got [SOMEv100500]
-- [ssl.supportedProtocols.3.1]: expected value to equal [TLSv1.1] but got [SOMEv100500]
-- [ssl.supportedProtocols.3.2]: expected value to equal [TLSv1.2] but got [SOMEv100500]"
-`;
-
-exports[`with TLS throws if TLS is enabled but \`certificate\` is not specified 1`] = `"[ssl]: must specify [certificate] and [key] when ssl is enabled"`;
-
-exports[`with TLS throws if TLS is enabled but \`key\` is not specified 1`] = `"[ssl]: must specify [certificate] and [key] when ssl is enabled"`;
-
 exports[`with TLS throws if TLS is enabled but \`redirectHttpFromPort\` is equal to \`port\` 1`] = `"Kibana does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234]."`;
 
 exports[`with compression accepts valid referrer whitelist 1`] = `
