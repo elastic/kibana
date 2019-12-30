@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { chain, each, find, first, get, has, isEqual } from 'lodash';
+import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -117,7 +117,6 @@ function getTimeseriesexplorerDefaultState() {
     loadCounter: 0,
     loading: false,
     modelPlotEnabled: false,
-    selectedJob: undefined,
     // Toggles display of annotations in the focus chart
     showAnnotations: mlAnnotationsEnabled,
     showAnnotationsCheckbox: mlAnnotationsEnabled,
@@ -170,9 +169,8 @@ export class TimeSeriesExplorer extends React.Component {
   static propTypes = {
     appStateHandler: PropTypes.func.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
-    globalState: PropTypes.object.isRequired,
     tableInterval: PropTypes.string.isRequired,
-    tableSeverity: PropTypes.object.isRequired,
+    tableSeverity: PropTypes.number.isRequired,
     timefilter: PropTypes.object.isRequired,
   };
 
@@ -288,7 +286,9 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   getFocusAggregationInterval(selection) {
-    const { jobs, selectedJob } = this.state;
+    const { selectedJobIds } = this.props;
+    const { jobs } = this.state;
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     // Calculate the aggregation interval for the focus chart.
     const bounds = { min: moment(selection.from), max: moment(selection.to) };
@@ -300,7 +300,9 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const { detectorId, entities, modelPlotEnabled, selectedJob } = this.state;
+    const { selectedJobIds } = this.props;
+    const { detectorId, entities, modelPlotEnabled } = this.state;
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     const { appStateHandler } = this.props;
 
@@ -351,8 +353,8 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
-    const { dateFormatTz, tableInterval, tableSeverity } = this.props;
-    const { selectedJob } = this.state;
+    const { dateFormatTz, selectedJobIds, tableInterval, tableSeverity } = this.props;
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     return ml.results
       .getAnomaliesTableData(
@@ -360,7 +362,7 @@ export class TimeSeriesExplorer extends React.Component {
         this._criteriaFields,
         [],
         tableInterval,
-        tableSeverity.val,
+        tableSeverity,
         earliestMs,
         latestMs,
         dateFormatTz,
@@ -408,8 +410,9 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   loadEntityValues = (callback = () => {}) => {
-    const { timefilter } = this.props;
-    const { detectorId, entities, selectedJob } = this.state;
+    const { selectedJobIds, timefilter } = this.props;
+    const { detectorId, entities } = this.state;
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     // Populate the entity input datalists with the values from the top records by score
     // for the selected detector across the full time range. No need to pass through finish().
@@ -462,8 +465,9 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   loadForForecastId = forecastId => {
-    const { appStateHandler, timefilter } = this.props;
-    const { autoZoomDuration, contextChartData, selectedJob } = this.state;
+    const { appStateHandler, selectedJobIds, timefilter } = this.props;
+    const { autoZoomDuration, contextChartData } = this.state;
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     mlForecastService
       .getForecastDateRange(selectedJob, forecastId)
@@ -520,17 +524,18 @@ export class TimeSeriesExplorer extends React.Component {
       return;
     }
 
-    const { appStateHandler, timefilter } = this.props;
+    const { appStateHandler, selectedJobIds, timefilter } = this.props;
+
+    if (selectedJobIds === undefined) {
+      return;
+    }
+
     const {
       detectorId: currentDetectorId,
       entities: currentEntities,
       loadCounter: currentLoadCounter,
-      selectedJob: currentSelectedJob,
     } = this.state;
-
-    if (currentSelectedJob === undefined) {
-      return;
-    }
+    const currentSelectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     this.contextChartSelectedInitCallDone = false;
 
@@ -559,14 +564,8 @@ export class TimeSeriesExplorer extends React.Component {
           : {}),
       },
       () => {
-        const {
-          detectorId,
-          entities,
-          loadCounter,
-          jobs,
-          modelPlotEnabled,
-          selectedJob,
-        } = this.state;
+        const { detectorId, entities, loadCounter, jobs, modelPlotEnabled } = this.state;
+        const selectedJob = mlJobService.getJob(selectedJobIds[0]);
         const detectorIndex = +detectorId;
 
         let awaitingCount = 3;
@@ -765,8 +764,9 @@ export class TimeSeriesExplorer extends React.Component {
    * @param callback to invoke after a state update.
    */
   updateControlsForDetector = (callback = () => {}) => {
-    const { appStateHandler } = this.props;
-    const { detectorId, selectedJob } = this.state;
+    const { appStateHandler, selectedJobIds } = this.props;
+    const { detectorId } = this.state;
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
     // Update the entity dropdown control(s) according to the partitioning fields for the selected detector.
     const detectorIndex = +detectorId;
     const detector = selectedJob.analysis_config.detectors[detectorIndex];
@@ -876,7 +876,7 @@ export class TimeSeriesExplorer extends React.Component {
     // Store the detector index as a string so it can be used as ng-model in a select control.
     const detectorId = '' + detectorIndex;
 
-    this.setState({ detectorId, detectors, selectedJob }, () => {
+    this.setState({ detectorId, detectors }, () => {
       this.updateControlsForDetector(() => {
         // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
         mlFieldFormatService
@@ -928,104 +928,6 @@ export class TimeSeriesExplorer extends React.Component {
         this.refresh(true);
       })
     );
-
-    // Listen for changes to job selection.
-    /*
-    this.subscriptions.add(
-      this.jobSelectService$.subscribe(({ selection: selectedJobIds }) => {
-        const jobs = createTimeSeriesJobData(mlJobService.jobs);
-
-        this.contextChartSelectedInitCallDone = false;
-        this.setState({ fullRefresh: false, loading: true, showForecastCheckbox: false });
-
-        const timeSeriesJobIds = jobs.map(j => j.id);
-
-        // Check if any of the jobs set in the URL are not time series jobs
-        // (e.g. if switching to this view straight from the Anomaly Explorer).
-        const invalidIds = difference(selectedJobIds, timeSeriesJobIds);
-        selectedJobIds = without(selectedJobIds, ...invalidIds);
-        if (invalidIds.length > 0) {
-          let warningText = i18n.translate(
-            'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage',
-            {
-              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
-              values: {
-                invalidIdsCount: invalidIds.length,
-                invalidIds,
-              },
-            }
-          );
-          if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-            warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
-              defaultMessage: ', auto selecting first job',
-            });
-          }
-          toastNotifications.addWarning(warningText);
-        }
-
-        if (selectedJobIds.length > 1) {
-          // if more than one job or a group has been loaded from the URL
-          if (selectedJobIds.length > 1) {
-            // if more than one job, select the first job from the selection.
-            toastNotifications.addWarning(
-              i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-                defaultMessage: 'You can only view one job at a time in this dashboard',
-              })
-            );
-
-            setGlobalStateSelection(globalState, { selectedIds: [selectedJobIds[0]] });
-            this.jobSelectService$.next({ selection: [selectedJobIds[0]], resetSelection: true });
-          } else {
-            // if a group has been loaded
-            if (selectedJobIds.length > 0) {
-              // if the group contains valid jobs, select the first
-              toastNotifications.addWarning(
-                i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-                  defaultMessage: 'You can only view one job at a time in this dashboard',
-                })
-              );
-
-              setGlobalStateSelection(globalState, { selectedIds: [selectedJobIds[0]] });
-              this.jobSelectService$.next({ selection: [selectedJobIds[0]], resetSelection: true });
-            } else if (jobs.length > 0) {
-              // if there are no valid jobs in the group but there are valid jobs
-              // in the list of all jobs, select the first
-              setGlobalStateSelection(globalState, { selectedIds: [jobs[0].id] });
-              this.jobSelectService$.next({ selection: [jobs[0].id], resetSelection: true });
-            } else {
-              // if there are no valid jobs left.
-              this.setState({ loading: false });
-            }
-          }
-        } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
-          // if some ids have been filtered out because they were invalid.
-          // refresh the URL with the first valid id
-          setGlobalStateSelection(globalState, { selectedIds: [selectedJobIds[0]] });
-          this.jobSelectService$.next({ selection: [selectedJobIds[0]], resetSelection: true });
-        } else if (selectedJobIds.length > 0) {
-          // normal behavior. a job ID has been loaded from the URL
-          if (
-            this.state.selectedJob !== undefined &&
-            selectedJobIds[0] !== this.state.selectedJob.job_id
-          ) {
-            // Clear the detectorIndex, entities and forecast info.
-            appStateHandler(APP_STATE_ACTION.CLEAR);
-          }
-          this.loadForJobId(selectedJobIds[0], jobs);
-        } else {
-          if (selectedJobIds.length === 0 && jobs.length > 0) {
-            // no jobs were loaded from the URL, so add the first job
-            // from the full jobs list.
-            setGlobalStateSelection(globalState, { selectedIds: [jobs[0].id] });
-            this.jobSelectService$.next({ selection: [jobs[0].id], resetSelection: true });
-          } else {
-            // Jobs exist, but no time series jobs.
-            this.setState({ loading: false });
-          }
-        }
-      })
-    );
-    */
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -1097,7 +999,9 @@ export class TimeSeriesExplorer extends React.Component {
             }
           }),
           switchMap(selection => {
-            const { jobs, selectedJob } = this.state;
+            const { selectedJobIds } = this.props;
+            const { jobs } = this.state;
+            const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
             // Calculate the aggregation interval for the focus chart.
             const bounds = { min: moment(selection.from), max: moment(selection.to) };
@@ -1142,12 +1046,99 @@ export class TimeSeriesExplorer extends React.Component {
           });
         })
     );
+
+    this.checkJobSelection();
+  }
+
+  checkJobSelection() {
+    const { appStateHandler, selectedJobIds, setGlobalState } = this.props;
+
+    // Listen for changes to job selection.
+    const jobs = createTimeSeriesJobData(mlJobService.jobs);
+
+    this.contextChartSelectedInitCallDone = false;
+    this.setState({ fullRefresh: false, loading: true, showForecastCheckbox: false });
+
+    const timeSeriesJobIds = jobs.map(j => j.id);
+
+    // Check if any of the jobs set in the URL are not time series jobs
+    // (e.g. if switching to this view straight from the Anomaly Explorer).
+    const invalidIds = difference(selectedJobIds, timeSeriesJobIds);
+    const validSelectedJobIds = without(selectedJobIds, ...invalidIds);
+    if (invalidIds.length > 0) {
+      let warningText = i18n.translate(
+        'xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage',
+        {
+          defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+          values: {
+            invalidIdsCount: invalidIds.length,
+            invalidIds,
+          },
+        }
+      );
+      if (validSelectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
+        warningText += i18n.translate('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+          defaultMessage: ', auto selecting first job',
+        });
+      }
+      toastNotifications.addWarning(warningText);
+    }
+
+    if (validSelectedJobIds.length > 1) {
+      // if more than one job or a group has been loaded from the URL
+      if (validSelectedJobIds.length > 1) {
+        // if more than one job, select the first job from the selection.
+        toastNotifications.addWarning(
+          i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+            defaultMessage: 'You can only view one job at a time in this dashboard',
+          })
+        );
+
+        setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
+      } else {
+        // if a group has been loaded
+        if (selectedJobIds.length > 0) {
+          // if the group contains valid jobs, select the first
+          toastNotifications.addWarning(
+            i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+              defaultMessage: 'You can only view one job at a time in this dashboard',
+            })
+          );
+
+          setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
+        } else if (jobs.length > 0) {
+          // if there are no valid jobs in the group but there are valid jobs
+          // in the list of all jobs, select the first
+          setGlobalState('ml', { jobIds: [jobs[0].id] });
+        } else {
+          // if there are no valid jobs left.
+          this.setState({ loading: false });
+        }
+      }
+    } else if (invalidIds.length > 0 && validSelectedJobIds.length > 0) {
+      // if some ids have been filtered out because they were invalid.
+      // refresh the URL with the first valid id
+      setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
+    } else if (validSelectedJobIds.length > 0) {
+      // normal behavior. a job ID has been loaded from the URL
+      // Clear the detectorIndex, entities and forecast info.
+      appStateHandler(APP_STATE_ACTION.CLEAR);
+      this.loadForJobId(validSelectedJobIds[0], jobs);
+    } else {
+      if (validSelectedJobIds.length === 0 && jobs.length > 0) {
+        // no jobs were loaded from the URL, so add the first job
+        // from the full jobs list.
+        setGlobalState('ml', { jobIds: [jobs[0].id] });
+      } else {
+        // Jobs exist, but no time series jobs.
+        this.setState({ loading: false });
+      }
+    }
   }
 
   componenDidUpdate(previousProps) {
-    console.warn('componentDidUpdate');
     if (previousProps.selectedJobIds !== this.props.selectedJobIds) {
-      console.warn('component class jobs change');
+      this.checkJobSelection();
     }
 
     // Reload the anomalies table if the Interval or Threshold controls are changed.
@@ -1162,7 +1153,7 @@ export class TimeSeriesExplorer extends React.Component {
 
     if (
       previousProps.tableInterval !== this.props.tableInterval ||
-      !isEqual(previousProps.tableSeverity, this.props.tableSeverity)
+      previousProps.tableSeverity !== this.props.tableSeverity
     ) {
       tableControlsListener();
     }
@@ -1174,7 +1165,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   render() {
-    const { dateFormatTz, timefilter } = this.props;
+    const { dateFormatTz, selectedJobIds, timefilter } = this.props;
 
     const {
       autoZoomDuration,
@@ -1195,7 +1186,6 @@ export class TimeSeriesExplorer extends React.Component {
       jobs,
       loading,
       modelPlotEnabled,
-      selectedJob,
       showAnnotations,
       showAnnotationsCheckbox,
       showForecast,
@@ -1240,6 +1230,14 @@ export class TimeSeriesExplorer extends React.Component {
       singleSelection: true,
       timeseriesOnly: true,
     };
+
+    if (selectedJobIds === undefined || selectedJobIds.length > 1) {
+      return (
+        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef} />
+      );
+    }
+
+    const selectedJob = mlJobService.getJob(selectedJobIds[0]);
 
     if (jobs.length === 0) {
       return (

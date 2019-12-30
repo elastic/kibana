@@ -1724,6 +1724,9 @@ const TimeseriesChartIntl = injectI18n(
 );
 
 export const TimeseriesChart = props => {
-  const annotation = useObservable(annotation$);
-  return <TimeseriesChartIntl annotation={annotation} {...props} />;
+  const annotationProp = useObservable(annotation$);
+  if (annotationProp === undefined) {
+    return null;
+  }
+  return <TimeseriesChartIntl annotation={annotationProp} {...props} />;
 };

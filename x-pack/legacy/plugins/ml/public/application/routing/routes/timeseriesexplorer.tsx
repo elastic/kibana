@@ -52,26 +52,22 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
 
 const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
   const [appState, setAppState] = useUrlState('_a');
-  const [globalState] = useUrlState('_g');
-
-  if (appState.mlTimeSeriesExplorer === undefined) {
-    setAppState('mlTimeSeriesExplorer', {});
-  }
+  const [globalState, setGlobalState] = useUrlState('_g');
 
   useEffect(() => {
-    const globalStateTime = globalState.time;
-    if (globalStateTime) {
+    if (globalState?.time !== undefined) {
       timefilter.setTime({
-        from: globalStateTime.from,
-        to: globalStateTime.to,
+        from: globalState.time.from,
+        to: globalState.time.to,
       });
     }
-  }, [JSON.stringify([appState, globalState])]);
+  }, [JSON.stringify(globalState?.time)]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
 
   const appStateHandler = (action: string, payload: any) => {
-    const mlTimeSeriesExplorer = appState.mlTimeSeriesExplorer;
+    const mlTimeSeriesExplorer =
+      appState?.mlTimeSeriesExplorer !== undefined ? appState.mlTimeSeriesExplorer : {};
     switch (action) {
       case APP_STATE_ACTION.CLEAR:
         delete mlTimeSeriesExplorer.detectorIndex;
@@ -116,19 +112,15 @@ const TimeSeriesExplorerUrlStateManager: FC<{ config: any }> = ({ config }) => {
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
-  if (appState.mlTimeSeriesExplorer === undefined) {
-    return null;
-  }
-
   return (
     <TimeSeriesExplorer
       {...{
         appStateHandler,
         dateFormatTz,
-        globalState,
         selectedJobIds,
+        setGlobalState,
         tableInterval,
-        tableSeverity,
+        tableSeverity: tableSeverity.val,
         timefilter,
       }}
     />

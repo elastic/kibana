@@ -29,6 +29,9 @@ describe('AnnotationFlyout', () => {
     // useObservable wraps the observable in a new component
     const ObservableComponent = (props: any) => {
       const annotationProp = useObservable(annotation$);
+      if (annotationProp === undefined) {
+        return null;
+      }
       return <AnnotationFlyout annotation={annotationProp} {...props} />;
     };
 
@@ -44,6 +47,9 @@ describe('AnnotationFlyout', () => {
     // useObservable wraps the observable in a new component
     const ObservableComponent = (props: any) => {
       const annotationProp = useObservable(annotation$);
+      if (annotationProp === undefined) {
+        return null;
+      }
       return <AnnotationFlyout annotation={annotationProp} {...props} />;
     };
 

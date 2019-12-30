@@ -345,7 +345,10 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
 }
 
 export const AnnotationFlyout: FC<any> = props => {
-  const annotation = useObservable(annotation$);
+  const annotationProp = useObservable(annotation$);
+  if (annotationProp === undefined) {
+    return null;
+  }
   const AnnotationFlyoutIntlInjected = injectI18n(AnnotationFlyoutIntl);
-  return <AnnotationFlyoutIntlInjected annotation={annotation} {...props} />;
+  return <AnnotationFlyoutIntlInjected annotation={annotationProp} {...props} />;
 };

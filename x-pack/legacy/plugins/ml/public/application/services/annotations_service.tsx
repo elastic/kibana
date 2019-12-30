@@ -63,8 +63,11 @@ export type AnnotationState = Annotation | null;
       }
 
       export const MyObservableComponent = (props) => {
-        const annotation = useObservable(annotation$);
-        return <MyOriginalComponent annotation={annotation} {...props} />;
+        const annotationProp = useObservable(annotation$);
+        if (annotationProp === undefined) {
+          return null;
+        }
+        return <MyOriginalComponent annotation={annotationProp} {...props} />;
       };
 */
 export const annotation$ = new BehaviorSubject<AnnotationState>(null);
