@@ -206,8 +206,6 @@ export class SavedObjectsService
 
     const savedObjectSchemas = new SavedObjectsSchema(savedObjectsSchemasDefinition);
 
-    const adminClient = await setupDeps.elasticsearch.adminClient$.pipe(first()).toPromise();
-
     const kibanaConfig = await this.coreContext.configService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
@@ -217,6 +215,8 @@ export class SavedObjectsService
       .atPath<SavedObjectsConfigType>('migrations')
       .pipe(first())
       .toPromise();
+
+    const adminClient = setupDeps.elasticsearch.adminClient;
 
     const migrator = (this.migrator = new KibanaMigrator({
       savedObjectSchemas,
