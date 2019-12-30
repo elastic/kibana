@@ -82,31 +82,48 @@ Elasticsearch nodes on startup.
 `elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of
 Elasticsearch nodes immediately following a connection fault.
 
-`elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls
-whether to always present the certificate specified by
-`elasticsearch.ssl.certificate` when requested. This applies to all requests to
-Elasticsearch, including requests that are proxied for end-users. Setting this
-to `true` when Elasticsearch is using certificates to authenticate users can
-lead to proxied requests for end-users being executed as the identity tied to
-the configured certificate.
+`elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls whether to always present the certificate specified by
+`elasticsearch.ssl.certificate` or `elasticsearch.ssl.keystore.path` when requested. This applies to all requests to Elasticsearch,
+including requests that are proxied for end-users. Setting this to `true` when Elasticsearch is using certificates to authenticate users can
+lead to proxied requests for end-users being executed as the identity tied to the configured certificate.
 
-`elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Optional
-settings that provide the paths to the PEM-format SSL certificate and key files.
-These files are used to verify the identity of Kibana to Elasticsearch and are
-required when `xpack.security.http.ssl.client_authentication` in Elasticsearch is
-set to `required`.
+`elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Paths to a PEM-encoded X.509 certificate and its private key, respectively.
+When `xpack.security.http.ssl.client_authentication` in Elasticsearch is set to `required`, the certificate and key are used to prove
+Kibana's identity when it makes an outbound request to your Elasticsearch cluster.
 
-`elasticsearch.ssl.certificateAuthorities:`:: Optional setting that enables you
-to specify a list of paths to the PEM file for the certificate authority for
-your Elasticsearch instance.
+NOTE: These settings cannot be used in conjunction with `elasticsearch.ssl.keystore.path`.
 
-`elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt
-the private key. This value is optional as the key may not be encrypted.
+`elasticsearch.ssl.certificateAuthorities:`:: Paths to one or more PEM-encoded X.509 certificates. This may consist of a root certificate
+authority (CA), and one or more intermediate CAs, which make up a trusted certificate chain for Kibana. This is used to establish trust when
+Kibana creates an SSL connection with your Elasticsearch cluster. In addition to this setting, trusted certificates may be specified via
+`elasticsearch.ssl.keystore.path` and/or `elasticsearch.ssl.truststore.path`.
 
-`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the
-verification of certificates presented by Elasticsearch. Valid values are `none`,
-`certificate`, and `full`. `full` performs hostname verification, and
-`certificate` does not.
+`elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key that is specified via
+`elasticsearch.ssl.key`. This value is optional, as the key may not be encrypted.
+
+`elasticsearch.ssl.keystore.path:`:: Path to a PKCS #12 file -- this should contain an X.509 certificate with its private key. When
+`xpack.security.http.ssl.client_authentication` in Elasticsearch is set to `required`, the certificate and key are used to prove Kibana's
+identity when it makes an outbound request to your Elasticsearch cluster. If the file contains any additional certificates, those will be
+used as a trusted certificate chain for your Elasticsearch cluster. This is used to establish trust when Kibana creates an SSL connection
+with your Elasticsearch cluster. In addition to this setting, trusted certificates may be specified via
+`elasticsearch.ssl.certificateAuthorities` and/or `elasticsearch.ssl.truststore.path`.
+
+NOTE: This setting cannot be used in conjunction with `elasticsearch.ssl.certificate` or `elasticsearch.ssl.key`.
+
+`elasticsearch.ssl.keystore.password:`:: The password that will be used to decrypt the key store and its private key. If your key store has
+no password, leave this unset. If your key store has an empty password, set this to `""`.
+
+`elasticsearch.ssl.truststore.path:`:: Path to a PKCS #12 trust store -- this should contain one or more X.509 certificates. This may
+consist of a root certificate authority (CA), and one or more intermediate CAs, which make up a trusted certificate chain for your
+Elasticsearch cluster. This is used to establish trust when Kibana creates an SSL connection with your Elasticsearch cluster. In addition to
+this setting, trusted certificates may be specified via `elasticsearch.ssl.certificateAuthorities` and/or `elasticsearch.ssl.keystore.path`.
+
+`elasticsearch.ssl.truststore.password:`:: The password that will be used to decrypt the trust store. If your trust store has no password,
+leave this unset. If your trust store has an empty password, set this to `""`.
+
+`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values
+are `none`, `certificate`, and `full`. `full` performs hostname verification, and `certificate` does not. This is only used when traffic to
+Elasticsearch is encrypted -- this is specified by using the HTTPS protocol in `elasticsearch.hosts`.
 
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait
 for Elasticsearch at Kibana startup before retrying.
@@ -325,11 +342,16 @@ default is `true`.
 `server.socketTimeout:`:: *Default: "120000"* The number of milliseconds to wait before closing an
 inactive socket.
 
-`server.ssl.certificate:` and `server.ssl.key:`:: Paths to the PEM-format SSL
-certificate and SSL key files, respectively.
+`server.ssl.certificate:` and `server.ssl.key:`:: Paths to a PEM-encoded X.509 certificate and its private key, respectively. These are used
+when enabling SSL for inbound requests from web browsers to the Kibana server.
 
-`server.ssl.certificateAuthorities:`:: List of paths to PEM encoded certificate
-files that should be trusted.
+NOTE: These settings cannot be used in conjunction with `server.ssl.keystore.path`.
+
+`server.ssl.certificateAuthorities:`:: Paths to one or more PEM-encoded X.509 certificates. This may consist of a root certificate authority
+(CA), and one or more intermediate CAs, which make up a trusted certificate chain for Kibana. This is used when a web browser creates an SSL
+connection with the Kibana server; the certificate chain is sent to the browser along with the end-entity certificate to establish trust.
+This is also used to determine if client certificates should be trusted when PKI authentication is enabled. In addition to this setting,
+trusted certificates may be specified via `server.ssl.keystore.path` and/or `server.ssl.truststore.path`.
 
 `server.ssl.cipherSuites:`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*.
 Details on the format, and the valid options, are available via the
@@ -339,12 +361,34 @@ https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT[OpenS
 connections. Valid values are `required`, `optional`, and `none`. `required` forces a client to present a certificate, while `optional`
 requests a client certificate but the client is not required to present one.
 
-`server.ssl.enabled:`:: *Default: "false"* Enables SSL for outgoing requests
-from the Kibana server to the browser. When set to `true`,
-`server.ssl.certificate` and `server.ssl.key` are required.
+`server.ssl.enabled:`:: *Default: "false"* Enables SSL for inbound requests from the browser to the Kibana server. When set to `true`, a
+certificate and private key must be provided. These can be specified via `server.ssl.keystore.path`, or the combination of
+`server.ssl.certificate` and `server.ssl.key`.
 
-`server.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the
-private key. This value is optional as the key may not be encrypted.
+`server.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key that is specified via `server.ssl.key`. This value
+is optional, as the key may not be encrypted.
+
+`server.ssl.keystore.path:`:: Path to a PKCS #12 file -- this should contain an X.509 certificate with its private key. These are used when
+enabling SSL for inbound requests from web browsers to the Kibana server. If the file contains any additional certificates, those will be
+used as a trusted certificate chain for Kibana. This is used when a web browser creates an SSL connection with the Kibana server; the
+certificate chain is sent to the browser along with the end-entity certificate to establish trust. This is also used to determine if client
+certificates should be trusted when PKI authentication is enabled. In addition to this setting, trusted certificates may be specified via
+`server.ssl.certificateAuthorities` and/or `server.ssl.truststore.path`.
+
+NOTE: This setting cannot be used in conjunction with `server.ssl.certificate` or `server.ssl.key`.
+
+`server.ssl.keystore.password:`:: The password that will be used to decrypt the key store and its private key. If your key store has no
+password, leave this unset. If your key store has an empty password, set this to `""`.
+
+`server.ssl.truststore.path:`:: Path to a PKCS #12 trust store -- this should contain one or more X.509 certificates. This may consist of a
+root certificate authority (CA), and one or more intermediate CAs, which make up a trusted certificate chain for Kibana. This is used when a
+web browser creates an SSL connection with the Kibana server; the certificate chain is sent to the browser along with the end-entity
+certificate to establish trust. This is also used to determine if client certificates should be trusted when PKI authentication is enabled.
+In addition to this setting, trusted certificates may be specified via `server.ssl.certificateAuthorities` and/or
+`server.ssl.keystore.path`.
+
+`server.ssl.truststore.password:`:: The password that will be used to decrypt the trust store. If your trust store has no password, leave
+this unset. If your trust store has an empty password, set this to `""`.
 
 `server.ssl.redirectHttpFromPort:`:: Kibana will bind to this port and redirect
 all http requests to https over the port configured as `server.port`.

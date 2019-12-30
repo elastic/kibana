@@ -4,121 +4,113 @@
 <titleabbrev>Encrypting communications</titleabbrev>
 ++++
 
-{kib} supports Transport Layer Security (TLS/SSL) encryption for client 
-requests. 
-//TBD: It is unclear what "client requests" are in this context. Is it just 
-// communication between the browser and the Kibana server or are we talking 
-// about other types of clients connecting to the Kibana server?
+{kib} supports Transport Layer Security (TLS/SSL) encryption for all forms of data-in-transit. Browsers will send traffic to {kib}, and
+{kib} will send traffic to {es}. These are configured separately.
 
-If you are using {security} or a proxy that provides an HTTPS endpoint for {es}, 
-you can configure {kib} to access {es} via HTTPS. Thus, communications between 
-{kib} and {es} are also encrypted. 
+==== Encrypting traffic between the browser and {kib}
 
-. Configure {kib} to encrypt communications between the browser and the {kib}
-server:
-+
---
 NOTE: You do not need to enable {security} for this type of encryption. 
 
---
-
-.. Generate a server certificate for {kib}. 
+. Obtain a server certificate and private key for {kib}.
 +
 --
-//TBD: Can we provide more information about how they generate the certificate? 
-//Would they be able to use something like the elasticsearch-certutil command?
-You must either set the certificate's
-`subjectAltName` to the hostname, fully-qualified domain name (FQDN), or IP
-address of the {kib} server, or set the CN to the {kib} server's hostname
-or FQDN. Using the server's IP address as the CN does not work.
+{kib} supports certificates/keys in both PKCS #12 key stores and PEM format.
+
+When you obtain a certificate, you must do at least one of the following:
+
+.. Set the certificate's `subjectAltName` to the hostname, fully-qualified domain name (FQDN), or IP address of the {kib} server.
+
+.. Set the certificate's Common Name (CN) to the {kib} server's hostname or FQDN. Using the server's IP address as the CN does not work.
+
+You may choose to generate a certificate and private key using {ref}/certutil.html[the {es} certutil tool]. If you already used certutil to
+generate a certificate authority (CA), you would generate a certificate/key for Kibana like so (using the `--dns` param to set the
+`subjectAltName`):
+
+[source,sh]
+--------------------------------------------------------------------------------
+bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 --name kibana --dns localhost
+--------------------------------------------------------------------------------
+
+This will generate a certificate/key contained PKCS #12 keystore named `kibana.p12`.
+
 --
 
-.. Set the `server.ssl.enabled`, `server.ssl.key`, and `server.ssl.certificate` 
-properties in `kibana.yml`:
+. Enable TLS/SSL in `kibana.yml`:
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
 server.ssl.enabled: true
-server.ssl.key: /path/to/your/server.key
-server.ssl.certificate: /path/to/your/server.crt
+--------------------------------------------------------------------------------
+--
+
+. Specify your server certificate and private key in `kibana.yml`:
++
+--
+If your certificate/key are contained in a PKCS #12 keystore, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.keystore.path: "/path/to/your/keystore.p12"
+server.ssl.keystore.password: "optional decryption password"
+--------------------------------------------------------------------------------
+
+Otherwise, if your certificate/key are in PEM format, specify them like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.certificate: "/path/to/your/server.crt"
+server.ssl.key: "/path/to/your/server.key"
+server.ssl.keyPassphrase: "optional decryption password"
 --------------------------------------------------------------------------------
 
 After making these changes, you must always access {kib} via HTTPS. For example, 
 https://localhost:5601.
 
-// TBD: The reference information for server.ssl.enabled says it "enables SSL for 
-// outgoing requests from the Kibana server to the browser". Do we need to 
-// reiterate here that only one side of the communications is encrypted?
-
 For more information, see <<settings,{kib} configuration settings>>.
 --
 
-. Configure {kib} to connect to {es} via HTTPS:
-+
---
+==== Encrypting traffic between {kib} and {es}
+
 NOTE: To perform this step, you must 
 {ref}/configuring-security.html[enable the {es} {security-features}] or you 
 must have a proxy that provides an HTTPS endpoint for {es}. 
 
---
-
-.. Specify the HTTPS protocol in the `elasticsearch.hosts` setting in the {kib}
-configuration file, `kibana.yml`:
+. Specify the HTTPS URL in the `elasticsearch.hosts` setting in the {kib} configuration file, `kibana.yml`:
 +
 --
 [source,yaml]
 --------------------------------------------------------------------------------
 elasticsearch.hosts: ["https://<your_elasticsearch_host>.com:9200"]
 --------------------------------------------------------------------------------
---
 
-.. If you are using your own CA to sign certificates for {es}, set the
-`elasticsearch.ssl.certificateAuthorities` setting in `kibana.yml` to specify
-the location of the PEM file.
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
---------------------------------------------------------------------------------
-
-Setting the `certificateAuthorities` property lets you use the default 
-`verificationMode` option of `full`. 
-//TBD: Is this still true? It isn't mentioned in https://www.elastic.co/guide/en/kibana/master/settings.html
+Using the HTTPS protocol results in a default `elasticsearch.ssl.verificationMode` option of `full`, which utilizes hostname verification.
 
 For more information, see <<settings,{kib} configuration settings>>. 
 --
 
-. (Optional) If the Elastic {monitor-features} are enabled, configure {kib} to 
-connect to the {es} monitoring cluster via HTTPS: 
+. Specify the {es} cluster's CA certificate chain in `kibana.yml`:
 +
 --
-NOTE: To perform this step, you must 
-{ref}/configuring-security.html[enable the {es} {security-features}] or you 
-must have a proxy that provides an HTTPS endpoint for {es}. 
 
---
-
-.. Specify the HTTPS URL in the `xpack.monitoring.elasticsearch.hosts` setting in 
-the {kib} configuration file, `kibana.yml`
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.monitoring.elasticsearch.hosts: ["https://<your_monitoring_cluster>:9200"]
---------------------------------------------------------------------------------
---
-
-.. Specify the `xpack.monitoring.elasticsearch.ssl.*` settings in the 
-`kibana.yml` file.
-+
---
-For example, if you are using your own certificate authority to sign
-certificates, specify the location of the PEM file in the `kibana.yml` file:
+If you are using your own CA to sign certificates for {es}, then you need to specify the CA certificate chain in {kib} to properly establish
+trust in TLS connections. If your CA certificate chain is contained in a PKCS #12 trust store, specify it like so:
 
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.monitoring.elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.pem
+elasticsearch.ssl.truststore.path: "/path/to/your/truststore.p12"
+elasticsearch.ssl.truststore.password: "optional decryption password"
 --------------------------------------------------------------------------------
+
+Otherwise, if your CA certificate chain is in PEM format, specify each certificate like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.ssl.certificateAuthorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]
+--------------------------------------------------------------------------------
+
 --
+
+(Optional) If the Elastic {monitor-features} are enabled, configure {kib} to connect to the {es} monitoring cluster via HTTPS. The steps are
+the same as above, but each setting is prefixed by `xpack.monitoring.` -- e.g., `xpack.monitoring.elasticsearch.hosts`,
+`xpack.monitoring.elasticsearch.ssl.truststore.path`, etc.
