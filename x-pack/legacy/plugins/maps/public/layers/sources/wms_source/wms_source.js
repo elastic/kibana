@@ -14,13 +14,12 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 import { WmsClient } from './wms_client';
 
 export class WMSSource extends AbstractTMSSource {
-
   static type = 'WMS';
   static title = i18n.translate('xpack.maps.source.wmsTitle', {
-    defaultMessage: 'Web Map Service'
+    defaultMessage: 'Web Map Service',
   });
   static description = i18n.translate('xpack.maps.source.wmsDescription', {
-    defaultMessage: 'Maps from OGC Standard WMS'
+    defaultMessage: 'Maps from OGC Standard WMS',
   });
   static icon = 'grid';
 
@@ -31,12 +30,12 @@ export class WMSSource extends AbstractTMSSource {
       layers,
       styles,
       attributionText,
-      attributionUrl
+      attributionUrl,
     };
   }
 
-  static renderEditor({  onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = (sourceConfig) => {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
+    const onSourceConfigChange = sourceConfig => {
       if (!sourceConfig) {
         onPreviewSource(null);
         return;
@@ -46,7 +45,7 @@ export class WMSSource extends AbstractTMSSource {
       const source = new WMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
+    return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   async getImmutableProperties() {
@@ -55,15 +54,15 @@ export class WMSSource extends AbstractTMSSource {
       { label: getUrlLabel(), value: this._descriptor.serviceUrl },
       {
         label: i18n.translate('xpack.maps.source.wms.layersLabel', {
-          defaultMessage: 'Layers'
+          defaultMessage: 'Layers',
         }),
-        value: this._descriptor.layers
+        value: this._descriptor.layers,
       },
       {
         label: i18n.translate('xpack.maps.source.wms.stylesLabel', {
-          defaultMessage: 'Styles'
+          defaultMessage: 'Styles',
         }),
-        value: this._descriptor.styles
+        value: this._descriptor.styles,
       },
     ];
   }
@@ -71,14 +70,14 @@ export class WMSSource extends AbstractTMSSource {
   _createDefaultLayerDescriptor(options) {
     return TileLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
-      ...options
+      ...options,
     });
   }
 
   createDefaultLayer(options) {
     return new TileLayer({
       layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this
+      source: this,
     });
   }
 
@@ -91,10 +90,12 @@ export class WMSSource extends AbstractTMSSource {
     const attributionComplete = !!attributionText && !!attributionUrl;
 
     return attributionComplete
-      ? [{
-        url: attributionUrl,
-        label: attributionText
-      }]
+      ? [
+          {
+            url: attributionUrl,
+            label: attributionText,
+          },
+        ]
       : [];
   }
 

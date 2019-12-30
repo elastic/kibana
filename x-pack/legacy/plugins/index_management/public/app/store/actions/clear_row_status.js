@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { createAction } from 'redux-actions';
-
 
 export const clearRowStatus = createAction('INDEX_MANAGEMENT_CLEAR_ROW_STATUS');

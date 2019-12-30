@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React popover for adding items to a filter list.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -24,15 +21,14 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTextArea
+  EuiTextArea,
 } from '@elastic/eui';
-
 
 export class AddItemPopover extends Component {
   static displayName = 'AddItemPopover';
   static propTypes = {
     addItems: PropTypes.func.isRequired,
-    canCreateFilter: PropTypes.bool.isRequired
+    canCreateFilter: PropTypes.bool.isRequired,
   };
 
   constructor(props) {
@@ -40,11 +36,11 @@ export class AddItemPopover extends Component {
 
     this.state = {
       isPopoverOpen: false,
-      itemsText: ''
+      itemsText: '',
     };
   }
 
-  onItemsTextChange = (e) => {
+  onItemsTextChange = e => {
     this.setState({
       itemsText: e.target.value,
     });
@@ -54,20 +50,20 @@ export class AddItemPopover extends Component {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
   closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   onAddButtonClick = () => {
     const items = this.state.itemsText.split('\n');
     const addItems = [];
     // Remove duplicates.
-    items.forEach((item) => {
-      if ((addItems.indexOf(item) === -1 && item.length > 0)) {
+    items.forEach(item => {
+      if (addItems.indexOf(item) === -1 && item.length > 0) {
         addItems.push(item);
       }
     });
@@ -75,9 +71,9 @@ export class AddItemPopover extends Component {
     this.props.addItems(addItems);
     this.setState({
       isPopoverOpen: false,
-      itemsText: ''
+      itemsText: '',
     });
-  }
+  };
 
   render() {
     const button = (
@@ -108,15 +104,14 @@ export class AddItemPopover extends Component {
         >
           <EuiForm>
             <EuiFormRow
-              label={<FormattedMessage
-                id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
-                defaultMessage="Items"
-              />}
+              label={
+                <FormattedMessage
+                  id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+                  defaultMessage="Items"
+                />
+              }
             >
-              <EuiTextArea
-                value={this.state.itemsText}
-                onChange={this.onItemsTextChange}
-              />
+              <EuiTextArea value={this.state.itemsText} onChange={this.onItemsTextChange} />
             </EuiFormRow>
           </EuiForm>
           <EuiText size="xs">
@@ -125,12 +120,12 @@ export class AddItemPopover extends Component {
               defaultMessage="Enter one item per line"
             />
           </EuiText>
-          <EuiSpacer size="s"/>
+          <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={this.onAddButtonClick}
-                disabled={(this.state.itemsText.length === 0)}
+                disabled={this.state.itemsText.length === 0}
               >
                 <FormattedMessage
                   id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"

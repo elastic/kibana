@@ -17,13 +17,13 @@ uiModule.directive('monitoringBeatsBeat', () => {
     scope: {
       data: '=',
       onBrush: '<',
-      zoomInfo: '<'
+      zoomInfo: '<',
     },
     link(scope, $el) {
       scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
 
       scope.$watch('data', (data = {}) => {
-        render((
+        render(
           <I18nContext>
             <Beat
               summary={data.summary}
@@ -31,10 +31,10 @@ uiModule.directive('monitoringBeatsBeat', () => {
               onBrush={scope.onBrush}
               zoomInfo={scope.zoomInfo}
             />
-          </I18nContext>
-        ), $el[0]);
+          </I18nContext>,
+          $el[0]
+        );
       });
-
-    }
+    },
   };
 });

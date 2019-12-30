@@ -13,8 +13,7 @@ import 'ui/autoload/all';
 
 // needed to make syntax highlighting work in ace editors
 import 'ace';
-
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import {
   IndexPatternsContract,
   Plugin as DataPlugin,
@@ -30,24 +29,28 @@ export interface MlDependencies extends AppMountParameters {
 }
 
 interface AppProps {
-  context: AppMountContext;
+  coreStart: CoreStart;
   indexPatterns: IndexPatternsContract;
 }
 
-const App: FC<AppProps> = ({ context, indexPatterns }) => {
-  const config = (context.core.uiSettings as never) as KibanaConfigTypeFix; // TODO - make this UiSettingsClientContract, get rid of KibanaConfigTypeFix
+const App: FC<AppProps> = ({ coreStart, indexPatterns }) => {
+  const config = (coreStart.uiSettings as never) as KibanaConfigTypeFix; // TODO - make this UiSettingsClientContract, get rid of KibanaConfigTypeFix
 
   return (
     <MlRouter
       config={config}
-      setBreadcrumbs={context.core.chrome.setBreadcrumbs}
+      setBreadcrumbs={coreStart.chrome.setBreadcrumbs}
       indexPatterns={indexPatterns}
     />
   );
 };
 
-export const renderApp = (context: AppMountContext, { element, indexPatterns }: MlDependencies) => {
-  ReactDOM.render(<App context={context} indexPatterns={indexPatterns} />, element);
+export const renderApp = (
+  coreStart: CoreStart,
+  depsStart: object,
+  { element, indexPatterns }: MlDependencies
+) => {
+  ReactDOM.render(<App coreStart={coreStart} indexPatterns={indexPatterns} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

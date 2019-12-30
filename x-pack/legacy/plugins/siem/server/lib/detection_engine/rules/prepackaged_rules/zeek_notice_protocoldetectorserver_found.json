@@ -1,0 +1,17 @@
+{
+  "rule_id": "7d7f7635-6900-4f63-b14b-477a909ea90a",
+  "risk_score": 50,
+  "description": "Indicates a server was detected on a non-standard port for the protocol.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice ProtocolDetector::Server_Found",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"ProtocolDetector::Server_Found\" or rule.name: \"ProtocolDetector::Server_Found\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

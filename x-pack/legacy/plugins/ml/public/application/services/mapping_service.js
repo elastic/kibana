@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 
 import { ml } from './ml_api_service';
@@ -16,10 +14,10 @@ export function getFieldTypeFromMapping(index, fieldName) {
   return new Promise((resolve, reject) => {
     if (index !== '') {
       ml.getFieldCaps({ index, fields: [fieldName] })
-        .then((resp) => {
+        .then(resp => {
           let fieldType = '';
-          _.each(resp.fields, (field) => {
-            _.each(field, (type) => {
+          _.each(resp.fields, field => {
+            _.each(field, type => {
               if (fieldType === '') {
                 fieldType = type.type;
               }
@@ -27,7 +25,7 @@ export function getFieldTypeFromMapping(index, fieldName) {
           });
           resolve(fieldType);
         })
-        .catch((error) => {
+        .catch(error => {
           reject(error);
         });
     } else {

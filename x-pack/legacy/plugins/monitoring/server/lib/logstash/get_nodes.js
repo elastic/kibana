@@ -39,14 +39,12 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
         end,
         clusterUuid,
         metric: LogstashMetric.getMetricFields(),
-        type: 'logstash_stats'
+        type: 'logstash_stats',
       }),
       collapse: {
-        field: 'logstash_stats.logstash.uuid'
+        field: 'logstash_stats.logstash.uuid',
       },
-      sort: [
-        { timestamp: { order: 'desc' } }
-      ],
+      sort: [{ timestamp: { order: 'desc' } }],
       _source: [
         'timestamp',
         'logstash_stats.process.cpu.percent',
@@ -60,21 +58,20 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
         'logstash_stats.logstash.status',
         'logstash_stats.logstash.pipeline',
         'logstash_stats.reloads',
-        'logstash_stats.logstash.version'
-      ]
-    }
+        'logstash_stats.logstash.version',
+      ],
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(resp => {
-      const instances = get(resp, 'hits.hits', []);
+  return callWithRequest(req, 'search', params).then(resp => {
+    const instances = get(resp, 'hits.hits', []);
 
-      return instances.map(hit => {
-        return {
-          ...get(hit, '_source.logstash_stats'),
-          availability: calculateAvailability(get(hit, '_source.timestamp'))
-        };
-      });
+    return instances.map(hit => {
+      return {
+        ...get(hit, '_source.logstash_stats'),
+        availability: calculateAvailability(get(hit, '_source.timestamp')),
+      };
     });
+  });
 }

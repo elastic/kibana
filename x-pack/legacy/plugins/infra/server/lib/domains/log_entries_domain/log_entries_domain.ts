@@ -11,12 +11,11 @@ import { RequestHandlerContext } from 'src/core/server';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
-  InfraLogEntry,
-  InfraLogItem,
-  InfraLogMessageSegment,
-  InfraLogSummaryBucket,
-  InfraLogSummaryHighlightBucket,
-} from '../../../graphql/types';
+  LogEntriesSummaryBucket,
+  LogEntriesSummaryHighlightsBucket,
+  LogEntriesItem,
+} from '../../../../common/http_api';
+import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
   InfraSourceConfiguration,
   InfraSources,
@@ -218,7 +217,7 @@ export class InfraLogEntriesDomain {
     end: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
-  ): Promise<InfraLogSummaryBucket[]> {
+  ): Promise<LogEntriesSummaryBucket[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext,
       sourceId
@@ -242,7 +241,7 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
-  ): Promise<InfraLogSummaryHighlightBucket[][]> {
+  ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext,
       sourceId
@@ -284,7 +283,7 @@ export class InfraLogEntriesDomain {
     requestContext: RequestHandlerContext,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
-  ): Promise<InfraLogItem> {
+  ): Promise<LogEntriesItem> {
     const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
     const defaultFields = [
       { field: '_index', value: document._index },
@@ -402,7 +401,7 @@ const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
 
 const convertLogSummaryBucketToSummaryHighlightBucket = (
   bucket: LogSummaryBucket
-): InfraLogSummaryHighlightBucket => ({
+): LogEntriesSummaryHighlightsBucket => ({
   entriesCount: bucket.entriesCount,
   start: bucket.start,
   end: bucket.end,

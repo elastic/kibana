@@ -22,20 +22,20 @@ import { createZeroFilledArray } from './zero_filled_array';
 import { zeroFillDataArray } from './zero_fill_data_array';
 
 /*
-* A Kibana data object may have multiple series with different array lengths.
-* This proves an impediment to stacking in the visualization library.
-* Therefore, zero values must be injected wherever these arrays do not line up.
-* That is, each array must have the same x values with zeros filled in where the
-* x values were added.
-*
-* This function and its helper functions accepts a Kibana data object
-* and injects zeros where needed.
-*/
+ * A Kibana data object may have multiple series with different array lengths.
+ * This proves an impediment to stacking in the visualization library.
+ * Therefore, zero values must be injected wherever these arrays do not line up.
+ * That is, each array must have the same x values with zeros filled in where the
+ * x values were added.
+ *
+ * This function and its helper functions accepts a Kibana data object
+ * and injects zeros where needed.
+ */
 
 export function injectZeros(obj, data, orderBucketsBySum = false) {
   const keys = orderXValues(data, orderBucketsBySum);
 
-  obj.forEach(function (series) {
+  obj.forEach(function(series) {
     const zeroArray = createZeroFilledArray(keys, series.label);
     series.values = zeroFillDataArray(zeroArray, series.values);
   });
