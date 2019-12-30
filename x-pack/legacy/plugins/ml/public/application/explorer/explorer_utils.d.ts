@@ -47,7 +47,7 @@ interface SelectionTimeRange {
 }
 
 export declare const getSelectionTimeRange: (
-  selectedCells: AppStateSelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   interval: number,
   bounds: TimeRangeBounds
 ) => SelectionTimeRange;
@@ -94,7 +94,7 @@ declare interface SwimlaneBounds {
 }
 
 export declare const loadAnnotationsTableData: (
-  selectedCells: AppStateSelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds
@@ -109,7 +109,7 @@ export declare interface AnomaliesTableData {
 }
 
 export declare const loadAnomaliesTableData: (
-  selectedCells: AppStateSelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   selectedJobs: ExplorerJob[],
   dateFormatTz: any,
   interval: number,
@@ -125,7 +125,7 @@ export declare const loadDataForCharts: (
   earliestMs: number,
   latestMs: number,
   influencers: any[],
-  selectedCells: AppStateSelectedCells,
+  selectedCells: AppStateSelectedCells | undefined,
   influencersFilterQuery: any
 ) => Promise<any[] | undefined>;
 

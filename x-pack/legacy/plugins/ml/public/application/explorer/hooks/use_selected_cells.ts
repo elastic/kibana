@@ -8,7 +8,10 @@ import { useUrlState } from '../../util/url_state';
 import { SWIMLANE_TYPE } from '../../explorer/explorer_constants';
 import { AppStateSelectedCells } from '../../explorer/explorer_utils';
 
-export const useSelectedCells = () => {
+export const useSelectedCells = (): [
+  AppStateSelectedCells | undefined,
+  (swimlaneSelectedCells: AppStateSelectedCells) => void
+] => {
   const [appState, setAppState] = useUrlState('_a');
 
   let selectedCells: AppStateSelectedCells | undefined;
@@ -49,6 +52,12 @@ export const useSelectedCells = () => {
       appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
       appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
       appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      setAppState('mlExplorerSwimlane', appState.mlExplorerSwimlane);
+    } else {
+      delete appState.mlExplorerSwimlane.selectedType;
+      delete appState.mlExplorerSwimlane.selectedLanes;
+      delete appState.mlExplorerSwimlane.selectedTimes;
+      delete appState.mlExplorerSwimlane.showTopFieldValues;
       setAppState('mlExplorerSwimlane', appState.mlExplorerSwimlane);
     }
   };

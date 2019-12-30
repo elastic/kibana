@@ -677,7 +677,7 @@ export async function loadDataForCharts(
     // Just skip doing the request when this function
     // is called without the minimum required data.
     if (
-      selectedCells === null &&
+      selectedCells === undefined &&
       influencers.length === 0 &&
       influencersFilterQuery === undefined
     ) {

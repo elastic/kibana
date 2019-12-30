@@ -44,9 +44,7 @@ export interface ExplorerState {
   swimlaneContainerWidth: number;
   swimlaneLimit: number;
   tableData: AnomaliesTableData;
-  tableInterval: string;
   tableQueryString: string;
-  tableSeverity: number;
   viewByLoadedForTimeFormatted: string | null;
   viewBySwimlaneData: SwimlaneData;
   viewBySwimlaneDataLoading: boolean;
@@ -89,9 +87,7 @@ export function getExplorerDefaultState(): ExplorerState {
       jobIds: [],
       showViewSeriesLink: false,
     },
-    tableInterval: 'auto',
     tableQueryString: '',
-    tableSeverity: 0,
     viewByLoadedForTimeFormatted: null,
     viewBySwimlaneData: getDefaultSwimlaneData(),
     viewBySwimlaneDataLoading: false,

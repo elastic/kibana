@@ -6,11 +6,7 @@
 
 import { VIEW_BY_JOB_LABEL } from '../../explorer_constants';
 import { ActionPayload } from '../../explorer_dashboard_service';
-import {
-  getClearedSelectedAnomaliesState,
-  getDefaultSwimlaneData,
-  getInfluencers,
-} from '../../explorer_utils';
+import { getDefaultSwimlaneData, getInfluencers } from '../../explorer_utils';
 
 import { getIndexPattern } from './get_index_pattern';
 import { ExplorerState } from './state';

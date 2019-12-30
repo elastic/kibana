@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash';
 import moment from 'moment';
 import React, { FC, useEffect } from 'react';
 import { useObservable } from 'react-use';
-import { merge, Subject, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { merge, Subscription } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 
 import { timefilter } from 'ui/timefilter';
-
-import { DeepPartial } from '../../../../common/types/common';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
@@ -25,14 +21,8 @@ import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
-import { ExplorerState } from '../../explorer/reducers';
-import { loadExplorerData } from '../../explorer/actions';
-import {
-  explorerAction$,
-  explorerService,
-  setStateActionCreator,
-} from '../../explorer/explorer_dashboard_service';
-import { restoreAppState } from '../../explorer/explorer_utils';
+import { useExplorerData } from '../../explorer/actions';
+import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useUrlState } from '../../util/url_state';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
@@ -70,13 +60,8 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   );
 };
 
-const loadExplorerData$ = new Subject<ExplorerState>();
-const loadExplorerDataWithSwitchMap$ = loadExplorerData$.pipe(
-  switchMap((s: ExplorerState) => loadExplorerData(s).pipe(map(d => setStateActionCreator(d))))
-);
-
 const ExplorerUrlStateManager: FC = () => {
-  const [appState, setAppState] = useUrlState('_a');
+  const [, setAppState] = useUrlState('_a');
   const [globalState] = useUrlState('_g');
 
   const { jobIds } = useJobSelection();
@@ -121,16 +106,17 @@ const ExplorerUrlStateManager: FC = () => {
       })
     );
 
-    subscriptions.add(
-      loadExplorerDataWithSwitchMap$.subscribe(d => {
-        explorerAction$.next(d);
-      })
-    );
-
     return () => {
       subscriptions.unsubscribe();
     };
   }, []);
+
+  const [explorerData, loadExplorerData] = useExplorerData();
+  useEffect(() => {
+    if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
+      explorerService.setExplorerData(explorerData);
+    }
+  }, [JSON.stringify(explorerData)]);
 
   const explorerAppState = useObservable(explorerService.appState$);
   useEffect(() => {
@@ -149,44 +135,28 @@ const ExplorerUrlStateManager: FC = () => {
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
 
-  const restoredAppState = restoreAppState(appState);
-
   const [selectedCells, setSelectedCells] = useSelectedCells();
   useEffect(() => {
-    if (selectedCells !== undefined) {
-      explorerService.setSelectedCells(selectedCells);
-    }
+    explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
 
-  const appStateMappedToExplorerState: DeepPartial<ExplorerState> = {
-    tableInterval,
-    tableSeverity: tableSeverity.val,
-  };
-
+  const loadExplorerDataConfig =
+    (explorerState !== undefined && {
+      bounds: explorerState.bounds,
+      influencersFilterQuery: explorerState.influencersFilterQuery,
+      noInfluencersConfigured: explorerState.noInfluencersConfigured,
+      selectedCells,
+      selectedJobs: explorerState.selectedJobs,
+      swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
+      swimlaneLimit: explorerState.swimlaneLimit,
+      tableInterval,
+      tableSeverity: tableSeverity.val,
+      viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+    }) ||
+    undefined;
   useEffect(() => {
-    explorerService.setState(appStateMappedToExplorerState);
-  }, [JSON.stringify(appStateMappedToExplorerState)]);
-
-  useEffect(() => {
-    if (explorerState !== undefined) {
-      loadExplorerData$.next(explorerState);
-    }
-  }, [
-    JSON.stringify(
-      pick(explorerState || {}, [
-        'bounds',
-        'influencersFilterQuery',
-        'noInfluencersConfigured',
-        'selectedCells',
-        'selectedJobs',
-        'swimlaneBucketInterval',
-        'swimlaneLimit',
-        'tableInterval',
-        'tableSeverity',
-        'viewBySwimlaneFieldName',
-      ])
-    ),
-  ]);
+    loadExplorerData(loadExplorerDataConfig);
+  }, [JSON.stringify(loadExplorerDataConfig)]);
 
   if (annotationsRefresh === undefined || explorerState === undefined || showCharts === undefined) {
     return null;

@@ -6,9 +6,10 @@
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import { useObservable } from 'react-use';
 
-import { forkJoin, of } from 'rxjs';
-import { mergeMap, tap } from 'rxjs/operators';
+import { forkJoin, of, Observable, Subject } from 'rxjs';
+import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { explorerChartsContainerServiceFactory } from '../explorer_charts/explorer_charts_container_service';
 import { VIEW_BY_JOB_LABEL } from '../explorer_constants';
@@ -25,6 +26,9 @@ import {
   loadTopInfluencers,
   loadViewBySwimlane,
   loadViewByTopFieldValuesForSelectedTime,
+  AppStateSelectedCells,
+  ExplorerJob,
+  TimeRangeBounds,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
 
@@ -44,14 +48,41 @@ const memoizedLoadAnomaliesTableData = memoizeOne(loadAnomaliesTableData, memoiz
 
 const dateFormatTz = getDateFormatTz();
 
+export interface LoadExplorerDataConfig {
+  bounds: TimeRangeBounds;
+  influencersFilterQuery: any;
+  noInfluencersConfigured: boolean;
+  selectedCells: AppStateSelectedCells | undefined;
+  selectedJobs: ExplorerJob[];
+  swimlaneBucketInterval: any;
+  swimlaneLimit: number;
+  tableInterval: any;
+  tableSeverity: number;
+  viewBySwimlaneFieldName: string;
+}
+
+export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
+  return (
+    arg !== undefined &&
+    arg.bounds !== undefined &&
+    arg.selectedJobs !== undefined &&
+    arg.selectedJobs !== null &&
+    arg.viewBySwimlaneFieldName !== undefined
+  );
+};
+
 /**
  * Fetches the data necessary for the Anomaly Explorer using observables.
  *
- * @param state ExplorerState
+ * @param config LoadExplorerDataConfig
  *
  * @return Partial<ExplorerState>
  */
-export function loadExplorerData(state: ExplorerState) {
+function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> {
+  if (!isLoadExplorerDataConfig(config)) {
+    return of({});
+  }
+
   const {
     bounds,
     influencersFilterQuery,
@@ -63,11 +94,7 @@ export function loadExplorerData(state: ExplorerState) {
     tableInterval,
     tableSeverity,
     viewBySwimlaneFieldName,
-  } = state;
-
-  if (selectedJobs === null || bounds === undefined || viewBySwimlaneFieldName === undefined) {
-    return of({});
-  }
+  } = config;
 
   // TODO This factory should be refactored so we can load the charts using memoization.
   const updateCharts = explorerChartsContainerServiceFactory(explorerService.setCharts);
@@ -183,7 +210,10 @@ export function loadExplorerData(state: ExplorerState) {
             noInfluencersConfigured
           ),
         }),
-      ({ annotationsData, overallState, tableData }, { influencers, viewBySwimlaneState }) => {
+      (
+        { annotationsData, overallState, tableData },
+        { influencers, viewBySwimlaneState }
+      ): Partial<ExplorerState> => {
         return {
           annotationsData,
           influencers,
@@ -195,3 +225,13 @@ export function loadExplorerData(state: ExplorerState) {
     )
   );
 }
+
+const loadExplorerData$ = new Subject();
+const loadExplorerDataWithSwitchMap$ = loadExplorerData$.pipe(
+  switchMap((s: any) => loadExplorerData(s))
+);
+
+export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
+  const explorerData = useObservable(loadExplorerDataWithSwitchMap$);
+  return [explorerData, c => loadExplorerData$.next(c)];
+};

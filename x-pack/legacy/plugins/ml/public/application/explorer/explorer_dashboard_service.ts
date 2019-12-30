@@ -98,8 +98,8 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
   distinctUntilChanged(isEqual)
 );
 
-export const setStateActionCreator = (payload: DeepPartial<ExplorerState>) => ({
-  type: EXPLORER_ACTION.SET_STATE,
+const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
+  type: EXPLORER_ACTION.SET_EXPLORER_DATA,
   payload,
 });
 
@@ -134,14 +134,14 @@ export const explorerService = {
       payload,
     });
   },
-  setSelectedCells: (payload: AppStateSelectedCells) => {
+  setSelectedCells: (payload: AppStateSelectedCells | undefined) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SELECTED_CELLS,
       payload,
     });
   },
-  setState: (payload: DeepPartial<ExplorerState>) => {
-    explorerAction$.next(setStateActionCreator(payload));
+  setExplorerData: (payload: DeepPartial<ExplorerState>) => {
+    explorerAction$.next(setExplorerDataActionCreator(payload));
   },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({

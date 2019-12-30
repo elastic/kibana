@@ -87,7 +87,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       };
       break;
 
-    case EXPLORER_ACTION.SET_STATE:
+    case EXPLORER_ACTION.SET_EXPLORER_DATA:
       nextState = { ...state, ...payload };
       break;
 
