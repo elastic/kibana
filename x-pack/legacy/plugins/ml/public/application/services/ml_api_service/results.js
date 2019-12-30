@@ -76,11 +76,11 @@ export const results = {
     });
   },
 
-  fetchPartitionFieldsValues(jobId, earliestMs, latestMs) {
+  fetchPartitionFieldsValues(criteriaFields, earliestMs, latestMs) {
     return http$(`${basePath}/results/partition_fields_values`, {
       method: 'POST',
       body: {
-        jobId,
+        criteriaFields,
         earliestMs,
         latestMs,
       },
