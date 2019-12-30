@@ -57,12 +57,12 @@ export async function installPipelinesForDataset({
 
   pipelinePaths.forEach(path => {
     const { name, extension } = getNameAndExtension(path);
-    const nameForInstallation = getPipelineNameForInstallation(
-      name,
+    const nameForInstallation = getPipelineNameForInstallation({
+      pipelineName: name,
       dataset,
       datasourceName,
-      packageName
-    );
+      packageName,
+    });
     const content = Registry.getAsset(path).toString('utf-8');
     pipelines.push({
       name,
@@ -150,11 +150,16 @@ const getNameAndExtension = (
   };
 };
 
-export const getPipelineNameForInstallation = (
-  pipelineName: string,
-  dataset: Dataset,
-  datasourceName: string,
-  packageName: string
-): string => {
+export const getPipelineNameForInstallation = ({
+  pipelineName,
+  dataset,
+  datasourceName,
+  packageName,
+}: {
+  pipelineName: string;
+  dataset: Dataset;
+  datasourceName: string;
+  packageName: string;
+}): string => {
   return `${dataset.type}-${packageName}-${datasourceName}-${dataset.name}-${pipelineName}`;
 };
