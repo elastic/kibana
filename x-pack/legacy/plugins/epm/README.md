@@ -45,6 +45,17 @@ See the Kibana docs for [how to set up your dev environment](https://github.com/
 One common workflow is:
  1. `yarn es snapshot`
  1. In another shell: `yarn start --no-base-path`
+
+#### API Tests
+  1. in one terminal, change to the `x-pack` directory and start the test server with
+      ```shell
+      node scripts/functional_tests_server.js --config test/epm_api_integration/config.ts
+      ```
+
+  1. in a second terminal, run the tests from the Kibana root directory with
+      ```shell
+      node scripts/functional_test_runner.js --config x-pack/test/epm_api_integration/config.ts
+      ```
  
 ### Plugin architecture
 Follows the `common`, `server`, `public` structure from the [Architecture Style Guide
