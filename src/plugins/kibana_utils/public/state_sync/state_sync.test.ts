@@ -27,7 +27,10 @@ import {
 import { syncState } from './state_sync';
 import { ISyncStrategy } from './state_sync_strategies/types';
 import { Observable, Subject } from 'rxjs';
-import { createSessionStorageSyncStrategy, createUrlSyncStrategy } from './state_sync_strategies';
+import {
+  createSessionStorageSyncStrategy,
+  createKbnUrlSyncStrategy,
+} from './state_sync_strategies';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createBrowserHistory, History } from 'history';
 
@@ -159,7 +162,7 @@ describe('state_sync', () => {
       sessionStorageSyncStrategy = createSessionStorageSyncStrategy(sessionStorage);
       history = createBrowserHistory();
       (history as any).anton = 'ha';
-      urlSyncStrategy = createUrlSyncStrategy({ useHash: false, history });
+      urlSyncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
     });
 
     it('should sync state containers and storages to proper initial state', async () => {

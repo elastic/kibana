@@ -19,21 +19,21 @@
 
 import { hashUrl, hashQuery, unhashUrl, unhashQuery } from './hash_unhash_url';
 import {
-  createUrlControls,
-  setStateToUrl,
-  getStateFromUrl,
-  getStatesFromUrl,
-  IUrlControls,
-} from './url_storage';
+  createKbnUrlControls,
+  setStateToKbnUrl,
+  getStateFromKbnUrl,
+  getStatesFromKbnUrl,
+  IKbnUrlControls,
+} from './kbn_url_storage';
 export { createUrlTracker, useUrlTracker } from './url_tracker';
 export {
   hashUrl,
   hashQuery,
   unhashUrl,
   unhashQuery,
-  createUrlControls,
-  setStateToUrl,
-  getStateFromUrl,
-  getStatesFromUrl,
-  IUrlControls,
+  createKbnUrlControls,
+  setStateToKbnUrl,
+  getStatesFromKbnUrl,
+  getStateFromKbnUrl,
+  IKbnUrlControls,
 };

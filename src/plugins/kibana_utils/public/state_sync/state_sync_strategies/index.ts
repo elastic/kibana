@@ -19,29 +19,23 @@
 
 import { createBrowserHistory } from 'history';
 import { ISyncStrategy } from './types';
-import { createUrlSyncStrategy } from './create_url_sync_strategy';
+import { createKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
 import { createSessionStorageSyncStrategy } from './create_session_storage_sync_strategy';
 
 // strategies provided out of the box
 enum SyncStrategy {
-  Url,
-  HashedUrl,
+  KbnUrl,
+  KbnHashedUrl,
   SessionStorage,
 }
 
-const createStrategies: () => {
-  [key in SyncStrategy]: ISyncStrategy;
-} = () => {
-  const history = createBrowserHistory(); // share the same instance
-  return {
-    [SyncStrategy.Url]: createUrlSyncStrategy({ useHash: false, history }),
-    [SyncStrategy.HashedUrl]: createUrlSyncStrategy({ useHash: true, history }),
-    [SyncStrategy.SessionStorage]: createSessionStorageSyncStrategy(),
-    // SyncStrategies: LocalStorage, es, somewhere else...
-  };
+const history = createBrowserHistory(); // share the same instance
+const syncStrategies = {
+  [SyncStrategy.KbnUrl]: createKbnUrlSyncStrategy({ useHash: false, history }),
+  [SyncStrategy.KbnHashedUrl]: createKbnUrlSyncStrategy({ useHash: true, history }),
+  [SyncStrategy.SessionStorage]: createSessionStorageSyncStrategy(),
+  // SyncStrategies: LocalStorage, es, somewhere else...
 };
-
-const syncStrategies = createStrategies();
 
 function isSyncStrategy(
   syncStrategy: SyncStrategy | ISyncStrategy | void
@@ -54,6 +48,6 @@ export {
   ISyncStrategy,
   SyncStrategy,
   syncStrategies,
-  createUrlSyncStrategy,
+  createKbnUrlSyncStrategy,
   createSessionStorageSyncStrategy,
 };

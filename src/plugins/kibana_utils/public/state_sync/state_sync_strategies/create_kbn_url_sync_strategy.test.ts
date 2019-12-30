@@ -17,20 +17,20 @@
  * under the License.
  */
 import '../../storage/hashed_item_store/mock';
-import { createUrlSyncStrategy } from './create_url_sync_strategy';
+import { createKbnUrlSyncStrategy } from './create_kbn_url_sync_strategy';
 import { ISyncStrategy } from './types';
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
-describe('UrlSyncStrategy', () => {
+describe('KbnUrlSyncStrategy', () => {
   describe('useHash: false', () => {
     let syncStrategy: ISyncStrategy;
     let history: History;
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       history = createBrowserHistory();
-      syncStrategy = createUrlSyncStrategy({ useHash: false, history });
+      syncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
     });
 
     it('should persist state to url', async () => {
@@ -66,7 +66,7 @@ describe('UrlSyncStrategy', () => {
     const getCurrentUrl = () => history.createHref(history.location);
     beforeEach(() => {
       history = createBrowserHistory();
-      syncStrategy = createUrlSyncStrategy({ useHash: true, history });
+      syncStrategy = createKbnUrlSyncStrategy({ useHash: true, history });
     });
 
     it('should persist state to url', async () => {

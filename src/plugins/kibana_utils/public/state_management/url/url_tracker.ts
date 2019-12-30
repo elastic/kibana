@@ -19,10 +19,10 @@
 
 import { createBrowserHistory, History, Location } from 'history';
 import { useLayoutEffect } from 'react';
-import { getRelativeToHistoryPath } from './url_storage';
+import { getRelativeToHistoryPath } from './kbn_url_storage';
 
 export interface IUrlTracker {
-  startTrackingUrl: (history: History) => () => void;
+  startTrackingUrl: (history?: History) => () => void;
   getTrackedUrl: () => string | null;
   trackUrl: (url: string) => void;
 }
@@ -50,13 +50,13 @@ export function createUrlTracker(key: string, storage: Storage = sessionStorage)
 }
 
 export function useUrlTracker(
-  appInstanceId: string,
+  key: string,
   history: History,
   shouldRestoreUrl: (urlToRestore: string) => boolean = () => true,
   storage: Storage = sessionStorage
 ) {
   useLayoutEffect(() => {
-    const urlTracker = createUrlTracker(`lastUrlTracker:${appInstanceId}`, storage);
+    const urlTracker = createUrlTracker(key, storage);
     const urlToRestore = urlTracker.getTrackedUrl();
     if (urlToRestore && shouldRestoreUrl(urlToRestore)) {
       history.replace(urlToRestore);
@@ -65,5 +65,5 @@ export function useUrlTracker(
     return () => {
       stopTrackingUrl();
     };
-  }, [appInstanceId, history]);
+  }, [key, history]);
 }

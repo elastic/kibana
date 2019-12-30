@@ -42,7 +42,7 @@ export interface IStateSyncConfig<State = any> {
    *
    * Possible to provide own custom SyncStrategy by implementing ISyncStrategy
    *
-   * SyncStrategy.Url is default
+   * SyncStrategy.KbnUrl is default
    */
   syncStrategy?: SyncStrategy | ISyncStrategy;
 

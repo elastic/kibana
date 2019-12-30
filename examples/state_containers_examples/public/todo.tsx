@@ -34,7 +34,7 @@ import {
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-  createUrlSyncStrategy,
+  createKbnUrlSyncStrategy,
   PureTransition,
   syncState,
   SyncStrategy,
@@ -170,7 +170,7 @@ export const TodoAppPage: React.FC<{
    * Replicates what src/legacy/ui/public/chrome/api/nav.ts did
    * Persists the url in sessionStorage and tries to restore it on "componentDidMount"
    */
-  useUrlTracker(props.appInstanceId, props.history, urlToRestore => {
+  useUrlTracker(`lastUrlTracker:${props.appInstanceId}`, props.history, urlToRestore => {
     // shouldRestoreUrl:
     // App decides if it should restore url or not
     // In this specific case, restore only if navigated to app base path
@@ -186,7 +186,7 @@ export const TodoAppPage: React.FC<{
   useEffect(() => {
     // have to sync with history passed to react-router
     // history v5 will be singleton and this will not be needed
-    const urlSyncStrategy = createUrlSyncStrategy({
+    const urlSyncStrategy = createKbnUrlSyncStrategy({
       useHash: useHashedUrl,
       history: props.history,
     });

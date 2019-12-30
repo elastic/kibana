@@ -34,7 +34,7 @@ import { replaceUrlHashQuery } from './format';
  * will return object:
  * {_a: {tab: 'indexedFields'}, _b: {f: 'test', i: '', l: ''}};
  */
-export function getStatesFromUrl(
+export function getStatesFromKbnUrl(
   url: string = window.location.href,
   keys?: string[]
 ): Record<string, unknown> {
@@ -61,11 +61,11 @@ export function getStatesFromUrl(
  * will return object:
  * {tab: 'indexedFields'}
  */
-export function getStateFromUrl<State>(
+export function getStateFromKbnUrl<State>(
   key: string,
   url: string = window.location.href
 ): State | null {
-  return (getStatesFromUrl(url, [key])[key] as State) || null;
+  return (getStatesFromKbnUrl(url, [key])[key] as State) || null;
 }
 
 /**
@@ -80,7 +80,7 @@ export function getStateFromUrl<State>(
  * will return url:
  * http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:other)&_b=(f:test,i:'',l:'')
  */
-export function setStateToUrl<State>(
+export function setStateToKbnUrl<State>(
   key: string,
   state: State,
   { useHash = false }: { useHash: boolean } = { useHash: false },
@@ -99,7 +99,7 @@ export function setStateToUrl<State>(
  * A tiny wrapper around history library to listen for url changes and update url
  * History library handles a bunch of cross browser edge cases
  */
-export interface IUrlControls {
+export interface IKbnUrlControls {
   /**
    * Listen for url changes
    * @param cb - get's called when url has been changed
@@ -123,12 +123,29 @@ export interface IUrlControls {
 }
 export type UrlUpdaterFnType = (currentUrl: string) => string;
 
-export const createUrlControls = (history: History = createBrowserHistory()): IUrlControls => {
+export const createKbnUrlControls = (
+  history: History = createBrowserHistory()
+): IKbnUrlControls => {
   const updateQueue: Array<(currentUrl: string) => string> = [];
 
   // if we should replace or push with next async update,
   // if any call in a queue asked to push, then we should push
   let shouldReplace = true;
+
+  function updateUrl(newUrl: string, replace = false): string {
+    const currentUrl = getCurrentUrl();
+    if (newUrl === currentUrl) return currentUrl; // skip update
+
+    const historyPath = getRelativeToHistoryPath(newUrl, history);
+
+    if (replace) {
+      history.replace(historyPath);
+    } else {
+      history.push(historyPath);
+    }
+
+    return getCurrentUrl();
+  }
 
   return {
     listen: (cb: () => void) =>
@@ -155,21 +172,6 @@ export const createUrlControls = (history: History = createBrowserHistory()): IU
       });
     },
   };
-
-  function updateUrl(newUrl: string, replace = false): string {
-    const currentUrl = getCurrentUrl();
-    if (newUrl === currentUrl) return currentUrl; // skip update
-
-    const historyPath = getRelativeToHistoryPath(newUrl, history);
-
-    if (replace) {
-      history.replace(historyPath);
-    } else {
-      history.push(historyPath);
-    }
-
-    return getCurrentUrl();
-  }
 };
 
 /**
@@ -181,8 +183,16 @@ export const createUrlControls = (history: History = createBrowserHistory()): IU
  * 4. Hash history with base path
  */
 export function getRelativeToHistoryPath(absoluteUrl: string, history: History): History.Path {
-  const parsedUrl = isHashHistory() ? parseUrlHash(absoluteUrl)! : parseUrl(absoluteUrl);
-  const parsedHash = isHashHistory() ? null : parseUrlHash(absoluteUrl);
+  function stripBasename(path: string = '') {
+    const stripLeadingHash = _ => (_.charAt(0) === '#' ? _.substr(1) : _);
+    const stripTrailingSlash = _ =>
+      _.charAt(_.length - 1) === '/' ? _.substr(0, _.length - 1) : _;
+    const baseName = stripLeadingHash(stripTrailingSlash(history.createHref({})));
+    return path.startsWith(baseName) ? path.substr(baseName.length) : path;
+  }
+  const isHashHistory = history.createHref({}).includes('#');
+  const parsedUrl = isHashHistory ? parseUrlHash(absoluteUrl)! : parseUrl(absoluteUrl);
+  const parsedHash = isHashHistory ? null : parseUrlHash(absoluteUrl);
 
   return formatUrl({
     pathname: stripBasename(parsedUrl.pathname),
@@ -194,21 +204,4 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
         })
       : parsedUrl.hash,
   });
-
-  function isHashHistory() {
-    return history.createHref({}).includes('#');
-  }
-
-  function stripBasename(path: string = '') {
-    const getBaseName = () => stripLeadingHash(stripTrailingSlash(history.createHref({})));
-    const baseName = getBaseName();
-    return path.startsWith(baseName) ? path.substr(baseName.length) : path;
-  }
-
-  function stripLeadingHash(path: string) {
-    return path.charAt(0) === '#' ? path.substr(1) : path;
-  }
-  function stripTrailingSlash(path: string) {
-    return path.charAt(path.length - 1) === '/' ? path.substr(0, path.length - 1) : path;
-  }
 }

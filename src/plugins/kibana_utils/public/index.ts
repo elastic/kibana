@@ -50,5 +50,5 @@ export {
   InitialTruthSource,
   StartSyncStateFnType,
   StopSyncStateFnType,
-  createUrlSyncStrategy,
+  createKbnUrlSyncStrategy,
 } from './state_sync';

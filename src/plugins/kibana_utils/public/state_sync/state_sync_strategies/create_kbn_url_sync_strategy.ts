@@ -21,17 +21,21 @@ import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import { History } from 'history';
 import { ISyncStrategy } from './types';
-import { createUrlControls, getStateFromUrl, setStateToUrl } from '../../state_management/url';
+import {
+  createKbnUrlControls,
+  getStateFromKbnUrl,
+  setStateToKbnUrl,
+} from '../../state_management/url';
 
 /**
  * Implements syncing to/from url strategies.
  * Replicates what was implemented in state (AppState, GlobalState)
  * Both expanded and hashed use cases
  */
-export const createUrlSyncStrategy = (
+export const createKbnUrlSyncStrategy = (
   { useHash = false, history }: { useHash: boolean; history?: History } = { useHash: false }
 ): ISyncStrategy => {
-  const url = createUrlControls(history);
+  const url = createKbnUrlControls(history);
   return {
     toStorage: async <State>(
       syncKey: string,
@@ -39,11 +43,11 @@ export const createUrlSyncStrategy = (
       { replace = false }: { replace: boolean } = { replace: false }
     ) => {
       await url.updateAsync(
-        currentUrl => setStateToUrl(syncKey, state, { useHash }, currentUrl),
+        currentUrl => setStateToKbnUrl(syncKey, state, { useHash }, currentUrl),
         replace
       );
     },
-    fromStorage: async syncKey => getStateFromUrl(syncKey),
+    fromStorage: async syncKey => getStateFromKbnUrl(syncKey),
     storageChange$: <State>(syncKey: string) =>
       new Observable(observer => {
         const unlisten = url.listen(() => {
@@ -54,7 +58,7 @@ export const createUrlSyncStrategy = (
           unlisten();
         };
       }).pipe(
-        map(() => getStateFromUrl<State>(syncKey)),
+        map(() => getStateFromKbnUrl<State>(syncKey)),
         share()
       ),
   };

@@ -37,7 +37,7 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  * syncState({
  *   syncKey: '_s',
  *   stateContainer,
- *   syncStrategy: config.get('state:stateContainerInSessionStorage') ? SyncStrategy.HashedUrl : SyncStrategy.Url
+ *   syncStrategy: config.get('state:stateContainerInSessionStorage') ? SyncStrategy.KbnHashedUrl : SyncStrategy.KbnUrl
  * });
  *
  * 3. implementing custom sync strategy
@@ -129,7 +129,7 @@ export function syncState(
         stateSyncConfig.syncStrategy
       )
         ? stateSyncConfig.syncStrategy
-        : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.Url];
+        : syncStrategies[stateSyncConfig.syncStrategy || SyncStrategy.KbnUrl];
 
       // returned boolean indicates if update happen
       const updateState = async (): Promise<boolean> => {

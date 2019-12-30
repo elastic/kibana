@@ -34,6 +34,7 @@ export function distinctUntilChangedWithInitialValue<T>(
 function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
   return (
     !!value &&
+    typeof value === 'object' &&
     typeof (value as any).subscribe !== 'function' &&
     typeof (value as any).then === 'function'
   );

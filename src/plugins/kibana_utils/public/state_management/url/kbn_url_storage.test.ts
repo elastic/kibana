@@ -26,13 +26,13 @@ import {
 } from 'history';
 import {
   getRelativeToHistoryPath,
-  createUrlControls,
-  IUrlControls,
-  setStateToUrl,
-  getStateFromUrl,
-} from './url_storage';
+  createKbnUrlControls,
+  IKbnUrlControls,
+  setStateToKbnUrl,
+  getStateFromKbnUrl,
+} from './kbn_url_storage';
 
-describe('url_storage', () => {
+describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {
     const url = 'http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id';
     const state1 = {
@@ -47,44 +47,44 @@ describe('url_storage', () => {
     };
 
     it('should set expanded state to url', () => {
-      let newUrl = setStateToUrl('_s', state1, { useHash: false }, url);
+      let newUrl = setStateToKbnUrl('_s', state1, { useHash: false }, url);
       expect(newUrl).toMatchInlineSnapshot(
         `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')"`
       );
-      const retrievedState1 = getStateFromUrl('_s', newUrl);
+      const retrievedState1 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState1).toEqual(state1);
 
-      newUrl = setStateToUrl('_s', state2, { useHash: false }, newUrl);
+      newUrl = setStateToKbnUrl('_s', state2, { useHash: false }, newUrl);
       expect(newUrl).toMatchInlineSnapshot(
         `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=(test:'123')"`
       );
-      const retrievedState2 = getStateFromUrl('_s', newUrl);
+      const retrievedState2 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState2).toEqual(state2);
     });
 
     it('should set hashed state to url', () => {
-      let newUrl = setStateToUrl('_s', state1, { useHash: true }, url);
+      let newUrl = setStateToKbnUrl('_s', state1, { useHash: true }, url);
       expect(newUrl).toMatchInlineSnapshot(
         `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=h@a897fac"`
       );
-      const retrievedState1 = getStateFromUrl('_s', newUrl);
+      const retrievedState1 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState1).toEqual(state1);
 
-      newUrl = setStateToUrl('_s', state2, { useHash: true }, newUrl);
+      newUrl = setStateToKbnUrl('_s', state2, { useHash: true }, newUrl);
       expect(newUrl).toMatchInlineSnapshot(
         `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=h@40f94d5"`
       );
-      const retrievedState2 = getStateFromUrl('_s', newUrl);
+      const retrievedState2 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState2).toEqual(state2);
     });
   });
 
   describe('urlControls', () => {
     let history: History;
-    let urlControls: IUrlControls;
+    let urlControls: IKbnUrlControls;
     beforeEach(() => {
       history = createMemoryHistory();
-      urlControls = createUrlControls(history);
+      urlControls = createKbnUrlControls(history);
     });
 
     const getCurrentUrl = () => createPath(history.location);
