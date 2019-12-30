@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
@@ -42,8 +42,13 @@ export const useField = (
     deserializer = (value: unknown) => value,
   } = config;
 
-  const initialValue =
-    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue);
+  const initialValue = useMemo(
+    () =>
+      typeof defaultValue === 'function'
+        ? deserializer(defaultValue())
+        : deserializer(defaultValue),
+    [defaultValue]
+  );
 
   const [value, setStateValue] = useState(initialValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
@@ -416,15 +421,6 @@ export const useField = (
     };
   }, [value]);
 
-  /**
-   * On unmount
-   */
-  useEffect(() => {
-    return () => {
-      isUnmounted.current = true;
-    };
-  }, []);
-
   const field: FieldHook = {
     path,
     type,
@@ -448,7 +444,28 @@ export const useField = (
     __serializeOutput: serializeOutput,
   };
 
-  form.__addField(field);
+  form.__addField(field); // Executed first (1)
+
+  useEffect(() => {
+    /**
+     * NOTE: effect cleanup actually happens *after* the new component has been mounted,
+     * but before the next effect callback is run.
+     * Ref: https://kentcdodds.com/blog/understanding-reacts-key-prop
+     *
+     * This means that, the "form.__addField(field)" outside the effect will be called *before*
+     * the cleanup `form.__removeField(path);` creating a race condition.
+     *
+     * TODO: See how we could refactor "use_field" & "use_form" to avoid having the
+     * `form.__addField(field)` call outside the effect.
+     */
+    form.__addField(field); // Executed third (3)
+
+    return () => {
+      // Remove field from the form when it is unmounted or if its path changes.
+      isUnmounted.current = true;
+      form.__removeField(path); // Executed second (2)
+    };
+  }, [path]);
 
   return field;
 };

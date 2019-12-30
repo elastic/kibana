@@ -6,4 +6,8 @@
 
 export * from './mappings_editor';
 
+// We export both the button & the load mappings provider
+// to give flexibility to the consumer
+export * from './components/load_mappings';
+
 export { OnUpdateHandler, Types } from './mappings_state';
