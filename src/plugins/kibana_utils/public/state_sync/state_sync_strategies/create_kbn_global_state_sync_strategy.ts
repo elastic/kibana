@@ -18,10 +18,10 @@
  */
 
 import isEqual from 'react-fast-compare';
-import { ISyncStrategy } from './types';
-import { getStateFromKbnUrl } from '../../state_management/url';
 import { concatMap, map, share } from 'rxjs/operators';
 import { from } from 'rxjs';
+import { ISyncStrategy } from './types';
+import { getStateFromKbnUrl } from '../../state_management/url';
 
 /**
  * This strategy implements state restoration similar to what GlobalState in legacy world did
