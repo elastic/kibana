@@ -19,7 +19,7 @@ import routing from '../../../../../services/routing';
 import {
   FollowerIndexPauseProvider,
   FollowerIndexResumeProvider,
-  FollowerIndexUnfollowProvider
+  FollowerIndexUnfollowProvider,
 } from '../../../../../components';
 
 export class ContextMenu extends PureComponent {
@@ -29,33 +29,33 @@ export class ContextMenu extends PureComponent {
     anchorPosition: PropTypes.string,
     label: PropTypes.node,
     followerIndices: PropTypes.array.isRequired,
-  }
+  };
 
   state = {
     isPopoverOpen: false,
-  }
+  };
 
   onButtonClick = () => {
     this.setState(prevState => ({
-      isPopoverOpen: !prevState.isPopoverOpen
+      isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
 
   closePopover = () => {
     this.setState({
-      isPopoverOpen: false
+      isPopoverOpen: false,
     });
   };
 
-  editFollowerIndex = (id) => {
+  editFollowerIndex = id => {
     const uri = routing.getFollowerIndexPath(id, '/edit', false);
     routing.navigate(uri);
-  }
+  };
 
   render() {
     const { followerIndices } = this.props;
     const followerIndicesLength = followerIndices.length;
-    const followerIndexNames = followerIndices.map((index) => index.name);
+    const followerIndexNames = followerIndices.map(index => index.name);
     const {
       iconSide = 'right',
       iconType = 'arrowDown',
@@ -70,7 +70,6 @@ export class ContextMenu extends PureComponent {
       testSubj,
     } = this.props;
 
-
     const button = (
       <EuiButton
         data-test-subj={testSubj}
@@ -83,7 +82,9 @@ export class ContextMenu extends PureComponent {
       </EuiButton>
     );
 
-    const pausedFollowerIndexNames = followerIndices.filter(({ isPaused }) => isPaused).map((index) => index.name);
+    const pausedFollowerIndexNames = followerIndices
+      .filter(({ isPaused }) => isPaused)
+      .map(index => index.name);
     const activeFollowerIndices = followerIndices.filter(({ isPaused }) => !isPaused);
 
     return (
@@ -104,45 +105,41 @@ export class ContextMenu extends PureComponent {
           />
         </EuiPopoverTitle>
         <EuiContextMenuPanel data-test-subj="contextMenu">
-          {
-            activeFollowerIndices.length ? (
-              <FollowerIndexPauseProvider onConfirm={this.closePopover}>
-                {(pauseFollowerIndex) => (
-                  <EuiContextMenuItem
-                    icon="pause"
-                    onClick={() => pauseFollowerIndex(activeFollowerIndices)}
-                    data-test-subj="pauseButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
-                      defaultMessage="Pause replication"
-                    />
-                  </EuiContextMenuItem>
-                )}
-              </FollowerIndexPauseProvider>
-            ) : null
-          }
+          {activeFollowerIndices.length ? (
+            <FollowerIndexPauseProvider onConfirm={this.closePopover}>
+              {pauseFollowerIndex => (
+                <EuiContextMenuItem
+                  icon="pause"
+                  onClick={() => pauseFollowerIndex(activeFollowerIndices)}
+                  data-test-subj="pauseButton"
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
+                    defaultMessage="Pause replication"
+                  />
+                </EuiContextMenuItem>
+              )}
+            </FollowerIndexPauseProvider>
+          ) : null}
 
-          {
-            pausedFollowerIndexNames.length ? (
-              <FollowerIndexResumeProvider onConfirm={this.closePopover}>
-                {(resumeFollowerIndex) => (
-                  <EuiContextMenuItem
-                    icon="play"
-                    onClick={() => resumeFollowerIndex(pausedFollowerIndexNames)}
-                    data-test-subj="resumeButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
-                      defaultMessage="Resume replication"
-                    />
-                  </EuiContextMenuItem>
-                )}
-              </FollowerIndexResumeProvider>
-            ) : null
-          }
+          {pausedFollowerIndexNames.length ? (
+            <FollowerIndexResumeProvider onConfirm={this.closePopover}>
+              {resumeFollowerIndex => (
+                <EuiContextMenuItem
+                  icon="play"
+                  onClick={() => resumeFollowerIndex(pausedFollowerIndexNames)}
+                  data-test-subj="resumeButton"
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
+                    defaultMessage="Resume replication"
+                  />
+                </EuiContextMenuItem>
+              )}
+            </FollowerIndexResumeProvider>
+          ) : null}
 
-          { followerIndexNames.length === 1 && (
+          {followerIndexNames.length === 1 && (
             <Fragment>
               <EuiContextMenuItem
                 icon="pencil"
@@ -156,10 +153,10 @@ export class ContextMenu extends PureComponent {
                 />
               </EuiContextMenuItem>
             </Fragment>
-          ) }
+          )}
 
           <FollowerIndexUnfollowProvider onConfirm={this.closePopover}>
-            {(unfollowLeaderIndex) => (
+            {unfollowLeaderIndex => (
               <EuiContextMenuItem
                 icon="indexFlush"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}

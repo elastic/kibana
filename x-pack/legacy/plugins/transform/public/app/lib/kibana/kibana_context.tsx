@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext, FC } from 'react';
 
-import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearch } from '../../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import {
   IndexPattern,
   IndexPatternsContract,

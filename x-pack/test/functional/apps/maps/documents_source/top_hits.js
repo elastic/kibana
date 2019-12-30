@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 const VECTOR_SOURCE_ID = 'z52lq';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const inspector = getService('inspector');
   const find = getService('find');
@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+      const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
       expect(hits).to.equal('0'); // aggregation requests do not return any documents
     });
 
@@ -35,7 +35,9 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await PageObjects.maps.openLayerPanel('logstash');
         // Can not use testSubjects because data-test-subj is placed range input and number input
-        const sizeInput = await find.byCssSelector(`input[data-test-subj="layerPanelTopHitsSize"][type='number']`);
+        const sizeInput = await find.byCssSelector(
+          `input[data-test-subj="layerPanelTopHitsSize"][type='number']`
+        );
         await sizeInput.click();
         await sizeInput.clearValue();
         await sizeInput.type('3');

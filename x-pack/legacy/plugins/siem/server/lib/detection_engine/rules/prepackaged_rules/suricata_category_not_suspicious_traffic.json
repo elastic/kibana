@@ -1,0 +1,17 @@
+{
+  "rule_id": "c0f684ff-4f15-44e7-912d-aa8b8f08a910",
+  "risk_score": 50,
+  "description": "Suricata Category - Not Suspicious Traffic",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Not Suspicious Traffic",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Not Suspicious Traffic\" or rule.category: \"Not Suspicious Traffic\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -5,7 +5,7 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
@@ -13,14 +13,16 @@ import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { FormattedFieldValue } from './formatted_field';
 import { HOST_NAME_FIELD_NAME } from './constants';
 
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+jest.mock('../../../../lib/kibana');
 
 describe('Events', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(

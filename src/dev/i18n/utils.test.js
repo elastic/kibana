@@ -79,9 +79,9 @@ describe('i18n utils', () => {
   });
 
   test('should detect object property with defined key', () => {
-    const objectExpresssionNode = [...traverseNodes(parse(objectPropertySource).program.body)].find(
-      node => isObjectExpression(node)
-    );
+    const objectExpresssionNode = [
+      ...traverseNodes(parse(objectPropertySource).program.body),
+    ].find(node => isObjectExpression(node));
     const [objectExpresssionProperty] = objectExpresssionNode.properties;
 
     expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);
@@ -165,9 +165,7 @@ describe('i18n utils', () => {
     const defaultMessage = 'Test message {first, plural, one {{second}} other {{third}}}';
     const messageId = 'namespace.message.id';
 
-    expect(() =>
-      checkValuesProperty(valuesKeys, defaultMessage, messageId)
-    ).not.toThrow();
+    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).not.toThrow();
   });
 
   test(`should throw on wrong nested ICU message`, () => {

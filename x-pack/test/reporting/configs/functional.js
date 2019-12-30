@@ -6,7 +6,9 @@
 const path = require('path');
 
 export async function getFunctionalConfig({ readConfigFile }) {
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../../functional/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../../functional/config.js')
+  );
 
   return {
     services: xPackFunctionalTestsConfig.get('services'),
@@ -15,7 +17,7 @@ export async function getFunctionalConfig({ readConfigFile }) {
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
     apps: xPackFunctionalTestsConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../es_archives'),
     },
     screenshots: xPackFunctionalTestsConfig.get('screenshots'),
     junit: {
@@ -26,7 +28,8 @@ export async function getFunctionalConfig({ readConfigFile }) {
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.reporting.csv.enablePanelActionDownload=true',
-        '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
+        '--logging.events.log',
+        JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting']),
       ],
     },
     testFiles: [require.resolve('../functional')],

@@ -21,19 +21,17 @@ const getBaseStats = () => ({
   // state
   input: {
     count: 0,
-    names: []
+    names: [],
   },
   module: {
     count: 0,
-    names: []
+    names: [],
   },
   architecture: {
     count: 0,
-    architectures: []
-  }
+    architectures: [],
+  },
 });
-
-
 
 /*
  * Update a clusters object with processed beat stats
@@ -42,7 +40,10 @@ const getBaseStats = () => ({
  * @param {Object} clusterHostSets - the object keyed by cluster UUIDs to count the unique hosts
  * @param {Object} clusterModuleSets - the object keyed by cluster UUIDs to count the unique modules
  */
-export function processResults(results = [], { clusters, clusterHostSets, clusterInputSets, clusterModuleSets, clusterArchitectureMaps }) {
+export function processResults(
+  results = [],
+  { clusters, clusterHostSets, clusterInputSets, clusterModuleSets, clusterArchitectureMaps }
+) {
   const currHits = get(results, 'hits.hits', []);
   currHits.forEach(hit => {
     const clusterUuid = get(hit, '_source.cluster_uuid');
@@ -110,7 +111,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
         if (!clusters[clusterUuid].hasOwnProperty('heartbeat')) {
           clusters[clusterUuid].heartbeat = {
             monitors: 0,
-            endpoints: 0
+            endpoints: 0,
           };
         }
         const clusterHb = clusters[clusterUuid].heartbeat;
@@ -129,7 +130,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
           if (!clusterHb.hasOwnProperty(proto)) {
             clusterHb[proto] = {
               monitors: 0,
-              endpoints: 0
+              endpoints: 0,
             };
           }
           clusterHb[proto].monitors += val.monitors;
@@ -143,7 +144,8 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
         const hostKey = `${stateHost.architecture}/${stateHost.os.platform}`;
         let os = hostMap.get(hostKey);
 
-        if (!os) { // undefined if new
+        if (!os) {
+          // undefined if new
           os = { name: stateHost.os.platform, architecture: stateHost.architecture, count: 0 };
           hostMap.set(hostKey, os);
         }
@@ -178,7 +180,15 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
  * @param {String} type - beats_stats or beats_state
  * @return {Promise}
  */
-async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, { page = 0, ...options } = {}, type) {
+async function fetchBeatsByType(
+  server,
+  callCluster,
+  clusterUuids,
+  start,
+  end,
+  { page = 0, ...options } = {},
+  type
+) {
   const params = {
     index: INDEX_PATTERN_BEATS,
     ignoreUnavailable: true,
@@ -202,10 +212,12 @@ async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, {
         end,
         filters: [
           { terms: { cluster_uuid: clusterUuids } },
-          { bool: {
-            must_not: { term: { [`${type}.beat.type`]: 'apm-server' } },
-            must: { term: { 'type': type } }
-          } }
+          {
+            bool: {
+              must_not: { term: { [`${type}.beat.type`]: 'apm-server' } },
+              must: { term: { type: type } },
+            },
+          },
         ],
       }),
       from: page * HITS_SIZE,
@@ -254,12 +266,12 @@ export async function getBeatsStats(server, callCluster, clusterUuids, start, en
     clusterHostSets: {}, // passed to processResults for tracking state in the results generation
     clusterInputSets: {}, // passed to processResults for tracking state in the results generation
     clusterModuleSets: {}, // passed to processResults for tracking state in the results generation
-    clusterArchitectureMaps: {} // passed to processResults for tracking state in the results generation
+    clusterArchitectureMaps: {}, // passed to processResults for tracking state in the results generation
   };
 
   await Promise.all([
     fetchBeatsStats(server, callCluster, clusterUuids, start, end, options),
-    fetchBeatsStates(server, callCluster, clusterUuids, start, end, options)
+    fetchBeatsStates(server, callCluster, clusterUuids, start, end, options),
   ]);
 
   return options.clusters;

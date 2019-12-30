@@ -116,6 +116,8 @@ def legacyJobRunner(name) {
 
 def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    agentInfo.print()
+
     if (useRamDisk) {
       // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
       def originalWorkspace = env.WORKSPACE

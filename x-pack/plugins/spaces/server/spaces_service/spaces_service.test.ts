@@ -5,7 +5,12 @@
  */
 import * as Rx from 'rxjs';
 import { SpacesService } from './spaces_service';
-import { coreMock, elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingServiceMock,
+} from 'src/core/server/mocks';
 import { SpacesAuditLogger } from '../lib/audit_logger';
 import {
   KibanaRequest,
@@ -19,15 +24,7 @@ import { LegacyAPI } from '../plugin';
 import { spacesConfig } from '../lib/__fixtures__';
 import { securityMock } from '../../../security/server/mocks';
 
-const mockLogger = {
-  trace: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-  log: jest.fn(),
-};
+const mockLogger = loggingServiceMock.createLogger();
 
 const createService = async (serverBasePath: string = '') => {
   const legacyAPI = {

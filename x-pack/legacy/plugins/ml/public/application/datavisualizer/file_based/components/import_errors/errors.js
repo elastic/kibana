@@ -4,30 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiAccordion,
-} from '@elastic/eui';
+import { EuiCallOut, EuiAccordion } from '@elastic/eui';
 
 import { IMPORT_STATUS } from '../import_progress';
 
 export function ImportErrors({ errors, statuses }) {
   return (
-    <EuiCallOut
-      title={title(statuses)}
-      color="danger"
-      iconType="cross"
-    >
-      {
-        errors.map((e, i) => (
-          <ImportError error={e} key={i} />
-        ))
-      }
-
+    <EuiCallOut title={title(statuses)} color="danger" iconType="cross">
+      {errors.map((e, i) => (
+        <ImportError error={e} key={i} />
+      ))}
     </EuiCallOut>
   );
 }
@@ -97,11 +86,9 @@ function ImportError(error, key) {
   const errorObj = toString(error);
   return (
     <React.Fragment>
-      <p key={key}>
-        { errorObj.msg }
-      </p>
+      <p key={key}>{errorObj.msg}</p>
 
-      {errorObj.more !== undefined &&
+      {errorObj.more !== undefined && (
         <EuiAccordion
           id="more"
           buttonContent={
@@ -114,8 +101,7 @@ function ImportError(error, key) {
         >
           {errorObj.more}
         </EuiAccordion>
-      }
-
+      )}
     </React.Fragment>
   );
 }
@@ -149,7 +135,6 @@ function toString(error) {
     } else {
       // last resort, just display the whole object
       return { msg: JSON.stringify(error) };
-
     }
   }
 

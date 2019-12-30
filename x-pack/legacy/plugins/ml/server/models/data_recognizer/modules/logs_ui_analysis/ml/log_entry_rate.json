@@ -1,6 +1,6 @@
 {
   "job_type": "anomaly_detector",
-  "description": "Detect anomalies in the log entry ingestion rate",
+  "description": "Logs UI: Detects anomalies in the log entry ingestion rate",
   "groups": ["logs-ui"],
   "analysis_config": {
     "bucket_span": "15m",

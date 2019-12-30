@@ -6,25 +6,33 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { fetchElasticsearchStats, getElasticsearchStats, handleElasticsearchStats } from '../get_es_stats';
+import {
+  fetchElasticsearchStats,
+  getElasticsearchStats,
+  handleElasticsearchStats,
+} from '../get_es_stats';
 
 describe('get_es_stats', () => {
   const callWith = sinon.stub();
   const size = 123;
   const server = {
     config: sinon.stub().returns({
-      get: sinon.stub().withArgs('xpack.monitoring.elasticsearch.index_pattern').returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size').returns(size)
-    })
+      get: sinon
+        .stub()
+        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
+        .returns('.monitoring-es-N-*')
+        .withArgs('xpack.monitoring.max_bucket_size')
+        .returns(size),
+    }),
   };
   const response = {
     hits: {
       hits: [
         { _id: 'abc', _source: { cluster_uuid: 'abc' } },
         { _id: 'xyz', _source: { cluster_uuid: 'xyz' } },
-        { _id: '123', _source: { cluster_uuid: '123' } }
-      ]
-    }
+        { _id: '123', _source: { cluster_uuid: '123' } },
+      ],
+    },
   };
   const expectedClusters = response.hits.hits.map(hit => hit._source);
   const clusterUuids = expectedClusters.map(cluster => cluster.cluster_uuid);
