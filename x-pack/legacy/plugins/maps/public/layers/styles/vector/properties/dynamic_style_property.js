@@ -8,8 +8,11 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
-import { DynamicLegendRow } from './components/dynamic_legend_row';
 import React from 'react';
+import { OrdinalLegend } from './components/ordinal_legend';
+import { CategoricalLegend } from './components/categorical_legend';
+
+const EMPTY_VALUE = '';
 
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
@@ -135,6 +138,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   formatField(value) {
+    if (value === EMPTY_VALUE) {
+      return value;
+    }
+
     if (this.getField()) {
       const fieldName = this.getField().getName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
@@ -144,14 +151,32 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+  renderBreakedLegend() {
+    return null;
+  }
+
+  _renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
     return (
-      <DynamicLegendRow
+      <CategoricalLegend
         style={this}
-        loadIsPointsOnly={loadIsPointsOnly}
         loadIsLinesOnly={loadIsLinesOnly}
+        loadIsPointsOnly={loadIsPointsOnly}
         symbolId={symbolId}
       />
     );
+  }
+
+  _renderRangeLegend() {
+    return <OrdinalLegend style={this} />;
+  }
+
+  renderLegendDetailRow({ loadIsPointsOnly, loadIsLinesOnly, symbolId }) {
+    if (this.isRanged()) {
+      return this._renderRangeLegend();
+    } else if (this.hasBreaks()) {
+      return this._renderCategoricalLegend({ loadIsPointsOnly, loadIsLinesOnly, symbolId });
+    } else {
+      return null;
+    }
   }
 }

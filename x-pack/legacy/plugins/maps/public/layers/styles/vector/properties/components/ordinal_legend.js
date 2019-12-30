@@ -9,22 +9,18 @@ import _ from 'lodash';
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 const EMPTY_VALUE = '';
 
-export class DynamicLegendRow extends React.Component {
+export class OrdinalLegend extends React.Component {
   constructor() {
     super();
     this._isMounted = false;
     this.state = {
       label: EMPTY_VALUE,
-      isPointsOnly: null,
-      isLinesOnly: null,
     };
   }
 
   async _loadParams() {
     const label = await this.props.style.getField().getLabel();
-    const isLinesOnly = await this.props.loadIsLinesOnly();
-    const isPointsOnly = await this.props.loadIsPointsOnly();
-    const newState = { label, isLinesOnly, isPointsOnly };
+    const newState = { label };
     if (this._isMounted && !_.isEqual(this.state, newState)) {
       this.setState(newState);
     }
@@ -42,28 +38,20 @@ export class DynamicLegendRow extends React.Component {
     this._isMounted = true;
     this._loadParams();
   }
-
-  _formatValue(value) {
-    if (value === EMPTY_VALUE) {
-      return value;
-    }
-    return this.props.style.formatField(value);
-  }
-
-  _renderRangeLegend() {
+  render() {
     const fieldMeta = this.props.style.getFieldMeta();
 
     let minLabel = EMPTY_VALUE;
     let maxLabel = EMPTY_VALUE;
     if (fieldMeta) {
       const range = { min: fieldMeta.min, max: fieldMeta.max };
-      const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
+      const min = this.props.style.formatField(_.get(range, 'min', EMPTY_VALUE));
       minLabel =
         this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange
           ? `< ${min}`
           : min;
 
-      const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
+      const max = this.props.style.formatField(_.get(range, 'max', EMPTY_VALUE));
       maxLabel =
         this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange
           ? `> ${max}`
@@ -79,28 +67,5 @@ export class DynamicLegendRow extends React.Component {
         fieldLabel={this.state.label}
       />
     );
-  }
-
-  _renderBreakedLegend() {
-    return this.props.style.renderBreakedLegend({
-      fieldLabel: this.state.label,
-      isLinesOnly: this.state.isLinesOnly,
-      isPointsOnly: this.state.isPointsOnly,
-      symbolId: this.props.symbolId,
-    });
-  }
-
-  render() {
-    if (this.state.label === EMPTY_VALUE) {
-      return null;
-    }
-
-    if (this.props.style.isRanged()) {
-      return this._renderRangeLegend();
-    } else if (this.props.style.hasBreaks()) {
-      return this._renderBreakedLegend();
-    } else {
-      return null;
-    }
   }
 }
