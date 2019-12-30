@@ -34,22 +34,8 @@ const createCustomClusterClientMock = (): jest.Mocked<ICustomClusterClient> => (
   close: jest.fn(),
 });
 
-type MockedElasticSearchServiceSetup = jest.Mocked<
-  ElasticsearchServiceSetup & {
-    adminClient: jest.Mocked<IClusterClient>;
-    dataClient: jest.Mocked<IClusterClient>;
-  }
->;
-
-type MockedInternalElasticSearchServiceSetup = jest.Mocked<
-  InternalElasticsearchServiceSetup & {
-    adminClient: jest.Mocked<IClusterClient>;
-    dataClient: jest.Mocked<IClusterClient>;
-  }
->;
-
-function createClusterClientMock(): jest.Mocked<IClusterClient> {
-  const client = {
+function createClusterClientMock() {
+  const client: jest.Mocked<IClusterClient> = {
     callAsInternalUser: jest.fn(),
     asScoped: jest.fn(),
   };
@@ -57,25 +43,39 @@ function createClusterClientMock(): jest.Mocked<IClusterClient> {
   return client;
 }
 
+type MockedElasticSearchServiceSetup = jest.Mocked<
+  ElasticsearchServiceSetup & {
+    adminClient: jest.Mocked<IClusterClient>;
+    dataClient: jest.Mocked<IClusterClient>;
+  }
+>;
+
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
-    createClient: jest.fn().mockImplementation(createCustomClusterClientMock),
+    createClient: jest.fn(),
     adminClient: createClusterClientMock(),
     dataClient: createClusterClientMock(),
   };
+  setupContract.createClient.mockReturnValue(createCustomClusterClientMock());
   setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
   setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
   return setupContract;
 };
 
+type MockedInternalElasticSearchServiceSetup = jest.Mocked<
+  InternalElasticsearchServiceSetup & {
+    adminClient: jest.Mocked<IClusterClient>;
+    dataClient: jest.Mocked<IClusterClient>;
+  }
+>;
 const createInternalSetupContractMock = () => {
   const setupContract: MockedInternalElasticSearchServiceSetup = {
     ...createSetupContractMock(),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
-    adminClient$: new BehaviorSubject((createClusterClientMock() as unknown) as IClusterClient),
-    dataClient$: new BehaviorSubject((createClusterClientMock() as unknown) as IClusterClient),
+    adminClient$: new BehaviorSubject(createClusterClientMock()),
+    dataClient$: new BehaviorSubject(createClusterClientMock()),
   };
   setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
   setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
