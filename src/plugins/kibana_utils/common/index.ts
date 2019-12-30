@@ -18,3 +18,4 @@
  */
 
 export * from './defer';
+export * from './of';

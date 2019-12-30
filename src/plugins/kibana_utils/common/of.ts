@@ -17,16 +17,21 @@
  * under the License.
  */
 
-export { defer, Defer, of } from '../common';
-export * from './core';
-export * from './errors';
-export * from './field_mapping';
-export * from './field_wildcard';
-export * from './parse';
-export * from './render_complete';
-export * from './resize_checker';
-export * from './state_containers';
-export * from './storage';
-export * from './storage/hashed_item_store';
-export * from './state_management/state_hash';
-export * from './state_management/url';
+/**
+ * Given a promise returns a 3-tuple, with the following members:
+ *
+ * - First entry is either the resolved value of the promise or `undefined`.
+ * - Second entry is either the error thrown by promise or `undefined`.
+ * - Third entry is a boolean, truthy if promise was resolved and falsy if rejected.
+ *
+ * @param promise Promise to convert to 3-tuple.
+ */
+export const of = async <T, E = any>(
+  promise: Promise<T>
+): Promise<[T | undefined, E | undefined, boolean]> => {
+  try {
+    return [await promise, undefined, true];
+  } catch (error) {
+    return [, error, false];
+  }
+};
