@@ -17,18 +17,19 @@
  * under the License.
  */
 
-import { UiNavLink } from './ui_nav_link';
+import { mockCoreContext } from '../../core_context.mock';
+import { httpServiceMock } from '../../http/http_service.mock';
+import { pluginServiceMock } from '../../plugins/plugins_service.mock';
+import { legacyServiceMock } from '../../legacy/legacy_service.mock';
 
-export function uiNavLinksMixin(kbnServer, server) {
-  const uiApps = server.getAllUiApps();
+const context = mockCoreContext.create();
+const http = httpServiceMock.createSetupContract();
+const plugins = pluginServiceMock.createSetupContract();
+const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 
-  const { navLinkSpecs = [] } = kbnServer.uiExports;
-
-  const fromSpecs = navLinkSpecs.map(navLinkSpec => new UiNavLink(navLinkSpec));
-
-  const fromApps = uiApps.map(app => app.getNavLink()).filter(Boolean);
-
-  const uiNavLinks = fromSpecs.concat(fromApps).sort((a, b) => a.getOrder() - b.getOrder());
-
-  server.decorate('server', 'getUiNavLinks', () => uiNavLinks.slice(0));
-}
+export const mockRenderingServiceParams = context;
+export const mockRenderingSetupDeps = {
+  http,
+  legacyPlugins,
+  plugins,
+};
