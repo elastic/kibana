@@ -44,6 +44,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     return {
       configuration: {
         _source,
+        _meta,
         dynamic,
         numeric_detection,
         date_detection,
