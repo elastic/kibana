@@ -94,11 +94,11 @@ const stripUnknownOrInvalidParameter = (field: GenericObject): FieldValidatorRes
   );
 
 const parseField = (field: any): FieldValidatorResponse & { meta?: FieldMeta } => {
-  // A field must be an object...
+  // Sanitize the input to make sure we are working with an object
   if (!isObject(field)) {
     return { parametersRemoved: [] };
   }
-  // ...with a known type
+  // Make sure the field "type" is valid
   if (!validateFieldType(field.type ?? DEFAULT_FIELD_TYPE)) {
     return { parametersRemoved: [] };
   }
@@ -173,9 +173,14 @@ const parseFields = (
  * This allows us to display a warning in the UI and let the user correct the fields that we
  * are about to remove.
  *
+ * NOTE: The Joi Schema that we defined for each parameter (in "parameters_definition".tsx)
+ * does not do an exhaustive validation of the parameter value.
+ * It's main purpose is to prevent the UI from blowing up.
+ *
  * @param properties A mappings "properties" object
  */
 export const validateProperties = (properties = {}): PropertiesValidatorResponse => {
+  // Sanitize the input to make sure we are working with an object
   if (!isObject(properties)) {
     return { value: {}, errors: [] };
   }
