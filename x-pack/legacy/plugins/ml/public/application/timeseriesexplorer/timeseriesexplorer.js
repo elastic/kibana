@@ -456,13 +456,13 @@ export class TimeSeriesExplorer extends React.Component {
     this.setState(
       {
         entities: entities.map(entity => {
-          if (partitionField.name === entity.fieldName) {
+          if (partitionField?.name === entity.fieldName) {
             entity.fieldValues = partitionField.values;
           }
-          if (overField.name === entity.fieldName) {
+          if (overField?.name === entity.fieldName) {
             entity.fieldValues = overField.values;
           }
-          if (byField.name === entity.fieldName) {
+          if (byField?.name === entity.fieldName) {
             entity.fieldValues = byField.values;
           }
           return entity;
