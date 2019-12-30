@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import { useForm } from '../../../../shared_imports';
 import { useDispatch } from '../../../../mappings_state';
-import { Field, NormalizedField, NormalizedFields, DataType } from '../../../../types';
+import { Field, NormalizedField, NormalizedFields } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
 import { EditField } from './edit_field';
 
@@ -17,7 +17,6 @@ interface Props {
 }
 
 export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
-  const [type, setType] = useState<DataType>(field.source.type);
   const dispatch = useDispatch();
 
   const { form } = useForm<Field>({
@@ -29,7 +28,6 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
 
   useEffect(() => {
     const subscription = form.subscribe(updatedFieldForm => {
-      setType(updatedFieldForm.data.raw.subType || updatedFieldForm.data.raw.type);
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
@@ -40,7 +38,5 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   }, []);
 
-  return (
-    <EditField type={type} form={form} field={field} allFields={allFields} exitEdit={exitEdit} />
-  );
+  return <EditField form={form} field={field} allFields={allFields} exitEdit={exitEdit} />;
 });

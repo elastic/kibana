@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { FieldHook, FieldConfig } from '../types';
 import { useField } from '../hooks';
@@ -62,13 +62,6 @@ export const UseField = React.memo(
     }
 
     const field = useField(form, path, configCopy, onChange);
-
-    // Remove field from form when it is unmounted or if its path changes
-    useEffect(() => {
-      return () => {
-        form.__removeField(path);
-      };
-    }, [path]);
 
     // Children prevails over anything else provided.
     if (children) {

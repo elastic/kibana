@@ -23,14 +23,7 @@ import {
 import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import {
-  Field,
-  NormalizedField,
-  NormalizedFields,
-  DataType,
-  MainType,
-  SubType,
-} from '../../../../types';
+import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
@@ -44,7 +37,6 @@ const limitStringLength = (text: string, limit = 18): string => {
 };
 
 interface Props {
-  type: DataType;
   form: FormHook<Field>;
   field: NormalizedField;
   allFields: NormalizedFields['byId'];
@@ -163,6 +155,10 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
                     {ParametersForm && (
                       <ParametersForm
+                        // As the component "ParametersForm" does not change when switching type, and all the props
+                        // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
+                        // This will trigger an unmount of all the previous form fields and then mount the new ones.
+                        key={subType ?? type}
                         field={field}
                         allFields={allFields}
                         isMultiField={isMultiField}
