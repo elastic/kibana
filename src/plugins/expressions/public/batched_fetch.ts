@@ -20,10 +20,8 @@
 import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
 // eslint-disable-next-line
-import { split } from '../../../../../plugins/bfetch/public/streaming';
-import { BfetchPublicContract } from '../../../../../plugins/bfetch/public';
-import { defer } from '../../../../../plugins/kibana_utils/public';
-import { FUNCTIONS_URL } from './consts';
+import { split, BfetchPublicContract } from '../../bfetch/public';
+import { defer } from '../../kibana_utils/public';
 
 export interface Options {
   fetchStreaming: BfetchPublicContract['fetchStreaming'];
@@ -113,7 +111,7 @@ export function batchedFetch({ fetchStreaming, serialize, ms = 10 }: Options) {
  */
 async function processBatch(fetchStreaming: BfetchPublicContract['fetchStreaming'], batch: Batch) {
   const { stream, promise } = fetchStreaming({
-    url: FUNCTIONS_URL,
+    url: `/api/interpreter/fns`,
     body: JSON.stringify({
       functions: Object.values(batch).map(({ request }) => request),
     }),

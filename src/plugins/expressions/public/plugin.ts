@@ -20,6 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import {
   setCoreStart,
@@ -56,12 +57,16 @@ import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
+import { serializeProvider } from '../common';
+import { batchedFetch } from './batched_fetch';
 
 export interface ExpressionsSetupDeps {
+  bfetch: BfetchPublicSetup;
   inspector: InspectorSetup;
 }
 
 export interface ExpressionsStartDeps {
+  bfetch: BfetchPublicStart;
   inspector: InspectorStart;
 }
 
@@ -74,6 +79,7 @@ export interface ExpressionsSetup {
     renderers: RenderFunctionsRegistry;
     types: TypesRegistry;
     getExecutor: () => ExpressionExecutor;
+    loadLegacyServerFunctionWrappers: () => Promise<void>;
   };
 }
 
@@ -96,7 +102,7 @@ export class ExpressionsPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
+  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
     setRenderersRegistry(renderers);
@@ -142,6 +148,32 @@ export class ExpressionsPublicPlugin
 
     setInterpreter(getExecutor().interpreter);
 
+    let cached: Promise<void> | null = null;
+    const loadLegacyServerFunctionWrappers = async () => {
+      if (!cached) {
+        cached = (async () => {
+          const serverFunctionList = await core.http.get(`/api/interpreter/fns`);
+          const { serialize } = serializeProvider(types.toJS());
+          const batch = batchedFetch({
+            fetchStreaming: bfetch.fetchStreaming,
+            serialize,
+          });
+
+          // For every sever-side function, register a client-side
+          // function that matches its definition, but which simply
+          // calls the server-side function endpoint.
+          Object.keys(serverFunctionList).forEach(functionName => {
+            const fn = () => ({
+              ...serverFunctionList[functionName],
+              fn: (context: any, args: any) => batch({ functionName, args, context }),
+            });
+            registerFunction(fn);
+          });
+        })();
+      }
+      return cached;
+    };
+
     const setup: ExpressionsSetup = {
       registerFunction,
       registerRenderer: (renderer: any) => {
@@ -155,6 +187,7 @@ export class ExpressionsPublicPlugin
         renderers,
         types,
         getExecutor,
+        loadLegacyServerFunctionWrappers,
       },
     };
 
