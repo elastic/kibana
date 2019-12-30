@@ -59,7 +59,6 @@ export function registerServerFunctions(server: any) {
     };
   });
 
-  getServerFunctions(server);
   runServerFunctions(server);
 }
 
@@ -158,20 +157,6 @@ function batchError(id: any, message: any, statusCode = 500) {
     statusCode,
     result: { statusCode, message },
   };
-}
-
-/**
- * Register the endpoint that returns the list of server-only functions.
- * @param {*} server - The Kibana server
- */
-function getServerFunctions(server: any) {
-  server.route({
-    method: 'GET',
-    path: `${API_ROUTE}/fns`,
-    handler() {
-      return server.plugins.interpreter.registries().serverFunctions.toJS();
-    },
-  });
 }
 
 /**

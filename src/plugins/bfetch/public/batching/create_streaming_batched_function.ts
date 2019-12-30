@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defer, Defer } from 'src/plugins/kibana_utils/public';
+import { defer, Defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,

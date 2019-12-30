@@ -18,13 +18,22 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { LegacyInterpreterServerApi, createLegacyServerInterpreterApi } from './legacy';
+import { BfetchServerSetup, BfetchServerStart } from '../../bfetch/server';
+import {
+  LegacyInterpreterServerApi,
+  createLegacyServerInterpreterApi,
+  createLegacyServerEndpoints,
+} from './legacy';
 
 // eslint-disable-next-line
-export interface ExpressionsServerSetupDependencies {}
+export interface ExpressionsServerSetupDependencies {
+  bfetch: BfetchServerSetup;
+}
 
 // eslint-disable-next-line
-export interface ExpressionsServerStartDependencies {}
+export interface ExpressionsServerStartDependencies {
+  bfetch: BfetchServerStart;
+}
 
 export interface ExpressionsServerSetup {
   __LEGACY: LegacyInterpreterServerApi;
@@ -47,8 +56,11 @@ export class ExpressionsServerPlugin
     core: CoreSetup,
     plugins: ExpressionsServerSetupDependencies
   ): ExpressionsServerSetup {
+    const legacyApi = createLegacyServerInterpreterApi();
+    createLegacyServerEndpoints(legacyApi, core, plugins);
+
     return {
-      __LEGACY: createLegacyServerInterpreterApi(),
+      __LEGACY: legacyApi,
     };
   }
 

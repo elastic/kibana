@@ -24,6 +24,9 @@
 // @ts-ignore
 import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common';
 
+import { schema } from '@kbn/config-schema';
+import { CoreSetup } from 'src/core/server';
+import { ExpressionsServerSetupDependencies } from './plugin';
 import { typeSpecs as types, Type } from '../common';
 
 export class TypesRegistry extends Registry<any, any> {
@@ -56,4 +59,31 @@ export const createLegacyServerInterpreterApi = (): LegacyInterpreterServerApi =
   });
 
   return api;
+};
+
+export const createLegacyServerEndpoints = (
+  api: LegacyInterpreterServerApi,
+  core: CoreSetup,
+  plugins: ExpressionsServerSetupDependencies
+) => {
+  const router = core.http.createRouter();
+
+  /**
+   * Register the endpoint that returns the list of server-only functions.
+   */
+  router.get(
+    {
+      path: `/api/interpreter/fns`,
+      validate: {
+        body: schema.any(),
+      },
+    },
+    async (context, request, response) => {
+      const functions = api.registries().serverFunctions.toJS();
+      const body = JSON.stringify(functions);
+      return response.ok({
+        body,
+      });
+    }
+  );
 };
