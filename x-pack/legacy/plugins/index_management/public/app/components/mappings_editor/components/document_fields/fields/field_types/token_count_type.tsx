@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { documentationService } from '../../../../../../services/documentation';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { STANDARD } from '../../../../constants';
 import { UseField, NumericField } from '../../../../shared_imports';
 
 import {
@@ -58,6 +59,7 @@ export const TokenCountType = ({ field }: Props) => {
         >
           <AnalyzerParameter
             path="analyzer"
+            config={{ ...getFieldConfig('analyzer'), defaultValue: STANDARD }} // If "field.source.analyzer" is undefined, defaults to "standard" analyzer
             defaultValue={field.source.analyzer}
             allowsIndexDefaultOption={false}
           />
