@@ -21,7 +21,7 @@ export const type = 'text-object';
 
 export interface TextObject extends SavedObjectAttributes {
   createdAt: number;
-  updateAt: number;
+  updatedAt: number;
   text: string;
   userId: string;
   id: string;

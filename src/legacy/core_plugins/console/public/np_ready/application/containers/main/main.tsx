@@ -53,11 +53,11 @@ export function Main() {
   const { done, error } = useDataInit();
 
   if (!done) {
-    return <p>Migrating...</p>;
+    return <p>Loading...</p>;
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return <p>{JSON.stringify(error)}</p>;
   }
 
   return (

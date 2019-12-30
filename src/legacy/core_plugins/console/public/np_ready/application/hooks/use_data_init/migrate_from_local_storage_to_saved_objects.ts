@@ -25,6 +25,8 @@ export interface Dependencies {
   database: AppDatabase;
 }
 
+export const shouldMigrate = (history: History) => Boolean(history.getLegacySavedEditorState());
+
 /**
  * This is a special, once-off migration from localStorage to Saved Objects.
  *
@@ -42,7 +44,7 @@ export async function localStorageToSavedObjects({
   await database.text.create({
     userId: 'n',
     createdAt: Date.now(),
-    lastUpdatedAt: Date.now(),
+    updatedAt: Date.now(),
     text: legacyTextContent.content,
   });
 

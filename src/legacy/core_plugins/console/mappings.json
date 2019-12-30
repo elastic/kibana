@@ -4,7 +4,7 @@
       "createdAt": {
         "type": "long"
       },
-      "updateAt": {
+      "updatedAt": {
         "type": "long"
       },
       "text": {

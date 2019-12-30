@@ -16,5 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 export { useDataInit } from './use_data_init';
