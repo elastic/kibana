@@ -115,7 +115,7 @@ export interface IKbnUrlControls {
 
   /**
    * Schedules url update to next microtask,
-   * Useful to ignore sync changes to url
+   * Useful to batch sync changes to url to cause only one browser history update
    * @param updater - fn which receives current url and should return next url to update to
    * @param replace - use replace instead of push
    */
