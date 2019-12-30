@@ -26,6 +26,9 @@ export const DocumentFields = () => {
   };
 
   useEffect(() => {
+    /**
+     * If there aren't any fields yet, we display the create field form
+     */
     if (status === 'idle' && fields.length === 0) {
       addField();
     }

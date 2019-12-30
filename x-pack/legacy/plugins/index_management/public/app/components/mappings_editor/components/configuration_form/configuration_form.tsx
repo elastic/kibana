@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, SerializerFunc } from '../../shared_imports';
@@ -82,6 +82,8 @@ const formDeserializer = (formData: { [key: string]: any }) => {
 };
 
 export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
+  const didMountRef = useRef(false);
+
   const { form } = useForm<MappingsConfiguration>({
     schema: configurationFormSchema,
     serializer: formSerializer,
@@ -98,8 +100,19 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, [form]);
 
   useEffect(() => {
+    if (didMountRef.current) {
+      // If the defaultValue has changed (it probably means that we have loaded a new JSON)
+      // we need to reset the form to update the fields values.
+      form.reset({ resetValues: true });
+    } else {
+      // Avoid reseting the form on component mount.
+      didMountRef.current = true;
+    }
+  }, [defaultValue]);
+
+  useEffect(() => {
     return () => {
-      // On unmount, we save in the state a snapshot of the current form data.
+      // On unmount => save in the state a snapshot of the current form data.
       dispatch({ type: 'configuration.save' });
     };
   }, []);

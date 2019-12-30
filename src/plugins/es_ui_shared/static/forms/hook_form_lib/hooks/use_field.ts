@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
@@ -42,8 +42,13 @@ export const useField = (
     deserializer = (value: unknown) => value,
   } = config;
 
-  const initialValue =
-    typeof defaultValue === 'function' ? deserializer(defaultValue()) : deserializer(defaultValue);
+  const initialValue = useMemo(
+    () =>
+      typeof defaultValue === 'function'
+        ? deserializer(defaultValue())
+        : deserializer(defaultValue),
+    [defaultValue]
+  );
 
   const [value, setStateValue] = useState(initialValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);

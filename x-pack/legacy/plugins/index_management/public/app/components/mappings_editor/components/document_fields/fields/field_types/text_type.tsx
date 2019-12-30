@@ -61,6 +61,9 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
       return minCharsValue !== defaultMinCharsValue || maxCharsValue !== defaultMaxCharsValue;
     }
+    case 'fielddata': {
+      return field.fielddata === true ? true : field.fielddata_frequency_filter !== undefined;
+    }
     default:
       return false;
   }
@@ -229,7 +232,7 @@ export const TextType = React.memo(({ field }: Props) => {
           defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
         />
 
-        <FieldDataParameter />
+        <FieldDataParameter defaultToggleValue={getDefaultToggleValue('fielddata', field.source)} />
 
         <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
