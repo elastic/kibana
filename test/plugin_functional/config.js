@@ -57,11 +57,12 @@ export default async function({ readConfigFile }) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+
+        // Required to load new platform plugins via `--plugin-path` flag.
+        '--env.name=development',
         ...plugins.map(
           pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
-        // Required to load new platform plugins via `--plugin-path` flag.
-        '--env.name=development',
       ],
     },
   };
