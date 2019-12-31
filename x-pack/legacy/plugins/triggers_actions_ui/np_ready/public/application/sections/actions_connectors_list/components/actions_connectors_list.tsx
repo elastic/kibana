@@ -150,6 +150,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   async function deleteSelectedItems() {
     await deleteItems(selectedItems);
+    setSelectedItems([]);
   }
 
   const actionsTableColumns = [
