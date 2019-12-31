@@ -104,7 +104,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
-        size: size ? size : LOG_ENTRIES_PAGE_SIZE,
+        size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
         track_total_hits: false,
         query: {
           bool: {
