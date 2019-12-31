@@ -20,8 +20,6 @@ import { convertDirectiveToRenderFn } from './doc_views_helpers';
 import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_views_types';
 import { Chrome } from '../../kibana_services';
 
-export { DocViewRenderProps, DocView, DocViewRenderFn } from './doc_views_types';
-
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
 
