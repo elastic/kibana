@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './json_editor';
-
-export { OnUpdateHandler } from './use_json';
+export { MetaFieldSection } from './meta_field_section';

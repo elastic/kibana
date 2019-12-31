@@ -7,7 +7,7 @@
 import React, { useRef, useCallback } from 'react';
 
 import { useDispatch } from '../../mappings_state';
-import { JsonEditor } from '../../../json_editor';
+import { JsonEditor } from '../../shared_imports';
 
 export interface Props {
   defaultValue: object;

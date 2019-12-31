@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { JsonEditor, OnUpdateHandler } from '../../../json_editor';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
 import { validateMappings, MappingsValidationError } from '../../lib';
 
 const MAX_ERRORS_TO_DISPLAY = 10;
@@ -130,12 +130,12 @@ const getErrorMessage = (error: MappingsValidationError) => {
 export const LoadMappingsProvider = ({ onJson, children }: Props) => {
   const [state, setState] = useState<State>({ isModalOpen: false });
   const [totalErrorsToDisplay, setTotalErrorsToDisplay] = useState<number>(MAX_ERRORS_TO_DISPLAY);
-  const jsonContent = useRef<Parameters<OnUpdateHandler>['0'] | undefined>();
+  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>();
   const view: ModalView =
     state.json !== undefined && state.errors !== undefined ? 'validationResult' : 'json';
   const i18nTexts = getTexts(view, state.errors?.length);
 
-  const onJsonUpdate: OnUpdateHandler = jsonUpdateData => {
+  const onJsonUpdate: OnJsonEditorUpdateHandler = jsonUpdateData => {
     jsonContent.current = jsonUpdateData;
   };
 
