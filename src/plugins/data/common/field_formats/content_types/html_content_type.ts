@@ -26,7 +26,8 @@ const getConvertFn = (
   format: IFieldFormat,
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
-  const fallbackHtml: HtmlContextTypeConvert = (value, field, hit) => {
+  const fallbackHtml: HtmlContextTypeConvert = (value, options = {}) => {
+    const { field, hit } = options;
     const formatted = escape(format.convert(value, 'text'));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
@@ -43,27 +44,23 @@ export const setup = (
 ): HtmlContextTypeConvert => {
   const convert = getConvertFn(format, htmlContextTypeConvert);
 
-  const recurse: HtmlContextTypeConvert = (value, field, hit, meta) => {
+  const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
       return asPrettyString(value);
     }
 
     if (!value || !isFunction(value.map)) {
-      return convert.call(format, value, field, hit, meta);
+      return convert.call(format, value, options);
     }
 
-    const subValues = value.map((v: any) => {
-      return recurse(v, field, hit, meta);
-    });
-    const useMultiLine = subValues.some((sub: string) => {
-      return sub.indexOf('\n') > -1;
-    });
+    const subValues = value.map((v: any) => recurse(v, options));
+    const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
 
     return subValues.join(',' + (useMultiLine ? '\n' : ' '));
   };
 
-  const wrap: HtmlContextTypeConvert = (value, field, hit, meta) => {
-    return `<span ng-non-bindable>${recurse(value, field, hit, meta)}</span>`;
+  const wrap: HtmlContextTypeConvert = (value, options) => {
+    return `<span ng-non-bindable>${recurse(value, options)}</span>`;
   };
 
   return wrap;

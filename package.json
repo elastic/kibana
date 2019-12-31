@@ -116,7 +116,7 @@
     "@elastic/charts": "^14.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "1.0.5",
-    "@elastic/eui": "17.1.2",
+    "@elastic/eui": "17.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
