@@ -76,10 +76,11 @@ export const results = {
     });
   },
 
-  fetchPartitionFieldsValues(criteriaFields, earliestMs, latestMs) {
+  fetchPartitionFieldsValues(searchTerm, criteriaFields, earliestMs, latestMs) {
     return http$(`${basePath}/results/partition_fields_values`, {
       method: 'POST',
       body: {
+        searchTerm,
         criteriaFields,
         earliestMs,
         latestMs,

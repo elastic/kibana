@@ -57,8 +57,8 @@ function getMaxAnomalyScore(callWithRequest, payload) {
 
 function getPartitionFieldsValues(callWithRequest, payload) {
   const rs = resultsServiceProvider(callWithRequest);
-  const { criteriaFields, earliestMs, latestMs } = payload;
-  return rs.getPartitionFieldsValues(criteriaFields, earliestMs, latestMs);
+  const { searchTerm, criteriaFields, earliestMs, latestMs } = payload;
+  return rs.getPartitionFieldsValues(searchTerm, criteriaFields, earliestMs, latestMs);
 }
 
 export function resultsServiceRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {

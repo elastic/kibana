@@ -534,9 +534,10 @@ export function getScheduledEventsByBucket(
 }
 
 export function fetchPartitionFieldsValues(
+  searchTerm: Record<string, string>,
   criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
   earliestMs: number,
   latestMs: number
 ) {
-  return ml.results.fetchPartitionFieldsValues(criteriaFields, earliestMs, latestMs);
+  return ml.results.fetchPartitionFieldsValues(searchTerm, criteriaFields, earliestMs, latestMs);
 }

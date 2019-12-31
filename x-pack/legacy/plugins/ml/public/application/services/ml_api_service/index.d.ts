@@ -125,6 +125,7 @@ declare interface Ml {
   results: {
     getMaxAnomalyScore: (jobIds: string[], earliestMs: number, latestMs: number) => Promise<any>;
     fetchPartitionFieldsValues: (
+      searchTerm: Record<string, string>,
       criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
       earliestMs: number,
       latestMs: number

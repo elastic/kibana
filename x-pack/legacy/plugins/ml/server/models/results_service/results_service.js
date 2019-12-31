@@ -404,12 +404,15 @@ export function resultsServiceProvider(callWithRequest) {
 
   /**
    * Gets the record of partition filed - values pairs.
-   * @param criteriaFields
-   * @param earliestMs
-   * @param latestMs
+   * @param {Object} searchTerm - object of wildcard queries for partition fields, e.g.
+   * @param {Object} criteriaFields - key - value pairs of the term field, e.g. { job_id: 'ml-job', detector_index: 0 }
+   * @param {number} earliestMs
+   * @param {number} latestMs
    * @returns {Promise<*>}
    */
-  async function getPartitionFieldsValues(criteriaFields, earliestMs, latestMs) {
+  async function getPartitionFieldsValues(searchTerm = {}, criteriaFields, earliestMs, latestMs) {
+    const { partitionField } = searchTerm;
+
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
@@ -453,21 +456,54 @@ export function resultsServiceProvider(callWithRequest) {
             },
           },
           partition_field_values: {
-            terms: {
-              size: 100,
-              field: 'partition_field_value',
+            filter: {
+              wildcard: {
+                partition_field_value: {
+                  value: partitionField ? `*${partitionField}*` : '*',
+                },
+              },
+            },
+            aggs: {
+              values: {
+                terms: {
+                  size: 100,
+                  field: 'partition_field_value',
+                },
+              },
             },
           },
           over_field_values: {
-            terms: {
-              size: 100,
-              field: 'over_field_value',
+            filter: {
+              wildcard: {
+                over_field_value: {
+                  value: '*dit*',
+                },
+              },
+            },
+            aggs: {
+              values: {
+                terms: {
+                  size: 100,
+                  field: 'over_field_value',
+                },
+              },
             },
           },
           by_field_values: {
-            terms: {
-              size: 100,
-              field: 'by_field_value',
+            filter: {
+              wildcard: {
+                by_field_value: {
+                  value: '*dit*',
+                },
+              },
+            },
+            aggs: {
+              values: {
+                terms: {
+                  size: 100,
+                  field: 'by_field_value',
+                },
+              },
             },
           },
         },
@@ -490,12 +526,12 @@ export function resultsServiceProvider(callWithRequest) {
     };
   }
 
-  function getFieldObject(fieldName, values, field) {
+  function getFieldObject(fieldName, fieldValues, field) {
     return fieldName.buckets.length > 0
       ? {
           [field]: {
             name: fieldName.buckets[0].key,
-            values: values.buckets.map(({ key }) => key),
+            values: fieldValues.values.buckets.map(({ key }) => key),
           },
         }
       : {};

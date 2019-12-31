@@ -362,6 +362,12 @@ export class TimeSeriesExplorer extends React.Component {
     });
   };
 
+  entityFieldSearchChanged = (entity, queryTerm) => {
+    this.loadEntityValues({
+      [entity.fieldType]: queryTerm,
+    });
+  };
+
   loadAnomaliesTableData = (earliestMs, latestMs) => {
     const { dateFormatTz } = this.props;
     const { selectedJob } = this.state;
@@ -421,9 +427,10 @@ export class TimeSeriesExplorer extends React.Component {
 
   /**
    * Loads available entity values.
-   * @param callback
+   * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
+   * @param callback - Callback to execute after component state update.
    */
-  loadEntityValues = async (callback = () => {}) => {
+  loadEntityValues = async (searchTerm = {}, callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
@@ -438,6 +445,7 @@ export class TimeSeriesExplorer extends React.Component {
       by_field: byField,
     } = await mlResultsService
       .fetchPartitionFieldsValues(
+        searchTerm,
         [
           {
             fieldName: 'job_id',
@@ -456,16 +464,18 @@ export class TimeSeriesExplorer extends React.Component {
     this.setState(
       {
         entities: entities.map(entity => {
+          const newEntity = { ...entity };
           if (partitionField?.name === entity.fieldName) {
-            entity.fieldValues = partitionField.values;
+            newEntity.fieldValues = partitionField.values;
           }
           if (overField?.name === entity.fieldName) {
-            entity.fieldValues = overField.values;
+            newEntity.fieldValues = overField.values;
           }
           if (byField?.name === entity.fieldName) {
-            entity.fieldValues = byField.values;
+            newEntity.fieldValues = byField.values;
           }
-          return entity;
+          console.log(newEntity, '___newEntity___');
+          return newEntity;
         }),
       },
       callback
@@ -795,11 +805,19 @@ export class TimeSeriesExplorer extends React.Component {
     const byFieldName = get(detector, 'by_field_name');
     if (partitionFieldName !== undefined) {
       const partitionFieldValue = get(entitiesState, partitionFieldName, '');
-      entities.push({ fieldName: partitionFieldName, fieldValue: partitionFieldValue });
+      entities.push({
+        fieldType: 'partitionField',
+        fieldName: partitionFieldName,
+        fieldValue: partitionFieldValue,
+      });
     }
     if (overFieldName !== undefined) {
       const overFieldValue = get(entitiesState, overFieldName, '');
-      entities.push({ fieldName: overFieldName, fieldValue: overFieldValue });
+      entities.push({
+        fieldType: 'overField',
+        fieldName: overFieldName,
+        fieldValue: overFieldValue,
+      });
     }
 
     // For jobs with by and over fields, don't add the 'by' field as this
@@ -809,7 +827,7 @@ export class TimeSeriesExplorer extends React.Component {
     // from filter for the anomaly records.
     if (byFieldName !== undefined && overFieldName === undefined) {
       const byFieldValue = get(entitiesState, byFieldName, '');
-      entities.push({ fieldName: byFieldName, fieldValue: byFieldValue });
+      entities.push({ fieldType: 'byField', fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
     this.updateCriteriaFields(detectorIndex, entities);
@@ -1337,6 +1355,7 @@ export class TimeSeriesExplorer extends React.Component {
                 <EntityControl
                   entity={entity}
                   entityFieldValueChanged={this.entityFieldValueChanged}
+                  onSearchChange={this.entityFieldSearchChanged}
                   forceSelection={forceSelection}
                   key={entityKey}
                 />
