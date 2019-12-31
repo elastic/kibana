@@ -34,9 +34,9 @@ const alertsClientParams = {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  alertsClientParams.createAPIKey.mockResolvedValue({ created: false });
+  alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   alertsClientParams.invalidateAPIKey.mockResolvedValue({
-    invalidated: true,
+    apiKeysEnabled: true,
     result: { error_count: 0 },
   });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
@@ -724,7 +724,7 @@ describe('create()', () => {
       async executor() {},
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      created: true,
+      apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -941,7 +941,7 @@ describe('enable()', () => {
       ownerId: null,
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      created: true,
+      apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
     });
 
@@ -1796,7 +1796,7 @@ describe('update()', () => {
       ],
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      created: true,
+      apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
     });
     savedObjectsClient.update.mockResolvedValueOnce({
@@ -2206,7 +2206,7 @@ describe('updateApiKey()', () => {
       references: [],
     });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      created: true,
+      apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
     });
 

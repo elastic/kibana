@@ -30,24 +30,13 @@ import {
 } from '../../../../plugins/security/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
 
-interface FailedCreateAPIKeyResult {
-  created: false;
-}
-interface SuccessCreateAPIKeyResult {
-  created: true;
-  result: SecurityPluginCreateAPIKeyResult;
-}
-export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyResult;
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
-
-interface IInvalidateAPIKeyFailedResult {
-  invalidated: false;
-}
-interface IInvalidateAPIKeySuccessResult {
-  invalidated: true;
-  result: SecurityPluginInvalidateAPIKeyResult;
-}
-export type InvalidateAPIKeyResult = IInvalidateAPIKeyFailedResult | IInvalidateAPIKeySuccessResult;
+export type CreateAPIKeyResult =
+  | { apiKeysEnabled: false }
+  | { apiKeysEnabled: true; result: SecurityPluginCreateAPIKeyResult };
+export type InvalidateAPIKeyResult =
+  | { apiKeysEnabled: false }
+  | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
 
 interface ConstructorOptions {
   logger: Logger;
@@ -297,7 +286,7 @@ export class AlertsClient {
     apiKey: CreateAPIKeyResult,
     username: string | null
   ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
-    return apiKey.created
+    return apiKey.apiKeysEnabled
       ? {
           apiKeyOwner: username,
           apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
@@ -340,7 +329,7 @@ export class AlertsClient {
       .toString()
       .split(':')[0];
     const response = await this.invalidateAPIKey({ id: apiKeyId });
-    if (response.invalidated === true && response.result.error_count > 0) {
+    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
       this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
     }
   }

@@ -62,23 +62,23 @@ export class AlertsClientFactory {
       },
       async createAPIKey() {
         if (!securityPluginSetup) {
-          return { created: false };
+          return { apiKeysEnabled: false };
         }
         const createAPIKeyResult = await securityPluginSetup.authc.createAPIKey(request, {
           name: `source: alerting, generated uuid: "${uuid.v4()}"`,
           role_descriptors: {},
         });
         if (!createAPIKeyResult) {
-          return { created: false };
+          return { apiKeysEnabled: false };
         }
         return {
-          created: true,
+          apiKeysEnabled: true,
           result: createAPIKeyResult,
         };
       },
       async invalidateAPIKey(params: InvalidateAPIKeyParams) {
         if (!securityPluginSetup) {
-          return { invalidated: false };
+          return { apiKeysEnabled: false };
         }
         const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKey(
           request,
@@ -86,10 +86,10 @@ export class AlertsClientFactory {
         );
         // Null when Elasticsearch security is disabled
         if (!invalidateAPIKeyResult) {
-          return { invalidated: false };
+          return { apiKeysEnabled: false };
         }
         return {
-          invalidated: true,
+          apiKeysEnabled: true,
           result: invalidateAPIKeyResult,
         };
       },

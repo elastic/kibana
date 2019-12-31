@@ -91,23 +91,23 @@ test('getUserName() returns a name when security is enabled', async () => {
   expect(userNameResult).toEqual('bob');
 });
 
-test('createAPIKey() returns { created: false } when security is disabled', async () => {
+test('createAPIKey() returns { apiKeysEnabled: false } when security is disabled', async () => {
   const factory = new AlertsClientFactory(alertsClientFactoryParams);
   factory.create(KibanaRequest.from(fakeRequest), fakeRequest);
   const constructorCall = jest.requireMock('../alerts_client').AlertsClient.mock.calls[0][0];
 
   const createAPIKeyResult = await constructorCall.createAPIKey();
-  expect(createAPIKeyResult).toEqual({ created: false });
+  expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
 });
 
-test('createAPIKey() returns { created: false } when security is enabled but ES security is disabled', async () => {
+test('createAPIKey() returns { apiKeysEnabled: false } when security is enabled but ES security is disabled', async () => {
   const factory = new AlertsClientFactory(alertsClientFactoryParams);
   factory.create(KibanaRequest.from(fakeRequest), fakeRequest);
   const constructorCall = jest.requireMock('../alerts_client').AlertsClient.mock.calls[0][0];
 
   securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce(null);
   const createAPIKeyResult = await constructorCall.createAPIKey();
-  expect(createAPIKeyResult).toEqual({ created: false });
+  expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
 });
 
 test('createAPIKey() returns an API key when security is enabled', async () => {
@@ -120,7 +120,10 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
 
   securityPluginSetup.authc.createAPIKey.mockResolvedValueOnce({ api_key: '123', id: 'abc' });
   const createAPIKeyResult = await constructorCall.createAPIKey();
-  expect(createAPIKeyResult).toEqual({ created: true, result: { api_key: '123', id: 'abc' } });
+  expect(createAPIKeyResult).toEqual({
+    apiKeysEnabled: true,
+    result: { api_key: '123', id: 'abc' },
+  });
 });
 
 test('createAPIKey() throws when security plugin createAPIKey throws an error', async () => {
