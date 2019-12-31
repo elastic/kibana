@@ -7,8 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useState } from 'react';
-// @ts-ignore: EuiSearchBar not exported in TypeScript
-import { EuiBasicTable, EuiButton, EuiFilterButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
@@ -226,24 +233,38 @@ export const AlertsList: React.FunctionComponent = () => {
       <Fragment>
         <EuiSpacer size="m" />
         <AlertsContextProvider value={{ alertFlyoutVisible, setAlertFlyoutVisibility }}>
-          <EuiSearchBar
-            onChange={({ queryText }: { queryText: string }) => setSearchText(queryText)}
-            toolsLeft={
-              selectedIds.length === 0 || !canDelete
-                ? []
-                : [
-                    <BulkActionPopover
-                      selectedItems={pickFromData(data, selectedIds)}
-                      onPerformingAction={() => setIsPerformingAction(true)}
-                      onActionPerformed={() => {
-                        loadAlertsData();
-                        setIsPerformingAction(false);
-                      }}
-                    />,
-                  ]
-            }
-            toolsRight={toolsRight}
-          />
+          <EuiFlexGroup>
+            {selectedIds.length > 0 && canDelete && (
+              <EuiFlexItem grow={false}>
+                <BulkActionPopover
+                  selectedItems={pickFromData(data, selectedIds)}
+                  onPerformingAction={() => setIsPerformingAction(true)}
+                  onActionPerformed={() => {
+                    loadAlertsData();
+                    setIsPerformingAction(false);
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem>
+              <EuiFieldText
+                fullWidth
+                prepend={<EuiIcon type="search" />}
+                onChange={e => setSearchText(e.target.value)}
+                placeholder={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
+                  { defaultMessage: 'Search...' }
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup>
+                {toolsRight.map(tool => (
+                  <EuiFlexItem grow={false}>{tool}</EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           {/* Large to remain consistent with ActionsList table spacing */}
           <EuiSpacer size="l" />
