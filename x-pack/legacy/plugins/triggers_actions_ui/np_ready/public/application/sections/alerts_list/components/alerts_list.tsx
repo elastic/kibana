@@ -29,6 +29,8 @@ import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 
+const ENTER_KEY = 13;
+
 export const AlertsList: React.FunctionComponent = () => {
   const {
     http,
@@ -50,7 +52,8 @@ export const AlertsList: React.FunctionComponent = () => {
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
-  const [searchText, setSearchText] = useState<string | undefined>(undefined);
+  const [searchText, setSearchText] = useState<string | undefined>();
+  const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
@@ -249,8 +252,14 @@ export const AlertsList: React.FunctionComponent = () => {
             <EuiFlexItem>
               <EuiFieldText
                 fullWidth
+                data-test-subj="alertSearchField"
                 prepend={<EuiIcon type="search" />}
-                onChange={e => setSearchText(e.target.value)}
+                onChange={e => setInputText(e.target.value)}
+                onKeyUp={e => {
+                  if (e.keyCode === ENTER_KEY) {
+                    setSearchText(inputText);
+                  }
+                }}
                 placeholder={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
                   { defaultMessage: 'Search...' }

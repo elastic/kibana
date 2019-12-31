@@ -33,7 +33,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       );
     },
     async searchAlerts(searchText: string) {
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
+      const searchBox = await testSubjects.find('alertSearchField');
       await searchBox.click();
       await searchBox.clearValue();
       await searchBox.type(searchText);
