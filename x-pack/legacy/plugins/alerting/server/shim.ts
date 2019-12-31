@@ -121,7 +121,7 @@ export function shim(
 
   const pluginsSetup: AlertingPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
-    task_manager: server.plugins.task_manager,
+    task_manager: newPlatform.setup.plugins.kibanaTaskManager as TaskManagerSetupContract,
     actions: server.plugins.actions.setup,
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
@@ -137,7 +137,7 @@ export function shim(
     spaces: () => server.plugins.spaces,
     encryptedSavedObjects: newPlatform.start.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
-    task_manager: server.plugins.task_manager,
+    task_manager: newPlatform.start.plugins.kibanaTaskManager as TaskManagerStartContract,
   };
 
   return {

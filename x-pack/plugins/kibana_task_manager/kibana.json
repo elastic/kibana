@@ -1,0 +1,8 @@
+{
+  "id": "kibanaTaskManager",
+  "server": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "task_manager"],
+  "ui": false
+}

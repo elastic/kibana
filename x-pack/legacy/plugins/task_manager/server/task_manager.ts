@@ -10,8 +10,10 @@ import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
+
 import { SavedObjectsClientContract, SavedObjectsSerializer } from '../../../../../src/core/server';
 import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
+import { TaskManagerConfig } from '../../../../plugins/kibana_task_manager/server';
 
 import { Logger } from './types';
 import {
@@ -56,10 +58,11 @@ const VERSION_CONFLICT_STATUS = 409;
 
 export interface TaskManagerOpts {
   logger: Logger;
-  config: any;
+  config: TaskManagerConfig;
   callWithInternalUser: any;
   savedObjectsRepository: SavedObjectsClientContract;
   serializer: SavedObjectsSerializer;
+  taskManagerId: string;
 }
 
 interface RunNowResult {
@@ -102,6 +105,8 @@ export class TaskManager {
     beforeMarkRunning: async (runOpts: RunContext) => runOpts,
   };
 
+  private shouldAllowRegistrationAfterStart: boolean;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -109,8 +114,9 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.logger = opts.logger;
+    this.shouldAllowRegistrationAfterStart = true;
 
-    const taskManagerId = opts.config.get('server.uuid');
+    const { taskManagerId } = opts;
     if (!taskManagerId) {
       this.logger.error(
         `TaskManager is unable to start as there the Kibana UUID is invalid (value of the "server.uuid" configuration is ${taskManagerId})`
@@ -124,8 +130,8 @@ export class TaskManager {
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
       callCluster: opts.callWithInternalUser,
-      index: opts.config.get('xpack.task_manager.index'),
-      maxAttempts: opts.config.get('xpack.task_manager.max_attempts'),
+      index: opts.config.index,
+      maxAttempts: opts.config.max_attempts,
       definitions: this.definitions,
       taskManagerId: `kibana:${taskManagerId}`,
     });
@@ -134,12 +140,12 @@ export class TaskManager {
 
     this.pool = new TaskPool({
       logger: this.logger,
-      maxWorkers: opts.config.get('xpack.task_manager.max_workers'),
+      maxWorkers: opts.config.max_workers,
     });
 
     this.poller$ = createTaskPoller<string, FillPoolResult>({
-      pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
-      bufferCapacity: opts.config.get('xpack.task_manager.request_capacity'),
+      pollInterval: opts.config.poll_interval,
+      bufferCapacity: opts.config.request_capacity,
       getCapacity: () => this.pool.availableWorkers,
       pollRequests$: this.claimRequests$,
       work: this.pollForWork,
@@ -345,7 +351,7 @@ export class TaskManager {
    * @returns void
    */
   private assertUninitialized(message: string) {
-    if (this.isStarted) {
+    if (!this.shouldAllowRegistrationAfterStart && this.isStarted) {
       throw new Error(`Cannot ${message} after the task manager is initialized!`);
     }
   }

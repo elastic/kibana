@@ -23,7 +23,10 @@ export default function TaskManagerPerformanceAPI(kibana) {
     },
 
     init(server) {
-      const taskManager = server.plugins.task_manager;
+      const taskManager = {
+        ...server.newPlatform.setup.plugins.kibanaTaskManager,
+        ...server.newPlatform.start.plugins.kibanaTaskManager,
+      };
       const performanceState = resetPerfState({});
 
       let lastFlush = new Date();

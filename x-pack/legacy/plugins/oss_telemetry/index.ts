@@ -29,7 +29,7 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
       } as PluginInitializerContext);
       plugin.setup(server.newPlatform.setup.core, {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
-        taskManager: server.plugins.task_manager,
+        taskManager: server.newPlatform.setup.plugins.kibanaTaskManager,
         __LEGACY: {
           config: server.config(),
           xpackMainStatus: ((server.plugins.xpack_main as unknown) as { status: any }).status

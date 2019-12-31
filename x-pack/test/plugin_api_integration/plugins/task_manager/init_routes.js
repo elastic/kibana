@@ -23,9 +23,7 @@ const taskManagerQuery = {
   },
 };
 
-export function initRoutes(server, taskTestingEvents) {
-  const taskManager = server.plugins.task_manager;
-
+export function initRoutes(server, taskManager, taskTestingEvents) {
   server.route({
     path: '/api/sample_tasks/schedule',
     method: 'POST',

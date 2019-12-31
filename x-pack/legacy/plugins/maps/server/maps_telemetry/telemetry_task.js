@@ -11,7 +11,7 @@ const TELEMETRY_TASK_TYPE = 'maps_telemetry';
 export const TASK_ID = `Maps-${TELEMETRY_TASK_TYPE}`;
 
 export function scheduleTask(server) {
-  const taskManager = server.plugins.task_manager;
+  const taskManager = server.newPlatform.start.plugins.kibanaTaskManager;
 
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);
@@ -42,7 +42,10 @@ export function scheduleTask(server) {
 }
 
 export function registerMapsTelemetryTask(server) {
-  const taskManager = server.plugins.task_manager;
+  const taskManager = {
+    ...server.newPlatform.setup.plugins.kibanaTaskManager,
+    ...server.newPlatform.start.plugins.kibanaTaskManager,
+  };
 
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);

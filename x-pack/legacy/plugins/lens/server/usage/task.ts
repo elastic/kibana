@@ -14,9 +14,10 @@ import {
   SearchResponse,
   DeleteDocumentByQueryResponse,
 } from 'elasticsearch';
+import { TaskManagerPluginStartContract } from '../../../../../plugins/kibana_task_manager/server';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { RunContext } from '../../../task_manager/server';
+import { RunContext, TaskManager } from '../../../task_manager/server';
 import { getVisualizationCounts } from './visualization_counts';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
@@ -45,7 +46,10 @@ export function initializeLensTelemetry(core: CoreSetup, server: Server) {
 }
 
 function registerLensTelemetryTask(core: CoreSetup, server: Server) {
-  const taskManager = server.plugins.task_manager;
+  const taskManager = {
+    ...server.newPlatform.setup.plugins.kibanaTaskManager,
+    ...server.newPlatform.start.plugins.kibanaTaskManager,
+  } as TaskManager;
 
   if (!taskManager) {
     server.log(['debug', 'telemetry'], `Task manager is not available`);
@@ -63,7 +67,8 @@ function registerLensTelemetryTask(core: CoreSetup, server: Server) {
 }
 
 function scheduleTasks(server: Server) {
-  const taskManager = server.plugins.task_manager;
+  const taskManager = server.newPlatform.start.plugins
+    .kibanaTaskManager as TaskManagerPluginStartContract;
   const { kbnServer } = (server.plugins.xpack_main as XPackMainPlugin & {
     status: { plugin: { kbnServer: KbnServer } };
   }).status.plugin;

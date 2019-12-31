@@ -6,12 +6,15 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { Plugin, PluginSetupContract } from './plugin';
+import { Plugin, PluginContract } from './plugin';
 import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../../src/core/server';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
+import { TaskManagerPluginSetupContract } from '../../../../plugins/kibana_task_manager/server';
+export { Middleware } from './lib/middleware';
+export { TaskDictionary, TaskDefinition } from './task';
 
-export { PluginSetupContract as TaskManager };
+export { PluginContract as TaskManager };
 export {
   TaskInstance,
   ConcreteTaskInstance,
@@ -55,32 +58,29 @@ export function taskManager(kibana: any) {
           .default(10),
       }).default();
     },
-    init(server: Legacy.Server) {
-      const plugin = new Plugin({
-        logger: {
-          get: () => ({
-            info: (message: string) => server.log(['info', 'task_manager'], message),
-            debug: (message: string) => server.log(['debug', 'task_manager'], message),
-            warn: (message: string) => server.log(['warn', 'task_manager'], message),
-            error: (message: string) => server.log(['error', 'task_manager'], message),
-          }),
-        },
-      });
+    async init(server: Legacy.Server) {
+      const legacyPlugin = new Plugin();
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
-      const setupContract = plugin.setup(
-        {},
-        {
+
+      const {
+        savedObjects,
+        newPlatform: {
+          setup: {
+            plugins: { kibanaTaskManager },
+          },
+        },
+        plugins: { elasticsearch },
+      } = server;
+
+      await (kibanaTaskManager as TaskManagerPluginSetupContract).registerLegacyAPI({
+        legacyPlugin,
+        legacyDependencies: {
           serializer,
-          config: server.config(),
-          elasticsearch: server.plugins.elasticsearch,
-          savedObjects: server.savedObjects,
-        }
-      );
-      this.kbnServer.afterPluginsInit(() => {
-        plugin.start();
+          savedObjects,
+          elasticsearch,
+        },
       });
-      server.expose(setupContract);
     },
     uiExports: {
       mappings,
