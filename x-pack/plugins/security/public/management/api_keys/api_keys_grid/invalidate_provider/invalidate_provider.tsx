@@ -6,14 +6,16 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { ApiKeyToInvalidate } from '../../../../../../common/model';
-import { ApiKeysApi } from '../../../../../lib/api_keys_api';
+import { NotificationsStart } from 'src/core/public';
+import { ApiKeyToInvalidate } from '../../../../../common/model';
+import { APIKeysAPIClient } from '../../api_keys_api_client';
 
 interface Props {
   isAdmin: boolean;
   children: (invalidateApiKeys: InvalidateApiKeys) => React.ReactElement;
+  notifications: NotificationsStart;
+  apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
 }
 
 export type InvalidateApiKeys = (
@@ -23,7 +25,12 @@ export type InvalidateApiKeys = (
 
 type OnSuccessCallback = (apiKeysInvalidated: ApiKeyToInvalidate[]) => void;
 
-export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, children }) => {
+export const InvalidateProvider: React.FunctionComponent<Props> = ({
+  isAdmin,
+  children,
+  notifications,
+  apiKeysAPIClient,
+}) => {
   const [apiKeys, setApiKeys] = useState<ApiKeyToInvalidate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
@@ -48,7 +55,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
     let errors;
 
     try {
-      result = await ApiKeysApi.invalidateApiKeys(apiKeys, isAdmin);
+      result = await apiKeysAPIClient.invalidateApiKeys(apiKeys, isAdmin);
     } catch (e) {
       error = e;
     }
@@ -77,7 +84,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
                 values: { name: itemsInvalidated[0].name },
               }
             );
-        toastNotifications.addSuccess(successMessage);
+        notifications.toasts.addSuccess(successMessage);
         if (onSuccessCallback.current) {
           onSuccessCallback.current([...itemsInvalidated]);
         }
@@ -106,7 +113,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({ isAdmin, ch
               values: { name: (errors && errors[0].name) || apiKeys[0].name },
             }
           );
-      toastNotifications.addDanger(errorMessage);
+      notifications.toasts.addDanger(errorMessage);
     }
   };
 

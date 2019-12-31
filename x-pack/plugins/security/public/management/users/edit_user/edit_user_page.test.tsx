@@ -8,13 +8,13 @@ import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EditUserPage } from './edit_user_page';
 import React from 'react';
-import { securityMock } from '../../../../../../../../plugins/security/public/mocks';
-import { UserAPIClient } from '../../../../lib/api';
-import { User, Role } from '../../../../../common/model';
+import { User, Role } from '../../../../common/model';
 import { ReactWrapper } from 'enzyme';
-import { mockAuthenticatedUser } from '../../../../../../../../plugins/security/common/model/authenticated_user.mock';
 
-jest.mock('ui/kfetch');
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../../mocks';
+import { userAPIClientMock } from '../index.mock';
 
 const createUser = (username: string) => {
   const user: User = {
@@ -35,13 +35,11 @@ const createUser = (username: string) => {
 };
 
 const buildClient = () => {
-  const apiClient = new UserAPIClient();
+  const apiClientMock = userAPIClientMock.create();
 
-  apiClient.getUser = jest
-    .fn()
-    .mockImplementation(async (username: string) => createUser(username));
+  apiClientMock.getUser.mockImplementation(async (username: string) => createUser(username));
 
-  apiClient.getRoles = jest.fn().mockImplementation(() => {
+  apiClientMock.getRoles.mockImplementation(() => {
     return Promise.resolve([
       {
         name: 'role 1',
@@ -64,7 +62,7 @@ const buildClient = () => {
     ] as Role[]);
   });
 
-  return apiClient;
+  return apiClientMock;
 };
 
 function buildSecuritySetup() {
@@ -88,12 +86,11 @@ describe('EditUserPage', () => {
     const apiClient = buildClient();
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
-      <EditUserPage.WrappedComponent
+      <EditUserPage
         username={'reserved_user'}
         apiClient={apiClient}
-        securitySetup={securitySetup}
-        changeUrl={path => path}
-        intl={null as any}
+        authc={securitySetup.authc}
+        notifications={coreMock.createStart().notifications}
       />
     );
 
@@ -109,12 +106,11 @@ describe('EditUserPage', () => {
     const apiClient = buildClient();
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
-      <EditUserPage.WrappedComponent
+      <EditUserPage
         username={''}
         apiClient={apiClient}
-        securitySetup={securitySetup}
-        changeUrl={path => path}
-        intl={null as any}
+        authc={securitySetup.authc}
+        notifications={coreMock.createStart().notifications}
       />
     );
 
@@ -130,12 +126,11 @@ describe('EditUserPage', () => {
     const apiClient = buildClient();
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
-      <EditUserPage.WrappedComponent
+      <EditUserPage
         username={'existing_user'}
         apiClient={apiClient}
-        securitySetup={securitySetup}
-        changeUrl={path => path}
-        intl={null as any}
+        authc={securitySetup.authc}
+        notifications={coreMock.createStart().notifications}
       />
     );
 

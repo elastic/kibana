@@ -19,20 +19,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { toastNotifications } from 'ui/notify';
-import { RoleMapping } from '../../../../../../common/model';
-import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
+import { NotificationsStart } from 'src/core/public';
+import { RoleMapping } from '../../../../common/model';
 import { RuleEditorPanel } from './rule_editor_panel';
 import {
   NoCompatibleRealms,
   PermissionDenied,
   DeleteProvider,
   SectionLoading,
-} from '../../components';
-import { ROLE_MAPPINGS_PATH } from '../../../management_urls';
-import { validateRoleMappingForSave } from '../services/role_mapping_validation';
+} from '../components';
+import { RolesAPIClient } from '../../roles';
+import { ROLE_MAPPINGS_PATH } from '../../management_urls';
+import { validateRoleMappingForSave } from './services/role_mapping_validation';
 import { MappingInfoPanel } from './mapping_info_panel';
-import { documentationLinks } from '../../services/documentation_links';
+import { DocumentationLinksService } from '../documentation_links';
+import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 
 interface State {
   loadState: 'loading' | 'permissionDenied' | 'ready' | 'saveInProgress';
@@ -50,7 +51,10 @@ interface State {
 
 interface Props {
   name?: string;
-  roleMappingsAPI: RoleMappingsAPI;
+  roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  notifications: NotificationsStart;
+  docLinks: DocumentationLinksService;
 }
 
 export class EditRoleMappingPage extends Component<Props, State> {
@@ -101,6 +105,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
             validateForm={this.state.validateForm}
             canUseInlineScripts={this.state.canUseInlineScripts}
             canUseStoredScripts={this.state.canUseStoredScripts}
+            rolesAPIClient={this.props.rolesAPIClient}
+            docLinks={this.props.docLinks}
           />
           <EuiSpacer />
           <RuleEditorPanel
@@ -115,6 +121,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
                 },
               })
             }
+            docLinks={this.props.docLinks}
           />
           <EuiSpacer />
           {this.getFormButtons()}
@@ -149,7 +156,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               values={{
                 learnMoreLink: (
                   <EuiLink
-                    href={documentationLinks.getRoleMappingDocUrl()}
+                    href={this.props.docLinks.getRoleMappingDocUrl()}
                     external={true}
                     target="_blank"
                   >
@@ -166,7 +173,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         {!this.state.hasCompatibleRealms && (
           <>
             <EuiSpacer size="s" />
-            <NoCompatibleRealms />
+            <NoCompatibleRealms docLinks={this.props.docLinks} />
           </>
         )}
       </Fragment>
@@ -201,7 +208,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
         <EuiFlexItem grow={true} />
         {this.editingExistingRoleMapping() && (
           <EuiFlexItem grow={false}>
-            <DeleteProvider roleMappingsAPI={this.props.roleMappingsAPI}>
+            <DeleteProvider
+              roleMappingsAPI={this.props.roleMappingsAPI}
+              notifications={this.props.notifications}
+            >
               {deleteRoleMappingsPrompt => {
                 return (
                   <EuiButtonEmpty
@@ -252,7 +262,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     this.props.roleMappingsAPI
       .saveRoleMapping(this.state.roleMapping)
       .then(() => {
-        toastNotifications.addSuccess({
+        this.props.notifications.toasts.addSuccess({
           title: i18n.translate('xpack.security.management.editRoleMapping.saveSuccess', {
             defaultMessage: `Saved role mapping '{roleMappingName}'`,
             values: {
@@ -264,7 +274,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         this.backToRoleMappingsList();
       })
       .catch(e => {
-        toastNotifications.addError(e, {
+        this.props.notifications.toasts.addError(e, {
           title: i18n.translate('xpack.security.management.editRoleMapping.saveError', {
             defaultMessage: `Error saving role mapping`,
           }),
@@ -312,7 +322,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         roleMapping,
       });
     } catch (e) {
-      toastNotifications.addDanger({
+      this.props.notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.security.management.editRoleMapping.table.fetchingRoleMappingsErrorMessage',
           {

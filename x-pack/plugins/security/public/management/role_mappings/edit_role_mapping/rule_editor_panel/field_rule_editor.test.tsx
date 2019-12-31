@@ -7,7 +7,7 @@
 import React from 'react';
 import { FieldRuleEditor } from './field_rule_editor';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { FieldRule } from '../../../model';
+import { FieldRule } from '../../model';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { ReactWrapper } from 'enzyme';
 

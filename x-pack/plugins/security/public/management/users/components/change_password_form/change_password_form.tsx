@@ -5,10 +5,7 @@
  */
 import {
   EuiButton,
-  // @ts-ignore
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,15 +15,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
-import { toastNotifications } from 'ui/notify';
-import { User } from '../../../../common/model';
-import { UserAPIClient } from '../../../lib/api';
+import { NotificationsStart } from 'src/core/public';
+import { User } from '../../../../../common/model';
+import { UserAPIClient } from '../..';
 
 interface Props {
   user: User;
   isUserChangingOwnPassword: boolean;
   onChangePassword?: () => void;
-  apiClient: UserAPIClient;
+  apiClient: PublicMethodsOf<UserAPIClient>;
+  notifications: NotificationsStart;
 }
 
 interface State {
@@ -294,7 +292,7 @@ export class ChangePasswordForm extends Component<Props, State> {
   };
 
   private handleChangePasswordSuccess = () => {
-    toastNotifications.addSuccess({
+    this.props.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.security.account.changePasswordSuccess', {
         defaultMessage: 'Your password has been changed.',
       }),
@@ -317,7 +315,7 @@ export class ChangePasswordForm extends Component<Props, State> {
     if (error.body && error.body.statusCode === 403) {
       this.setState({ currentPasswordError: true });
     } else {
-      toastNotifications.addDanger(
+      this.props.notifications.toasts.addDanger(
         i18n.translate('xpack.security.management.users.editUser.settingPasswordErrorMessage', {
           defaultMessage: 'Error setting password: {message}',
           values: { message: _.get(error, 'body.message') },

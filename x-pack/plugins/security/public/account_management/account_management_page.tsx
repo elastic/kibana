@@ -5,20 +5,24 @@
  */
 import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
-import { getUserDisplayName, AuthenticatedUser } from '../../../../common/model';
+import { NotificationsStart } from 'src/core/public';
+import { getUserDisplayName, AuthenticatedUser } from '../../common/model';
+import { AuthenticationServiceSetup } from '../authentication';
 import { ChangePassword } from './change_password';
+import { UserAPIClient } from '../management';
 import { PersonalInfo } from './personal_info';
 
 interface Props {
-  securitySetup: SecurityPluginSetup;
+  authc: AuthenticationServiceSetup;
+  apiClient: PublicMethodsOf<UserAPIClient>;
+  notifications: NotificationsStart;
 }
 
-export const AccountManagementPage = (props: Props) => {
+export const AccountManagementPage = ({ apiClient, authc, notifications }: Props) => {
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   useEffect(() => {
-    props.securitySetup.authc.getCurrentUser().then(setCurrentUser);
-  }, [props]);
+    authc.getCurrentUser().then(setCurrentUser);
+  }, [authc]);
 
   if (!currentUser) {
     return null;
@@ -36,7 +40,7 @@ export const AccountManagementPage = (props: Props) => {
 
           <PersonalInfo user={currentUser} />
 
-          <ChangePassword user={currentUser} />
+          <ChangePassword user={currentUser} apiClient={apiClient} notifications={notifications} />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

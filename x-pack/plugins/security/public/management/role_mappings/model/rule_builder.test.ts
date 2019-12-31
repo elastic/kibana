@@ -5,7 +5,7 @@
  */
 
 import { generateRulesFromRaw, FieldRule } from '.';
-import { RoleMapping } from '../../../../../common/model';
+import { RoleMapping } from '../../../../common/model';
 import { RuleBuilderError } from './rule_builder_error';
 
 describe('generateRulesFromRaw', () => {

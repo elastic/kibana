@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import { FeaturesPrivileges, KibanaPrivileges, RoleKibanaPrivilege } from '../../../common/model';
-import { areActionsFullyCovered } from '../../../../../../plugins/security/common/privilege_calculator_utils';
-import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
-import { isGlobalPrivilegeDefinition } from '../privilege_utils';
+import {
+  FeaturesPrivileges,
+  KibanaPrivileges,
+  RoleKibanaPrivilege,
+} from '../../../../../../../common/model';
+import { areActionsFullyCovered } from '../../../../../../../common/privilege_calculator_utils';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import {
   PRIVILEGE_SOURCE,
   PrivilegeExplanation,

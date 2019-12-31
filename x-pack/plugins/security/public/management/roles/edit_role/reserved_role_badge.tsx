@@ -8,8 +8,7 @@ import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Role } from '../../../../../common/model';
-import { isReservedRole } from '../../../../lib/role_utils';
+import { Role, isReservedRole } from '../../../../common/model';
 
 interface Props {
   role: Role;

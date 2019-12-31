@@ -7,12 +7,13 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { RoleMapping, Role } from '../../../../../../../common/model';
-import { RolesApi } from '../../../../../../lib/roles_api';
+import { RoleMapping, Role } from '../../../../../common/model';
+import { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
 
 interface Props {
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMapping: RoleMapping;
   canUseInlineScripts: boolean;
   canUseStoredScripts: boolean;
@@ -32,7 +33,7 @@ export class RoleSelector extends React.Component<Props, State> {
   }
 
   public async componentDidMount() {
-    const roles = await RolesApi.getRoles();
+    const roles = await this.props.rolesAPIClient.getRoles();
     this.setState({ roles });
   }
 

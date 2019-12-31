@@ -5,16 +5,21 @@
  */
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ConfirmDeleteUsers } from './confirm_delete';
+import { ConfirmDeleteUsers } from './confirm_delete_users';
 import React from 'react';
-import { UserAPIClient } from '../../../lib/api';
 
-jest.mock('ui/kfetch');
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { userAPIClientMock } from '../../index.mock';
 
 describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {
     const wrapper = mountWithIntl(
-      <ConfirmDeleteUsers apiClient={null as any} usersToDelete={['foo']} onCancel={jest.fn()} />
+      <ConfirmDeleteUsers
+        apiClient={userAPIClientMock.create()}
+        notifications={coreMock.createStart().notifications}
+        usersToDelete={['foo']}
+        onCancel={jest.fn()}
+      />
     );
 
     expect(wrapper.find('EuiModalHeaderTitle').text()).toMatchInlineSnapshot(`"Delete user foo"`);
@@ -23,7 +28,8 @@ describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a multiple users', () => {
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
-        apiClient={null as any}
+        apiClient={userAPIClientMock.create()}
+        notifications={coreMock.createStart().notifications}
         usersToDelete={['foo', 'bar', 'baz']}
         onCancel={jest.fn()}
       />
@@ -35,7 +41,12 @@ describe('ConfirmDeleteUsers', () => {
   it('fires onCancel when the operation is cancelled', () => {
     const onCancel = jest.fn();
     const wrapper = mountWithIntl(
-      <ConfirmDeleteUsers apiClient={null as any} usersToDelete={['foo']} onCancel={onCancel} />
+      <ConfirmDeleteUsers
+        apiClient={userAPIClientMock.create()}
+        notifications={coreMock.createStart().notifications}
+        usersToDelete={['foo']}
+        onCancel={onCancel}
+      />
     );
 
     expect(onCancel).toBeCalledTimes(0);
@@ -47,50 +58,48 @@ describe('ConfirmDeleteUsers', () => {
 
   it('deletes the requested users when confirmed', () => {
     const onCancel = jest.fn();
-    const deleteUser = jest.fn();
-
-    const apiClient = new UserAPIClient();
-    apiClient.deleteUser = deleteUser;
+    const apiClientMock = userAPIClientMock.create();
 
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
         usersToDelete={['foo', 'bar']}
-        apiClient={apiClient}
+        apiClient={apiClientMock}
+        notifications={coreMock.createStart().notifications}
         onCancel={onCancel}
       />
     );
 
     wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
-    expect(deleteUser).toBeCalledTimes(2);
-    expect(deleteUser).toBeCalledWith('foo');
-    expect(deleteUser).toBeCalledWith('bar');
+    expect(apiClientMock.deleteUser).toBeCalledTimes(2);
+    expect(apiClientMock.deleteUser).toBeCalledWith('foo');
+    expect(apiClientMock.deleteUser).toBeCalledWith('bar');
   });
 
   it('attempts to delete all users even if some fail', () => {
     const onCancel = jest.fn();
-    const deleteUser = jest.fn().mockImplementation(user => {
+
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.deleteUser.mockImplementation(user => {
       if (user === 'foo') {
         return Promise.reject('something terrible happened');
       }
       return Promise.resolve();
     });
 
-    const apiClient = new UserAPIClient();
-    apiClient.deleteUser = deleteUser;
-
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
         usersToDelete={['foo', 'bar']}
-        apiClient={apiClient}
+        apiClient={apiClientMock}
+        notifications={coreMock.createStart().notifications}
         onCancel={onCancel}
       />
     );
 
     wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
-    expect(deleteUser).toBeCalledTimes(2);
-    expect(deleteUser).toBeCalledWith('foo');
-    expect(deleteUser).toBeCalledWith('bar');
+    expect(apiClientMock.deleteUser).toBeCalledTimes(2);
+    expect(apiClientMock.deleteUser).toBeCalledWith('foo');
+    expect(apiClientMock.deleteUser).toBeCalledWith('bar');
   });
 });

@@ -18,7 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldRule, FieldRuleValue } from '../../../model';
+import { FieldRule, FieldRuleValue } from '../../model';
 
 interface Props {
   rule: FieldRule;

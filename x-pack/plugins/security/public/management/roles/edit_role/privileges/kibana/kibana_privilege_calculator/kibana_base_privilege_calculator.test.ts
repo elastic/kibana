@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../common/model';
-import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
-import { isGlobalPrivilegeDefinition } from '../privilege_utils';
+import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { buildRole, defaultPrivilegeDefinition } from './__fixtures__';
 import { KibanaBasePrivilegeCalculator } from './kibana_base_privilege_calculator';
 import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calculator_types';

@@ -6,21 +6,27 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { MappingInfoPanel } from '.';
-import { RoleMapping } from '../../../../../../../common/model';
 import { findTestSubject } from 'test_utils/find_test_subject';
+import { Role, RoleMapping } from '../../../../../common/model';
+import { RolesAPIClient } from '../../../roles';
+import { DocumentationLinksService } from '../../documentation_links';
 import { RoleSelector } from '../role_selector';
 import { RoleTemplateEditor } from '../role_selector/role_template_editor';
+import { MappingInfoPanel } from '.';
 
-jest.mock('../../../../../../lib/roles_api', () => {
-  return {
-    RolesApi: {
-      getRoles: () => Promise.resolve([{ name: 'foo_role' }, { name: 'bar role' }]),
-    },
-  };
-});
+import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('MappingInfoPanel', () => {
+  let rolesAPI: PublicMethodsOf<RolesAPIClient>;
+  beforeEach(() => {
+    rolesAPI = rolesAPIClientMock.create();
+    (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
+      { name: 'foo_role' },
+      { name: 'bar role' },
+    ] as Role[]);
+  });
+
   it('renders when creating a role mapping, default to the "roles" view', () => {
     const props = {
       roleMapping: {
@@ -32,6 +38,8 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'create',
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
@@ -77,6 +85,8 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'edit',
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
@@ -101,6 +111,8 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: true,
       canUseStoredScripts: false,
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      rolesAPIClient: rolesAPI,
     };
 
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
@@ -140,6 +152,8 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: false,
       canUseStoredScripts: true,
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      rolesAPIClient: rolesAPI,
     };
 
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
@@ -179,6 +193,8 @@ describe('MappingInfoPanel', () => {
       canUseInlineScripts: false,
       canUseStoredScripts: false,
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      rolesAPIClient: rolesAPI,
     };
 
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);
@@ -202,6 +218,8 @@ describe('MappingInfoPanel', () => {
         metadata: {},
       } as RoleMapping,
       mode: 'edit',
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      rolesAPIClient: rolesAPI,
     } as MappingInfoPanel['props'];
 
     const wrapper = mountWithIntl(<MappingInfoPanel {...props} />);

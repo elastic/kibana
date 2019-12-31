@@ -7,7 +7,7 @@
 import React from 'react';
 import { RuleGroupEditor } from './rule_group_editor';
 import { shallowWithIntl, mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { AllRule, FieldRule, AnyRule, ExceptAnyRule } from '../../../model';
+import { AllRule, FieldRule, AnyRule, ExceptAnyRule } from '../../model';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 import { EuiContextMenuItem } from '@elastic/eui';

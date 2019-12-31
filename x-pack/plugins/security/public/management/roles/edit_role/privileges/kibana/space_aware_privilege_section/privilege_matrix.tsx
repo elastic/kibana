@@ -8,7 +8,6 @@ import {
   EuiButtonEmpty,
   EuiIcon,
   EuiIconTip,
-  // @ts-ignore
   EuiInMemoryTable,
   EuiModal,
   EuiModalBody,
@@ -16,18 +15,16 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  // @ts-ignore
-  EuiToolTip,
   IconType,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { SpaceAvatar } from '../../../../../../../../../spaces/public/space_avatar';
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
-import { FeaturesPrivileges, Role } from '../../../../../../../../common/model';
-import { CalculatedPrivilege } from '../../../../../../../lib/kibana_privilege_calculator';
-import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
+import { SpaceAvatar } from '../../../../../../../../../legacy/plugins/spaces/public/space_avatar';
+import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../../../../features/public';
+import { FeaturesPrivileges, Role } from '../../../../../../../common/model';
+import { CalculatedPrivilege } from '../kibana_privilege_calculator';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 

@@ -10,7 +10,7 @@ import {
   validateRoleMappingRules,
   validateRoleMappingForSave,
 } from './role_mapping_validation';
-import { RoleMapping } from '../../../../../../common/model';
+import { RoleMapping } from '../../../../../common/model';
 
 describe('validateRoleMappingName', () => {
   it('requires a value', () => {

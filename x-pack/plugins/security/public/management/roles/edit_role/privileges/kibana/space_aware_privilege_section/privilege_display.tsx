@@ -7,11 +7,8 @@ import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf, EuiToolTip } from '@el
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ReactNode, FC } from 'react';
-import {
-  PRIVILEGE_SOURCE,
-  PrivilegeExplanation,
-} from '../../../../../../../lib/kibana_privilege_calculator';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { PRIVILEGE_SOURCE, PrivilegeExplanation } from '../kibana_privilege_calculator';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;

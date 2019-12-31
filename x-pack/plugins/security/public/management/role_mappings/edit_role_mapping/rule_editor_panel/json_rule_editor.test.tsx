@@ -17,7 +17,10 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { JSONRuleEditor } from './json_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
-import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../../model';
+import { AllRule, AnyRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';
+import { DocumentationLinksService } from '../../documentation_links';
+
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('JSONRuleEditor', () => {
   it('renders an empty rule set', () => {
@@ -25,6 +28,7 @@ describe('JSONRuleEditor', () => {
       rules: null,
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
@@ -46,6 +50,7 @@ describe('JSONRuleEditor', () => {
       ]),
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
@@ -79,6 +84,7 @@ describe('JSONRuleEditor', () => {
       rules: null,
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
@@ -100,6 +106,7 @@ describe('JSONRuleEditor', () => {
       rules: null,
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 
@@ -130,6 +137,7 @@ describe('JSONRuleEditor', () => {
       rules: null,
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<JSONRuleEditor {...props} />);
 

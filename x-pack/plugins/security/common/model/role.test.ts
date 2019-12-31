@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Role } from '../../common/model';
-import {
-  copyRole,
-  isReadOnlyRole,
-  isReservedRole,
-  isRoleEnabled,
-  prepareRoleClone,
-} from './role_utils';
+import { Role, isReadOnlyRole, isReservedRole, isRoleEnabled, copyRole, prepareRoleClone } from '.';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {

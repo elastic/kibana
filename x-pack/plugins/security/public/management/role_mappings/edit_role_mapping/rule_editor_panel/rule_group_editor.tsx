@@ -16,8 +16,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupTitle } from './rule_group_title';
 import { FieldRuleEditor } from './field_rule_editor';
-import { RuleGroup, Rule, FieldRule } from '../../../model';
-import { isRuleGroup } from '../../services/is_rule_group';
+import { RuleGroup, Rule, FieldRule } from '../../model';
+import { isRuleGroup } from '../services/is_rule_group';
 
 interface Props {
   rule: RuleGroup;

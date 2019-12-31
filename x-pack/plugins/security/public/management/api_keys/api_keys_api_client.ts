@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
-import { ApiKey, ApiKeyToInvalidate } from '../../common/model';
+import { HttpStart } from 'src/core/public';
+import { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
 
 interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;
@@ -21,27 +21,22 @@ interface GetApiKeysResponse {
   apiKeys: ApiKey[];
 }
 
-const apiKeysUrl = `/internal/security/api_key`;
+const apiKeysUrl = '/internal/security/api_key';
 
-export class ApiKeysApi {
-  public static async checkPrivileges(): Promise<CheckPrivilegesResponse> {
-    return kfetch({ pathname: `${apiKeysUrl}/privileges` });
+export class APIKeysAPIClient {
+  constructor(private readonly http: HttpStart) {}
+
+  public async checkPrivileges() {
+    return await this.http.get<CheckPrivilegesResponse>(`${apiKeysUrl}/privileges`);
   }
 
-  public static async getApiKeys(isAdmin: boolean = false): Promise<GetApiKeysResponse> {
-    const query = {
-      isAdmin,
-    };
-
-    return kfetch({ pathname: apiKeysUrl, query });
+  public async getApiKeys(isAdmin = false) {
+    return await this.http.get<GetApiKeysResponse>(apiKeysUrl, { query: { isAdmin } });
   }
 
-  public static async invalidateApiKeys(
-    apiKeys: ApiKeyToInvalidate[],
-    isAdmin: boolean = false
-  ): Promise<InvalidateApiKeysResponse> {
-    const pathname = `${apiKeysUrl}/invalidate`;
-    const body = JSON.stringify({ apiKeys, isAdmin });
-    return kfetch({ pathname, method: 'POST', body });
+  public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
+    return await this.http.post<InvalidateApiKeysResponse>(`${apiKeysUrl}/invalidate`, {
+      body: JSON.stringify({ apiKeys, isAdmin }),
+    });
   }
 }

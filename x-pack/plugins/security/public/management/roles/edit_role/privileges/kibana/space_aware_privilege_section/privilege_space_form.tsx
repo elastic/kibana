@@ -24,17 +24,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
-import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
+import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../../../../features/public';
+import { KibanaPrivileges, Role, copyRole } from '../../../../../../../common/model';
 import {
   AllowedPrivilege,
   KibanaPrivilegeCalculatorFactory,
   PrivilegeExplanation,
-} from '../../../../../../../lib/kibana_privilege_calculator';
-import { hasAssignedFeaturePrivileges } from '../../../../../../../lib/privilege_utils';
-import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
+} from '../kibana_privilege_calculator';
+import { hasAssignedFeaturePrivileges } from '../../../privilege_utils';
+import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { SpaceSelector } from './space_selector';
 
@@ -285,7 +284,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           calculatedPrivileges={calculatedPrivileges}
           allowedPrivileges={allowedPrivileges}
           rankedFeaturePrivileges={privilegeCalculator.rankedFeaturePrivileges}
-          intl={this.props.intl}
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}

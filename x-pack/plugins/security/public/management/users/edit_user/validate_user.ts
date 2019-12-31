@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { User, EditUser } from '../../common/model';
+import { User, EditUser } from '../../../../common/model';
 
 interface UserValidatorOptions {
   shouldValidate?: boolean;

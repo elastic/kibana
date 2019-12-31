@@ -1,7 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ApiKeysGridPage renders a callout when API keys are not enabled 1`] = `
-<NotEnabled>
+exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
+<NotEnabled
+  docLinks={
+    DocumentationLinksService {
+      "esDocBasePath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/",
+    }
+  }
+>
   <EuiCallOut
     color="danger"
     iconType="alert"
@@ -75,7 +81,7 @@ exports[`ApiKeysGridPage renders a callout when API keys are not enabled 1`] = `
             values={
               Object {
                 "link": <ForwardRef
-                  href="undefinedguide/en/elasticsearch/reference/undefined/security-settings.html#api-key-service-settings"
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
                   target="_blank"
                 >
                   <FormattedMessage
@@ -89,13 +95,13 @@ exports[`ApiKeysGridPage renders a callout when API keys are not enabled 1`] = `
           >
             Contact your system administrator and refer to the 
             <EuiLink
-              href="undefinedguide/en/elasticsearch/reference/undefined/security-settings.html#api-key-service-settings"
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
               target="_blank"
             >
               <a
                 className="euiLink euiLink--primary"
-                href="undefinedguide/en/elasticsearch/reference/undefined/security-settings.html#api-key-service-settings"
-                rel="noopener noreferrer"
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
+                rel="noopener"
                 target="_blank"
               >
                 <FormattedMessage
@@ -116,7 +122,7 @@ exports[`ApiKeysGridPage renders a callout when API keys are not enabled 1`] = `
 </NotEnabled>
 `;
 
-exports[`ApiKeysGridPage renders permission denied if user does not have required permissions 1`] = `
+exports[`APIKeysGridPage renders permission denied if user does not have required permissions 1`] = `
 <PermissionDenied>
   <EuiFlexGroup
     gutterSize="none"

@@ -6,11 +6,12 @@
 import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { securityMock } from '../../../../../../../plugins/security/public/mocks';
+import { AuthenticatedUser } from '../../common/model';
 import { AccountManagementPage } from './account_management_page';
-import { AuthenticatedUser } from '../../../../common/model';
 
-jest.mock('ui/kfetch');
+import { coreMock } from 'src/core/public/mocks';
+import { securityMock } from '../mocks';
+import { userAPIClientMock } from '../management/users/index.mock';
 
 interface Options {
   withFullName?: boolean;
@@ -45,7 +46,11 @@ describe('<AccountManagementPage>', () => {
   it(`displays users full name, username, and email address`, async () => {
     const user = createUser();
     const wrapper = mountWithIntl(
-      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+      <AccountManagementPage
+        authc={getSecuritySetupMock({ currentUser: user }).authc}
+        notifications={coreMock.createStart().notifications}
+        apiClient={userAPIClientMock.create()}
+      />
     );
 
     await act(async () => {
@@ -63,7 +68,11 @@ describe('<AccountManagementPage>', () => {
   it(`displays username when full_name is not provided`, async () => {
     const user = createUser({ withFullName: false });
     const wrapper = mountWithIntl(
-      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+      <AccountManagementPage
+        authc={getSecuritySetupMock({ currentUser: user }).authc}
+        notifications={coreMock.createStart().notifications}
+        apiClient={userAPIClientMock.create()}
+      />
     );
 
     await act(async () => {
@@ -77,7 +86,11 @@ describe('<AccountManagementPage>', () => {
   it(`displays a placeholder when no email address is provided`, async () => {
     const user = createUser({ withEmail: false });
     const wrapper = mountWithIntl(
-      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+      <AccountManagementPage
+        authc={getSecuritySetupMock({ currentUser: user }).authc}
+        notifications={coreMock.createStart().notifications}
+        apiClient={userAPIClientMock.create()}
+      />
     );
 
     await act(async () => {
@@ -91,7 +104,11 @@ describe('<AccountManagementPage>', () => {
   it(`displays change password form for users in the native realm`, async () => {
     const user = createUser();
     const wrapper = mountWithIntl(
-      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+      <AccountManagementPage
+        authc={getSecuritySetupMock({ currentUser: user }).authc}
+        notifications={coreMock.createStart().notifications}
+        apiClient={userAPIClientMock.create()}
+      />
     );
 
     await act(async () => {
@@ -106,7 +123,11 @@ describe('<AccountManagementPage>', () => {
   it(`does not display change password form for users in the saml realm`, async () => {
     const user = createUser({ realm: 'saml' });
     const wrapper = mountWithIntl(
-      <AccountManagementPage securitySetup={getSecuritySetupMock({ currentUser: user })} />
+      <AccountManagementPage
+        authc={getSecuritySetupMock({ currentUser: user }).authc}
+        notifications={coreMock.createStart().notifications}
+        apiClient={userAPIClientMock.create()}
+      />
     );
 
     await act(async () => {

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiIcon,
@@ -18,18 +20,17 @@ import {
   EuiButtonIcon,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import _ from 'lodash';
-import React, { Component } from 'react';
-import { toastNotifications } from 'ui/notify';
-import { Role } from '../../../../../common/model';
-import { isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
-import { RolesApi } from '../../../../lib/roles_api';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { NotificationsStart } from 'src/core/public';
+import { Role, isRoleEnabled, isReadOnlyRole, isReservedRole } from '../../../../common/model';
+import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
 
 interface Props {
-  intl: InjectedIntl;
+  notifications: NotificationsStart;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
 }
 
 interface State {
@@ -44,7 +45,7 @@ const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `#/management/security/roles/${action}${roleName ? `/${roleName}` : ''}`;
 };
 
-class RolesGridPageUI extends Component<Props, State> {
+export class RolesGridPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -68,7 +69,6 @@ class RolesGridPageUI extends Component<Props, State> {
 
   private getPageContent = () => {
     const { roles } = this.state;
-    const { intl } = this.props;
     return (
       <EuiPageContent>
         <EuiPageContentHeader>
@@ -105,6 +105,8 @@ class RolesGridPageUI extends Component<Props, State> {
               onCancel={this.onCancelDelete}
               rolesToDelete={this.state.selection.map(role => role.name)}
               callback={this.handleDelete}
+              notifications={this.props.notifications}
+              rolesAPIClient={this.props.rolesAPIClient}
             />
           ) : null}
 
@@ -112,7 +114,7 @@ class RolesGridPageUI extends Component<Props, State> {
             <EuiInMemoryTable
               itemId="name"
               responsive={false}
-              columns={this.getColumnConfig(intl)}
+              columns={this.getColumnConfig()}
               hasActions={true}
               selection={{
                 selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
@@ -155,17 +157,16 @@ class RolesGridPageUI extends Component<Props, State> {
     );
   };
 
-  private getColumnConfig = (intl: InjectedIntl) => {
-    const reservedRoleDesc = intl.formatMessage({
-      id: 'xpack.security.management.roles.reservedColumnDescription',
-      defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.',
-    });
+  private getColumnConfig = () => {
+    const reservedRoleDesc = i18n.translate(
+      'xpack.security.management.roles.reservedColumnDescription',
+      { defaultMessage: 'Reserved roles are built-in and cannot be edited or removed.' }
+    );
 
     return [
       {
         field: 'name',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.roles.nameColumnName',
+        name: i18n.translate('xpack.security.management.roles.nameColumnName', {
           defaultMessage: 'Role',
         }),
         sortable: true,
@@ -188,8 +189,7 @@ class RolesGridPageUI extends Component<Props, State> {
       },
       {
         field: 'metadata',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.roles.reservedColumnName',
+        name: i18n.translate('xpack.security.management.roles.reservedColumnName', {
           defaultMessage: 'Reserved',
         }),
         sortable: ({ metadata }: Role) => Boolean(metadata && metadata._reserved),
@@ -197,8 +197,7 @@ class RolesGridPageUI extends Component<Props, State> {
         align: 'right',
         description: reservedRoleDesc,
         render: (metadata: Role['metadata']) => {
-          const label = intl.formatMessage({
-            id: 'xpack.security.management.roles.reservedRoleIconLabel',
+          const label = i18n.translate('xpack.security.management.roles.reservedRoleIconLabel', {
             defaultMessage: 'Reserved role',
           });
 
@@ -210,8 +209,7 @@ class RolesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        name: intl.formatMessage({
-          id: 'xpack.security.management.roles.actionsColumnName',
+        name: i18n.translate('xpack.security.management.roles.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
         width: '150px',
@@ -219,15 +217,10 @@ class RolesGridPageUI extends Component<Props, State> {
           {
             available: (role: Role) => !isReadOnlyRole(role),
             render: (role: Role) => {
-              const title = intl.formatMessage(
-                {
-                  id: 'xpack.security.management.roles.editRoleActionName',
-                  defaultMessage: `Edit {roleName}`,
-                },
-                {
-                  roleName: role.name,
-                }
-              );
+              const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
+                defaultMessage: `Edit {roleName}`,
+                values: { roleName: role.name },
+              });
 
               return (
                 <EuiButtonIcon
@@ -244,15 +237,10 @@ class RolesGridPageUI extends Component<Props, State> {
           {
             available: (role: Role) => !isReservedRole(role),
             render: (role: Role) => {
-              const title = intl.formatMessage(
-                {
-                  id: 'xpack.security.management.roles.cloneRoleActionName',
-                  defaultMessage: `Clone {roleName}`,
-                },
-                {
-                  roleName: role.name,
-                }
-              );
+              const title = i18n.translate('xpack.security.management.roles.cloneRoleActionName', {
+                defaultMessage: `Clone {roleName}`,
+                values: { roleName: role.name },
+              });
 
               return (
                 <EuiButtonIcon
@@ -293,21 +281,18 @@ class RolesGridPageUI extends Component<Props, State> {
 
   private async loadRoles() {
     try {
-      const roles = await RolesApi.getRoles();
+      const roles = await this.props.rolesAPIClient.getRoles();
 
       this.setState({ roles });
     } catch (e) {
       if (_.get(e, 'body.statusCode') === 403) {
         this.setState({ permissionDenied: true });
       } else {
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.security.management.roles.fetchingRolesErrorMessage',
-              defaultMessage: 'Error fetching roles: {message}',
-            },
-            { message: _.get(e, 'body.message', '') }
-          )
+        this.props.notifications.toasts.addDanger(
+          i18n.translate('xpack.security.management.roles.fetchingRolesErrorMessage', {
+            defaultMessage: 'Error fetching roles: {message}',
+            values: { message: _.get(e, 'body.message', '') },
+          })
         );
       }
     }
@@ -339,5 +324,3 @@ class RolesGridPageUI extends Component<Props, State> {
     this.setState({ showDeleteConfirmation: false });
   };
 }
-
-export const RolesGridPage = injectI18n(RolesGridPageUI);

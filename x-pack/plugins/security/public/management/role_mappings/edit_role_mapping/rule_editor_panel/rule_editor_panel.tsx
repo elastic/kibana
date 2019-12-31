@@ -22,19 +22,20 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { RoleMapping } from '../../../../../../../common/model';
+import { RoleMapping } from '../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { JSONRuleEditor } from './json_rule_editor';
-import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
-import { Rule, generateRulesFromRaw } from '../../../model';
-import { validateRoleMappingRules } from '../../services/role_mapping_validation';
-import { documentationLinks } from '../../../services/documentation_links';
+import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
+import { Rule, generateRulesFromRaw } from '../../model';
+import { DocumentationLinksService } from '../../documentation_links';
+import { validateRoleMappingRules } from '../services/role_mapping_validation';
 
 interface Props {
   rawRules: RoleMapping['rules'];
   onChange: (rawRules: RoleMapping['rules']) => void;
   onValidityChange: (isValid: boolean) => void;
   validateForm: boolean;
+  docLinks: DocumentationLinksService;
 }
 
 interface State {
@@ -91,7 +92,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={documentationLinks.getRoleMappingFieldRulesDocUrl()}
+                        href={this.props.docLinks.getRoleMappingFieldRulesDocUrl()}
                         target="_blank"
                         external={true}
                       >
@@ -214,6 +215,7 @@ export class RuleEditorPanel extends Component<Props, State> {
             rules={this.state.rules}
             onChange={this.onRuleChange}
             onValidityChange={this.onValidityChange}
+            docLinks={this.props.docLinks}
           />
         );
       default:

@@ -4,19 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UserAPIClient } from '../../../../lib/api';
-import { User } from '../../../../../common/model';
+import { User } from '../../../../common/model';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { UsersListPage } from './users_list_page';
+import { UsersGridPage } from './users_grid_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import { userAPIClientMock } from '../index.mock';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-jest.mock('ui/kfetch');
-
-describe('UsersListPage', () => {
+describe('UsersGridPage', () => {
   it('renders the list of users', async () => {
-    const apiClient = new UserAPIClient();
-    apiClient.getUsers = jest.fn().mockImplementation(() => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
       return Promise.resolve<User[]>([
         {
           username: 'foo',
@@ -38,22 +37,27 @@ describe('UsersListPage', () => {
       ]);
     });
 
-    const wrapper = mountWithIntl(<UsersListPage apiClient={apiClient} />);
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        apiClient={apiClientMock}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
 
     await waitForRender(wrapper);
 
-    expect(apiClient.getUsers).toBeCalledTimes(1);
+    expect(apiClientMock.getUsers).toBeCalledTimes(1);
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
   });
 
   it('renders a forbidden message if user is not authorized', async () => {
-    const apiClient = new UserAPIClient();
-    apiClient.getUsers = jest.fn().mockImplementation(() => {
-      return Promise.reject({ body: { statusCode: 403 } });
-    });
+    const apiClient = userAPIClientMock.create();
+    apiClient.getUsers.mockRejectedValue({ body: { statusCode: 403 } });
 
-    const wrapper = mountWithIntl(<UsersListPage apiClient={apiClient} />);
+    const wrapper = mountWithIntl(
+      <UsersGridPage apiClient={apiClient} notifications={coreMock.createStart().notifications} />
+    );
 
     await waitForRender(wrapper);
 

@@ -5,24 +5,15 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { DeleteProvider } from '.';
-import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
-import { RoleMapping } from '../../../../../../common/model';
 import { EuiConfirmModal } from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
 import { act } from '@testing-library/react';
-import { toastNotifications } from 'ui/notify';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from 'test_utils/find_test_subject';
+import { RoleMapping } from '../../../../../common/model';
+import { DeleteProvider } from '.';
 
-jest.mock('ui/notify', () => {
-  return {
-    toastNotifications: {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-      addDanger: jest.fn(),
-    },
-  };
-});
+import { roleMappingsAPIClientMock } from '../../index.mock';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {
@@ -30,17 +21,14 @@ describe('DeleteProvider', () => {
   });
 
   it('allows a single role mapping to be deleted', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.deleteRoleMappings.mockResolvedValue([{ name: 'delete-me', success: true }]);
+
+    const notifications = coreMock.createStart().notifications;
+
     const props = {
-      roleMappingsAPI: ({
-        deleteRoleMappings: jest.fn().mockReturnValue(
-          Promise.resolve([
-            {
-              name: 'delete-me',
-              success: true,
-            },
-          ])
-        ),
-      } as unknown) as RoleMappingsAPI,
+      roleMappingsAPI,
+      notifications,
     };
 
     const roleMappingsToDelete = [
@@ -79,11 +67,10 @@ describe('DeleteProvider', () => {
 
     expect(props.roleMappingsAPI.deleteRoleMappings).toHaveBeenCalledWith(['delete-me']);
 
-    const notifications = toastNotifications as jest.Mocked<typeof toastNotifications>;
-    expect(notifications.addError).toHaveBeenCalledTimes(0);
-    expect(notifications.addDanger).toHaveBeenCalledTimes(0);
-    expect(notifications.addSuccess).toHaveBeenCalledTimes(1);
-    expect(notifications.addSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+    expect(notifications.toasts.addSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data-test-subj": "deletedRoleMappingSuccessToast",
@@ -94,21 +81,23 @@ describe('DeleteProvider', () => {
   });
 
   it('allows multiple role mappings to be deleted', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
+      {
+        name: 'delete-me',
+        success: true,
+      },
+      {
+        name: 'delete-me-too',
+        success: true,
+      },
+    ]);
+
+    const notifications = coreMock.createStart().notifications;
+
     const props = {
-      roleMappingsAPI: ({
-        deleteRoleMappings: jest.fn().mockReturnValue(
-          Promise.resolve([
-            {
-              name: 'delete-me',
-              success: true,
-            },
-            {
-              name: 'delete-me-too',
-              success: true,
-            },
-          ])
-        ),
-      } as unknown) as RoleMappingsAPI,
+      roleMappingsAPI,
+      notifications,
     };
 
     const roleMappingsToDelete = [
@@ -152,11 +141,11 @@ describe('DeleteProvider', () => {
       'delete-me',
       'delete-me-too',
     ]);
-    const notifications = toastNotifications as jest.Mocked<typeof toastNotifications>;
-    expect(notifications.addError).toHaveBeenCalledTimes(0);
-    expect(notifications.addDanger).toHaveBeenCalledTimes(0);
-    expect(notifications.addSuccess).toHaveBeenCalledTimes(1);
-    expect(notifications.addSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+    expect(notifications.toasts.addSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data-test-subj": "deletedRoleMappingSuccessToast",
@@ -167,22 +156,24 @@ describe('DeleteProvider', () => {
   });
 
   it('handles mixed success/failure conditions', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
+      {
+        name: 'delete-me',
+        success: true,
+      },
+      {
+        name: 'i-wont-work',
+        success: false,
+        error: new Error('something went wrong. sad.'),
+      },
+    ]);
+
+    const notifications = coreMock.createStart().notifications;
+
     const props = {
-      roleMappingsAPI: ({
-        deleteRoleMappings: jest.fn().mockReturnValue(
-          Promise.resolve([
-            {
-              name: 'delete-me',
-              success: true,
-            },
-            {
-              name: 'i-wont-work',
-              success: false,
-              error: new Error('something went wrong. sad.'),
-            },
-          ])
-        ),
-      } as unknown) as RoleMappingsAPI,
+      roleMappingsAPI,
+      notifications,
     };
 
     const roleMappingsToDelete = [
@@ -223,10 +214,9 @@ describe('DeleteProvider', () => {
       'i-wont-work',
     ]);
 
-    const notifications = toastNotifications as jest.Mocked<typeof toastNotifications>;
-    expect(notifications.addError).toHaveBeenCalledTimes(0);
-    expect(notifications.addSuccess).toHaveBeenCalledTimes(1);
-    expect(notifications.addSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+    expect(notifications.toasts.addSuccess.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data-test-subj": "deletedRoleMappingSuccessToast",
@@ -235,8 +225,8 @@ describe('DeleteProvider', () => {
       ]
     `);
 
-    expect(notifications.addDanger).toHaveBeenCalledTimes(1);
-    expect(notifications.addDanger.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+    expect(notifications.toasts.addDanger.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "Error deleting role mapping 'i-wont-work'",
       ]
@@ -244,12 +234,13 @@ describe('DeleteProvider', () => {
   });
 
   it('handles errors calling the API', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.deleteRoleMappings.mockRejectedValue(new Error('AHHHHH'));
+
+    const notifications = coreMock.createStart().notifications;
     const props = {
-      roleMappingsAPI: ({
-        deleteRoleMappings: jest.fn().mockImplementation(() => {
-          throw new Error('AHHHHH');
-        }),
-      } as unknown) as RoleMappingsAPI,
+      roleMappingsAPI,
+      notifications,
     };
 
     const roleMappingsToDelete = [
@@ -284,12 +275,11 @@ describe('DeleteProvider', () => {
 
     expect(props.roleMappingsAPI.deleteRoleMappings).toHaveBeenCalledWith(['delete-me']);
 
-    const notifications = toastNotifications as jest.Mocked<typeof toastNotifications>;
-    expect(notifications.addDanger).toHaveBeenCalledTimes(0);
-    expect(notifications.addSuccess).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
+    expect(notifications.toasts.addSuccess).toHaveBeenCalledTimes(0);
 
-    expect(notifications.addError).toHaveBeenCalledTimes(1);
-    expect(notifications.addError.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(notifications.toasts.addError).toHaveBeenCalledTimes(1);
+    expect(notifications.toasts.addError.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         [Error: AHHHHH],
         Object {

@@ -5,7 +5,7 @@
  */
 
 import { UserValidator, UserValidationResult } from './validate_user';
-import { User, EditUser } from '../../common/model';
+import { User, EditUser } from '../../../../common/model';
 
 function expectValid(result: UserValidationResult) {
   expect(result.isInvalid).toBe(false);

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ApiKeysGridPage } from './api_keys_grid_page';
+export { APIKeysGridPage } from './api_keys_grid_page';

@@ -7,24 +7,33 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { RoleMappingsGridPage } from '.';
-import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../../components';
+import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
 import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiLink } from '@elastic/eui';
-import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 import { act } from '@testing-library/react';
+import { DocumentationLinksService } from '../documentation_links';
+
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 
 describe('RoleMappingsGridPage', () => {
   it('renders an empty prompt when no role mappings exist', async () => {
-    const roleMappingsAPI = ({
-      getRoleMappings: jest.fn().mockResolvedValue([]),
-      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
-        canManageRoleMappings: true,
-        hasCompatibleRealms: true,
-      }),
-    } as unknown) as RoleMappingsAPI;
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+    });
 
-    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
 
@@ -37,14 +46,20 @@ describe('RoleMappingsGridPage', () => {
   });
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
-    const roleMappingsAPI = ({
-      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
-        canManageRoleMappings: false,
-        hasCompatibleRealms: true,
-      }),
-    } as unknown) as RoleMappingsAPI;
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: false,
+      hasCompatibleRealms: true,
+    });
 
-    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -57,22 +72,28 @@ describe('RoleMappingsGridPage', () => {
   });
 
   it('renders a warning when there are no compatible realms enabled', async () => {
-    const roleMappingsAPI = ({
-      getRoleMappings: jest.fn().mockResolvedValue([
-        {
-          name: 'some realm',
-          enabled: true,
-          roles: [],
-          rules: { field: { username: '*' } },
-        },
-      ]),
-      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
-        canManageRoleMappings: true,
-        hasCompatibleRealms: false,
-      }),
-    } as unknown) as RoleMappingsAPI;
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([
+      {
+        name: 'some realm',
+        enabled: true,
+        roles: [],
+        rules: { field: { username: '*' } },
+      },
+    ]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: false,
+    });
 
-    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -84,22 +105,28 @@ describe('RoleMappingsGridPage', () => {
   });
 
   it('renders links to mapped roles', async () => {
-    const roleMappingsAPI = ({
-      getRoleMappings: jest.fn().mockResolvedValue([
-        {
-          name: 'some realm',
-          enabled: true,
-          roles: ['superuser'],
-          rules: { field: { username: '*' } },
-        },
-      ]),
-      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
-        canManageRoleMappings: true,
-        hasCompatibleRealms: true,
-      }),
-    } as unknown) as RoleMappingsAPI;
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([
+      {
+        name: 'some realm',
+        enabled: true,
+        roles: ['superuser'],
+        rules: { field: { username: '*' } },
+      },
+    ]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+    });
 
-    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
     await nextTick();
     wrapper.update();
 
@@ -111,22 +138,28 @@ describe('RoleMappingsGridPage', () => {
   });
 
   it('describes the number of mapped role templates', async () => {
-    const roleMappingsAPI = ({
-      getRoleMappings: jest.fn().mockResolvedValue([
-        {
-          name: 'some realm',
-          enabled: true,
-          role_templates: [{}, {}],
-          rules: { field: { username: '*' } },
-        },
-      ]),
-      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
-        canManageRoleMappings: true,
-        hasCompatibleRealms: true,
-      }),
-    } as unknown) as RoleMappingsAPI;
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([
+      {
+        name: 'some realm',
+        enabled: true,
+        role_templates: [{}, {}],
+        rules: { field: { username: '*' } },
+      },
+    ]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+    });
 
-    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
     await nextTick();
     wrapper.update();
 
@@ -136,30 +169,34 @@ describe('RoleMappingsGridPage', () => {
   });
 
   it('allows role mappings to be deleted, refreshing the grid after', async () => {
-    const roleMappingsAPI = ({
-      getRoleMappings: jest.fn().mockResolvedValue([
-        {
-          name: 'some-realm',
-          enabled: true,
-          roles: ['superuser'],
-          rules: { field: { username: '*' } },
-        },
-      ]),
-      checkRoleMappingFeatures: jest.fn().mockResolvedValue({
-        canManageRoleMappings: true,
-        hasCompatibleRealms: true,
-      }),
-      deleteRoleMappings: jest.fn().mockReturnValue(
-        Promise.resolve([
-          {
-            name: 'some-realm',
-            success: true,
-          },
-        ])
-      ),
-    } as unknown) as RoleMappingsAPI;
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.getRoleMappings.mockResolvedValue([
+      {
+        name: 'some-realm',
+        enabled: true,
+        roles: ['superuser'],
+        rules: { field: { username: '*' } },
+      },
+    ]);
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+    });
+    roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
+      {
+        name: 'some-realm',
+        success: true,
+      },
+    ]);
 
-    const wrapper = mountWithIntl(<RoleMappingsGridPage roleMappingsAPI={roleMappingsAPI} />);
+    const { docLinks, notifications } = coreMock.createStart();
+    const wrapper = mountWithIntl(
+      <RoleMappingsGridPage
+        roleMappingsAPI={roleMappingsAPI}
+        notifications={notifications}
+        docLinks={new DocumentationLinksService(docLinks)}
+      />
+    );
     await nextTick();
     wrapper.update();
 

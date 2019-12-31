@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  // @ts-ignore
-  EuiConfirmModal,
-  // @ts-ignore
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 

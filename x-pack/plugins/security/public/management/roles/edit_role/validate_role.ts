@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Role, RoleIndexPrivilege } from '../../../../../common/model';
+import { Role, RoleIndexPrivilege } from '../../../../common/model';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;

@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
-import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+import { Feature } from '../../../../../../../../features/public';
+import { KibanaPrivileges, Role } from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 

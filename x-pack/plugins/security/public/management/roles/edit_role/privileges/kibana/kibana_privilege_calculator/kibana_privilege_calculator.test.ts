@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaPrivileges, Role } from '../../../common/model';
-import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
+import { KibanaPrivileges, Role } from '../../../../../../../common/model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 import {
   buildRole,
   defaultPrivilegeDefinition,

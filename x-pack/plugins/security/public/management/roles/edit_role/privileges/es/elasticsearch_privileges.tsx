@@ -19,26 +19,26 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Role, BuiltinESPrivileges } from '../../../../../../../common/model';
-// @ts-ignore
-import { documentationLinks } from '../../../../../../documentation_links';
-import { RoleValidator } from '../../../lib/validate_role';
+import { Role, BuiltinESPrivileges } from '../../../../../../common/model';
+import { SecurityLicense } from '../../../../../../common/licensing';
+import { IndicesAPIClient } from '../../../indices_api_client';
+import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { ClusterPrivileges } from './cluster_privileges';
-
 import { IndexPrivileges } from './index_privileges';
+import { DocumentationLinksService } from '../../../documentation_links';
 
 interface Props {
   role: Role;
   editable: boolean;
-  httpClient: any;
+  indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
+  docLinks: DocumentationLinksService;
+  license: SecurityLicense;
   onChange: (role: Role) => void;
   runAsUsers: string[];
   validator: RoleValidator;
   builtinESPrivileges: BuiltinESPrivileges;
   indexPatterns: string[];
-  allowDocumentLevelSecurity: boolean;
-  allowFieldLevelSecurity: boolean;
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
@@ -53,23 +53,22 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
   public getForm = () => {
     const {
       role,
-      httpClient,
+      indicesAPIClient,
+      docLinks,
       validator,
       onChange,
       editable,
       indexPatterns,
-      allowDocumentLevelSecurity,
-      allowFieldLevelSecurity,
+      license,
       builtinESPrivileges,
     } = this.props;
 
     const indexProps = {
       role,
-      httpClient,
+      indicesAPIClient,
       validator,
       indexPatterns,
-      allowDocumentLevelSecurity,
-      allowFieldLevelSecurity,
+      license,
       onChange,
       availableIndexPrivileges: builtinESPrivileges.index,
     };
@@ -91,7 +90,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                 id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
                 defaultMessage="Manage the actions this role can perform against your cluster. "
               />
-              {this.learnMore(documentationLinks.esClusterPrivileges)}
+              {this.learnMore(docLinks.getESClusterPrivilegesDocUrl())}
             </p>
           }
         >
@@ -121,7 +120,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                 id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
                 defaultMessage="Allow requests to be submitted on the behalf of other users. "
               />
-              {this.learnMore(documentationLinks.esRunAsPrivileges)}
+              {this.learnMore(docLinks.getESRunAsPrivilegesDocUrl())}
             </p>
           }
         >
@@ -165,7 +164,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
               defaultMessage="Control access to the data in your cluster. "
             />
-            {this.learnMore(documentationLinks.esIndicesPrivileges)}
+            {this.learnMore(docLinks.getESIndicesPrivilegesDocUrl())}
           </p>
         </EuiText>
 

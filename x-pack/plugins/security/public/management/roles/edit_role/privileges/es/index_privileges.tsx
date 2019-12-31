@@ -5,19 +5,23 @@
  */
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { Role, RoleIndexPrivilege } from '../../../../../../../common/model';
-import { isReadOnlyRole, isRoleEnabled } from '../../../../../../lib/role_utils';
-import { getFields } from '../../../../../../objects';
-import { RoleValidator } from '../../../lib/validate_role';
+import {
+  Role,
+  RoleIndexPrivilege,
+  isReadOnlyRole,
+  isRoleEnabled,
+} from '../../../../../../common/model';
+import { SecurityLicense } from '../../../../../../common/licensing';
+import { IndicesAPIClient } from '../../../indices_api_client';
+import { RoleValidator } from '../../validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 
 interface Props {
   role: Role;
   indexPatterns: string[];
   availableIndexPrivileges: string[];
-  allowDocumentLevelSecurity: boolean;
-  allowFieldLevelSecurity: boolean;
-  httpClient: any;
+  indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
+  license: SecurityLicense;
   onChange: (role: Role) => void;
   validator: RoleValidator;
 }
@@ -43,20 +47,16 @@ export class IndexPrivileges extends Component<Props, State> {
   public render() {
     const { indices = [] } = this.props.role.elasticsearch;
 
-    const {
-      indexPatterns,
-      allowDocumentLevelSecurity,
-      allowFieldLevelSecurity,
-      availableIndexPrivileges,
-    } = this.props;
+    const { indexPatterns, license, availableIndexPrivileges } = this.props;
+    const { allowRoleDocumentLevelSecurity, allowRoleFieldLevelSecurity } = license.getFeatures();
 
     const props = {
       indexPatterns,
       // If editing an existing role while that has been disabled, always show the FLS/DLS fields because currently
       // a role is only marked as disabled if it has FLS/DLS setup (usually before the user changed to a license that
       // doesn't permit FLS/DLS).
-      allowDocumentLevelSecurity: allowDocumentLevelSecurity || !isRoleEnabled(this.props.role),
-      allowFieldLevelSecurity: allowFieldLevelSecurity || !isRoleEnabled(this.props.role),
+      allowDocumentLevelSecurity: allowRoleDocumentLevelSecurity || !isRoleEnabled(this.props.role),
+      allowFieldLevelSecurity: allowRoleFieldLevelSecurity || !isRoleEnabled(this.props.role),
       isReadOnlyRole: isReadOnlyRole(this.props.role),
     };
 
@@ -171,7 +171,7 @@ export class IndexPrivileges extends Component<Props, State> {
 
     try {
       return {
-        [pattern]: await getFields(this.props.httpClient, pattern),
+        [pattern]: await this.props.indicesAPIClient.getFields(pattern),
       };
     } catch (e) {
       return {

@@ -9,19 +9,22 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiComboBox } from '@elastic/eui';
 import { RoleSelector } from './role_selector';
-import { RoleMapping } from '../../../../../../../common/model';
+import { Role, RoleMapping } from '../../../../../common/model';
 import { RoleTemplateEditor } from './role_template_editor';
 import { AddRoleTemplateButton } from './add_role_template_button';
-
-jest.mock('../../../../../../lib/roles_api', () => {
-  return {
-    RolesApi: {
-      getRoles: () => Promise.resolve([{ name: 'foo_role' }, { name: 'bar role' }]),
-    },
-  };
-});
+import { RolesAPIClient } from '../../../roles';
+import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
 
 describe('RoleSelector', () => {
+  let rolesAPI: PublicMethodsOf<RolesAPIClient>;
+  beforeEach(() => {
+    rolesAPI = rolesAPIClientMock.create();
+    (rolesAPI as jest.Mocked<RolesAPIClient>).getRoles.mockResolvedValue([
+      { name: 'foo_role' },
+      { name: 'bar role' },
+    ] as Role[]);
+  });
+
   it('allows roles to be selected, removing any previously selected role templates', () => {
     const props = {
       roleMapping: {
@@ -36,6 +39,7 @@ describe('RoleSelector', () => {
       canUseInlineScripts: true,
       onChange: jest.fn(),
       mode: 'roles',
+      rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
 
     const wrapper = mountWithIntl(<RoleSelector {...props} />);
@@ -57,6 +61,7 @@ describe('RoleSelector', () => {
       canUseInlineScripts: true,
       onChange: jest.fn(),
       mode: 'templates',
+      rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
 
     const wrapper = mountWithIntl(<RoleSelector {...props} />);
@@ -87,6 +92,7 @@ describe('RoleSelector', () => {
       canUseInlineScripts: true,
       onChange: jest.fn(),
       mode: 'templates',
+      rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
 
     const wrapper = mountWithIntl(<RoleSelector {...props} />);
@@ -122,6 +128,7 @@ describe('RoleSelector', () => {
       canUseInlineScripts: true,
       onChange: jest.fn(),
       mode: 'templates',
+      rolesAPIClient: rolesAPI,
     } as RoleSelector['props'];
 
     const wrapper = mountWithIntl(<RoleSelector {...props} />);

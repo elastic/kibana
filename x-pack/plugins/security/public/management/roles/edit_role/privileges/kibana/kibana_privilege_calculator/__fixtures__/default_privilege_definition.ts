@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaPrivileges } from '../../../../common/model';
+import { KibanaPrivileges } from '../../../../../../../../common/model';
 
 export const defaultPrivilegeDefinition = new KibanaPrivileges({
   global: {

@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  // @ts-ignore
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { DeleteRoleButton } from './delete_role_button';

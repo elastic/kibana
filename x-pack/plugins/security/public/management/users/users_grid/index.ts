@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UsersListPage } from './users_list_page';
+export { UsersGridPage } from './users_grid_page';

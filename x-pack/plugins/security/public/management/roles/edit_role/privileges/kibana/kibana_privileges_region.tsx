@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { Space } from '../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../../plugins/features/public';
-import { KibanaPrivileges, Role } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../lib/kibana_privilege_calculator';
-import { RoleValidator } from '../../../lib/validate_role';
+import { Capabilities } from 'src/core/public';
+import { Space } from '../../../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../../../features/public';
+import { KibanaPrivileges, Role } from '../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from './kibana_privilege_calculator';
+import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
@@ -21,13 +20,12 @@ interface Props {
   role: Role;
   spacesEnabled: boolean;
   spaces?: Space[];
-  uiCapabilities: UICapabilities;
+  uiCapabilities: Capabilities;
   features: Feature[];
   editable: boolean;
   kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
   validator: RoleValidator;
-  intl: InjectedIntl;
 }
 
 export class KibanaPrivilegesRegion extends Component<Props, {}> {
@@ -81,7 +79,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           privilegeCalculatorFactory={privilegeCalculatorFactory}
           onChange={onChange}
           editable={editable}
-          intl={this.props.intl}
         />
       );
     }

@@ -9,7 +9,7 @@ import {
   StoredRoleTemplate,
   InlineRoleTemplate,
   InvalidRoleTemplate,
-} from '../../../../../../common/model';
+} from '../../../../../common/model';
 
 export function isStoredRoleTemplate(
   roleMappingTemplate: RoleTemplate

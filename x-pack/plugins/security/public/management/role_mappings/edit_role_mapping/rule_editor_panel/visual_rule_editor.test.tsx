@@ -8,7 +8,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { findTestSubject } from 'test_utils/find_test_subject';
-import { AnyRule, AllRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../../model';
+import { AnyRule, AllRule, FieldRule, ExceptAnyRule, ExceptAllRule } from '../../model';
 import { RuleGroupEditor } from './rule_group_editor';
 import { FieldRuleEditor } from './field_rule_editor';
 

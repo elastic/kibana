@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { DocLinksStart } from 'src/core/public';
 
-class DocumentationLinksService {
-  private esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+export class DocumentationLinksService {
+  private readonly esDocBasePath: string;
+
+  constructor(docLinks: DocLinksStart) {
+    this.esDocBasePath = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/`;
+  }
 
   public getRoleMappingDocUrl() {
     return `${this.esDocBasePath}/mapping-roles.html`;
@@ -25,5 +29,3 @@ class DocumentationLinksService {
     return `${this.esDocBasePath}/role-mapping-resources.html#mapping-roles-rule-field`;
   }
 }
-
-export const documentationLinks = new DocumentationLinksService();

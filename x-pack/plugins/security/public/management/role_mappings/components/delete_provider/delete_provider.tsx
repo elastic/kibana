@@ -6,13 +6,14 @@
 
 import React, { Fragment, useRef, useState, ReactElement } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { RoleMapping } from '../../../../../../common/model';
-import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
+import { NotificationsStart } from 'src/core/public';
+import { RoleMapping } from '../../../../../common/model';
+import { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 
 interface Props {
-  roleMappingsAPI: RoleMappingsAPI;
+  roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
+  notifications: NotificationsStart;
   children: (deleteMappings: DeleteRoleMappings) => ReactElement;
 }
 
@@ -23,7 +24,11 @@ export type DeleteRoleMappings = (
 
 type OnSuccessCallback = (deletedRoleMappings: string[]) => void;
 
-export const DeleteProvider: React.FunctionComponent<Props> = ({ roleMappingsAPI, children }) => {
+export const DeleteProvider: React.FunctionComponent<Props> = ({
+  roleMappingsAPI,
+  children,
+  notifications,
+}) => {
   const [roleMappings, setRoleMappings] = useState<RoleMapping[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteInProgress, setIsDeleteInProgress] = useState(false);
@@ -55,7 +60,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({ roleMappingsAPI
     try {
       result = await roleMappingsAPI.deleteRoleMappings(roleMappings.map(rm => rm.name));
     } catch (e) {
-      toastNotifications.addError(e, {
+      notifications.toasts.addError(e, {
         title: i18n.translate(
           'xpack.security.management.roleMappings.deleteRoleMapping.unknownError',
           {
@@ -92,7 +97,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({ roleMappingsAPI
               values: { name: successfulDeletes[0].name },
             }
           );
-      toastNotifications.addSuccess({
+      notifications.toasts.addSuccess({
         title: successMessage,
         'data-test-subj': 'deletedRoleMappingSuccessToast',
       });
@@ -121,7 +126,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({ roleMappingsAPI
               values: { name: erroredDeletes[0].name },
             }
           );
-      toastNotifications.addDanger(errorMessage);
+      notifications.toasts.addDanger(errorMessage);
     }
   };
 

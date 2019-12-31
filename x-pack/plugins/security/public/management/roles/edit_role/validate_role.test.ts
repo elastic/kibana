@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Role } from '../../../../../common/model';
+import { Role } from '../../../../common/model';
 import { RoleValidator } from './validate_role';
 
 let validator: RoleValidator;

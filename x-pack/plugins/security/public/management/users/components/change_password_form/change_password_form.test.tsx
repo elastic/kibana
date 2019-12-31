@@ -7,9 +7,11 @@ import { EuiFieldText } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { User } from '../../../../common/model';
-import { UserAPIClient } from '../../../lib/api';
+import { User } from '../../../../../common/model';
 import { ChangePasswordForm } from './change_password_form';
+
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { userAPIClientMock } from '../../index.mock';
 
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {
   return wrapper.find(EuiFieldText).filter('[data-test-subj="currentPassword"]');
@@ -22,8 +24,6 @@ function getNewPasswordField(wrapper: ReactWrapper<any>) {
 function getConfirmPasswordField(wrapper: ReactWrapper<any>) {
   return wrapper.find(EuiFieldText).filter('[data-test-subj="confirmNewPassword"]');
 }
-
-jest.mock('ui/kfetch');
 
 describe('<ChangePasswordForm>', () => {
   describe('for the current user', () => {
@@ -40,7 +40,8 @@ describe('<ChangePasswordForm>', () => {
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={true}
-          apiClient={new UserAPIClient()}
+          apiClient={userAPIClientMock.create()}
+          notifications={coreMock.createStart().notifications}
         />
       );
 
@@ -60,15 +61,15 @@ describe('<ChangePasswordForm>', () => {
 
       const callback = jest.fn();
 
-      const apiClient = new UserAPIClient();
-      apiClient.changePassword = jest.fn();
+      const apiClientMock = userAPIClientMock.create();
 
       const wrapper = mountWithIntl(
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={true}
           onChangePassword={callback}
-          apiClient={apiClient}
+          apiClient={apiClientMock}
+          notifications={coreMock.createStart().notifications}
         />
       );
 
@@ -83,8 +84,8 @@ describe('<ChangePasswordForm>', () => {
 
       wrapper.find('button[data-test-subj="changePasswordButton"]').simulate('click');
 
-      expect(apiClient.changePassword).toHaveBeenCalledTimes(1);
-      expect(apiClient.changePassword).toHaveBeenCalledWith(
+      expect(apiClientMock.changePassword).toHaveBeenCalledTimes(1);
+      expect(apiClientMock.changePassword).toHaveBeenCalledWith(
         'user',
         'myNewPassword',
         'myCurrentPassword'
@@ -106,7 +107,8 @@ describe('<ChangePasswordForm>', () => {
         <ChangePasswordForm
           user={user}
           isUserChangingOwnPassword={false}
-          apiClient={new UserAPIClient()}
+          apiClient={userAPIClientMock.create()}
+          notifications={coreMock.createStart().notifications}
         />
       );
 

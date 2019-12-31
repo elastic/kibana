@@ -15,7 +15,7 @@ exports[`it renders without crashing 1`] = `
         />
         <ForwardRef
           className="editRole__learnMore"
-          href="undefinedguide/en/elasticsearch/reference/undefined/security-privileges.html#privileges-list-cluster"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
           target="_blank"
         >
           <FormattedMessage
@@ -81,7 +81,7 @@ exports[`it renders without crashing 1`] = `
         />
         <ForwardRef
           className="editRole__learnMore"
-          href="undefinedguide/en/elasticsearch/reference/undefined/security-privileges.html#_run_as_privilege"
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#_run_as_privilege"
           target="_blank"
         >
           <FormattedMessage
@@ -154,7 +154,7 @@ exports[`it renders without crashing 1`] = `
       />
       <EuiLink
         className="editRole__learnMore"
-        href="undefinedguide/en/elasticsearch/reference/undefined/security-privileges.html#privileges-list-indices"
+        href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-indices"
         target="_blank"
       >
         <FormattedMessage
@@ -166,8 +166,6 @@ exports[`it renders without crashing 1`] = `
     </p>
   </EuiText>
   <IndexPrivileges
-    allowDocumentLevelSecurity={true}
-    allowFieldLevelSecurity={true}
     availableIndexPrivileges={
       Array [
         "all",
@@ -176,8 +174,22 @@ exports[`it renders without crashing 1`] = `
         "index",
       ]
     }
-    httpClient={[MockFunction]}
     indexPatterns={Array []}
+    indicesAPIClient={
+      Object {
+        "getFields": [MockFunction],
+      }
+    }
+    license={
+      Object {
+        "features$": Observable {
+          "_isScalar": false,
+          "_subscribe": [Function],
+        },
+        "getFeatures": [MockFunction],
+        "isEnabled": [MockFunction],
+      }
+    }
     onChange={[MockFunction]}
     role={
       Object {

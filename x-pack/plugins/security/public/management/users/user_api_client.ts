@@ -4,40 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
-import { Role, User, EditUser } from '../../common/model';
+import { HttpStart } from 'src/core/public';
+import { Role, User, EditUser } from '../../../common/model';
 
 const usersUrl = '/internal/security/users';
 const rolesUrl = '/api/security/role';
 
 export class UserAPIClient {
-  public async getUsers(): Promise<User[]> {
-    return await kfetch({ pathname: usersUrl });
+  constructor(private readonly http: HttpStart) {}
+
+  public async getUsers() {
+    return await this.http.get<User[]>(usersUrl);
   }
 
-  public async getUser(username: string): Promise<User> {
-    const url = `${usersUrl}/${encodeURIComponent(username)}`;
-    return await kfetch({ pathname: url });
+  public async getUser(username: string) {
+    return await this.http.get<User>(`${usersUrl}/${encodeURIComponent(username)}`);
   }
 
   public async deleteUser(username: string) {
-    const url = `${usersUrl}/${encodeURIComponent(username)}`;
-    await kfetch({ pathname: url, method: 'DELETE' }, {});
+    await this.http.delete(`${usersUrl}/${encodeURIComponent(username)}`);
   }
 
   public async saveUser(user: EditUser) {
-    const url = `${usersUrl}/${encodeURIComponent(user.username)}`;
-
-    await kfetch({ pathname: url, body: JSON.stringify(user), method: 'POST' });
+    await this.http.post(`${usersUrl}/${encodeURIComponent(user.username)}`, {
+      body: JSON.stringify(user),
+    });
   }
 
-  public async getRoles(): Promise<Role[]> {
-    return await kfetch({ pathname: rolesUrl });
+  public async getRoles() {
+    return await this.http.get<Role[]>(rolesUrl);
   }
 
-  public async getRole(name: string): Promise<Role> {
-    const url = `${rolesUrl}/${encodeURIComponent(name)}`;
-    return await kfetch({ pathname: url });
+  public async getRole(name: string) {
+    return await this.http.get<Role>(`${rolesUrl}/${encodeURIComponent(name)}`);
   }
 
   public async changePassword(username: string, password: string, currentPassword: string) {
@@ -47,9 +46,8 @@ export class UserAPIClient {
     if (currentPassword) {
       data.password = currentPassword;
     }
-    await kfetch({
-      pathname: `${usersUrl}/${encodeURIComponent(username)}/password`,
-      method: 'POST',
+
+    await this.http.post(`${usersUrl}/${encodeURIComponent(username)}/password`, {
       body: JSON.stringify(data),
     });
   }

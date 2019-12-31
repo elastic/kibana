@@ -7,9 +7,13 @@
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { documentationLinks } from '../../services/documentation_links';
+import { DocumentationLinksService } from '../../documentation_links';
 
-export const NoCompatibleRealms: React.FunctionComponent = () => (
+interface Props {
+  docLinks: DocumentationLinksService;
+}
+
+export const NoCompatibleRealms: React.FunctionComponent<Props> = ({ docLinks }: Props) => (
   <EuiCallOut
     title={
       <FormattedMessage
@@ -25,7 +29,7 @@ export const NoCompatibleRealms: React.FunctionComponent = () => (
       defaultMessage="Role mappings will not be applied to any users. Contact your system administrator and refer to the {link} for more information."
       values={{
         link: (
-          <EuiLink href={documentationLinks.getRoleMappingDocUrl()} external={true} target="_blank">
+          <EuiLink href={docLinks.getRoleMappingDocUrl()} external={true} target="_blank">
             <FormattedMessage
               id="xpack.security.management.roleMappings.noCompatibleRealmsErrorLinkText"
               defaultMessage="docs"

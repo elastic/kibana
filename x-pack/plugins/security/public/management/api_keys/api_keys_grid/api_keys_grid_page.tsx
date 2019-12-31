@@ -27,15 +27,22 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 import _ from 'lodash';
-import { toastNotifications } from 'ui/notify';
+import { NotificationsStart } from 'src/core/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SectionLoading } from '../../../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
-import { ApiKey, ApiKeyToInvalidate } from '../../../../../common/model';
-import { ApiKeysApi } from '../../../../lib/api_keys_api';
+import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
+import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
+import { APIKeysAPIClient } from '../api_keys_api_client';
+import { DocumentationLinksService } from '../documentation_links';
 import { PermissionDenied } from './permission_denied';
 import { EmptyPrompt } from './empty_prompt';
 import { NotEnabled } from './not_enabled';
 import { InvalidateProvider } from './invalidate_provider';
+
+interface Props {
+  notifications: NotificationsStart;
+  docLinks: DocumentationLinksService;
+  apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
+}
 
 interface State {
   isLoadingApp: boolean;
@@ -50,7 +57,7 @@ interface State {
 
 const DATE_FORMAT = 'MMMM Do YYYY HH:mm:ss';
 
-export class ApiKeysGridPage extends Component<any, State> {
+export class APIKeysGridPage extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -124,7 +131,7 @@ export class ApiKeysGridPage extends Component<any, State> {
     if (!areApiKeysEnabled) {
       return (
         <EuiPageContent>
-          <NotEnabled />
+          <NotEnabled docLinks={this.props.docLinks} />
         </EuiPageContent>
       );
     }
@@ -132,7 +139,7 @@ export class ApiKeysGridPage extends Component<any, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt isAdmin={isAdmin} />
+          <EmptyPrompt isAdmin={isAdmin} docLinks={this.props.docLinks} />
         </EuiPageContent>
       );
     }
@@ -210,7 +217,11 @@ export class ApiKeysGridPage extends Component<any, State> {
 
     const search: EuiInMemoryTableProps<ApiKey>['search'] = {
       toolsLeft: selectedItems.length ? (
-        <InvalidateProvider isAdmin={isAdmin}>
+        <InvalidateProvider
+          isAdmin={isAdmin}
+          notifications={this.props.notifications}
+          apiKeysAPIClient={this.props.apiKeysAPIClient}
+        >
           {invalidateApiKeyPrompt => {
             return (
               <EuiButton
@@ -433,7 +444,11 @@ export class ApiKeysGridPage extends Component<any, State> {
               return (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <InvalidateProvider isAdmin={isAdmin}>
+                    <InvalidateProvider
+                      isAdmin={isAdmin}
+                      notifications={this.props.notifications}
+                      apiKeysAPIClient={this.props.apiKeysAPIClient}
+                    >
                       {invalidateApiKeyPrompt => {
                         return (
                           <EuiToolTip
@@ -481,7 +496,7 @@ export class ApiKeysGridPage extends Component<any, State> {
 
   private async checkPrivileges() {
     try {
-      const { isAdmin, areApiKeysEnabled } = await ApiKeysApi.checkPrivileges();
+      const { isAdmin, areApiKeysEnabled } = await this.props.apiKeysAPIClient.checkPrivileges();
       this.setState({ isAdmin, areApiKeysEnabled });
 
       if (areApiKeysEnabled) {
@@ -494,14 +509,11 @@ export class ApiKeysGridPage extends Component<any, State> {
       if (_.get(e, 'body.statusCode') === 403) {
         this.setState({ permissionDenied: true, isLoadingApp: false });
       } else {
-        toastNotifications.addDanger(
-          this.props.i18n.translate(
-            'xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage',
-            {
-              defaultMessage: 'Error checking privileges: {message}',
-              values: { message: _.get(e, 'body.message', '') },
-            }
-          )
+        this.props.notifications.toasts.addDanger(
+          i18n.translate('xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage', {
+            defaultMessage: 'Error checking privileges: {message}',
+            values: { message: _.get(e, 'body.message', '') },
+          })
         );
       }
     }
@@ -520,7 +532,7 @@ export class ApiKeysGridPage extends Component<any, State> {
   private loadApiKeys = async () => {
     try {
       const { isAdmin } = this.state;
-      const { apiKeys } = await ApiKeysApi.getApiKeys(isAdmin);
+      const { apiKeys } = await this.props.apiKeysAPIClient.getApiKeys(isAdmin);
       this.setState({ apiKeys });
     } catch (e) {
       this.setState({ error: e });

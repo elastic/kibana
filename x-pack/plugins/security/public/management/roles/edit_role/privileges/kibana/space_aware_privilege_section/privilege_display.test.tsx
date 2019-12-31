@@ -7,7 +7,7 @@
 import { EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PRIVILEGE_SOURCE } from '../../../../../../../lib/kibana_privilege_calculator';
+import { PRIVILEGE_SOURCE } from '../kibana_privilege_calculator';
 import { PrivilegeDisplay } from './privilege_display';
 
 describe('PrivilegeDisplay', () => {

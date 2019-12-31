@@ -9,8 +9,8 @@ import { merge } from 'lodash';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
-import { KibanaPrivileges } from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+import { KibanaPrivileges } from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { rawKibanaPrivileges } from './__fixtures__';
 

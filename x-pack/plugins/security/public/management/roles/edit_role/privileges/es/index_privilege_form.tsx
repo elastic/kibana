@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { RoleIndexPrivilege } from '../../../../../../../common/model';
-import { RoleValidator } from '../../../lib/validate_role';
+import { RoleIndexPrivilege } from '../../../../../../common/model';
+import { RoleValidator } from '../../validate_role';
 
 const fromOption = (option: any) => option.label;
 const toOption = (value: string) => ({ label: value });

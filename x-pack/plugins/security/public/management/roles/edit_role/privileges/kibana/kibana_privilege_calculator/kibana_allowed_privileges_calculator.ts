@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../common/model';
+import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import {
   areActionsFullyCovered,
   compareActions,
-} from '../../../../../../plugins/security/common/privilege_calculator_utils';
-import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
-import { isGlobalPrivilegeDefinition } from '../privilege_utils';
+} from '../../../../../../../common/privilege_calculator_utils';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import {
   AllowedPrivilege,
   CalculatedPrivilege,
@@ -23,7 +22,7 @@ export class KibanaAllowedPrivilegesCalculator {
   private globalPrivilege: RoleKibanaPrivilege;
 
   // list of privilege actions that comprise the global base privilege
-  private assignedGlobalBaseActions: string[];
+  private readonly assignedGlobalBaseActions: string[];
 
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {
     this.globalPrivilege = this.locateGlobalPrivilege(role);

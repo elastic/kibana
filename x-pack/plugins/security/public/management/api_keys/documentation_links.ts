@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { DocLinksStart } from 'src/core/public';
 
-class DocumentationLinksService {
-  private esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+export class DocumentationLinksService {
+  private readonly esDocBasePath: string;
 
-  public getApiKeyServiceSettingsDocUrl(): string {
+  constructor(docLinks: DocLinksStart) {
+    this.esDocBasePath = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/`;
+  }
+
+  public getApiKeyServiceSettingsDocUrl() {
     return `${this.esDocBasePath}security-settings.html#api-key-service-settings`;
   }
 
-  public getCreateApiKeyDocUrl(): string {
+  public getCreateApiKeyDocUrl() {
     return `${this.esDocBasePath}security-api-create-api-key.html`;
   }
 }
-
-export const documentationLinks = new DocumentationLinksService();

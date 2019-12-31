@@ -6,8 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPrivileges, Role } from '../../../../../../../common/model';
-import { RoleValidator } from '../../../lib/validate_role';
+import { KibanaPrivileges, Role } from '../../../../../../common/model';
+import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';

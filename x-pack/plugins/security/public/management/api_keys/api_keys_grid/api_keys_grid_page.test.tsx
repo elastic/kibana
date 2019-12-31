@@ -4,58 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let mockSimulate403 = false;
-let mockSimulate500 = false;
-let mockAreApiKeysEnabled = true;
-let mockIsAdmin = true;
-
-const mock403 = () => ({ body: { statusCode: 403 } });
-const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
-
-jest.mock('../../../../lib/api_keys_api', () => {
-  return {
-    ApiKeysApi: {
-      async checkPrivileges() {
-        if (mockSimulate403) {
-          throw mock403();
-        }
-
-        return {
-          isAdmin: mockIsAdmin,
-          areApiKeysEnabled: mockAreApiKeysEnabled,
-        };
-      },
-      async getApiKeys() {
-        if (mockSimulate500) {
-          throw mock500();
-        }
-
-        return {
-          apiKeys: [
-            {
-              creation: 1571322182082,
-              expiration: 1571408582082,
-              id: '0QQZ2m0BO2XZwgJFuWTT',
-              invalidated: false,
-              name: 'my-api-key',
-              realm: 'reserved',
-              username: 'elastic',
-            },
-          ],
-        };
-      },
-    },
-  };
-});
-
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ApiKeysGridPage } from './api_keys_grid_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
 
 import { NotEnabled } from './not_enabled';
 import { PermissionDenied } from './permission_denied';
+import { APIKeysAPIClient } from '../api_keys_api_client';
+import { DocumentationLinksService } from '../documentation_links';
+import { APIKeysGridPage } from './api_keys_grid_page';
+
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { apiKeysAPIClientMock } from '../index.mock';
+
+const mock403 = () => ({ body: { statusCode: 403 } });
+const mock500 = () => ({ body: { error: 'Internal Server Error', message: '', statusCode: 500 } });
 
 const waitForRender = async (
   wrapper: ReactWrapper<any>,
@@ -77,23 +41,51 @@ const waitForRender = async (
   });
 };
 
-describe('ApiKeysGridPage', () => {
+describe('APIKeysGridPage', () => {
+  let apiClientMock: jest.Mocked<PublicMethodsOf<APIKeysAPIClient>>;
   beforeEach(() => {
-    mockSimulate403 = false;
-    mockSimulate500 = false;
-    mockAreApiKeysEnabled = true;
-    mockIsAdmin = true;
+    apiClientMock = apiKeysAPIClientMock.create();
+    apiClientMock.checkPrivileges.mockResolvedValue({
+      isAdmin: true,
+      areApiKeysEnabled: true,
+    });
+    apiClientMock.getApiKeys.mockResolvedValue({
+      apiKeys: [
+        {
+          creation: 1571322182082,
+          expiration: 1571408582082,
+          id: '0QQZ2m0BO2XZwgJFuWTT',
+          invalidated: false,
+          name: 'my-api-key',
+          realm: 'reserved',
+          username: 'elastic',
+        },
+      ],
+    });
   });
 
+  const getViewProperties = () => {
+    const { docLinks, notifications } = coreMock.createStart();
+    return {
+      docLinks: new DocumentationLinksService(docLinks),
+      notifications,
+      apiKeysAPIClient: apiClientMock,
+    };
+  };
+
   it('renders a loading state when fetching API keys', async () => {
-    const wrapper = mountWithIntl(<ApiKeysGridPage />);
+    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
     expect(wrapper.find('[data-test-subj="apiKeysSectionLoading"]')).toHaveLength(1);
   });
 
   it('renders a callout when API keys are not enabled', async () => {
-    mockAreApiKeysEnabled = false;
-    const wrapper = mountWithIntl(<ApiKeysGridPage />);
+    apiClientMock.checkPrivileges.mockResolvedValue({
+      isAdmin: true,
+      areApiKeysEnabled: false,
+    });
+
+    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
     await waitForRender(wrapper, updatedWrapper => {
       return updatedWrapper.find(NotEnabled).length > 0;
@@ -103,8 +95,9 @@ describe('ApiKeysGridPage', () => {
   });
 
   it('renders permission denied if user does not have required permissions', async () => {
-    mockSimulate403 = true;
-    const wrapper = mountWithIntl(<ApiKeysGridPage />);
+    apiClientMock.checkPrivileges.mockRejectedValue(mock403());
+
+    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
     await waitForRender(wrapper, updatedWrapper => {
       return updatedWrapper.find(PermissionDenied).length > 0;
@@ -114,8 +107,9 @@ describe('ApiKeysGridPage', () => {
   });
 
   it('renders error callout if error fetching API keys', async () => {
-    mockSimulate500 = true;
-    const wrapper = mountWithIntl(<ApiKeysGridPage />);
+    apiClientMock.getApiKeys.mockRejectedValue(mock500());
+
+    const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
     await waitForRender(wrapper, updatedWrapper => {
       return updatedWrapper.find(EuiCallOut).length > 0;
@@ -125,7 +119,10 @@ describe('ApiKeysGridPage', () => {
   });
 
   describe('Admin view', () => {
-    const wrapper = mountWithIntl(<ApiKeysGridPage />);
+    let wrapper: ReactWrapper<any>;
+    beforeEach(() => {
+      wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
+    });
 
     it('renders a callout indicating the user is an administrator', async () => {
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
@@ -151,8 +148,15 @@ describe('ApiKeysGridPage', () => {
   });
 
   describe('Non-admin view', () => {
-    mockIsAdmin = false;
-    const wrapper = mountWithIntl(<ApiKeysGridPage />);
+    let wrapper: ReactWrapper<any>;
+    beforeEach(() => {
+      apiClientMock.checkPrivileges.mockResolvedValue({
+        isAdmin: false,
+        areApiKeysEnabled: true,
+      });
+
+      wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
+    });
 
     it('does NOT render a callout indicating the user is an administrator', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';

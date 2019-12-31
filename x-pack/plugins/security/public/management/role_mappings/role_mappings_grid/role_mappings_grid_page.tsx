@@ -25,24 +25,27 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RoleMapping } from '../../../../../../common/model';
-import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
+import { NotificationsStart } from 'src/core/public';
+import { RoleMapping } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
 import {
   NoCompatibleRealms,
   DeleteProvider,
   PermissionDenied,
   SectionLoading,
-} from '../../components';
-import { documentationLinks } from '../../services/documentation_links';
+} from '../components';
 import {
   getCreateRoleMappingHref,
   getEditRoleMappingHref,
   getEditRoleHref,
-} from '../../../management_urls';
+} from '../../management_urls';
+import { DocumentationLinksService } from '../documentation_links';
+import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 
 interface Props {
-  roleMappingsAPI: RoleMappingsAPI;
+  roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
+  notifications: NotificationsStart;
+  docLinks: DocumentationLinksService;
 }
 
 interface State {
@@ -140,7 +143,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                   values={{
                     learnMoreLink: (
                       <EuiLink
-                        href={documentationLinks.getRoleMappingDocUrl()}
+                        href={this.props.docLinks.getRoleMappingDocUrl()}
                         external={true}
                         target="_blank"
                       >
@@ -168,7 +171,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           <Fragment>
             {!this.state.hasCompatibleRealms && (
               <>
-                <NoCompatibleRealms />
+                <NoCompatibleRealms docLinks={this.props.docLinks} />
                 <EuiSpacer />
               </>
             )}
@@ -214,7 +217,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <DeleteProvider roleMappingsAPI={this.props.roleMappingsAPI}>
+        <DeleteProvider
+          roleMappingsAPI={this.props.roleMappingsAPI}
+          notifications={this.props.notifications}
+        >
           {deleteRoleMappingsPrompt => {
             return (
               <EuiButton
@@ -391,7 +397,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               return (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <DeleteProvider roleMappingsAPI={this.props.roleMappingsAPI}>
+                    <DeleteProvider
+                      roleMappingsAPI={this.props.roleMappingsAPI}
+                      notifications={this.props.notifications}
+                    >
                       {deleteRoleMappingPrompt => {
                         return (
                           <EuiToolTip

@@ -15,14 +15,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  RuleGroup,
-  AllRule,
-  AnyRule,
-  ExceptAllRule,
-  ExceptAnyRule,
-  FieldRule,
-} from '../../../model';
+import { RuleGroup, AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 interface Props {
   rule: RuleGroup;

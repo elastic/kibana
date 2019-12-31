@@ -10,8 +10,8 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeDisplay } from './privilege_display';
-import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { rawKibanaPrivileges } from './__fixtures__';
 
 interface TableRow {

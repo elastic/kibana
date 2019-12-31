@@ -6,51 +6,46 @@
 
 import React, { Component, Fragment } from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
-import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import { UserAPIClient } from '../../../lib/api';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { NotificationsStart } from 'src/core/public';
+import { UserAPIClient } from '../..';
 
 interface Props {
-  intl: InjectedIntl;
   usersToDelete: string[];
-  apiClient: UserAPIClient;
+  apiClient: PublicMethodsOf<UserAPIClient>;
+  notifications: NotificationsStart;
   onCancel: () => void;
   callback?: (usersToDelete: string[], errors: string[]) => void;
 }
 
-class ConfirmDeleteUI extends Component<Props, {}> {
+export class ConfirmDeleteUsers extends Component<Props, unknown> {
   public render() {
-    const { usersToDelete, onCancel, intl } = this.props;
+    const { usersToDelete, onCancel } = this.props;
     const moreThanOne = usersToDelete.length > 1;
     const title = moreThanOne
-      ? intl.formatMessage(
-          {
-            id: 'xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle',
-            defaultMessage: 'Delete {userLength} users',
-          },
-          { userLength: usersToDelete.length }
-        )
-      : intl.formatMessage(
-          {
-            id: 'xpack.security.management.users.confirmDelete.deleteOneUserTitle',
-            defaultMessage: 'Delete user {userLength}',
-          },
-          { userLength: usersToDelete[0] }
-        );
+      ? i18n.translate('xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle', {
+          defaultMessage: 'Delete {userLength} users',
+          values: { userLength: usersToDelete.length },
+        })
+      : i18n.translate('xpack.security.management.users.confirmDelete.deleteOneUserTitle', {
+          defaultMessage: 'Delete user {userLength}',
+          values: { userLength: usersToDelete[0] },
+        });
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
           title={title}
           onCancel={onCancel}
           onConfirm={this.deleteUsers}
-          cancelButtonText={intl.formatMessage({
-            id: 'xpack.security.management.users.confirmDelete.cancelButtonLabel',
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={intl.formatMessage({
-            id: 'xpack.security.management.users.confirmDelete.confirmButtonLabel',
-            defaultMessage: 'Delete',
-          })}
+          cancelButtonText={i18n.translate(
+            'xpack.security.management.users.confirmDelete.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.security.management.users.confirmDelete.confirmButtonLabel',
+            { defaultMessage: 'Delete' }
+          )}
           buttonColor="danger"
         >
           <div>
@@ -82,31 +77,23 @@ class ConfirmDeleteUI extends Component<Props, {}> {
   }
 
   private deleteUsers = () => {
-    const { usersToDelete, callback, apiClient } = this.props;
+    const { usersToDelete, callback, apiClient, notifications } = this.props;
     const errors: string[] = [];
     usersToDelete.forEach(async username => {
       try {
         await apiClient.deleteUser(username);
-        toastNotifications.addSuccess(
-          this.props.intl.formatMessage(
-            {
-              id:
-                'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
-              defaultMessage: 'Deleted user {username}',
-            },
-            { username }
+        notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
+            { defaultMessage: 'Deleted user {username}', values: { username } }
           )
         );
       } catch (e) {
         errors.push(username);
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id:
-                'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
-              defaultMessage: 'Error deleting user {username}',
-            },
-            { username }
+        notifications.toasts.addDanger(
+          i18n.translate(
+            'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
+            { defaultMessage: 'Error deleting user {username}', values: { username } }
           )
         );
       }
@@ -116,5 +103,3 @@ class ConfirmDeleteUI extends Component<Props, {}> {
     });
   };
 }
-
-export const ConfirmDeleteUsers = injectI18n(ConfirmDeleteUI);

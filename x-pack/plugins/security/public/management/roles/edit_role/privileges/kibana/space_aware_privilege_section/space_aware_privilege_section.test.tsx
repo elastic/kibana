@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { KibanaPrivileges } from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
-import { RoleValidator } from '../../../../lib/validate_role';
+import { KibanaPrivileges } from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import { RoleValidator } from '../../../validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';

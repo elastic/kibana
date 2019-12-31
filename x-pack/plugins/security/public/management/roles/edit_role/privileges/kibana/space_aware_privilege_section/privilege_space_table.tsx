@@ -12,22 +12,21 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import _ from 'lodash';
 import React, { Component } from 'react';
-import { getSpaceColor } from '../../../../../../../../../spaces/public/space_avatar';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { getSpaceColor } from '../../../../../../../../../legacy/plugins/spaces/public/space_avatar';
+import { Space } from '../../../../../../../../spaces/common/model/space';
 import {
   FeaturesPrivileges,
   Role,
   RoleKibanaPrivilege,
-} from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+  copyRole,
+} from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import {
   isGlobalPrivilegeDefinition,
   hasAssignedFeaturePrivileges,
-} from '../../../../../../../lib/privilege_utils';
-import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+} from '../../../privilege_utils';
+import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 

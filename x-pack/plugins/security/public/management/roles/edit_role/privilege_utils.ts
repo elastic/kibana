@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RoleKibanaPrivilege } from '../../common/model';
+import { RoleKibanaPrivilege } from '../../../../common/model';
 
 /**
  * Determines if the passed privilege spec defines global privileges.

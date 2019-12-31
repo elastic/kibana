@@ -8,16 +8,25 @@ import React, { useState, Fragment } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiCodeEditor,
+  EuiFormRow,
+  EuiButton,
+  EuiSpacer,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../../model';
-import { documentationLinks } from '../../../services/documentation_links';
+import { DocumentationLinksService } from '../../documentation_links';
+import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../model';
 
 interface Props {
   rules: Rule | null;
   onChange: (updatedRules: Rule | null) => void;
   onValidityChange: (isValid: boolean) => void;
+  docLinks: DocumentationLinksService;
 }
 
 export const JSONRuleEditor = (props: Props) => {
@@ -107,7 +116,7 @@ export const JSONRuleEditor = (props: Props) => {
               values={{
                 roleMappingAPI: (
                   <EuiLink
-                    href={documentationLinks.getRoleMappingAPIDocUrl()}
+                    href={props.docLinks.getRoleMappingAPIDocUrl()}
                     external={true}
                     target="_blank"
                   >

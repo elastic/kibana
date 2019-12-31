@@ -9,9 +9,9 @@ import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldRuleEditor } from './field_rule_editor';
 import { RuleGroupEditor } from './rule_group_editor';
-import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
-import { Rule, FieldRule, RuleGroup, AllRule } from '../../../model';
-import { isRuleGroup } from '../../services/is_rule_group';
+import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
+import { Rule, FieldRule, RuleGroup, AllRule } from '../../model';
+import { isRuleGroup } from '../services/is_rule_group';
 
 interface Props {
   rules: Rule | null;

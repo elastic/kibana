@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
 import { EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
+import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { FeatureTable } from './feature_table';
 
 const defaultPrivilegeDefinition = new KibanaPrivileges({
@@ -113,7 +112,6 @@ describe('FeatureTable', () => {
         onChange={jest.fn()}
         onChangeAll={jest.fn()}
         spacesIndex={0}
-        intl={null as any}
       />
     );
 
@@ -141,7 +139,6 @@ describe('FeatureTable', () => {
         onChange={jest.fn()}
         onChangeAll={jest.fn()}
         spacesIndex={-1}
-        intl={null as any}
       />
     );
 

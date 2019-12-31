@@ -10,6 +10,7 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
+  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,
@@ -18,14 +19,15 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RoleMapping } from '../../../../../../../common/model';
+import { RoleMapping } from '../../../../../common/model';
+import { RolesAPIClient } from '../../../roles';
 import {
   validateRoleMappingName,
   validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
-} from '../../services/role_mapping_validation';
+} from '../services/role_mapping_validation';
 import { RoleSelector } from '../role_selector';
-import { documentationLinks } from '../../../services/documentation_links';
+import { DocumentationLinksService } from '../../documentation_links';
 
 interface Props {
   roleMapping: RoleMapping;
@@ -34,6 +36,8 @@ interface Props {
   validateForm: boolean;
   canUseInlineScripts: boolean;
   canUseStoredScripts: boolean;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  docLinks: DocumentationLinksService;
 }
 
 interface State {
@@ -163,6 +167,7 @@ export class MappingInfoPanel extends Component<Props, State> {
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
+            rolesAPIClient={this.props.rolesAPIClient}
             roleMapping={this.props.roleMapping}
             mode={this.state.rolesMode}
             canUseInlineScripts={this.props.canUseInlineScripts}
@@ -199,7 +204,7 @@ export class MappingInfoPanel extends Component<Props, State> {
                 defaultMessage="Create templates that describe the roles to assign to your users."
               />{' '}
               <EuiLink
-                href={documentationLinks.getRoleMappingTemplateDocUrl()}
+                href={this.props.docLinks.getRoleMappingTemplateDocUrl()}
                 external={true}
                 target="_blank"
               >
@@ -230,6 +235,7 @@ export class MappingInfoPanel extends Component<Props, State> {
       >
         <EuiFormRow fullWidth={true} {...validationFunction()}>
           <RoleSelector
+            rolesAPIClient={this.props.rolesAPIClient}
             roleMapping={this.props.roleMapping}
             mode={this.state.rolesMode}
             canUseInlineScripts={this.props.canUseInlineScripts}

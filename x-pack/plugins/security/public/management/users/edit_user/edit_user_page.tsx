@@ -26,22 +26,21 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
-import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import { SecurityPluginSetup } from '../../../../../../../../plugins/security/public';
-import { UserValidator, UserValidationResult } from '../../../../lib/validate_user';
-import { User, EditUser, Role } from '../../../../../common/model';
-import { USERS_PATH } from '../../../../views/management/management_urls';
-import { ConfirmDeleteUsers } from '../../../../components/management/users';
-import { UserAPIClient } from '../../../../lib/api';
-import { ChangePasswordForm } from '../../../../components/management/change_password_form';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { NotificationsStart } from 'src/core/public';
+import { User, EditUser, Role } from '../../../../common/model';
+import { AuthenticationServiceSetup } from '../../../authentication';
+import { USERS_PATH } from '../../management_urls';
+import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
+import { UserValidator, UserValidationResult } from './validate_user';
+import { UserAPIClient } from '..';
 
 interface Props {
-  username: string;
-  intl: InjectedIntl;
-  changeUrl: (path: string) => void;
-  apiClient: UserAPIClient;
-  securitySetup: SecurityPluginSetup;
+  username?: string;
+  apiClient: PublicMethodsOf<UserAPIClient>;
+  authc: AuthenticationServiceSetup;
+  notifications: NotificationsStart;
 }
 
 interface State {
@@ -56,7 +55,11 @@ interface State {
   formError: UserValidationResult | null;
 }
 
-class EditUserPageUI extends Component<Props, State> {
+function backToUserList() {
+  window.location.hash = USERS_PATH;
+}
+
+export class EditUserPage extends Component<Props, State> {
   private validator: UserValidator;
 
   constructor(props: Props) {
@@ -84,7 +87,17 @@ class EditUserPageUI extends Component<Props, State> {
   }
 
   public async componentDidMount() {
-    const { username, apiClient, securitySetup } = this.props;
+    await this.setCurrentUser();
+  }
+
+  public async componentDidUpdate(prevProps: Props) {
+    if (prevProps.username !== this.props.username) {
+      await this.setCurrentUser();
+    }
+  }
+
+  private async setCurrentUser() {
+    const { username, apiClient, notifications, authc } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
@@ -93,16 +106,15 @@ class EditUserPageUI extends Component<Props, State> {
           password: '',
           confirmPassword: '',
         };
-        currentUser = await securitySetup.authc.getCurrentUser();
+        currentUser = await authc.getCurrentUser();
       } catch (err) {
-        toastNotifications.addDanger({
-          title: this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.editUser.errorLoadingUserTitle',
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.security.management.users.editUser.errorLoadingUserTitle', {
             defaultMessage: 'Error loading user',
           }),
           text: get(err, 'body.message') || err.message,
         });
-        return;
+        return backToUserList();
       }
     }
 
@@ -110,9 +122,8 @@ class EditUserPageUI extends Component<Props, State> {
     try {
       roles = await apiClient.getRoles();
     } catch (err) {
-      toastNotifications.addDanger({
-        title: this.props.intl.formatMessage({
-          id: 'xpack.security.management.users.editUser.errorLoadingRolesTitle',
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.security.management.users.editUser.errorLoadingRolesTitle', {
           defaultMessage: 'Error loading roles',
         }),
         text: get(err, 'body.message') || err.message,
@@ -131,8 +142,7 @@ class EditUserPageUI extends Component<Props, State> {
 
   private handleDelete = (usernames: string[], errors: string[]) => {
     if (errors.length === 0) {
-      const { changeUrl } = this.props;
-      changeUrl(USERS_PATH);
+      backToUserList();
     }
   };
 
@@ -148,7 +158,7 @@ class EditUserPageUI extends Component<Props, State> {
       this.setState({
         formError: null,
       });
-      const { changeUrl, apiClient } = this.props;
+      const { apiClient } = this.props;
       const { user, isNewUser, selectedRoles } = this.state;
       const userToSave: EditUser = { ...user };
       if (!isNewUser) {
@@ -160,26 +170,23 @@ class EditUserPageUI extends Component<Props, State> {
       });
       try {
         await apiClient.saveUser(userToSave);
-        toastNotifications.addSuccess(
-          this.props.intl.formatMessage(
+        this.props.notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
             {
-              id:
-                'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
               defaultMessage: 'Saved user {message}',
-            },
-            { message: user.username }
+              values: { message: user.username },
+            }
           )
         );
-        changeUrl(USERS_PATH);
+
+        backToUserList();
       } catch (e) {
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.security.management.users.editUser.savingUserErrorMessage',
-              defaultMessage: 'Error saving user: {message}',
-            },
-            { message: get(e, 'body.message', 'Unknown error') }
-          )
+        this.props.notifications.toasts.addDanger(
+          i18n.translate('xpack.security.management.users.editUser.savingUserErrorMessage', {
+            defaultMessage: 'Error saving user: {message}',
+            values: { message: get(e, 'body.message', 'Unknown error') },
+          })
         );
       }
     }
@@ -189,8 +196,7 @@ class EditUserPageUI extends Component<Props, State> {
     return (
       <Fragment>
         <EuiFormRow
-          label={this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.editUser.passwordFormRowLabel',
+          label={i18n.translate('xpack.security.management.users.editUser.passwordFormRowLabel', {
             defaultMessage: 'Password',
           })}
           {...this.validator.validatePassword(this.state.user)}
@@ -203,10 +209,10 @@ class EditUserPageUI extends Component<Props, State> {
           />
         </EuiFormRow>
         <EuiFormRow
-          label={this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.editUser.confirmPasswordFormRowLabel',
-            defaultMessage: 'Confirm password',
-          })}
+          label={i18n.translate(
+            'xpack.security.management.users.editUser.confirmPasswordFormRowLabel',
+            { defaultMessage: 'Confirm password' }
+          )}
           {...this.validator.validateConfirmPassword(this.state.user)}
         >
           <EuiFieldText
@@ -236,10 +242,10 @@ class EditUserPageUI extends Component<Props, State> {
         {user.username === 'kibana' ? (
           <Fragment>
             <EuiCallOut
-              title={this.props.intl.formatMessage({
-                id: 'xpack.security.management.users.editUser.changePasswordExtraStepTitle',
-                defaultMessage: 'Extra step needed',
-              })}
+              title={i18n.translate(
+                'xpack.security.management.users.editUser.changePasswordExtraStepTitle',
+                { defaultMessage: 'Extra step needed' }
+              )}
               color="warning"
               iconType="help"
             >
@@ -260,6 +266,7 @@ class EditUserPageUI extends Component<Props, State> {
           isUserChangingOwnPassword={userIsLoggedInUser}
           onChangePassword={this.toggleChangePasswordForm}
           apiClient={this.props.apiClient}
+          notifications={this.props.notifications}
         />
       </Fragment>
     );
@@ -352,7 +359,6 @@ class EditUserPageUI extends Component<Props, State> {
   };
 
   public render() {
-    const { changeUrl, intl } = this.props;
     const {
       user,
       roles,
@@ -417,6 +423,7 @@ class EditUserPageUI extends Component<Props, State> {
                 usersToDelete={[user.username]}
                 callback={this.handleDelete}
                 apiClient={this.props.apiClient}
+                notifications={this.props.notifications}
               />
             ) : null}
 
@@ -425,17 +432,16 @@ class EditUserPageUI extends Component<Props, State> {
                 {...this.validator.validateUsername(this.state.user)}
                 helpText={
                   !isNewUser && !reserved
-                    ? intl.formatMessage({
-                        id:
-                          'xpack.security.management.users.editUser.changingUserNameAfterCreationDescription',
-                        defaultMessage: `Usernames can't be changed after creation.`,
-                      })
+                    ? i18n.translate(
+                        'xpack.security.management.users.editUser.changingUserNameAfterCreationDescription',
+                        { defaultMessage: `Usernames can't be changed after creation.` }
+                      )
                     : null
                 }
-                label={intl.formatMessage({
-                  id: 'xpack.security.management.users.editUser.usernameFormRowLabel',
-                  defaultMessage: 'Username',
-                })}
+                label={i18n.translate(
+                  'xpack.security.management.users.editUser.usernameFormRowLabel',
+                  { defaultMessage: 'Username' }
+                )}
               >
                 <EuiFieldText
                   value={user.username || ''}
@@ -449,10 +455,10 @@ class EditUserPageUI extends Component<Props, State> {
               {reserved ? null : (
                 <Fragment>
                   <EuiFormRow
-                    label={intl.formatMessage({
-                      id: 'xpack.security.management.users.editUser.fullNameFormRowLabel',
-                      defaultMessage: 'Full name',
-                    })}
+                    label={i18n.translate(
+                      'xpack.security.management.users.editUser.fullNameFormRowLabel',
+                      { defaultMessage: 'Full name' }
+                    )}
                   >
                     <EuiFieldText
                       data-test-subj="userFormFullNameInput"
@@ -463,10 +469,10 @@ class EditUserPageUI extends Component<Props, State> {
                   </EuiFormRow>
                   <EuiFormRow
                     {...this.validator.validateEmail(this.state.user)}
-                    label={intl.formatMessage({
-                      id: 'xpack.security.management.users.editUser.emailAddressFormRowLabel',
-                      defaultMessage: 'Email address',
-                    })}
+                    label={i18n.translate(
+                      'xpack.security.management.users.editUser.emailAddressFormRowLabel',
+                      { defaultMessage: 'Email address' }
+                    )}
                   >
                     <EuiFieldText
                       data-test-subj="userFormEmailInput"
@@ -478,17 +484,17 @@ class EditUserPageUI extends Component<Props, State> {
                 </Fragment>
               )}
               <EuiFormRow
-                label={intl.formatMessage({
-                  id: 'xpack.security.management.users.editUser.rolesFormRowLabel',
-                  defaultMessage: 'Roles',
-                })}
+                label={i18n.translate(
+                  'xpack.security.management.users.editUser.rolesFormRowLabel',
+                  { defaultMessage: 'Roles' }
+                )}
               >
                 <EuiComboBox
                   data-test-subj="userFormRolesDropdown"
-                  placeholder={intl.formatMessage({
-                    id: 'xpack.security.management.users.editUser.addRolesPlaceholder',
-                    defaultMessage: 'Add roles',
-                  })}
+                  placeholder={i18n.translate(
+                    'xpack.security.management.users.editUser.addRolesPlaceholder',
+                    { defaultMessage: 'Add roles' }
+                  )}
                   onChange={this.onRolesChange}
                   isDisabled={reserved}
                   options={roles.map(role => {
@@ -513,7 +519,7 @@ class EditUserPageUI extends Component<Props, State> {
               <EuiHorizontalRule />
 
               {reserved && (
-                <EuiButton onClick={() => changeUrl(USERS_PATH)}>
+                <EuiButton onClick={backToUserList}>
                   <FormattedMessage
                     id="xpack.security.management.users.editUser.returnToUserListButtonLabel"
                     defaultMessage="Return to user list"
@@ -543,10 +549,7 @@ class EditUserPageUI extends Component<Props, State> {
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="userFormCancelButton"
-                      onClick={() => changeUrl(USERS_PATH)}
-                    >
+                    <EuiButtonEmpty data-test-subj="userFormCancelButton" onClick={backToUserList}>
                       <FormattedMessage
                         id="xpack.security.management.users.editUser.cancelButtonLabel"
                         defaultMessage="Cancel"
@@ -579,5 +582,3 @@ class EditUserPageUI extends Component<Props, State> {
     );
   }
 }
-
-export const EditUserPage = injectI18n(EditUserPageUI);

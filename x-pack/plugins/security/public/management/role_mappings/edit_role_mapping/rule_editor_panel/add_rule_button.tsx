@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Rule, FieldRule, AllRule } from '../../../model';
+import { Rule, FieldRule, AllRule } from '../../model';
 
 interface Props {
   onClick: (newRule: Rule) => void;

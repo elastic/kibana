@@ -15,8 +15,11 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
 import 'test_utils/stub_web_worker';
-import { AllRule, FieldRule } from '../../../model';
+import { AllRule, FieldRule } from '../../model';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { DocumentationLinksService } from '../../documentation_links';
+
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('RuleEditorPanel', () => {
   it('renders the visual editor when no rules are defined', () => {
@@ -25,6 +28,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
@@ -45,6 +49,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
@@ -68,6 +73,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
 
@@ -103,6 +109,7 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
+      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
     const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
 

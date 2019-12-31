@@ -6,13 +6,26 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { RoleValidator } from '../../../lib/validate_role';
+import { DocumentationLinksService } from '../../../documentation_links';
+import { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';
 import { IndexPrivileges } from './index_privileges';
 
-test('it renders without crashing', () => {
-  const props = {
+import { licenseMock } from '../../../../../../common/licensing/index.mock';
+import { indicesAPIClientMock } from '../../../index.mock';
+import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+
+function getProps() {
+  const license = licenseMock.create();
+  license.getFeatures.mockReturnValue({
+    allowRoleFieldLevelSecurity: true,
+    allowRoleDocumentLevelSecurity: true,
+  } as any);
+
+  const { docLinks } = coreMock.createStart();
+
+  return {
     role: {
       name: '',
       elasticsearch: {
@@ -23,74 +36,32 @@ test('it renders without crashing', () => {
       kibana: [],
     },
     editable: true,
-    httpClient: jest.fn(),
     onChange: jest.fn(),
     runAsUsers: [],
     indexPatterns: [],
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
     builtinESPrivileges: {
       cluster: ['all', 'manage', 'monitor'],
       index: ['all', 'read', 'write', 'index'],
     },
+    indicesAPIClient: indicesAPIClientMock.create(),
+    docLinks: new DocumentationLinksService(docLinks),
+    license,
   };
-  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...props} />);
-  expect(wrapper).toMatchSnapshot();
+}
+
+test('it renders without crashing', () => {
+  expect(shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />)).toMatchSnapshot();
 });
 
 test('it renders ClusterPrivileges', () => {
-  const props = {
-    role: {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: [],
-    },
-    editable: true,
-    httpClient: jest.fn(),
-    onChange: jest.fn(),
-    runAsUsers: [],
-    indexPatterns: [],
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
-    validator: new RoleValidator(),
-    builtinESPrivileges: {
-      cluster: ['all', 'manage', 'monitor'],
-      index: ['all', 'read', 'write', 'index'],
-    },
-  };
-  const wrapper = mountWithIntl(<ElasticsearchPrivileges {...props} />);
-  expect(wrapper.find(ClusterPrivileges)).toHaveLength(1);
+  expect(
+    mountWithIntl(<ElasticsearchPrivileges {...getProps()} />).find(ClusterPrivileges)
+  ).toHaveLength(1);
 });
 
 test('it renders IndexPrivileges', () => {
-  const props = {
-    role: {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-      },
-      kibana: [],
-    },
-    editable: true,
-    httpClient: jest.fn(),
-    onChange: jest.fn(),
-    runAsUsers: [],
-    indexPatterns: [],
-    allowDocumentLevelSecurity: true,
-    allowFieldLevelSecurity: true,
-    validator: new RoleValidator(),
-    builtinESPrivileges: {
-      cluster: ['all', 'manage', 'monitor'],
-      index: ['all', 'read', 'write', 'index'],
-    },
-  };
-  const wrapper = mountWithIntl(<ElasticsearchPrivileges {...props} />);
-  expect(wrapper.find(IndexPrivileges)).toHaveLength(1);
+  expect(
+    mountWithIntl(<ElasticsearchPrivileges {...getProps()} />).find(IndexPrivileges)
+  ).toHaveLength(1);
 });

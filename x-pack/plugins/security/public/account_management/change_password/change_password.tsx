@@ -3,18 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React, { Component } from 'react';
 import {
   // @ts-ignore
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import { UserAPIClient } from '../../../../lib/api';
-import { AuthenticatedUser, canUserChangePassword } from '../../../../../common/model';
-import { ChangePasswordForm } from '../../../../components/management/change_password_form';
+import { NotificationsSetup } from 'src/core/public';
+import { AuthenticatedUser, canUserChangePassword } from '../../../common/model';
+import { UserAPIClient } from '../../management/users';
+import { ChangePasswordForm } from '../../management/users/components/change_password_form';
 
 interface Props {
   user: AuthenticatedUser;
+  apiClient: PublicMethodsOf<UserAPIClient>;
+  notifications: NotificationsSetup;
 }
 
 export class ChangePassword extends Component<Props, {}> {
@@ -48,7 +51,8 @@ export class ChangePassword extends Component<Props, {}> {
         <ChangePasswordForm
           user={this.props.user}
           isUserChangingOwnPassword={true}
-          apiClient={new UserAPIClient()}
+          apiClient={this.props.apiClient}
+          notifications={this.props.notifications}
         />
       </EuiDescribedFormGroup>
     );

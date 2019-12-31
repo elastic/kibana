@@ -19,15 +19,16 @@ import {
   EuiEmptyPrompt,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { ConfirmDeleteUsers } from '../../../../components/management/users';
-import { User } from '../../../../../common/model';
-import { UserAPIClient } from '../../../../lib/api';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { NotificationsStart } from 'src/core/public';
+import { User } from '../../../../common/model';
+import { ConfirmDeleteUsers } from '../components';
+import { UserAPIClient } from '..';
 
 interface Props {
-  intl: InjectedIntl;
-  apiClient: UserAPIClient;
+  apiClient: PublicMethodsOf<UserAPIClient>;
+  notifications: NotificationsStart;
 }
 
 interface State {
@@ -38,7 +39,7 @@ interface State {
   filter: string;
 }
 
-class UsersListPageUI extends Component<Props, State> {
+export class UsersGridPage extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -56,7 +57,6 @@ class UsersListPageUI extends Component<Props, State> {
 
   public render() {
     const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
-    const { intl } = this.props;
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
@@ -88,8 +88,7 @@ class UsersListPageUI extends Component<Props, State> {
     const columns: Array<EuiBasicTableColumn<User>> = [
       {
         field: 'full_name',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.users.fullNameColumnName',
+        name: i18n.translate('xpack.security.management.users.fullNameColumnName', {
           defaultMessage: 'Full Name',
         }),
         sortable: true,
@@ -100,8 +99,7 @@ class UsersListPageUI extends Component<Props, State> {
       },
       {
         field: 'username',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.users.userNameColumnName',
+        name: i18n.translate('xpack.security.management.users.userNameColumnName', {
           defaultMessage: 'User Name',
         }),
         sortable: true,
@@ -114,8 +112,7 @@ class UsersListPageUI extends Component<Props, State> {
       },
       {
         field: 'email',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.users.emailAddressColumnName',
+        name: i18n.translate('xpack.security.management.users.emailAddressColumnName', {
           defaultMessage: 'Email Address',
         }),
         sortable: true,
@@ -126,8 +123,7 @@ class UsersListPageUI extends Component<Props, State> {
       },
       {
         field: 'roles',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.users.rolesColumnName',
+        name: i18n.translate('xpack.security.management.users.rolesColumnName', {
           defaultMessage: 'Roles',
         }),
         render: (rolenames: string[]) => {
@@ -144,15 +140,13 @@ class UsersListPageUI extends Component<Props, State> {
       },
       {
         field: 'metadata',
-        name: intl.formatMessage({
-          id: 'xpack.security.management.users.reservedColumnName',
+        name: i18n.translate('xpack.security.management.users.reservedColumnName', {
           defaultMessage: 'Reserved',
         }),
         sortable: ({ metadata }: User) => Boolean(metadata && metadata._reserved),
         width: '100px',
         align: 'right',
-        description: intl.formatMessage({
-          id: 'xpack.security.management.users.reservedColumnDescription',
+        description: i18n.translate('xpack.security.management.users.reservedColumnDescription', {
           defaultMessage:
             'Reserved users are built-in and cannot be removed. Only the password can be changed.',
         }),
@@ -233,6 +227,7 @@ class UsersListPageUI extends Component<Props, State> {
                 usersToDelete={selection.map(user => user.username)}
                 callback={this.handleDelete}
                 apiClient={this.props.apiClient}
+                notifications={this.props.notifications}
               />
             ) : null}
 
@@ -275,14 +270,11 @@ class UsersListPageUI extends Component<Props, State> {
       if (e.body.statusCode === 403) {
         this.setState({ permissionDenied: true });
       } else {
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.security.management.users.fetchingUsersErrorMessage',
-              defaultMessage: 'Error fetching users: {message}',
-            },
-            { message: e.body.message }
-          )
+        this.props.notifications.toasts.addDanger(
+          i18n.translate('xpack.security.management.users.fetchingUsersErrorMessage', {
+            defaultMessage: 'Error fetching users: {message}',
+            values: { message: e.body.message },
+          })
         );
       }
     }
@@ -315,5 +307,3 @@ class UsersListPageUI extends Component<Props, State> {
     this.setState({ showDeleteConfirmation: false });
   };
 }
-
-export const UsersListPage = injectI18n(UsersListPageUI);

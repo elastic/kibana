@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,23 +16,24 @@ import {
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import { toastNotifications } from 'ui/notify';
-import { RolesApi } from '../../../../../lib/roles_api';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { NotificationsStart } from 'src/core/public';
+import { RolesAPIClient } from '../../roles_api_client';
 
 interface Props {
   rolesToDelete: string[];
-  intl: InjectedIntl;
   callback: (rolesToDelete: string[], errors: string[]) => void;
   onCancel: () => void;
+  notifications: NotificationsStart;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
 }
 
 interface State {
   deleteInProgress: boolean;
 }
 
-class ConfirmDeleteUI extends Component<Props, State> {
+export class ConfirmDelete extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -40,15 +42,12 @@ class ConfirmDeleteUI extends Component<Props, State> {
   }
 
   public render() {
-    const { rolesToDelete, intl } = this.props;
+    const { rolesToDelete } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
-    const title = intl.formatMessage(
-      {
-        id: 'xpack.security.management.roles.deleteRoleTitle',
-        defaultMessage: 'Delete role{value, plural, one {{roleName}} other {s}}',
-      },
-      { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` }
-    );
+    const title = i18n.translate('xpack.security.management.roles.deleteRoleTitle', {
+      defaultMessage: 'Delete role{value, plural, one {{roleName}} other {s}}',
+      values: { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` },
+    });
 
     // This is largely the same as the built-in EuiConfirmModal component, but we needed the ability
     // to disable the buttons since this could be a long-running operation
@@ -128,32 +127,24 @@ class ConfirmDeleteUI extends Component<Props, State> {
   };
 
   private deleteRoles = async () => {
-    const { rolesToDelete, callback } = this.props;
+    const { rolesToDelete, callback, rolesAPIClient, notifications } = this.props;
     const errors: string[] = [];
     const deleteOperations = rolesToDelete.map(roleName => {
       const deleteRoleTask = async () => {
         try {
-          await RolesApi.deleteRole(roleName);
-          toastNotifications.addSuccess(
-            this.props.intl.formatMessage(
-              {
-                id:
-                  'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
-                defaultMessage: 'Deleted role {roleName}',
-              },
-              { roleName }
+          await rolesAPIClient.deleteRole(roleName);
+          notifications.toasts.addSuccess(
+            i18n.translate(
+              'xpack.security.management.roles.confirmDelete.roleSuccessfullyDeletedNotificationMessage',
+              { defaultMessage: 'Deleted role {roleName}', values: { roleName } }
             )
           );
         } catch (e) {
           errors.push(roleName);
-          toastNotifications.addDanger(
-            this.props.intl.formatMessage(
-              {
-                id:
-                  'xpack.security.management.roles.confirmDelete.roleDeletingErrorNotificationMessage',
-                defaultMessage: 'Error deleting role {roleName}',
-              },
-              { roleName }
+          notifications.toasts.addDanger(
+            i18n.translate(
+              'xpack.security.management.roles.confirmDelete.roleDeletingErrorNotificationMessage',
+              { defaultMessage: 'Error deleting role {roleName}', values: { roleName } }
             )
           );
         }
@@ -167,5 +158,3 @@ class ConfirmDeleteUI extends Component<Props, State> {
     callback(rolesToDelete, errors);
   };
 }
-
-export const ConfirmDelete = injectI18n(ConfirmDeleteUI);

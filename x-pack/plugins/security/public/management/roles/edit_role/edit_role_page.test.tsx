@@ -6,20 +6,28 @@
 
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { UICapabilities } from 'ui/capabilities';
-import { Space } from '../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../plugins/features/public';
+import { act } from '@testing-library/react';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { Capabilities } from 'src/core/public';
+import { Space } from '../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../features/public';
 // These modules should be moved into a common directory
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Actions } from '../../../../../../../../plugins/security/server/authorization/actions';
+import { Actions } from '../../../../server/authorization/actions';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { privilegesFactory } from '../../../../../../../../plugins/security/server/authorization/privileges';
-import { RawKibanaPrivileges, Role } from '../../../../../common/model';
+import { privilegesFactory } from '../../../../server/authorization/privileges';
+import { Role } from '../../../../common/model';
+import { DocumentationLinksService } from '../documentation_links';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { licenseMock } from '../../../../common/licensing/index.mock';
+import { userAPIClientMock } from '../../users/index.mock';
+import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
 
 const buildFeatures = () => {
   return [
@@ -79,7 +87,7 @@ const buildUICapabilities = (canManageSpaces = true) => {
     spaces: {
       manage: canManageSpaces,
     },
-  } as UICapabilities;
+  } as Capabilities;
 };
 
 const buildSpaces = () => {
@@ -113,53 +121,89 @@ const expectSaveFormButtons = (wrapper: ReactWrapper<any, any>) => {
   expect(wrapper.find('button[data-test-subj="roleFormSaveButton"]')).toHaveLength(1);
 };
 
+function getProps({
+  action,
+  role,
+  canManageSpaces = true,
+  spacesEnabled = true,
+}: {
+  action: 'edit' | 'clone';
+  role: Role;
+  canManageSpaces?: boolean;
+  spacesEnabled?: boolean;
+}) {
+  const rolesAPIClient = rolesAPIClientMock.create();
+  rolesAPIClient.getRole.mockResolvedValue(role);
+
+  const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*']);
+
+  const indicesAPIClient = indicesAPIClientMock.create();
+
+  const userAPIClient = userAPIClientMock.create();
+  userAPIClient.getUsers.mockResolvedValue([]);
+
+  const privilegesAPIClient = privilegesAPIClientMock.create();
+  privilegesAPIClient.getAll.mockResolvedValue(buildRawKibanaPrivileges());
+  privilegesAPIClient.getBuiltIn.mockResolvedValue(buildBuiltinESPrivileges());
+
+  const license = licenseMock.create();
+  license.getFeatures.mockReturnValue({
+    allowRoleDocumentLevelSecurity: true,
+    allowRoleFieldLevelSecurity: true,
+  } as any);
+
+  const { fatalErrors } = coreMock.createSetup();
+  const { http, docLinks, notifications } = coreMock.createStart();
+  http.get.mockImplementation(async path => {
+    if (path === '/api/features') {
+      return buildFeatures();
+    }
+
+    if (path === '/api/spaces/space') {
+      return buildSpaces();
+    }
+  });
+
+  return {
+    action,
+    roleName: role.name,
+    license,
+    http,
+    indexPatterns,
+    indicesAPIClient,
+    privilegesAPIClient,
+    rolesAPIClient,
+    userAPIClient,
+    notifications,
+    docLinks: new DocumentationLinksService(docLinks),
+    fatalErrors,
+    spacesEnabled,
+    uiCapabilities: buildUICapabilities(canManageSpaces),
+  };
+}
+
 describe('<EditRolePage />', () => {
   describe('with spaces enabled', () => {
-    it('can render a reserved role', () => {
-      const role: Role = {
-        name: 'superuser',
-        metadata: {
-          _reserved: true,
-        },
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const spaces: Space[] = buildSpaces();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
+    it('can render a reserved role', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={spaces}
-          spacesEnabled={true}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            role: {
+              name: 'superuser',
+              metadata: { _reserved: true },
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
@@ -167,49 +211,25 @@ describe('<EditRolePage />', () => {
       expectReadOnlyFormButtons(wrapper);
     });
 
-    it('can render a user defined role', () => {
-      const role: Role = {
-        name: 'my custom role',
-        metadata: {},
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const spaces: Space[] = buildSpaces();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
+    it('can render a user defined role', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={spaces}
-          spacesEnabled={true}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
@@ -217,152 +237,85 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons(wrapper);
     });
 
-    it('can render when creating a new role', () => {
-      // @ts-ignore
-      const role: Role = {
-        metadata: {},
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const spaces: Space[] = buildSpaces();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
+    it('can render when creating a new role', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={spaces}
-          spacesEnabled={true}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            role: {
+              metadata: {},
+              elasticsearch: { cluster: [], indices: [], run_as: [] },
+              kibana: [],
+            } as any,
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expectSaveFormButtons(wrapper);
     });
 
-    it('can render when cloning an existing role', () => {
-      const role: Role = {
-        metadata: {
-          _reserved: false,
-        },
-        name: '',
-        elasticsearch: {
-          cluster: ['all', 'manage'],
-          indices: [
-            {
-              names: ['foo*'],
-              privileges: ['all'],
-              field_security: {
-                except: ['f'],
-                grant: ['b*'],
+    it('can render when cloning an existing role', async () => {
+      const wrapper = mountWithIntl(
+        <EditRolePage
+          {...getProps({
+            action: 'edit',
+            role: {
+              name: '',
+              metadata: { _reserved: false },
+              elasticsearch: {
+                cluster: ['all', 'manage'],
+                indices: [
+                  {
+                    names: ['foo*'],
+                    privileges: ['all'],
+                    field_security: { except: ['f'], grant: ['b*'] },
+                  },
+                ],
+                run_as: ['elastic'],
               },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
             },
-          ],
-          run_as: ['elastic'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const spaces: Space[] = buildSpaces();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          action={'clone'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={spaces}
-          spacesEnabled={true}
-          uiCapabilities={uiCapabilities}
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expectSaveFormButtons(wrapper);
     });
 
-    it('renders an auth error when not authorized to manage spaces', () => {
-      const role: Role = {
-        name: 'my custom role',
-        metadata: {},
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const spaces: Space[] = buildSpaces();
-      const uiCapabilities: UICapabilities = buildUICapabilities(false);
-
+    it('renders an auth error when not authorized to manage spaces', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={spaces}
-          spacesEnabled={true}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            canManageSpaces: false,
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
 
@@ -374,44 +327,27 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons(wrapper);
     });
 
-    it('renders a partial read-only view when there is a transform error', () => {
-      const role: Role = {
-        name: 'my custom role',
-        metadata: {},
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [],
-        _transform_error: ['kibana'],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const spaces: Space[] = buildSpaces();
-      const uiCapabilities: UICapabilities = buildUICapabilities(false);
-
+    it('renders a partial read-only view when there is a transform error', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={spaces}
-          spacesEnabled={true}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            canManageSpaces: false,
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [],
+              _transform_error: ['kibana'],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -419,50 +355,26 @@ describe('<EditRolePage />', () => {
   });
 
   describe('with spaces disabled', () => {
-    it('can render a reserved role', () => {
-      const role: Role = {
-        name: 'superuser',
-        metadata: {
-          _reserved: true,
-        },
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
+    it('can render a reserved role', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={[]}
-          spacesEnabled={false}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            spacesEnabled: false,
+            role: {
+              name: 'superuser',
+              metadata: { _reserved: true },
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
@@ -470,48 +382,26 @@ describe('<EditRolePage />', () => {
       expectReadOnlyFormButtons(wrapper);
     });
 
-    it('can render a user defined role', () => {
-      const role: Role = {
-        name: 'my custom role',
-        metadata: {},
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
+    it('can render a user defined role', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={[]}
-          spacesEnabled={false}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            spacesEnabled: false,
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
@@ -519,147 +409,86 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons(wrapper);
     });
 
-    it('can render when creating a new role', () => {
-      // @ts-ignore
-      const role: Role = {
-        metadata: {},
-        elasticsearch: {
-          cluster: [],
-          indices: [],
-          run_as: [],
-        },
-        kibana: [],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
+    it('can render when creating a new role', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={[]}
-          spacesEnabled={false}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            spacesEnabled: false,
+            role: {
+              metadata: {},
+              elasticsearch: { cluster: [], indices: [], run_as: [] },
+              kibana: [],
+            } as any,
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
-    it('can render when cloning an existing role', () => {
-      const role: Role = {
-        metadata: {
-          _reserved: false,
-        },
-        name: '',
-        elasticsearch: {
-          cluster: ['all', 'manage'],
-          indices: [
-            {
-              names: ['foo*'],
-              privileges: ['all'],
-              field_security: {
-                except: ['f'],
-                grant: ['b*'],
+    it('can render when cloning an existing role', async () => {
+      const wrapper = mountWithIntl(
+        <EditRolePage
+          {...getProps({
+            action: 'edit',
+            spacesEnabled: false,
+            role: {
+              metadata: { _reserved: false },
+              name: '',
+              elasticsearch: {
+                cluster: ['all', 'manage'],
+                indices: [
+                  {
+                    names: ['foo*'],
+                    privileges: ['all'],
+                    field_security: { except: ['f'], grant: ['b*'] },
+                  },
+                ],
+                run_as: ['elastic'],
               },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
             },
-          ],
-          run_as: ['elastic'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const uiCapabilities: UICapabilities = buildUICapabilities();
-
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          action={'clone'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={[]}
-          spacesEnabled={false}
-          uiCapabilities={uiCapabilities}
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
-    it('does not care if user cannot manage spaces', () => {
-      const role: Role = {
-        name: 'my custom role',
-        metadata: {},
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: ['all'],
-            feature: {},
-          },
-        ],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const uiCapabilities: UICapabilities = buildUICapabilities(false);
-
+    it('does not care if user cannot manage spaces', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={[]}
-          spacesEnabled={false}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            spacesEnabled: false,
+            canManageSpaces: false,
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
 
@@ -671,43 +500,28 @@ describe('<EditRolePage />', () => {
       expectSaveFormButtons(wrapper);
     });
 
-    it('renders a partial read-only view when there is a transform error', () => {
-      const role: Role = {
-        name: 'my custom role',
-        metadata: {},
-        elasticsearch: {
-          cluster: ['all'],
-          indices: [],
-          run_as: ['*'],
-        },
-        kibana: [],
-        _transform_error: ['kibana'],
-      };
-
-      const features: Feature[] = buildFeatures();
-      const mockHttpClient = jest.fn();
-      const indexPatterns: string[] = ['foo*', 'bar*'];
-      const kibanaPrivileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
-      const builtinESPrivileges = buildBuiltinESPrivileges();
-      const uiCapabilities: UICapabilities = buildUICapabilities(false);
-
+    it('renders a partial read-only view when there is a transform error', async () => {
       const wrapper = mountWithIntl(
         <EditRolePage
-          action={'edit'}
-          role={role}
-          runAsUsers={[]}
-          allowDocumentLevelSecurity={true}
-          allowFieldLevelSecurity={true}
-          features={features}
-          httpClient={mockHttpClient}
-          indexPatterns={indexPatterns}
-          kibanaPrivileges={kibanaPrivileges}
-          builtinESPrivileges={builtinESPrivileges}
-          spaces={[]}
-          spacesEnabled={false}
-          uiCapabilities={uiCapabilities}
+          {...getProps({
+            action: 'edit',
+            spacesEnabled: false,
+            canManageSpaces: false,
+            role: {
+              name: 'my custom role',
+              metadata: {},
+              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+              kibana: [],
+              _transform_error: ['kibana'],
+            },
+          })}
         />
       );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
 
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);

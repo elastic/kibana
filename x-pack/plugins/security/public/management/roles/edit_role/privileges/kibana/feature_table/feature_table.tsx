@@ -4,28 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+import React, { Component } from 'react';
 import {
-  // @ts-ignore
   EuiButtonGroup,
   EuiIcon,
   EuiIconTip,
-  // @ts-ignore
   EuiInMemoryTable,
   EuiText,
   IconType,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import _ from 'lodash';
-import React, { Component } from 'react';
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
-import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../../common/model';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Feature } from '../../../../../../../../features/public';
+import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../common/model';
 import {
   AllowedPrivilege,
   CalculatedPrivilege,
   PrivilegeExplanation,
-} from '../../../../../../../lib/kibana_privilege_calculator';
-import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+} from '../kibana_privilege_calculator';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 
@@ -36,7 +35,6 @@ interface Props {
   allowedPrivileges: AllowedPrivilege;
   rankedFeaturePrivileges: FeaturesPrivileges;
   kibanaPrivileges: KibanaPrivileges;
-  intl: InjectedIntl;
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
@@ -122,10 +120,10 @@ export class FeatureTable extends Component<Props, {}> {
   private getColumns = (availablePrivileges: string[]) => [
     {
       field: 'feature',
-      name: this.props.intl.formatMessage({
-        id: 'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
-        defaultMessage: 'Feature',
-      }),
+      name: i18n.translate(
+        'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
+        { defaultMessage: 'Feature' }
+      ),
       render: (feature: TableFeature) => {
         let tooltipElement = null;
         if (feature.privilegesTooltip) {

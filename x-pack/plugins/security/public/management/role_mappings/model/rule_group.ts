@@ -7,7 +7,7 @@
 import { Rule } from './rule';
 
 /**
- * Represents a catagory of Role Mapping rules which are capable of containing other rules.
+ * Represents a category of Role Mapping rules which are capable of containing other rules.
  */
 export abstract class RuleGroup extends Rule {
   /**

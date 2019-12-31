@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getCreateRoleMappingHref } from '../../../../management_urls';
+import { getCreateRoleMappingHref } from '../../../management_urls';
 
 export const CreateRoleMappingButton = () => {
   return (

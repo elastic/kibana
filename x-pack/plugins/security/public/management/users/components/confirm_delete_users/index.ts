@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConfirmDeleteUsers } from './confirm_delete';
+export { ConfirmDeleteUsers } from './confirm_delete_users';

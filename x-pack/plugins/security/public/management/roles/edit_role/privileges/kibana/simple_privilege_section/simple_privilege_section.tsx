@@ -12,15 +12,19 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
-import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
-import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
-import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { Feature } from '../../../../../../../../features/public';
+import {
+  KibanaPrivileges,
+  Role,
+  RoleKibanaPrivilege,
+  copyRole,
+} from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
@@ -31,7 +35,6 @@ interface Props {
   features: Feature[];
   onChange: (role: Role) => void;
   editable: boolean;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -230,7 +233,6 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                 allowedPrivileges={allowedPrivileges}
                 rankedFeaturePrivileges={privilegeCalculator.rankedFeaturePrivileges}
                 features={this.props.features}
-                intl={this.props.intl}
                 onChange={this.onFeaturePrivilegeChange}
                 onChangeAll={this.onChangeAllFeaturePrivileges}
                 spacesIndex={this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))}

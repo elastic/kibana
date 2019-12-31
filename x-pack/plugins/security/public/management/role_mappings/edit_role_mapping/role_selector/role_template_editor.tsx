@@ -18,12 +18,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RoleTemplate } from '../../../../../../../common/model';
+import { RoleTemplate } from '../../../../../common/model';
 import {
   isInlineRoleTemplate,
   isStoredRoleTemplate,
   isInvalidRoleTemplate,
-} from '../../services/role_template_type';
+} from '../services/role_template_type';
 import { RoleTemplateTypeSelect } from './role_template_type_select';
 
 interface Props {

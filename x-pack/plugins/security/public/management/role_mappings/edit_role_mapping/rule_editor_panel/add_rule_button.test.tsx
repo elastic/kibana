@@ -8,7 +8,7 @@ import React from 'react';
 import { AddRuleButton } from './add_rule_button';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
-import { FieldRule, AllRule } from '../../../model';
+import { FieldRule, AllRule } from '../../model';
 
 describe('AddRuleButton', () => {
   it('allows a field rule to be created', () => {

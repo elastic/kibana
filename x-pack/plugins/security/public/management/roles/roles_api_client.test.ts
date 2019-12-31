@@ -4,12 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Role } from '../../common/model';
-import { transformRoleForSave } from './transform_role_for_save';
+import { Role } from '../../../common/model';
+import { RolesAPIClient } from './roles_api_client';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 
-describe('transformRoleForSave', () => {
+describe('RolesAPIClient', () => {
+  async function saveRole(role: Role, spacesEnabled: boolean) {
+    const httpMock = httpServiceMock.createStartContract();
+    const rolesAPIClient = new RolesAPIClient(httpMock);
+
+    await rolesAPIClient.saveRole({ role, spacesEnabled });
+    expect(httpMock.put).toHaveBeenCalledTimes(1);
+
+    return JSON.parse(httpMock.put.mock.calls[0][1]?.body as any);
+  }
+
   describe('spaces disabled', () => {
-    it('removes placeholder index privileges', () => {
+    it('removes placeholder index privileges', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -20,7 +31,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -32,7 +43,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('removes placeholder query entries', () => {
+    it('removes placeholder query entries', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -43,7 +54,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -55,7 +66,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('removes transient fields not required for save', () => {
+    it('removes transient fields not required for save', async () => {
       const role: Role = {
         name: 'my role',
         transient_metadata: {
@@ -74,7 +85,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         metadata: {
@@ -89,7 +100,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('does not remove actual query entries', () => {
+    it('does not remove actual query entries', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -100,7 +111,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -112,7 +123,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('should remove feature privileges if a corresponding base privilege is defined', () => {
+    it('should remove feature privileges if a corresponding base privilege is defined', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -132,7 +143,7 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -150,7 +161,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('should not remove feature privileges if a corresponding base privilege is not defined', () => {
+    it('should not remove feature privileges if a corresponding base privilege is not defined', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -170,7 +181,7 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -191,7 +202,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('should remove space privileges', () => {
+    it('should remove space privileges', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -219,7 +230,7 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      const result = transformRoleForSave(role, false);
+      const result = await saveRole(role, false);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -242,7 +253,7 @@ describe('transformRoleForSave', () => {
   });
 
   describe('spaces enabled', () => {
-    it('removes placeholder index privileges', () => {
+    it('removes placeholder index privileges', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -253,7 +264,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -265,7 +276,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('removes placeholder query entries', () => {
+    it('removes placeholder query entries', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -276,7 +287,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -288,7 +299,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('removes transient fields not required for save', () => {
+    it('removes transient fields not required for save', async () => {
       const role: Role = {
         name: 'my role',
         transient_metadata: {
@@ -307,7 +318,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         metadata: {
@@ -322,7 +333,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('does not remove actual query entries', () => {
+    it('does not remove actual query entries', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -333,7 +344,7 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -345,7 +356,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('should remove feature privileges if a corresponding base privilege is defined', () => {
+    it('should remove feature privileges if a corresponding base privilege is defined', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -365,7 +376,7 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -383,7 +394,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('should not remove feature privileges if a corresponding base privilege is not defined', () => {
+    it('should not remove feature privileges if a corresponding base privilege is not defined', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -403,7 +414,7 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         elasticsearch: {
@@ -424,7 +435,7 @@ describe('transformRoleForSave', () => {
       });
     });
 
-    it('should not remove space privileges', () => {
+    it('should not remove space privileges', async () => {
       const role: Role = {
         name: 'my role',
         elasticsearch: {
@@ -452,7 +463,7 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      const result = transformRoleForSave(role, true);
+      const result = await saveRole(role, true);
 
       expect(result).toEqual({
         elasticsearch: {

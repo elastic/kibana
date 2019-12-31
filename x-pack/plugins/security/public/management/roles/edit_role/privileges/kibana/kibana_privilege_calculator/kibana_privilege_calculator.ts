@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import {
   FeaturesPrivileges,
   KibanaPrivileges,
   Role,
   RoleKibanaPrivilege,
-} from '../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../privilege_utils';
+} from '../../../../../../../common/model';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { KibanaAllowedPrivilegesCalculator } from './kibana_allowed_privileges_calculator';
 import { KibanaBasePrivilegeCalculator } from './kibana_base_privilege_calculator';
 import { KibanaFeaturePrivilegeCalculator } from './kibana_feature_privilege_calculator';

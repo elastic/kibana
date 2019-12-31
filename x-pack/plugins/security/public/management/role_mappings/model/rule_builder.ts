@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RoleMapping } from '../../../../../common/model';
+import { RoleMapping } from '../../../../common/model';
 import { FieldRule, FieldRuleValue } from './field_rule';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
