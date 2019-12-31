@@ -205,16 +205,12 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
               }
             }
           >
-            <EuiPageBody
-              component="main"
-              restrictWidth={false}
-            >
+            <EuiPageBody>
               <main
                 className="euiPageBody"
               >
                 <EuiPageContent
                   horizontalPosition="center"
-                  panelPaddingSize="l"
                   verticalPosition="center"
                 >
                   <EuiPanel
@@ -580,16 +576,12 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
               }
             }
           >
-            <EuiPageBody
-              component="main"
-              restrictWidth={false}
-            >
+            <EuiPageBody>
               <main
                 className="euiPageBody"
               >
                 <EuiPageContent
                   horizontalPosition="center"
-                  panelPaddingSize="l"
                   verticalPosition="center"
                 >
                   <EuiPanel

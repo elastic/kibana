@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { SearchSourceContract } from '../kibana_services';
+import { ISearchSource } from '../kibana_services';
 import { SortOrder } from './angular/doc_table/components/table_header/helpers';
-export { SortOrder } from './angular/doc_table/components/table_header/helpers';
 
 export interface SavedSearch {
   readonly id: string;
   title: string;
-  searchSource: SearchSourceContract;
+  searchSource: ISearchSource;
   description?: string;
   columns: string[];
   sort: SortOrder[];

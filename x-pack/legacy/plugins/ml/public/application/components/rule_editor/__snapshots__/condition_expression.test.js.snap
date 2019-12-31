@@ -184,9 +184,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
               }
             >
               <EuiFieldNumber
-                compressed={false}
-                fullWidth={false}
-                isLoading={false}
                 onChange={[Function]}
                 value={123}
               />
@@ -392,9 +389,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
               }
             >
               <EuiFieldNumber
-                compressed={false}
-                fullWidth={false}
-                isLoading={false}
                 onChange={[Function]}
                 value={123}
               />
