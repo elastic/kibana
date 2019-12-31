@@ -23,15 +23,18 @@ import { ISyncStrategy } from './types';
 import { getStateFromKbnUrl } from '../../state_management/url';
 
 /**
- * This strategy implements state restoration similar to what GlobalState in legacy world did
+ * KbnGlobalStateSyncStrategy strategy implements state restoration similar to what GlobalState in legacy world did
  * It syncs state both to url and to session storage
  *
- * Syncing to session storage is needed to restore state piece which should be preserved between apps
+ * Syncing to session storage is needed to restore state during navigation between apps,
+ * as in NP the agreement is that apps will handle state restoration by themselves without help of core.
+ * Global state from session storage should be restored when user navigates to base root of the app
  *
- * @param urlSyncStrategy
- * @param sessionStorageSyncStrategy
+ * @param urlSyncStrategy - sync strategy to use for syncing state to url
+ * @param sessionStorageSyncStrategy - sync strategy to use for syncing state to session storage
  * @param initialUrl (optional) - initial application url to restore state from.
- * Will take the highest priority duration state restoration if present.
+ *
+ * initialUrl will take the highest priority duration state restoration if present.
  * Is needed for cases when user manually pastes kibana url and we don't want it to be overridden by session storage data
  */
 export const createKbnGlobalStateSyncStrategy = (
@@ -55,41 +58,44 @@ export const createKbnGlobalStateSyncStrategy = (
         isRestoringInitialState: false,
       }
     ) => {
-      if (isRestoringInitialState) {
-        const [currentStateFromUrl, stateFromSessionStorage] = await Promise.all([
-          urlSyncStrategy.fromStorage<State>(syncKey),
-          sessionStorageSyncStrategy.fromStorage<State>(syncKey),
-        ]);
-
-        if (initialUrl) {
-          const initialStateFromUrl = getStateFromKbnUrl<State>(syncKey, initialUrl);
-          if (initialStateFromUrl) {
-            if (!isEqual(initialStateFromUrl, currentStateFromUrl)) {
-              await Promise.all([
-                urlSyncStrategy.toStorage(syncKey, initialStateFromUrl, { replace: true }),
-                sessionStorageSyncStrategy.toStorage(syncKey, initialStateFromUrl),
-              ]);
-            }
-            return initialStateFromUrl;
-          }
-        }
-
-        if (stateFromSessionStorage) {
-          await Promise.all([
-            urlSyncStrategy.toStorage(syncKey, stateFromSessionStorage, { replace: true }),
-            sessionStorageSyncStrategy.toStorage(syncKey, stateFromSessionStorage),
-          ]);
-          return stateFromSessionStorage;
-        }
-
-        return currentStateFromUrl;
+      if (!isRestoringInitialState) {
+        return urlSyncStrategy.fromStorage<State>(syncKey);
       }
 
-      return urlSyncStrategy.fromStorage<State>(syncKey);
+      // restoring initial state
+      // when restoring initial state also need to make sure that all sources of KbnGlobalStateSyncStrategy are in sync
+
+      const [currentStateFromUrl, stateFromSessionStorage] = await Promise.all([
+        urlSyncStrategy.fromStorage<State>(syncKey),
+        sessionStorageSyncStrategy.fromStorage<State>(syncKey),
+      ]);
+
+      if (initialUrl) {
+        const initialStateFromUrl = getStateFromKbnUrl<State>(syncKey, initialUrl);
+        if (initialStateFromUrl) {
+          // make sure other sources are in sync
+          await Promise.all([
+            urlSyncStrategy.toStorage(syncKey, initialStateFromUrl, { replace: true }),
+            sessionStorageSyncStrategy.toStorage(syncKey, initialStateFromUrl),
+          ]);
+          return initialStateFromUrl;
+        }
+      }
+
+      if (stateFromSessionStorage) {
+        // make sure that url is in state that are going to restore
+        await urlSyncStrategy.toStorage(syncKey, stateFromSessionStorage, { replace: true });
+        return stateFromSessionStorage;
+      }
+
+      // make sure that session storage in a state that are going to restore
+      await sessionStorageSyncStrategy.toStorage(syncKey, stateFromSessionStorage);
+      return currentStateFromUrl;
     },
     storageChange$: <State>(syncKey: string) =>
       urlSyncStrategy.storageChange$!<State>(syncKey).pipe(
         tap(newState => {
+          // have to manually sync this change to session storage
           sessionStorageSyncStrategy.toStorage<State>(syncKey, newState!);
         }),
         share()
