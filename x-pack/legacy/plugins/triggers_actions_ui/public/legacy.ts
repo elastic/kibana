@@ -19,8 +19,14 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { plugin } from '../np_ready/public';
 import { manageAngularLifecycle } from './manage_angular_lifecycle';
 import { BASE_PATH } from '../np_ready/public/application/constants';
+import {
+  hasShowActionsCapability,
+  hasShowAlertsCapability,
+} from '../np_ready/public/application/lib/capabilities';
 
 const REACT_ROOT_ID = 'triggersActionsRoot';
+const canShowActions = hasShowActionsCapability(capabilities.get());
+const canShowAlerts = hasShowAlertsCapability(capabilities.get());
 
 const template = `<kbn-management-app section="kibana/triggersActions">
 <div id="triggersActionsRoot"></div>
@@ -80,10 +86,12 @@ routes.when(`${BASE_PATH}:section?/:subsection?/:view?/:id?`, {
   })(),
 });
 
-management.getSection('kibana').register('triggersActions', {
-  display: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-    defaultMessage: 'Alerts and Actions',
-  }),
-  order: 7,
-  url: `#${BASE_PATH}`,
-});
+if (canShowActions || canShowAlerts) {
+  management.getSection('kibana').register('triggersActions', {
+    display: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+      defaultMessage: 'Alerts and Actions',
+    }),
+    order: 7,
+    url: `#${BASE_PATH}`,
+  });
+}
