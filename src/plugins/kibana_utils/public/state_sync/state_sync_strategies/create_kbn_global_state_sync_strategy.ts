@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import isEqual from 'react-fast-compare';
 import { share, tap } from 'rxjs/operators';
 import { ISyncStrategy } from './types';
 import { getStateFromKbnUrl } from '../../state_management/url';

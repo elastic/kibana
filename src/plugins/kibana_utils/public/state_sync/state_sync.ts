@@ -27,7 +27,7 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
 /**
  * Utility for syncing application state wrapped in state container
  * with some kind of storage (e.g. URL)
- * * 1. the simplest use case
+ * 1. the simplest use case
  * syncState({
  *   syncKey: '_s',
  *   stateContainer,
@@ -73,35 +73,6 @@ import { distinctUntilChangedWithInitialValue } from '../../common';
  *     state$: stateContainer.state$.pipe(map(stateToStorage))
  *   }
  * });
- *
- * 6. multiple different sync configs
- * const stateAToStorage = s => ({ t: s.tab });
- * const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
- * syncStates([
- *   {
- *     syncKey: '_a',
- *     syncStrategy: SyncStrategy.Url,
- *     stateContainer: {
- *       get: () => stateAToStorage(stateContainer.get()),
- *       set: s => stateContainer.set(({ ...stateContainer.get(), tab: s.t })),
- *       state$: stateContainer.state$.pipe(map(stateAToStorage))
- *     },
- *   },
- *   {
- *     syncKey: '_b',
- *     syncStrategy: SyncStrategy.HashedUrl,
- *     stateContainer: {
- *       get: () => stateBToStorage(stateContainer.get()),
- *       set: s => stateContainer.set({
- *         ...stateContainer.get(),
- *         fieldFilter: s.f || '',
- *         indexedFieldTypeFilter: s.i || '',
- *         scriptedFieldLanguageFilter: s.l || ''
- *       }),
- *       state$: stateContainer.state$.pipe(map(stateBToStorage))
- *     },
- *   },
- * ]);
  */
 export type StartSyncStateFnType = () => Promise<void>; // resolves when initial state is rehydrated
 export type StopSyncStateFnType = () => void;
@@ -204,15 +175,15 @@ export function syncState(
               fromStorage(stateSyncConfig.syncKey),
               defaultComparator
             ),
-            concatMap(t => {
-              return updateState({ isRestoringInitialState: false }).then(hasUpdated => {
+            concatMap(() =>
+              updateState({ isRestoringInitialState: false }).then(hasUpdated => {
                 // if there is nothing by state key in storage
                 // then we should fallback and consider state source of truth
                 if (!hasUpdated) {
                   return updateStorage({ replace: true, isRestoringInitialState: false });
                 }
-              });
-            })
+              })
+            )
           )
           .subscribe()
       );
@@ -220,6 +191,37 @@ export function syncState(
   }
 }
 
+/**
+ * 6. multiple different sync configs
+ * const stateAToStorage = s => ({ t: s.tab });
+ * const stateBToStorage = s => ({ f: s.fieldFilter, i: s.indexedFieldTypeFilter, l: s.scriptedFieldLanguageFilter });
+ * syncStates([
+ *   {
+ *     syncKey: '_a',
+ *     syncStrategy: SyncStrategy.Url,
+ *     stateContainer: {
+ *       get: () => stateAToStorage(stateContainer.get()),
+ *       set: s => stateContainer.set(({ ...stateContainer.get(), tab: s.t })),
+ *       state$: stateContainer.state$.pipe(map(stateAToStorage))
+ *     },
+ *   },
+ *   {
+ *     syncKey: '_b',
+ *     syncStrategy: SyncStrategy.HashedUrl,
+ *     stateContainer: {
+ *       get: () => stateBToStorage(stateContainer.get()),
+ *       set: s => stateContainer.set({
+ *         ...stateContainer.get(),
+ *         fieldFilter: s.f || '',
+ *         indexedFieldTypeFilter: s.i || '',
+ *         scriptedFieldLanguageFilter: s.l || ''
+ *       }),
+ *       state$: stateContainer.state$.pipe(map(stateBToStorage))
+ *     },
+ *   },
+ * ]);
+ * @param stateSyncConfig
+ */
 export function syncStates(
   stateSyncConfig: IStateSyncConfig[]
 ): [StartSyncStateFnType, StopSyncStateFnType] {
