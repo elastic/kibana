@@ -35,6 +35,8 @@ export interface FormHook<T extends FormData = FormData> {
   getFields: () => FieldsMap;
   getFormData: (options?: { unflatten?: boolean }) => T;
   getFieldDefaultValue: (fieldName: string) => unknown;
+  /* Returns a list of all errors in the form */
+  getErrors: () => string[];
   reset: (options?: { resetValues?: boolean }) => void;
   readonly __options: Required<FormOptions>;
   readonly __formData$: MutableRefObject<Subject<T>>;

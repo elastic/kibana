@@ -126,7 +126,12 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
         };
       },
       validate: async () => {
-        const promisesToValidate = [state.configuration.validate()];
+        const configurationFormValidator =
+          state.configuration.form !== undefined
+            ? (await state.configuration.form!.submit()).isValid
+            : Promise.resolve(true);
+
+        const promisesToValidate = [configurationFormValidator];
 
         if (state.fieldForm !== undefined && !bypassFieldFormValidation) {
           promisesToValidate.push(state.fieldForm.validate());
