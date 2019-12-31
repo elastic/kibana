@@ -131,6 +131,9 @@ export const npSetup = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        update: sinon.fake(),
+      },
     },
   },
 };

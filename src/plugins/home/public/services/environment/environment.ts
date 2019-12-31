@@ -34,7 +34,6 @@ export interface Environment {
 }
 
 export class EnvironmentService {
-  private frozen = false;
   private environment = {
     cloud: false,
     apmUi: false,
@@ -51,19 +50,12 @@ export class EnvironmentService {
        * @param update
        */
       update: (update: Partial<Environment>) => {
-        if (this.frozen) {
-          throw new Error(
-            'Environment already frozen, did you try to change the environment in the start phase?'
-          );
-        }
         this.environment = Object.assign({}, this.environment, update);
       },
     };
   }
 
   public start() {
-    this.frozen = true;
-    Object.freeze(this.environment);
     return {
       /**
        * Retrieve the current environment home is running in. This API is only intended for internal

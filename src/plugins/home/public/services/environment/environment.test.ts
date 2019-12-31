@@ -41,14 +41,5 @@ describe('EnvironmentService', () => {
       setup.update({ ml: false, apmUi: true });
       expect(service.start().get()).toEqual({ ml: false, cloud: true, apmUi: true });
     });
-
-    test('fails if trying to update state after setup phase', () => {
-      const service = new EnvironmentService();
-      const setup = service.setup();
-      service.start();
-      expect(() => {
-        setup.update({ ml: true });
-      }).toThrow();
-    });
   });
 });
