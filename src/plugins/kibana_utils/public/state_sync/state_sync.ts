@@ -175,15 +175,7 @@ export function syncState(
               fromStorage(stateSyncConfig.syncKey),
               defaultComparator
             ),
-            concatMap(() =>
-              updateState({ isRestoringInitialState: false }).then(hasUpdated => {
-                // if there is nothing by state key in storage
-                // then we should fallback and consider state source of truth
-                if (!hasUpdated) {
-                  return updateStorage({ replace: true, isRestoringInitialState: false });
-                }
-              })
-            )
+            concatMap(() => updateState({ isRestoringInitialState: false }))
           )
           .subscribe()
       );
