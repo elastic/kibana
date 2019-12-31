@@ -78,8 +78,8 @@ export const ActionConnectorForm = ({
     body: { message: string; error: string };
   } | null>(null);
 
-  const actionTypeRegisterd = actionTypeRegistry.get(initialConnector.actionTypeId);
-  if (!actionTypeRegisterd) return null;
+  const actionTypeRegistered = actionTypeRegistry.get(initialConnector.actionTypeId);
+  if (!actionTypeRegistered) return null;
 
   function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
@@ -100,9 +100,9 @@ export const ActionConnectorForm = ({
     return validationResult;
   }
 
-  const FieldsComponent = actionTypeRegisterd.actionConnectorFields;
+  const FieldsComponent = actionTypeRegistered.actionConnectorFields;
   const errors = {
-    ...actionTypeRegisterd.validateConnector(connector).errors,
+    ...actionTypeRegistered.validateConnector(connector).errors,
     ...validateBaseProperties(connector).errors,
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
