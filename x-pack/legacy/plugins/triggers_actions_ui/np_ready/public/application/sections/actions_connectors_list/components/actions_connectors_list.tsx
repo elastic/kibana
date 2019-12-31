@@ -229,6 +229,143 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     },
   ];
 
+  const table = (
+    <EuiInMemoryTable
+      loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
+      items={data}
+      sorting={true}
+      itemId="id"
+      columns={actionsTableColumns}
+      rowProps={() => ({
+        'data-test-subj': 'connectors-row',
+      })}
+      cellProps={() => ({
+        'data-test-subj': 'cell',
+      })}
+      data-test-subj="actionsTable"
+      pagination={true}
+      selection={
+        canDelete
+          ? {
+              onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
+                setSelectedItems(updatedSelectedItemsList);
+              },
+            }
+          : undefined
+      }
+      search={{
+        filters: [
+          {
+            type: 'field_value_selection',
+            field: 'actionTypeId',
+            name: i18n.translate(
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName',
+              { defaultMessage: 'Type' }
+            ),
+            multiSelect: 'or',
+            options: actionTypesList,
+          },
+        ],
+        toolsLeft:
+          selectedItems.length === 0 || !canDelete
+            ? []
+            : [
+                <EuiButton
+                  key="delete"
+                  iconType="trash"
+                  color="danger"
+                  data-test-subj="bulkDelete"
+                  onClick={deleteSelectedItems}
+                  title={
+                    canDelete
+                      ? undefined
+                      : i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
+                          { defaultMessage: 'Unable to delete actions' }
+                        )
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
+                    defaultMessage="Delete ({count})"
+                    values={{
+                      count: selectedItems.length,
+                    }}
+                  />
+                </EuiButton>,
+              ],
+        toolsRight: [
+          <EuiButton
+            data-test-subj="createActionButton"
+            key="create-action"
+            fill
+            iconType="plusInCircle"
+            iconSide="left"
+            onClick={() => setAddFlyoutVisibility(true)}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+              defaultMessage="Create"
+            />
+          </EuiButton>,
+        ],
+      }}
+    />
+  );
+
+  const emptyPrompt = (
+    <EuiEmptyPrompt
+      title={
+        <Fragment>
+          <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />
+          <EuiIcon type="logoGmail" size="xl" className="actConnectorsList__logo" />
+          <EuiIcon type="logoWebhook" size="xl" className="actConnectorsList__logo" />
+          <EuiSpacer size="s" />
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
+                defaultMessage="Create your first connector"
+              />
+            </h2>
+          </EuiTitle>
+        </Fragment>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
+            defaultMessage="Use connectors to set up reusable configurations for your Email, Slack, Elasticsearch and third party services that Kibana can trigger"
+          />
+        </p>
+      }
+      actions={
+        <EuiButton
+          data-test-subj="createFirstActionButton"
+          key="create-action"
+          fill
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={() => setAddFlyoutVisibility(true)}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+            defaultMessage="Create"
+          />
+        </EuiButton>
+      }
+    />
+  );
+
+  const noPermissionPrompt = (
+    <h2>
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
+        defaultMessage="No permissions to create connector"
+      />
+    </h2>
+  );
+
   return (
     <section data-test-subj="actionsList">
       <Fragment>
@@ -243,138 +380,10 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             reloadConnectors: loadActions,
           }}
         >
-          {data.length > 0 ? (
-            <EuiInMemoryTable
-              loading={isLoadingActions || isLoadingActionTypes || isDeletingActions}
-              items={data}
-              sorting={true}
-              itemId="id"
-              columns={actionsTableColumns}
-              rowProps={() => ({
-                'data-test-subj': 'connectors-row',
-              })}
-              cellProps={() => ({
-                'data-test-subj': 'cell',
-              })}
-              data-test-subj="actionsTable"
-              pagination={true}
-              selection={
-                canDelete
-                  ? {
-                      onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
-                        setSelectedItems(updatedSelectedItemsList);
-                      },
-                    }
-                  : undefined
-              }
-              search={{
-                filters: [
-                  {
-                    type: 'field_value_selection',
-                    field: 'actionTypeId',
-                    name: i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName',
-                      { defaultMessage: 'Type' }
-                    ),
-                    multiSelect: 'or',
-                    options: actionTypesList,
-                  },
-                ],
-                toolsLeft:
-                  selectedItems.length === 0 || !canDelete
-                    ? []
-                    : [
-                        <EuiButton
-                          key="delete"
-                          iconType="trash"
-                          color="danger"
-                          data-test-subj="bulkDelete"
-                          onClick={deleteSelectedItems}
-                          title={
-                            canDelete
-                              ? undefined
-                              : i18n.translate(
-                                  'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                                  { defaultMessage: 'Unable to delete actions' }
-                                )
-                          }
-                        >
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                            defaultMessage="Delete ({count})"
-                            values={{
-                              count: selectedItems.length,
-                            }}
-                          />
-                        </EuiButton>,
-                      ],
-                toolsRight: [
-                  <EuiButton
-                    data-test-subj="createActionButton"
-                    key="create-action"
-                    fill
-                    iconType="plusInCircle"
-                    iconSide="left"
-                    onClick={() => setAddFlyoutVisibility(true)}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                      defaultMessage="Create"
-                    />
-                  </EuiButton>,
-                ],
-              }}
-            />
-          ) : canSave ? (
-            <EuiEmptyPrompt
-              title={
-                <Fragment>
-                  <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />
-                  <EuiIcon type="logoGmail" size="xl" className="actConnectorsList__logo" />
-                  <EuiIcon type="logoWebhook" size="xl" className="actConnectorsList__logo" />
-                  <EuiSpacer size="s" />
-                  <EuiTitle size="m">
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
-                        defaultMessage="Create your first connector"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </Fragment>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
-                    defaultMessage="Use connectors to set up reusable configurations for your Email, Slack, Elasticsearch and third party services that Kibana can trigger"
-                  />
-                </p>
-              }
-              actions={
-                <EuiButton
-                  data-test-subj="createFirstActionButton"
-                  key="create-action"
-                  fill
-                  iconType="plusInCircle"
-                  iconSide="left"
-                  onClick={() => setAddFlyoutVisibility(true)}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                    defaultMessage="Create"
-                  />
-                </EuiButton>
-              }
-            />
-          ) : (
-            <h2>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
-                defaultMessage="No permissions to create connector"
-              />
-            </h2>
-          )}
+          {/* Render the view based on if there's data or if they can save */}
+          {data.length !== 0 && table}
+          {data.length === 0 && canSave && emptyPrompt}
+          {data.length === 0 && !canSave && noPermissionPrompt}
           <ConnectorAddFlyout />
           {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}
         </ActionsConnectorsContextProvider>
