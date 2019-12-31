@@ -17,15 +17,26 @@
  * under the License.
  */
 
-export type ERROR_CODE =
-  | 'ERR_FIELD_MISSING'
-  | 'ERR_FIELD_FORMAT'
-  | 'ERR_INVALID_CHARS'
-  | 'ERR_FIRST_CHAR'
-  | 'ERR_MIN_LENGTH'
-  | 'ERR_MAX_LENGTH'
-  | 'ERR_MIN_SELECTION'
-  | 'ERR_MAX_SELECTION'
-  | 'ERR_LOWERCASE_STRING'
-  | 'ERR_SMALLER_THAN_NUMBER'
-  | 'ERR_GREATER_THAN_NUMBER';
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import { isNumberSmallerThan } from '../../../validators/number';
+import { ERROR_CODE } from './types';
+
+export const numberSmallerThanField = ({
+  than,
+  message,
+  allowEquality = false,
+}: {
+  than: number;
+  message: string | ((err: Partial<ValidationError>) => string);
+  allowEquality?: boolean;
+}) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+  const [{ value }] = args;
+
+  return isNumberSmallerThan(than, allowEquality)(value as number)
+    ? undefined
+    : {
+        code: 'ERR_SMALLER_THAN_NUMBER',
+        than,
+        message: typeof message === 'function' ? message({ than }) : message,
+      };
+};
