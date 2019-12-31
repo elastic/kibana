@@ -166,7 +166,7 @@ describe('state_sync', () => {
       urlSyncStrategy = createKbnUrlSyncStrategy({ useHash: false, history });
     });
 
-    it('should sync state containers and storages to proper initial state', async () => {
+    it('should sync state containers and storage to proper initial state depending on the order of state configs', async () => {
       const sessionStorageState1 = [{ id: 1, text: 'todo1', completed: false }];
       const sessionStorageState2 = [{ id: 2, text: 'todo2', completed: true }];
       sessionStorage.setItem(key1, JSON.stringify(sessionStorageState1));
@@ -213,7 +213,7 @@ describe('state_sync', () => {
       stop();
     });
 
-    it('kbnGlobalStateSyncStrategy', async () => {
+    it('kbnGlobalStateSyncStrategy should restore initial state from passed initial url, then session storage and then current url', async () => {
       const sessionStorageState1 = [{ id: 1, text: 'todo1', completed: false }];
       const sessionStorageState2 = [{ id: 2, text: 'todo2', completed: true }];
       sessionStorage.setItem(key1, JSON.stringify(sessionStorageState1));
