@@ -27,7 +27,7 @@ const alertsClientFactoryParams: jest.Mocked<ConstructorOpts> = {
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
-  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.createStart()
+  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.createStart(),
 };
 const fakeRequest: Request = {
   headers: {},
