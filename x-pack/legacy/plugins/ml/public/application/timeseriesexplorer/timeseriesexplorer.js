@@ -474,7 +474,6 @@ export class TimeSeriesExplorer extends React.Component {
           if (byField?.name === entity.fieldName) {
             newEntity.fieldValues = byField.values;
           }
-          console.log(newEntity, '___newEntity___');
           return newEntity;
         }),
       },
@@ -806,7 +805,7 @@ export class TimeSeriesExplorer extends React.Component {
     if (partitionFieldName !== undefined) {
       const partitionFieldValue = get(entitiesState, partitionFieldName, '');
       entities.push({
-        fieldType: 'partitionField',
+        fieldType: 'partition_field',
         fieldName: partitionFieldName,
         fieldValue: partitionFieldValue,
       });
@@ -814,7 +813,7 @@ export class TimeSeriesExplorer extends React.Component {
     if (overFieldName !== undefined) {
       const overFieldValue = get(entitiesState, overFieldName, '');
       entities.push({
-        fieldType: 'overField',
+        fieldType: 'over_field',
         fieldName: overFieldName,
         fieldValue: overFieldValue,
       });
@@ -827,7 +826,7 @@ export class TimeSeriesExplorer extends React.Component {
     // from filter for the anomaly records.
     if (byFieldName !== undefined && overFieldName === undefined) {
       const byFieldValue = get(entitiesState, byFieldName, '');
-      entities.push({ fieldType: 'byField', fieldName: byFieldName, fieldValue: byFieldValue });
+      entities.push({ fieldType: 'by_field', fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
     this.updateCriteriaFields(detectorIndex, entities);
