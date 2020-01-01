@@ -1,5 +1,5 @@
 Kibana source code with Kibana X-Pack source code
-Copyright 2012-2019 Elasticsearch B.V.
+Copyright 2012-2020 Elasticsearch B.V.
 
 ---
 This product has relied on ASTExplorer that is licensed under MIT.
