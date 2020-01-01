@@ -449,8 +449,8 @@ export function resultsServiceProvider(callWithRequest) {
   }
 
   /**
-   * Gets the record of partition filed - values pairs.
-   * @param {Object} searchTerm - object of wildcard queries for partition fields, e.g. { partition_field: 'query' }
+   * Gets the record of partition fields with possible values that fit the provided queries.
+   * @param {Object} searchTerm - object of queries for partition fields, e.g. { partition_field: 'query' }
    * @param {Object} criteriaFields - key - value pairs of the term field, e.g. { job_id: 'ml-job', detector_index: 0 }
    * @param {number} earliestMs
    * @param {number} latestMs

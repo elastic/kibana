@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { difference, each, find, first, get, has, isEqual, without } from 'lodash';
+import { debounce, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -362,11 +362,11 @@ export class TimeSeriesExplorer extends React.Component {
     });
   };
 
-  entityFieldSearchChanged = (entity, queryTerm) => {
+  entityFieldSearchChanged = debounce((entity, queryTerm) => {
     this.loadEntityValues({
       [entity.fieldType]: queryTerm,
     });
-  };
+  }, 500);
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
     const { dateFormatTz } = this.props;
