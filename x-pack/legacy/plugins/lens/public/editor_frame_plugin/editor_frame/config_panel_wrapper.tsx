@@ -222,24 +222,44 @@ function LayerPanel(
         render={activeVisualization.renderLayerConfigPanel}
         nativeProps={layerConfigProps}
       />
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          size="xs"
+          iconType="trash"
+          color="danger"
+          data-test-subj="lns_layer_remove"
+          onClick={onRemove}
+        >
+          {isOnlyLayer
+            ? i18n.translate('xpack.lens.resetLayer', {
+                defaultMessage: 'Reset layer',
+              })
+            : i18n.translate('xpack.lens.deleteLayer', {
+                defaultMessage: 'Delete layer',
+              })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiPanel>
   );
 }
 
 function LayerSettings({
   layerId,
-  onRemove,
-  isOnlyLayer,
   activeVisualization,
   layerConfigProps,
 }: {
   layerId: string;
-  isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerConfigProps: VisualizationLayerConfigProps;
-  onRemove: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  if (!activeVisualization.renderLayerContextMenu) {
+    return null;
+  }
 
   return (
     <EuiPopover
@@ -248,7 +268,7 @@ function LayerSettings({
       ownFocus
       button={
         <EuiButtonIcon
-          iconType="gear"
+          iconType={activeVisualization.getLayerContextMenuIcon?.(layerConfigProps) || 'gear'}
           aria-label={i18n.translate('xpack.lens.editLayerSettings', {
             defaultMessage: 'Edit layer settings',
           })}
@@ -260,30 +280,10 @@ function LayerSettings({
       closePopover={() => setIsOpen(false)}
       anchorPosition="leftUp"
     >
-      {activeVisualization.renderLayerContextMenu && (
-        <>
-          <NativeRenderer
-            render={activeVisualization.renderLayerContextMenu}
-            nativeProps={layerConfigProps}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
-      )}
-      <EuiButtonEmpty
-        size="xs"
-        iconType="trash"
-        color="danger"
-        data-test-subj="lns_layer_remove"
-        onClick={onRemove}
-      >
-        {isOnlyLayer
-          ? i18n.translate('xpack.lens.clearLayer', {
-              defaultMessage: 'Clear layer',
-            })
-          : i18n.translate('xpack.lens.deleteLayer', {
-              defaultMessage: 'Delete layer',
-            })}
-      </EuiButtonEmpty>
+      <NativeRenderer
+        render={activeVisualization.renderLayerContextMenu}
+        nativeProps={layerConfigProps}
+      />
     </EuiPopover>
   );
 }

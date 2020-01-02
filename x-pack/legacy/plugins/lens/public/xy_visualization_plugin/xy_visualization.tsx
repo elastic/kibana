@@ -155,6 +155,11 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       domElement
     ),
 
+  getLayerContextMenuIcon({ state, layerId }) {
+    const layer = state.layers.find(l => l.layerId === layerId);
+    return visualizationTypes.find(t => t.id === layer?.seriesType)?.icon;
+  },
+
   renderLayerContextMenu(domElement, props) {
     render(
       <I18nProvider>

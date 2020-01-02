@@ -335,6 +335,8 @@ export interface Visualization<T = unknown, P = unknown> {
 
   appendLayer?: (state: T, layerId: string) => T;
 
+  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+
   renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
 
   getDescription: (
