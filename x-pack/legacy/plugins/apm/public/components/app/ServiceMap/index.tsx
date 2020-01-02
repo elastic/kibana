@@ -150,10 +150,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         const destination =
           nodesById[getConnectionNodeId(connection.destination, destMap)];
 
-        if (source === destination) {
-          return acc;
-        }
-
         return {
           ...acc,
           [getEdgeId(source, destination)]: {
