@@ -95,6 +95,7 @@ filters
 
 Similar to the <<pie_fn, pie>> function, the <<plot_fn, plot>> function takes arguments that control the design elements of the visualization. As one example, passing a `legend` argument with a value of `false` to the function will hide the legend on the chart.
 
+image::images/canvas-change-your-expression-chart-no-legend.png[Bubble Chart Without Legend, scaledwidth="50%"]
 [source,text,subs=+quotes]
 ----
 filters
