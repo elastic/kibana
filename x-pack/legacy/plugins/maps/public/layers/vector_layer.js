@@ -391,7 +391,6 @@ export class VectorLayer extends AbstractLayer {
       const { data: sourceFeatureCollection, meta } = await this._source.getGeoJsonWithMeta(
         layerName,
         searchFilters,
-        prevDataRequest ? prevDataRequest.getMeta() : {},
         registerCancelCallback.bind(null, requestToken)
       );
       const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);

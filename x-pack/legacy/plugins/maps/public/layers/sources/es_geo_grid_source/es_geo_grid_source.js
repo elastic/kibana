@@ -175,7 +175,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     );
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, prevMeta, registerCancelCallback) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(

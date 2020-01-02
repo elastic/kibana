@@ -174,7 +174,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, prevMeta, registerCancelCallback) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
     const metricAggConfigs = this.createMetricAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);

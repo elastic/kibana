@@ -17,6 +17,7 @@ import {
   EMS_TILES_VECTOR_TILE_PATH,
   GIS_API_PATH,
   EMS_SPRITES_PATH,
+  INDEX_SETTINGS_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -417,11 +418,12 @@ export function initRoutes(server, licenseUid) {
 
   server.route({
     method: 'GET',
-    path: `${ROOT}/indexSettings`,
+    path: `/${INDEX_SETTINGS_API_PATH}`,
     handler: async (request, h) => {
       const { server, query } = request;
 
       if (!query.indexPatternTitle) {
+        server.log('warning', `Required query parameter 'indexPatternTitle' not provided.`);
         return h.response().code(400);
       }
 
@@ -432,6 +434,10 @@ export function initRoutes(server, licenseUid) {
         });
         return getIndexPatternSettings(resp);
       } catch (error) {
+        server.log(
+          'warning',
+          `Cannot load index settings for index pattern '${query.indexPatternTitle}', error: ${error.message}.`
+        );
         return h.response().code(400);
       }
     },

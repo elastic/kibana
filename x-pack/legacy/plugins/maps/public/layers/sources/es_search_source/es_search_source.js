@@ -382,12 +382,10 @@ export class ESSearchSource extends AbstractESSource {
     return !!sortField && !!sortOrder;
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters, prevMeta, registerCancelCallback) {
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
 
-    const indexSettings = prevMeta.indexSettings
-      ? prevMeta.indexSettings
-      : await loadIndexSettings(indexPattern.title);
+    const indexSettings = await loadIndexSettings(indexPattern.title);
 
     const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
