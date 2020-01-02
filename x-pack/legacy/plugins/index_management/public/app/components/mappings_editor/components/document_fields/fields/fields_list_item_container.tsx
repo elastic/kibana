@@ -8,7 +8,6 @@ import React, { useMemo, useCallback } from 'react';
 import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
-import { FieldsListItemFlat } from './fields_list_item_flat';
 
 interface Props {
   fieldId: string;
@@ -54,18 +53,7 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
     dispatch({ type: 'field.toggleExpand', value: { fieldId } });
   }, [fieldId]);
 
-  const isFlat = true;
-
-  return isFlat ? (
-    <FieldsListItemFlat
-      field={field}
-      areActionButtonsVisible={areActionButtonsVisible}
-      isHighlighted={isHighlighted}
-      isDimmed={isDimmed}
-      addField={addField}
-      editField={editField}
-    />
-  ) : (
+  return (
     <FieldsListItem
       field={field}
       allFields={byId}

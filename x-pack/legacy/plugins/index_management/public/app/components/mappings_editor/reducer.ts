@@ -44,12 +44,14 @@ interface DocumentFieldsState {
   fieldToAddFieldTo?: string;
 }
 
+interface ConfigurationFormState extends OnFormUpdateArg<MappingsConfiguration> {
+  defaultValue: MappingsConfiguration;
+  submitForm?: FormHook<MappingsConfiguration>['submit'];
+}
+
 export interface State {
   isValid: boolean | undefined;
-  configuration: {
-    defaultValue: MappingsConfiguration;
-    form?: FormHook<MappingsConfiguration>;
-  } & OnFormUpdateArg<MappingsConfiguration>;
+  configuration: ConfigurationFormState;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
@@ -57,11 +59,15 @@ export interface State {
     format(): MappingsFields;
     isValid: boolean;
   };
+  search: {
+    term: string;
+    result: NormalizedField[];
+  };
 }
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
-  | { type: 'configuration.update'; value: Partial<State['configuration']> }
+  | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
   | { type: 'configuration.save' }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
@@ -72,7 +78,8 @@ export type Action =
   | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
-  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } };
+  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
+  | { type: 'search:update'; value: string };
 
 export type Dispatch = (action: Action) => void;
 
@@ -504,6 +511,15 @@ export const reducer = (state: State, action: Action): State => {
       nextState.isValid = isStateValid(nextState);
 
       return nextState;
+    }
+    case 'search:update': {
+      return {
+        ...state,
+        search: {
+          term: action.value,
+          result: [],
+        },
+      };
     }
     default:
       throw new Error(`Action "${action!.type}" not recognized.`);

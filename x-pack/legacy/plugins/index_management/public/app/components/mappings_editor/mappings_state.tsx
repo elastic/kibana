@@ -79,6 +79,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       format: () => ({}),
       isValid: true,
     },
+    search: {
+      term: '',
+      result: [],
+    },
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -127,8 +131,11 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       },
       validate: async () => {
         const configurationFormValidator =
-          state.configuration.form !== undefined
-            ? (await state.configuration.form!.submit()).isValid
+          state.configuration.submitForm !== undefined
+            ? new Promise(async resolve => {
+                const { isValid } = await state.configuration.submitForm!();
+                resolve(isValid);
+              })
             : Promise.resolve(true);
 
         const promisesToValidate = [configurationFormValidator];

@@ -3,14 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { documentationService } from '../../../../services/documentation';
 
-export const DocumentFieldsHeader = () => {
-  const [tempValue, setTempValue] = useState('');
+interface Props {
+  searchValue: string;
+  onSearchChange(value: string): void;
+}
+
+export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }: Props) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -33,12 +37,12 @@ export const DocumentFieldsHeader = () => {
 
       <EuiFlexItem>
         <EuiFieldSearch
-          placeholder="Search fields..."
-          value={tempValue}
-          onChange={e => setTempValue(e.target.value)}
+          placeholder="Search fields"
+          value={searchValue}
+          onChange={e => onSearchChange(e.target.value)}
           aria-label="Search mapped fields"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
