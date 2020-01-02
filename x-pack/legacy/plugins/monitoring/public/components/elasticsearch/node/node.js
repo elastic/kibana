@@ -21,10 +21,6 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-function formatScreenReaderMsg(msg, nodeSummary) {
-  return msg + ' ' + nodeSummary.name;
-}
-
 export const Node = ({
   nodeSummary,
   metrics,
@@ -51,7 +47,7 @@ export const Node = ({
           <h1>
             <FormattedMessage
               id="xpack.monitoring.elasticsearch.node.heading"
-              defaultMessage={formatScreenReaderMsg('Elasticsearch node', nodeSummary)}
+              defaultMessage={`Elasticsearch node ${nodeSummary.name}`}
             />
           </h1>
         </EuiScreenReaderOnly>
