@@ -9,22 +9,14 @@ import { HttpHandler } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export enum UptimePage {
-  Overview = 0,
-  Monitor,
-  NotFound,
+  Overview = '/api/uptime/logOverview',
+  Monitor = '/api/uptime/logMonitor',
+  NotFound = '',
 }
 
 const getApiPath = (page: UptimePage) => {
-  switch (page) {
-    case UptimePage.Overview:
-      return '/api/uptime/logOverview';
-    case UptimePage.Monitor:
-      return '/api/uptime/logMonitor';
-    case UptimePage.NotFound:
-      throw new Error('Telemetry logging for 404 page not yet implemented');
-    default:
-      throw new Error('Invalid telemetry logging page specified');
-  }
+  if (page === '') throw new Error('Telemetry logging for this page not yet implemented');
+  return page.valueOf();
 };
 
 const logPageLoad = async (fetch: HttpHandler, page: UptimePage) => {
