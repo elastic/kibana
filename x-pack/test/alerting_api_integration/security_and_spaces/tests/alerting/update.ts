@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
+  checkAAD,
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
@@ -86,6 +87,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 muteAll: false,
                 mutedInstanceIds: [],
                 scheduledTaskId: createdAlert.scheduledTaskId,
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
               });
               break;
             default:
