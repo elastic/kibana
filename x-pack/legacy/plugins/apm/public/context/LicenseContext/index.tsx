@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
-import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
+import useObservable from 'react-use/lib/useObservable';
+import { ILicense } from '../../../../../../plugins/licensing/public';
+import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 
