@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { countBy } from 'lodash';
+import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSearchResponse, BulkResponse } from './types';
@@ -82,9 +82,9 @@ export const singleBulkCreate = async ({
   if (response.errors) {
     const itemsWithErrors = response.items.filter(item => item.create.error);
     const errorCountsByStatus = countBy(itemsWithErrors, item => item.create.status);
-    const hasNonDuplicateError = Object.keys(errorCountsByStatus).some(status => status !== '409');
+    delete errorCountsByStatus['409']; // Duplicate signals are expected
 
-    if (hasNonDuplicateError) {
+    if (!isEmpty(errorCountsByStatus)) {
       logger.error(
         `[-] bulkResponse had errors with response statuses:counts of...\n${JSON.stringify(
           errorCountsByStatus,
