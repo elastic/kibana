@@ -6,7 +6,6 @@
 
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import * as RuleI18n from '../../translations';
@@ -18,6 +17,7 @@ import {
   ValidationFunc,
   ERROR_CODE,
 } from '../shared_imports';
+import { isMitreAttackInvalid } from '../mitre/helpers';
 import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -126,7 +126,7 @@ export const schema: FormSchema = {
           const [{ value, path }] = args;
           let hasError = false;
           (value as IMitreEnterpriseAttack[]).forEach(v => {
-            if (isEmpty(v.tactic.name) || (v.tactic.name !== 'none' && isEmpty(v.techniques))) {
+            if (isMitreAttackInvalid(v.tactic.name, v.techniques)) {
               hasError = true;
             }
           });

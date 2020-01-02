@@ -7,13 +7,13 @@
 import { i18n } from '@kbn/i18n';
 
 export const TACTIC = i18n.translate('xpack.siem.detectionEngine.mitreAttack.tacticsDescription', {
-  defaultMessage: 'Tactic',
+  defaultMessage: 'tactic',
 });
 
-export const TECHNIQUES = i18n.translate(
+export const TECHNIQUE = i18n.translate(
   'xpack.siem.detectionEngine.mitreAttack.techniquesDescription',
   {
-    defaultMessage: 'Techniques',
+    defaultMessage: 'technique',
   }
 );
 

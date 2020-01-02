@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
+import styled from 'styled-components';
 
 import * as RuleI18n from '../../translations';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -18,6 +27,14 @@ interface AddItemProps {
   idAria: string;
   isDisabled: boolean;
 }
+
+const MyEuiFormRow = styled(EuiFormRow)`
+  .euiFormRow__labelWrapper {
+    .euiText {
+      padding-right: 32px;
+    }
+  }
+`;
 
 export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -104,7 +121,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
 
   const values = field.value as string[];
   return (
-    <EuiFormRow
+    <MyEuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
       error={errorMessage}
@@ -127,8 +144,11 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
           };
           return (
             <div key={index}>
-              <EuiFieldText
-                append={
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  <EuiFieldText onChange={e => updateItem(e, index)} fullWidth {...euiFieldProps} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="danger"
                     iconType="trash"
@@ -136,20 +156,18 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
                     onClick={() => removeItem(index)}
                     aria-label={RuleI18n.DELETE}
                   />
-                }
-                onChange={e => updateItem(e, index)}
-                fullWidth
-                {...euiFieldProps}
-              />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
               {values.length - 1 !== index && <EuiSpacer size="s" />}
             </div>
           );
         })}
 
-        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled}>
+        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled} iconType="plusInCircle">
           {addText}
         </EuiButtonEmpty>
       </>
-    </EuiFormRow>
+    </MyEuiFormRow>
   );
 };

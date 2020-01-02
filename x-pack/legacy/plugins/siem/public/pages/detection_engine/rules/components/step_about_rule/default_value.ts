@@ -6,6 +6,14 @@
 
 import { AboutStepRule } from '../../types';
 
+export const threatsDefault = [
+  {
+    framework: 'MITRE ATT&CK',
+    tactic: { id: 'none', name: 'none', reference: 'none' },
+    techniques: [],
+  },
+];
+
 export const stepAboutDefaultValue: AboutStepRule = {
   name: '',
   description: '',
@@ -15,11 +23,5 @@ export const stepAboutDefaultValue: AboutStepRule = {
   references: [''],
   falsePositives: [''],
   tags: [],
-  threats: [
-    {
-      framework: 'MITRE ATT&CK',
-      tactic: { id: 'none', name: 'none', reference: 'none' },
-      techniques: [],
-    },
-  ],
+  threats: threatsDefault,
 };

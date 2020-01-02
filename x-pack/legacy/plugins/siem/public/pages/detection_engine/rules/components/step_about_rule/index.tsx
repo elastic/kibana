@@ -7,6 +7,7 @@
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, get } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as RuleI18n from '../../translations';
@@ -24,6 +25,10 @@ const CommonUseField = getUseField({ component: Field });
 interface StepAboutRuleProps extends RuleStepProps {
   defaultValues?: AboutStepRule | null;
 }
+
+const TagContainer = styled.div`
+  margin-top: 16px;
+`;
 
 export const StepAboutRule = memo<StepAboutRuleProps>(
   ({
@@ -163,18 +168,20 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
               dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
             }}
           />
-          <CommonUseField
-            path="tags"
-            componentProps={{
-              idAria: 'detectionEngineStepAboutRuleTags',
-              'data-test-subj': 'detectionEngineStepAboutRuleTags',
-              euiFieldProps: {
-                fullWidth: true,
-                isDisabled: isLoading,
-                placeholder: '',
-              },
-            }}
-          />
+          <TagContainer>
+            <CommonUseField
+              path="tags"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleTags',
+                'data-test-subj': 'detectionEngineStepAboutRuleTags',
+                euiFieldProps: {
+                  fullWidth: true,
+                  isDisabled: isLoading,
+                  placeholder: '',
+                },
+              }}
+            />
+          </TagContainer>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
