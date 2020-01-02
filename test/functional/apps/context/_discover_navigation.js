@@ -36,15 +36,14 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await Promise.all(
-        TEST_COLUMN_NAMES.map(columnName => PageObjects.discover.clickFieldListItemAdd(columnName))
-      );
-      await Promise.all(
-        TEST_FILTER_COLUMN_NAMES.map(async ([columnName, value]) => {
-          await PageObjects.discover.clickFieldListItem(columnName);
-          await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-        })
-      );
+      await PageObjects.discover.waitForDocTableLoadingComplete();
+      for (const columnName of TEST_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItemAdd(columnName);
+      }
+      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+      }
     });
 
     it('should open the context view with the selected document as anchor', async function() {
