@@ -15,11 +15,8 @@ import { errorToToaster } from '../api/error_to_toaster';
 
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
-import {
-  DEFAULT_ANOMALY_SCORE,
-  DEFAULT_TIMEZONE_BROWSER,
-  DEFAULT_KBN_VERSION,
-} from '../../../../common/constants';
+import { DEFAULT_ANOMALY_SCORE, DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { useTimeZone } from '../../../hooks';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -67,7 +64,7 @@ export const useAnomaliesTableData = ({
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
   const [, dispatchToaster] = useStateToaster();
-  const [timezone] = useUiSetting$<string>(DEFAULT_TIMEZONE_BROWSER);
+  const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
   const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
 
@@ -95,7 +92,7 @@ export const useAnomaliesTableData = ({
               earliestMs,
               latestMs,
               influencers: influencersInput,
-              dateFormatTz: timezone,
+              dateFormatTz: timeZone,
               maxRecords: 500,
               maxExamples: 10,
             },

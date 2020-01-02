@@ -15,10 +15,9 @@ import {
   SettingsSpecProps,
   TickFormatter,
 } from '@elastic/charts';
-import moment from 'moment-timezone';
 import styled from 'styled-components';
 import { useUiSetting } from '../../lib/kibana';
-import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
+import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
@@ -106,11 +105,6 @@ export const chartDefaultSettings = {
   showLegend: false,
   showLegendDisplayValue: false,
   debug: false,
-};
-
-export const useBrowserTimeZone = () => {
-  const kibanaTimezone = useUiSetting<string>(DEFAULT_DATE_FORMAT_TZ);
-  return kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
 };
 
 export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {

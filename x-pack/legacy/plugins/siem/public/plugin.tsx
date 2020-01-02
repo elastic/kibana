@@ -17,7 +17,7 @@ import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
-import { DEFAULT_KBN_VERSION, DEFAULT_TIMEZONE_BROWSER } from '../common/constants';
+import { DEFAULT_KBN_VERSION } from '../common/constants';
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
 export interface SetupPlugins {
@@ -46,7 +46,6 @@ export class Plugin implements IPlugin<Setup, Start> {
   public setup(core: CoreSetup, plugins: SetupPlugins) {
     // TODO(rylnd): These are unknown by uiSettings by default
     core.uiSettings.set(DEFAULT_KBN_VERSION, '8.0.0');
-    core.uiSettings.set(DEFAULT_TIMEZONE_BROWSER, 'UTC');
 
     core.application.register({
       id: this.id,
