@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
-import { getIndexPattern } from '../../../lib/adapters/index_pattern';
-import { UptimeSettingsContext } from '../../../contexts';
 import { useUrlParams } from '../../../hooks';
 import { toStaticIndexPattern } from '../../../lib/helper';
 import {
@@ -20,6 +18,7 @@ import {
   esKuery,
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
+import { useIndexPattern } from '../../../hooks';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -71,14 +70,14 @@ export function KueryBar({ autocomplete }: Props) {
     suggestions: [],
     isLoadingIndexPattern: true,
   });
-  const { basePath } = useContext(UptimeSettingsContext);
   const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
   const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
+  useIndexPattern((result: any) => setIndexPattern(toStaticIndexPattern(result)));
+
   useEffect(() => {
-    getIndexPattern(basePath, (result: any) => setIndexPattern(toStaticIndexPattern(result)));
     setIsLoadingIndexPattern(false);
   }, []);
   const [getUrlParams, updateUrlParams] = useUrlParams();
