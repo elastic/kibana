@@ -12,6 +12,7 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+import { VectorStyle } from '../vector_style';
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
@@ -128,11 +129,28 @@ export class VectorStyleEditor extends Component {
     this.props.onIsTimeAwareChange(event.target.checked);
   };
 
+  _onStaticStyleChange = (propertyName, options) => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options,
+    };
+    this.props.handlePropertyChange(propertyName, styleDescriptor);
+  };
+
+  _onDynamicStyleChange = (propertyName, options) => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options,
+    };
+    this.props.handlePropertyChange(propertyName, styleDescriptor);
+  };
+
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
         swatches={DEFAULT_FILL_COLORS}
-        handlePropertyChange={this.props.handlePropertyChange}
+        onStaticStyleChange={this._onStaticStyleChange}
+        onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties.fillColor}
         fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
@@ -145,7 +163,8 @@ export class VectorStyleEditor extends Component {
     return (
       <VectorStyleColorEditor
         swatches={DEFAULT_LINE_COLORS}
-        handlePropertyChange={this.props.handlePropertyChange}
+        onStaticStyleChange={this._onStaticStyleChange}
+        onDynamicStyleChange={this._onDynamicStyleChange}
         styleProperty={this.props.styleProperties.lineColor}
         fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
@@ -192,7 +211,8 @@ export class VectorStyleEditor extends Component {
 
         <VectorStyleColorEditor
           swatches={DEFAULT_LINE_COLORS}
-          handlePropertyChange={this.props.handlePropertyChange}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties.labelColor}
           fields={this._getOrdinalFields()}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.labelColor.options}

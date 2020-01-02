@@ -6,21 +6,29 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../static_dynamic_style_row';
-import { DynamicColorSelection } from './dynamic_color_selection';
-import { StaticColorSelection } from './static_color_selection';
+import { StylePropEditor } from '../style_prop_editor';
+import { DynamicColorEditor } from './dynamic_color_editor';
+import { StaticColorEditor } from './static_color_editor';
+import { i18n } from '@kbn/i18n';
 
 export function VectorStyleColorEditor(props) {
+  const colorEditor = props.styleProperty.isDynamic() ? (
+    <DynamicColorEditor {...props} />
+  ) : (
+    <StaticColorEditor {...props} />
+  );
+
   return (
-    <StaticDynamicStyleRow
-      fields={props.fields}
-      styleProperty={props.styleProperty}
-      handlePropertyChange={props.handlePropertyChange}
-      swatches={props.swatches}
-      DynamicSelector={DynamicColorSelection}
-      StaticSelector={StaticColorSelection}
-      defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
-      defaultStaticStyleOptions={props.defaultStaticStyleOptions}
-    />
+    <StylePropEditor
+      {...props}
+      customStaticOptionLabel={i18n.translate(
+        'xpack.maps.styles.color.staticDynamicSelect.staticLabel',
+        {
+          defaultMessage: 'Solid',
+        }
+      )}
+    >
+      {colorEditor}
+    </StylePropEditor>
   );
 }
