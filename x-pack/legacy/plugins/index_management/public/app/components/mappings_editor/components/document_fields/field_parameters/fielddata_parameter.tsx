@@ -51,14 +51,10 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
     const nextMaxConfig = getConfig('max', nextValueType);
 
     min.setValue(
-      nextMinConfig.deserializer
-        ? nextMinConfig.deserializer(nextMinConfig.defaultValue)
-        : nextMinConfig.defaultValue
+      nextMinConfig.deserializer?.(nextMinConfig.defaultValue) ?? nextMinConfig.defaultValue
     );
     max.setValue(
-      nextMaxConfig.deserializer
-        ? nextMaxConfig.deserializer(nextMaxConfig.defaultValue)
-        : nextMaxConfig.defaultValue
+      nextMaxConfig.deserializer?.(nextMaxConfig.defaultValue) ?? nextMaxConfig.defaultValue
     );
 
     setValueType(nextValueType);
