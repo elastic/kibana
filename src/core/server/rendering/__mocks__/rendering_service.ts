@@ -17,23 +17,23 @@
  * under the License.
  */
 
-const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
+import { RenderingService as Service } from '../rendering_service';
+import { RenderingServiceSetup } from '../types';
+import { mockRenderingServiceParams } from './params';
 
-export function mergeVariables(...sources: Array<Record<string, any>>) {
-  const result: Record<string, any> = {};
+type IRenderingService = PublicMethodsOf<Service>;
 
-  for (const source of sources) {
-    Object.entries(source).forEach(([key, value]) => {
-      if (ELIGIBLE_FLAT_MERGE_KEYS.includes(key)) {
-        result[key] = {
-          ...value,
-          ...result[key],
-        };
-      } else if (!result.hasOwnProperty(key)) {
-        result[key] = value;
-      }
-    });
-  }
-
-  return result;
-}
+export const setupMock: jest.Mocked<RenderingServiceSetup> = {
+  render: jest.fn(),
+};
+export const mockSetup = jest.fn().mockResolvedValue(setupMock);
+export const mockStart = jest.fn();
+export const mockStop = jest.fn();
+export const mockRenderingService: jest.Mocked<IRenderingService> = {
+  setup: mockSetup,
+  start: mockStart,
+  stop: mockStop,
+};
+export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
+  () => mockRenderingService
+);
