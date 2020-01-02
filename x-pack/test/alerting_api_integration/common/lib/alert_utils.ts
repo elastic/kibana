@@ -17,7 +17,7 @@ export interface AlertUtilsOpts {
   objectRemover?: ObjectRemover;
 }
 
-export interface CreateAlwaysFiringActionOpts {
+export interface CreateAlertWithActionOpts {
   indexRecordActionId?: string;
   objectRemover?: ObjectRemover;
   overwrites?: Record<string, any>;
@@ -159,7 +159,7 @@ export class AlertUtils {
     overwrites = {},
     indexRecordActionId,
     reference,
-  }: CreateAlwaysFiringActionOpts) {
+  }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
 
@@ -213,7 +213,7 @@ export class AlertUtils {
     overwrites = {},
     indexRecordActionId,
     reference,
-  }: CreateAlwaysFiringActionOpts) {
+  }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
 

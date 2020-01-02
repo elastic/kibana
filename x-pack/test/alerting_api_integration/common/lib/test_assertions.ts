@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 
 export function ensureDatetimeIsWithinRange(
-  scheduledRunTime: number,
+  date: number,
   expectedDiff: number,
   buffer: number = 10000
 ) {
-  const diff = scheduledRunTime - Date.now();
+  const diff = date - Date.now();
   expect(diff).to.be.greaterThan(expectedDiff - buffer);
   expect(diff).to.be.lessThan(expectedDiff + buffer);
 }
