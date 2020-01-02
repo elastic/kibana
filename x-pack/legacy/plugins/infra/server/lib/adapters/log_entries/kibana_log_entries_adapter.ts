@@ -497,23 +497,24 @@ function processCursor(
   sortDirection: 'asc' | 'desc';
   searchAfterClause: { search_after?: readonly [number, number] };
 } {
-  let sortDirection: 'asc' | 'desc' = 'asc';
-  let searchAfterClause = {};
-
-  if (!cursor) {
-    return { sortDirection, searchAfterClause };
-  }
-
-  if ('before' in cursor) {
-    sortDirection = 'desc';
-    if (cursor.before !== 'last') {
-      searchAfterClause = { search_after: [cursor.before.time, cursor.before.tiebreaker] as const };
+  if (cursor) {
+    if ('before' in cursor) {
+      return {
+        sortDirection: 'desc',
+        searchAfterClause:
+          cursor.before !== 'last'
+            ? { search_after: [cursor.before.time, cursor.before.tiebreaker] as const }
+            : {},
+      };
+    } else if (cursor.after !== 'first') {
+      return {
+        sortDirection: 'asc',
+        searchAfterClause: { search_after: [cursor.after.time, cursor.after.tiebreaker] as const },
+      };
     }
-  } else if ('after' in cursor && cursor.after !== 'first') {
-    searchAfterClause = { search_after: [cursor.after.time, cursor.after.tiebreaker] as const };
   }
 
-  return { sortDirection, searchAfterClause };
+  return { sortDirection: 'asc', searchAfterClause: {} };
 }
 
 const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
