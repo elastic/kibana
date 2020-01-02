@@ -129,16 +129,18 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       };
     }, {} as Record<string, ServiceConnectionNode>);
 
+    const services = responses.flatMap(response => response.services);
+
     const nodesById = responses
       .flatMap(response => response.connections)
-      .reduce((acc, connection) => {
-        const sourceId = getConnectionNodeId(connection.source, destMap);
-        const destId = getConnectionNodeId(connection.destination, destMap);
+      .flatMap(connection => [connection.source, connection.destination])
+      .concat(services)
+      .reduce((acc, node) => {
+        const nodeId = getConnectionNodeId(node, destMap);
 
         return {
           ...acc,
-          [sourceId]: destMap[sourceId] || connection.source,
-          [destId]: destMap[destId] || connection.destination
+          [nodeId]: destMap[nodeId] || node
         };
       }, {} as Record<string, ConnectionNode>);
 
