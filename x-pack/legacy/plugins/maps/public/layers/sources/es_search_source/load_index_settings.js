@@ -40,7 +40,7 @@ async function fetchIndexSettings(indexPatternTitle) {
       defaultMessage: `Unable to fetch index settings for index pattern '{indexPatternTitle}'.
       Ensure you have '{viewIndexMetaRole}' role.`,
       values: {
-        indexPattern: indexPatternTitle,
+        indexPatternTitle,
         viewIndexMetaRole: 'view_index_metadata',
       },
     });
