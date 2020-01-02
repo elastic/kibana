@@ -27,6 +27,20 @@ const services: Services = {
 
 let actionType: ActionType;
 
+const mockServiceNow = {
+  config: {
+    apiUrl: 'www.servicenowisinkibanaactions.com',
+  },
+  secrets: {
+    password: 'secret-password',
+    username: 'secret-username',
+  },
+  params: {
+    comments: 'hello cool service now incident',
+    short_description: 'this is a cool service now incident',
+  },
+};
+
 beforeAll(() => {
   const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
@@ -41,7 +55,8 @@ describe('get()', () => {
 
 describe('validateConfig()', () => {
   test('should validate and pass when config is valid', () => {
-    expect(validateConfig(actionType, { apiUrl: 'bar' })).toEqual({ apiUrl: 'bar' });
+    const { config } = mockServiceNow;
+    expect(validateConfig(actionType, config)).toEqual(config);
   });
 
   test('should validate and throw error when config is invalid', () => {
@@ -87,15 +102,8 @@ describe('validateConfig()', () => {
 
 describe('validateSecrets()', () => {
   test('should validate and pass when secrets is valid', () => {
-    expect(
-      validateSecrets(actionType, {
-        password: 'secret-password',
-        username: 'secret-username',
-      })
-    ).toEqual({
-      password: 'secret-password',
-      username: 'secret-username',
-    });
+    const { secrets } = mockServiceNow;
+    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
   });
 
   test('should validate and throw error when secrets is invalid', () => {
@@ -115,10 +123,7 @@ describe('validateSecrets()', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    const params = {
-      comments: 'comments',
-      short_description: 'a short_description',
-    };
+    const { params } = mockServiceNow;
     expect(validateParams(actionType, params)).toEqual(params);
   });
 
@@ -135,14 +140,10 @@ describe('execute()', () => {
   beforeEach(() => {
     postServiceNowMock.mockReset();
   });
-
-  test('should succeed with minimal valid params', async () => {
-    const secrets = { routingKey: 'super-secret' };
-    const config = {};
-    const params = {};
-
+  const { config, params, secrets } = mockServiceNow;
+  test('should succeed with valid params', async () => {
     postServiceNowMock.mockImplementation(() => {
-      return { status: 202, data: 'data-here' };
+      return { status: 201, data: 'data-here' };
     });
 
     const actionId = 'some-action-id';
@@ -155,192 +156,20 @@ describe('execute()', () => {
     };
     const actionResponse = await actionType.executor(executorOptions);
     const { apiUrl, data, headers } = postServiceNowMock.mock.calls[0][0];
-    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
+    expect({ apiUrl, data, headers, secrets }).toMatchInlineSnapshot(`
       Object {
-        "apiUrl": "https://events.servicenow.com/v2/enqueue",
+        "apiUrl": "www.servicenowisinkibanaactions.com",
         "data": Object {
-          "dedup_key": "action:some-action-id",
-          "event_action": "trigger",
-          "payload": Object {
-            "severity": "info",
-            "source": "Kibana Action some-action-id",
-            "summary": "No summary provided.",
-          },
+          "comments": "hello cool service now incident",
+          "short_description": "this is a cool service now incident",
         },
         "headers": Object {
+          "Accept": "application/json",
           "Content-Type": "application/json",
-          "X-Routing-Key": "super-secret",
         },
-      }
-    `);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "data": "data-here",
-        "status": "ok",
-      }
-    `);
-  });
-
-  test('should succeed with maximal valid params for trigger', async () => {
-    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
-    const secrets = {
-      password: 'secret-password',
-      username: 'secret-username',
-    };
-    const config = {
-      apiUrl: 'the-api-url',
-    };
-    const params = {
-      comments: 'comments',
-      short_description: 'short_description',
-    };
-
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 202, data: 'data-here' };
-    });
-
-    const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
-    const actionResponse = await actionType.executor(executorOptions);
-    const { apiUrl, data, headers } = postServiceNowMock.mock.calls[0][0];
-    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
-      Object {
-        "apiUrl": "the-api-url",
-        "data": Object {
-          "dedup_key": "a-dedup-key",
-          "event_action": "trigger",
-          "payload": Object {
-            "class": "the-class",
-            "component": "the-component",
-            "group": "the-group",
-            "severity": "critical",
-            "source": "the-source",
-            "summary": "the summary",
-            "timestamp": "1963-09-23T01:23:45.000Z",
-          },
-        },
-        "headers": Object {
-          "Content-Type": "application/json",
-          "X-Routing-Key": "super-secret",
-        },
-      }
-    `);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "data": "data-here",
-        "status": "ok",
-      }
-    `);
-  });
-
-  test('should succeed with maximal valid params for acknowledge', async () => {
-    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
-    const secrets = {
-      routingKey: 'super-secret',
-    };
-    const config = {
-      apiUrl: 'the-api-url',
-    };
-    const params = {
-      eventAction: 'acknowledge',
-      dedupKey: 'a-dedup-key',
-      summary: 'the summary',
-      source: 'the-source',
-      severity: 'critical',
-      timestamp: randoDate,
-      component: 'the-component',
-      group: 'the-group',
-      class: 'the-class',
-    };
-
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 202, data: 'data-here' };
-    });
-
-    const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
-    const actionResponse = await actionType.executor(executorOptions);
-    const { apiUrl, data, headers } = postServiceNowMock.mock.calls[0][0];
-    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
-      Object {
-        "apiUrl": "the-api-url",
-        "data": Object {
-          "dedup_key": "a-dedup-key",
-          "event_action": "acknowledge",
-        },
-        "headers": Object {
-          "Content-Type": "application/json",
-          "X-Routing-Key": "super-secret",
-        },
-      }
-    `);
-    expect(actionResponse).toMatchInlineSnapshot(`
-      Object {
-        "actionId": "some-action-id",
-        "data": "data-here",
-        "status": "ok",
-      }
-    `);
-  });
-
-  test('should succeed with maximal valid params for resolve', async () => {
-    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
-    const secrets = {
-      routingKey: 'super-secret',
-    };
-    const config = {
-      apiUrl: 'the-api-url',
-    };
-    const params = {
-      eventAction: 'resolve',
-      dedupKey: 'a-dedup-key',
-      summary: 'the summary',
-      source: 'the-source',
-      severity: 'critical',
-      timestamp: randoDate,
-      component: 'the-component',
-      group: 'the-group',
-      class: 'the-class',
-    };
-
-    postServiceNowMock.mockImplementation(() => {
-      return { status: 202, data: 'data-here' };
-    });
-
-    const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
-      actionId,
-      config,
-      params,
-      secrets,
-      services,
-    };
-    const actionResponse = await actionType.executor(executorOptions);
-    const { apiUrl, data, headers } = postServiceNowMock.mock.calls[0][0];
-    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
-      Object {
-        "apiUrl": "the-api-url",
-        "data": Object {
-          "dedup_key": "a-dedup-key",
-          "event_action": "resolve",
-        },
-        "headers": Object {
-          "Content-Type": "application/json",
-          "X-Routing-Key": "super-secret",
+        "secrets": Object {
+          "password": "secret-password",
+          "username": "secret-username",
         },
       }
     `);
@@ -354,10 +183,6 @@ describe('execute()', () => {
   });
 
   test('should fail when postServiceNow throws', async () => {
-    const secrets = { routingKey: 'super-secret' };
-    const config = {};
-    const params = {};
-
     postServiceNowMock.mockImplementation(() => {
       throw new Error('doing some testing');
     });
@@ -382,10 +207,6 @@ describe('execute()', () => {
   });
 
   test('should fail when postServiceNow returns 429', async () => {
-    const secrets = { routingKey: 'super-secret' };
-    const config = {};
-    const params = {};
-
     postServiceNowMock.mockImplementation(() => {
       return { status: 429, data: 'data-here' };
     });
@@ -410,10 +231,6 @@ describe('execute()', () => {
   });
 
   test('should fail when postServiceNow returns 501', async () => {
-    const secrets = { routingKey: 'super-secret' };
-    const config = {};
-    const params = {};
-
     postServiceNowMock.mockImplementation(() => {
       return { status: 501, data: 'data-here' };
     });
@@ -438,10 +255,6 @@ describe('execute()', () => {
   });
 
   test('should fail when postServiceNow returns 418', async () => {
-    const secrets = { routingKey: 'super-secret' };
-    const config = {};
-    const params = {};
-
     postServiceNowMock.mockImplementation(() => {
       return { status: 418, data: 'data-here' };
     });
