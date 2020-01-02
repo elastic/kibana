@@ -31,7 +31,7 @@ export const TopCategories: FC = () => {
   const jobCreator = jc as CategorizationJobCreator;
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tableRow, setTableRow] = useState<Array<{ count: number; regex: string }>>([]);
+  const [tableRow, setTableRow] = useState<Array<{ count: number; example: string }>>([]);
   const [totalCategories, setTotalCategories] = useState(0);
 
   function setResultsWrapper(results: Results) {
@@ -41,7 +41,12 @@ export const TopCategories: FC = () => {
   async function loadTopCats() {
     const results = await ml.jobs.topCategories(jobCreator.jobId, 5);
     setCategories(results.categories);
-    setTableRow(results.categories.map(c => ({ count: c.count, regex: c.category.regex })));
+    setTableRow(
+      results.categories.map(c => ({
+        count: c.count,
+        example: c.category.examples?.length ? c.category.examples[0] : '',
+      }))
+    );
     setTotalCategories(results.total);
     // console.log(topCats.total);
   }
@@ -59,18 +64,18 @@ export const TopCategories: FC = () => {
       field: 'count',
       name: 'count',
       width: '100px',
-      render: (regex: any) => (
+      render: (count: any) => (
         <EuiText size="s">
-          <code>{regex}</code>
+          <code>{count}</code>
         </EuiText>
       ),
     },
     {
-      field: 'regex',
-      name: 'Regex',
-      render: (regex: any) => (
+      field: 'example',
+      name: 'Example',
+      render: (example: any) => (
         <EuiText size="s">
-          <code>{regex}</code>
+          <code>{example}</code>
         </EuiText>
       ),
     },

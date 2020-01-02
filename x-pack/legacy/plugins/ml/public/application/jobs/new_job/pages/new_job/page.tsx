@@ -40,6 +40,7 @@ import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_se
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
+import { getNewJobDefaults } from '../../../../services/ml_server_info';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -141,6 +142,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     const rare = newJobCapsService.getAggById('rare');
     const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
     jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
+
+    const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
+    jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
   }
 
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {

@@ -8,7 +8,6 @@ import { IndexPattern } from 'ui/index_patterns';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
-import { getNewJobDefaults, CategorizationAnalyzer } from '../../../../services/ml_server_info';
 
 const NUM_OF_EXAMPLES = 5;
 
@@ -30,7 +29,6 @@ export class CategorizationExamplesLoader {
   private _indexPatternTitle: IndexPatternTitle = '';
   private _timeFieldName: string = '';
   private _query: object = {};
-  private _analyzer: CategorizationAnalyzer;
 
   constructor(jobCreator: CategorizationJobCreator, indexPattern: IndexPattern, query: object) {
     this._jobCreator = jobCreator;
@@ -40,12 +38,10 @@ export class CategorizationExamplesLoader {
     if (typeof indexPattern.timeFieldName === 'string') {
       this._timeFieldName = indexPattern.timeFieldName;
     }
-
-    const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
-    this._analyzer = anomalyDetectors.categorization_analyzer!;
   }
 
   public async loadExamples() {
+    const analyzer = this._jobCreator.categorizationAnalyzer;
     const categorizationFieldName = this._jobCreator.categorizationFieldName;
     if (categorizationFieldName === null) {
       return { valid: 0, examples: [] };
@@ -62,7 +58,7 @@ export class CategorizationExamplesLoader {
       this._timeFieldName,
       start,
       0,
-      this._analyzer
+      analyzer
     );
     return resp;
   }

@@ -148,12 +148,17 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       analyzer
     );
 
-    const sortedExamples = examples.sort((a, b) => b.tokens.length - a.tokens.length);
+    const sortedExamples = examples
+      .map((e, i) => ({ ...e, origIndex: i }))
+      .sort((a, b) => b.tokens.length - a.tokens.length);
     const validExamples = sortedExamples.filter(e => e.tokens.length > 1);
 
     return {
       valid: sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length,
-      examples: examples.filter((e, i) => i / MULTIPLIER - Math.floor(i / MULTIPLIER) === 0),
+      examples: sortedExamples
+        .filter((e, i) => i / MULTIPLIER - Math.floor(i / MULTIPLIER) === 0)
+        .sort((a, b) => a.origIndex - b.origIndex)
+        .map(e => ({ text: e.text, tokens: e.tokens })),
     };
   }
 

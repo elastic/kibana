@@ -14,8 +14,10 @@ import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/n
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
+import { CategorizationAnalyzer } from '../../../../services/ml_server_info';
 
 // type DETECTOR_TYPE = ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE;
+type CategorizationAnalyzerType = string | CategorizationAnalyzer | null;
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
@@ -26,6 +28,7 @@ export class CategorizationJobCreator extends JobCreator {
   private _categoryFieldValid: number = 0;
   private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
     ML_JOB_AGGREGATION.COUNT;
+  private _categorization_analyzer: CategorizationAnalyzerType = null;
 
   constructor(
     indexPattern: IndexPattern,
@@ -78,6 +81,8 @@ export class CategorizationJobCreator extends JobCreator {
       this.addInfluencer(mlCategory.id);
     } else {
       delete this._job_config.analysis_config.categorization_field_name;
+      this._categoryFieldExamples = [];
+      this._categoryFieldValid = 0;
     }
   }
 
@@ -102,6 +107,19 @@ export class CategorizationJobCreator extends JobCreator {
 
   public get selectedDetectorType() {
     return this._detectorType;
+  }
+
+  public set categorizationAnalyzer(analyzer: CategorizationAnalyzerType) {
+    this._categorization_analyzer = analyzer;
+    if (analyzer !== null) {
+      this._job_config.analysis_config.categorization_analyzer = analyzer;
+    } else {
+      delete this._job_config.analysis_config.categorization_analyzer;
+    }
+  }
+
+  public get categorizationAnalyzer() {
+    return this._categorization_analyzer;
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
