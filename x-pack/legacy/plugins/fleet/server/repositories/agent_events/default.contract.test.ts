@@ -11,7 +11,7 @@ import { SODatabaseAdapter as SODatabaseAdapterType } from '../../adapters/saved
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/default';
 import { MemorizeSODatabaseAdapter } from '../../adapters/saved_objects_database/memorize_adapter';
 import { FrameworkUser, internalAuthData } from '../../adapters/framework/adapter_types';
-import { AgentEvent } from '../agent_events/types';
+import { AgentEvent } from '../../../common/types/domain_data';
 
 describe('AgentsEventsRepository', () => {
   let repository: AgentEventsRepository;

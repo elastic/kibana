@@ -11,8 +11,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { FrameworkRequest } from '../../adapters/framework/adapter_types';
 import { ReturnTypeCreate } from '../../../common/return_types';
 import { FleetServerLib } from '../../libs/types';
-import { RuntimeAgentActionData } from '../../repositories/agents/types';
-import { AgentAction } from '../../../common/types/domain_data';
+import { AgentAction, RuntimeAgentActionData } from '../../../common/types/domain_data';
 
 export const createAgentsAddActionRoute = (libs: FleetServerLib) => ({
   method: 'POST',

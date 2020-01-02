@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
-import { RuntimeAgentType } from '../agents/types';
+import { RuntimeAgentType } from '../../../common/types/domain_data';
 
 export const SAVED_OBJECT_TYPE = 'enrollment_api_keys';
 

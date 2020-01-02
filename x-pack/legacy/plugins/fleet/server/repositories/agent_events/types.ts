@@ -7,47 +7,11 @@
 import * as t from 'io-ts';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 
-export const RuntimeAgentEventType = t.union([
-  t.literal('STATE'),
-  t.literal('ERROR'),
-  t.literal('ACTION_RESULT'),
-  t.literal('ACTION'),
-]);
-
-export const RuntimeAgentEventSubtype = t.union([
-  // State
-  t.literal('RUNNING'),
-  t.literal('STARTING'),
-  t.literal('IN_PROGRESS'),
-  t.literal('CONFIG'),
-  t.literal('FAILED'),
-  t.literal('STOPPED'),
-  // Action results
-  t.literal('DATA_DUMP'),
-  // Actions
-  t.literal('ACKNOWLEDGED'),
-  t.literal('UNKNOWN'),
-]);
-
-export const RuntimeAgentEvent = t.intersection(
-  [
-    t.interface({
-      type: RuntimeAgentEventType,
-      subtype: RuntimeAgentEventSubtype,
-      timestamp: t.string,
-      message: t.string,
-    }),
-    t.partial({
-      payload: t.any,
-      data: t.string,
-      action_id: t.string,
-      policy_id: t.string,
-      stream_id: t.string,
-    }),
-  ],
-  'AgentEvent'
-);
-export type AgentEvent = t.TypeOf<typeof RuntimeAgentEvent>;
+import {
+  RuntimeAgentEventType,
+  RuntimeAgentEventSubtype,
+  AgentEvent,
+} from '../../../common/types/domain_data';
 
 export const RuntimeAgentEventSOAttributes = t.intersection(
   [

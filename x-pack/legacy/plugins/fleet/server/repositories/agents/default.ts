@@ -17,10 +17,10 @@ import {
   Agent,
   AgentsRepository as AgentsRepositoryType,
   ListOptions,
-  NewAgent,
   SavedObjectAgentAttributes,
   SortOptions,
 } from './types';
+import { NewAgent } from '../../../common/types/domain_data';
 
 const SO_TYPE = 'agents';
 
