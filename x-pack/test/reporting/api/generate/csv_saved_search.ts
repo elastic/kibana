@@ -14,6 +14,7 @@ import {
   CSV_RESULT_TIMEBASED,
   CSV_RESULT_TIMELESS,
   CSV_RESULT_NANOS,
+  CSV_RESULT_DOCVALUE,
 } from './fixtures';
 
 interface GenerateOpts {
@@ -267,6 +268,68 @@ export default function({ getService }: { getService: any }) {
         expect(resText).to.eql(CSV_RESULT_SCRIPTED_RESORTED);
 
         await esArchiver.unload('reporting/scripted');
+      });
+
+      it('for docvalue_fields', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/ecommerce');
+        await esArchiver.load('reporting/ecommerce_kibana');
+
+        const params = {
+          searchId: 'search:6091ead0-1c6d-11ea-a100-8589bb9d7c6b',
+          postPayload: {
+            timerange: {
+              min: '2019-06-26T06:20:28Z',
+              max: '2019-06-26T07:27:58Z',
+              timezone: 'UTC',
+            },
+            state: {
+              sort: [{ order_date: { order: 'desc', unmapped_type: 'boolean' } }],
+              docvalue_fields: [
+                { field: 'customer_birth_date', format: 'date_time' },
+                { field: 'order_date', format: 'date_time' },
+                { field: 'products.created_on', format: 'date_time' },
+              ],
+              query: {
+                bool: {
+                  must: [],
+                  filter: [
+                    { match_all: {} },
+                    { match_all: {} },
+                    {
+                      range: {
+                        order_date: {
+                          gte: '2019-06-26T06:20:28.066Z',
+                          lte: '2019-06-26T07:27:58.573Z',
+                          format: 'strict_date_optional_time',
+                        },
+                      },
+                    },
+                  ],
+                  should: [],
+                  must_not: [],
+                },
+              },
+            },
+          },
+          isImmediate: true,
+        };
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          params.searchId,
+          params.postPayload,
+          params.isImmediate
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(CSV_RESULT_DOCVALUE);
+
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
       });
     });
 
