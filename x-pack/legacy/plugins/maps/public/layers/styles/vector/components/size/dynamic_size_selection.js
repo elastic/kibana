@@ -12,7 +12,7 @@ import { FieldSelect, fieldShape } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
 import { EuiSpacer } from '@elastic/eui';
 
-export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) {
+export function DynamicSizeSelection({ fields, styleOptions, onChange }) {
   const onFieldChange = ({ field }) => {
     onChange({ ...styleOptions, field });
   };
@@ -32,7 +32,7 @@ export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) 
       />
       <EuiSpacer size="s" />
       <FieldSelect
-        fields={ordinalFields}
+        fields={fields}
         selectedFieldName={_.get(styleOptions, 'field.name')}
         onChange={onFieldChange}
         compressed
@@ -42,7 +42,7 @@ export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) 
 }
 
 DynamicSizeSelection.propTypes = {
-  ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
+  fields: PropTypes.arrayOf(fieldShape).isRequired,
   styleOptions: dynamicSizeShape.isRequired,
   onChange: PropTypes.func.isRequired,
 };

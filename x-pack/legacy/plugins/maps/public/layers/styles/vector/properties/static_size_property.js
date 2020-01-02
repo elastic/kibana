@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { StaticStyleProperty } from './static_style_property';
-import { HALF_LARGE_MAKI_ICON_SIZE, LARGE_MAKI_ICON_SIZE, SMALL_MAKI_ICON_SIZE } from '../symbol_utils';
-
+import {
+  HALF_LARGE_MAKI_ICON_SIZE,
+  LARGE_MAKI_ICON_SIZE,
+  SMALL_MAKI_ICON_SIZE,
+} from '../symbol_utils';
 
 export class StaticSizeProperty extends StaticStyleProperty {
-
   constructor(options, styleName) {
     if (typeof options.size !== 'number') {
       super({ size: 1 }, styleName);
@@ -24,7 +25,8 @@ export class StaticSizeProperty extends StaticStyleProperty {
   }
 
   syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId) {
-    const iconPixels = this._size >= HALF_LARGE_MAKI_ICON_SIZE ? LARGE_MAKI_ICON_SIZE : SMALL_MAKI_ICON_SIZE;
+    const iconPixels =
+      this._size >= HALF_LARGE_MAKI_ICON_SIZE ? LARGE_MAKI_ICON_SIZE : SMALL_MAKI_ICON_SIZE;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
     const halfIconPixels = iconPixels / 2;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / halfIconPixels);
@@ -42,5 +44,7 @@ export class StaticSizeProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-width', this._options.size);
   }
 
-
+  syncLabelSizeWithMb(mbLayerId, mbMap) {
+    mbMap.setLayoutProperty(mbLayerId, 'text-size', this._options.size);
+  }
 }

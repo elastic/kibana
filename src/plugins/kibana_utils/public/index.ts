@@ -17,10 +17,11 @@
  * under the License.
  */
 
+export { defer } from '../common';
 export * from './core';
 export * from './errors';
-export * from './errors';
 export * from './field_mapping';
+export * from './field_wildcard';
 export * from './parse';
 export * from './render_complete';
 export * from './resize_checker';

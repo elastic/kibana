@@ -4,15 +4,10 @@ exports[`it renders without crashing 1`] = `
 <EuiPage
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
-  restrictWidth={false}
 >
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageHeader
       className="spcSpaceSelector__heading"
-      responsive={true}
     >
       <EuiSpacer
         size="xxl"
@@ -53,7 +48,6 @@ exports[`it renders without crashing 1`] = `
     </EuiPageHeader>
     <EuiPageContent
       className="spcSpaceSelector__pageContent"
-      panelPaddingSize="l"
     >
       <EuiFlexGroup
         alignItems="center"
@@ -63,21 +57,9 @@ exports[`it renders without crashing 1`] = `
       <EuiSpacer
         size="xl"
       />
-      <SpaceCards
-        onSpaceSelect={[Function]}
-        spaces={Array []}
+      <EuiLoadingSpinner
+        size="xl"
       />
-      <EuiSpacer />
-      <EuiText
-        color="subdued"
-        textAlign="center"
-      >
-        <FormattedMessage
-          defaultMessage="No spaces match search criteria"
-          id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
-          values={Object {}}
-        />
-      </EuiText>
     </EuiPageContent>
   </EuiPageBody>
 </EuiPage>

@@ -8,13 +8,12 @@ import { BaseWatch } from './base_watch';
 
 describe('BaseWatch', () => {
   describe('Constructor', () => {
-
     let props;
     beforeEach(() => {
       props = {
         id: 'my-watch',
         name: 'foo',
-        type: 'logging'
+        type: 'logging',
       };
     });
 
@@ -28,7 +27,7 @@ describe('BaseWatch', () => {
         'isSystemWatch',
         'watchStatus',
         'watchErrors',
-        'actions'
+        'actions',
       ];
 
       expect(actual).toEqual(expected);
@@ -53,22 +52,20 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: 'bar',
         watchErrors: { actions: 'email' },
-        actions: 'baz'
+        actions: 'baz',
       };
 
       expect(actual).toEqual(expected);
     });
-
   });
 
   describe('watchJson getter method', () => {
-
     let props;
     beforeEach(() => {
       props = {
         id: 'my-watch',
         name: 'foo',
-        type: 'logging'
+        type: 'logging',
       };
     });
 
@@ -79,9 +76,9 @@ describe('BaseWatch', () => {
         metadata: {
           name: 'foo',
           xpack: {
-            type: 'logging'
-          }
-        }
+            type: 'logging',
+          },
+        },
       };
 
       expect(actual).toEqual(expected);
@@ -94,18 +91,16 @@ describe('BaseWatch', () => {
       const expected = {
         metadata: {
           xpack: {
-            type: props.type
-          }
-        }
+            type: props.type,
+          },
+        },
       };
 
       expect(actual).toEqual(expected);
     });
-
   });
 
   describe('getVisualizeQuery getter method', () => {
-
     it('should return an empty object', () => {
       const watch = new BaseWatch({});
       const actual = watch.getVisualizeQuery();
@@ -113,11 +108,9 @@ describe('BaseWatch', () => {
 
       expect(actual).toEqual(expected);
     });
-
   });
 
   describe('formatVisualizeData getter method', () => {
-
     it('should return an empty array', () => {
       const watch = new BaseWatch({});
       const actual = watch.formatVisualizeData();
@@ -125,11 +118,9 @@ describe('BaseWatch', () => {
 
       expect(actual).toEqual(expected);
     });
-
   });
 
   describe('downstreamJson getter method', () => {
-
     let props;
     beforeEach(() => {
       props = {
@@ -139,21 +130,23 @@ describe('BaseWatch', () => {
         watchStatus: {
           downstreamJson: {
             prop1: 'prop1',
-            prop2: 'prop2'
-          }
+            prop2: 'prop2',
+          },
         },
         watchErrors: {
           downstreamJson: {
             prop1: 'prop1',
-            prop2: 'prop2'
-          }
+            prop2: 'prop2',
+          },
         },
-        actions: [{
-          downstreamJson: {
-            prop1: 'prop3',
-            prop2: 'prop4'
-          }
-        }]
+        actions: [
+          {
+            downstreamJson: {
+              prop1: 'prop3',
+              prop2: 'prop4',
+            },
+          },
+        ],
       };
     });
 
@@ -168,7 +161,7 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: props.watchStatus.downstreamJson,
         watchErrors: props.watchErrors.downstreamJson,
-        actions: props.actions.map(a => a.downstreamJson)
+        actions: props.actions.map(a => a.downstreamJson),
       };
 
       expect(actual).toEqual(expected);
@@ -188,16 +181,14 @@ describe('BaseWatch', () => {
         isSystemWatch: false,
         watchStatus: undefined,
         watchErrors: undefined,
-        actions: props.actions.map(a => a.downstreamJson)
+        actions: props.actions.map(a => a.downstreamJson),
       };
 
       expect(actual).toEqual(expected);
     });
-
   });
 
   describe('upstreamJson getter method', () => {
-
     let props;
     beforeEach(() => {
       props = {
@@ -207,15 +198,17 @@ describe('BaseWatch', () => {
         watchStatus: {
           downstreamJson: {
             prop1: 'prop1',
-            prop2: 'prop2'
-          }
+            prop2: 'prop2',
+          },
         },
-        actions: [{
-          downstreamJson: {
-            prop1: 'prop3',
-            prop2: 'prop4'
-          }
-        }]
+        actions: [
+          {
+            downstreamJson: {
+              prop1: 'prop3',
+              prop2: 'prop4',
+            },
+          },
+        ],
       };
     });
 
@@ -229,36 +222,30 @@ describe('BaseWatch', () => {
           metadata: {
             name: props.name,
             xpack: {
-              type: props.type
-            }
-          }
-        }
+              type: props.type,
+            },
+          },
+        },
       };
 
       expect(actual).toEqual(expected);
     });
-
   });
 
   describe('getPropsFromDownstreamJson method', () => {
-
     let downstreamJson;
     beforeEach(() => {
       downstreamJson = {
         id: 'my-watch',
         name: 'foo',
-        actions: []
+        actions: [],
       };
     });
 
     it('should return a valid props object', () => {
       const props = BaseWatch.getPropsFromDownstreamJson(downstreamJson);
       const actual = Object.keys(props);
-      const expected = [
-        'id',
-        'name',
-        'actions'
-      ];
+      const expected = ['id', 'name', 'actions'];
 
       expect(actual).toEqual(expected);
     });
@@ -278,7 +265,6 @@ describe('BaseWatch', () => {
   });
 
   describe('getPropsFromUpstreamJson method', () => {
-
     let upstreamJson;
     beforeEach(() => {
       upstreamJson = {
@@ -286,17 +272,17 @@ describe('BaseWatch', () => {
         type: 'json',
         watchJson: {
           metadata: {
-            name: 'foo'
+            name: 'foo',
           },
           condition: {
-            never: {}
-          }
+            never: {},
+          },
         },
         watchStatusJson: {
           state: {
-            active: true
-          }
-        }
+            active: true,
+          },
+        },
       };
     });
 
@@ -335,7 +321,7 @@ describe('BaseWatch', () => {
         metadata: {},
         transform: {},
         throttle_period: {},
-        throttle_period_in_millis: {}
+        throttle_period_in_millis: {},
       };
 
       const props = BaseWatch.getPropsFromUpstreamJson(upstreamJson);
@@ -348,7 +334,7 @@ describe('BaseWatch', () => {
         'metadata',
         'transform',
         'throttle_period',
-        'throttle_period_in_millis'
+        'throttle_period_in_millis',
       ];
 
       expect(actual).toEqual(expected);
@@ -357,14 +343,7 @@ describe('BaseWatch', () => {
     it('should return a valid props object', () => {
       const props = BaseWatch.getPropsFromUpstreamJson(upstreamJson);
       const actual = Object.keys(props);
-      const expected = [
-        'id',
-        'name',
-        'watchJson',
-        'watchStatus',
-        'watchErrors',
-        'actions'
-      ];
+      const expected = ['id', 'name', 'watchJson', 'watchStatus', 'watchErrors', 'actions'];
 
       expect(actual).toEqual(expected);
     });

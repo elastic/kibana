@@ -8,7 +8,7 @@ import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { format as formatUrl } from 'url';
 import { ReportingAPIProvider } from '../services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
 
   return {
@@ -22,7 +22,8 @@ export default async function ({ readConfigFile }) {
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
-        '--logging.events.log', '["info","warning","error","fatal","optimize","reporting"]',
+        '--logging.events.log',
+        '["info","warning","error","fatal","optimize","reporting"]',
         `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,

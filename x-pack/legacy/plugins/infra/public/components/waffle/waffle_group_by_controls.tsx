@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
 import { InfraNodeType, InfraSnapshotGroupbyInput } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
@@ -28,7 +28,7 @@ interface Props {
   groupBy: InfraSnapshotGroupbyInput[];
   onChange: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
-  fields: FieldType[];
+  fields: IFieldType[];
   customOptions: InfraGroupByOptions[];
 }
 

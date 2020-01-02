@@ -1,16 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Overview that overview page renders normally 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+<EuiPage>
+  <EuiPageBody>
+    <EuiPageContent>
       <Stats
         stats={Array []}
       />
@@ -199,16 +192,9 @@ exports[`Overview that overview page renders normally 1`] = `
 `;
 
 exports[`Overview that overview page shows a message if there is no beats data 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+<EuiPage>
+  <EuiPageBody>
+    <EuiPageContent>
       <Stats
         stats={Array []}
       />

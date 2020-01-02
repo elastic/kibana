@@ -8,19 +8,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 const type = 'conjunction';
 
-const bothArgumentsText =
-  (<FormattedMessage
+const bothArgumentsText = (
+  <FormattedMessage
     id="xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText"
     defaultMessage="both arguments"
     description="Part of xpack.kueryAutocomplete.andOperatorDescription. Full text: 'Requires both arguments to be true'"
-  />);
+  />
+);
 
-const oneOrMoreArgumentsText =
-  (<FormattedMessage
+const oneOrMoreArgumentsText = (
+  <FormattedMessage
     id="xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText"
     defaultMessage="one or more arguments"
     description="Part of xpack.kueryAutocomplete.orOperatorDescription. Full text: 'Requires one or more arguments to be true'"
-  />);
+  />
+);
 
 const conjunctions = {
   and: (
@@ -28,7 +30,9 @@ const conjunctions = {
       <FormattedMessage
         id="xpack.kueryAutocomplete.andOperatorDescription"
         defaultMessage="Requires {bothArguments} to be true"
-        values={{ bothArguments: <span className="kbnSuggestionItem__callout">{bothArgumentsText}</span> }}
+        values={{
+          bothArguments: <span className="kbnSuggestionItem__callout">{bothArgumentsText}</span>,
+        }}
         description="Full text: ' Requires both arguments to be true'. See
           'xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
       />
@@ -39,12 +43,16 @@ const conjunctions = {
       <FormattedMessage
         id="xpack.kueryAutocomplete.orOperatorDescription"
         defaultMessage="Requires {oneOrMoreArguments} to be true"
-        values={{ oneOrMoreArguments: <span className="kbnSuggestionItem__callout">{oneOrMoreArgumentsText}</span> }}
+        values={{
+          oneOrMoreArguments: (
+            <span className="kbnSuggestionItem__callout">{oneOrMoreArgumentsText}</span>
+          ),
+        }}
         description="Full text: 'Requires one or more arguments to be true'. See
           'xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
       />
     </p>
-  )
+  ),
 };
 
 function getDescription(conjunction) {

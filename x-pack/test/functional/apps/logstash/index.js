@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('logstash', function () {
+export default function({ loadTestFile }) {
+  describe('logstash', function() {
     this.tags(['ciGroup2', 'smoke']);
 
     loadTestFile(require.resolve('./pipeline_list'));

@@ -12,7 +12,6 @@ import {
   EuiComboBox,
   EuiColorPicker,
   EuiFieldNumber,
-  // @ts-ignore
   EuiHighlight,
   EuiContextMenu,
   EuiIcon,

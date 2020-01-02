@@ -22,7 +22,8 @@ import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
 
 export function buildNode(name, value) {
-  const argumentNode = (_.get(value, 'type') === 'literal') ? value : nodeTypes.literal.buildNode(value);
+  const argumentNode =
+    _.get(value, 'type') === 'literal' ? value : nodeTypes.literal.buildNode(value);
   return {
     type: 'namedArg',
     name,
@@ -33,4 +34,3 @@ export function buildNode(name, value) {
 export function toElasticsearchQuery(node) {
   return ast.toElasticsearchQuery(node.value);
 }
-

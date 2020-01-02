@@ -7,24 +7,16 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
-import { uiSettingsServiceMock } from '../../../../../../../src/core/public/ui_settings/ui_settings_service.mock';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { QueryBar, QueryBarComponentProps } from '.';
+import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
-import { mockUiSettings } from '../../mock/ui_settings';
+import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
+import { QueryBar, QueryBarComponentProps } from '.';
+import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 
-jest.mock('ui/new_platform');
+jest.mock('../../lib/kibana');
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-const mockUiSettingsForFilterManager = uiSettingsServiceMock.createSetupContract();
-jest.mock('../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-  savedObjects: {},
-}));
+const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
 describe('QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux
@@ -197,9 +189,13 @@ describe('QueryBar ', () => {
 
   describe('#onQueryChange', () => {
     test(' is the only reference that changed when filterQueryDraft props get updated', () => {
+      const KibanaWithStorageProvider = createKibanaContextProviderMock();
+
       const Proxy = (props: QueryBarComponentProps) => (
         <TestProviders>
-          <QueryBar {...props} />
+          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
+            <QueryBar {...props} />
+          </KibanaWithStorageProvider>
         </TestProviders>
       );
 
