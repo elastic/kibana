@@ -10,7 +10,7 @@ Elements in Canvas are all created using an *expression language* that defines h
 
 Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some kind of output. That output can then be inserted into another function, and another after that, until it produces the output you need. 
 
-To use random available data in Canvas to produce a table, run the following expression:
+To use demo dataset available in Canvas to produce a table, run the following expression:
 
 [source,text]
 ----
