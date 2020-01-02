@@ -8,8 +8,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { History, createBrowserHistory } from 'history';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Route, BrowserRouter, Switch } from 'react-router-dom';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -17,8 +16,7 @@ import { Route, Router, Switch } from 'react-router-dom';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const history = createBrowserHistory({ basename: appBasePath });
-  ReactDOM.render(<AppRoot history={history} />, element);
+  ReactDOM.render(<AppRoot basename={appBasePath} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -26,12 +24,12 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 }
 
 interface RouterProps {
-  history: History;
+  basename: string;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ history }) => (
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({basename}) => (
   <I18nProvider>
-    <Router history={history}>
+    <BrowserRouter basename={basename}>
       <Switch>
         <Route
           exact
@@ -59,6 +57,6 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ history }) =
           )}
         />
       </Switch>
-    </Router>
+    </BrowserRouter>
   </I18nProvider>
 ));
