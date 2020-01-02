@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 
 import { timefilter } from 'ui/timefilter';
 
+import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
@@ -20,14 +22,16 @@ import { Explorer } from '../../explorer';
 import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { annotationsRefresh$ } from '../../services/annotations_service';
 import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
+import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
-import { useUrlState } from '../../util/url_state';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
+import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
@@ -48,24 +52,28 @@ export const explorerRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context } = useResolver(undefined, undefined, config, {
+  const { context, results } = useResolver(undefined, undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
+    jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
 
   return (
     <PageLoader context={context}>
-      <ExplorerUrlStateManager />
+      <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
     </PageLoader>
   );
 };
 
-const ExplorerUrlStateManager: FC = () => {
+interface ExplorerUrlStateManagerProps {
+  jobsWithTimeRange: MlJobWithTimeRange[];
+}
+
+const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const [, setAppState] = useUrlState('_a');
   const [globalState] = useUrlState('_g');
 
-  const { jobIds } = useJobSelection();
-  jobIds.sort();
+  const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 
   useEffect(() => {
     timefilter.enableTimeRangeSelector();
@@ -158,7 +166,12 @@ const ExplorerUrlStateManager: FC = () => {
     loadExplorerData(loadExplorerDataConfig);
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
-  if (annotationsRefresh === undefined || explorerState === undefined || showCharts === undefined) {
+  if (
+    annotationsRefresh === undefined ||
+    explorerState === undefined ||
+    jobIds.length === 0 ||
+    showCharts === undefined
+  ) {
     return null;
   }
 

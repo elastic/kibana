@@ -206,13 +206,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
 
     closeFlyout();
 
-    // If the job selection changed, then when
-    // calling `applyTimeRangeFromSelection()` here
-    // Single Metric Viewer will skip an update
-    // triggered by timefilter to avoid a race
-    // condition caused by the job update listener
-    // that's also going to be triggered.
-    const time = getTimeRangeFromSelection(allNewSelectionUnique);
+    const time = applyTimeRange ? getTimeRangeFromSelection(allNewSelectionUnique) : undefined;
 
     setGlobalState({
       ml: {
@@ -224,7 +218,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   }
 
   function getTimeRangeFromSelection(selection: string[]) {
-    if (applyTimeRange && jobs.length > 0) {
+    if (jobs.length > 0) {
       const times: number[] = [];
       jobs.forEach(job => {
         if (selection.includes(job.job_id)) {

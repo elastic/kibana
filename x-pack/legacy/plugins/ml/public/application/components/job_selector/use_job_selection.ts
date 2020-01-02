@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import d3 from 'd3';
+import moment from 'moment';
 import { difference } from 'lodash';
 import { useEffect } from 'react';
 
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 
-import { mlJobService } from '../../services/job_service';
+import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+
 import { useUrlState } from '../../util/url_state';
 
 // check that the ids read from the url exist by comparing them to the
 // jobs loaded via mlJobsService.
-function getInvalidJobIds(ids: string[]) {
+function getInvalidJobIds(jobs: MlJobWithTimeRange[], ids: string[]) {
   return ids.filter(id => {
-    const jobExists = mlJobService.jobs.some(job => job.job_id === id);
+    const jobExists = jobs.some(job => job.job_id === id);
     return jobExists === false && id !== '*';
   });
 }
@@ -42,20 +45,21 @@ export interface JobSelection {
   selectedGroups: string[];
 }
 
-export const useJobSelection = () => {
+export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string) => {
   const [globalState, setGlobalState] = useUrlState('_g');
 
-  const selection: JobSelection = { jobIds: [], selectedGroups: [] };
+  const jobSelection: JobSelection = { jobIds: [], selectedGroups: [] };
 
   const ids = globalState?.ml?.jobIds || [];
   const tmpIds = (typeof ids === 'string' ? [ids] : ids).map((id: string) => String(id));
-  const invalidIds = getInvalidJobIds(tmpIds);
+  const invalidIds = getInvalidJobIds(jobs, tmpIds);
   const validIds = difference(tmpIds, invalidIds);
+  validIds.sort();
 
-  selection.jobIds = validIds;
-  selection.selectedGroups = globalState?.ml?.groups || [];
+  jobSelection.jobIds = validIds;
+  jobSelection.selectedGroups = globalState?.ml?.groups || [];
 
-  useEffect(() => {
+  const jobCheck = () => {
     warnAboutInvalidJobIds(invalidIds);
 
     // if there are no valid ids, warn and then select the first job
@@ -66,14 +70,47 @@ export const useJobSelection = () => {
         })
       );
 
-      if (mlJobService.jobs.length) {
-        const ml = globalState?.ml || {};
-        ml.jobIds = [mlJobService.jobs[0].job_id];
-        setGlobalState('ml', ml);
-      }
-      return;
-    }
-  }, [invalidIds, validIds]);
+      if (jobs.length > 0) {
+        const mlGlobalState = globalState?.ml || {};
+        mlGlobalState.jobIds = [jobs[0].job_id];
 
-  return selection;
+        const time = getTimeRangeFromSelection(mlGlobalState.jobIds);
+
+        setGlobalState({
+          ...{ ml: mlGlobalState },
+          ...(time !== undefined ? { time } : {}),
+        });
+      }
+    }
+
+    function getTimeRangeFromSelection(selection: string[]) {
+      if (jobs.length > 0) {
+        const times: number[] = [];
+        jobs.forEach(job => {
+          if (selection.includes(job.job_id)) {
+            if (job.timeRange.from !== undefined) {
+              times.push(job.timeRange.from);
+            }
+            if (job.timeRange.to !== undefined) {
+              times.push(job.timeRange.to);
+            }
+          }
+        });
+        if (times.length) {
+          const extent = d3.extent(times);
+          const selectedTime = {
+            from: moment(extent[0]).toISOString(),
+            to: moment(extent[1]).toISOString(),
+          };
+          return selectedTime;
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    jobCheck();
+  }, [jobs, invalidIds, validIds]);
+
+  return jobSelection;
 };

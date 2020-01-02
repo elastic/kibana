@@ -18,17 +18,7 @@ import { getNestedProperty } from './object_utils';
 export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
 export type UrlState = [Dictionary<any>, SetUrlState];
 
-// Compared to the original appState/globalState,
-// this no longer makes use of fetch/save methods.
-// - Reading from `location.search` is the successor of `fetch`.
-// - `history.push()` is the successor of `save`.
-// - The exposed state and set call make use of the above and make sure that
-//   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
-
-export const useUrlState = (accessor: string): UrlState => {
-  const history = useHistory();
-  const { search } = useLocation();
-
+function getUrlState(search: string) {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = queryString.parse(search);
 
@@ -38,34 +28,27 @@ export const useUrlState = (accessor: string): UrlState => {
     });
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Could not read url state', accessor, error);
+    console.error('Could not read url state', error);
   }
 
-  const persistStateToUrl = useCallback(
-    (newUrlState: Dictionary<any>) => {
-      try {
-        const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+  return urlState;
+}
 
-        Object.keys(newUrlState).forEach(a => {
-          parsedQueryString[a] = encode(newUrlState[a]);
-        });
-        const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
-
-        if (oldLocationSearch !== newLocationSearch) {
-          history.push({
-            search: queryString.stringify(parsedQueryString),
-          });
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Could not save url state', error);
-      }
-    },
-    [parsedQueryString]
-  );
+// Compared to the original appState/globalState,
+// this no longer makes use of fetch/save methods.
+// - Reading from `location.search` is the successor of `fetch`.
+// - `history.push()` is the successor of `save`.
+// - The exposed state and set call make use of the above and make sure that
+//   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
+export const useUrlState = (accessor: string): UrlState => {
+  const history = useHistory();
+  const { search } = useLocation();
 
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
+      const urlState = getUrlState(search);
+      const parsedQueryString = queryString.parse(search);
+
       if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
         urlState[accessor] = {};
       }
@@ -83,10 +66,26 @@ export const useUrlState = (accessor: string): UrlState => {
         });
       }
 
-      persistStateToUrl(urlState);
+      try {
+        const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+
+        Object.keys(urlState).forEach(a => {
+          parsedQueryString[a] = encode(urlState[a]);
+        });
+        const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+
+        if (oldLocationSearch !== newLocationSearch) {
+          history.push({
+            search: queryString.stringify(parsedQueryString),
+          });
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not save url state', error);
+      }
     },
-    [JSON.stringify(urlState)]
+    [search]
   );
 
-  return [urlState[accessor], setUrlState];
+  return [getUrlState(search)[accessor], setUrlState];
 };

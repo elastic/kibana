@@ -346,7 +346,7 @@ export function getViewBySwimlaneOptions({
     if (selectedJobIds.length > 1) {
       // If more than one job selected, default to job ID.
       viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
-    } else if (mlJobService.jobs.length > 0) {
+    } else if (mlJobService.jobs.length > 0 && selectedJobIds.length > 0) {
       // For a single job, default to the first partition, over,
       // by or influencer field of the first selected job.
       const firstSelectedJob = mlJobService.jobs.find(job => {
