@@ -23,3 +23,4 @@ export { ConsoleMenu } from './console_menu';
 export { WelcomePanel } from './welcome_panel';
 export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
 export { HelpPanel } from './help_panel';
+export { EuiLoadingContent10 } from './editor_content_spinner';

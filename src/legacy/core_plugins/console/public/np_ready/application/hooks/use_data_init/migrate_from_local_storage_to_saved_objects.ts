@@ -18,14 +18,12 @@
  */
 
 import { History } from '../../../services';
-import { AppDatabase } from '../../app_database';
+import { ObjectsClient } from '../../../lib/objects_client';
 
 export interface Dependencies {
   history: History;
-  database: AppDatabase;
+  objectsClient: ObjectsClient;
 }
-
-export const shouldMigrate = (history: History) => Boolean(history.getLegacySavedEditorState());
 
 /**
  * This is a special, once-off migration from localStorage to Saved Objects.
@@ -35,13 +33,13 @@ export const shouldMigrate = (history: History) => Boolean(history.getLegacySave
  */
 export async function localStorageToSavedObjects({
   history,
-  database,
+  objectsClient,
 }: Dependencies): Promise<void> {
   const legacyTextContent = history.getLegacySavedEditorState();
 
   if (!legacyTextContent) return;
 
-  await database.text.create({
+  await objectsClient.text.create({
     userId: 'n',
     createdAt: Date.now(),
     updatedAt: Date.now(),

@@ -19,7 +19,14 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiCallOut,
+  EuiPageContent,
+  EuiText,
+} from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
@@ -52,12 +59,29 @@ export function Main() {
 
   const { done, error } = useDataInit();
 
-  if (!done) {
-    return <p>Loading...</p>;
-  }
-
   if (error) {
-    return <p>{JSON.stringify(error)}</p>;
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return (
+      <EuiPageContent>
+        <EuiCallOut
+          iconType="alert"
+          color="danger"
+          title={i18n.translate('console.loadingErrorTitle', {
+            defaultMessage: 'Something went wrong',
+          })}
+        >
+          <EuiText>
+            <p>
+              {i18n.translate('console.loadingErrorMessage', {
+                defaultMessage:
+                  'We could not load data from Elasticsearch at the moment. Please ensure that the remote instance is accessible.',
+              })}
+            </p>
+          </EuiText>
+        </EuiCallOut>
+      </EuiPageContent>
+    );
   }
 
   return (
@@ -77,6 +101,7 @@ export function Main() {
             </h1>
           </EuiTitle>
           <TopNavMenu
+            disabled={!done}
             items={getTopNavConfig({
               onClickHistory: () => setShowHistory(!showingHistory),
               onClickSettings: () => setShowSettings(true),
@@ -86,11 +111,11 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor />
+          <Editor loading={!done} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {showWelcome ? (
+      {done && showWelcome ? (
         <WelcomePanel
           onDismiss={() => {
             storage.set('version_welcome_shown', '@@SENSE_REVISION');

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/public';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';

@@ -26,6 +26,10 @@
 
   // Required on IE11 to render ace editor correctly after first input.
   position: relative;
+
+  &__spinner {
+    width: 100%;
+  }
 }
 
 .conApp__output {

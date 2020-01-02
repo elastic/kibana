@@ -17,38 +17,9 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { PluginInitializerContext } from 'kibana/server';
+import { ConsoleServerPlugin } from './plugin';
 
-export interface TopNavMenuItem {
-  id: string;
-  label: string;
-  description: string;
-  onClick: () => void;
-  testId: string;
-}
-
-interface Props {
-  disabled: boolean;
-  items: TopNavMenuItem[];
-}
-
-export function TopNavMenu({ items, disabled }: Props) {
-  return (
-    <EuiTabs size="s">
-      {items.map((item, idx) => {
-        return (
-          <EuiTab
-            key={idx}
-            disabled={disabled}
-            onClick={item.onClick}
-            title={item.label}
-            data-test-subj={item.testId}
-          >
-            {item.label}
-          </EuiTab>
-        );
-      })}
-    </EuiTabs>
-  );
-}
+export const plugin = (ctx: PluginInitializerContext) => {
+  return new ConsoleServerPlugin();
+};

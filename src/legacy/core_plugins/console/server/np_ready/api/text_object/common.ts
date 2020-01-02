@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectAttributes } from 'src/core/public';
-export const type = 'text-object';
 
-export interface TextObject extends SavedObjectAttributes {
-  createdAt: number;
-  updatedAt: number;
-  text: string;
-  userId: string;
-  id: string;
-}
+import { schema } from '@kbn/config-schema';
+
+export const anonymousUserId = schema.string({ defaultValue: '' });

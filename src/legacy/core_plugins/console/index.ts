@@ -23,6 +23,8 @@ import { resolve, join } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
 
+import { plugin } from './server/np_ready';
+
 // @ts-ignore
 import mappings from './mappings.json';
 
@@ -178,6 +180,10 @@ export default function(kibana: any) {
           return resolveApi(version, apis.split(','), h);
         },
       });
+
+      const instance = plugin({} as any);
+      instance.setup(server.newPlatform.setup.core, server.newPlatform.setup.plugins);
+      instance.setup(server.newPlatform.start.core, server.newPlatform.start.plugins);
     },
 
     uiExports: {

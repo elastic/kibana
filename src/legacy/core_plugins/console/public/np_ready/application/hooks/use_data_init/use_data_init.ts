@@ -18,14 +18,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  localStorageToSavedObjects,
-  shouldMigrate,
-} from './migrate_from_local_storage_to_saved_objects';
+import { localStorageToSavedObjects } from './migrate_from_local_storage_to_saved_objects';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
 export const useDataInit = () => {
-  const [error, setError] = useState('');
+  const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState<boolean>(false);
 
   const {
@@ -37,10 +34,8 @@ export const useDataInit = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        if (shouldMigrate(history)) {
-          await localStorageToSavedObjects({ history, database: db });
-        }
-        const results = await db.text.findAll();
+        await localStorageToSavedObjects({ history, database: db });
+        const results = await db.text.findByUserId('n');
         if (!results) {
           const newObject = await db.text.create({
             userId: 'n',
@@ -50,8 +45,7 @@ export const useDataInit = () => {
           });
           dispatch({ type: 'setCurrentTextObject', payload: newObject });
         } else {
-          const existingObject = results[Object.keys(results)[0]];
-          dispatch({ type: 'setCurrentTextObject', payload: existingObject });
+          dispatch({ type: 'setCurrentTextObject', payload: results[0] });
         }
       } catch (e) {
         setError(e);

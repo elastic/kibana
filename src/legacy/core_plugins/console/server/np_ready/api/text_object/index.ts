@@ -16,39 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IRouter, SavedObjectsServiceStart } from 'src/core/server';
 
-import React from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import {} from './create';
+import {} from './find';
+import {} from './update';
 
-export interface TopNavMenuItem {
-  id: string;
-  label: string;
-  description: string;
-  onClick: () => void;
-  testId: string;
+export interface RouteDependencies {
+  savedObjectsService: SavedObjectsServiceStart;
 }
 
-interface Props {
-  disabled: boolean;
-  items: TopNavMenuItem[];
-}
-
-export function TopNavMenu({ items, disabled }: Props) {
-  return (
-    <EuiTabs size="s">
-      {items.map((item, idx) => {
-        return (
-          <EuiTab
-            key={idx}
-            disabled={disabled}
-            onClick={item.onClick}
-            title={item.label}
-            data-test-subj={item.testId}
-          >
-            {item.label}
-          </EuiTab>
-        );
-      })}
-    </EuiTabs>
-  );
-}
+export const register = (router: IRouter, { savedObjectsService }: RouteDependencies) => {};

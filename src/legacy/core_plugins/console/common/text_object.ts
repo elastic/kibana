@@ -17,38 +17,14 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { SavedObjectAttributes } from 'kibana/server';
 
-export interface TopNavMenuItem {
+export const type = 'text-object';
+
+export interface TextObject extends SavedObjectAttributes {
+  createdAt: number;
+  updatedAt: number;
+  text: string;
+  userId: string;
   id: string;
-  label: string;
-  description: string;
-  onClick: () => void;
-  testId: string;
-}
-
-interface Props {
-  disabled: boolean;
-  items: TopNavMenuItem[];
-}
-
-export function TopNavMenu({ items, disabled }: Props) {
-  return (
-    <EuiTabs size="s">
-      {items.map((item, idx) => {
-        return (
-          <EuiTab
-            key={idx}
-            disabled={disabled}
-            onClick={item.onClick}
-            title={item.label}
-            data-test-subj={item.testId}
-          >
-            {item.label}
-          </EuiTab>
-        );
-      })}
-    </EuiTabs>
-  );
 }

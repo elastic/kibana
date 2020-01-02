@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract } from 'src/core/public';
-import { ObjectStorage } from '../services';
-import { TextObject, type } from './models/text_object';
+import { HttpSetup } from 'src/core/public';
+import { TEXT_OBJECT_API_PATH } from '../../../common/constants';
+import { TextObject } from '../../../common/text_object';
 
-interface Dependencies {
-  client: SavedObjectsClientContract;
-}
+export type ObjectsClient = ReturnType<typeof create>;
 
-export type AppDatabase = ReturnType<typeof create>;
-
-export const create = ({ client }: Dependencies) => ({
-  text: new ObjectStorage<TextObject>(type, client),
-});
+export const create = (http: HttpSetup, anonymousUser: string) => {
+  return {
+    text: {
+      async create(object: Exclude<TextObject, 'id'>) {
+        await http.put(TEXT_OBJECT_API_PATH, { body: JSON.stringify(object) });
+      },
+    },
+  };
+};

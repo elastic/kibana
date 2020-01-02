@@ -12,6 +12,9 @@
       },
       "userId": {
         "type": "keyword"
+      },
+      "anonymous": {
+        "type": "boolean"
       }
     }
   }

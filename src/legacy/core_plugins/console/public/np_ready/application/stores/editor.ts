@@ -21,7 +21,7 @@ import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 import { DevToolsSettings } from '../../services';
-import { TextObject } from '../models/text_object';
+import { TextObject } from '../../../../common/text_object';
 
 export interface Store {
   ready: boolean;

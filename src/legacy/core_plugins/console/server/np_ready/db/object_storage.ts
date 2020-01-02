@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
 
-interface FindAllResponse<A> {
-  [id: string]: A;
-}
+type FindResponse<A> = A[];
 
 export class ObjectStorage<A extends SavedObjectAttributes & { id: string }> {
   constructor(private readonly type: string, private readonly client: SavedObjectsClientContract) {}
@@ -34,34 +32,29 @@ export class ObjectStorage<A extends SavedObjectAttributes & { id: string }> {
     } as A;
   }
 
-  async get(id: string): Promise<A> {
-    const simpleObj = await this.client.get<A>(this.type, id);
-    return { ...simpleObj.attributes, id: simpleObj.id };
-  }
-
-  async update(obj: A): Promise<void> {
-    const { id, ...rest } = obj;
+  async update(opts: A): Promise<void> {
+    const { id, ...rest } = opts;
     await this.client.update(this.type, id, rest);
   }
 
-  async delete(id: string): Promise<void> {
-    await this.client.delete(this.type, id);
-  }
-
-  async findAll(): Promise<FindAllResponse<A> | null> {
+  async findByUserId(id: string): Promise<FindResponse<A> | null> {
+    const userDSLQuery = {
+      query: {
+        bool: {
+          must: [{ match: { userId: id } }],
+        },
+      },
+    };
     const findResponse = await this.client.find<A>({
       type: this.type,
+      search: JSON.stringify(userDSLQuery),
     });
-    if (findResponse.savedObjects && findResponse.savedObjects.length) {
-      return findResponse.savedObjects.reduce((acc, so) => {
-        return {
-          ...acc,
-          [so.id]: {
-            ...so.attributes,
-            id: so.id,
-          },
-        };
-      }, {});
+
+    if (findResponse.saved_objects && findResponse.saved_objects.length) {
+      return findResponse.saved_objects.map(so => ({
+        ...so.attributes,
+        id: so.id,
+      }));
     }
     return null;
   }

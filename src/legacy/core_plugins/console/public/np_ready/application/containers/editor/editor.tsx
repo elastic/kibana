@@ -20,6 +20,7 @@
 import React, { useCallback } from 'react';
 import { debounce } from 'lodash';
 
+import { EuiLoadingContent10 } from '../../components';
 import { Panel, PanelsContainer } from '../../components/split_panel';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
@@ -28,7 +29,11 @@ import { useEditorReadContext, useServicesContext } from '../../contexts';
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
-export const Editor = () => {
+interface Props {
+  loading: boolean;
+}
+
+export const Editor = ({ loading }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
@@ -55,13 +60,13 @@ export const Editor = () => {
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={firstPanelWidth + '%'}
       >
-        <EditorUI initialTextValue={currentTextObject.text} />
+        {loading ? <EuiLoadingContent10 /> : <EditorUI initialTextValue={currentTextObject.text} />}
       </Panel>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={secondPanelWidth + '%'}
       >
-        <EditorOutput />
+        {loading ? <EuiLoadingContent10 /> : <EditorOutput />}
       </Panel>
     </PanelsContainer>
   );

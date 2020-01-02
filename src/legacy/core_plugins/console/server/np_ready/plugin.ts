@@ -16,39 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Plugin, CoreSetup, CoreStart, HttpServiceSetup } from 'src/core/server';
 
-import React from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import * as textObject from './api/text_object';
 
-export interface TopNavMenuItem {
-  id: string;
-  label: string;
-  description: string;
-  onClick: () => void;
-  testId: string;
-}
+export class ConsoleServerPlugin implements Plugin<any, any, any> {
+  private http: HttpServiceSetup | null = null;
 
-interface Props {
-  disabled: boolean;
-  items: TopNavMenuItem[];
-}
+  setup({ http }: CoreSetup, plugins: any) {
+    this.http = http;
+  }
 
-export function TopNavMenu({ items, disabled }: Props) {
-  return (
-    <EuiTabs size="s">
-      {items.map((item, idx) => {
-        return (
-          <EuiTab
-            key={idx}
-            disabled={disabled}
-            onClick={item.onClick}
-            title={item.label}
-            data-test-subj={item.testId}
-          >
-            {item.label}
-          </EuiTab>
-        );
-      })}
-    </EuiTabs>
-  );
+  start({ savedObjects }: CoreStart) {
+    const router = this.http!.createRouter();
+
+    textObject.register(router, { savedObjectsService: savedObjects });
+  }
+  stop() {}
 }
