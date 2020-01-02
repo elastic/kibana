@@ -159,6 +159,13 @@ export class LogEntryCategoriesAnalysis {
     logEntryCategoriesCountJobId: string,
     categoryIds: number[]
   ) {
+    if (categoryIds.length === 0) {
+      return {
+        logEntryCategoriesById: {},
+        timing: { spans: [] },
+      };
+    }
+
     const finalizeEsSearchSpan = startTracingSpan('Fetch category patterns from ES');
 
     const logEntryCategoriesResponse = decodeOrThrow(logEntryCategoriesResponseRT)(
@@ -197,6 +204,13 @@ export class LogEntryCategoriesAnalysis {
     endTime: number,
     bucketDuration: number
   ) {
+    if (categoryIds.length === 0) {
+      return {
+        categoryHistogramsById: {},
+        timing: { spans: [] },
+      };
+    }
+
     const finalizeEsSearchSpan = startTracingSpan('Fetch category histograms from ES');
 
     const categoryHistogramsReponse = decodeOrThrow(logEntryCategoryHistogramsResponseRT)(
@@ -217,7 +231,7 @@ export class LogEntryCategoriesAnalysis {
 
     const categoryHistogramsById = Object.entries(
       categoryHistogramsReponse.aggregations.filters_categories.buckets
-    ).reduce<Record<string, LogEntryCategoryFilterBucket>>(
+    ).reduce<Record<number, LogEntryCategoryFilterBucket>>(
       (accumulatedHistogramsById, [categoryBucketKey, categoryBucket]) => ({
         ...accumulatedHistogramsById,
         [parseCategoryId(categoryBucketKey)]: categoryBucket,

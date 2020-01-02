@@ -39,7 +39,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
-        <TopCategoriesTable topCategories={topCategories} />
+        <TopCategoriesTable timeRange={timeRange} topCategories={topCategories} />
       </LoadingOverlayWrapper>
     </>
   );
