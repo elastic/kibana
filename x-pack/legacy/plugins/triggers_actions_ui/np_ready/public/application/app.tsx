@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import { Switch, Route, Redirect, HashRouter } from 'react-router-dom';
 import {
   ChromeStart,
@@ -32,21 +31,6 @@ export interface AppDeps {
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 }
 
-class ShareRouter extends Component {
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired,
-      }).isRequired,
-    }).isRequired,
-  };
-
-  render() {
-    return this.props.children;
-  }
-}
-
 export const App = (deps: AppDeps) => {
   const sections: Section[] = ['alerts', 'connectors'];
 
@@ -54,11 +38,9 @@ export const App = (deps: AppDeps) => {
 
   return (
     <HashRouter>
-      <ShareRouter>
-        <AppContextProvider value={deps}>
-          <AppWithoutRouter sectionsRegex={sectionsRegex} />
-        </AppContextProvider>
-      </ShareRouter>
+      <AppContextProvider value={deps}>
+        <AppWithoutRouter sectionsRegex={sectionsRegex} />
+      </AppContextProvider>
     </HashRouter>
   );
 };
