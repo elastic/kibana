@@ -369,26 +369,24 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="actionsList">
-      <Fragment>
-        <EuiSpacer size="m" />
-        <ActionsConnectorsContextProvider
-          value={{
-            addFlyoutVisible,
-            setAddFlyoutVisibility,
-            editFlyoutVisible,
-            setEditFlyoutVisibility,
-            actionTypesIndex,
-            reloadConnectors: loadActions,
-          }}
-        >
-          {/* Render the view based on if there's data or if they can save */}
-          {data.length !== 0 && table}
-          {data.length === 0 && canSave && emptyPrompt}
-          {data.length === 0 && !canSave && noPermissionPrompt}
-          <ConnectorAddFlyout />
-          {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}
-        </ActionsConnectorsContextProvider>
-      </Fragment>
+      <EuiSpacer size="m" />
+      {/* Render the view based on if there's data or if they can save */}
+      {data.length !== 0 && table}
+      {data.length === 0 && canSave && emptyPrompt}
+      {data.length === 0 && !canSave && noPermissionPrompt}
+      <ActionsConnectorsContextProvider
+        value={{
+          addFlyoutVisible,
+          setAddFlyoutVisibility,
+          editFlyoutVisible,
+          setEditFlyoutVisibility,
+          actionTypesIndex,
+          reloadConnectors: loadActions,
+        }}
+      >
+        <ConnectorAddFlyout />
+        {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}
+      </ActionsConnectorsContextProvider>
     </section>
   );
 };
