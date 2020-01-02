@@ -56,10 +56,6 @@ export const ActionConnectorForm = ({
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setConnector = (key: string, value: any) => {
-    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
-  };
-
   const setActionConfigProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setConfigProperty' }, payload: { key, value } });
   };
@@ -67,11 +63,6 @@ export const ActionConnectorForm = ({
   const setActionSecretsProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setSecretsProperty' }, payload: { key, value } });
   };
-
-  useEffect(() => {
-    setConnector('connector', initialConnector);
-    setServerError(null);
-  }, [initialConnector]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
