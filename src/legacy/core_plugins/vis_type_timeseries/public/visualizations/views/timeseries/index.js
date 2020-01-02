@@ -72,7 +72,7 @@ export const TimeSeries = ({
   const chartRef = useRef();
   const updateCursor = (_, cursor) => {
     if (chartRef.current) {
-      chartRef.current.dispatchExternalCursorEvent(cursor);
+      chartRef.current.dispatchExternalPointerEvent(cursor);
     }
   };
 
@@ -96,7 +96,7 @@ export const TimeSeries = ({
         legendPosition={legendPosition}
         onBrushEnd={onBrush}
         animateData={false}
-        onCursorUpdate={handleCursorUpdate}
+        onPointerUpdate={handleCursorUpdate}
         theme={
           hasBarChart
             ? {}
