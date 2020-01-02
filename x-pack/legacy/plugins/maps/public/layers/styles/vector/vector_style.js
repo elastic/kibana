@@ -393,29 +393,31 @@ export class VectorStyle extends AbstractStyle {
       : this._descriptor.properties.symbol.options.symbolId;
   }
 
-  getIcon = () => {
+  _getColorForProperty = (styleProperty, isLinesOnly) => {
     const styles = this.getRawProperties();
-    const symbolId = this._getSymbolId();
-    const getColorForProperty = (styleProperty, isLinesOnly) => {
-      if (isLinesOnly) {
-        return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
-      }
+    if (isLinesOnly) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
+    }
 
-      if (styleProperty === VECTOR_STYLES.LINE_COLOR) {
-        return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'none');
-      } else if (styleProperty === VECTOR_STYLES.FILL_COLOR) {
-        return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'grey');
-      } else {
-        //unexpected
-        console.error('Cannot return color for properties other then line or fill color');
-      }
-    };
+    if (styleProperty === VECTOR_STYLES.LINE_COLOR) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.LINE_COLOR], 'none');
+    } else if (styleProperty === VECTOR_STYLES.FILL_COLOR) {
+      return extractColorFromStyleProperty(styles[VECTOR_STYLES.FILL_COLOR], 'grey');
+    } else {
+      //unexpected
+      console.error('Cannot return color for properties other then line or fill color');
+    }
+  };
+
+  getIcon = () => {
+    const symbolId = this._getSymbolId();
+
     return (
       <VectorIcon
         loadIsPointsOnly={this._getIsPointsOnly}
         loadIsLinesOnly={this._getIsLinesOnly}
         symbolId={symbolId}
-        getColorForProperty={getColorForProperty}
+        getColorForProperty={this._getColorForProperty}
       />
     );
   };
