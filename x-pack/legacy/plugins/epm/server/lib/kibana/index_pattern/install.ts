@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { RegistryPackage, Dataset } from '../../../../common/types';
 import { Field } from '../../fields/field';
 import { loadFieldsFromYaml } from '../../elasticsearch/template/install';
 import * as Registry from '../../../registry';
@@ -14,26 +15,65 @@ interface IndexPatternField extends Field {
   aggregatable: boolean;
   readFromDocValues: boolean;
 }
+interface DatasetMapByType {
+  logs: string[];
+  metrics: string[];
+}
 export async function installIndexPatterns(
   pkgkey: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  const fields = await loadFieldsFromYaml(registryPackageInfo);
-  const kibanaIndexPatternFields = makeKibanaIndexPatternFields(fields);
-  // TODO: separate out logs and metrics patterns
-  await savedObjectsClient.create(
-    'index-pattern',
-    getData('logs-metrics', kibanaIndexPatternFields)
+  if (!registryPackageInfo.datasets) return;
+
+  // sort datasets by logs and metrics
+  const datasetMapByType = sortLogsMetricsTypes(registryPackageInfo.datasets);
+
+  createIndexPatternByType('logs', datasetMapByType.logs, registryPackageInfo, savedObjectsClient);
+  createIndexPatternByType(
+    'metrics',
+    datasetMapByType.metrics,
+    registryPackageInfo,
+    savedObjectsClient
   );
 }
 
-function getData(name: string, fields: IndexPatternField[]) {
-  return {
-    title: name + '-*',
-    fields: JSON.stringify(fields),
-  };
-}
+const sortLogsMetricsTypes = (datasets: Dataset[]): DatasetMapByType =>
+  datasets.reduce<DatasetMapByType>(
+    (acc, dataset) => {
+      if (dataset.type === 'logs') {
+        acc.logs.push(dataset.name);
+      }
+      if (dataset.type === 'metric') {
+        acc.metrics.push(dataset.name);
+      }
+      return acc;
+    },
+    {
+      logs: [],
+      metrics: [],
+    }
+  );
+
+// loop through each dataset, get all the fields, create index pattern by type.
+const createIndexPatternByType = async (
+  datasetType: string,
+  datasetList: string[],
+  registryPackageInfo: RegistryPackage,
+  savedObjectsClient: SavedObjectsClientContract
+) => {
+  let allFields: Field[] = [];
+  for (let i = 0; i < datasetList.length; i++) {
+    const fields = await loadFieldsFromYaml(registryPackageInfo, datasetList[i]);
+    allFields = allFields.concat(fields);
+  }
+
+  const kibanaIndexPatternFields = makeKibanaIndexPatternFields(allFields);
+  savedObjectsClient.create('index-pattern', {
+    title: datasetType + '-*',
+    fields: JSON.stringify(kibanaIndexPatternFields),
+  });
+};
 
 const makeKibanaIndexPatternFields = (fields: Field[]): IndexPatternField[] => {
   const flattenedFields = flattenFields(fields);
