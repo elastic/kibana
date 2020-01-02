@@ -11,7 +11,7 @@ export interface UMLicenseStatusResponse {
   message: string;
 }
 export type UMLicenseCheck = (
-  license?: Pick<ILicense, 'isActive' | 'isOneOf'>
+  license?: Pick<ILicense, 'isActive' | 'hasAtLeast'>
 ) => UMLicenseStatusResponse;
 
 export const licenseCheck: UMLicenseCheck = license => {
@@ -21,7 +21,7 @@ export const licenseCheck: UMLicenseCheck = license => {
       statusCode: 400,
     };
   }
-  if (!license.isOneOf(['basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial'])) {
+  if (!license.hasAtLeast('basic')) {
     return {
       message: 'License not supported',
       statusCode: 401,

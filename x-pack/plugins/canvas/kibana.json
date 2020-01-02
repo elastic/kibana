@@ -5,6 +5,6 @@
     "configPath": ["xpack", "canvas"],
     "server": true,
     "ui": false,
-    "requiredPlugins": []
+    "requiredPlugins": [],
+    "optionalPlugins": ["usageCollection"]
   }
-  
