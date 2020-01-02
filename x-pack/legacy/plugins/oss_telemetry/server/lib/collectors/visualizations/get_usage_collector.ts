@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/server/plugin';
+import { PluginContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/server/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
 
 async function isTaskManagerReady(taskManager: TaskManagerPluginSetupContract | undefined) {

@@ -7,7 +7,7 @@
 import { APICaller, CoreSetup } from 'kibana/server';
 
 import { TaskInstance } from '../../task_manager/server';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../task_manager/server/plugin';
+import { PluginContract as TaskManagerPluginSetupContract } from '../../task_manager/server/plugin';
 
 export const getMockTaskInstance = (): TaskInstance => ({
   state: { runs: 0, stats: {} },

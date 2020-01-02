@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../task_manager/server/plugin';
+import { PluginContract as TaskManagerPluginSetupContract } from '../../task_manager/server/plugin';
 import { registerCollectors } from './lib/collectors';
 import { registerTasks, scheduleTasks } from './lib/tasks';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';

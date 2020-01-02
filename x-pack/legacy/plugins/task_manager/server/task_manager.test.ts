@@ -31,21 +31,14 @@ const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
-  const defaultConfig = {
-    xpack: {
-      task_manager: {
-        max_workers: 10,
-        index: 'foo',
-        max_attempts: 9,
-        poll_interval: 6000000,
-      },
-    },
-    server: {
-      uuid: 'some-uuid',
-    },
-  };
+
   const config = {
-    get: (path: string) => _.get(defaultConfig, path),
+    enabled: true,
+    max_workers: 10,
+    index: 'foo',
+    max_attempts: 9,
+    poll_interval: 6000000,
+    request_capacity: 1000,
   };
   const taskManagerOpts = {
     config,
@@ -53,6 +46,7 @@ describe('TaskManager', () => {
     serializer,
     callWithInternalUser: jest.fn(),
     logger: mockLogger(),
+    taskManagerId: 'some-uuid',
   };
 
   beforeEach(() => {
@@ -63,21 +57,9 @@ describe('TaskManager', () => {
 
   test('throws if no valid UUID is available', async () => {
     expect(() => {
-      const configWithoutServerUUID = {
-        xpack: {
-          task_manager: {
-            max_workers: 10,
-            index: 'foo',
-            max_attempts: 9,
-            poll_interval: 6000000,
-          },
-        },
-      };
       new TaskManager({
         ...taskManagerOpts,
-        config: {
-          get: (path: string) => _.get(configWithoutServerUUID, path),
-        },
+        taskManagerId: '',
       });
     }).toThrowErrorMatchingInlineSnapshot(
       `"TaskManager is unable to start as Kibana has no valid UUID assigned to it."`
@@ -273,7 +255,7 @@ describe('TaskManager', () => {
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
 
-  test('disallows middleware registration after starting', async () => {
+  test('allows middleware registration after starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
@@ -283,9 +265,7 @@ describe('TaskManager', () => {
 
     client.start();
 
-    expect(() => client.addMiddleware(middleware)).toThrow(
-      /Cannot add middleware after the task manager is initialized/i
-    );
+    expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
 
   describe('runNow', () => {

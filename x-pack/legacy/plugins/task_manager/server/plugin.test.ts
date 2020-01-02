@@ -7,16 +7,23 @@
 import { Plugin, LegacyDeps } from './plugin';
 import { mockLogger } from './test_utils';
 import { TaskManager } from './task_manager';
+import { CoreSetup, UuidServiceSetup } from 'kibana/server';
 
 jest.mock('./task_manager');
 
 describe('Task Manager Plugin', () => {
   let plugin: Plugin;
-  const mockCoreSetup = {};
-  const mockLegacyDeps: LegacyDeps = {
-    config: {
-      get: jest.fn(),
+  const uuid: UuidServiceSetup = {
+    getInstanceUuid() {
+      return 'some-uuid';
     },
+  };
+  const mockCoreSetup = {
+    uuid,
+  } as CoreSetup;
+
+  const mockLegacyDeps: LegacyDeps = {
+    config: {},
     serializer: {},
     elasticsearch: {
       getCluster: jest.fn(),
@@ -24,30 +31,32 @@ describe('Task Manager Plugin', () => {
     savedObjects: {
       getSavedObjectsRepository: jest.fn(),
     },
+    logger: mockLogger(),
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
     mockLegacyDeps.elasticsearch.getCluster.mockReturnValue({ callWithInternalUser: jest.fn() });
-    plugin = new Plugin({
-      logger: {
-        get: mockLogger,
-      },
-    });
+    plugin = new Plugin();
   });
 
   describe('setup()', () => {
-    test('exposes proper contract', async () => {
+    test('exposes the underlying TaskManager', async () => {
       const setupResult = plugin.setup(mockCoreSetup, mockLegacyDeps);
       expect(setupResult).toMatchInlineSnapshot(`
-        Object {
-          "addMiddleware": [Function],
-          "ensureScheduled": [Function],
-          "fetch": [Function],
-          "registerTaskDefinitions": [Function],
-          "remove": [Function],
-          "runNow": [Function],
-          "schedule": [Function],
+        TaskManager {
+          "addMiddleware": [MockFunction],
+          "assertUninitialized": [MockFunction],
+          "attemptToRun": [MockFunction],
+          "ensureScheduled": [MockFunction],
+          "fetch": [MockFunction],
+          "registerTaskDefinitions": [MockFunction],
+          "remove": [MockFunction],
+          "runNow": [MockFunction],
+          "schedule": [MockFunction],
+          "start": [MockFunction],
+          "stop": [MockFunction],
+          "waitUntilStarted": [MockFunction],
         }
       `);
     });

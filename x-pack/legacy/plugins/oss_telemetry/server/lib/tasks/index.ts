@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, Logger } from 'kibana/server';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../task_manager/server/plugin';
+import { PluginContract as TaskManagerPluginSetupContract } from '../../../../task_manager/server/plugin';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 import KbnServer from '../../../../../../../src/legacy/server/kbn_server';

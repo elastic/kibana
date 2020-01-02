@@ -8,6 +8,7 @@ import { Logger, PluginInitializerContext } from 'kibana/server';
 import { PLUGIN_ID } from './constants';
 import { OssTelemetryPlugin } from './server/plugin';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
+import { TaskManager } from '../task_manager';
 
 export const ossTelemetry: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -29,7 +30,10 @@ export const ossTelemetry: LegacyPluginInitializer = kibana => {
       } as PluginInitializerContext);
       plugin.setup(server.newPlatform.setup.core, {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
-        taskManager: server.newPlatform.setup.plugins.kibanaTaskManager,
+        taskManager: {
+          ...server.newPlatform.setup.plugins.kibanaTaskManager,
+          ...server.newPlatform.start.plugins.kibanaTaskManager,
+        } as TaskManager,
         __LEGACY: {
           config: server.config(),
           xpackMainStatus: ((server.plugins.xpack_main as unknown) as { status: any }).status
