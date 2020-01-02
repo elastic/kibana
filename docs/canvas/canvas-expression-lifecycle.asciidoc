@@ -72,7 +72,7 @@ The `expression` argument includes some aliases, namely `exp`, `fn`, and `functi
 
 So `mapColumn name=newColumn fn={string example}` is equal to `mapColumn name=newColumn expression={string example}`.
 
-There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is simply `_`, which indicates that the argument is an _unnamed_ argument and can be provided without explicitly naming it in the expression. The `name` argument here uses the _unnamed_ alias, which means that you can further simplify our example to `mapColumn newColumn fn={string example}`.
+There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is simply `\_`, which indicates that the argument is an _unnamed_ argument and can be provided without explicitly naming it in the expression. The `name` argument here uses the _unnamed_ alias, which means that you can further simplify our example to `mapColumn newColumn fn={string example}`.
 
 NOTE: There can only be one _unnamed_ argument for each function.
 
