@@ -4695,6 +4695,11 @@
   dependencies:
     tslib "^1.9.3"
 
+"@xobotyi/scrollbar-width@1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@xobotyi/scrollbar-width/-/scrollbar-width-1.5.0.tgz#488210bff634548040dc22a72f62722a85b134e1"
+  integrity sha512-BK+HR1D00F2xh7n4+5en8/dMkG13uvIXLmEbsjtc1702b7+VwXkvlBDKoRPJMbkRN5hD7VqWa3nS9fNT8JG3CA==
+
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@xtuc/ieee754/-/ieee754-1.2.0.tgz#eef014a3145ae477a1cbc00cd1e552336dceb790"
@@ -12457,6 +12462,11 @@ fast-safe-stringify@^2.0.7:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.0.7.tgz#124aa885899261f68aedb42a7c080de9da608743"
   integrity sha512-Utm6CdzT+6xsDk2m8S6uL8VHxNwI6Jub+e9NYTcAms28T84pTa25GJQV9j0CY0N1rM8hK4x6grpF2BQf+2qwVA==
+
+fast-shallow-equal@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/fast-shallow-equal/-/fast-shallow-equal-0.1.1.tgz#44d01324d7fd31e00a67bb02b9396e283d526c22"
+  integrity sha512-XVP6nhaXLYOH6JZCWBcNaeEer9GJ5/8cJWUP+OLmgwWgEkJp5Kpl/fdpJ01zl0mpLxrk7f5J3hIv+GmjTCi7Mg==
 
 fast-stream-to-buffer@^1.0.0:
   version "1.0.0"
@@ -23779,12 +23789,14 @@ react-transition-group@^2.2.1:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
 
-react-use@^13.10.2:
-  version "13.10.2"
-  resolved "https://registry.yarnpkg.com/react-use/-/react-use-13.10.2.tgz#4250d258ca9068662943299c01794a136408c8e9"
-  integrity sha512-z3VFSiPHW6arViGVnajO7YKY5OD+Z9LWcImoJdYHkau23cLSoTctxM3XENLpGxjhJlHaYiQZ6pPgq7pwGTqSZA==
+react-use@^13.13.0:
+  version "13.13.0"
+  resolved "https://registry.yarnpkg.com/react-use/-/react-use-13.13.0.tgz#5d133c4d4d8d3f21f6ccf4ccbe54fbcd6fdafb36"
+  integrity sha512-J3/h5wvL6vXmecAvEnninCC3DviLMRWcQrEnouTliwws1b376DQKEgIFuTXlF8c3SKpXBQJdDDm1RpluokW6ag==
   dependencies:
+    "@xobotyi/scrollbar-width" "1.5.0"
     copy-to-clipboard "^3.2.0"
+    fast-shallow-equal "^0.1.1"
     nano-css "^5.2.1"
     react-fast-compare "^2.0.4"
     resize-observer-polyfill "^1.5.1"
