@@ -55,6 +55,7 @@ export default function ({ getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { waitDialogIsClosed: false });
 
+      await PageObjects.dashboard.ensureDuplicateTitleCallout();
       await PageObjects.dashboard.clickSave();
 
       // This is important since saving a new dashboard will cause a refresh of the page. We have to

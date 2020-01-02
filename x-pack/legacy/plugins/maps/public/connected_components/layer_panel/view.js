@@ -11,7 +11,6 @@ import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
-import { SourceSettings } from './source_settings';
 import { StyleSettings } from './style_settings';
 import {
   EuiButtonIcon,
@@ -95,6 +94,10 @@ export class LayerPanel extends React.Component {
       });
     }
   }
+
+  _onSourceChange = ({ propName, value }) => {
+    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value);
+  };
 
   _renderFilterSection() {
     if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
@@ -213,7 +216,7 @@ export class LayerPanel extends React.Component {
 
               <LayerSettings/>
 
-              <SourceSettings/>
+              {this.props.selectedLayer.renderSourceSettingsEditor({ onChange: this._onSourceChange })}
 
               {this._renderFilterSection()}
 

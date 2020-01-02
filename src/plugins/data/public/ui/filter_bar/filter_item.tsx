@@ -20,7 +20,7 @@
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { Component } from 'react';
+import React, { Component, MouseEvent } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -46,6 +46,13 @@ class FilterItemUI extends Component<Props, State> {
     isPopoverOpen: false,
   };
 
+  private handleBadgeClick = (e: MouseEvent<HTMLInputElement>) => {
+    if (e.shiftKey) {
+      this.onToggleDisabled();
+    } else {
+      this.togglePopover();
+    }
+  };
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
@@ -73,7 +80,7 @@ class FilterItemUI extends Component<Props, State> {
         valueLabel={valueLabel}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
-        onClick={this.togglePopover}
+        onClick={this.handleBadgeClick}
         data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
       />
     );

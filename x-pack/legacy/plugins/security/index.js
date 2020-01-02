@@ -5,10 +5,6 @@
  */
 
 import { resolve } from 'path';
-import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
-import { initUsersApi } from './server/routes/api/v1/users';
-import { initApiKeysApi } from './server/routes/api/v1/api_keys';
-import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initOverwrittenSessionView } from './server/routes/views/overwritten_session';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
@@ -34,7 +30,7 @@ export const security = (kibana) => new kibana.Plugin({
         lifespan: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       }).default(),
       secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-      loginAssistanceMessage: Joi.string().default(),
+      loginAssistanceMessage: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -144,10 +140,6 @@ export const security = (kibana) => new kibana.Plugin({
 
     server.expose({ getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)) });
 
-    initAuthenticateApi(securityPlugin, server);
-    initUsersApi(securityPlugin, server);
-    initApiKeysApi(server);
-    initIndicesApi(server);
     initLoginView(securityPlugin, server);
     initLogoutView(server);
     initLoggedOutView(securityPlugin, server);

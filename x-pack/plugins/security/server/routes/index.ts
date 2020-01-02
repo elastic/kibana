@@ -12,6 +12,9 @@ import { LegacyAPI } from '../plugin';
 
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
+import { defineApiKeysRoutes } from './api_keys';
+import { defineIndicesRoutes } from './indices';
+import { defineUsersRoutes } from './users';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -30,4 +33,7 @@ export interface RouteDefinitionParams {
 export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
+  defineApiKeysRoutes(params);
+  defineIndicesRoutes(params);
+  defineUsersRoutes(params);
 }
