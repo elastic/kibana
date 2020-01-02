@@ -16,8 +16,6 @@ import {
   checkIfAllValuesAreZero,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
-  SeriesType,
   WrappedByAutoSizer,
   useBrowserTimeZone,
   useTheme,
