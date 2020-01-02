@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-(error: Error | string, path?: string[]) => {
-        RouteValidationError;
+badRequest: (error: Error | string, path?: string[]) => {
+        error: RouteValidationError;
     };
 ```

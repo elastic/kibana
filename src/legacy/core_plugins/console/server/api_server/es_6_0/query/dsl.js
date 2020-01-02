@@ -467,7 +467,7 @@ export function queryDsl(api) {
         __one_of: [true, false],
       },
       tie_breaker: 0,
-      time_zone: '+1:00',
+      time_zone: '+01:00',
     },
     simple_query_string: {
       __template: {
@@ -493,7 +493,7 @@ export function queryDsl(api) {
         gt: 10,
         lte: 20,
         lt: 20,
-        time_zone: '+1:00',
+        time_zone: '+01:00',
         boost: 1.0,
         format: 'dd/MM/yyyy||yyyy',
       },
