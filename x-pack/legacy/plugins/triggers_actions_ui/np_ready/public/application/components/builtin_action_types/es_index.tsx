@@ -13,7 +13,6 @@ import {
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
-import { ErrableFormRow } from '../page_error';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -80,11 +79,10 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   const { refresh } = action;
   return (
     <Fragment>
-      <ErrableFormRow
-        errorKey="index"
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors === true && action.index !== undefined}
+        error={errors.index}
+        isInvalid={hasErrors === true && action.index !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexFieldLabel',
           {
@@ -94,6 +92,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
+          isInvalid={hasErrors === true && action.index !== undefined}
           name="index"
           data-test-subj="indexInput"
           value={action.index || ''}
@@ -106,7 +105,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             }
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
       <EuiSwitch
         data-test-subj="indexRefreshCheckbox"
         checked={refresh}

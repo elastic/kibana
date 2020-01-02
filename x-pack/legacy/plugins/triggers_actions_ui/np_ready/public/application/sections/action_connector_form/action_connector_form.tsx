@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useReducer, useEffect } from 'react';
+import React, { Fragment, useState, useReducer } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,11 +17,11 @@ import {
   EuiFlyoutFooter,
   EuiFieldText,
   EuiFlyoutBody,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createActionConnector, updateActionConnector } from '../../lib/action_connector_api';
-import { SectionError, ErrableFormRow } from '../../components/page_error';
 import { useAppDependencies } from '../../app_context';
 import { connectorReducer } from './connector_reducer';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
@@ -137,22 +137,8 @@ export const ActionConnectorForm = ({
   return (
     <Fragment>
       <EuiFlyoutBody>
-        <EuiForm>
-          {serverError && (
-            <Fragment>
-              <SectionError
-                title={
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionConnectorForm.saveActionErrorTitle"
-                    defaultMessage="Error saving connector"
-                  />
-                }
-                error={serverError}
-              />
-              <EuiSpacer />
-            </Fragment>
-          )}
-          <ErrableFormRow
+        <EuiForm isInvalid={serverError !== null} error={serverError?.body.message}>
+          <EuiFormRow
             id="actionName"
             fullWidth
             label={
@@ -161,12 +147,12 @@ export const ActionConnectorForm = ({
                 defaultMessage="Name"
               />
             }
-            errorKey="name"
-            isShowingErrors={hasErrors && connector.name !== undefined}
-            errors={errors}
+            isInvalid={hasErrors && connector.name !== undefined}
+            error={errors.name}
           >
             <EuiFieldText
               fullWidth
+              isInvalid={hasErrors && connector.name !== undefined}
               name="name"
               data-test-subj="nameInput"
               value={connector.name || ''}
@@ -179,7 +165,7 @@ export const ActionConnectorForm = ({
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
           <EuiSpacer size="s" />
           {FieldsComponent !== null ? (
             <FieldsComponent

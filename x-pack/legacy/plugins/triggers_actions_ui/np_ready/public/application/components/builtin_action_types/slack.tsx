@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiTextArea, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiTextArea,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiFormRow,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../page_error';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -62,21 +68,21 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
 
   return (
     <Fragment>
-      <ErrableFormRow
+      <EuiFormRow
         id="webhookUrl"
-        errorKey="webhookUrl"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors === true && webhookUrl !== undefined}
+        error={errors.webhookUrl}
+        isInvalid={hasErrors === true && webhookUrl !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlTextFieldLabel',
           {
-            defaultMessage: 'WebhookUrl',
+            defaultMessage: 'Webhook URL',
           }
         )}
       >
         <EuiFieldText
           fullWidth
+          isInvalid={hasErrors === true && webhookUrl !== undefined}
           name="webhookUrl"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"
@@ -89,7 +95,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
             }
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };
@@ -114,12 +120,11 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <ErrableFormRow
+      <EuiFormRow
         id="slackMessage"
-        errorKey="message"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && message !== undefined}
+        error={errors.message}
+        isInvalid={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.messageTextAreaFieldLabel',
           {
@@ -129,6 +134,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiTextArea
           fullWidth
+          isInvalid={hasErrors && message !== undefined}
           name="message"
           value={message}
           data-test-subj="slackMessageTextarea"
@@ -136,7 +142,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             editAction('message', e.target.value, index);
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };

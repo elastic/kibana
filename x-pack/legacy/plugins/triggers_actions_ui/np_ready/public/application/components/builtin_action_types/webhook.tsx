@@ -21,7 +21,6 @@ import {
   EuiCodeEditor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../page_error';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -175,12 +174,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
     headerControl = (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <ErrableFormRow
+          <EuiFormRow
             id="webhookHeaderKey"
-            errorKey="keyHeader"
             fullWidth
-            errors={headerErrors}
-            isShowingErrors={hasHeaderErrors && headerKey !== undefined}
+            error={headerErrors.keyHeader}
+            isInvalid={hasHeaderErrors && headerKey !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
               {
@@ -190,6 +188,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           >
             <EuiFieldText
               fullWidth
+              isInvalid={hasHeaderErrors && headerKey !== undefined}
               name="keyHeader"
               value={headerKey}
               data-test-subj="webhookHeadersKeyInput"
@@ -197,15 +196,14 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 setHeaderKey(e.target.value);
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ErrableFormRow
+          <EuiFormRow
             id="webhookHeaderValue"
-            errorKey="valueHeader"
             fullWidth
-            errors={headerErrors}
-            isShowingErrors={hasHeaderErrors && headerValue !== undefined}
+            error={headerErrors.valueHeader}
+            isInvalid={hasHeaderErrors && headerValue !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
               {
@@ -215,6 +213,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           >
             <EuiFieldText
               fullWidth
+              isInvalid={hasHeaderErrors && headerValue !== undefined}
               name="valueHeader"
               value={headerValue}
               data-test-subj="webhookHeadersValueInput"
@@ -222,7 +221,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 setHeaderValue(e.target.value);
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -252,12 +251,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="url"
             fullWidth
-            errorKey="url"
-            errors={errors}
-            isShowingErrors={hasErrors === true && url !== undefined}
+            error={errors.url}
+            isInvalid={hasErrors === true && url !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.urlTextFieldLabel',
               {
@@ -267,6 +265,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           >
             <EuiFieldText
               name="url"
+              isInvalid={hasErrors === true && url !== undefined}
               fullWidth
               value={url || ''}
               data-test-subj="webhookUrlText"
@@ -279,17 +278,16 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="webhookUser"
-            errorKey="user"
             fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors === true && user !== undefined}
+            error={errors.user}
+            isInvalid={hasErrors === true && user !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.userTextFieldLabel',
               {
@@ -299,6 +297,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           >
             <EuiFieldText
               fullWidth
+              isInvalid={hasErrors === true && user !== undefined}
               name="user"
               value={user || ''}
               data-test-subj="webhookUserInput"
@@ -311,15 +310,14 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="webhookPassword"
-            errorKey="password"
             fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors === true && password !== undefined}
+            error={errors.password}
+            isInvalid={hasErrors === true && password !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.passwordTextFieldLabel',
               {
@@ -330,6 +328,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             <EuiFieldPassword
               fullWidth
               name="password"
+              isInvalid={hasErrors === true && password !== undefined}
               value={password || ''}
               data-test-subj="webhookPasswordInput"
               onChange={e => {
@@ -341,7 +340,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -413,7 +412,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
 
   return (
     <Fragment>
-      <ErrableFormRow
+      <EuiFormRow
         id="webhookBody"
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyFieldLabel',
@@ -421,13 +420,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             defaultMessage: 'Body',
           }
         )}
-        errorKey="body"
-        isShowingErrors={hasErrors === true}
+        isInvalid={hasErrors === true}
         fullWidth
-        errors={errors}
+        error={errors.body}
       >
         <EuiCodeEditor
           fullWidth
+          isInvalid={hasErrors === true}
           mode="json"
           width="100%"
           height="200px"
@@ -444,7 +443,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             editAction('body', json, index);
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };

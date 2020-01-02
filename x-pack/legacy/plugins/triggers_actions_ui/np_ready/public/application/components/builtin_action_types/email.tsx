@@ -13,9 +13,9 @@ import {
   EuiComboBox,
   EuiTextArea,
   EuiSwitch,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../page_error';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -171,12 +171,11 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
   return (
     <Fragment>
-      <ErrableFormRow
+      <EuiFormRow
         id="from"
-        errorKey="from"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && from !== undefined}
+        error={errors.from}
+        isInvalid={hasErrors && from !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
           {
@@ -186,6 +185,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       >
         <EuiFieldText
           fullWidth
+          isInvalid={hasErrors && from !== undefined}
           name="from"
           value={from || ''}
           data-test-subj="emailFromInput"
@@ -198,13 +198,12 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             }
           }}
         />
-      </ErrableFormRow>
-      <ErrableFormRow
+      </EuiFormRow>
+      <EuiFormRow
         id="service"
-        errorKey="service"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && service !== undefined}
+        error={errors.service}
+        isInvalid={hasErrors && service !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
           {
@@ -215,6 +214,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         <EuiFieldText
           fullWidth
           name="service"
+          isInvalid={hasErrors && service !== undefined}
           value={service || ''}
           data-test-subj="emailServiceInput"
           onChange={e => {
@@ -226,15 +226,14 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
             }
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="emailHost"
-            errorKey="host"
             fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors && host !== undefined}
+            error={errors.host}
+            isInvalid={hasErrors && host !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
               {
@@ -244,6 +243,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldText
               fullWidth
+              isInvalid={hasErrors && host !== undefined}
               name="host"
               value={host || ''}
               data-test-subj="emailHostInput"
@@ -256,15 +256,14 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="emailPort"
-            errorKey="port"
             fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors && port !== undefined}
+            error={errors.port}
+            isInvalid={hasErrors && port !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
               {
@@ -274,6 +273,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldNumber
               prepend=":"
+              isInvalid={hasErrors && port !== undefined}
               fullWidth
               name="port"
               value={port || ''}
@@ -287,7 +287,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
@@ -306,12 +306,11 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="emailUser"
-            errorKey="user"
             fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors && user !== undefined}
+            error={errors.user}
+            isInvalid={hasErrors && user !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
               {
@@ -321,6 +320,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldText
               fullWidth
+              isInvalid={hasErrors && user !== undefined}
               name="user"
               value={user || ''}
               data-test-subj="emailUserInput"
@@ -333,15 +333,14 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ErrableFormRow
+          <EuiFormRow
             id="emailPassword"
-            errorKey="password"
             fullWidth
-            errors={errors}
-            isShowingErrors={hasErrors && password !== undefined}
+            error={errors.password}
+            isInvalid={hasErrors && password !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
               {
@@ -351,6 +350,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           >
             <EuiFieldPassword
               fullWidth
+              isInvalid={hasErrors && password !== undefined}
               name="password"
               value={password || ''}
               data-test-subj="emailPasswordInput"
@@ -363,7 +363,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 }
               }}
             />
-          </ErrableFormRow>
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>
@@ -384,11 +384,10 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
 
   return (
     <Fragment>
-      <ErrableFormRow
-        errorKey="to"
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && to !== undefined}
+        error={errors.to}
+        isInvalid={hasErrors && to !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
@@ -398,6 +397,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiComboBox
           noSuggestions
+          isInvalid={hasErrors && to !== undefined}
           fullWidth
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
@@ -422,12 +422,11 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             }
           }}
         />
-      </ErrableFormRow>
-      <ErrableFormRow
-        errorKey="cc"
+      </EuiFormRow>
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && cc !== undefined}
+        error={errors.cc}
+        isInvalid={hasErrors && cc !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
           {
@@ -437,6 +436,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiComboBox
           noSuggestions
+          isInvalid={hasErrors && cc !== undefined}
           fullWidth
           data-test-subj="ccEmailAddressInput"
           selectedOptions={ccOptions}
@@ -461,12 +461,11 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             }
           }}
         />
-      </ErrableFormRow>
-      <ErrableFormRow
-        errorKey="bcc"
+      </EuiFormRow>
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && bcc !== undefined}
+        error={errors.bcc}
+        isInvalid={hasErrors && bcc !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
           {
@@ -476,6 +475,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiComboBox
           noSuggestions
+          isInvalid={hasErrors && bcc !== undefined}
           fullWidth
           data-test-subj="bccEmailAddressInput"
           selectedOptions={bccOptions}
@@ -500,12 +500,11 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             }
           }}
         />
-      </ErrableFormRow>
-      <ErrableFormRow
-        errorKey="subject"
+      </EuiFormRow>
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && message !== undefined}
+        error={errors.subject}
+        isInvalid={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
@@ -515,6 +514,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
+          isInvalid={hasErrors && message !== undefined}
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
@@ -522,12 +522,11 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             editAction('subject', e.target.value, index);
           }}
         />
-      </ErrableFormRow>
-      <ErrableFormRow
-        errorKey="message"
+      </EuiFormRow>
+      <EuiFormRow
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && message !== undefined}
+        error={errors.message}
+        isInvalid={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
@@ -537,6 +536,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiTextArea
           fullWidth
+          isInvalid={hasErrors && message !== undefined}
           value={message || ''}
           name="message"
           data-test-subj="emailMessageInput"
@@ -544,7 +544,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             editAction('message', e.target.value, index);
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };

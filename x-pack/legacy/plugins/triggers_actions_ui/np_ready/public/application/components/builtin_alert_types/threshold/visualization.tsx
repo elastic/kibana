@@ -29,7 +29,6 @@ import { npStart } from 'ui/new_platform';
 import { getThresholdAlertVisualizationData } from './lib/api';
 import { comparators, aggregationTypes } from './expression';
 import { useAppDependencies } from '../../../app_context';
-import { SectionError } from '../../../components/page_error/section_error';
 import { Alert } from '../../../../types';
 
 const customTheme = () => {
@@ -194,15 +193,19 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
     return (
       <Fragment>
         <EuiSpacer size="l" />
-        <SectionError
+        <EuiCallOut
           title={
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertAdd.errorLoadingAlertVisualizationTitle"
               defaultMessage="Cannot load alert visualization"
+              values={{}}
             />
           }
-          error={error}
-        />
+          color="danger"
+          iconType="alert"
+        >
+          {error}
+        </EuiCallOut>
         <EuiSpacer size="l" />
       </Fragment>
     );

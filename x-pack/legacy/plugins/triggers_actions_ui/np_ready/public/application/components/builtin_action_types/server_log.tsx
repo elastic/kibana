@@ -5,9 +5,8 @@
  */
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiTextArea } from '@elastic/eui';
+import { EuiSelect, EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
-import { ErrableFormRow } from '../page_error';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -50,12 +49,11 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
 
   return (
     <Fragment>
-      <ErrableFormRow
+      <EuiFormRow
         id="loggingLevel"
-        errorKey="level"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && level !== undefined}
+        error={errors.level}
+        isInvalid={hasErrors && level !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logLevelFieldLabel',
           {
@@ -65,6 +63,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
       >
         <EuiSelect
           fullWidth
+          isInvalid={hasErrors && level !== undefined}
           id="loggLevelSelect"
           data-test-subj="loggingLevelSelect"
           options={levelOptions}
@@ -73,13 +72,12 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
             editAction('level', e.target.value, index);
           }}
         />
-      </ErrableFormRow>
-      <ErrableFormRow
+      </EuiFormRow>
+      <EuiFormRow
         id="loggingMessage"
-        errorKey="message"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && message !== undefined}
+        error={errors.message}
+        isInvalid={hasErrors && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logMessageFieldLabel',
           {
@@ -89,6 +87,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
       >
         <EuiTextArea
           fullWidth
+          isInvalid={hasErrors && message !== undefined}
           value={message || ''}
           name="message"
           data-test-subj="loggingMessageInput"
@@ -96,7 +95,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
             editAction('message', e.target.value, index);
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };

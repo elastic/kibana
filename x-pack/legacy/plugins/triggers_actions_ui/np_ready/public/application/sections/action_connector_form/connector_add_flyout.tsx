@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useEffect, Fragment } from 'react';
+import React, { useCallback, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,

@@ -6,7 +6,6 @@
 import React, { Fragment } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../page_error';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -88,12 +87,11 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           }}
         />
       </EuiFormRow>
-      <ErrableFormRow
+      <EuiFormRow
         id="routingKey"
-        errorKey="routingKey"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors === true && routingKey !== undefined}
+        error={errors.routingKey}
+        isInvalid={hasErrors === true && routingKey !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
@@ -103,6 +101,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
       >
         <EuiFieldText
           fullWidth
+          isInvalid={hasErrors === true && routingKey !== undefined}
           name="routingKey"
           value={routingKey || ''}
           data-test-subj="pagerdutyRoutingKeyInput"
@@ -115,7 +114,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
             }
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };
@@ -311,12 +310,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           }}
         />
       </EuiFormRow>
-      <ErrableFormRow
+      <EuiFormRow
         id="pagerDutySummary"
-        errorKey="summary"
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors === true && summary !== undefined}
+        error={errors.summary}
+        isInvalid={hasErrors === true && summary !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
           {
@@ -326,6 +324,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
+          isInvalid={hasErrors === true && summary !== undefined}
           name="summary"
           value={summary || ''}
           data-test-subj="pagerdutyDescriptionInput"
@@ -338,7 +337,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             }
           }}
         />
-      </ErrableFormRow>
+      </EuiFormRow>
     </Fragment>
   );
 };

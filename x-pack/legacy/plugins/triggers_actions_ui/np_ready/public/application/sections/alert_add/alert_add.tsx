@@ -39,7 +39,6 @@ import { createAlert } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { useAlertsContext } from '../../context/alerts_context';
 import { alertReducer } from './alert_reducer';
-import { ErrableFormRow, SectionError } from '../../components/page_error';
 import {
   AlertTypeModel,
   Alert,
@@ -587,24 +586,10 @@ export const AlertAdd = ({ refreshList }: Props) => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiForm>
-            {serverError && (
-              <Fragment>
-                <SectionError
-                  title={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertAdd.saveActionErrorTitle"
-                      defaultMessage="Error saving alert"
-                    />
-                  }
-                  error={serverError}
-                />
-                <EuiSpacer />
-              </Fragment>
-            )}
+          <EuiForm isInvalid={serverError !== null} error={serverError?.body.message}>
             <EuiFlexGrid columns={2}>
               <EuiFlexItem>
-                <ErrableFormRow
+                <EuiFormRow
                   fullWidth
                   id="alertName"
                   label={
@@ -613,12 +598,12 @@ export const AlertAdd = ({ refreshList }: Props) => {
                       defaultMessage="Name"
                     />
                   }
-                  errorKey="name"
-                  isShowingErrors={hasErrors && alert.name !== undefined}
-                  errors={errors}
+                  isInvalid={hasErrors && alert.name !== undefined}
+                  error={errors.name}
                 >
                   <EuiFieldText
                     fullWidth
+                    isInvalid={hasErrors && alert.name !== undefined}
                     compressed
                     name="name"
                     data-test-subj="alertNameInput"
@@ -632,7 +617,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                       }
                     }}
                   />
-                </ErrableFormRow>
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
